@@ -22,7 +22,7 @@ Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. Edi
 2. **Last worn** (LR-10): "Last worn today", "yesterday", "5 days ago", then a date ("Oct 7", with the year when it isn't this year's). With no wear recorded it says "Not marked as worn yet", since wear is only what she records.
 3. **The recent-wear note**, only for a top, bottom or dress worn inside her repeat window: "Style Me won’t repeat an outfit you wore it in during the last week" (or "last 2 weeks"). Shoes, layers, bags and accessories can repeat freely, and "I don't mind" has no note. This is the same `WearRules.isRecent` the mock stylist uses.
 4. **"In suitcases:"** (LR-11), a chip per active suitcase, by name. Each opens that suitcase (a stand-in until 13). Archived suitcases don't count.
-5. **The piece** on a soft glow with its contact shadow, tilted 3 degrees like a sticker, through `GarmentPicture` and the shared image loader at the size it's shown. "In the wash" sits on it while tracking is on.
+5. **The piece** on a soft glow with its contact shadow, tilted 3 degrees, as a sticker with a white edge (Phase 8b, `docs/stickers.md`): the drawing or the clean cutout, resting on the bottom of its space, or the photo in a rounded tile when there's no clean cutout. "In the wash" sits on it while tracking is on.
 6. **Style with this**, and **Mark as dirty** or **Mark as clean** while tracking is on (RD-11). Laundry changes show a toast with Undo.
 7. **Details**: Kind, Colour (swatches, names, and her note for the shade), Fit, Seasons ("All year" for all four), Occasions, Brand, Size, Status, Saved looks ("In 2 saved looks") and her Notes. Unknown facts are left out.
 8. **Remove from closet**, quiet, at the end (LR-16).

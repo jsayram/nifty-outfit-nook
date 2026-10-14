@@ -50,7 +50,7 @@ Debug builds launched with `-catalog` open a catalog of every DesignSystem compo
 
 ## Cutout benchmark
 
-Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) instead of the app: pick photos with the system picker (no photo-library permission needed) or use drawn samples, and it times each cutout, samples memory, shows the quality signals and exports the numbers as text. The simulator can't run Vision's subject lifting, so it needs a device. `docs/cutout-feasibility.md` has the steps and the go/no-go limits. Like the catalog, it's compiled only in Debug.
+Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) instead of the app: pick photos with the system picker (no photo-library permission needed) or use drawn samples, and it times each cutout, samples memory, shows the quality signals and exports the numbers as text. Since Phase 8b it also shows each photo as a sticker and as a tile, marking the one the signals pick. The simulator can't run Vision's subject lifting, so it needs a device. `docs/cutout-feasibility.md` has the steps and the go/no-go limits. Like the catalog, it's compiled only in Debug.
 
 ## Sample data
 
@@ -59,7 +59,8 @@ Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty
 - a behaviour for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`;
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
-- `draft=` with `add` or `edit`, to start with an unsaved Add a piece or Edit draft, as if the app had been closed mid-way.
+- `draft=` with `add` or `edit`, to start with an unsaved Add a piece or Edit draft, as if the app had been closed mid-way;
+- `photos=samples`, to add eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`).
 
 For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, and no draft.
 
@@ -98,6 +99,7 @@ docs/closet.md               Closet browsing: search, filters, the grid and garm
 docs/garment-detail.md       Garment detail, Remove from closet and Recently deleted.
 docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and Describe in words.
 docs/cutout-feasibility.md   Lifting garments out of photos: the pipeline, the benchmark and the go/no-go.
+docs/stickers.md             Stickers and the photo tile: choosing, drawing, caching and the sample photos.
 website/                     The app's static website.
 ```
 
