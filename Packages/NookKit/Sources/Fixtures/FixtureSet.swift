@@ -78,13 +78,23 @@ public enum FixtureDraftState: String, CaseIterable, Sendable {
     case edit
 }
 
+/// Garment pictures in the fixture closet (Phase 8b).
+public enum FixturePhotoState: String, CaseIterable, Sendable {
+    /// Every piece shows its drawing, the default.
+    case drawn
+    /// Eight more pieces with drawn sample photos and stand-in cutouts, six shown as stickers and
+    /// two as photo tiles (`SamplePhotoGarments`).
+    case samples
+}
+
 /// A fixture set plus options, as read from `-fixtures <set>[:<option>]...`.
 ///
 /// Each option after a colon is one of:
 /// - a behaviour (`FixtureBehavior`), such as `offline` or `stores-fail`;
 /// - `weather=<state>` (`FixtureWeatherState`), such as `weather=snow`;
 /// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`;
-/// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`.
+/// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`;
+/// - `photos=<state>` (`FixturePhotoState`), such as `photos=samples`.
 ///
 /// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
 public struct FixtureConfiguration: Hashable, Sendable {
@@ -96,19 +106,23 @@ public struct FixtureConfiguration: Hashable, Sendable {
     public var laundry: FixtureLaundryState?
     /// An unsaved draft waiting at launch. `nil` starts with none.
     public var draft: FixtureDraftState?
+    /// Whether sample photos are added to the closet.
+    public var photos: FixturePhotoState
 
     public init(
         set: FixtureSet = .demo,
         behavior: FixtureBehavior = .normal,
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
-        draft: FixtureDraftState? = nil
+        draft: FixtureDraftState? = nil,
+        photos: FixturePhotoState = .drawn
     ) {
         self.set = set
         self.behavior = behavior
         self.weather = weather
         self.laundry = laundry
         self.draft = draft
+        self.photos = photos
     }
 
     /// Unknown or missing parts fall back to `demo`, `normal`, the set's own weather and laundry,
@@ -134,6 +148,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
             case "weather": weather = FixtureWeatherState(rawValue: pair[1]) ?? weather
             case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
             case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
+            case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
             default: continue
             }
         }

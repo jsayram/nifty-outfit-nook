@@ -54,10 +54,34 @@ public enum SyntheticGarmentPhotos {
     }
 
     /// The picture as a `CGImage`, or `nil` if Core Graphics can't make a canvas that size.
-    public static func draw(_ scene: Scene, width: Int = 1200, height: Int = 1500) -> CGImage? {
+    /// Without `background`, only the garments are drawn, on transparency.
+    public static func draw(_ scene: Scene, width: Int = 1200, height: Int = 1500, background: Bool = true)
+        -> CGImage?
+    {
         guard let canvas = Canvas(width: width, height: height) else { return nil }
-        canvas.draw(scene)
+        canvas.draw(scene, background: background)
         return canvas.context.makeImage()
+    }
+
+    /// The scene's garments alone on transparency, cropped to `crop` (fractions of the picture,
+    /// origin top left), as a PNG: a stand-in for what the cutout step returns, since the
+    /// simulator can't lift subjects (Phase 8b's sample photos).
+    public static func cutoutPNG(
+        _ scene: Scene, width: Int = 1200, height: Int = 1500, crop: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    ) -> Data {
+        let pixels = CGRect(
+            x: crop.minX * CGFloat(width), y: crop.minY * CGFloat(height), width: crop.width * CGFloat(width),
+            height: crop.height * CGFloat(height)
+        ).integral
+        guard let whole = draw(scene, width: width, height: height, background: false),
+            let image = whole.cropping(to: pixels)
+        else { return Data() }
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil)
+        else { return Data() }
+        CGImageDestinationAddImage(destination, image, nil)
+        guard CGImageDestinationFinalize(destination) else { return Data() }
+        return data as Data
     }
 
     static let sRGB = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
@@ -67,6 +91,7 @@ public enum SyntheticGarmentPhotos {
 private final class Canvas {
     let context: CGContext
     private var seed: UInt64 = 0x5EED_CAFE
+    private var drawsBackground = true
 
     init?(width: Int, height: Int) {
         guard
@@ -79,7 +104,10 @@ private final class Canvas {
         context.scaleBy(x: CGFloat(width) / 1000, y: -CGFloat(height) / 1250)
     }
 
-    func draw(_ scene: SyntheticGarmentPhotos.Scene) {
+    /// Draws `scene`. Without `background`, only the garments (and a hanger) are drawn, on
+    /// transparency, the way a perfect cutout would come out.
+    func draw(_ scene: SyntheticGarmentPhotos.Scene, background: Bool = true) {
+        drawsBackground = background
         switch scene {
         case .flatLayTee:
             linen()
@@ -122,11 +150,13 @@ private final class Canvas {
     // MARK: Backgrounds
 
     private func plain(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) {
+        guard drawsBackground else { return }
         context.setFillColor(red: red, green: green, blue: blue, alpha: 1)
         context.fill(CGRect(x: 0, y: 0, width: 1000, height: 1250))
     }
 
     private func linen() {
+        guard drawsBackground else { return }
         plain(0.86, 0.81, 0.73)
         for _ in 0..<3000 {
             let shade = 0.78 + 0.1 * unit()
@@ -136,6 +166,7 @@ private final class Canvas {
     }
 
     private func wood() {
+        guard drawsBackground else { return }
         plain(0.60, 0.43, 0.28)
         for row in 0..<25 {
             let shade = 0.5 + 0.15 * unit()

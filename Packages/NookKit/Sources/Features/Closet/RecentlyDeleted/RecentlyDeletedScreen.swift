@@ -148,8 +148,7 @@ private struct RecentlyDeletedRow: View {
             : AnyLayout(HStackLayout(alignment: .center, spacing: NookSpacing.medium))
         layout {
             HStack(spacing: NookSpacing.medium) {
-                GarmentPicture(photo: piece.photo, category: piece.category, colors: piece.colors, pointSize: 64)
-                    .frame(width: 50, height: 64)
+                GarmentPicture(piece, size: CGSize(width: 50, height: 64))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: NookSpacing.xxSmall) {
                     Text(piece.name)

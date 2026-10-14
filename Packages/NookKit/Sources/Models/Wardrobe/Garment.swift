@@ -32,6 +32,9 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
     /// Free-text notes. **Sensitive** tier: never logged, never sent without a consented request.
     public var notes: String
     public var photo: PhotoReference
+    /// The piece lifted out of `photo`, with how clean the lift looks (Phase 8b). `nil` until a
+    /// cutout has been made, and whenever the photo changes. **Personal** tier, like the photo.
+    public var cutout: GarmentCutout?
     public var ownership: Ownership
     /// Only matters when laundry tracking is on (RD-11). Kept when tracking is turned off.
     public var laundry: LaundryState
@@ -59,6 +62,7 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
         sizeLabel: String? = nil,
         notes: String = "",
         photo: PhotoReference = .noPhoto,
+        cutout: GarmentCutout? = nil,
         ownership: Ownership = .owned,
         laundry: LaundryState = .clean,
         availability: Availability = .available,
@@ -81,6 +85,7 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
         self.sizeLabel = sizeLabel
         self.notes = notes
         self.photo = photo
+        self.cutout = cutout
         self.ownership = ownership
         self.laundry = laundry
         self.availability = availability

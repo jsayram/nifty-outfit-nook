@@ -166,4 +166,4 @@ Paste the exported text below this line.
 2. **Every lifted subject is kept**, not just the largest. A garment on a hanger comes out with the hanger. Phase 8b can switch to the largest subject if Lily's photos show that's better; the signals already say when there's more than one.
 3. **The cutout is a PNG.** It's lossless with transparency and carries no metadata. HEIC with alpha would be smaller; storage is decided in Phase 22.
 4. **The benchmark is Debug only** and `scripts/check-release.sh` now checks a Release build has none of it and no `-cutout-bench` argument.
-5. **No sticker outline yet.** The white outline, padding and tile fallback are Phase 8b.
+5. **No sticker outline yet.** The white outline, padding and tile fallback are Phase 8b (`docs/stickers.md`). Since 8b the benchmark shows each photo as a sticker and as a tile, so the run on her phone doubles as 8b's checkpoint.

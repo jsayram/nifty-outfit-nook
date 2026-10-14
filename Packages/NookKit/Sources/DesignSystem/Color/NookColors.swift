@@ -56,6 +56,7 @@ nonisolated public struct NookColors: Sendable {
     public var artButterLine: Color { Color(token: .artButterLine) }
     public var signPanel: Color { Color(token: .signPanel) }
     public var signText: Color { Color(token: .signText) }
+    public var stickerEdge: Color { Color(token: .stickerEdge) }
 
     /// The wall, from `background` at the top to `backgroundLow` at the bottom (`.screen` in the mockups).
     public var wallGradient: LinearGradient {

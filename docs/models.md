@@ -32,6 +32,8 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 
 **GarmentDraft** (Sensitive, since it can hold her notes and her own words). An unsaved add or edit: its target (a new piece or a garment), the step she was on, the details, what they started from, her description, and when it was last written. See `docs/add-a-piece.md`.
 
+**GarmentCutout** (Personal, Phase 8b). A garment's `cutout`: the cutout picture's reference and its `CutoutQuality`. `nil` until a cutout is made. A new photo on Edit drops it. See `docs/stickers.md`.
+
 **Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, wear days, and a link to a try-on picture. A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
 
 A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a described piece she doesn't own, shown as "Not in your closet" with Find one. An idea never becomes owned by being in a look. Each piece records whether it's the same as in Simple ("Same as Simple", LR-05a.3).
@@ -66,7 +68,8 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
 | `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
-| `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker, with a proposed set of limits for Phase 8b to settle | RD-07, Phase 8a |
+| `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker. `current` is 8a's proposal until the benchmark on her phone | RD-07, Phase 8a |
+| `GarmentArtChoice` | How a piece's picture shows: its drawing (no photo), its cutout (clean), or its photo in a tile (no cutout yet, or a concern) | RD-07, Phase 8b |
 | `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
 
 ## The store protocol
@@ -131,6 +134,8 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | `stylist-partial` | The stylist returns Simple and Dressed up only |
 | `stores-fail` | Every store call throws `unavailable` (error states) |
 | `photo-fails` | Add a piece's photo stand-in says the photo couldn't be read |
+
+`photos=samples` adds eight pieces with drawn sample photos and stand-in cutouts, and an image provider (`SamplePhotoProvider`) that draws them, so stickers and tiles can be seen without real photos (Phase 8b, `docs/stickers.md`).
 
 `draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). Stage A drafts live in memory, so UI tests use it after a relaunch.
 

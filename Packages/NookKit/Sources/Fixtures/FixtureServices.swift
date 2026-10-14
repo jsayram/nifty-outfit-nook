@@ -15,6 +15,7 @@ public enum FixtureServices {
             weather: configuration.weather,
             laundry: configuration.laundry,
             draft: configuration.draft,
+            photos: configuration.photos,
             now: now,
             calendar: calendar
         )
@@ -22,17 +23,22 @@ public enum FixtureServices {
 
     /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
     /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
-    /// `draft` puts an unsaved Add a piece or Edit draft in the draft store.
+    /// `draft` puts an unsaved Add a piece or Edit draft in the draft store. `photos` adds the
+    /// sample photo pieces and the provider that draws their pictures.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
         draft: FixtureDraftState? = nil,
+        photos: FixturePhotoState = .drawn,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
         var data = set.data(now: now, calendar: calendar)
+        if photos == .samples {
+            data.garments = SamplePhotoGarments.garments(now: now) + data.garments
+        }
         if let laundry {
             data = data.applying(laundry: laundry)
         }
@@ -61,7 +67,7 @@ public enum FixtureServices {
                 isOffline: behavior == .offline || weather == .unavailable,
                 latency: slow ? .seconds(1) : .zero
             ),
-            images: PlaceholderImageProvider(),
+            images: photos == .samples ? SamplePhotoProvider() : PlaceholderImageProvider(),
             drafts: InMemoryDraftStore(drafts: drafts, options: stores),
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
             descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),

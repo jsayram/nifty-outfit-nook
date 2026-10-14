@@ -67,6 +67,18 @@ final class GarmentImageLoader {
         return image
     }
 
+    /// The picture if it has already loaded, without asking the provider. Lets a view show a
+    /// loaded picture on its first frame, and still images draw one at all.
+    func cachedImage(for reference: PhotoReference, maxPixelSize: Int) -> UIImage? {
+        cache.object(forKey: Key(reference: reference, maxPixelSize: maxPixelSize).cacheName)
+    }
+
+    /// True when the provider had no picture for `reference` at this size.
+    func isMissing(_ reference: PhotoReference, maxPixelSize: Int) -> Bool {
+        if case .noPhoto = reference { return true }
+        return missing.contains(Key(reference: reference, maxPixelSize: maxPixelSize))
+    }
+
     /// Decodes `data` straight to a thumbnail no larger than `maxPixelSize`, off the main actor.
     @concurrent
     nonisolated static func downsample(_ data: Data, maxPixelSize: Int) async -> UIImage? {
@@ -93,34 +105,4 @@ extension GarmentImageLoader.Key {
 extension EnvironmentValues {
     /// Garment pictures for every screen, built once at the root from the services' image provider.
     @Entry var garmentImages: GarmentImageLoader?
-}
-
-/// A garment's picture: the photo once it has loaded, the placeholder drawing until then and for
-/// pieces with no photo. Sized by its frame; the photo is requested at that size in pixels.
-struct GarmentPicture: View {
-    let photo: PhotoReference
-    let category: GarmentCategory
-    let colors: [ColorName]
-    /// The longest side the picture is shown at, in points.
-    let pointSize: CGFloat
-
-    @Environment(\.garmentImages) private var loader
-    @Environment(\.displayScale) private var displayScale
-    @State private var image: UIImage?
-
-    var body: some View {
-        Group {
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                GarmentPlaceholderArt(category: category, colors: colors)
-            }
-        }
-        .task(id: photo) {
-            guard let loader, photo != .noPhoto else { return }
-            image = await loader.image(for: photo, maxPixelSize: Int((pointSize * displayScale).rounded(.up)))
-        }
-    }
 }

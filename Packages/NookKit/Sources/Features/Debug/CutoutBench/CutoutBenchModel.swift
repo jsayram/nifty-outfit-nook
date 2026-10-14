@@ -24,6 +24,8 @@
             var label: String
             var original: CGImage?
             var cutout: CGImage?
+            /// Changes with every new cutout, so its sticker preview is made again.
+            var cutoutID = UUID()
             var record: CutoutBenchRecord?
             var isRunning = false
         }
@@ -101,6 +103,7 @@
                 rows[index].isRunning = false
                 rows[index].record = CutoutBenchRecord(id: index + 1, label: input.label, outcome: outcome)
                 rows[index].cutout = cutout
+                rows[index].cutoutID = UUID()
             }
         }
 

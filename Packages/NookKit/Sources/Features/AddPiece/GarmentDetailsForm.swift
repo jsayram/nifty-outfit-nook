@@ -220,10 +220,9 @@ private struct PhotoRow: View {
             layout {
                 GarmentPicture(
                     photo: model.details.photo, category: model.details.category ?? .top,
-                    colors: model.details.colors, pointSize: thumbSize * 0.8
+                    colors: model.details.colors, size: CGSize(width: thumbSize * 0.8, height: thumbSize * 0.8)
                 )
                 .opacity(model.details.category == nil ? 0.45 : 1)
-                .frame(width: thumbSize * 0.8, height: thumbSize * 0.8)
                 .frame(width: thumbSize, height: thumbSize)
                 .background(Color.nook.tint, in: NookRadius.shape(NookRadius.group))
                 .accessibilityHidden(true)

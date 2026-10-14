@@ -77,6 +77,8 @@ Tapping a piece opens its detail (Phase 7a, see `docs/garment-detail.md`). Close
 
 Stage A has no photos, so every piece draws a placeholder: its kind's outline (a top, trousers, a dress, a jacket, a loafer, a handbag, a hat for accessories) filled with its main colour, a detail such as a waistband or sole in its second colour, and a darker outline. Garment colours are their own, not the room's palette (LR-02), and dim to 92% in dark, as the room art's garments do. A piece with no colour recorded is a quiet stone.
 
+Phase 8b routes every piece's picture through `GarmentPicture`, which picks the drawing, the cutout or the photo tile (`GarmentArtChoice`, see `docs/stickers.md`). The grid keeps the standing look from `closet.html`: a clean cutout stands plain on the floor, and a photo without one shows in a rounded tile the same size.
+
 The path for real photos is already in place. `GarmentPicture` asks `GarmentImageLoader` for the picture at the size it's shown, in pixels. The loader asks the `ImageProvider` (Stage A's answers `nil`), shrinks what comes back with ImageIO's thumbnail call away from the main actor, so a full photo is never decoded, and keeps it in an in-memory cache by picture and size. Pieces with no picture are remembered too, and two cells asking for the same picture share one load. Nothing is written to disk. Phases 7b, 8b and 22b only need a provider that returns bytes.
 
 ## States

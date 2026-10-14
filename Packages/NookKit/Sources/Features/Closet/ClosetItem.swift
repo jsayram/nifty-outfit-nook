@@ -10,6 +10,7 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
     let category: GarmentCategory
     let colors: [ColorName]
     let photo: PhotoReference
+    let cutout: GarmentCutout?
     /// The active suitcases it's packed in, by name. A packed piece shows one small suitcase
     /// icon however many there are, and VoiceOver reads every name (LR-11.1).
     let suitcaseNames: [String]
@@ -23,6 +24,7 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
         category = garment.category
         colors = garment.colors
         photo = garment.photo
+        cutout = garment.cutout
         self.suitcaseNames = suitcaseNames
         isDirty = tracksLaundry && garment.laundry == .dirty
         lastWorn = garment.lastWorn

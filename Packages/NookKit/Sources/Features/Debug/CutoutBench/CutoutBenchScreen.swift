@@ -1,4 +1,5 @@
 #if DEBUG
+    import DesignSystem
     import Models
     import PhotosUI
     import SwiftUI
@@ -15,6 +16,7 @@
         @State private var model: CutoutBenchModel
         @State private var selection: [PhotosPickerItem] = []
         @State private var copied = false
+        @State private var stickers = StickerCache()
         private let samples: @Sendable () -> [CutoutBenchModel.Input]
 
         /// - Parameters:
@@ -46,6 +48,7 @@
                 }
                 .onDisappear { model.cancel() }
             }
+            .environment(\.stickerCache, stickers)
             .accessibilityIdentifier("cutoutBench")
         }
 
@@ -179,21 +182,24 @@
         }
     }
 
-    /// One photo: the original and the cutout side by side, then its numbers.
+    /// One photo: the original, the cutout as a sticker and the photo as the fallback tile
+    /// (Phase 8b), with the one the signals pick marked, then its numbers.
     private struct CutoutBenchRowView: View {
         let row: CutoutBenchModel.Row
         let thresholds: CutoutThresholds
         let mark: (Bool?) -> Void
 
+        private static let previewSize = CGSize(width: 92, height: 115)
+
         var body: some View {
             Section {
-                HStack(spacing: 12) {
-                    picture(row.original, checkerboard: false)
-                    picture(row.cutout, checkerboard: true)
+                HStack(alignment: .top, spacing: 10) {
+                    preview("Photo") { picture(row.original, checkerboard: false) }
+                    preview(suggestsSticker == true ? "Sticker (pick)" : "Sticker") { stickerPreview }
+                    preview(suggestsSticker == false ? "Tile (pick)" : "Tile") { tilePreview }
                 }
-                .frame(height: 160)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text(verbatim: "Original and cutout"))
+                .accessibilityLabel(Text(verbatim: "Photo, sticker and tile"))
 
                 details
             } header: {
@@ -262,6 +268,42 @@
                 .buttonStyle(.bordered)
                 .tint(usable == false ? .red : .secondary)
                 .accessibilityAddTraits(usable == false ? .isSelected : [])
+            }
+        }
+
+        private var measured: CutoutBenchRecord.Measured? {
+            if case .measured(let measured) = row.record?.outcome { return measured }
+            return nil
+        }
+
+        /// Whether the signals pick the sticker, once the photo has been measured.
+        private var suggestsSticker: Bool? {
+            measured.map { thresholds.suggestsSticker($0.quality) }
+        }
+
+        private func preview(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+            VStack(spacing: 4) {
+                content()
+                    .frame(width: Self.previewSize.width, height: Self.previewSize.height)
+                    .padding(6)
+                    .background(Color.nook.floor, in: RoundedRectangle(cornerRadius: 8))
+                Text(verbatim: title).font(.caption2)
+            }
+        }
+
+        /// The cutout with its white edge, as Closet and looks will show it.
+        @ViewBuilder private var stickerPreview: some View {
+            if let cutout = row.cutout {
+                NookSticker("bench:\(row.cutoutID)", size: Self.previewSize, source: .image(cutout))
+            }
+        }
+
+        /// The original in a rounded tile, framed on the subject when there are signals.
+        @ViewBuilder private var tilePreview: some View {
+            if let original = row.original {
+                NookPhotoTile(
+                    TileFraming.crop(original, subject: measured?.quality.subjectBounds, tileSize: Self.previewSize),
+                    size: Self.previewSize)
             }
         }
 

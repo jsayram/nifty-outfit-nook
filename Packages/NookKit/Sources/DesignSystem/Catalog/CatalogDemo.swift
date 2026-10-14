@@ -19,6 +19,7 @@
         case loadingState
         case errorState
         case sheet
+        case stickers
 
         var id: Self { self }
 
@@ -37,6 +38,7 @@
             case .loadingState: "Loading state"
             case .errorState: "Error state"
             case .sheet: "Bottom sheet"
+            case .stickers: "Stickers and photo tiles"
             }
         }
 
@@ -55,6 +57,7 @@
             case .loadingState: NookLoadingState("Getting your looks", message: "This takes a few seconds.")
             case .errorState: ErrorStateDemo()
             case .sheet: SheetDemo()
+            case .stickers: StickerDemo()
             }
         }
     }

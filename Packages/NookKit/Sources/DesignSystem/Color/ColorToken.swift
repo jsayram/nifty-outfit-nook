@@ -86,6 +86,9 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case signPanel
     /// Her name, written on the sign's panel.
     case signText
+    /// The paper edge of a garment sticker (RD-07). Part of the art, like the sticker's paper,
+    /// not an outline on the interface. Stays near white in dark, a little dimmed with the garments.
+    case stickerEdge
 
     /// Where the token is used, for grouping in docs and the catalog.
     public enum Group: String, CaseIterable, Sendable {
@@ -99,7 +102,7 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
         case .success, .successSurface, .warning, .warningSurface, .error, .errorSurface:
             .status
         case .floor, .floorLow, .floorLine, .artSage, .artSageDeep, .artSageLine, .artSand, .artStone, .artButter,
-            .artButterLine, .signPanel, .signText:
+            .artButterLine, .signPanel, .signText, .stickerEdge:
             .room
         default:
             .interface
