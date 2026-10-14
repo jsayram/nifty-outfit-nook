@@ -28,6 +28,10 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 - `deletedAt`: in Recently deleted, purged 30 days later.
 - `wornOn`: the days she chose Wear today, one entry per day. `lastWorn` comes from it (LR-10).
 
+**GarmentDetails** (Personal; `notes` is Sensitive). The facts she types or picks on Add a piece and Edit (Phase 7b): everything above except the states. `GarmentDetails(garment)` reads them from a piece, `apply(to:)` writes them back without touching its states, and `makeGarment(id:addedAt:)` makes a new owned piece. The kind is optional here, so a new piece never gets one she didn't choose.
+
+**GarmentDraft** (Sensitive, since it can hold her notes and her own words). An unsaved add or edit: its target (a new piece or a garment), the step she was on, the details, what they started from, her description, and when it was last written. See `docs/add-a-piece.md`.
+
 **Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, wear days, and a link to a try-on picture. A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
 
 A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a described piece she doesn't own, shown as "Not in your closet" with Find one. An idea never becomes owned by being in a look. Each piece records whether it's the same as in Simple ("Same as Simple", LR-05a.3).
@@ -61,11 +65,12 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `SuitcaseShelf` | Three favourites by most recent use, See all only above three, archived only under their filter | RD-09, LR-17 |
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
+| `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
 | `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
 
 ## The store protocol
 
-Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; Stage B puts persistence behind the same protocols (Phase 20a).
+Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid details, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; Stage B puts persistence behind the same protocols (Phase 20a).
 
 ```swift
 protocol ClosetStore: Sendable {
@@ -90,6 +95,11 @@ protocol Stylist: Sendable {
 }
 protocol WeatherProvider: Sendable { func currentWeather() async throws(WeatherError) -> WeatherSnapshot }
 protocol ImageProvider: Sendable { func imageData(for: PhotoReference, maxPixelSize: Int) async throws(ImageError) -> Data? }
+
+// Phase 7b, Add a piece
+protocol DraftStore: Sendable { drafts, draft(for:), save, discard }      // unsaved adds and edits
+protocol PhotoIntake: Sendable { func photo(from: PhotoSource) async throws(PhotoIntakeError) -> PhotoReference }
+protocol GarmentDescriptionReader: Sendable { func suggestions(for: String) async throws(DescriptionError) -> [GarmentSuggestion] }
 ```
 
 `NookServices` bundles one of each. The app target builds it and passes it to `RootTabView`, which puts it in the SwiftUI environment (`\.services`). Screens never build services.
@@ -114,6 +124,11 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | `stylist-fails` | The stylist throws `notCompleted` |
 | `stylist-partial` | The stylist returns Simple and Dressed up only |
 | `stores-fail` | Every store call throws `unavailable` (error states) |
+| `photo-fails` | Add a piece's photo stand-in says the photo couldn't be read |
+
+`draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). Stage A drafts live in memory, so UI tests use it after a relaunch.
+
+Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample picture for every source, no permission asked) and `WordMatchDescriptionReader` (Describe in words, a deterministic word matcher on the phone with no style rules).
 
 Dates in the demo and large sets are relative to launch time, so "Last worn" reads naturally; tests pass a fixed date.
 

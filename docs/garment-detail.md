@@ -14,7 +14,7 @@ Phase 7a, 14 October 2026. Garment detail shows one piece and what she can do wi
 | `Features/Garment/GarmentDetailText.swift` | Every line of words, from stored facts with a given clock, calendar and locale |
 | `Features/Closet/RecentlyDeleted/` | Recently deleted: its model, screen and rows |
 
-Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. Edit, each suitcase, Style Me and Make your own look are still stand-ins.
+Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. Edit opens the Add a piece form filled in with the piece (Phase 7b, see `docs/add-a-piece.md`). Each suitcase, Style Me and Make your own look are still stand-ins.
 
 ## The page
 
