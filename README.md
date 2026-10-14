@@ -27,7 +27,10 @@ scripts/build.sh Release    # Release build
 scripts/test.sh             # package tests and UI tests on an iPhone simulator
 scripts/format.sh           # swift-format lint (fails on any finding)
 scripts/format.sh --fix     # rewrite files, then lint
+scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
 ```
+
+The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commit whose staged changes look like they contain a secret.
 
 `scripts/test.sh` picks the newest iOS 26 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`. Results land in `build/TestResults.xcresult`.
 
@@ -60,7 +63,9 @@ Configs/                     Build settings as xcconfig files.
   App.xcconfig               App target: bundle ID, Info.plist keys, entitlements.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
-scripts/                     build.sh, test.sh, format.sh, simulator.sh.
+scripts/                     build.sh, test.sh, format.sh, simulator.sh, install-hooks.sh.
+.githooks/                   The gitleaks pre-commit hook.
+.github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
 website/                     The app's static website.
 ```
@@ -79,6 +84,22 @@ The local package is added to the project as a folder reference rather than a pa
 ## Branches
 
 Git Flow. `main` is what's released, `develop` is the integration branch, and every phase is a `feature/*` branch off `develop`. Releases go through `release/*`, urgent fixes through `hotfix/*`. Nothing is pushed straight to `main` or `develop`.
+
+Rulesets on `main` and `develop` enforce this for everyone, administrators included: changes arrive by pull request, CI must pass, history stays linear and signed, and force pushes and deletion are blocked. Pull requests are squash-merged.
+
+## CI
+
+GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`. Its three checks are all required:
+
+- `swift-format`: `scripts/format.sh` on a `macos-26` runner.
+- `build-and-test`: a Release build, then `scripts/test.sh` with Xcode 26.6 on the newest iOS 26 simulator the runner has.
+- `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
+
+Actions are pinned to full commit SHAs and the workflow token is read-only. Dependabot keeps the pins current.
+
+## Reporting a security problem
+
+See [SECURITY.md](SECURITY.md).
 
 ## License
 
