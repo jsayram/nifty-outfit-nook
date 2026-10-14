@@ -29,7 +29,8 @@ final class HomeTests: XCTestCase {
             let control = app.buttons[identifier]
             reveal(control, in: app)
             control.tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(identifier) didn't open \(title)")
+            XCTAssertTrue(
+                app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(identifier) didn't open \(title)")
             app.navigationBars[title].buttons.firstMatch.tap()
             XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "No way back from \(title)")
         }
