@@ -8,35 +8,33 @@ import Testing
 /// Closet stays quick with the large closet (RD-13.1, LR-09.4, Definition of done item 7).
 ///
 /// Measured serially on an Apple-silicon Mac, iOS 26.5 simulator, Debug: see docs/closet.md.
-/// The bounds sit far above those numbers so CI doesn't flake; a failure means something got
+/// The bounds sit far above those numbers so CI doesn't flake: each check takes the fastest of
+/// three runs and allows three times as long on CI (`SpeedCheck`). A failure means something got
 /// many times slower.
 @MainActor
 struct LargeClosetBrowsingTests {
     private static let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
 
-    private func time(_ work: () -> Void) -> Duration {
-        let clock = ContinuousClock()
-        let start = clock.now
-        work()
-        return clock.now - start
-    }
-
-    @Test func preparingTheGridIsFast() {
-        let model = ClosetModel()
-        let elapsed = time {
-            model.show(
-                Self.data.garments, suitcases: Self.data.suitcases, profile: Self.data.profile,
-                now: ClosetTestTime.now)
-        }
-        #expect(model.items.count > 2_000)
-        #expect(elapsed < .milliseconds(500), "Preparing \(model.items.count) pieces took \(elapsed)")
-    }
-
-    @Test func eachFilterAndSearchIsFast() {
+    private func loadedModel() -> ClosetModel {
         let model = ClosetModel()
         model.show(
             Self.data.garments, suitcases: Self.data.suitcases, profile: Self.data.profile, now: ClosetTestTime.now)
-        var slowest = Duration.zero
+        return model
+    }
+
+    @Test func preparingTheGridIsFast() {
+        var model = ClosetModel()
+        let elapsed = SpeedCheck.fastest {
+            model = loadedModel()
+        }
+        #expect(model.items.count > 2_000)
+        #expect(
+            elapsed < SpeedCheck.limit(.milliseconds(500)), "Preparing \(model.items.count) pieces took \(elapsed)")
+    }
+
+    /// Each step changes the filters, so a round runs them all in order on a fresh model, and a
+    /// step's time is its fastest over three rounds.
+    @Test func eachFilterAndSearchIsFast() {
         let steps: [(ClosetModel) -> Void] = [
             { $0.toggle(.top) },
             { $0.toggle(.navy) },
@@ -52,10 +50,18 @@ struct LargeClosetBrowsingTests {
             },
             { $0.clearFilters() },
         ]
-        for step in steps {
-            slowest = max(slowest, time { step(model) })
+        var fastest = Array(repeating: Duration.seconds(Int64.max), count: steps.count)
+        let clock = ContinuousClock()
+        for _ in 0..<3 {
+            let model = loadedModel()
+            for (index, step) in steps.enumerated() {
+                let start = clock.now
+                step(model)
+                fastest[index] = min(fastest[index], clock.now - start)
+            }
+            #expect(model.shown.count == model.items.count)
         }
-        #expect(model.shown.count == model.items.count)
-        #expect(slowest < .milliseconds(150), "The slowest step took \(slowest)")
+        let slowest = fastest.max() ?? .zero
+        #expect(slowest < SpeedCheck.limit(.milliseconds(150)), "The slowest step took \(slowest)")
     }
 }

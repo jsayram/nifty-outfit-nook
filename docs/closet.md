@@ -100,7 +100,7 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 - The slowest single chip, swatch, Suitcase or search change: 7 ms.
 - Scrolling: five fast flings down the grid, measured with `XCTOSSignpostMetric.scrollingAndDecelerationMetric`, took 2.58 s on average with 0.3% spread. The simulator doesn't report hitch counts, so the hitch rate needs a run on a real phone (see Needs Jose in the PR).
 
-`LargeClosetBrowsingTests` holds the first two to loose bounds (500 ms and 150 ms) so CI catches a big slowdown. `ClosetScrollPerformanceTests` (UI) is the scroll measurement; it's skipped unless `TEST_RUNNER_NOOK_PERFORMANCE=1` is set, because it takes about three minutes.
+`LargeClosetBrowsingTests` holds the first two to loose bounds (500 ms and 150 ms, the fastest of three runs, three times that on CI) so CI catches a big slowdown without flaking. `ClosetScrollPerformanceTests` (UI) is the scroll measurement; it's skipped unless `TEST_RUNNER_NOOK_PERFORMANCE=1` is set, because it takes about three minutes.
 
 ## Tests
 

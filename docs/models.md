@@ -66,6 +66,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
 | `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
+| `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker, with a proposed set of limits for Phase 8b to settle | RD-07, Phase 8a |
 | `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
 
 ## The store protocol
@@ -100,7 +101,12 @@ protocol ImageProvider: Sendable { func imageData(for: PhotoReference, maxPixelS
 protocol DraftStore: Sendable { drafts, draft(for:), save, discard }      // unsaved adds and edits
 protocol PhotoIntake: Sendable { func photo(from: PhotoSource) async throws(PhotoIntakeError) -> PhotoReference }
 protocol GarmentDescriptionReader: Sendable { func suggestions(for: String) async throws(DescriptionError) -> [GarmentSuggestion] }
+
+// Phase 8a, cutouts
+protocol CutoutService: Sendable { func cutout(from: Data) async throws(CutoutError) -> CutoutResult }
 ```
+
+`CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
 
 `NookServices` bundles one of each. The app target builds it and passes it to `RootTabView`, which puts it in the SwiftUI environment (`\.services`). Screens never build services.
 
@@ -134,7 +140,7 @@ Dates in the demo and large sets are relative to launch time, so "Last worn" rea
 
 The **mock stylist** is deterministic and uses plain matching on stored facts only: occasion tags, season, warmth against the temperature, fit against comfort, and the colour wish. It pairs the best-matching main pieces with shoes, adds a layer in rain or cool weather, skips main-piece combinations worn inside the repeat window, swaps in a dressier owned piece for Dressed up, and adds one idea (or swaps another owned piece) for Something new. It has no real fit or styling rules; those stay in the private backend.
 
-Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in Debug: generating the large set 36 ms, five filters over it 35 ms, building a styling context 6 ms, styling 41 ms. The tests allow 1 s, 500 ms, 500 ms and 500 ms, so a failure means something got many times slower.
+Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in Debug: generating the large set 36 ms, five filters over it 35 ms, building a styling context 6 ms, styling 41 ms. The tests allow 1 s, 500 ms, 500 ms and 500 ms, so a failure means something got many times slower. Each check takes the fastest of three runs and allows three times as long on CI, after two checks went over once on a busy CI runner (a context build took 862 ms there, against 6 ms locally).
 
 ## Left out on purpose
 

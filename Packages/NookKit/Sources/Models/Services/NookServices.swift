@@ -17,6 +17,8 @@ public struct NookServices: Sendable {
     public var photos: any PhotoIntake
     /// "Describe in words" suggestions (an on-phone word matcher in Stage A).
     public var descriptions: any GarmentDescriptionReader
+    /// Lifting a garment out of its photo (a stand-in in Stage A; Vision is measured in Phase 8a).
+    public var cutouts: any CutoutService
 
     public init(
         closet: any ClosetStore,
@@ -28,7 +30,8 @@ public struct NookServices: Sendable {
         images: any ImageProvider,
         drafts: any DraftStore,
         photos: any PhotoIntake,
-        descriptions: any GarmentDescriptionReader
+        descriptions: any GarmentDescriptionReader,
+        cutouts: any CutoutService
     ) {
         self.closet = closet
         self.looks = looks
@@ -40,5 +43,6 @@ public struct NookServices: Sendable {
         self.drafts = drafts
         self.photos = photos
         self.descriptions = descriptions
+        self.cutouts = cutouts
     }
 }

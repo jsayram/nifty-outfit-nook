@@ -36,6 +36,8 @@ scripts/promote.sh "<title>" <body-file>  # at a milestone: open the develop-to-
 
 The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commit whose staged changes look like they contain a secret.
 
+On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet speed checks allow three times their local bound. Each speed check also takes the fastest of three runs, so a stall from tests running in parallel doesn't fail it.
+
 `scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator.
@@ -45,6 +47,10 @@ Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Config
 ## Component catalog
 
 Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
+
+## Cutout benchmark
+
+Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) instead of the app: pick photos with the system picker (no photo-library permission needed) or use drawn samples, and it times each cutout, samples memory, shows the quality signals and exports the numbers as text. The simulator can't run Vision's subject lifting, so it needs a device. `docs/cutout-feasibility.md` has the steps and the go/no-go limits. Like the catalog, it's compiled only in Debug.
 
 ## Sample data
 
@@ -70,6 +76,7 @@ Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
   Sources/Models/            Domain types, rules as pure functions, and service protocols (Phase 3).
   Sources/Fixtures/          In-memory stores, the mock stylist, sample data sets and the -fixtures argument.
+  Sources/Services/          Real services on Apple frameworks only. Phase 8a: subject lifting with Vision.
   Sources/Features/          Screens and view models, one folder per feature.
     Resources/               Localizable.xcstrings, the String Catalog for user-facing text.
   Tests/                     One Swift Testing target per module.
@@ -90,10 +97,11 @@ docs/home-room.md            The Home room, its layouts and states.
 docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
 docs/garment-detail.md       Garment detail, Remove from closet and Recently deleted.
 docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and Describe in words.
+docs/cutout-feasibility.md   Lifting garments out of photos: the pipeline, the benchmark and the go/no-go.
 website/                     The app's static website.
 ```
 
-Features depend on DesignSystem and Models. Fixtures depends on Models. The app target links Features, Fixtures and DesignSystem (for the debug catalog) and only wires them together.
+Features depend on DesignSystem and Models. Fixtures and Services depend on Models. The app target links Features, Fixtures, DesignSystem (for the debug catalog) and Services (for the debug cutout benchmark) and only wires them together.
 
 The local package is added to the project as a folder reference rather than a package reference. That keeps it editable in Xcode, lets the test plan run its test targets, and stops Xcode building it with warnings suppressed.
 

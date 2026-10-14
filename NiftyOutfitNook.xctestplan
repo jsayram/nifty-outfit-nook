@@ -38,6 +38,13 @@
     {
       "target": {
         "containerPath": "container:Packages/NookKit",
+        "identifier": "ServicesTests",
+        "name": "ServicesTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
         "identifier": "FeaturesTests",
         "name": "FeaturesTests"
       }
