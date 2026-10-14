@@ -39,10 +39,12 @@ jobs:
   # only when every one of them passed. Splitting them took the check from about 18 minutes to
   # the length of the slowest job. Nothing is cached between runs, so a pull request can't
   # leave build output behind for a later run on develop or main to pick up.
-  release-build:
-    name: release-build
+  # The Release check and the package tests share a runner: together they take about as long as
+  # one UI part, and it keeps a run within the five macOS runners the free plan allows at once.
+  release-and-package-tests:
+    name: release-and-package-tests
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -57,9 +59,27 @@ jobs:
         run: scripts/build.sh Release
       - name: Check the Release build has no debug or test code
         run: scripts/check-release.sh
+      - name: Test (every package test target, anything that isn't a UI test)
+        env:
+          # Failed snapshots write the new image and a diff here (passed through to the simulator).
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
+        run: scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      - name: Keep test results on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: TestResults-package
+          path: |
+            build/TestResults.xcresult
+            build/SnapshotArtifacts
+          retention-days: 7
+          if-no-files-found: ignore
 
-  tests:
-    name: tests (${{ matrix.part }})
+  # The UI tests in parts. Each part has a fixed cost of about 6 minutes on the hosted runner
+  # (setup, build, a cold simulator boot and the first launch), so a part should hold at least
+  # a few minutes of tests.
+  ui-tests:
+    name: ui-tests (${{ matrix.part }})
     runs-on: macos-26
     timeout-minutes: 40
     strategy:
@@ -67,19 +87,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Every package test target (anything that isn't a UI test).
-          - part: package
-            selection: -skip-testing:NiftyOutfitNookUITests
           - part: ui-catalog
             selection: -only-testing:NiftyOutfitNookUITests/CatalogTests
           - part: ui-home
             selection: -only-testing:NiftyOutfitNookUITests/HomeTests
+          - part: ui-home-variants
+            selection: -only-testing:NiftyOutfitNookUITests/HomeVariantTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             selection: >-
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
+              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -111,19 +131,19 @@ jobs:
   # because GitHub counts a skipped required check as passed.
   build-and-test:
     name: build-and-test
-    needs: [release-build, tests]
+    needs: [release-and-package-tests, ui-tests]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Every build and test job passed
         env:
-          RELEASE_BUILD: ${{ needs.release-build.result }}
-          TESTS: ${{ needs.tests.result }}
+          RELEASE_AND_PACKAGE: ${{ needs.release-and-package-tests.result }}
+          UI_TESTS: ${{ needs.ui-tests.result }}
         run: |
-          echo "release-build: $RELEASE_BUILD"
-          echo "tests: $TESTS"
-          [[ "$RELEASE_BUILD" == "success" && "$TESTS" == "success" ]]
+          echo "release-and-package-tests: $RELEASE_AND_PACKAGE"
+          echo "ui-tests: $UI_TESTS"
+          [[ "$RELEASE_AND_PACKAGE" == "success" && "$UI_TESTS" == "success" ]]
 
   gitleaks:
     name: gitleaks
