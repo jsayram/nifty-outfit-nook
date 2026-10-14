@@ -8,6 +8,8 @@ public struct RootTabView: View {
     private let services: NookServices?
     /// Garment pictures, shared by every screen so they're cached once.
     @State private var garmentImages: GarmentImageLoader?
+    /// Garment stickers, made once and shared by every screen (Phase 8b).
+    @State private var stickers = StickerCache()
 
     /// - Parameter services: what every screen below reads its data from.
     public init(services: NookServices?) {
@@ -31,6 +33,7 @@ public struct RootTabView: View {
         .tint(.nook.accent)
         .environment(\.services, services)
         .environment(\.garmentImages, garmentImages)
+        .environment(\.stickerCache, stickers)
     }
 }
 

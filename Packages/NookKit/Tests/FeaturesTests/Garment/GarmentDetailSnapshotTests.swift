@@ -128,6 +128,7 @@ struct GarmentDetailSnapshotTests {
             .environment(\.closetIsStillImage, true)
             .environment(\.nookStaticRendering, true)
             .environment(\.colorScheme, colorScheme)
+            .environment(\.displayScale, 2)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, ClosetTestTime.locale)
             .environment(\.calendar, ClosetTestTime.calendar)

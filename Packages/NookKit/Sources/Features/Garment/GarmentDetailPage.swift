@@ -237,12 +237,8 @@ struct GarmentStage: View {
             GarmentContactShadow()
                 .frame(width: size.width * 0.9, height: size.height * 0.1)
                 .offset(y: size.height * 0.47)
-            GarmentPicture(
-                photo: garment.photo, category: garment.category, colors: garment.colors,
-                pointSize: max(size.width, size.height)
-            )
-            .frame(width: size.width, height: size.height)
-            .rotationEffect(.degrees(-3))
+            GarmentPicture(garment, size: size, presentation: .sticker(.resting))
+                .rotationEffect(.degrees(-3))
         }
         .frame(maxWidth: .infinity)
         .frame(height: size.height * 1.12)
