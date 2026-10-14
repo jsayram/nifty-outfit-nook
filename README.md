@@ -46,7 +46,9 @@ Debug builds launched with `-catalog` open a catalog of every DesignSystem compo
 
 ## Sample data
 
-Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Missing or unknown values fall back to `demo`. The sets themselves arrive in Phase 3.
+Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add a behaviour after a colon for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial` or `stores-fail`, for example `-fixtures demo:offline`. Missing or unknown values fall back to `demo` and `normal`.
+
+The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
 ## Folder structure
 
@@ -57,8 +59,8 @@ NiftyOutfitNook/             App target: entry point, assets, entitlements, priv
 NiftyOutfitNookUITests/      XCUITest UI tests.
 Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
-  Sources/Models/            Domain types and service protocols (Phase 3).
-  Sources/Fixtures/          Sample data sets and the -fixtures launch argument.
+  Sources/Models/            Domain types, rules as pure functions, and service protocols (Phase 3).
+  Sources/Fixtures/          In-memory stores, the mock stylist, sample data sets and the -fixtures argument.
   Sources/Features/          Screens and view models, one folder per feature.
     Resources/               Localizable.xcstrings, the String Catalog for user-facing text.
   Tests/                     One Swift Testing target per module.
@@ -74,6 +76,7 @@ scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-r
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
+docs/models.md               The models, rules, store protocols and fixture sets.
 website/                     The app's static website.
 ```
 

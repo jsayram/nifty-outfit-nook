@@ -1,10 +1,15 @@
+import Models
 import SwiftUI
 
 /// The app's root: a tab bar with Home, Closet and Saved Looks.
 public struct RootTabView: View {
     @State private var selection: AppTab = .home
+    private let services: NookServices?
 
-    public init() {}
+    /// - Parameter services: what every screen below reads its data from.
+    public init(services: NookServices?) {
+        self.services = services
+    }
 
     public var body: some View {
         TabView(selection: $selection) {
@@ -18,9 +23,10 @@ public struct RootTabView: View {
                 SavedLooksScreen()
             }
         }
+        .environment(\.services, services)
     }
 }
 
 #Preview {
-    RootTabView()
+    RootTabView(services: nil)
 }

@@ -1,6 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld pieces in the sample closet" : {
+      "comment" : "Placeholder detail on Closet",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece in the sample closet"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces in the sample closet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Closet" : {
       "comment" : "Tab bar label",
       "localizations" : {

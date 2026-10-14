@@ -25,3 +25,24 @@ struct FixtureSetTests {
         #expect(FixtureSet(launchArguments: arguments) == .large)
     }
 }
+
+struct FixtureConfigurationTests {
+    @Test func readsASetAndABehavior() {
+        let configuration = FixtureConfiguration(launchArguments: ["App", "-fixtures", "large:stylist-fails"])
+        #expect(configuration == FixtureConfiguration(set: .large, behavior: .stylistFails))
+        #expect(FixtureSet(launchArguments: ["App", "-fixtures", "empty:offline"]) == .empty)
+    }
+
+    @Test(arguments: FixtureBehavior.allCases)
+    func readsEachBehavior(_ behavior: FixtureBehavior) {
+        let configuration = FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:\(behavior.rawValue)"])
+        #expect(configuration.behavior == behavior)
+    }
+
+    @Test func unknownPartsFallBackToDemoAndNormal() {
+        #expect(FixtureConfiguration(launchArguments: ["App"]) == FixtureConfiguration())
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo"]).behavior == .normal)
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:wobbly"]).behavior == .normal)
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "huge:slow"]).set == .demo)
+    }
+}

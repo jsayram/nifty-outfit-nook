@@ -8,8 +8,11 @@ import SwiftUI
 
 @main
 struct NiftyOutfitNookApp: App {
-    /// Chosen with `-fixtures demo|empty|large`. Not used yet; Phase 3 wires the sets in.
-    private let fixtureSet = FixtureSet(launchArguments: ProcessInfo.processInfo.arguments)
+    /// Stage A runs on sample data. `-fixtures <set>[:<behavior>]` picks it, for example
+    /// `-fixtures large` or `-fixtures demo:offline`; the default is the demo closet.
+    private let services = FixtureServices.make(
+        FixtureConfiguration(launchArguments: ProcessInfo.processInfo.arguments)
+    )
 
     var body: some Scene {
         WindowGroup {
@@ -18,10 +21,10 @@ struct NiftyOutfitNookApp: App {
                 if ProcessInfo.processInfo.arguments.contains("-catalog") {
                     NookCatalogView()
                 } else {
-                    RootTabView()
+                    RootTabView(services: services)
                 }
             #else
-                RootTabView()
+                RootTabView(services: services)
             #endif
         }
     }
