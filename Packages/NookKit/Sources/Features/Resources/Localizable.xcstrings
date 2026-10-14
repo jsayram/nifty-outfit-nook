@@ -34,6 +34,17 @@
         }
       }
     },
+    "%@ is in your closet" : {
+      "comment" : "Toast after Add a piece, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is in your closet"
+          }
+        }
+      }
+    },
     "%@ is out of your closet" : {
       "comment" : "Toast after I don't have it any more, with the piece's name",
       "localizations" : {
@@ -41,6 +52,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ is out of your closet"
+          }
+        }
+      }
+    },
+    "%@ isn’t in your closet yet." : {
+      "comment" : "Draft card: a new piece, with the name she gave it",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ isn’t in your closet yet."
           }
         }
       }
@@ -56,6 +78,17 @@
         }
       }
     },
+    "%@ stays as it was." : {
+      "comment" : "Edit: under the discard question, with the piece's saved name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stays as it was."
+          }
+        }
+      }
+    },
     "%@ · %@" : {
       "comment" : "Pill on Home's Source row: the piece count, then the scope",
       "localizations" : {
@@ -63,6 +96,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@, optional" : {
+      "comment" : "VoiceOver name of an optional field, like Brand, optional",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, optional"
           }
         }
       }
@@ -157,6 +201,61 @@
         }
       }
     },
+    "A photo you copied from somewhere else" : {
+      "comment" : "Add a piece choice: under Paste",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A photo you copied from somewhere else"
+          }
+        }
+      }
+    },
+    "A plain drawing stands in until you add one." : {
+      "comment" : "Describe in words: under No photo yet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A plain drawing stands in until you add one."
+          }
+        }
+      }
+    },
+    "About this piece" : {
+      "comment" : "Add a piece: details step title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About this piece"
+          }
+        }
+      }
+    },
+    "Accept" : {
+      "comment" : "Suggestion chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept"
+          }
+        }
+      }
+    },
+    "Accept %@: %@" : {
+      "comment" : "VoiceOver: accept a suggestion, with its field and value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept %@: %@"
+          }
+        }
+      }
+    },
     "Accessories" : {
       "comment" : "Piece chip",
       "localizations" : {
@@ -179,6 +278,17 @@
         }
       }
     },
+    "Add a photo" : {
+      "comment" : "Button on the Add a piece form",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a photo"
+          }
+        }
+      }
+    },
     "Add a piece" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -197,6 +307,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add a piece from a photo, or describe it in words. You can add more whenever you like."
+          }
+        }
+      }
+    },
+    "Added" : {
+      "comment" : "Suggestion chip once accepted",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added"
           }
         }
       }
@@ -263,6 +384,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Away until %@"
+          }
+        }
+      }
+    },
+    "Back" : {
+      "comment" : "Button: the previous step of Add a piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
           }
         }
       }
@@ -454,6 +586,17 @@
         }
       }
     },
+    "Cancel" : {
+      "comment" : "Button: closes Add a piece or Edit",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
     "Can’t be read right now" : {
       "comment" : "Weather sheet, when the weather can't be read",
       "localizations" : {
@@ -476,6 +619,39 @@
         }
       }
     },
+    "Change anything, then save. Nothing changes until you do." : {
+      "comment" : "Edit piece: line under the title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change anything, then save. Nothing changes until you do."
+          }
+        }
+      }
+    },
+    "Change photo" : {
+      "comment" : "Button on the Add a piece form",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change photo"
+          }
+        }
+      }
+    },
+    "Changes saved" : {
+      "comment" : "Toast after editing a piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes saved"
+          }
+        }
+      }
+    },
     "Checking the weather…" : {
       "comment" : "Weather sheet, while it loads",
       "localizations" : {
@@ -487,6 +663,17 @@
         }
       }
     },
+    "Choose from Photos" : {
+      "comment" : "Add a piece choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose from Photos"
+          }
+        }
+      }
+    },
     "Choose how the weather is used." : {
       "comment" : "VoiceOver hint for the Weather row",
       "localizations" : {
@@ -494,6 +681,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choose how the weather is used."
+          }
+        }
+      }
+    },
+    "Choose what kind of piece it is." : {
+      "comment" : "Add a piece: no kind of piece chosen",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose what kind of piece it is."
           }
         }
       }
@@ -571,6 +769,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Concert"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "comment" : "Button: to the details form",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "Continue where you left off?" : {
+      "comment" : "Draft card title (PRD 7.3)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue where you left off?"
           }
         }
       }
@@ -674,6 +894,28 @@
         }
       }
     },
+    "Describe it" : {
+      "comment" : "Add a piece: words step title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Describe it"
+          }
+        }
+      }
+    },
+    "Detail" : {
+      "comment" : "Add a piece: a suggested detail for her notes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detail"
+          }
+        }
+      }
+    },
     "Details" : {
       "comment" : "Garment detail: heading over the facts",
       "localizations" : {
@@ -707,6 +949,61 @@
         }
       }
     },
+    "Discard" : {
+      "comment" : "Button: throws a draft away",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        }
+      }
+    },
+    "Discard changes" : {
+      "comment" : "Confirm button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard changes"
+          }
+        }
+      }
+    },
+    "Discard this piece" : {
+      "comment" : "Confirm button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard this piece"
+          }
+        }
+      }
+    },
+    "Discard this piece?" : {
+      "comment" : "Question before closing Add a piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard this piece?"
+          }
+        }
+      }
+    },
+    "Discard your changes?" : {
+      "comment" : "Question before closing Edit",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard your changes?"
+          }
+        }
+      }
+    },
     "Dress" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -725,6 +1022,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dresses"
+          }
+        }
+      }
+    },
+    "Dressy" : {
+      "comment" : "How dressy a piece is",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dressy"
           }
         }
       }
@@ -817,6 +1125,17 @@
         }
       }
     },
+    "Fill this in." : {
+      "comment" : "Add a piece: a field is empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill this in."
+          }
+        }
+      }
+    },
     "Fit" : {
       "comment" : "Garment fact label: how it's cut",
       "localizations" : {
@@ -846,6 +1165,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For a day inside, whatever it’s like out."
+          }
+        }
+      }
+    },
+    "For now each choice adds a sample picture." : {
+      "comment" : "Photo source question while photos are a stand-in",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For now each choice adds a sample picture."
+          }
+        }
+      }
+    },
+    "Getting your photo" : {
+      "comment" : "Add a piece: the photo step is busy",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getting your photo"
+          }
+        }
+      }
+    },
+    "Give it a name." : {
+      "comment" : "Add a piece: the name is empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give it a name."
           }
         }
       }
@@ -945,6 +1297,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Home"
+          }
+        }
+      }
+    },
+    "How dressy" : {
+      "comment" : "Add a piece: field label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How dressy"
+          }
+        }
+      }
+    },
+    "How warm" : {
+      "comment" : "Add a piece: field label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How warm"
+          }
+        }
+      }
+    },
+    "How would you like to add it?" : {
+      "comment" : "Add a piece: line under the title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How would you like to add it?"
           }
         }
       }
@@ -1071,6 +1456,17 @@
         }
       }
     },
+    "In your own words" : {
+      "comment" : "Describe in words: field label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In your own words"
+          }
+        }
+      }
+    },
     "Indoors" : {
       "comment" : "Weather row value: she'll be indoors",
       "localizations" : {
@@ -1137,6 +1533,39 @@
         }
       }
     },
+    "Keep editing" : {
+      "comment" : "Button: closes the discard question",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep editing"
+          }
+        }
+      }
+    },
+    "Keep this on one line." : {
+      "comment" : "Add a piece: a one-line field has a line break in it",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this on one line."
+          }
+        }
+      }
+    },
+    "Keep this to %lld characters." : {
+      "comment" : "Add a piece: a field is too long, with the limit",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this to %lld characters."
+          }
+        }
+      }
+    },
     "Kept until %@" : {
       "comment" : "Recently deleted: the day a piece is deleted for good, such as Nov 13",
       "localizations" : {
@@ -1177,6 +1606,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laptop: Style Me"
+          }
+        }
+      }
+    },
+    "Last changed %@" : {
+      "comment" : "Draft card: when the draft last changed, like 5 minutes ago",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last changed %@"
           }
         }
       }
@@ -1302,6 +1742,94 @@
         }
       }
     },
+    "Light" : {
+      "comment" : "How warm a piece is to wear",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        }
+      }
+    },
+    "Like “0 Petite”" : {
+      "comment" : "Add a piece: size prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “0 Petite”"
+          }
+        }
+      }
+    },
+    "Like “Cute pink shirt”" : {
+      "comment" : "Add a piece: name field prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “Cute pink shirt”"
+          }
+        }
+      }
+    },
+    "Like “Dusty rose”" : {
+      "comment" : "Add a piece: shade prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “Dusty rose”"
+          }
+        }
+      }
+    },
+    "Like “Old Navy”" : {
+      "comment" : "Add a piece: brand prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “Old Navy”"
+          }
+        }
+      }
+    },
+    "Like “Sage green cardigan with gold buttons, soft and cozy”" : {
+      "comment" : "Describe in words: field prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “Sage green cardigan with gold buttons, soft and cozy”"
+          }
+        }
+      }
+    },
+    "Little things you notice, like “Bow at the neck”" : {
+      "comment" : "Add a piece: notes prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little things you notice, like “Bow at the neck”"
+          }
+        }
+      }
+    },
+    "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it." : {
+      "comment" : "Describe in words: under the suggestions",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it."
+          }
+        }
+      }
+    },
     "Main closet" : {
       "comment" : "Source plate: the whole closet",
       "localizations" : {
@@ -1379,6 +1907,17 @@
         }
       }
     },
+    "Medium" : {
+      "comment" : "How warm a piece is to wear",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium"
+          }
+        }
+      }
+    },
     "Middle drawer: Send feedback" : {
       "comment" : "VoiceOver label for a desk drawer",
       "localizations" : {
@@ -1397,6 +1936,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Multicolour"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "comment" : "Add a piece: field label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
           }
         }
       }
@@ -1445,6 +1995,17 @@
         }
       }
     },
+    "No details found in those words. You can fill them in on the next step." : {
+      "comment" : "Describe in words: nothing recognised",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No details found in those words. You can fill them in on the next step."
+          }
+        }
+      }
+    },
     "No longer in your closet" : {
       "comment" : "Garment status",
       "localizations" : {
@@ -1452,6 +2013,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No longer in your closet"
+          }
+        }
+      }
+    },
+    "No photo needed. You can add one later." : {
+      "comment" : "Add a piece choice: under Describe in words",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No photo needed. You can add one later."
+          }
+        }
+      }
+    },
+    "No photo yet" : {
+      "comment" : "Describe in words: the piece has no photo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No photo yet"
           }
         }
       }
@@ -1544,6 +2127,28 @@
         }
       }
     },
+    "Not saved yet. Check %@." : {
+      "comment" : "VoiceOver, after Save found problems, with the fields to check, like Name and Kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not saved yet. Check %@."
+          }
+        }
+      }
+    },
+    "Not sure" : {
+      "comment" : "Add a piece: fit unknown",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not sure"
+          }
+        }
+      }
+    },
     "Notes" : {
       "comment" : "Garment fact label: her own notes",
       "localizations" : {
@@ -1584,6 +2189,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing was lost. Try again in a moment."
+          }
+        }
+      }
+    },
+    "Nothing was saved. You can try another photo, or describe the piece in words instead." : {
+      "comment" : "Add a piece: after a photo couldn't be read",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was saved. You can try another photo, or describe the piece in words instead."
           }
         }
       }
@@ -1661,6 +2277,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On your wishlist"
+          }
+        }
+      }
+    },
+    "One piece, flat or on a hanger" : {
+      "comment" : "Add a piece choice: under Take photo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One piece, flat or on a hanger"
+          }
+        }
+      }
+    },
+    "Only a name and the kind of piece are needed. Everything else can wait." : {
+      "comment" : "Add a piece details: line under the title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only a name and the kind of piece are needed. Everything else can wait."
+          }
+        }
+      }
+    },
+    "Only the picture you pick is shared with the app" : {
+      "comment" : "Add a piece choice: under Choose from Photos",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the picture you pick is shared with the app"
           }
         }
       }
@@ -1863,6 +2512,28 @@
         }
       }
     },
+    "Paste" : {
+      "comment" : "Add a piece choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste"
+          }
+        }
+      }
+    },
+    "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos." : {
+      "comment" : "Add a piece: under the choices, while photos are a stand-in",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos."
+          }
+        }
+      }
+    },
     "Pieces you delete stay here for 30 days, so you can bring them back." : {
       "comment" : "Recently deleted, empty",
       "localizations" : {
@@ -2028,6 +2699,61 @@
         }
       }
     },
+    "Resume" : {
+      "comment" : "Button: carries on with a draft",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume"
+          }
+        }
+      }
+    },
+    "Sample photo" : {
+      "comment" : "Add a piece form: a sample picture stands in for a real photo until photos are built",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sample photo"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "comment" : "Toolbar button: saves the piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
+    },
+    "Save changes" : {
+      "comment" : "Button: saves an edited piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save changes"
+          }
+        }
+      }
+    },
+    "Save to closet" : {
+      "comment" : "Button: saves a new piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save to closet"
+          }
+        }
+      }
+    },
     "Saved Looks" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -2046,6 +2772,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saved looks"
+          }
+        }
+      }
+    },
+    "Say it the way you would to a friend." : {
+      "comment" : "Describe in words: line under the title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Say it the way you would to a friend."
           }
         }
       }
@@ -2079,6 +2816,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Send feedback"
+          }
+        }
+      }
+    },
+    "Shade name" : {
+      "comment" : "Add a piece: field label, her word for the shade",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shade name"
           }
         }
       }
@@ -2134,6 +2882,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Size"
+          }
+        }
+      }
+    },
+    "Size on the label" : {
+      "comment" : "Add a piece: field label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size on the label"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "comment" : "Suggestion chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        }
+      }
+    },
+    "Skip %@" : {
+      "comment" : "VoiceOver: skip a suggestion, with its field",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip %@"
+          }
+        }
+      }
+    },
+    "Skipped" : {
+      "comment" : "Suggestion chip once skipped",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skipped"
+          }
+        }
+      }
+    },
+    "Smart" : {
+      "comment" : "How dressy a piece is",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart"
           }
         }
       }
@@ -2270,6 +3073,39 @@
         }
       }
     },
+    "Suggest details" : {
+      "comment" : "Button: reads her words for details",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggest details"
+          }
+        }
+      }
+    },
+    "Suggested, check each one" : {
+      "comment" : "Describe in words: list heading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggested, check each one"
+          }
+        }
+      }
+    },
+    "Suggestions didn’t load. You can fill in the details yourself." : {
+      "comment" : "Describe in words: the reader failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggestions didn’t load. You can fill in the details yourself."
+          }
+        }
+      }
+    },
     "Suitcase" : {
       "comment" : "Suitcase filter chip",
       "localizations" : {
@@ -2347,6 +3183,17 @@
         }
       }
     },
+    "Take photo" : {
+      "comment" : "Add a piece choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take photo"
+          }
+        }
+      }
+    },
     "Tan" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2365,6 +3212,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "That didn’t save. Nothing changed."
+          }
+        }
+      }
+    },
+    "That didn’t save. Your words are still here, so you can try again." : {
+      "comment" : "Add a piece: the store couldn't save",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That didn’t save. Your words are still here, so you can try again."
+          }
+        }
+      }
+    },
+    "That photo couldn’t be read" : {
+      "comment" : "Add a piece: the photo stand-in failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That photo couldn’t be read"
+          }
+        }
+      }
+    },
+    "That photo couldn’t be read. Nothing changed." : {
+      "comment" : "Add a piece form: the photo stand-in failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That photo couldn’t be read. Nothing changed."
+          }
+        }
+      }
+    },
+    "The first one you picked is the main colour." : {
+      "comment" : "Add a piece: under the colours when several are picked",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first one you picked is the main colour."
+          }
+        }
+      }
+    },
+    "The piece you started adding isn’t in your closet yet." : {
+      "comment" : "Draft card: a new piece with no name yet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The piece you started adding isn’t in your closet yet."
           }
         }
       }
@@ -2446,6 +3348,17 @@
         }
       }
     },
+    "Throws away what you started. Your closet doesn’t change." : {
+      "comment" : "Hint on a draft's Discard",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Throws away what you started. Your closet doesn’t change."
+          }
+        }
+      }
+    },
     "Top" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -2490,6 +3403,17 @@
         }
       }
     },
+    "Try another photo" : {
+      "comment" : "Button: back to the photo choices",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try another photo"
+          }
+        }
+      }
+    },
     "Turn on" : {
       "comment" : "Button: turns laundry tracking on",
       "localizations" : {
@@ -2497,6 +3421,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Turn on"
+          }
+        }
+      }
+    },
+    "Type a few words about the piece first." : {
+      "comment" : "Describe in words: Suggest details with nothing typed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a few words about the piece first."
           }
         }
       }
@@ -2534,6 +3469,17 @@
         }
       }
     },
+    "Warm" : {
+      "comment" : "How warm a piece is to wear",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm"
+          }
+        }
+      }
+    },
     "Weather" : {
       "comment" : "Style Me row title",
       "localizations" : {
@@ -2541,6 +3487,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weather"
+          }
+        }
+      }
+    },
+    "What you’ve filled in so far won’t be kept." : {
+      "comment" : "Add a piece: under the discard question",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you’ve filled in so far won’t be kept."
           }
         }
       }
@@ -2655,6 +3612,17 @@
         }
       }
     },
+    "With no season picked, Style Me won’t suggest it." : {
+      "comment" : "Add a piece: under Seasons when none is picked",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With no season picked, Style Me won’t suggest it."
+          }
+        }
+      }
+    },
     "Yellow" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2718,6 +3686,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Your changes to %@ aren’t saved yet." : {
+      "comment" : "Draft card: changes to a piece, with the piece's saved name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your changes to %@ aren’t saved yet."
           }
         }
       }
@@ -2788,6 +3767,17 @@
         }
       }
     },
+    "Your photo" : {
+      "comment" : "Add a piece form: her own photo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your photo"
+          }
+        }
+      }
+    },
     "clear" : {
       "comment" : "Weather at night with no clouds, as in 61° and clear",
       "localizations" : {
@@ -2806,6 +3796,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "cloudy"
+          }
+        }
+      }
+    },
+    "just now" : {
+      "comment" : "Draft card: changed less than a minute ago",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "just now"
+          }
+        }
+      }
+    },
+    "optional" : {
+      "comment" : "Add a piece: after an optional field's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "optional"
           }
         }
       }

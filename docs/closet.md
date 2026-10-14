@@ -8,7 +8,7 @@ All of it is in `Packages/NookKit/Sources/Features/Closet`, apart from the piece
 
 | File | Holds |
 |---|---|
-| `ClosetScreen.swift` | The navigation stack, Add a piece and Profile in the bar, the stand-ins it pushes |
+| `ClosetScreen.swift` | The navigation stack, Add a piece and Profile in the bar, the screens and stand-ins it pushes, and the toasts after a save or a removal |
 | `ClosetPage.swift` | The page top to bottom, and the loading, error, empty and no-match states |
 | `ClosetHeader.swift` | The wall with the title and count, and the small armoire |
 | `ClosetFilters.swift` | The piece chips, colour swatches, the Suitcase menu, Dirty and Clear |
@@ -27,11 +27,12 @@ All of it is in `Packages/NookKit/Sources/Features/Closet`, apart from the piece
 Top to bottom, as RD-13 orders it:
 
 1. **Header.** "Closet" in the display style on the wall, "Main closet" and the count under it ("17 pieces", "5 of 17 pieces" while filtering, "No pieces yet"), and the open armoire on the right at the mockup's size (390 x 284 at 0.535). The armoire is decoration only: hidden from VoiceOver, not tappable. Its clothes are a separate drawing, left out when the closet is empty. Add a piece and Profile sit in the navigation bar; the bar's own title is empty, since the big title is on the wall.
-2. **Search.** "Search your closet". See [Search](#search).
-3. **Filters.** Three rows of chips: the kinds of piece, a swatch for each colour in her closet, then the Suitcase menu, Dirty while laundry tracking is on, and Clear once anything is set.
-4. **Suitcases and Laundry** as soft tiles with their small drawings. Laundry only shows while tracking is on (RD-11.1), and its basket is full or empty to match.
-5. **Her pieces**, standing on the floor with a soft shadow under each and the name below.
-6. **"Recently deleted · N"** at the bottom when anything is in it (LR-16).
+2. **"Continue where you left off?"**, only when a piece she started adding or editing wasn't saved (Phase 7b, see `docs/add-a-piece.md`), with Resume and Discard.
+3. **Search.** "Search your closet". See [Search](#search).
+4. **Filters.** Three rows of chips: the kinds of piece, a swatch for each colour in her closet, then the Suitcase menu, Dirty while laundry tracking is on, and Clear once anything is set.
+5. **Suitcases and Laundry** as soft tiles with their small drawings. Laundry only shows while tracking is on (RD-11.1), and its basket is full or empty to match.
+6. **Her pieces**, standing on the floor with a soft shadow under each and the name below.
+7. **"Recently deleted · N"** at the bottom when anything is in it (LR-16).
 
 Everything below the header sits on the floor colour. Secondary text on the bare floor is just under 4.5:1, so the states and the Recently deleted row sit on a soft tint, as the design system asks.
 
@@ -122,6 +123,5 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 
 ## Left for later phases
 
-- **7b:** Add a piece, from a photo or in words (both open stand-ins now).
 - **13:** Suitcases and Laundry behind their tiles.
 - **15a:** iPad's sidebar and wide grid. Until then iPad shows this page full width with more columns, and the controls stop at 640 pt.

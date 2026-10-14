@@ -1,14 +1,14 @@
 import Models
 
-/// A screen Closet pushes. Garment detail and Recently deleted are built (Phase 7a); the rest are
-/// stand-ins until their phases build them.
+/// A screen Closet pushes. Garment detail and Recently deleted (Phase 7a) and Add a piece and
+/// Edit (Phase 7b) are built; the rest are stand-ins until their phases build them.
 nonisolated enum ClosetDestination: Hashable, Sendable {
     /// Garment detail (Phase 7a). Carries the name so the title shows before the piece loads.
     case garment(Garment.ID, name: String)
-    /// Add a piece (Phase 7b), from a photo or in words.
+    /// Add a piece (Phase 7b), from a photo or in words, or carrying on with a draft.
     case addPiece(AddPieceStart)
-    /// Edit a piece (Phase 7b), from garment detail.
-    case editPiece(Garment.ID, name: String)
+    /// Edit a piece (Phase 7b), from garment detail, or carrying on with a draft from Closet.
+    case editPiece(Garment.ID, name: String, resumesDraft: Bool = false)
     /// Suitcases (Phase 13).
     case suitcases
     /// One suitcase (Phase 13), from a name on garment detail (LR-11.4).
@@ -24,8 +24,12 @@ nonisolated enum ClosetDestination: Hashable, Sendable {
     case profile
 
     nonisolated enum AddPieceStart: Hashable, Sendable {
+        /// "How would you like to add it?"
         case photo
+        /// Straight to Describe in words.
         case words
+        /// Resume on Closet's "Continue where you left off?".
+        case resume
     }
 
     var title: String {
@@ -47,7 +51,7 @@ nonisolated enum ClosetDestination: Hashable, Sendable {
         switch self {
         case .garment: "hanger"
         case .addPiece(.photo): "camera"
-        case .addPiece(.words): "pencil"
+        case .addPiece(.words), .addPiece(.resume): "pencil"
         case .editPiece: "pencil"
         case .suitcases, .suitcase: "suitcase.rolling"
         case .laundry: "basket"

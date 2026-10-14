@@ -6,9 +6,9 @@ import SwiftUI
 ///
 /// The title sits on the wall in the page's header, as in `closet.html`, so the navigation bar
 /// only carries Add a piece and Profile. Tapping a piece opens its detail (7a), and the row at
-/// the bottom opens Recently deleted; Suitcases, Laundry and Add a piece open stand-ins until
-/// their phases build them (7b, 13). The closet reloads each time the tab appears and each time
-/// a pushed screen closes, so changes made there show up.
+/// the bottom opens Recently deleted, and Add a piece and Edit open the form (7b); Suitcases and
+/// Laundry open stand-ins until Phase 13. The closet reloads each time the tab appears and each
+/// time a pushed screen closes, so changes made there show up.
 ///
 /// When she removes a piece on its detail, Closet goes back to the grid and shows a toast with
 /// Undo (LR-16.1).
@@ -20,7 +20,7 @@ struct ClosetScreen: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            ClosetPage(model: model, open: { path.append($0) }, retry: reload)
+            ClosetPage(model: model, open: { path.append($0) }, retry: reload, discardDraft: discardDraft)
                 .navigationTitle(Text("Closet", bundle: .module, comment: "Navigation title on Closet"))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -75,6 +75,12 @@ struct ClosetScreen: View {
             RecentlyDeletedScreen()
         case .styleMe(_, let name):
             StyleMeStubScreen(startingPiece: name)
+        case .addPiece(let start):
+            GarmentEditorScreen(
+                target: .newPiece, firstStep: start == .words ? .words : .choose, resumesDraft: start == .resume,
+                saved: pieceSaved, close: goBack)
+        case .editPiece(let id, _, let resumesDraft):
+            GarmentEditorScreen(target: .garment(id), resumesDraft: resumesDraft, saved: pieceSaved, close: goBack)
         default:
             StubScreen(
                 title: destination.title, systemImage: destination.systemImage,
@@ -86,8 +92,32 @@ struct ClosetScreen: View {
         Task { await model.load(from: services) }
     }
 
+    private func discardDraft() {
+        guard let drafts = services?.drafts else { return }
+        Task { await model.discardDraft(in: drafts) }
+    }
+
     private func goBack() {
         if !path.isEmpty { path.removeLast() }
+    }
+
+    /// Add a piece or Edit saved: the form closes. A new piece shows at the top of the grid, an
+    /// edited one on its detail, which reloads as it appears.
+    private func pieceSaved(_ saved: GarmentEditorModel.Saved) {
+        goBack()
+        reload()
+        switch saved {
+        case .added(let garment):
+            toast = NookToastMessage(
+                String(
+                    localized: "\(garment.name) is in your closet", bundle: .module,
+                    comment: "Toast after Add a piece, with the piece's name"),
+                systemImage: "checkmark")
+        case .updated:
+            toast = NookToastMessage(
+                String(localized: "Changes saved", bundle: .module, comment: "Toast after editing a piece"),
+                systemImage: "checkmark")
+        }
     }
 
     /// Back to the grid, with Undo (LR-16.1). Undo puts the piece back and reloads.

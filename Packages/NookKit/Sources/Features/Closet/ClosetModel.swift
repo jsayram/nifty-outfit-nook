@@ -38,6 +38,8 @@ final class ClosetModel {
     private(set) var filter = GarmentFilter()
     /// When the closet loaded, for "Last worn 3 days ago".
     private(set) var loadedAt: Date = .now
+    /// An unsaved Add a piece or Edit draft, offered as "Continue where you left off?" (Phase 7b).
+    private(set) var draft: GarmentDraft?
 
     /// What's typed in the search field. Applied after `searchDelay` without typing.
     var searchText = "" {
@@ -78,7 +80,30 @@ final class ClosetModel {
             show(try await garmentList, suitcases: try await suitcaseList, profile: try await profile, now: now)
         } catch {
             phase = .failed
+            return
         }
+        await loadDraft(from: services.drafts)
+    }
+
+    /// The most recent draft with changes. A draft for a piece that's no longer in her closet
+    /// isn't offered (it stays, in case Undo brings the piece back). A draft store that can't
+    /// be read just means nothing is offered.
+    private func loadDraft(from drafts: any DraftStore) async {
+        let all = (try? await drafts.drafts()) ?? []
+        draft = all.first { draft in
+            guard draft.hasChanges else { return false }
+            switch draft.target {
+            case .newPiece: return true
+            case .garment(let id): return itemsByID[id] != nil
+            }
+        }
+    }
+
+    /// Discard on "Continue where you left off?".
+    func discardDraft(in drafts: any DraftStore) async {
+        guard let draft else { return }
+        self.draft = nil
+        try? await drafts.discard(draft.target)
     }
 
     /// Sets everything from loaded data. Separate from `load` so tests can hand data straight in.

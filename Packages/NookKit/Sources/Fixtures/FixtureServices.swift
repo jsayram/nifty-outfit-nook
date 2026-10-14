@@ -14,6 +14,7 @@ public enum FixtureServices {
             behavior: configuration.behavior,
             weather: configuration.weather,
             laundry: configuration.laundry,
+            draft: configuration.draft,
             now: now,
             calendar: calendar
         )
@@ -21,11 +22,13 @@ public enum FixtureServices {
 
     /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
     /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
+    /// `draft` puts an unsaved Add a piece or Edit draft in the draft store.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
+        draft: FixtureDraftState? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -43,8 +46,9 @@ public enum FixtureServices {
         case .offline: stylistMode = .failing(.offline)
         case .stylistFails: stylistMode = .failing(.notCompleted)
         case .stylistPartial: stylistMode = .partial
-        case .normal, .slow, .storesFail: stylistMode = .normal
+        case .normal, .slow, .storesFail, .photoFails: stylistMode = .normal
         }
+        let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
 
         return NookServices(
             closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: stores),
@@ -57,7 +61,10 @@ public enum FixtureServices {
                 isOffline: behavior == .offline || weather == .unavailable,
                 latency: slow ? .seconds(1) : .zero
             ),
-            images: PlaceholderImageProvider()
+            images: PlaceholderImageProvider(),
+            drafts: InMemoryDraftStore(drafts: drafts, options: stores),
+            photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
+            descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero)
         )
     }
 }

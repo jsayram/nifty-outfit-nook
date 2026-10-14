@@ -50,11 +50,12 @@ Debug builds launched with `-catalog` open a catalog of every DesignSystem compo
 
 Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
-- a behaviour for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial` or `stores-fail`, for example `-fixtures demo:offline`;
+- a behaviour for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`;
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
-- `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper.
+- `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
+- `draft=` with `add` or `edit`, to start with an unsaved Add a piece or Edit draft, as if the app had been closed mid-way.
 
-For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal` and the set's own weather (rain) and laundry.
+For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, and no draft.
 
 The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
@@ -88,6 +89,7 @@ docs/models.md               The models, rules, store protocols and fixture sets
 docs/home-room.md            The Home room, its layouts and states.
 docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
 docs/garment-detail.md       Garment detail, Remove from closet and Recently deleted.
+docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and Describe in words.
 website/                     The app's static website.
 ```
 

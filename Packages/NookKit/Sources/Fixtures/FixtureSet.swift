@@ -36,6 +36,8 @@ public enum FixtureBehavior: String, CaseIterable, Sendable {
     case stylistPartial = "stylist-partial"
     /// Every store call fails with `StoreError.unavailable`, for error states.
     case storesFail = "stores-fail"
+    /// The Add a piece photo stand-in says the photo couldn't be read (Phase 7b).
+    case photoFails = "photo-fails"
 }
 
 /// The weather the fixture weather service reports, to force each Home window (RD-01.4).
@@ -66,12 +68,23 @@ public enum FixtureLaundryState: String, CaseIterable, Sendable {
     case full
 }
 
+/// An unsaved draft waiting at launch, as if the app had been closed in the middle of Add a piece
+/// or Edit (Phase 7b). Stage A keeps drafts in memory only, so UI tests use this to check what
+/// she sees after a relaunch.
+public enum FixtureDraftState: String, CaseIterable, Sendable {
+    /// A new piece described in words, on the details step: "Sage cardigan".
+    case add
+    /// Changes to the navy dress pants: renamed "Navy work trousers". Demo set only.
+    case edit
+}
+
 /// A fixture set plus options, as read from `-fixtures <set>[:<option>]...`.
 ///
 /// Each option after a colon is one of:
 /// - a behaviour (`FixtureBehavior`), such as `offline` or `stores-fail`;
 /// - `weather=<state>` (`FixtureWeatherState`), such as `weather=snow`;
-/// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`.
+/// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`;
+/// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`.
 ///
 /// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
 public struct FixtureConfiguration: Hashable, Sendable {
@@ -81,20 +94,25 @@ public struct FixtureConfiguration: Hashable, Sendable {
     public var weather: FixtureWeatherState?
     /// `nil` keeps the set's own laundry and tracking setting.
     public var laundry: FixtureLaundryState?
+    /// An unsaved draft waiting at launch. `nil` starts with none.
+    public var draft: FixtureDraftState?
 
     public init(
         set: FixtureSet = .demo,
         behavior: FixtureBehavior = .normal,
         weather: FixtureWeatherState? = nil,
-        laundry: FixtureLaundryState? = nil
+        laundry: FixtureLaundryState? = nil,
+        draft: FixtureDraftState? = nil
     ) {
         self.set = set
         self.behavior = behavior
         self.weather = weather
         self.laundry = laundry
+        self.draft = draft
     }
 
-    /// Unknown or missing parts fall back to `demo`, `normal` and the set's own weather and laundry.
+    /// Unknown or missing parts fall back to `demo`, `normal`, the set's own weather and laundry,
+    /// and no draft.
     public init(launchArguments: [String]) {
         guard
             let flagIndex = launchArguments.firstIndex(of: FixtureSet.launchArgument),
@@ -115,6 +133,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
             switch pair[0] {
             case "weather": weather = FixtureWeatherState(rawValue: pair[1]) ?? weather
             case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
+            case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
             default: continue
             }
         }

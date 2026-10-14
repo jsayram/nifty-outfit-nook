@@ -93,6 +93,8 @@ public actor InMemoryClosetStore: ClosetStore {
         } catch {
             throw .invalidName(error)
         }
+        let problems = GarmentRules.problems(in: garment)
+        if !problems.isEmpty { throw .invalidDetails(problems) }
         return garment
     }
 

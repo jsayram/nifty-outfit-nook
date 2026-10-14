@@ -11,6 +11,12 @@ public struct NookServices: Sendable {
     public var stylist: any Stylist
     public var weather: any WeatherProvider
     public var images: any ImageProvider
+    /// Unsaved Add a piece and Edit work (Phase 7b).
+    public var drafts: any DraftStore
+    /// The photo step of Add a piece (a stand-in until Phase 22a).
+    public var photos: any PhotoIntake
+    /// "Describe in words" suggestions (an on-phone word matcher in Stage A).
+    public var descriptions: any GarmentDescriptionReader
 
     public init(
         closet: any ClosetStore,
@@ -19,7 +25,10 @@ public struct NookServices: Sendable {
         profile: any ProfileStore,
         stylist: any Stylist,
         weather: any WeatherProvider,
-        images: any ImageProvider
+        images: any ImageProvider,
+        drafts: any DraftStore,
+        photos: any PhotoIntake,
+        descriptions: any GarmentDescriptionReader
     ) {
         self.closet = closet
         self.looks = looks
@@ -28,5 +37,8 @@ public struct NookServices: Sendable {
         self.stylist = stylist
         self.weather = weather
         self.images = images
+        self.drafts = drafts
+        self.photos = photos
+        self.descriptions = descriptions
     }
 }

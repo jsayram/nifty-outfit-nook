@@ -95,3 +95,25 @@ extension Occasion {
         }
     }
 }
+
+extension Dressiness {
+    /// How dressy a piece is, on Add a piece: "Casual", "Smart", "Dressy".
+    var title: String {
+        switch self {
+        case .casual: String(localized: "Casual", bundle: .module, comment: "How dressy a piece is")
+        case .smart: String(localized: "Smart", bundle: .module, comment: "How dressy a piece is")
+        case .dressy: String(localized: "Dressy", bundle: .module, comment: "How dressy a piece is")
+        }
+    }
+}
+
+extension Warmth {
+    /// How warm a piece is to wear, on Add a piece: "Light", "Medium", "Warm".
+    var title: String {
+        switch self {
+        case .light: String(localized: "Light", bundle: .module, comment: "How warm a piece is to wear")
+        case .medium: String(localized: "Medium", bundle: .module, comment: "How warm a piece is to wear")
+        case .warm: String(localized: "Warm", bundle: .module, comment: "How warm a piece is to wear")
+        }
+    }
+}
