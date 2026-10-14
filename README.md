@@ -14,4 +14,4 @@ Git Flow. `main` is what's released, `develop` is the integration branch, and ev
 
 ## License
 
-Copyright © 2026 Jose Ramirez. All rights reserved. No license is granted to use, copy, modify or distribute this code.
+Copyright © 2026 Jose Ramirez-Villa. All rights reserved. No license is granted to use, copy, modify or distribute this code.
