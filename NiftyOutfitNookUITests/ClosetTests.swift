@@ -54,7 +54,7 @@ final class ClosetTests: XCTestCase {
         XCTAssertTrue(trousers.waitForExistence(timeout: Self.wait))
     }
 
-    /// RD-13.2: an empty closet explains how to add a piece, and Add a piece opens its stand-in.
+    /// RD-13.2: an empty closet explains how to add a piece, and Add a piece opens the form (7b).
     @MainActor
     func testEmptyClosetOffersToAddAPiece() {
         let app = launchOnCloset("empty")
