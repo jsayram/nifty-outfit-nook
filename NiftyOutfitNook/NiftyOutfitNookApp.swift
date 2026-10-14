@@ -2,6 +2,10 @@ import Features
 import Fixtures
 import SwiftUI
 
+#if DEBUG
+    import DesignSystem
+#endif
+
 @main
 struct NiftyOutfitNookApp: App {
     /// Chosen with `-fixtures demo|empty|large`. Not used yet; Phase 3 wires the sets in.
@@ -9,7 +13,16 @@ struct NiftyOutfitNookApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
+            #if DEBUG
+                // `-catalog` opens the component catalog instead of the app (debug builds only).
+                if ProcessInfo.processInfo.arguments.contains("-catalog") {
+                    NookCatalogView()
+                } else {
+                    RootTabView()
+                }
+            #else
+                RootTabView()
+            #endif
         }
     }
 }
