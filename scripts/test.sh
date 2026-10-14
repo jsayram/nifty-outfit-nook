@@ -1,18 +1,38 @@
 #!/usr/bin/env bash
 # Runs every test: the NookKit package tests and the UI tests, on an iPhone simulator.
 # See scripts/simulator.sh for how the simulator is chosen.
+#
+# Usage: scripts/test.sh [xcodebuild test selection...]
+# With no arguments it runs the whole test plan. Arguments go to `xcodebuild test-without-building`,
+# so CI can split the suite, for example:
+#   scripts/test.sh -skip-testing:NiftyOutfitNookUITests          # package tests only
+#   scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests # one UI test class
+#
+# It builds once with build-for-testing, then tests without building, and prints how long each
+# step took. xcodebuild boots the simulator itself: waiting for a full boot first with
+# `simctl bootstatus` took 2 to 4 minutes on CI, against about a minute for xcodebuild's own boot.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 simulator_id="$(scripts/simulator.sh)"
-result_bundle="build/TestResults.xcresult"
+result_bundle="${NOOK_RESULT_BUNDLE:-build/TestResults.xcresult}"
 echo "Testing on simulator $simulator_id"
 
+common=(
+    -project NiftyOutfitNook.xcodeproj
+    -scheme NiftyOutfitNook
+    -destination "id=$simulator_id"
+    -derivedDataPath build/DerivedData
+    -onlyUsePackageVersionsFromResolvedFile
+)
+
+SECONDS=0
+xcodebuild build-for-testing "${common[@]}" -quiet
+echo "Built for testing in ${SECONDS}s"
+
+SECONDS=0
 rm -rf "$result_bundle"
-xcodebuild test \
-    -project NiftyOutfitNook.xcodeproj \
-    -scheme NiftyOutfitNook \
-    -destination "id=$simulator_id" \
-    -derivedDataPath build/DerivedData \
-    -onlyUsePackageVersionsFromResolvedFile \
-    -resultBundlePath "$result_bundle"
+status=0
+xcodebuild test-without-building "${common[@]}" -resultBundlePath "$result_bundle" "$@" || status=$?
+echo "Tested in ${SECONDS}s"
+exit $status
