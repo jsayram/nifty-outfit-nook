@@ -9,17 +9,32 @@ public enum FixtureServices {
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
-        make(set: configuration.set, behavior: configuration.behavior, now: now, calendar: calendar)
+        make(
+            set: configuration.set,
+            behavior: configuration.behavior,
+            weather: configuration.weather,
+            laundry: configuration.laundry,
+            now: now,
+            calendar: calendar
+        )
     }
 
-    /// Services filled with `set`, behaving as `behavior` says.
+    /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
+    /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
+        weather: FixtureWeatherState? = nil,
+        laundry: FixtureLaundryState? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
-        let data = set.data(now: now, calendar: calendar)
+        var data = set.data(now: now, calendar: calendar)
+        if let laundry {
+            data = data.applying(laundry: laundry)
+        }
+        // `unavailable` has no snapshot: the provider throws instead, so any snapshot will do.
+        let snapshot = weather.flatMap { FixtureWeather.snapshot($0, at: now) } ?? data.weather
         let slow = behavior == .slow
         let stores = StoreOptions(latency: slow ? .milliseconds(600) : .zero, fails: behavior == .storesFail)
 
@@ -38,8 +53,8 @@ public enum FixtureServices {
             profile: InMemoryProfileStore(profile: data.profile, options: stores),
             stylist: MockStylist(mode: stylistMode, latency: slow ? .seconds(3) : .zero),
             weather: FixtureWeatherProvider(
-                snapshot: data.weather,
-                isOffline: behavior == .offline,
+                snapshot: snapshot,
+                isOffline: behavior == .offline || weather == .unavailable,
                 latency: slow ? .seconds(1) : .zero
             ),
             images: PlaceholderImageProvider()
