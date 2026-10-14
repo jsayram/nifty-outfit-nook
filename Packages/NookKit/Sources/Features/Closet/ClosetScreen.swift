@@ -5,13 +5,18 @@ import SwiftUI
 /// Closet: browse, search and filter her pieces (RD-13, LR-09, LR-11).
 ///
 /// The title sits on the wall in the page's header, as in `closet.html`, so the navigation bar
-/// only carries Add a piece and Profile. Tapping a piece opens its detail; Suitcases, Laundry,
-/// Recently deleted and Add a piece open stand-ins until their phases build them (7a, 7b, 13).
-/// The closet reloads each time the tab appears, so changes made elsewhere show up.
+/// only carries Add a piece and Profile. Tapping a piece opens its detail (7a), and the row at
+/// the bottom opens Recently deleted; Suitcases, Laundry and Add a piece open stand-ins until
+/// their phases build them (7b, 13). The closet reloads each time the tab appears and each time
+/// a pushed screen closes, so changes made there show up.
+///
+/// When she removes a piece on its detail, Closet goes back to the grid and shows a toast with
+/// Undo (LR-16.1).
 struct ClosetScreen: View {
     @Environment(\.services) private var services
     @State private var model = ClosetModel()
     @State private var path: [ClosetDestination] = []
+    @State private var toast: NookToastMessage?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -51,17 +56,56 @@ struct ClosetScreen: View {
                         .accessibilityIdentifier("closet.profile")
                     }
                 }
-                .navigationDestination(for: ClosetDestination.self) { destination in
-                    StubScreen(
-                        title: destination.title, systemImage: destination.systemImage,
-                        identifier: destination.identifier)
-                }
+                .navigationDestination(for: ClosetDestination.self, destination: screen)
         }
+        .nookToast($toast)
         .task { await model.load(from: services) }
+        .onChange(of: path) { old, new in
+            // Back from a pushed screen: it may have changed a piece.
+            if new.count < old.count { reload() }
+        }
+    }
+
+    @ViewBuilder private func screen(for destination: ClosetDestination) -> some View {
+        switch destination {
+        case .garment(let id, let name):
+            GarmentDetailScreen(
+                garmentID: id, name: name, open: { path.append($0) }, back: goBack, removed: pieceRemoved)
+        case .recentlyDeleted:
+            RecentlyDeletedScreen()
+        case .styleMe(_, let name):
+            StyleMeStubScreen(startingPiece: name)
+        default:
+            StubScreen(
+                title: destination.title, systemImage: destination.systemImage,
+                identifier: destination.identifier)
+        }
     }
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    private func goBack() {
+        if !path.isEmpty { path.removeLast() }
+    }
+
+    /// Back to the grid, with Undo (LR-16.1). Undo puts the piece back and reloads.
+    private func pieceRemoved(_ removal: GarmentRemoval) {
+        if case .garment(let id, _) = path.last, id == removal.garmentID {
+            path.removeLast()
+        }
+        reload()
+        guard let closet = services?.closet else { return }
+        toast = NookToastMessage(
+            removal.message, systemImage: "checkmark",
+            actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
+        ) {
+            Task {
+                try? await removal.undo(in: closet)
+                await model.load(from: services)
+            }
+        }
     }
 }
 

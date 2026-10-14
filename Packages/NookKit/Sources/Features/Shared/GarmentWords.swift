@@ -59,3 +59,39 @@ extension ColorName {
         }
     }
 }
+
+extension GarmentFit {
+    /// How a piece is cut, on garment detail: "Fitted", "Regular", "Relaxed".
+    var title: String {
+        switch self {
+        case .fitted: String(localized: "Fitted", bundle: .module, comment: "How a piece is cut")
+        case .regular: String(localized: "Regular", bundle: .module, comment: "How a piece is cut")
+        case .relaxed: String(localized: "Relaxed", bundle: .module, comment: "How a piece is cut")
+        }
+    }
+}
+
+extension Season {
+    var title: String {
+        switch self {
+        case .spring: String(localized: "Spring", bundle: .module, comment: "Season")
+        case .summer: String(localized: "Summer", bundle: .module, comment: "Season")
+        case .fall: String(localized: "Fall", bundle: .module, comment: "Season")
+        case .winter: String(localized: "Winter", bundle: .module, comment: "Season")
+        }
+    }
+}
+
+extension Occasion {
+    var title: String {
+        switch self {
+        case .office: String(localized: "Office", bundle: .module, comment: "Occasion")
+        case .casual: String(localized: "Casual", bundle: .module, comment: "Occasion")
+        case .brunch: String(localized: "Brunch", bundle: .module, comment: "Occasion")
+        case .dateNight: String(localized: "Date night", bundle: .module, comment: "Occasion")
+        case .event: String(localized: "Event", bundle: .module, comment: "Occasion")
+        case .concert: String(localized: "Concert", bundle: .module, comment: "Occasion")
+        case .other: String(localized: "Other", bundle: .module, comment: "Occasion")
+        }
+    }
+}

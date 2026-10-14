@@ -17,6 +17,7 @@ All of it is in `Packages/NookKit/Sources/Features/Closet`, apart from the piece
 | `ClosetModel.swift` | Loading, the filter state, the search delay and the words the page shows |
 | `ClosetItem.swift` | One piece as the grid shows it, and what VoiceOver reads about it |
 | `ClosetDestination.swift` | The screens Closet pushes |
+| `RecentlyDeleted/` | Recently deleted, with Restore (Phase 7a) |
 | `Shared/GarmentArt/` | Garment pictures: the image loader, the placeholder drawings and garment colours |
 | `Shared/GarmentWords.swift` | The words for kinds of piece and colour families |
 | `Shared/StubScreen.swift` | The stand-in for screens later phases build (Home's stubs use it too) |
@@ -69,7 +70,7 @@ Each cell was worked out when the closet loaded (`ClosetItem`): its suitcases' n
 
 **VoiceOver.** Each piece is one button. Its label is the name, its value the rest: "Navy dress pants", then "In Jose's house and Weekend, Last worn 5 days ago". Last worn says today, yesterday, 2 to 6 days ago, then a date ("Oct 7"). The hint is "Opens the piece." Filter chips say "Selected" when on, and each row is a group named for what it filters. The armoire, the tile drawings and the pictures are hidden.
 
-Tapping a piece opens a stand-in titled with its name until Phase 7a builds garment detail.
+Tapping a piece opens its detail (Phase 7a, see `docs/garment-detail.md`). Closet reloads when she comes back, so a piece she marked dirty or removed there shows as it is now.
 
 ## Garment pictures
 
@@ -121,7 +122,6 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 
 ## Left for later phases
 
-- **7a:** garment detail behind each piece, and Recently deleted.
 - **7b:** Add a piece, from a photo or in words (both open stand-ins now).
 - **13:** Suitcases and Laundry behind their tiles.
 - **15a:** iPad's sidebar and wide grid. Until then iPad shows this page full width with more columns, and the controls stop at 640 pt.

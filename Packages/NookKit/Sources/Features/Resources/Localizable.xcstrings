@@ -12,6 +12,50 @@
         }
       }
     },
+    "%@ is back in your closet" : {
+      "comment" : "Toast after Restore, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is back in your closet"
+          }
+        }
+      }
+    },
+    "%@ is in Recently deleted" : {
+      "comment" : "Toast after Delete it, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is in Recently deleted"
+          }
+        }
+      }
+    },
+    "%@ is out of your closet" : {
+      "comment" : "Toast after I don't have it any more, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is out of your closet"
+          }
+        }
+      }
+    },
+    "%@ leaves your closet, your suitcases and Style Me. Saved looks keep it, marked “No longer in your closet”. You can undo this straight after." : {
+      "comment" : "Remove from closet: what happens with I don't have it any more",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ leaves your closet, your suitcases and Style Me. Saved looks keep it, marked “No longer in your closet”. You can undo this straight after."
+          }
+        }
+      }
+    },
     "%@ · %@" : {
       "comment" : "Pill on Home's Source row: the piece count, then the scope",
       "localizations" : {
@@ -102,6 +146,17 @@
         }
       }
     },
+    "A look with no name" : {
+      "comment" : "Saved look with no name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A look with no name"
+          }
+        }
+      }
+    },
     "Accessories" : {
       "comment" : "Piece chip",
       "localizations" : {
@@ -157,6 +212,17 @@
         }
       }
     },
+    "All year" : {
+      "comment" : "Garment detail: worn in every season",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All year"
+          }
+        }
+      }
+    },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
       "localizations" : {
@@ -164,6 +230,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Any"
+          }
+        }
+      }
+    },
+    "Available" : {
+      "comment" : "Garment status: nothing in the way",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available"
+          }
+        }
+      }
+    },
+    "Away for now" : {
+      "comment" : "Garment status: away, no return date",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Away for now"
+          }
+        }
+      }
+    },
+    "Away until %@" : {
+      "comment" : "Garment status: lent out or at the tailor until a date, such as Oct 23",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Away until %@"
+          }
+        }
+      }
+    },
+    "Back to Closet" : {
+      "comment" : "Button: goes back to Closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to Closet"
           }
         }
       }
@@ -256,6 +366,28 @@
         }
       }
     },
+    "Bought, not here yet" : {
+      "comment" : "Garment status: not arrived",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bought, not here yet"
+          }
+        }
+      }
+    },
+    "Brand" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brand"
+          }
+        }
+      }
+    },
     "Brick" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -274,6 +406,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brown"
+          }
+        }
+      }
+    },
+    "Brunch" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brunch"
+          }
+        }
+      }
+    },
+    "Build an outfit yourself, piece by piece, starting with it." : {
+      "comment" : "Style with this choice: what Make my own look does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build an outfit yourself, piece by piece, starting with it."
           }
         }
       }
@@ -311,6 +465,17 @@
         }
       }
     },
+    "Casual" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casual"
+          }
+        }
+      }
+    },
     "Checking the weather…" : {
       "comment" : "Weather sheet, while it loads",
       "localizations" : {
@@ -329,6 +494,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choose how the weather is used."
+          }
+        }
+      }
+    },
+    "Choose whether you don’t have it any more, or want to delete it." : {
+      "comment" : "Hint on Remove from closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose whether you don’t have it any more, or want to delete it."
+          }
+        }
+      }
+    },
+    "Clean" : {
+      "comment" : "Garment status: laundry tracking on",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clean"
           }
         }
       }
@@ -377,6 +564,17 @@
         }
       }
     },
+    "Concert" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concert"
+          }
+        }
+      }
+    },
     "Couldn’t turn it on. Try again." : {
       "comment" : "Laundry tracking sheet: saving the setting failed",
       "localizations" : {
@@ -399,6 +597,61 @@
         }
       }
     },
+    "Date night" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date night"
+          }
+        }
+      }
+    },
+    "Delete %@?" : {
+      "comment" : "Remove from closet: asks before Delete it",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        }
+      }
+    },
+    "Delete it" : {
+      "comment" : "Remove from closet choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete it"
+          }
+        }
+      }
+    },
+    "Deleted pieces stay here for 30 days. After that they’re deleted for good." : {
+      "comment" : "Recently deleted: how long pieces stay",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted pieces stay here for 30 days. After that they’re deleted for good."
+          }
+        }
+      }
+    },
+    "Deleted pieces stay in Recently deleted for 30 days." : {
+      "comment" : "Garment detail: where a deleted piece went",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted pieces stay in Recently deleted for 30 days."
+          }
+        }
+      }
+    },
     "Denim" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -417,6 +670,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Describe in words"
+          }
+        }
+      }
+    },
+    "Details" : {
+      "comment" : "Garment detail: heading over the facts",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
           }
         }
       }
@@ -465,6 +729,28 @@
         }
       }
     },
+    "Edit" : {
+      "comment" : "Button: edits a piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        }
+      }
+    },
+    "Edit piece" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit piece"
+          }
+        }
+      }
+    },
     "Empty" : {
       "comment" : "Source plate: the source has no pieces",
       "localizations" : {
@@ -472,6 +758,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Empty"
+          }
+        }
+      }
+    },
+    "Event" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event"
           }
         }
       }
@@ -498,6 +795,17 @@
         }
       }
     },
+    "Fall" : {
+      "comment" : "Season",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fall"
+          }
+        }
+      }
+    },
     "Feedback" : {
       "comment" : "Plate on the middle desk drawer; opens Send feedback",
       "localizations" : {
@@ -509,6 +817,28 @@
         }
       }
     },
+    "Fit" : {
+      "comment" : "Garment fact label: how it's cut",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fit"
+          }
+        }
+      }
+    },
+    "Fitted" : {
+      "comment" : "How a piece is cut",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fitted"
+          }
+        }
+      }
+    },
     "For a day inside, whatever it’s like out." : {
       "comment" : "Weather sheet",
       "localizations" : {
@@ -516,6 +846,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For a day inside, whatever it’s like out."
+          }
+        }
+      }
+    },
+    "Go back" : {
+      "comment" : "Button: back to the two choices",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go back"
           }
         }
       }
@@ -608,6 +949,17 @@
         }
       }
     },
+    "I don’t have it any more" : {
+      "comment" : "Remove from closet choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I don’t have it any more"
+          }
+        }
+      }
+    },
     "Ignore the weather" : {
       "comment" : "Weather sheet option",
       "localizations" : {
@@ -641,6 +993,29 @@
         }
       }
     },
+    "In %lld saved looks" : {
+      "comment" : "Garment detail: how many saved looks use this piece",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "In %lld saved look"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "In %lld saved looks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "In a suitcase" : {
       "comment" : "Suitcase filter choice",
       "localizations" : {
@@ -648,6 +1023,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In a suitcase"
+          }
+        }
+      }
+    },
+    "In suitcase %@" : {
+      "comment" : "Spoken for a suitcase on garment detail, as in In suitcase Weekend",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In suitcase %@"
+          }
+        }
+      }
+    },
+    "In suitcases:" : {
+      "comment" : "Garment detail, before the suitcases it's in (LR-11)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In suitcases:"
           }
         }
       }
@@ -663,6 +1060,17 @@
         }
       }
     },
+    "In the wash" : {
+      "comment" : "Mark on a piece that's dirty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the wash"
+          }
+        }
+      }
+    },
     "Indoors" : {
       "comment" : "Weather row value: she'll be indoors",
       "localizations" : {
@@ -670,6 +1078,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Indoors"
+          }
+        }
+      }
+    },
+    "It goes to Recently deleted for 30 days. You can bring it back until then." : {
+      "comment" : "Remove from closet: what Delete it does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It goes to Recently deleted for 30 days. You can bring it back until then."
+          }
+        }
+      }
+    },
+    "It leaves your closet, suitcases and styling. Your saved looks keep it." : {
+      "comment" : "Remove from closet: what I don't have it any more does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It leaves your closet, suitcases and styling. Your saved looks keep it."
+          }
+        }
+      }
+    },
+    "It stays in Recently deleted until %@. After that it’s deleted for good." : {
+      "comment" : "Remove from closet: the Recently deleted deadline, such as Nov 13",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It stays in Recently deleted until %@. After that it’s deleted for good."
           }
         }
       }
@@ -692,6 +1133,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "I’ll be indoors"
+          }
+        }
+      }
+    },
+    "Kept until %@" : {
+      "comment" : "Recently deleted: the day a piece is deleted for good, such as Nov 13",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kept until %@"
+          }
+        }
+      }
+    },
+    "Kind" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kind"
           }
         }
       }
@@ -850,6 +1313,72 @@
         }
       }
     },
+    "Make my own look" : {
+      "comment" : "Style with this choice (LR-08)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make my own look"
+          }
+        }
+      }
+    },
+    "Make your own look" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make your own look"
+          }
+        }
+      }
+    },
+    "Mark as clean" : {
+      "comment" : "Button on garment detail",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark as clean"
+          }
+        }
+      }
+    },
+    "Mark as dirty" : {
+      "comment" : "Button on garment detail",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark as dirty"
+          }
+        }
+      }
+    },
+    "Marked as dirty" : {
+      "comment" : "Toast after Mark as dirty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marked as dirty"
+          }
+        }
+      }
+    },
+    "Marked clean" : {
+      "comment" : "Toast after Mark as clean",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marked clean"
+          }
+        }
+      }
+    },
     "Middle drawer: Send feedback" : {
       "comment" : "VoiceOver label for a desk drawer",
       "localizations" : {
@@ -916,6 +1445,17 @@
         }
       }
     },
+    "No longer in your closet" : {
+      "comment" : "Garment status",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No longer in your closet"
+          }
+        }
+      }
+    },
     "No pieces match" : {
       "comment" : "Closet: nothing matches the filters",
       "localizations" : {
@@ -938,6 +1478,17 @@
         }
       }
     },
+    "No saved looks use it." : {
+      "comment" : "Remove from closet: Delete it affects no saved looks",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved looks use it."
+          }
+        }
+      }
+    },
     "Not available" : {
       "comment" : "Weather row value when the weather can't be read",
       "localizations" : {
@@ -945,6 +1496,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not available"
+          }
+        }
+      }
+    },
+    "Not in a saved look yet" : {
+      "comment" : "Garment detail: no saved looks use it",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not in a saved look yet"
+          }
+        }
+      }
+    },
+    "Not marked as worn yet" : {
+      "comment" : "Garment detail: she hasn't used Wear today with this piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not marked as worn yet"
           }
         }
       }
@@ -967,6 +1540,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not packed"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "comment" : "Garment fact label: her own notes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        }
+      }
+    },
+    "Nothing here" : {
+      "comment" : "Recently deleted is empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing here"
           }
         }
       }
@@ -1004,6 +1599,17 @@
         }
       }
     },
+    "Occasions" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasions"
+          }
+        }
+      }
+    },
     "Off" : {
       "comment" : "Hamper plate: laundry tracking is off",
       "localizations" : {
@@ -1026,6 +1632,17 @@
         }
       }
     },
+    "Office" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Office"
+          }
+        }
+      }
+    },
     "Olive" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1033,6 +1650,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Olive"
+          }
+        }
+      }
+    },
+    "On your wishlist" : {
+      "comment" : "Garment status",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On your wishlist"
+          }
+        }
+      }
+    },
+    "Opening Recently deleted" : {
+      "comment" : "Loading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening Recently deleted"
+          }
+        }
+      }
+    },
+    "Opening this piece" : {
+      "comment" : "Garment detail loading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening this piece"
           }
         }
       }
@@ -1147,6 +1797,17 @@
         }
       }
     },
+    "Opens the suitcase." : {
+      "comment" : "Hint on a suitcase name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the suitcase."
+          }
+        }
+      }
+    },
     "Opens your closet." : {
       "comment" : "VoiceOver hint",
       "localizations" : {
@@ -1180,6 +1841,17 @@
         }
       }
     },
+    "Other" : {
+      "comment" : "Occasion",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        }
+      }
+    },
     "Part of your room didn’t load. Everything still opens." : {
       "comment" : "Home banner when a store failed",
       "localizations" : {
@@ -1187,6 +1859,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Part of your room didn’t load. Everything still opens."
+          }
+        }
+      }
+    },
+    "Pieces you delete stay here for 30 days, so you can bring them back." : {
+      "comment" : "Recently deleted, empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pieces you delete stay here for 30 days, so you can bring them back."
           }
         }
       }
@@ -1268,6 +1951,17 @@
         }
       }
     },
+    "Recently deleted didn’t load" : {
+      "comment" : "Recently deleted error title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recently deleted didn’t load"
+          }
+        }
+      }
+    },
     "Red" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1275,6 +1969,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Red"
+          }
+        }
+      }
+    },
+    "Regular" : {
+      "comment" : "How a piece is cut",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regular"
+          }
+        }
+      }
+    },
+    "Relaxed" : {
+      "comment" : "How a piece is cut",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relaxed"
+          }
+        }
+      }
+    },
+    "Remove from closet" : {
+      "comment" : "Button on garment detail (LR-16)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from closet"
+          }
+        }
+      }
+    },
+    "Restore" : {
+      "comment" : "Button: brings a deleted piece back",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore"
+          }
+        }
+      }
+    },
+    "Restore %@" : {
+      "comment" : "Spoken on Restore, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore %@"
           }
         }
       }
@@ -1290,6 +2039,17 @@
         }
       }
     },
+    "Saved looks" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved looks"
+          }
+        }
+      }
+    },
     "Search your closet" : {
       "comment" : "Closet search field prompt",
       "localizations" : {
@@ -1297,6 +2057,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search your closet"
+          }
+        }
+      }
+    },
+    "Seasons" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seasons"
           }
         }
       }
@@ -1356,6 +2127,17 @@
         }
       }
     },
+    "Size" : {
+      "comment" : "Garment fact label: size on the label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size"
+          }
+        }
+      }
+    },
     "Source" : {
       "comment" : "Plate on the suitcase, above the source's name",
       "localizations" : {
@@ -1378,6 +2160,39 @@
         }
       }
     },
+    "Spring" : {
+      "comment" : "Season",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring"
+          }
+        }
+      }
+    },
+    "Starting piece" : {
+      "comment" : "Style Me row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting piece"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "comment" : "Garment fact label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        }
+      }
+    },
     "Style Me" : {
       "comment" : "Words on the laptop screen; opens Style Me",
       "localizations" : {
@@ -1385,6 +2200,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Style Me"
+          }
+        }
+      }
+    },
+    "Style Me builds an outfit around it." : {
+      "comment" : "Style with this choice: what Style me with it does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style Me builds an outfit around it."
+          }
+        }
+      }
+    },
+    "Style Me with it, or make your own look with it." : {
+      "comment" : "Hint on Style with this",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style Me with it, or make your own look with it."
+          }
+        }
+      }
+    },
+    "Style Me won’t repeat an outfit you wore it in during the last 2 weeks." : {
+      "comment" : "Garment detail: recent-wear note with the repeat setting at 2 weeks (LR-10)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style Me won’t repeat an outfit you wore it in during the last 2 weeks."
+          }
+        }
+      }
+    },
+    "Style Me won’t repeat an outfit you wore it in during the last week." : {
+      "comment" : "Garment detail: recent-wear note with the repeat setting at 1 week (LR-10)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style Me won’t repeat an outfit you wore it in during the last week."
+          }
+        }
+      }
+    },
+    "Style me with it" : {
+      "comment" : "Style with this choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style me with it"
+          }
+        }
+      }
+    },
+    "Style with this" : {
+      "comment" : "Button on garment detail",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style with this"
           }
         }
       }
@@ -1444,6 +2325,28 @@
         }
       }
     },
+    "Summer" : {
+      "comment" : "Season",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summer"
+          }
+        }
+      }
+    },
+    "Take it out of your closet?" : {
+      "comment" : "Remove from closet: asks before I don't have it any more",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take it out of your closet?"
+          }
+        }
+      }
+    },
     "Tan" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1451,6 +2354,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tan"
+          }
+        }
+      }
+    },
+    "That didn’t save. Nothing changed." : {
+      "comment" : "Toast when a change to a piece couldn't be saved",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That didn’t save. Nothing changed."
           }
         }
       }
@@ -1477,6 +2391,17 @@
         }
       }
     },
+    "These saved looks use it. They’ll show it faded, with Swap it:" : {
+      "comment" : "Remove from closet: before the saved looks Delete it affects (LR-16.2)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These saved looks use it. They’ll show it faded, with Swap it:"
+          }
+        }
+      }
+    },
     "This choice is for this request only." : {
       "comment" : "Weather sheet: the choice doesn't stick",
       "localizations" : {
@@ -1495,6 +2420,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This part of the app is still being built."
+          }
+        }
+      }
+    },
+    "This piece didn’t load" : {
+      "comment" : "Garment detail error title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This piece didn’t load"
+          }
+        }
+      }
+    },
+    "This piece isn’t in your closet any more" : {
+      "comment" : "Garment detail: the piece was deleted elsewhere",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This piece isn’t in your closet any more"
           }
         }
       }
@@ -1550,6 +2497,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Turn on"
+          }
+        }
+      }
+    },
+    "Undo" : {
+      "comment" : "Toast action",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
           }
         }
       }
@@ -1686,6 +2644,17 @@
         }
       }
     },
+    "Winter" : {
+      "comment" : "Season",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Winter"
+          }
+        }
+      }
+    },
     "Yellow" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1693,6 +2662,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yellow"
+          }
+        }
+      }
+    },
+    "Yes, I don’t have it" : {
+      "comment" : "Button: confirms I don't have it any more",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes, I don’t have it"
           }
         }
       }
