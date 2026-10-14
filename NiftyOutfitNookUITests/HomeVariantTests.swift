@@ -4,6 +4,9 @@ import XCTest
 /// control she can reach and tap (RD-01.5), and held sideways every control is there beside the
 /// room, and turning the phone keeps what's open.
 final class HomeVariantTests: XCTestCase {
+    /// How long to wait for a screen or a change; waits end as soon as the condition holds.
+    static let wait: TimeInterval = 15
+
     override func setUp() {
         continueAfterFailure = false
     }
@@ -21,7 +24,7 @@ final class HomeVariantTests: XCTestCase {
 
         // The large-text layout, not the room: the suitcase is the Source row, read as it reads.
         let source = app.buttons["home.suitcase"]
-        XCTAssertTrue(source.waitForExistence(timeout: 5))
+        XCTAssertTrue(source.waitForExistence(timeout: Self.wait))
         XCTAssertTrue(
             waitForLabel(of: source, containing: "Source: Main closet, 17 pieces, Whole closet"), source.label)
 
@@ -39,9 +42,10 @@ final class HomeVariantTests: XCTestCase {
             let control = app.buttons[identifier]
             reveal(control, in: app)
             control.tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5), "\(identifier) didn't open \(title)")
+            XCTAssertTrue(
+                app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(identifier) didn't open \(title)")
             app.navigationBars[title].buttons.firstMatch.tap()
-            XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: 5), "No way back from \(title)")
+            XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "No way back from \(title)")
         }
 
         // Laundry tracking is off in the demo, so the Laundry row opens the short sheet.
@@ -52,19 +56,19 @@ final class HomeVariantTests: XCTestCase {
         let notNow = app.buttons["Not now"]
         reveal(notNow, in: app)
         notNow.tap()
-        XCTAssertTrue(notNow.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(notNow.waitForNonExistence(timeout: Self.wait))
 
         // The wardrobe's edge in the banner opens Closet; Saved Looks is the tab.
         let tabBar = app.tabBars.firstMatch
         let wardrobe = app.buttons["home.wardrobe"]
         reveal(wardrobe, in: app)
         wardrobe.tap()
-        XCTAssertTrue(tabBar.buttons["Closet"].waitForExistence(timeout: 5))
+        XCTAssertTrue(tabBar.buttons["Closet"].waitForExistence(timeout: Self.wait))
         XCTAssertTrue(tabBar.buttons["Closet"].isSelected, "The wardrobe didn't switch to Closet")
         tabBar.buttons["Saved Looks"].tap()
         XCTAssertTrue(tabBar.buttons["Saved Looks"].isSelected)
         tabBar.buttons["Home"].tap()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
     }
 
     /// Sideways, the controls sit beside the room with the title and Profile at their top.
@@ -92,11 +96,11 @@ final class HomeVariantTests: XCTestCase {
         }
 
         app.buttons["home.helpDrawer"].tap()
-        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait))
         XCUIDevice.shared.orientation = .portrait
-        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5), "Turning the phone closed Help")
+        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait), "Turning the phone closed Help")
         app.navigationBars["Help"].buttons.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
         XCTAssertTrue(waitForLabel(of: source, containing: "Suitcase: Source"), "Upright again, it's the room")
     }
 
@@ -104,7 +108,7 @@ final class HomeVariantTests: XCTestCase {
     private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
         let changed = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "label CONTAINS %@", text), object: element)
-        return XCTWaiter().wait(for: [changed], timeout: 5) == .completed
+        return XCTWaiter().wait(for: [changed], timeout: Self.wait) == .completed
     }
 
     /// Scrolls until the control can be tapped: down first, then back up.
@@ -112,7 +116,7 @@ final class HomeVariantTests: XCTestCase {
     private func reveal(
         _ element: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
     ) {
-        XCTAssertTrue(element.waitForExistence(timeout: 5), "Missing \(element)", file: file, line: line)
+        XCTAssertTrue(element.waitForExistence(timeout: Self.wait), "Missing \(element)", file: file, line: line)
         for _ in 0..<6 where !element.isHittable {
             app.swipeUp(velocity: .slow)
         }
