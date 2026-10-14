@@ -45,11 +45,12 @@ final class ClosetTests: XCTestCase {
         XCTAssertEqual(trousers.label, "Navy dress pants")
         XCTAssertTrue((trousers.value as? String)?.hasPrefix("In Jose's house and Weekend") == true)
 
-        // Opening a piece goes to its detail (a stand-in until Phase 7a), and back.
+        // Opening a piece goes to its detail (Phase 7a), and back.
         trousers.tap()
-        XCTAssertTrue(app.navigationBars["Navy dress pants"].waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(app.descendants(matching: .any)["stub.garment"].exists)
-        app.navigationBars["Navy dress pants"].buttons.firstMatch.tap()
+        let name = app.descendants(matching: .any)["garment.name"]
+        XCTAssertTrue(name.waitForExistence(timeout: Self.wait))
+        XCTAssertEqual(name.label, "Navy dress pants")
+        app.navigationBars.firstMatch.buttons.firstMatch.tap()
         XCTAssertTrue(trousers.waitForExistence(timeout: Self.wait))
     }
 
