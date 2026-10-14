@@ -6,7 +6,13 @@ The drawings for the Home bedroom. Phase 4, 14 October 2026.
 
 `source/` holds the SVGs exactly as they are in the planning repo, `closet/prototypes/RoomDirectionMockups/art`. They were drawn for this project in October 2026, by Claude working for Jose to the style contract in that folder's `ART_DIRECTION.md`, from Jose's reference picture. No stock art, icon set or third-party illustration is in them, so there is no outside licence to track; they are covered by this repo's all-rights-reserved notice.
 
-`source/wardrobe-rail.svg` is the one exception to "exactly as in the mockups": it's the four hanging garments on the Home wardrobe rail, exported from the mockups' `js/garments.js` (low detail, with hangers) and laid out as `screens/home.html` places them. The garments were drawn for this project too.
+Three files are exceptions to "exactly as in the mockups":
+
+- `source/wardrobe-rail.svg` is the four hanging garments on the Home wardrobe rail, exported from the mockups' `js/garments.js` (low detail, with hangers) and laid out as `screens/home.html` places them. The garments were drawn for this project too.
+- `source/window-plain.svg` (Phase 5a) is `window-sun.svg` without the sun and clouds and with a paler sky. The room shows it while the weather loads or when it can't be read, so the window never claims a weather it doesn't know.
+- `source/home-hamper-full.svg` (Phase 5a) is `home-hamper-dirty.svg` with a taller heap (a sage cardigan and a sand tee behind the two pieces already there) and a black sleeve hanging over the rim. Its viewBox starts 14 units higher, so the room draws it 14 units higher and the basket lands where the other hampers' does.
+
+`source/maya.svg` is Maya as the mockups draw her, from Jose's own illustration. It's heavy (about 1,300 small shapes of fur), but it's drawn once into the asset cache and only her z's move, so it stays as it is.
 
 ## How it gets into the app
 
@@ -20,11 +26,12 @@ What it changes:
 
 - **Colours.** The mockups drew the room in the first pastel palette and only toned it down with a CSS filter for Lily's palette study. Here every colour is recoloured for real into her warm neutral palette (LR-02.3). Colours that are mockup palette values with a design token become exactly that token: sage, sage-2 and sage-line become `artSage`, `artSageDeep` and `artSageLine`; pink becomes `artSand`; lilac `artStone`; butter and butter-line `artButter` and `artButterLine`; cream `signPanel`; plum (the laptop screen) `accent`. Every other colour keeps its lightness while its colourfulness drops and its hue moves toward the warm neutrals: greens stay a little green (olive), yellows and woods soften to sand and oak, and pinks, purples and blues become warm stone. The numbers were fitted to the pairs Lily approved (room.css colour to palette-warm colour).
 - **Dark.** The dark SVG is the light one in lamplight: red and green times 0.66, blue times 0.62, the same rule the dark art tokens use (`DesignSystem/README.md`).
+- **Windows keep a little sky.** In the six window drawings, blues (the sky, the rain, the night) keep their hue with 40% of their colourfulness instead of turning to warm stone, so sun, cloud, rain, snow and night still read at a glance. Everything else in a window is warmed as usual. `palette-map.json` lists these as `sky`.
 - **Garments keep their colours**, because they stand for her real clothes. In dark they're dimmed to 92%, as the mockups' `dark.css` does.
+- **Maya keeps her apricot colours**, because she's a real dog. In dark she gets the same lamplight as the room (red and green times 0.66, blue times 0.62), so she sits in it rather than glowing.
+- **The faded hamper is made, not drawn.** `home-hamper-faded` is `home-hamper` with the mockup's `saturate(.4) brightness(1.1) contrast(.8)` filter baked into each colour, for when laundry tracking is off. `palette-map.json` lists these as `faded`.
 - **`<use>` references are replaced by copies**, and comments are dropped, so the system SVG renderer only sees plain shapes.
 
-`RoomArtTests` checks that every drawing loads in light and dark, that each dark SVG is its light SVG dimmed by the rule, that the token colours match `Palette.swift`, and that no colour skipped the map.
+`RoomArtTests` checks that every drawing loads in light and dark, that each dark SVG is its light SVG dimmed by the rule, that the token colours match `Palette.swift`, that no colour skipped the map, that Maya keeps her source colours, and that the faded hamper is the empty one with the same shapes in greyer colours.
 
-## Not here yet
-
-Maya and her z's, the other windows (sun, cloudy, snow, night) and the hamper's full and faded states come in Phase 5a. Their sources are in the same mockup folder (`maya.svg` should be simplified first; it's 108 KB of fur).
+Maya's z's aren't in the catalog. They're three strokes drawn in SwiftUI (`MayaView.swift`, copied from the mockups' `maya-zzz.svg`) in the accent colour, so they show on the rug in dark appearance and each can drift on its own.

@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ and %@" : {
+      "comment" : "Today's weather: a temperature and a condition, as in 58° and rain",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ and %@"
+          }
+        }
+      }
+    },
     "%lld pieces" : {
       "comment" : "Source plate: how many pieces the source has",
       "localizations" : {
@@ -91,6 +102,39 @@
         }
       }
     },
+    "Can’t be read right now" : {
+      "comment" : "Weather sheet, when the weather can't be read",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can’t be read right now"
+          }
+        }
+      }
+    },
+    "Checking the weather…" : {
+      "comment" : "Weather sheet, while it loads",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking the weather…"
+          }
+        }
+      }
+    },
+    "Choose how the weather is used." : {
+      "comment" : "VoiceOver hint for the Weather row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose how the weather is used."
+          }
+        }
+      }
+    },
     "Closet" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -102,6 +146,17 @@
         }
       }
     },
+    "Couldn’t turn it on. Try again." : {
+      "comment" : "Laundry tracking sheet: saving the setting failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t turn it on. Try again."
+          }
+        }
+      }
+    },
     "Empty" : {
       "comment" : "Source plate: the source has no pieces",
       "localizations" : {
@@ -109,6 +164,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Empty"
+          }
+        }
+      }
+    },
+    "Every piece counts as available." : {
+      "comment" : "Laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every piece counts as available."
           }
         }
       }
@@ -131,6 +197,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feedback"
+          }
+        }
+      }
+    },
+    "For a day inside, whatever it’s like out." : {
+      "comment" : "Weather sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For a day inside, whatever it’s like out."
           }
         }
       }
@@ -190,6 +267,61 @@
         }
       }
     },
+    "Ignore the weather" : {
+      "comment" : "Weather sheet option",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignore the weather"
+          }
+        }
+      }
+    },
+    "Ignored" : {
+      "comment" : "Weather row value: ignore the weather",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignored"
+          }
+        }
+      }
+    },
+    "Indoors" : {
+      "comment" : "Weather row value: she'll be indoors",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indoors"
+          }
+        }
+      }
+    },
+    "It’s optional, and off for now." : {
+      "comment" : "Under the laundry tracking sheet's title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It’s optional, and off for now."
+          }
+        }
+      }
+    },
+    "I’ll be indoors" : {
+      "comment" : "Weather sheet option",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’ll be indoors"
+          }
+        }
+      }
+    },
     "Laptop: Style Me" : {
       "comment" : "VoiceOver label for the laptop",
       "localizations" : {
@@ -212,13 +344,35 @@
         }
       }
     },
-    "Laundry tracking" : {
-      "comment" : "Screen title: what laundry tracking does",
+    "Laundry tracking is off" : {
+      "comment" : "Sheet title",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laundry tracking"
+            "value" : "Laundry tracking is off"
+          }
+        }
+      }
+    },
+    "Laundry tracking is on." : {
+      "comment" : "Toast after turning it on",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry tracking is on."
+          }
+        }
+      }
+    },
+    "Laundry tracking keeps note of what’s in the wash, so Style Me doesn’t suggest it." : {
+      "comment" : "Laundry tracking sheet: what tracking does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry tracking keeps note of what’s in the wash, so Style Me doesn’t suggest it."
           }
         }
       }
@@ -274,6 +428,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nifty Outfit Nook"
+          }
+        }
+      }
+    },
+    "Not available" : {
+      "comment" : "Weather row value when the weather can't be read",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available"
+          }
+        }
+      }
+    },
+    "Not now" : {
+      "comment" : "Button: closes the laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
+          }
+        }
+      }
+    },
+    "Nothing is erased" : {
+      "comment" : "Laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is erased"
           }
         }
       }
@@ -421,6 +608,17 @@
         }
       }
     },
+    "Pieces you mark stay marked while it’s off." : {
+      "comment" : "Laundry tracking sheet, when nothing is marked as in the wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pieces you mark stay marked while it’s off."
+          }
+        }
+      }
+    },
     "Privacy" : {
       "comment" : "Plate on the bottom desk drawer; opens Privacy and terms",
       "localizations" : {
@@ -542,6 +740,39 @@
         }
       }
     },
+    "The rest of Style Me is still being built." : {
+      "comment" : "Shown on Style Me under the rows that exist so far",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The rest of Style Me is still being built."
+          }
+        }
+      }
+    },
+    "The weather can’t be read right now, so your looks won’t use it." : {
+      "comment" : "Under the Weather row when the weather can't be read",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weather can’t be read right now, so your looks won’t use it."
+          }
+        }
+      }
+    },
+    "This choice is for this request only." : {
+      "comment" : "Weather sheet: the choice doesn't stick",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This choice is for this request only."
+          }
+        }
+      }
+    },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
       "localizations" : {
@@ -575,6 +806,28 @@
         }
       }
     },
+    "Turn on" : {
+      "comment" : "Button: turns laundry tracking on",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on"
+          }
+        }
+      }
+    },
+    "Use today’s weather" : {
+      "comment" : "Weather sheet option",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use today’s weather"
+          }
+        }
+      }
+    },
     "Wardrobe: Closet" : {
       "comment" : "VoiceOver label for the wardrobe",
       "localizations" : {
@@ -586,6 +839,39 @@
         }
       }
     },
+    "Weather" : {
+      "comment" : "Style Me row title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather"
+          }
+        }
+      }
+    },
+    "When it’s on" : {
+      "comment" : "Laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When it’s on"
+          }
+        }
+      }
+    },
+    "While it’s off" : {
+      "comment" : "Laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While it’s off"
+          }
+        }
+      }
+    },
     "Whole closet" : {
       "comment" : "Source plate: styling uses the whole closet",
       "localizations" : {
@@ -593,6 +879,205 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Whole closet"
+          }
+        }
+      }
+    },
+    "Window: Cloudy" : {
+      "comment" : "VoiceOver label for the window",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window: Cloudy"
+          }
+        }
+      }
+    },
+    "Window: Night" : {
+      "comment" : "VoiceOver label for the window when it's dark outside",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window: Night"
+          }
+        }
+      }
+    },
+    "Window: Rain" : {
+      "comment" : "VoiceOver label for the window",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window: Rain"
+          }
+        }
+      }
+    },
+    "Window: Snow" : {
+      "comment" : "VoiceOver label for the window",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window: Snow"
+          }
+        }
+      }
+    },
+    "Window: Sunny" : {
+      "comment" : "VoiceOver label for the window",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window: Sunny"
+          }
+        }
+      }
+    },
+    "You can change this in Profile" : {
+      "comment" : "Link from the laundry tracking sheet to the Profile switch",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can change this in Profile"
+          }
+        }
+      }
+    },
+    "You mark pieces as in the wash. Style Me skips them unless you allow one." : {
+      "comment" : "Laundry tracking sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You mark pieces as in the wash. Style Me skips them unless you allow one."
+          }
+        }
+      }
+    },
+    "Your %lld pieces marked as in the wash are kept. Turn it back on and they come back." : {
+      "comment" : "Laundry tracking sheet: how many pieces are still marked as in the wash",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Your %lld piece marked as in the wash is kept. Turn it back on and it comes back."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Your %lld pieces marked as in the wash are kept. Turn it back on and they come back."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Your looks are picked for a day indoors." : {
+      "comment" : "Under the Weather row when she'll be indoors",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your looks are picked for a day indoors."
+          }
+        }
+      }
+    },
+    "Your looks are picked for today’s weather." : {
+      "comment" : "Under the Weather row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your looks are picked for today’s weather."
+          }
+        }
+      }
+    },
+    "Your looks don’t use the weather." : {
+      "comment" : "Under the Weather row when she ignores the weather",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your looks don’t use the weather."
+          }
+        }
+      }
+    },
+    "Your looks won’t use the weather." : {
+      "comment" : "Weather sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your looks won’t use the weather."
+          }
+        }
+      }
+    },
+    "clear" : {
+      "comment" : "Weather at night with no clouds, as in 61° and clear",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "clear"
+          }
+        }
+      }
+    },
+    "cloudy" : {
+      "comment" : "Weather, as in 63° and cloudy",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cloudy"
+          }
+        }
+      }
+    },
+    "rain" : {
+      "comment" : "Weather, as in 58° and rain",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rain"
+          }
+        }
+      }
+    },
+    "snow" : {
+      "comment" : "Weather, as in 30° and snow",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "snow"
+          }
+        }
+      }
+    },
+    "sunny" : {
+      "comment" : "Weather, as in 72° and sunny",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sunny"
           }
         }
       }

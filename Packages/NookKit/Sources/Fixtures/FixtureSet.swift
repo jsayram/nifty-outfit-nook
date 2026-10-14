@@ -1,7 +1,8 @@
 /// The sample data set the app runs on during Stage A.
 ///
-/// UI tests choose one with a launch argument, for example `-fixtures empty`. A behaviour can
-/// follow after a colon, for example `-fixtures demo:offline` (see `FixtureBehavior`).
+/// UI tests choose one with a launch argument, for example `-fixtures empty`. Options can follow
+/// after colons, for example `-fixtures demo:offline` or `-fixtures demo:weather=snow:laundry=full`
+/// (see `FixtureConfiguration`).
 public enum FixtureSet: String, CaseIterable, Sendable {
     /// The demo closet: 21 garments, a few looks, six suitcases and a profile named Lily.
     case demo
@@ -13,7 +14,7 @@ public enum FixtureSet: String, CaseIterable, Sendable {
     /// The launch argument that names a fixture set.
     public static let launchArgument = "-fixtures"
 
-    /// Reads `-fixtures <name>[:<behavior>]` from the launch arguments.
+    /// Reads the set from `-fixtures <name>[:<option>]...` in the launch arguments.
     ///
     /// A missing flag, a missing value or an unknown name all give `.demo`.
     public init(launchArguments: [String]) {
@@ -37,17 +38,63 @@ public enum FixtureBehavior: String, CaseIterable, Sendable {
     case storesFail = "stores-fail"
 }
 
-/// A fixture set plus a behaviour, as read from `-fixtures <set>[:<behavior>]`.
+/// The weather the fixture weather service reports, to force each Home window (RD-01.4).
+public enum FixtureWeatherState: String, CaseIterable, Sendable {
+    /// 72°F and sunny.
+    case sun
+    /// 63°F and cloudy.
+    case cloudy
+    /// 58°F and rain, the mockups' weather and every set's default.
+    case rain
+    /// 30°F and snow.
+    case snow
+    /// 61°F and clear, after dark.
+    case night
+    /// The weather can't be read, but everything else works (LR-04.3).
+    case unavailable
+}
+
+/// The laundry the fixture closet has, to force each hamper (RD-11).
+public enum FixtureLaundryState: String, CaseIterable, Sendable {
+    /// Tracking off. Dirty marks are kept.
+    case off
+    /// Tracking on, nothing dirty.
+    case clean
+    /// Tracking on, two pieces dirty.
+    case some
+    /// Tracking on, eight pieces dirty.
+    case full
+}
+
+/// A fixture set plus options, as read from `-fixtures <set>[:<option>]...`.
+///
+/// Each option after a colon is one of:
+/// - a behaviour (`FixtureBehavior`), such as `offline` or `stores-fail`;
+/// - `weather=<state>` (`FixtureWeatherState`), such as `weather=snow`;
+/// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`.
+///
+/// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
 public struct FixtureConfiguration: Hashable, Sendable {
     public var set: FixtureSet
     public var behavior: FixtureBehavior
+    /// `nil` keeps the set's own weather (rain).
+    public var weather: FixtureWeatherState?
+    /// `nil` keeps the set's own laundry and tracking setting.
+    public var laundry: FixtureLaundryState?
 
-    public init(set: FixtureSet = .demo, behavior: FixtureBehavior = .normal) {
+    public init(
+        set: FixtureSet = .demo,
+        behavior: FixtureBehavior = .normal,
+        weather: FixtureWeatherState? = nil,
+        laundry: FixtureLaundryState? = nil
+    ) {
         self.set = set
         self.behavior = behavior
+        self.weather = weather
+        self.laundry = laundry
     }
 
-    /// Unknown or missing parts fall back to `demo` and `normal`.
+    /// Unknown or missing parts fall back to `demo`, `normal` and the set's own weather and laundry.
     public init(launchArguments: [String]) {
         guard
             let flagIndex = launchArguments.firstIndex(of: FixtureSet.launchArgument),
@@ -56,10 +103,20 @@ public struct FixtureConfiguration: Hashable, Sendable {
             self.init()
             return
         }
-        let parts = launchArguments[flagIndex + 1].split(separator: ":", maxSplits: 1).map(String.init)
-        self.init(
-            set: parts.first.flatMap(FixtureSet.init(rawValue:)) ?? .demo,
-            behavior: parts.dropFirst().first.flatMap(FixtureBehavior.init(rawValue:)) ?? .normal
-        )
+        let parts = launchArguments[flagIndex + 1].split(separator: ":").map(String.init)
+        self.init(set: parts.first.flatMap(FixtureSet.init(rawValue:)) ?? .demo)
+        for option in parts.dropFirst() {
+            if let behavior = FixtureBehavior(rawValue: option) {
+                self.behavior = behavior
+                continue
+            }
+            let pair = option.split(separator: "=", maxSplits: 1).map(String.init)
+            guard pair.count == 2 else { continue }
+            switch pair[0] {
+            case "weather": weather = FixtureWeatherState(rawValue: pair[1]) ?? weather
+            case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
+            default: continue
+            }
+        }
     }
 }

@@ -8,18 +8,32 @@ nonisolated enum RoomArt: String, CaseIterable, Sendable {
     case chair
     case desk = "home-desk"
     case flats = "home-flats"
+    /// The hamper, empty: tracking on and nothing to wash (RD-11).
     case hamper = "home-hamper"
+    /// The empty hamper, faded: laundry tracking is off.
+    case hamperFaded = "home-hamper-faded"
+    /// A few pieces to wash: a low heap just above the rim.
+    case hamperSome = "home-hamper-dirty"
+    /// Many pieces to wash: a taller heap and a sleeve over the rim. Drawn 14 units taller.
+    case hamperFull = "home-hamper-full"
     case lamp = "home-lamp"
     case suitcase = "home-suitcase"
     case laptop
+    /// Maya asleep, in her own apricot colours (RD-12).
+    case maya
     case nameSign = "name-sign"
     case rug
     case shelfFrames = "shelf-frames"
     case shelfTop = "shelf-top"
     case wardrobeRail = "wardrobe-rail"
     case wardrobe
-    /// The window on a rainy day. Phase 5a adds the other weather and night (RD-01.4).
+    // The window for each weather, night, and a plain one when the weather isn't known (RD-01.4).
+    case windowSun = "window-sun"
+    case windowCloudy = "window-cloudy"
     case windowRain = "window-rain"
+    case windowSnow = "window-snow"
+    case windowNight = "window-night"
+    case windowPlain = "window-plain"
 }
 
 /// A room drawing, stretched to the frame it's given. Decorative: hidden from VoiceOver, since

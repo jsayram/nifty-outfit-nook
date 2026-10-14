@@ -98,7 +98,7 @@ A store returns everything it holds and leaves filtering to the rules: Closet sh
 
 ## Fixtures
 
-Pick a set with `-fixtures <set>`, and optionally a behaviour after a colon: `-fixtures demo:offline`. Unknown values fall back to `demo` and `normal`.
+Pick a set with `-fixtures <set>`, and optionally options after colons: a behaviour (`-fixtures demo:offline`), `weather=<state>` and `laundry=<state>` (`-fixtures demo:weather=night:laundry=full`). The README lists every value. Unknown values fall back to `demo`, `normal` and the set's own weather and laundry.
 
 | Set | Contents |
 |---|---|

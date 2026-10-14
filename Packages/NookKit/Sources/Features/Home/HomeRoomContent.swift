@@ -11,18 +11,24 @@ nonisolated struct HomeRoomContent: Hashable, Sendable {
     var hamper: HamperState?
     /// The occasion on the calendar. `nil` until Style Me remembers one (Phase 10a).
     var occasion: Occasion?
+    /// Today's weather for the window. `nil` while it loads or when it can't be read.
+    var weather: WeatherSnapshot?
 
     init(
         signName: String? = nil,
         source: SourcePlate = SourcePlate(),
         hamper: HamperState? = nil,
-        occasion: Occasion? = nil
+        occasion: Occasion? = nil,
+        weather: WeatherSnapshot? = nil
     ) {
         self.signName = signName
         self.source = source
         self.hamper = hamper
         self.occasion = occasion
+        self.weather = weather
     }
+
+    var window: RoomWindow { RoomWindow(weather: weather) }
 }
 
 /// The suitcase's two plates: "Source · Main closet" and "17 pieces · Whole closet" (RD-01.3).
