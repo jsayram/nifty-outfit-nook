@@ -2,7 +2,7 @@
 
 A native iOS app (SwiftUI) that styles outfits from the clothes you already own.
 
-This repo holds only the shipping app: the Xcode project, Swift packages, tests and CI. Planning, the product requirements, design mockups and the security standard live in the separate `closet` repo:
+This repo holds the shipping app (the Xcode project, Swift packages, tests and CI) and the app's website in `website/`. Planning, the product requirements, design mockups and the security standard live in the separate `closet` repo:
 
 - Build plan: `closet/SWIFT_BUILD_PLAN.md`
 - Security standard (required): `closet/SECURITY_STANDARD.md`
