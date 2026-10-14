@@ -30,6 +30,7 @@ scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding)
 scripts/format.sh --fix     # rewrite files, then lint
 scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
+scripts/promote.sh "<title>" <body-file>  # at a milestone: open the develop-to-main promotion PR
 ```
 
 The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commit whose staged changes look like they contain a secret.
@@ -72,7 +73,7 @@ Configs/                     Build settings as xcconfig files.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
 scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-release.sh, check-package-pins.sh,
-                             install-hooks.sh, merge-pr.sh.
+                             install-hooks.sh, merge-pr.sh, promote.sh.
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
