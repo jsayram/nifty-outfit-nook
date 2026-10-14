@@ -64,7 +64,8 @@ public enum FixtureServices {
             images: PlaceholderImageProvider(),
             drafts: InMemoryDraftStore(drafts: drafts, options: stores),
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
-            descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero)
+            descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),
+            cutouts: StandInCutoutService(latency: slow ? .seconds(1) : .zero)
         )
     }
 }
