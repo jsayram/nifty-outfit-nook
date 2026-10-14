@@ -1,0 +1,54 @@
+{
+  "configurations": [
+    {
+      "id": "0D5A6F3E-6C1B-4B8F-9E51-1A7C2B3D4E5F",
+      "name": "Default",
+      "options": {}
+    }
+  ],
+  "defaultOptions": {
+    "targetForVariableExpansion": {
+      "containerPath": "container:NiftyOutfitNook.xcodeproj",
+      "identifier": "4E4F4F4B000000000000000A",
+      "name": "NiftyOutfitNook"
+    }
+  },
+  "testTargets": [
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
+        "identifier": "DesignSystemTests",
+        "name": "DesignSystemTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
+        "identifier": "ModelsTests",
+        "name": "ModelsTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
+        "identifier": "FixturesTests",
+        "name": "FixturesTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
+        "identifier": "FeaturesTests",
+        "name": "FeaturesTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:NiftyOutfitNook.xcodeproj",
+        "identifier": "4E4F4F4B000000000000000B",
+        "name": "NiftyOutfitNookUITests"
+      }
+    }
+  ],
+  "version": 1
+}

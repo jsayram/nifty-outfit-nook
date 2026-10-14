@@ -1,0 +1,34 @@
+// Project-wide settings shared by Debug and Release. No secrets in any xcconfig.
+
+SDKROOT = iphoneos
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator
+IPHONEOS_DEPLOYMENT_TARGET = 26.0
+TARGETED_DEVICE_FAMILY = 1,2
+SUPPORTS_MACCATALYST = NO
+SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO
+SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO
+
+// Swift 6 language mode with complete concurrency checking.
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+
+// Warnings fail the build (decision 0001, item 5). NookKit sets the same in Package.swift.
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+
+// Strings come from String Catalogs.
+LOCALIZATION_PREFERS_STRING_CATALOGS = YES
+SWIFT_EMIT_LOC_STRINGS = YES
+
+CODE_SIGN_STYLE = Automatic
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+DEAD_CODE_STRIPPING = YES
+ENABLE_STRICT_OBJC_MSGSEND = YES
+ALWAYS_SEARCH_USER_PATHS = NO
+CLANG_ENABLE_MODULES = YES
+CLANG_ENABLE_OBJC_ARC = YES
+
+// Optional, ignored by git. Copy Signing.local.xcconfig.example to Signing.local.xcconfig
+// and set DEVELOPMENT_TEAM there to build for a device. Secrets.xcconfig is reserved for
+// non-secret identifiers that shouldn't be public; it never holds a real secret.
+#include? "Signing.local.xcconfig"
+#include? "Secrets.xcconfig"
