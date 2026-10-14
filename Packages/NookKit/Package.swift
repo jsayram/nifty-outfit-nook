@@ -59,7 +59,18 @@ let package = Package(
         ),
         .testTarget(name: "ModelsTests", dependencies: ["Models"], swiftSettings: strictSettings),
         .testTarget(name: "FixturesTests", dependencies: ["Fixtures", "Models"], swiftSettings: strictSettings),
-        .testTarget(name: "FeaturesTests", dependencies: ["Features"], swiftSettings: strictSettings),
+        .testTarget(
+            name: "FeaturesTests",
+            dependencies: [
+                "Features",
+                "Models",
+                "Fixtures",
+                "DesignSystem",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
+            exclude: ["Home/__Snapshots__"],
+            swiftSettings: strictSettings
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
