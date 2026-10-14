@@ -4,13 +4,18 @@ Phase 4, 14 October 2026. Home is the illustrated bedroom from `closet/prototype
 
 Phase 5a, the same day, brought the room to life: the window follows the weather, the hamper shows the laundry, and Maya sleeps on the rug (RD-01.4, RD-11, RD-12). See [Weather, laundry and Maya](#weather-laundry-and-maya).
 
+Phase 5b, also the same day, added the two other layouts, large text and a phone held sideways, and the design pass on dark appearance. See [Large text, sideways and dark](#large-text-sideways-and-dark).
+
 ## What's where
 
 All of it is in `Packages/NookKit/Sources/Features/Home`.
 
 | File | Holds |
 |---|---|
-| `HomeScreen.swift` | The navigation stack, the Profile button, the error banner, and `HomeRoomView`, which sizes the room to the screen |
+| `HomeScreen.swift` | The navigation stack, the Profile button, the error banner, the choice of layout, and `HomeRoomView`, which sizes the room to the screen |
+| `HomeLayout.swift` | Which layout shows (room, large text, sideways), and the words rows and tiles say to VoiceOver |
+| `LargeText/HomeLargeTextView.swift`, `LargeText/HomeBanner.swift` | The large-text layout: the banner and the large rows |
+| `Sideways/SidewaysStage.swift`, `Sideways/HomeSidewaysView.swift` | The sideways layout: the closer scene's rects, its scaling, and the tiles beside it |
 | `HomeModel.swift` | Loads the sign name, the piece count and the hamper state from the stores, and the weather from the weather service; turns laundry tracking on |
 | `HomeRoomContent.swift` | What the plates say, and the sign's fallback |
 | `HomeDestination.swift` | The screens Home pushes |
@@ -52,7 +57,7 @@ Measured bar heights on the iOS 26.5 simulator, used by the tests: 116 pt at the
 
 ## Text
 
-The plates, the title and the name are live text in the design system's text styles. The plates are fixed-size shapes on the drawing, so their words shrink to fit, and in the room they stop growing at the largest standard text size (xxxLarge). At the accessibility sizes Phase 5b replaces the room with the banner and large rows (`home-ax.html`, RD-01.5). Until then the room at AX5 shows capped text, with nothing cut off or overflowing.
+The plates, the title and the name are live text in the design system's text styles. The plates are fixed-size shapes on the drawing, so their words shrink to fit, and in the room they stop growing at the largest standard text size (xxxLarge). The room never shows past that: at the accessibility sizes Home switches to the large-text layout, where nothing is capped (see below).
 
 The sign shows her name from the profile. A long name wraps onto two lines and then shrinks. An empty name shows "Hello" (RD-03.2), and VoiceOver says "Name sign, no name yet". While the profile loads the panel stays empty, so the fallback never flashes up before her name.
 
@@ -118,10 +123,54 @@ Weather: `sun`, `cloudy`, `rain` (the default), `snow`, `night`, `unavailable`. 
 
 `HomeLifeTests` covers the window and hamper mapping, the z's drift, and the model (weather, unreadable weather, each laundry state, Turn on). `WeatherRowContentTests` covers what the row and sheet say. `HomeSnapshotTests` has one image of all six windows and one of all four hampers, each in light and dark, plus a snowy night with a full hamper. The UI tests check the hamper sheet's Not now and Turn on, and the window and Weather row with each sheet choice.
 
+## Large text, sideways and dark
+
+Phase 5b. `HomeLayout` picks one of three layouts from the text size and the vertical size class:
+
+| Layout | When | Mockup |
+|---|---|---|
+| Room | Upright phone, and iPad, at the standard text sizes | `home.html` |
+| Large text | Any accessibility text size (AX1 to AX5), in any orientation | `home-ax.html` |
+| Sideways | A phone held sideways (compact height) at the standard sizes | `home-landscape.html` |
+
+Only the view inside `HomeScreen` changes, so turning the phone or changing the text size keeps the model, a pushed screen and an open sheet. Every control keeps the same accessibility identifier (`home.suitcase` and so on) in every layout.
+
+### Large text
+
+The room shrinks to a banner 186 points tall, drawn at the mockup's sizes: the right edge of the wardrobe with two pieces on its rail (opens Closet), her name sign in the middle of the wall (opens Profile), and the window on the right, still following the weather. Under it, every other control is a large row in the room's order: Source (with the piece count and scope as a pill, green for a suitcase, butter for an empty one), Occasion on butter, the Style Me button, Laundry, and then "In the desk drawers" with Help, Send feedback, and Privacy and terms. Text uses the normal text styles with no cap, wraps instead of truncating, and the page scrolls. At AX4 and AX5 each row's icon moves above its words, so a word like "Occasion" keeps the full width and never breaks. On a wide screen the page stays at most 640 points wide and centres.
+
+Two things in the mockup aren't here:
+
+- **The weather plate on the banner.** LR-04 moved the weather to Style Me, as on the upright room; the window still says the weather to VoiceOver.
+- **A shelf row.** The mockup has none either. Saved Looks is the tab right under the rows.
+
+Rows read as they look ("Source: Main closet, 17 pieces, Whole closet", "Laundry: Off"), so VoiceOver and Voice Control use the words on screen (`RoomControl.rowLabel(for:)`). Hints are the room's.
+
+### Sideways
+
+The mockups have a sideways phone screen, so Home follows it rather than inventing one. Squashing the upright room into a 402-point-tall screen would need about 40% scale and drawers far below 44 points. Instead:
+
+- **The scene.** On the left, the mockup's closer view of the room (`SidewaysStage`, 430 x 390 units, the upright drawings at 0.72): wardrobe, window, sign, calendar, desk, suitcase, hamper, the rug and Maya. It scales to the height between the top of the screen and the tab bar, keeping its proportions, and gives way in width so the controls column keeps at least 340 points. On iPhone 17 that's a scale of 0.91 (62 points of safe area each side, 64 for the tab bar, measured on iOS 26.5). There's no shelf and no bed.
+- **The controls.** Beside it, the same controls as soft tiles in the room's order: Source and Occasion side by side (stacked above the Large text size), Style Me, Laundry, then Help, Feedback and Privacy as small soft buttons. The navigation bar would take a third of the height, so it's hidden on Home and the title and the Profile button sit at the top of the column. Pushed screens keep their bar. The column scrolls above the tab bar if the text is too big to fit.
+- **Who does what.** The drawings still open what they open upright, for a quick tap, but they're hidden from VoiceOver and the sideways drawers are smaller than 44 points. The tiles are the real controls: full-size targets, read once, with the words on screen. "Feedback" and "Privacy" are read as "Send feedback" and "Privacy and terms", and Voice Control answers to both names.
+
+### Dark
+
+The dark room already came from the art's dark versions and the colour tokens. Checking every element in dark (plates, sign, Maya, windows, hamper, the sheets) found two things to fix:
+
+- **The faded hamper glowed.** With tracking off, the faded hamper's dark version was the pale light one in lamplight, which made it the brightest thing on the floor. It now follows the mockups' darker "off" filter and sits greyer and dimmer than the lit hamper (`art/room/README.md`).
+- **The lamp at night.** In dark the lamp always glows a little; at night it now glows fully, as it does in light, and the glow fades to nothing at its edge at any size instead of being cut off in a circle.
+
+Everything else held up: the plates use the strong tint with light text, the sign keeps dark text on its dimmed panel, Maya's z's are in the latte accent and show on the rug, the windows keep their faint sky, and the laundry sheet and the error banner use the dark tokens.
+
+### Tests
+
+`HomeLayoutTests` checks which layout each text size and size class gets, the row labels, the banner's rail, and that the sideways scene fits above the tab bar and keeps every control inside it. `HomeSnapshotTests.darkRoom` is the dark room on iPhone 17. `HomeLayoutSnapshotTests` draws the large-text page at AX3 (light) and AX5 (dark, a snowy night in a suitcase), and the sideways layout at 874 x 402 in light and in dark at night. `HomeVariantTests` (UI) launches at AX5 (`-UIPreferredContentSizeCategoryName UICTContentSizeCategoryAccessibilityXXXL`) and opens every Home action from its row, the banner, the Profile button and the tabs, then turns the phone sideways, checks every control is there, opens Help and turns back upright with Help still open.
+
 ## Left for later phases
 
-- **5b:** the large-text layout and sideways phone. Dark appearance's design pass should look at the room at night too: in dark the wall is already night, so the night window and the glow fit; in light at night only the window and the lamp change. Dark appearance already works from the art's dark versions and the colour tokens, but hasn't had its design pass.
-- **10a:** the occasion on the calendar (`HomeRoomContent.occasion`), and opening Style Me on the Occasion sheet.
+- **10a:** the occasion on the calendar (`HomeRoomContent.occasion`) and under "Occasion" on the large-text row and the sideways tile, and opening Style Me on the Occasion sheet.
 - **12a:** her saved looks in the shelf frames, which are empty for now.
 - **13:** the remembered source (`HomeModel.source`, FR-67). Until the source picker exists, Home shows the main closet. The suitcase plate already knows how to show a suitcase source (green, or butter when empty).
 - **14a:** "Name on your sign" in Profile, and reloading Home when it changes (RD-03.1).
+- **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.

@@ -75,6 +75,8 @@ extension ContrastRequirement {
             ContrastRequirement(.textPrimary, on: .floorLow, kind: .text),
             ContrastRequirement(.textPrimary, on: .successSurface, kind: .text),
             ContrastRequirement(.textPrimary, on: .warningSurface, kind: .text),
+            // The caption on a butter row (Home's Occasion row at large text sizes, Phase 5b).
+            ContrastRequirement(.textSecondary, on: .warningSurface, kind: .text),
             ContrastRequirement(.textPrimary, on: .errorSurface, kind: .text),
             // Selected chips, primary buttons and the active tab.
             ContrastRequirement(.onAccent, on: .accent, kind: .text),
@@ -102,6 +104,8 @@ extension ContrastRequirement {
             ContrastRequirement(.accent, on: .floor, kind: .largeTextOrGraphic),
             // The filled part of a meter against its track.
             ContrastRequirement(.accent, on: .track, kind: .largeTextOrGraphic),
+            // Icons on a butter row (Phase 5b).
+            ContrastRequirement(.accent, on: .warningSurface, kind: .largeTextOrGraphic),
         ]
         + [ColorToken.background, .backgroundLow, .surface].map {
             ContrastRequirement(.chevron, on: $0, kind: .largeTextOrGraphic)

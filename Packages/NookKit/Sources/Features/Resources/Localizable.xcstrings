@@ -12,6 +12,17 @@
         }
       }
     },
+    "%@ · %@" : {
+      "comment" : "Pill on Home's Source row: the piece count, then the scope",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        }
+      }
+    },
     "%lld pieces" : {
       "comment" : "Source plate: how many pieces the source has",
       "localizations" : {
@@ -289,6 +300,17 @@
         }
       }
     },
+    "In the desk drawers" : {
+      "comment" : "Caption above Help, Send feedback and Privacy",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the desk drawers"
+          }
+        }
+      }
+    },
     "Indoors" : {
       "comment" : "Weather row value: she'll be indoors",
       "localizations" : {
@@ -373,6 +395,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laundry tracking keeps note of what’s in the wash, so Style Me doesn’t suggest it."
+          }
+        }
+      }
+    },
+    "Laundry: %@" : {
+      "comment" : "VoiceOver label for the Laundry row, with its state such as Off or 2 to wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry: %@"
           }
         }
       }
@@ -483,6 +516,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Off"
+          }
+        }
+      }
+    },
+    "Off · tap to learn more" : {
+      "comment" : "Home's Laundry row while laundry tracking is off",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off · tap to learn more"
           }
         }
       }
@@ -692,6 +736,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Source"
+          }
+        }
+      }
+    },
+    "Source: %@" : {
+      "comment" : "VoiceOver label for the Source row. The values are the source name, piece count and scope.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source: %@"
           }
         }
       }

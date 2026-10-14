@@ -28,8 +28,8 @@ struct RoomCanvas: View {
         .frame(width: layout.size.width, height: layout.contentHeight, alignment: .topLeading)
         .clipped()
         // The plates are drawn at a fixed size on the art, so their words stop growing at the
-        // largest standard size. At the accessibility sizes Phase 5b swaps the room for the
-        // banner and large rows (`home-ax.html`, RD-01.5).
+        // largest standard size. The room never shows past it: at the accessibility sizes Home
+        // shows the banner and large rows instead (`HomeLayout`, `home-ax.html`, RD-01.5).
         .dynamicTypeSize(...Self.largestTextSize)
         .accessibilityElement(children: .contain)
     }
