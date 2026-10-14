@@ -96,6 +96,7 @@ is redrawn in a later phase; these are the values it uses.
 | `artButterLine` | `#CDB98F` | `#877A59` | `--butter-line` |
 | `signPanel` | `#FFF7EA` | `#A8A391` | `name-sign.svg` panel |
 | `signText` | `#4B3628` | `#3A2A1E` | `.sign .name` (`--plum`) |
+| `stickerEdge` | `#FFFFFF` | `#EEE7DE` | `.stk` drop shadows `#fff` (Phase 8b) |
 
 ### How dark appearance was derived
 
@@ -224,9 +225,39 @@ on. Text that a component shows comes in already localized, as a `String`; the f
 | `NookBanner`, `NookOfflineBanner` | `.banner` (Your looks) | Butter or neutral, with an optional action that moves under the text at large sizes. |
 | `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. |
 | `NookBadge` | `.sim`, `.pill`, `.dirty` | Small capsule label in four tones. Always words, never colour alone. |
+| `NookSticker`, `StickerRenderer`, `StickerCache` | `.stk` in `results.html` and `garment.html` | Phase 8b. See [Stickers](#stickers). |
+| `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
 
 New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
 toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter.
+
+### Stickers
+
+Phase 8b. A garment picture with transparency becomes a sticker: the piece, a thick white edge that follows its
+outline, and a soft shadow that falls below it. The mockups draw the edge with eight stacked CSS drop shadows; here
+it's drawn once into a picture and cached.
+
+- **Size.** A sticker takes exactly the size it's given. The garment is cropped to what isn't transparent and fitted
+  inside, centred, or resting on the bottom (`.resting`, used on garment detail so shoes sit on the contact shadow).
+  The shadow falls outside that size, like a CSS shadow, so it never moves a layout.
+- **Edge.** 1.8% of the long side, 1.25 to 6 points: about 4.25 points on garment detail, 1.6 on a closet-sized piece.
+  The shadow's offset and blur grow the same way, and it always falls further than it spreads, so nothing shows
+  above the sticker. The edge is the `stickerEdge` token: white, and a warm off-white in dark so it doesn't glare
+  next to garments dimmed for dark mode. The shadow is the `shadow` token, a little lighter, as in the mockups.
+- **How the edge is drawn** (`StickerRenderer`). The garment's alpha is doubled (so a half-covered pixel of a thin
+  strap counts as solid) and grown with a greyscale dilation, `vImageDilate_Planar8` with a round brush whose rim
+  fades over one pixel. The garment's own anti-aliased edge carries through, so the paper's edge is smooth along
+  slanted sides. Thin straps get the full edge and small holes fill in, as on a die-cut sticker. Core Graphics and
+  Accelerate on the CPU, so it's the same on every machine and in the snapshot tests.
+- **Cost and caching** (`StickerCache`). A detail-sized sticker at 3x took about 25 ms in a Debug build on the
+  simulator (an earlier pure-Swift distance transform took 1.7 s in Debug). It's still made away from the main
+  actor, once, and kept by its key: what it shows plus its size,
+  scale, appearance and placement. Two views asking at once share one render. The least recently used go first
+  past 48 MB, and everything goes on a memory warning. Nothing is written to disk. The root screen puts one cache in
+  the environment (`\.stickerCache`).
+- **Still images.** With `nookStaticRendering` on, a sticker is made on the spot, since `ImageRenderer` can't wait.
+
+The catalog's "Stickers and photo tiles" page shows three sizes, the tile fallback in the same sizes, and thin parts.
 
 ### The catalog
 
@@ -237,7 +268,7 @@ wrapped in `#if DEBUG`, so a Release build doesn't contain it. CI checks that wi
 ### Snapshot tests
 
 `ComponentSnapshotTests` draws every catalog page in light, dark and AX5 on a 390 pt canvas, and five pages on an
-820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 44 images,
+820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 47 images,
 about 4 MB at 2x.
 
 - **How they're drawn.** With SwiftUI's `ImageRenderer`, not the library's UIKit host. The UIKit host's

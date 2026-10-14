@@ -73,6 +73,7 @@ nonisolated public enum Palette {
         case .artButterLine: TokenValue(light: RGBA(hex: 0xCDB98F), dark: RGBA(hex: 0x877A59))
         case .signPanel: TokenValue(light: RGBA(hex: 0xFFF7EA), dark: RGBA(hex: 0xA8A391))
         case .signText: TokenValue(light: RGBA(hex: 0x4B3628), dark: RGBA(hex: 0x3A2A1E))
+        case .stickerEdge: TokenValue(light: RGBA(hex: 0xFFFFFF), dark: RGBA(hex: 0xEEE7DE))
         }
     }
 }

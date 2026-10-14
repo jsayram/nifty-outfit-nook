@@ -28,6 +28,7 @@
 
         @State private var appearance = AppearanceChoice.system
         @State private var textSize = TextSizeChoice.system
+        @State private var stickers = StickerCache()
 
         public init() {}
 
@@ -59,6 +60,7 @@
                 .navigationBarTitleDisplayMode(.inline)
             }
             .preferredColorScheme(colorScheme)
+            .environment(\.stickerCache, stickers)
             .accessibilityIdentifier("catalog")
         }
 
