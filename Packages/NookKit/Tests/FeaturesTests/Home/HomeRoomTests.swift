@@ -21,12 +21,13 @@ struct RoomControlTests {
         #expect(routes[.hamper] == .push(.laundry))
     }
 
-    /// RD-11.3: Laundry when tracking is on, the explanation when it's off.
+    /// RD-11.3: Laundry when tracking is on, the short sheet about it when it's off. Before the
+    /// closet loads it opens Laundry rather than claim tracking is off.
     @Test func hamperFollowsLaundryTracking() {
         #expect(RoomControl.hamper.route(hamper: .toWash(2)) == .push(.laundry))
         #expect(RoomControl.hamper.route(hamper: .allClean) == .push(.laundry))
-        #expect(RoomControl.hamper.route(hamper: .off) == .push(.laundryTracking))
-        #expect(RoomControl.hamper.route(hamper: nil) == .push(.laundryTracking))
+        #expect(RoomControl.hamper.route(hamper: .off) == .sheet(.laundryTracking))
+        #expect(RoomControl.hamper.route(hamper: nil) == .push(.laundry))
     }
 
     /// RD-01.2 and RD-10.2: each label names the object and where it goes.

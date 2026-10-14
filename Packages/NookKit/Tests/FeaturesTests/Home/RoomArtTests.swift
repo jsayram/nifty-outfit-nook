@@ -90,20 +90,45 @@ struct RoomArtTests {
         #expect(checked >= 8, "The art should use the room tokens")
     }
 
-    /// Every colour in a room drawing (not a garment) came through the palette map.
+    /// Every colour in a room drawing (not a garment, not Maya) came through the palette map:
+    /// the warm map, the windows' muted sky, or the faded hamper.
     @Test func everyRoomColourIsMapped() throws {
         let map = try #require(
             try JSONSerialization.jsonObject(
                 with: Data(contentsOf: Self.repoRoot.appending(path: "art/room/palette-map.json")))
                 as? [String: [String: String]])
-        let mapped = Set(map.values.compactMap { $0["light"] })
-        for art in RoomArt.allCases where art != .wardrobeRail {
+        let mapped = Set(map.values.flatMap { [$0["light"], $0["sky"], $0["faded"]].compactMap(\.self) })
+        for art in RoomArt.allCases where !Self.keepsItsColours.contains(art) {
             let url = Self.catalog.appending(path: "\(art.rawValue).imageset/\(art.rawValue).svg")
             for colour in Self.hexColours(in: try String(contentsOf: url, encoding: .utf8)) {
                 #expect(mapped.contains(colour.text), "\(art.rawValue) has \(colour.text), which isn't from the map")
             }
         }
     }
+
+    /// Maya is a real dog, so she keeps her apricot colours: the light drawing has exactly the
+    /// source's colours (RD-12). Dark dims her like the rest of the room (checked above).
+    @Test func mayaKeepsHerColours() throws {
+        let source = try String(
+            contentsOf: Self.repoRoot.appending(path: "art/room/source/maya.svg"), encoding: .utf8)
+        let light = try String(
+            contentsOf: Self.catalog.appending(path: "maya.imageset/maya.svg"), encoding: .utf8)
+        #expect(Set(Self.hexColours(in: light).map(\.text)) == Set(Self.hexColours(in: source).map(\.text)))
+    }
+
+    /// The faded hamper is the empty hamper with the same shapes, only paler and greyer.
+    @Test func fadedHamperIsTheEmptyHamperFaded() throws {
+        let folder = { (art: RoomArt) in Self.catalog.appending(path: "\(art.rawValue).imageset/\(art.rawValue).svg") }
+        let empty = try String(contentsOf: folder(.hamper), encoding: .utf8)
+        let faded = try String(contentsOf: folder(.hamperFaded), encoding: .utf8)
+        #expect(Self.removingHexColours(empty) == Self.removingHexColours(faded))
+        for (plain, pale) in zip(Self.hexColours(in: empty), Self.hexColours(in: faded)) {
+            let spread = { (bytes: [UInt8]) in Int(bytes.max() ?? 0) - Int(bytes.min() ?? 0) }
+            #expect(spread(pale.bytes) <= spread(plain.bytes), "\(pale.text) should be greyer than \(plain.text)")
+        }
+    }
+
+    static let keepsItsColours: Set<RoomArt> = [.wardrobeRail, .maya]
 
     // MARK: - Helpers
 

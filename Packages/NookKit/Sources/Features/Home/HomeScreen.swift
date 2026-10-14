@@ -7,7 +7,8 @@ import SwiftUI
 /// The wardrobe and the shelf switch to the Closet and Saved Looks tabs. Everything else is
 /// pushed here: Style Me from the laptop and the calendar, Suitcases from the suitcase, Laundry
 /// from the hamper, Help, Send feedback and Privacy and terms from the desk drawers, and
-/// Profile from the name sign and the top-right button.
+/// Profile from the name sign and the top-right button. While laundry tracking is off, the
+/// hamper opens a short sheet about it instead (RD-11).
 struct HomeScreen: View {
     /// Switches the tab bar to another tab.
     let openTab: (AppTab) -> Void
@@ -15,6 +16,8 @@ struct HomeScreen: View {
     @Environment(\.services) private var services
     @State private var model = HomeModel()
     @State private var path: [HomeDestination] = []
+    @State private var sheet: HomeSheet?
+    @State private var toast: NookToastMessage?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -37,10 +40,35 @@ struct HomeScreen: View {
                     }
                 }
                 .navigationDestination(for: HomeDestination.self) { destination in
-                    HomeStubScreen(destination: destination)
+                    switch destination {
+                    case .styleMe: StyleMeStubScreen()
+                    default: HomeStubScreen(destination: destination)
+                    }
                 }
+                .nookSheet(item: $sheet, title: { $0.title }, subtitle: { $0.subtitle }) { sheet in
+                    switch sheet {
+                    case .laundryTracking:
+                        LaundryTrackingSheet(keptDirtyCount: model.keptDirtyCount) {
+                            await turnOnLaundryTracking()
+                        } openProfile: {
+                            self.sheet = nil
+                            path.append(.profile)
+                        }
+                    }
+                }
+                .nookToast($toast)
         }
         .task { await model.load(from: services) }
+    }
+
+    private func turnOnLaundryTracking() async -> Bool {
+        let saved = await model.turnOnLaundryTracking(using: services)
+        if saved {
+            toast = NookToastMessage(
+                String(localized: "Laundry tracking is on.", bundle: .module, comment: "Toast after turning it on"),
+                systemImage: "basket")
+        }
+        return saved
     }
 
     @ViewBuilder
@@ -63,6 +91,7 @@ struct HomeScreen: View {
         switch control.route(hamper: model.content.hamper) {
         case .tab(let tab): openTab(tab)
         case .push(let destination): path.append(destination)
+        case .sheet(let sheet): self.sheet = sheet
         }
     }
 }

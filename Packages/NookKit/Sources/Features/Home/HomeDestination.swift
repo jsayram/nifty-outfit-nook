@@ -9,8 +9,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     case suitcases
     /// Laundry, when tracking is on (RD-11).
     case laundry
-    /// What laundry tracking does, when it's off. Phase 5a turns this into the short sheet.
-    case laundryTracking
     case help
     case feedback
     case privacy
@@ -22,8 +20,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         case .styleMe: String(localized: "Style Me", bundle: .module, comment: "Screen title")
         case .suitcases: String(localized: "Suitcases", bundle: .module, comment: "Screen title")
         case .laundry: String(localized: "Laundry", bundle: .module, comment: "Screen title")
-        case .laundryTracking:
-            String(localized: "Laundry tracking", bundle: .module, comment: "Screen title: what laundry tracking does")
         case .help: String(localized: "Help", bundle: .module, comment: "Screen title")
         case .feedback: String(localized: "Send feedback", bundle: .module, comment: "Screen title")
         case .privacy: String(localized: "Privacy and terms", bundle: .module, comment: "Screen title")
@@ -36,7 +32,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         switch self {
         case .styleMe: "sparkles"
         case .suitcases: "suitcase.rolling"
-        case .laundry, .laundryTracking: "basket"
+        case .laundry: "basket"
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
         case .privacy: "hand.raised"
@@ -50,7 +46,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         case .styleMe: "styleMe"
         case .suitcases: "suitcases"
         case .laundry: "laundry"
-        case .laundryTracking: "laundryTracking"
         case .help: "help"
         case .feedback: "feedback"
         case .privacy: "privacy"
@@ -59,8 +54,33 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     }
 }
 
+/// A short sheet Home opens over the room.
+nonisolated enum HomeSheet: String, Identifiable, Hashable, Sendable {
+    /// What laundry tracking does, with Turn on, when it's off (RD-11).
+    case laundryTracking
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .laundryTracking:
+            String(localized: "Laundry tracking is off", bundle: .module, comment: "Sheet title")
+        }
+    }
+
+    var subtitle: String? {
+        switch self {
+        case .laundryTracking:
+            String(
+                localized: "It’s optional, and off for now.", bundle: .module,
+                comment: "Under the laundry tracking sheet's title")
+        }
+    }
+}
+
 /// Where tapping something in the room goes.
 nonisolated enum HomeRoute: Hashable, Sendable {
     case tab(AppTab)
     case push(HomeDestination)
+    case sheet(HomeSheet)
 }

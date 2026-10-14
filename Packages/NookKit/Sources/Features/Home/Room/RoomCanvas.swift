@@ -14,6 +14,9 @@ struct RoomCanvas: View {
     let content: HomeRoomContent
     let open: (RoomControl) -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.roomIsStillImage) private var isStillImage
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             backdrop
@@ -49,7 +52,7 @@ struct RoomCanvas: View {
 
     private var wall: some View {
         ZStack(alignment: .topLeading) {
-            art(.windowRain, at: RoomStage.window)
+            window
             art(.shelfTop, at: RoomStage.shelfTop)
             shelfFrames
             art(.calendar, at: RoomStage.calendar)
@@ -61,11 +64,13 @@ struct RoomCanvas: View {
     private var floor: some View {
         ZStack(alignment: .topLeading) {
             art(.rug, at: RoomStage.rug)
+            LampGlow(isNight: content.window.lightsTheLamp)
+                .roomFrame(layout.rect(RoomStage.lampGlow))
             art(.desk, at: RoomStage.desk)
             art(.laptop, at: RoomStage.laptop)
             art(.lamp, at: RoomStage.lamp)
             art(.chair, at: RoomStage.chair)
-            // Maya sleeps on the rug at RoomStage.maya, with her z's at RoomStage.mayaZs (Phase 5a).
+            maya
             suitcase
             hamper
             savedLooksPlate
@@ -76,6 +81,38 @@ struct RoomCanvas: View {
     }
 
     // MARK: - Pieces
+
+    /// The window follows the weather (RD-01.4). It's a drawing, not a control, but VoiceOver
+    /// reads the weather it shows, so the room tells everyone the same thing.
+    private var window: some View {
+        let window = content.window
+        return ZStack {
+            RoomArtImage(window.art)
+                .id(window)
+                .transition(.opacity)
+        }
+        .animation(.easeInOut(duration: 0.4), value: window)
+        .roomFrame(layout.rect(RoomStage.window))
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(window.accessibilityLabel ?? "")
+        .accessibilityAddTraits(.isImage)
+        .accessibilityIdentifier("home.window")
+        .accessibilitySortPriority(Double(RoomControl.allCases.count) + 0.5)
+        .accessibilityHidden(window.accessibilityLabel == nil)
+    }
+
+    /// Maya asleep on the rug with her z's (RD-12). Decoration only: hidden from VoiceOver, and
+    /// taps go through her to nothing.
+    private var maya: some View {
+        ZStack(alignment: .topLeading) {
+            art(.maya, at: RoomStage.maya)
+            SleepyZs(scale: layout.scale, animates: !reduceMotion && !isStillImage)
+                .roomFrame(layout.rect(RoomStage.mayaZs))
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
 
     private var wardrobe: some View {
         control(.wardrobe) {
@@ -164,11 +201,13 @@ struct RoomCanvas: View {
         }
     }
 
-    /// One hamper drawing for now. Phase 5a adds the faded, empty and full states (RD-11).
+    /// Faded and empty when tracking is off, empty when all is clean, and a heap of clothes
+    /// when there's washing, taller when there's a lot (RD-11, `HamperLook`).
     private var hamper: some View {
-        control(.hamper) {
+        let look = HamperLook(hamper: content.hamper)
+        return control(.hamper) {
             ZStack(alignment: .topLeading) {
-                art(.hamper, at: RoomStage.hamperArt)
+                art(look.art, at: look.stageRect)
                 LaundryPlate(hamper: content.hamper).roomFrame(layout.rect(RoomStage.laundryPlate))
             }
         }
@@ -217,6 +256,12 @@ struct RoomCanvas: View {
             .accessibilitySortPriority(control.sortPriority)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// True when the room is drawn to a still image (the snapshot tests), so nothing in it
+    /// moves. Never set in the app.
+    @Entry var roomIsStillImage = false
 }
 
 /// No visible change on the invisible tap area itself; the press shows as a soft dim over the

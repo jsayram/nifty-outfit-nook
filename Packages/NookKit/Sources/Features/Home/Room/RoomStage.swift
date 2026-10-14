@@ -43,7 +43,9 @@ nonisolated enum RoomStage {
     static let laptopScreen = CGRect(x: 232, y: 386.6, width: 80, height: 45)
     static let lamp = CGRect(x: 334, y: 365.6, width: 44, height: 80)
     static let chair = CGRect(x: 198, y: 493, width: 94, height: 112)
-    /// Maya asleep on the rug, and her z's. Phase 5a draws her here.
+    /// The lamp's glow at night (`.glow`).
+    static let lampGlow = CGRect(x: 296, y: 340, width: 120, height: 120)
+    /// Maya asleep on the rug, and her z's (RD-12).
     static let maya = CGRect(x: 142, y: 630, width: 110, height: 60)
     static let mayaZs = CGRect(x: 170, y: 604, width: 40, height: 40)
 
@@ -56,6 +58,8 @@ nonisolated enum RoomStage {
     // The hamper in front of the suitcase, at the rug's edge.
     static let hamper = CGRect(x: 12, y: 632, width: 92, height: 100)
     static let hamperArt = CGRect(x: 14, y: 636, width: 88, height: 96)
+    /// The full hamper's drawing reaches 14 units higher, for the heap above the rim.
+    static let hamperFullArt = CGRect(x: 14, y: 622, width: 88, height: 110)
     static let laundryPlate = CGRect(x: 20, y: 676, width: 76, height: 40)
 
     // Plates and controls on the wall and the desk.
