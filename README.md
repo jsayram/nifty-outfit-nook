@@ -97,6 +97,15 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
 
 Actions are pinned to full commit SHAs and the workflow token is read-only. Dependabot keeps the pins current.
 
+## Repo settings
+
+These live in GitHub's settings rather than in files, so they're listed here. All were set in Phase 1b.
+
+- Ruleset "Protect main and develop", with no bypass actors: pull request required (squash only, no approvals needed while there's one maintainer), the three CI checks required from GitHub Actions, signed commits, linear history, and no force pushes or deletion.
+- Merging: squash only, and branches are deleted after merge.
+- Secret scanning with push protection, Dependabot alerts and security updates, and private vulnerability reporting.
+- Actions: the default `GITHUB_TOKEN` is read-only and can't approve pull requests; only GitHub-owned actions are allowed, and they must be pinned to a full commit SHA; workflows from every outside contributor wait for approval.
+
 ## Reporting a security problem
 
 See [SECURITY.md](SECURITY.md).
