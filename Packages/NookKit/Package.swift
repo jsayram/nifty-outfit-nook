@@ -29,7 +29,12 @@ let package = Package(
         .library(name: "Features", targets: ["Features"]),
     ],
     targets: [
-        .target(name: "DesignSystem", swiftSettings: uiSettings),
+        .target(
+            name: "DesignSystem",
+            exclude: ["README.md"],
+            resources: [.process("Resources")],
+            swiftSettings: uiSettings
+        ),
         .target(name: "Models", swiftSettings: strictSettings),
         .target(name: "Fixtures", dependencies: ["Models"], swiftSettings: strictSettings),
         .target(
