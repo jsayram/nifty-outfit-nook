@@ -12,6 +12,8 @@ struct ClosetPage: View {
     @Bindable var model: ClosetModel
     let open: (ClosetDestination) -> Void
     let retry: () -> Void
+    /// Discard on "Continue where you left off?".
+    var discardDraft: () -> Void = {}
 
     @Environment(\.closetIsStillImage) private var isStillImage
 
@@ -64,6 +66,9 @@ struct ClosetPage: View {
             .stateCard()
         case .loaded:
             VStack(spacing: 0) {
+                if let draft = model.draft {
+                    draftCard(draft)
+                }
                 if model.isEmpty {
                     emptyCloset
                 } else {
@@ -104,6 +109,26 @@ struct ClosetPage: View {
             .padding(.top, NookSpacing.small)
         }
         .frame(maxWidth: Self.controlsMaximumWidth, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// "Continue where you left off?" for a piece she didn't finish adding or editing (Phase 7b).
+    private func draftCard(_ draft: GarmentDraft) -> some View {
+        DraftResumeCard(
+            draft: draft, now: model.loadedAt, identifier: "closet.draft",
+            resume: {
+                switch draft.target {
+                case .newPiece:
+                    open(.addPiece(.resume))
+                case .garment(let id):
+                    open(.editPiece(id, name: draft.base.name, resumesDraft: true))
+                }
+            },
+            discard: discardDraft
+        )
+        .padding(.horizontal, NookSpacing.screenMargin)
+        .padding(.bottom, NookSpacing.medium)
+        .frame(maxWidth: Self.controlsMaximumWidth)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
