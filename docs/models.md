@@ -60,7 +60,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `ResultCheck` | Checks a result before it's shown: Simple present, 2 to 6 pieces, only eligible pieces, ideas only in Something new and only when allowed, at most one, the starting piece in every version, every version shares a piece with Simple, "Same as Simple" marks right | PRD §8, LR-05a, LR-05b |
 | `SuitcaseShelf` | Three favourites by most recent use, See all only above three, archived only under their filter | RD-09, LR-17 |
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
-| `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter and typed search (name, brand, colour note, suitcase names), all combined | LR-09, LR-11 |
+| `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
 | `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
 
 ## The store protocol
