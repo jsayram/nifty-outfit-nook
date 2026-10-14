@@ -1,6 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld pieces" : {
+      "comment" : "Source plate: how many pieces the source has",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld pieces in the sample closet" : {
       "comment" : "Placeholder detail on Closet",
       "localizations" : {
@@ -24,6 +47,50 @@
         }
       }
     },
+    "%lld to wash" : {
+      "comment" : "Hamper plate: how many pieces are dirty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld to wash"
+          }
+        }
+      }
+    },
+    "All clean" : {
+      "comment" : "Hamper plate: nothing to wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All clean"
+          }
+        }
+      }
+    },
+    "Bottom drawer: Privacy and terms" : {
+      "comment" : "VoiceOver label for a desk drawer",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottom drawer: Privacy and terms"
+          }
+        }
+      }
+    },
+    "Calendar: Occasion" : {
+      "comment" : "VoiceOver label for the calendar",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar: Occasion"
+          }
+        }
+      }
+    },
     "Closet" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -31,6 +98,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Closet"
+          }
+        }
+      }
+    },
+    "Empty" : {
+      "comment" : "Source plate: the source has no pieces",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty"
+          }
+        }
+      }
+    },
+    "Explains laundry tracking." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explains laundry tracking."
+          }
+        }
+      }
+    },
+    "Feedback" : {
+      "comment" : "Plate on the middle desk drawer; opens Send feedback",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback"
+          }
+        }
+      }
+    },
+    "Hamper: Laundry" : {
+      "comment" : "VoiceOver label for the hamper",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hamper: Laundry"
+          }
+        }
+      }
+    },
+    "Hamper: Laundry, %@" : {
+      "comment" : "VoiceOver label for the hamper, with its state such as Off or 2 to wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hamper: Laundry, %@"
+          }
+        }
+      }
+    },
+    "Hello" : {
+      "comment" : "Name sign when no name is set. A neutral greeting, not a name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hello"
+          }
+        }
+      }
+    },
+    "Help" : {
+      "comment" : "Plate on the top desk drawer",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Help"
           }
         }
       }
@@ -46,6 +190,270 @@
         }
       }
     },
+    "Laptop: Style Me" : {
+      "comment" : "VoiceOver label for the laptop",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laptop: Style Me"
+          }
+        }
+      }
+    },
+    "Laundry" : {
+      "comment" : "Plate on the hamper",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry"
+          }
+        }
+      }
+    },
+    "Laundry tracking" : {
+      "comment" : "Screen title: what laundry tracking does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry tracking"
+          }
+        }
+      }
+    },
+    "Main closet" : {
+      "comment" : "Source plate: the whole closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Main closet"
+          }
+        }
+      }
+    },
+    "Middle drawer: Send feedback" : {
+      "comment" : "VoiceOver label for a desk drawer",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Middle drawer: Send feedback"
+          }
+        }
+      }
+    },
+    "Name sign, no name yet" : {
+      "comment" : "VoiceOver label for the name sign when no name is set",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name sign, no name yet"
+          }
+        }
+      }
+    },
+    "Name sign: %@" : {
+      "comment" : "VoiceOver label for the name sign",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name sign: %@"
+          }
+        }
+      }
+    },
+    "Nifty Outfit Nook" : {
+      "comment" : "The app's name, as the Home title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nifty Outfit Nook"
+          }
+        }
+      }
+    },
+    "Occasion" : {
+      "comment" : "Label on the calendar",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasion"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "comment" : "Hamper plate: laundry tracking is off",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        }
+      }
+    },
+    "Opens Help." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Help."
+          }
+        }
+      }
+    },
+    "Opens Laundry." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Laundry."
+          }
+        }
+      }
+    },
+    "Opens Privacy and terms." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Privacy and terms."
+          }
+        }
+      }
+    },
+    "Opens Profile." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Profile."
+          }
+        }
+      }
+    },
+    "Opens Send feedback." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Send feedback."
+          }
+        }
+      }
+    },
+    "Opens Style Me to pick the occasion." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Style Me to pick the occasion."
+          }
+        }
+      }
+    },
+    "Opens Style Me. Nothing is sent until you ask." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Style Me. Nothing is sent until you ask."
+          }
+        }
+      }
+    },
+    "Opens Suitcases, where you pick the source." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Suitcases, where you pick the source."
+          }
+        }
+      }
+    },
+    "Opens your closet." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens your closet."
+          }
+        }
+      }
+    },
+    "Opens your saved looks." : {
+      "comment" : "VoiceOver hint",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens your saved looks."
+          }
+        }
+      }
+    },
+    "Part of your room didn’t load. Everything still opens." : {
+      "comment" : "Home banner when a store failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part of your room didn’t load. Everything still opens."
+          }
+        }
+      }
+    },
+    "Privacy" : {
+      "comment" : "Plate on the bottom desk drawer; opens Privacy and terms",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        }
+      }
+    },
+    "Privacy and terms" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy and terms"
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "comment" : "Button: opens Profile",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
+          }
+        }
+      }
+    },
     "Saved Looks" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -57,6 +465,83 @@
         }
       }
     },
+    "Send feedback" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send feedback"
+          }
+        }
+      }
+    },
+    "Shelf: Saved Looks" : {
+      "comment" : "VoiceOver label for the shelf",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shelf: Saved Looks"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "comment" : "Plate on the suitcase, above the source's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
+    "Style Me" : {
+      "comment" : "Words on the laptop screen; opens Style Me",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style Me"
+          }
+        }
+      }
+    },
+    "Suitcase only" : {
+      "comment" : "Source plate: styling uses this suitcase only",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suitcase only"
+          }
+        }
+      }
+    },
+    "Suitcase: Source, %@" : {
+      "comment" : "VoiceOver label for the suitcase. The values are the source name, piece count and scope.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suitcase: Source, %@"
+          }
+        }
+      }
+    },
+    "Suitcases" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suitcases"
+          }
+        }
+      }
+    },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
       "localizations" : {
@@ -64,6 +549,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This part of the app is still being built."
+          }
+        }
+      }
+    },
+    "Top drawer: Help" : {
+      "comment" : "VoiceOver label for a desk drawer",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top drawer: Help"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "comment" : "Button on the Home banner",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        }
+      }
+    },
+    "Wardrobe: Closet" : {
+      "comment" : "VoiceOver label for the wardrobe",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wardrobe: Closet"
+          }
+        }
+      }
+    },
+    "Whole closet" : {
+      "comment" : "Source plate: styling uses the whole closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whole closet"
           }
         }
       }
