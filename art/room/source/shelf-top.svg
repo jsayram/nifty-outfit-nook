@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 110" width="152" height="110" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Saved Looks top shelf, built like the reference: a wood board with a leafy plant in a pink pot on its right half,
+       a label plate (page HTML) under the board, and a slim ledge on two tapered brackets under the plate.
+       Board: x 1..151, y 52..63 (top face y 52..55, front edge y 55..63), the same 11-unit profile as shelf-frames.
+       Plate zone: x 7..145, y 61..91 (138 x 30). The plate overlaps the board and the ledge by 2 units each.
+       Ledge: x 5..147, y 89..97. Brackets: x 16..27 and 125..136, y 97..110. Left half of the board (x < 76) stays empty. -->
+
+  <defs>
+    <!-- Leaves: base at the origin, tip at (0,-L). Light half on -x, shade half on +x, midrib and a soft highlight. -->
+    <g id="st-leaf-s">
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24C-6.9 -16.3 -8.9 -5.3 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24Z" fill="#5C9670"/>
+      <path d="M0 -2.4V-20.2" stroke="#44795A" stroke-width=".9"/>
+      <path d="M-3.1 -5.8C-4 -10 -3.4 -14.8 -1.7 -18.4" stroke="#92C39C" stroke-width="1.1"/>
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24C-6.9 -16.3 -8.9 -5.3 0 0Z" stroke="#44795A" stroke-width="1.25"/>
+    </g>
+    <g id="st-leaf-t">
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21C-6.3 -14.3 -8.1 -4.6 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21Z" fill="#5C9670"/>
+      <path d="M0 -2.2V-17.6" stroke="#44795A" stroke-width=".9"/>
+      <path d="M-2.8 -5.1C-3.6 -8.8 -3.1 -13 -1.5 -16.1" stroke="#92C39C" stroke-width="1.1"/>
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21C-6.3 -14.3 -8.1 -4.6 0 0Z" stroke="#44795A" stroke-width="1.25"/>
+    </g>
+    <g id="st-leaf-xs">
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17C-5.3 -11.6 -6.8 -3.7 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17Z" fill="#5C9670"/>
+      <path d="M0 -2V-14" stroke="#44795A" stroke-width=".9"/>
+      <path d="M-2.3 -4.2C-3 -7.2 -2.6 -10.6 -1.3 -13.2" stroke="#92C39C" stroke-width="1.1"/>
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17C-5.3 -11.6 -6.8 -3.7 0 0Z" stroke="#44795A" stroke-width="1.25"/>
+    </g>
+    <!-- tapered bracket, 11 wide and 13 tall, the short cousin of the shelf-frames bracket -->
+    <g id="st-bracket">
+      <path d="M0 0H11L9.6 10.6C9.4 12 8.5 13 7.1 13H3.9C2.5 13 1.6 12 1.4 10.6Z" fill="#E7BC6E"/>
+      <path d="M6.4 0H11L9.6 10.6C9.4 12 8.5 13 7.1 13H5.9Z" fill="#D9A650"/>
+      <path d="M0 0H11L10.75 2.4H.25Z" fill="#D9A650"/>
+      <path d="M3.2 4.2L3.5 10.2" stroke="#F3D391" stroke-width="1.1"/>
+      <path d="M0 0H11L9.6 10.6C9.4 12 8.5 13 7.1 13H3.9C2.5 13 1.6 12 1.4 10.6Z" stroke="#B98632" stroke-width="1.3"/>
+      <circle cx="5.5" cy="6.6" r=".9" fill="#B98632"/>
+    </g>
+  </defs>
+
+  <!-- brackets, under the ledge -->
+  <use href="#st-bracket" transform="translate(16 97)"/>
+  <use href="#st-bracket" transform="translate(125 97)"/>
+
+  <!-- ledge under the plate -->
+  <rect x="5" y="89" width="142" height="8" rx="1.6" fill="#E7BC6E"/>
+  <path d="M6.6 89H145.4A1.6 1.6 0 0 1 147 90.6V91.6H5V90.6A1.6 1.6 0 0 1 6.6 89Z" fill="#F3D391"/>
+  <path d="M5 95.6H147A1.6 1.6 0 0 1 145.4 97H6.6A1.6 1.6 0 0 1 5 95.6Z" fill="#D9A650"/>
+  <path d="M5.5 91.6H146.5" stroke="#CF9D45" stroke-width=".8"/>
+  <path d="M34 93.6h10M60 93.4h14M98 93.7h8" stroke="#D9A650" stroke-width=".9"/>
+  <rect x="5" y="89" width="142" height="8" rx="1.6" stroke="#B98632" stroke-width="1.3"/>
+
+  <!-- board -->
+  <rect x="1" y="52" width="150" height="11" rx="1.8" fill="#E7BC6E"/>
+  <path d="M2.8 52H149.2A1.8 1.8 0 0 1 151 53.8V55H1V53.8A1.8 1.8 0 0 1 2.8 52Z" fill="#F3D391"/>
+  <path d="M1 61.2H151A1.8 1.8 0 0 1 149.2 63H2.8A1.8 1.8 0 0 1 1 61.2Z" fill="#D9A650"/>
+  <path d="M1.5 55H150.5" stroke="#CF9D45" stroke-width=".8"/>
+  <path d="M7 58h14M28 58.6h7M46 57.8h12M66 58.4h6M84 58h10M120 58.2h16" stroke="#D9A650" stroke-width=".9"/>
+  <!-- pot's shadow on the top face -->
+  <ellipse cx="112" cy="54.3" rx="11.4" ry="1.4" fill="#DDB05E"/>
+  <rect x="1" y="52" width="150" height="11" rx="1.8" stroke="#B98632" stroke-width="1.3"/>
+
+  <!-- plant: drawn around a pot centred at x 90 with its foot at y 48.9, placed at (112, 54) at 110 percent -->
+  <g transform="translate(112 54) scale(1.1) translate(-90 -48.9)">
+    <!-- stems, out of the pot to each leaf -->
+    <path d="M90.2 36.5C90.6 33.4 91 30.2 91.5 27.2M89.6 36.5C88 34 86 31 84 28.6M89.2 36.6C87 35.5 84.6 34.2 82.2 33.2M90.8 36.5C93 33.8 95.6 31.5 98 29.6M91.2 36.6C93.6 35.8 96 35.2 98.4 34.6M89.8 36.6C89.2 35.2 88.6 33.6 88.1 32.2" stroke="#44795A" stroke-width="1.4"/>
+
+    <!-- back leaves: tall centre, upper left, right -->
+    <use href="#st-leaf-s" transform="translate(91.5 27) rotate(10)"/>
+    <use href="#st-leaf-s" transform="translate(84 28.5) rotate(-42) scale(-1 1)"/>
+    <use href="#st-leaf-s" transform="translate(98 29.5) rotate(55)"/>
+
+    <!-- pot -->
+    <path d="M81.2 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H85.2C83.9 48.9 82.9 48.1 82.7 46.8Z" fill="#F4B4C2"/>
+    <path d="M92.6 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H91.6Z" fill="#EC9DB0"/>
+    <path d="M84.8 41.2L85.5 46.4" stroke="#FCD9E0" stroke-width="1.2"/>
+    <path d="M81.2 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H85.2C83.9 48.9 82.9 48.1 82.7 46.8Z" stroke="#D97F97" stroke-width="1.25"/>
+    <!-- rim -->
+    <rect x="79.8" y="35.4" width="20.4" height="4.2" rx="1.4" fill="#F4B4C2"/>
+    <path d="M93.8 35.4H98.8A1.4 1.4 0 0 1 100.2 36.8V38.2A1.4 1.4 0 0 1 98.8 39.6H93.8Z" fill="#EC9DB0"/>
+    <path d="M82 36.9H89.6" stroke="#FCD9E0" stroke-width="1"/>
+    <rect x="79.8" y="35.4" width="20.4" height="4.2" rx="1.4" stroke="#D97F97" stroke-width="1.25"/>
+
+    <!-- front leaves: drooping left and right, and a small one at the front -->
+    <use href="#st-leaf-t" transform="translate(82 33) rotate(-74) scale(-1 1)"/>
+    <use href="#st-leaf-t" transform="translate(98.5 34.5) rotate(98)"/>
+    <use href="#st-leaf-xs" transform="translate(88 32) rotate(-25) scale(-1 1)"/>
+  </g>
+</svg>

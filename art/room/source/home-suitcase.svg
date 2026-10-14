@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 182" width="104" height="182" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Home suitcase: the travel hard-shell spinner recoloured lilac so it reads against the blue wardrobe and the pink rug. It is the Source control on Home. Ids are prefixed hsc-.
+       Tones (lilac): fill #D8C6F0, shade #C3ABE6, outline #A98CD6, highlight #EEE4FA; handles and wheels #B79BE0 / #8466B8.
+       Shell x 2..102, y 16..166; the side band is x 94..102. Front face centre x 48.
+       Label zone (flat, plain): x 4..92, y 30..78. An 88 x 48 luggage-tag plate sits at x 4, y 30.
+       The tag strap loops round the grip and comes straight down into the plate's top centre (48, 30);
+       the plate draws the last bit of strap down to its eyelet, so the strap reads as threaded through it. Wheels rest on y 178.6; contact shadow to y 182. -->
+  <defs><clipPath id="hsc-shell"><path d="M15 16H89Q102 16 102 29V153Q102 166 89 166H15Q2 166 2 153V29Q2 16 15 16Z"/></clipPath></defs>
+  <ellipse cx="52" cy="178.8" rx="51" ry="2.6" fill="#7A4636" opacity=".13"/>
+  <!-- rear wheels -->
+  <g transform="translate(21 162.8) scale(0.82)"><path d="M-6.5 0H6.5L5.2 4.6H-5.2Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><rect x="-4.2" y="3.4" width="8.4" height="9.2" rx="3.6" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><path d="M1.6 5.6V10.4" stroke="#8466B8" stroke-width="1" opacity=".8"/><circle cx="-.6" cy="8" r="1.3" fill="#EEE4FA"/></g><g transform="translate(96.5 162.8) scale(0.82)"><path d="M-6.5 0H6.5L5.2 4.6H-5.2Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><rect x="-4.2" y="3.4" width="8.4" height="9.2" rx="3.6" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><path d="M1.6 5.6V10.4" stroke="#8466B8" stroke-width="1" opacity=".8"/><circle cx="-.6" cy="8" r="1.3" fill="#EEE4FA"/></g>
+  <!-- trolley handle, retracted: two posts and a rounded grip -->
+  <path d="M24.6 18V9.6H29.4V18M66.6 18V9.6H71.4V18" fill="#C3ABE6" stroke="#A98CD6" stroke-width="1.3"/>
+  <rect x="21" y="2" width="54" height="8.4" rx="4.2" fill="#B79BE0" stroke="#8466B8" stroke-width="1.4"/>
+  <path d="M25 4.6H70" stroke="#EEE4FA" stroke-width="1.2" opacity=".75"/>
+  <!-- shell -->
+  <path d="M15 16H89Q102 16 102 29V153Q102 166 89 166H15Q2 166 2 153V29Q2 16 15 16Z" fill="#D8C6F0"/>
+  <g clip-path="url(#hsc-shell)">
+    <rect x="94" y="14" width="10" height="154" fill="#C3ABE6"/>
+    <path d="M94 16V166" stroke="#A98CD6" stroke-width="1.2"/>
+    <path d="M98.2 25V157" stroke="#A98CD6" stroke-width="1.1" stroke-dasharray="1.4 2.2" opacity=".7"/>
+    <path d="M2 157H94V168H2Z" fill="#C3ABE6" opacity=".75"/>
+    <path d="M7 150V28Q7 21 14 21H42" stroke="#EEE4FA" stroke-width="2.2"/>
+    <path d="M14.5 19.5H91V162.5H14.5Q5.5 162.5 5.5 153.5V28.5Q5.5 19.5 14.5 19.5Z" stroke="#A98CD6" stroke-width=".9" opacity=".45"/>
+    <rect x="12.4" y="88" width="5.2" height="64" rx="2.6" fill="#EEE4FA"/>
+    <path d="M16.2 90V150" stroke="#C3ABE6" stroke-width="1.6"/>
+    <rect x="12.4" y="88" width="5.2" height="64" rx="2.6" stroke="#A98CD6" stroke-width="1" opacity=".7"/>
+    <rect x="34.4" y="88" width="5.2" height="64" rx="2.6" fill="#EEE4FA"/>
+    <path d="M38.2 90V150" stroke="#C3ABE6" stroke-width="1.6"/>
+    <rect x="34.4" y="88" width="5.2" height="64" rx="2.6" stroke="#A98CD6" stroke-width="1" opacity=".7"/>
+    <rect x="56.4" y="88" width="5.2" height="64" rx="2.6" fill="#EEE4FA"/>
+    <path d="M60.2 90V150" stroke="#C3ABE6" stroke-width="1.6"/>
+    <rect x="56.4" y="88" width="5.2" height="64" rx="2.6" stroke="#A98CD6" stroke-width="1" opacity=".7"/>
+    <rect x="78.4" y="88" width="5.2" height="64" rx="2.6" fill="#EEE4FA"/>
+    <path d="M82.2 90V150" stroke="#C3ABE6" stroke-width="1.6"/>
+    <rect x="78.4" y="88" width="5.2" height="64" rx="2.6" stroke="#A98CD6" stroke-width="1" opacity=".7"/>
+  </g>
+  <path d="M2 148V153Q2 166 15 166H20V160.5H15Q7.5 160.5 7.5 153V148Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.2"/>
+  <path d="M102 148V153Q102 166 89 166H84V160.5H89Q96.5 160.5 96.5 153V148Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.2"/>
+  <path d="M4.6 151V154" stroke="#EEE4FA" stroke-width="1" opacity=".8"/>
+  <!-- side carry handle -->
+  <rect x="95.6" y="70" width="5" height="30" rx="2.5" fill="#B79BE0" stroke="#8466B8" stroke-width="1.2"/>
+  <path d="M97.4 74V94" stroke="#EEE4FA" stroke-width="1" opacity=".7"/>
+  <path d="M15 16H89Q102 16 102 29V153Q102 166 89 166H15Q2 166 2 153V29Q2 16 15 16Z" stroke="#A98CD6" stroke-width="1.5"/>
+  <path d="M23.6 17.2H30.4M65.6 17.2H72.4" stroke="#A98CD6" stroke-width="2"/>
+  <!-- front wheels -->
+  <g transform="translate(13 164.8) scale(1)"><path d="M-6.5 0H6.5L5.2 4.6H-5.2Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><rect x="-4.2" y="3.4" width="8.4" height="9.2" rx="3.6" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><path d="M1.6 5.6V10.4" stroke="#8466B8" stroke-width="1" opacity=".8"/><circle cx="-.6" cy="8" r="1.3" fill="#EEE4FA"/></g><g transform="translate(85 164.8) scale(1)"><path d="M-6.5 0H6.5L5.2 4.6H-5.2Z" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><rect x="-4.2" y="3.4" width="8.4" height="9.2" rx="3.6" fill="#B79BE0" stroke="#8466B8" stroke-width="1.3"/><path d="M1.6 5.6V10.4" stroke="#8466B8" stroke-width="1" opacity=".8"/><circle cx="-.6" cy="8" r="1.3" fill="#EEE4FA"/></g>
+  <!-- luggage-tag strap: wrapped round the grip, down to the plate's eyelet -->
+  <path d="M40 11.4C39.4 17.6 48 21 48 27V35" stroke="#B98632" stroke-width="3.8"/>
+  <path d="M40 11.4C39.4 17.6 48 21 48 27V35" stroke="#E7BC6E" stroke-width="2"/>
+  <rect x="37.4" y=".9" width="5.2" height="11.4" rx="1.6" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M39 3V10" stroke="#F6DB9E" stroke-width="1"/>
+</svg>
