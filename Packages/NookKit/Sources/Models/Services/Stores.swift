@@ -15,6 +15,9 @@ public enum StoreError: Error, Hashable, Sendable {
     case unavailable
     case cancelled
     case invalidName(NameProblem)
+    /// A garment's other text fields were refused (`GarmentRules`): too long, or a line break in
+    /// a one-line field.
+    case invalidDetails(GarmentProblems)
     case invalidMeasurements([MeasurementProblem])
 }
 
@@ -25,9 +28,10 @@ public protocol ClosetStore: Sendable {
     /// Every garment, newest first.
     func garments() async throws(StoreError) -> [Garment]
     func garment(_ id: Garment.ID) async throws(StoreError) -> Garment
-    /// Adds a garment, or replaces the one with the same ID. Checks the name (`NameRules`).
+    /// Adds a garment, or replaces the one with the same ID. Checks the name (`NameRules`) and
+    /// the other text fields (`GarmentRules`).
     func save(_ garment: Garment) async throws(StoreError)
-    /// Changes one garment in place and returns the new value. Checks the name.
+    /// Changes one garment in place and returns the new value. Checks it as `save` does.
     @discardableResult
     func update(
         _ id: Garment.ID,
