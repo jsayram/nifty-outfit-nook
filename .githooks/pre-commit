@@ -9,7 +9,7 @@ if ! command -v gitleaks >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! gitleaks git --pre-commit --staged --redact --no-banner --verbose; then
+if ! gitleaks git --pre-commit --staged --redact --no-banner --verbose --log-level warn; then
     echo >&2
     echo "pre-commit: gitleaks found what looks like a secret in the staged changes." >&2
     echo "Remove it and keep it out of the repo. If it was a real key, rotate it." >&2
