@@ -25,6 +25,7 @@ From the command line:
 scripts/build.sh            # Debug build for the simulator
 scripts/build.sh Release    # Release build
 scripts/test.sh             # package tests, snapshot tests and UI tests on an iPhone simulator
+scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebuild test selection
 scripts/check-release.sh    # after a Release build: no catalog or snapshot-testing code in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding)
@@ -109,7 +110,11 @@ Rulesets on `main` and `develop` enforce this for everyone, administrators inclu
 GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`. Its three checks are all required:
 
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
-- `build-and-test`: checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs `scripts/test.sh` with Xcode 26.6 on the iOS 26.5 simulator. Builds only use the versions in `Package.resolved`. A failed run uploads the test results and any failed snapshots.
+- `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
+  - `release-build` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code;
+  - `tests (package)` runs every package test target, and `tests (ui-catalog)`, `tests (ui-home)` and `tests (ui-rest)` run the UI tests in three parts, each with `scripts/test.sh` on the iOS 26.5 simulator. `ui-rest` is every UI test class the other two don't name, so a new class is never skipped.
+
+  Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 - `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
 
 Actions are pinned to full commit SHAs and the workflow token is read-only. Dependabot keeps the pins current.

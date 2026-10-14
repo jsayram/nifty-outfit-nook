@@ -35,10 +35,51 @@ jobs:
       - name: Lint
         run: scripts/format.sh
 
-  build-and-test:
-    name: build-and-test
+  # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
+  # only when every one of them passed. Splitting them took the check from about 18 minutes to
+  # the length of the slowest job. Nothing is cached between runs, so a pull request can't
+  # leave build output behind for a later run on develop or main to pick up.
+  release-build:
+    name: release-build
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select Xcode
+        run: |
+          sudo xcode-select --switch "$XCODE_APP"
+          xcodebuild -version
+      - name: Check the two Package.resolved files agree
+        run: scripts/check-package-pins.sh
+      - name: Build (Release)
+        run: scripts/build.sh Release
+      - name: Check the Release build has no debug or test code
+        run: scripts/check-release.sh
+
+  tests:
+    name: tests (${{ matrix.part }})
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      # Let every part finish, so one failure doesn't hide another.
+      fail-fast: false
+      matrix:
+        include:
+          # Every package test target (anything that isn't a UI test).
+          - part: package
+            selection: -skip-testing:NiftyOutfitNookUITests
+          - part: ui-catalog
+            selection: -only-testing:NiftyOutfitNookUITests/CatalogTests
+          - part: ui-home
+            selection: -only-testing:NiftyOutfitNookUITests/HomeTests
+          # Every other UI test class, so a new one is never left out.
+          - part: ui-rest
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests
+              -skip-testing:NiftyOutfitNookUITests/CatalogTests
+              -skip-testing:NiftyOutfitNookUITests/HomeTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -48,27 +89,41 @@ jobs:
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
           xcrun simctl list runtimes available
-      - name: Check the two Package.resolved files agree
-        run: scripts/check-package-pins.sh
-      - name: Build (Release)
-        run: scripts/build.sh Release
-      - name: Check the Release build has no debug or test code
-        run: scripts/check-release.sh
-      - name: Test (package tests, snapshot tests and UI tests)
+      - name: Test (${{ matrix.part }})
         env:
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
-        run: scripts/test.sh
+          SELECTION: ${{ matrix.selection }}
+        # SELECTION is a fixed list of xcodebuild flags from the matrix above, split on spaces on purpose.
+        run: scripts/test.sh $SELECTION
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: TestResults
+          name: TestResults-${{ matrix.part }}
           path: |
             build/TestResults.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
+
+  # The required check. It must run even when a job above fails or is cancelled (`always()`),
+  # because GitHub counts a skipped required check as passed.
+  build-and-test:
+    name: build-and-test
+    needs: [release-build, tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every build and test job passed
+        env:
+          RELEASE_BUILD: ${{ needs.release-build.result }}
+          TESTS: ${{ needs.tests.result }}
+        run: |
+          echo "release-build: $RELEASE_BUILD"
+          echo "tests: $TESTS"
+          [[ "$RELEASE_BUILD" == "success" && "$TESTS" == "success" ]]
 
   gitleaks:
     name: gitleaks
