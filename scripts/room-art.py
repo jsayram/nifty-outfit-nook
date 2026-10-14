@@ -19,6 +19,12 @@ What it changes on the way:
   red and green times 0.66, blue times 0.62.
 - Garments (the wardrobe rail) keep their real colours, because they stand for her real
   clothes. In dark they're dimmed to 92%, as in the mockups' dark.css.
+- The windows' blues are sky, so they keep their hue with much less colour (see `sky`).
+- Maya keeps her apricot colours too, because she's a real dog. In dark she's in the same
+  lamplight as the rest of the room.
+- Some drawings are made from another one here rather than drawn twice (see DERIVED): the
+  faded hamper for when laundry tracking is off is the empty hamper with the mockup's
+  "faded" filter baked in.
 - `<use>` elements are replaced by copies of what they point to, and comments are dropped, so
   the system's SVG renderer doesn't have to support references.
 
@@ -48,6 +54,9 @@ ET.register_namespace("xlink", XLINK_NS)
 
 # Drawings that stand for her real clothes keep their colours.
 GARMENTS = {"wardrobe-rail"}
+
+# Drawings of real things that keep their own colours in light, and get the room's lamplight in dark.
+KEEP_COLOURS = {"maya"}
 
 # Mockup palette colours (css/room.css) with a warm design token (Palette.swift). Keep in step
 # with RoomArtTests.tokenColours.
@@ -136,6 +145,16 @@ def warm(source: str) -> str:
     return to_hex(from_oklch(lightness, chroma, hue))
 
 
+def sky(source: str) -> str:
+    """Window colours: blues (the sky, rain, the night) keep their hue with much less colour, so
+    each weather still reads at a glance. Everything else in a window is warmed as usual."""
+    key = to_hex(parse_hex(source))
+    lightness, chroma, hue = to_oklch(parse_hex(key))
+    if key in TOKEN_COLOURS or chroma < 0.012 or not 200 <= hue < 300:
+        return warm(key)
+    return to_hex(from_oklch(lightness, chroma * 0.4, hue))
+
+
 def dim(light: str, factors: tuple[float, float, float] = (0.66, 0.66, 0.62)) -> str:
     """Dark appearance: the light colour in lamplight (DesignSystem/README.md)."""
     return to_hex(tuple(c * f for c, f in zip(parse_hex(light), factors)))
@@ -143,6 +162,30 @@ def dim(light: str, factors: tuple[float, float, float] = (0.66, 0.66, 0.62)) ->
 
 def garment_dark(light: str) -> str:
     return dim(light, (0.92, 0.92, 0.92))
+
+
+def faded(light: str) -> str:
+    """The mockup's faded hamper, `filter: saturate(.4) brightness(1.1) contrast(.8)`, baked in."""
+    r, g, b = parse_hex(light)
+    s = 0.4
+    # CSS saturate() matrix
+    rgb = (
+        (0.213 + 0.787 * s) * r + (0.715 - 0.715 * s) * g + (0.072 - 0.072 * s) * b,
+        (0.213 - 0.213 * s) * r + (0.715 + 0.285 * s) * g + (0.072 - 0.072 * s) * b,
+        (0.213 - 0.213 * s) * r + (0.715 - 0.715 * s) * g + (0.072 + 0.928 * s) * b,
+    )
+    rgb = tuple(min(255.0, c * 1.1) for c in rgb)
+    rgb = tuple((c / 255 - 0.5) * 0.8 * 255 + 127.5 for c in rgb)
+    return to_hex(rgb)
+
+
+# Drawings whose blues are sky, not furniture: they keep a little of their colour (see `sky`).
+SKIES = {"window-cloudy", "window-night", "window-plain", "window-rain", "window-snow", "window-sun"}
+
+# Drawings made from another drawing: name -> (source drawing, colour change after the warm map).
+DERIVED = {
+    "home-hamper-faded": ("home-hamper", faded),
+}
 
 
 # ----- SVG ------------------------------------------------------------------------------------
@@ -238,20 +281,29 @@ def main() -> None:
         old.rmdir()
 
     palette = {}
-    for source in sources:
-        name = source.stem
+    drawings = [(source.stem, source, None) for source in sources]
+    drawings += [(name, SOURCE / f"{base}.svg", change) for name, (base, change) in sorted(DERIVED.items())]
+    for name, source, change in drawings:
         light = ET.parse(source).getroot()
         inline_uses(light)
         dark = copy.deepcopy(light)
         if name in GARMENTS:
             recolour(dark, garment_dark)
+        elif name in KEEP_COLOURS:
+            recolour(dark, dim)
         else:
-            colours = recolour(light, warm)
-            recolour(dark, lambda c: dim(warm(c)))
+            shade = change or (lambda c: c)
+            base = sky if name in SKIES else warm
+            colours = recolour(light, lambda c: shade(base(c)))
+            recolour(dark, lambda c: dim(shade(base(c))))
             for colour in colours:
-                palette[colour] = {"light": warm(colour), "dark": dim(warm(colour))}
+                entry = palette.setdefault(colour, {"light": warm(colour), "dark": dim(warm(colour))})
                 if colour in TOKEN_COLOURS:
-                    palette[colour]["token"] = TOKEN_COLOURS[colour][0]
+                    entry["token"] = TOKEN_COLOURS[colour][0]
+                if base is sky and sky(colour) != warm(colour):
+                    entry["sky"] = sky(colour)
+                if change:
+                    entry["faded"] = shade(base(colour))
         imageset = CATALOG / f"{name}.imageset"
         imageset.mkdir()
         write_svg(light, imageset / f"{name}.svg")
