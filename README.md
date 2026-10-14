@@ -63,7 +63,7 @@ Configs/                     Build settings as xcconfig files.
   App.xcconfig               App target: bundle ID, Info.plist keys, entitlements.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
-scripts/                     build.sh, test.sh, format.sh, simulator.sh, install-hooks.sh.
+scripts/                     build.sh, test.sh, format.sh, simulator.sh, install-hooks.sh, merge-pr.sh.
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
