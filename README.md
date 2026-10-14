@@ -47,7 +47,13 @@ Debug builds launched with `-catalog` open a catalog of every DesignSystem compo
 
 ## Sample data
 
-Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add a behaviour after a colon for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial` or `stores-fail`, for example `-fixtures demo:offline`. Missing or unknown values fall back to `demo` and `normal`.
+Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
+
+- a behaviour for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial` or `stores-fail`, for example `-fixtures demo:offline`;
+- `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
+- `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper.
+
+For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal` and the set's own weather (rain) and laundry.
 
 The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
