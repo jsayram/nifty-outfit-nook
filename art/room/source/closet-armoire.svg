@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 76 390 284" width="390" height="284" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Closet tab: the blue armoire seen from the front with both doors swung open to the screen edges.
+       Drawn in art coordinates that run y 76..360 (viewBox 0 76 390 284). On closet.html it is placed at left 0, top 89,
+       390 x 284, so page y = art y + 13 and page x = art x. All numbers below are art coordinates.
+       Eye level is about y 220, so shelves below it show their top face and shelves above it their underside.
+       The cornice sits straight on a slim frieze band (y 100..112); the screen's display title carries the closet name
+       and count, so there is no label zone on the armoire.
+       Contract:
+         Opening x 52..338, y 112..328. Back wall x 60..330.
+         Left bay x 60..226: upper rail centre y 121 and lower rail centre y 191, both x 57..224.
+         Partition x 226..234, y 112..280.
+         Right bay x 234..338: sweater shelf front edge y 158..164 with a folded stack on it (x 262..310, y 130..158);
+           two wall hooks on the back wall, rosettes at (257, 171) and (306, 171), cups (rod centre) at (259.8, 180.5)
+           and (308.8, 180.5): the left one for a hanger (the blue dress), the right one for the bag's strap.
+         Divider shelf front edge y 280..286, full width. Shoe tier below it: the interior floor shows a deep top face,
+           back edge y 304 (x 60..330) to front edge y 328 (x 52..338), so a pair drawn one shoe behind the other
+           rests with the front sole on y 324 and the rear sole on about y 308.
+         Folded stack (top to bottom): cream knit sweater, brick knit top, old gray leggings.
+         Cornice y 79..100. Doors: hinge edges x 40 and 350, free edges x 7 and 383, y 100..341.
+         Plinth and bracket feet to y 354; floor contact shadow at y 354. -->
+  <defs>
+    <clipPath id="ca-open"><rect x="52" y="112" width="286" height="216"/></clipPath>
+    <linearGradient id="ca-top" x1="0" y1="118" x2="0" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C78B2" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#4C78B2" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ca-under" x1="0" y1="286" x2="0" y2="302" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C78B2" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#4C78B2" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ca-floor" x1="0" y1="304" x2="0" y2="328" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93BAE6"/>
+      <stop offset="1" stop-color="#B2D0F1"/>
+    </linearGradient>
+    <linearGradient id="ca-shelfunder" x1="0" y1="164" x2="0" y2="178" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C78B2" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#4C78B2" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- left door, inner face, swung open past square. Free edge nearer the eye, so a little taller. -->
+    <g id="ca-door">
+      <path d="M40 106 L7 100 L7 341 L40 334 Z" fill="#A9CBEF"/>
+      <!-- shade near the hinge, where the cabinet side shadows the door -->
+      <path d="M40 106 L35.5 105.2 V335 L40 334 Z" fill="#8FB8E6"/>
+      <!-- recessed panels: outline, dark top and free-side bevel, light bottom and hinge-side bevel -->
+      <path d="M11.5 112.8 L33 116.3 V197 L11.5 196.5 Z" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+      <path d="M12.2 113.6 L32.4 116.9 V119.4 L14.4 116.5 V196 H12.2 Z" fill="#8FB8E6"/>
+      <path d="M14.6 194 L30.6 194.4 V119.6" stroke="#DCEBFB" stroke-width="1.2"/>
+      <path d="M11.5 208.5 L33 208.6 V324 L11.5 328.1 Z" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+      <path d="M12.2 209.2 H32.4 V211.8 H14.4 V327.2 L12.2 327.6 Z" fill="#8FB8E6"/>
+      <path d="M14.6 325.2 L30.6 321.8 V212.2" stroke="#DCEBFB" stroke-width="1.2"/>
+      <!-- light along the free edge -->
+      <path d="M9.4 104 V337.4" stroke="#CFE2F8" stroke-width="1.2"/>
+      <path d="M40 106 L7 100 L7 341 L40 334 Z" stroke="#6C9AD0" stroke-width="1.5"/>
+      <!-- door thickness at the free edge -->
+      <path d="M7 100 L4.2 100.9 V340.2 L7 341 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.2"/>
+      <!-- gold hinges -->
+      <rect x="38.3" y="122" width="3.6" height="10" rx="1.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1"/>
+      <rect x="38.3" y="310" width="3.6" height="10" rx="1.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1"/>
+    </g>
+
+    <!-- wall hook, origin at the rosette centre. Stem straight down, cup bottom (rod centre) at (2.8, 9.5), ball tip at (5.2, 6.2). -->
+    <g id="ca-hook">
+      <ellipse cx="1" cy="1.6" rx="4.6" ry="3.6" fill="#6590C6" opacity=".5"/>
+      <circle cx="0" cy="0" r="4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+      <path d="M-2.4 -1.4 A2.8 2.8 0 0 1 -.6 -2.7" stroke="#F6DC9C" stroke-width="1"/>
+      <path d="M0 0 V6.4 Q0 9.6 2.8 9.5 Q5.2 9.3 5.2 6.8" stroke="#B98632" stroke-width="3"/>
+      <path d="M0 0 V6.4 Q0 9.6 2.8 9.5 Q5.2 9.3 5.2 6.8" stroke="#E7BC6E" stroke-width="1.4"/>
+      <circle cx="5.2" cy="6.2" r="1.5" fill="#E7BC6E" stroke="#B98632" stroke-width="1"/>
+      <circle cx="0" cy="0" r="1.1" fill="#B98632"/>
+    </g>
+
+    <!-- one folded sweater, 54 x 11, origin at its top-left: a soft folded body, the folded-in sleeves at both ends,
+         and the ribbed hem along the bottom. Fill / shade / highlight / outline / rib colour set per use. -->
+    <symbol id="ca-fold" viewBox="0 0 54 11" width="54" height="11" overflow="visible">
+      <path d="M4.4 .7 H49.6 Q53.3 .7 53.3 4.6 V6.6 Q53.3 10.3 49.6 10.3 H4.4 Q.7 10.3 .7 6.6 V4.6 Q.7 .7 4.4 .7 Z" fill="var(--f)"/>
+      <path d="M.8 6.9 H53.2 Q53.2 10.3 49.6 10.3 H4.4 Q.8 10.3 .8 6.9 Z" fill="var(--s)"/>
+      <path d="M6 6.9 H48" stroke="var(--l)" stroke-width=".9" opacity=".8"/>
+      <path d="M8 8 v1.6 M10.8 8 v1.6 M13.6 8 v1.6 M16.4 8 v1.6 M19.2 8 v1.6 M22 8 v1.6 M24.8 8 v1.6 M27.6 8 v1.6 M30.4 8 v1.6 M33.2 8 v1.6 M36 8 v1.6 M38.8 8 v1.6 M41.6 8 v1.6 M44.4 8 v1.6 M47.2 8 v1.6" stroke="var(--d)" stroke-width=".9"/>
+      <path d="M5.4 2.6 H31" stroke="var(--h)" stroke-width="1.3"/>
+      <path d="M12 1.4 C10.4 3.4 10.4 5.2 11.4 6.8 M42 1.4 C43.6 3.4 43.6 5.2 42.6 6.8" stroke="var(--l)" stroke-width="1" opacity=".75"/>
+      <path d="M4.4 .7 H49.6 Q53.3 .7 53.3 4.6 V6.6 Q53.3 10.3 49.6 10.3 H4.4 Q.7 10.3 .7 6.6 V4.6 Q.7 .7 4.4 .7 Z" stroke="var(--l)" stroke-width="1.3"/>
+    </symbol>
+  </defs>
+
+  <!-- floor contact shadow -->
+  <ellipse cx="195" cy="353.6" rx="168" ry="3.4" fill="#8A5A48" opacity=".13"/>
+
+  <!-- body front: frieze, stiles and base rail -->
+  <rect x="40" y="100" width="310" height="236" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <rect x="40.75" y="100.75" width="308.5" height="1.6" fill="#8FB8E6"/>
+
+  <!-- frieze band: a thin light bead just above the opening -->
+  <path d="M46 107.6 H344" stroke="#CFE2F8" stroke-width="1.2"/>
+  <path d="M46 109.4 H344" stroke="#8FB8E6" stroke-width="1"/>
+
+  <!-- ============ interior ============ -->
+  <g clip-path="url(#ca-open)">
+    <rect x="52" y="112" width="286" height="216" fill="#7FA8D8"/>
+    <!-- back boards -->
+    <path d="M106 118 V280 M152 118 V280 M190 118 V280 M282 118 V280 M140 286 V304 M250 286 V304" stroke="#6F9BD0" stroke-width="1" opacity=".6"/>
+    <!-- inner side walls in perspective: the left one in shade, the right one catching light -->
+    <path d="M52 112 L60 118 V304 L52 328 Z" fill="#6590C6"/>
+    <path d="M338 112 L330 118 V304 L338 328 Z" fill="#8FB8E6"/>
+    <path d="M60 118 V304 M330 118 V304" stroke="#557FB6" stroke-width="1" opacity=".8"/>
+    <!-- underside of the top -->
+    <path d="M52 112 H338 L330 118 H60 Z" fill="#6590C6"/>
+    <!-- soft shadow under the top -->
+    <rect x="52" y="118" width="286" height="32" fill="url(#ca-top)"/>
+    <!-- the partition's shadow on the right bay's back wall -->
+    <path d="M234 118 H242 V280 H234 Z" fill="#6590C6" opacity=".45"/>
+    <!-- rail shadows on the back wall -->
+    <path d="M64 127.5 H222 M64 197.5 H222" stroke="#6590C6" stroke-width="2.4" opacity=".7"/>
+    <!-- shade under the divider shelf, in the shoe tier -->
+    <rect x="52" y="286" width="286" height="16" fill="url(#ca-under)"/>
+    <!-- shade under the sweater shelf -->
+    <rect x="234" y="164" width="104" height="14" fill="url(#ca-shelfunder)"/>
+  </g>
+
+  <!-- folded stack on the right bay shelf, all pieces from the closet that are not shown elsewhere:
+       old gray leggings at the bottom, the brick knit top, the cream knit sweater on top -->
+  <use href="#ca-fold" x="259" y="148.8" style="--f:#8E9098;--s:#7B7D86;--h:#A4A6AE;--l:#565862;--d:#6C6E78"/>
+  <use href="#ca-fold" x="261.2" y="138.4" style="--f:#B5533C;--s:#9E4531;--h:#CC6E56;--l:#772E1F;--d:#8E3C2A"/>
+  <use href="#ca-fold" x="257.8" y="128" style="--f:#FFF3E0;--s:#F1DEBF;--h:#FFFCF6;--l:#C9A676;--d:#DDBE92"/>
+
+  <!-- sweater shelf: front edge and its underside (above eye level) -->
+  <path d="M234 164 H338 L330 167.2 H236 Z" fill="#6590C6"/>
+  <rect x="234" y="158" width="104" height="6" rx="1" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M236 159.7 H336" stroke="#CFE2F8" stroke-width="1"/>
+
+  <!-- two wall hooks on the right bay's back wall, each a small wood rosette and a gold J hook:
+       the left one holds the blue dress on its hanger, the right one the bag by its strap -->
+  <use href="#ca-hook" x="257" y="171"/>
+  <use href="#ca-hook" x="306" y="171"/>
+
+  <!-- divider shelf top face (below eye level, so it shows) -->
+  <path d="M52 280 H338 L330 276.6 H60 Z" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.1"/>
+
+  <!-- partition between the bays, with its thin side face -->
+  <path d="M224.4 118 L226 112 V280 L224.4 276.6 Z" fill="#8FB8E6"/>
+  <rect x="226" y="112" width="8" height="168" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M228 114 V278" stroke="#CFE2F8" stroke-width="1"/>
+
+  <!-- gold rails with round brackets: upper (tops and layers) and lower (bottoms) -->
+  <g>
+    <path d="M58 121 H223 M58 191 H223" stroke="#B98632" stroke-width="5.4"/>
+    <path d="M58 121 H223 M58 191 H223" stroke="#E7BC6E" stroke-width="3.1"/>
+    <path d="M61 120 H220 M61 190 H220" stroke="#F6DC9C" stroke-width="1"/>
+    <circle cx="57.5" cy="121" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="56.7" cy="120.1" r="1" fill="#F6DC9C"/>
+    <circle cx="222.6" cy="121" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="221.8" cy="120.1" r="1" fill="#F6DC9C"/>
+    <circle cx="57.5" cy="191" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="56.7" cy="190.1" r="1" fill="#F6DC9C"/>
+    <circle cx="222.6" cy="191" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="221.8" cy="190.1" r="1" fill="#F6DC9C"/>
+  </g>
+
+  <!-- divider shelf front edge -->
+  <rect x="52" y="280" width="286" height="6" rx="1" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M54 281.7 H336" stroke="#CFE2F8" stroke-width="1"/>
+
+  <!-- interior floor (the shoe ledge): a deep top face, lighter than the back wall, darkest where it meets the wall,
+       with two board seams that carry on from the back boards at x 140 and 250 -->
+  <path d="M52 328 H338 L330 304 H60 Z" fill="url(#ca-floor)"/>
+  <path d="M60 305.6 H330" stroke="#7FA8D8" stroke-width="2" opacity=".55"/>
+  <path d="M140 304.6 L136.8 327.4 M250 304.6 L253.2 327.4" stroke="#8FB8E6" stroke-width="1"/>
+  <path d="M60 304 H330" stroke="#557FB6" stroke-width="1.1"/>
+  <path d="M57 325.4 H333" stroke="#C7DEF6" stroke-width="1" opacity=".9"/>
+
+  <!-- opening edge and its light bevel -->
+  <rect x="52" y="112" width="286" height="216" stroke="#557FB6" stroke-width="1.5"/>
+  <path d="M50.4 113.5 V326.5 M53.5 329.6 H336.5" stroke="#CFE2F8" stroke-width="1" opacity=".9"/>
+  <path d="M339.6 113.5 V326.5" stroke="#8FB8E6" stroke-width="1"/>
+  <!-- light on the left stile, shade on the right stile -->
+  <path d="M42.6 104 V333" stroke="#CFE2F8" stroke-width="1.3"/>
+  <path d="M347.4 104 V333" stroke="#8FB8E6" stroke-width="1.3"/>
+  <!-- base rail line -->
+  <path d="M42 332 H348" stroke="#8FB8E6" stroke-width="1"/>
+
+  <!-- plinth: a ledge and a skirt with bracket feet -->
+  <path d="M40 342 V354 H58 C59.5 350.2 63.5 349.4 70 349.4 H320 C326.5 349.4 330.5 350.2 332 354 H350 V342 Z" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M42 343.4 V352.8 M348 343.4 V352.8" stroke="#8FB8E6" stroke-width="1.2"/>
+  <rect x="36" y="336" width="318" height="6.4" rx="1.4" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M39 338 H351" stroke="#CFE2F8" stroke-width="1"/>
+  <rect x="40.8" y="342.9" width="308.4" height="2" fill="#8FB8E6"/>
+
+  <!-- crown cornice: top face, cap board, cove, bead -->
+  <g transform="translate(0 28)">
+    <path d="M30 54 H360 L355 51 H35 Z" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.3"/>
+    <rect x="30" y="54" width="330" height="6" rx="1.3" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+    <path d="M33 55.8 H357" stroke="#CFE2F8" stroke-width="1"/>
+    <path d="M34 60 C34 64.6 36.6 67.6 40.4 68 H349.6 C353.4 67.6 356 64.6 356 60 Z" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.4"/>
+    <path d="M35.6 64 C36.6 66.4 38.4 67.4 40.6 67.4 H349.4 C351.6 67.4 353.4 66.4 354.4 64 Z" fill="#8FB8E6"/>
+    <rect x="37" y="68" width="316" height="4.2" rx="2.1" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.4"/>
+  </g>
+
+  <!-- doors -->
+  <use href="#ca-door"/>
+  <use href="#ca-door" transform="matrix(-1 0 0 1 390 0)"/>
+</svg>

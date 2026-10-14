@@ -61,7 +61,7 @@ struct RoomArtTests {
         let darkColours = Self.hexColours(in: dark)
         #expect(Self.removingHexColours(light) == Self.removingHexColours(dark), "The two drawings differ in shape")
         #expect(lightColours.count == darkColours.count)
-        let factors: [Double] = art == .wardrobeRail ? [0.92, 0.92, 0.92] : [0.66, 0.66, 0.62]
+        let factors: [Double] = Self.garments.contains(art) ? [0.92, 0.92, 0.92] : [0.66, 0.66, 0.62]
         for (lightColour, darkColour) in zip(lightColours, darkColours) {
             let expected = zip(lightColour.channels, factors).map { UInt8(($0 * $1).rounded()) }
             #expect(darkColour.bytes == expected, "\(art.rawValue): \(lightColour.text) should dim to \(expected)")
@@ -149,7 +149,9 @@ struct RoomArtTests {
         #expect(brightness(pale) < brightness(plain), "The faded hamper is brighter than the lit one in dark")
     }
 
-    static let keepsItsColours: Set<RoomArt> = [.wardrobeRail, .maya]
+    /// Drawings of her clothes, which keep their real colours (LR-02).
+    static let garments: Set<RoomArt> = [.wardrobeRail, .closetArmoireClothes]
+    static let keepsItsColours: Set<RoomArt> = garments.union([.maya])
 
     // MARK: - Helpers
 
