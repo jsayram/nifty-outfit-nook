@@ -81,6 +81,11 @@ extension ContrastRequirement {
             ContrastRequirement(.onAccent, on: .accentPressed, kind: .text),
             // Her name on the sign.
             ContrastRequirement(.signText, on: .signPanel, kind: .text),
+            // Components (Phase 2b): a pressed soft or pill button, the toast, and the action
+            // button inside a banner.
+            ContrastRequirement(.accentPressed, on: .track, kind: .text),
+            ContrastRequirement(.background, on: .textPrimary, kind: .text),
+            ContrastRequirement(.accent, on: .tintStrong, over: .warningSurface, kind: .text),
         ]
 
     private static let statusPairs: [ContrastRequirement] = [

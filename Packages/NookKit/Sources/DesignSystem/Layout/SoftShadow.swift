@@ -35,32 +35,40 @@ nonisolated public struct SoftShadow: Hashable, Sendable {
 
 extension View {
     /// Adds a soft shadow below `shape`, which should match the view's own shape.
-    public func softShadow<S: Shape>(_ shadow: SoftShadow = .drop, in shape: S) -> some View {
-        modifier(SoftShadowModifier(shadow: shadow, shape: shape))
+    /// Pass `isVisible: false` to drop it, for example on a pressed or disabled control.
+    public func softShadow<S: Shape>(_ shadow: SoftShadow = .drop, in shape: S, isVisible: Bool = true) -> some View {
+        modifier(SoftShadowModifier(shadow: shadow, shape: shape, isVisible: isVisible))
     }
 }
 
 private struct SoftShadowModifier<S: Shape>: ViewModifier {
     let shadow: SoftShadow
     let shape: S
+    let isVisible: Bool
 
     func body(content: Content) -> some View {
         content.background {
-            shape
-                .fill(Color(token: shadow.color))
-                .padding(-shadow.spread)
-                .offset(y: shadow.offsetY)
-                .blur(radius: shadow.blur / 2)
-                .mask {
-                    // Everything except the shape: a large rectangle with the shape punched out.
-                    ZStack {
-                        Rectangle().padding(-(shadow.offsetY + shadow.blur * 2))
-                        shape.blendMode(.destinationOut)
-                    }
-                    .compositingGroup()
-                }
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            if isVisible {
+                shadowLayer
+            }
         }
+    }
+
+    private var shadowLayer: some View {
+        shape
+            .fill(Color(token: shadow.color))
+            .padding(-shadow.spread)
+            .offset(y: shadow.offsetY)
+            .blur(radius: shadow.blur / 2)
+            .mask {
+                // Everything except the shape: a large rectangle with the shape punched out.
+                ZStack {
+                    Rectangle().padding(-(shadow.offsetY + shadow.blur * 2))
+                    shape.blendMode(.destinationOut)
+                }
+                .compositingGroup()
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
