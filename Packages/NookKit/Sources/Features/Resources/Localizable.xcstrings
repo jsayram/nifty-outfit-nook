@@ -1,0 +1,50 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Closet" : {
+      "comment" : "Tab bar label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closet"
+          }
+        }
+      }
+    },
+    "Home" : {
+      "comment" : "Tab bar label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
+    "Saved Looks" : {
+      "comment" : "Tab bar label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved Looks"
+          }
+        }
+      }
+    },
+    "This part of the app is still being built." : {
+      "comment" : "Shown on a tab whose screen isn't built yet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This part of the app is still being built."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
