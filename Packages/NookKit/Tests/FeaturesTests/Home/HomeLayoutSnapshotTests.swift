@@ -78,6 +78,7 @@ struct HomeLayoutSnapshotTests {
         let content =
             view
             .frame(width: size.width, height: height)
+            .fixedSize(horizontal: false, vertical: height == nil)
             .background(Color.nook.background)
             .environment(\.roomIsStillImage, true)
             .environment(\.colorScheme, colorScheme)
