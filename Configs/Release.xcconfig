@@ -1,0 +1,11 @@
+// Release configuration: the Production environment.
+
+#include "Base.xcconfig"
+#include "Environments/Production.xcconfig"
+
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+ENABLE_NS_ASSERTIONS = NO
+SWIFT_OPTIMIZATION_LEVEL = -O
+SWIFT_COMPILATION_MODE = wholemodule
+VALIDATE_PRODUCT = YES
+MTL_ENABLE_DEBUG_INFO = NO
