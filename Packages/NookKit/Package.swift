@@ -27,6 +27,7 @@ let package = Package(
         .library(name: "Models", targets: ["Models"]),
         .library(name: "Fixtures", targets: ["Fixtures"]),
         .library(name: "Features", targets: ["Features"]),
+        .library(name: "Services", targets: ["Services"]),
     ],
     // Test-only. Never add a dependency to a non-test target (decision 0001, items 8 and 10;
     // vetting in docs/decisions/0002-snapshot-testing.md).
@@ -42,6 +43,9 @@ let package = Package(
         ),
         .target(name: "Models", swiftSettings: strictSettings),
         .target(name: "Fixtures", dependencies: ["Models"], swiftSettings: strictSettings),
+        // Real services built on Apple frameworks only (decision 0001, item 4). Phase 8a adds
+        // on-device subject lifting with Vision.
+        .target(name: "Services", dependencies: ["Models"], swiftSettings: strictSettings),
         .target(
             name: "Features",
             dependencies: ["DesignSystem", "Models"],
@@ -59,6 +63,8 @@ let package = Package(
         ),
         .testTarget(name: "ModelsTests", dependencies: ["Models"], swiftSettings: strictSettings),
         .testTarget(name: "FixturesTests", dependencies: ["Fixtures", "Models"], swiftSettings: strictSettings),
+        .testTarget(
+            name: "ServicesTests", dependencies: ["Services", "Models", "Fixtures"], swiftSettings: strictSettings),
         .testTarget(
             name: "FeaturesTests",
             dependencies: [
