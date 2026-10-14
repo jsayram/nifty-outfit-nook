@@ -54,7 +54,7 @@ ET.register_namespace("", SVG_NS)
 ET.register_namespace("xlink", XLINK_NS)
 
 # Drawings that stand for her real clothes keep their colours.
-GARMENTS = {"wardrobe-rail"}
+GARMENTS = {"wardrobe-rail", "closet-armoire-clothes"}
 
 # Drawings of real things that keep their own colours in light, and get the room's lamplight in dark.
 KEEP_COLOURS = {"maya"}

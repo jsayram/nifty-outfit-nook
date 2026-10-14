@@ -19,35 +19,38 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(tabBar.buttons["Home"].isSelected)
     }
 
-    /// Each fixture set reaches the screens: the Closet placeholder shows its piece count.
+    /// Each fixture set reaches the screens: Closet's header shows its piece count.
     @MainActor
     func testFixtureSetsReachTheScreens() {
         let expected = [
-            ("demo", "17 pieces in the sample closet"),
-            ("demo:offline", "17 pieces in the sample closet"),
-            ("empty", "0 pieces in the sample closet"),
+            ("demo", "17 pieces"),
+            ("demo:offline", "17 pieces"),
+            ("empty", "No pieces yet"),
         ]
         for (fixtures, text) in expected {
             let app = launchOnCloset(fixtures)
-            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 10), "No piece count for \(fixtures)")
+            let count = pieceCount(in: app)
+            XCTAssertTrue(count.waitForExistence(timeout: 10), "No piece count for \(fixtures)")
+            XCTAssertTrue(count.label.hasSuffix(text), "\(fixtures): \(count.label)")
             app.terminate()
         }
     }
 
-    /// The large closet loads, and a failing store still leaves a working screen with no count.
+    /// The large closet loads, and a failing store shows Closet's error state with no count.
     @MainActor
     func testLargeAndFailingFixturesLaunch() {
         let large = launchOnCloset("large")
         let detail = pieceCount(in: large)
         XCTAssertTrue(detail.waitForExistence(timeout: 10))
         // The number is formatted for the locale, for example "2,117".
-        let count = Int(detail.label.prefix { $0 != " " }.filter(\.isNumber)) ?? 0
+        let count = Int(detail.label.filter(\.isNumber)) ?? 0
         XCTAssertGreaterThanOrEqual(count, 2_000, detail.label)
         large.terminate()
 
         let failing = launchOnCloset("demo:stores-fail")
-        XCTAssertTrue(failing.staticTexts["This part of the app is still being built."].waitForExistence(timeout: 10))
-        XCTAssertFalse(pieceCount(in: failing).waitForExistence(timeout: 2))
+        XCTAssertTrue(failing.staticTexts["Your closet didn’t load"].waitForExistence(timeout: 10))
+        XCTAssertTrue(failing.buttons["Try again"].exists)
+        XCTAssertFalse(pieceCount(in: failing).label.contains("pieces"))
     }
 
     @MainActor
@@ -63,6 +66,6 @@ final class LaunchTests: XCTestCase {
 
     @MainActor
     private func pieceCount(in app: XCUIApplication) -> XCUIElement {
-        app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "in the sample closet")).firstMatch
+        app.descendants(matching: .any)["closet.count"]
     }
 }

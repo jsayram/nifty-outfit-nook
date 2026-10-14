@@ -23,6 +23,28 @@
         }
       }
     },
+    "%lld of %@" : {
+      "comment" : "Closet count while filtering: how many match, of how many pieces, as in 5 of 17 pieces",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %@"
+          }
+        }
+      }
+    },
+    "%lld on" : {
+      "comment" : "How many filters are on, spoken on Show filters",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld on"
+          }
+        }
+      }
+    },
     "%lld pieces" : {
       "comment" : "Source plate: how many pieces the source has",
       "localizations" : {
@@ -46,8 +68,8 @@
         }
       }
     },
-    "%lld pieces in the sample closet" : {
-      "comment" : "Placeholder detail on Closet",
+    "%lld suitcases" : {
+      "comment" : "Closet tile: how many suitcases she has",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -55,13 +77,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld piece in the sample closet"
+                  "value" : "%lld suitcase"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld pieces in the sample closet"
+                  "value" : "%lld suitcases"
                 }
               }
             }
@@ -80,6 +102,50 @@
         }
       }
     },
+    "Accessories" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessories"
+          }
+        }
+      }
+    },
+    "Accessory" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessory"
+          }
+        }
+      }
+    },
+    "Add a piece" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a piece"
+          }
+        }
+      }
+    },
+    "Add a piece from a photo, or describe it in words. You can add more whenever you like." : {
+      "comment" : "Empty closet message",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a piece from a photo, or describe it in words. You can add more whenever you like."
+          }
+        }
+      }
+    },
     "All clean" : {
       "comment" : "Hamper plate: nothing to wash",
       "localizations" : {
@@ -91,6 +157,83 @@
         }
       }
     },
+    "Any" : {
+      "comment" : "Suitcase filter choice: no filter",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any"
+          }
+        }
+      }
+    },
+    "Bag" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bag"
+          }
+        }
+      }
+    },
+    "Bags" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bags"
+          }
+        }
+      }
+    },
+    "Beige" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beige"
+          }
+        }
+      }
+    },
+    "Black" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Black"
+          }
+        }
+      }
+    },
+    "Blue" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue"
+          }
+        }
+      }
+    },
+    "Bottom" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottom"
+          }
+        }
+      }
+    },
     "Bottom drawer: Privacy and terms" : {
       "comment" : "VoiceOver label for a desk drawer",
       "localizations" : {
@@ -98,6 +241,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bottom drawer: Privacy and terms"
+          }
+        }
+      }
+    },
+    "Bottoms" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottoms"
+          }
+        }
+      }
+    },
+    "Brick" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brick"
+          }
+        }
+      }
+    },
+    "Brown" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brown"
+          }
+        }
+      }
+    },
+    "Burgundy" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Burgundy"
           }
         }
       }
@@ -146,6 +333,28 @@
         }
       }
     },
+    "Clear" : {
+      "comment" : "Clears every filter and the search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        }
+      }
+    },
+    "Clear filters" : {
+      "comment" : "Spoken name of the Clear button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear filters"
+          }
+        }
+      }
+    },
     "Closet" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -157,6 +366,17 @@
         }
       }
     },
+    "Colour" : {
+      "comment" : "Name of the colour swatches row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colour"
+          }
+        }
+      }
+    },
     "Couldn’t turn it on. Try again." : {
       "comment" : "Laundry tracking sheet: saving the setting failed",
       "localizations" : {
@@ -164,6 +384,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Couldn’t turn it on. Try again."
+          }
+        }
+      }
+    },
+    "Cream" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cream"
+          }
+        }
+      }
+    },
+    "Denim" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denim"
+          }
+        }
+      }
+    },
+    "Describe in words" : {
+      "comment" : "Button: adds a piece by words",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Describe in words"
+          }
+        }
+      }
+    },
+    "Dirty" : {
+      "comment" : "Spoken on a closet piece in the wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dirty"
+          }
+        }
+      }
+    },
+    "Dirty (%lld)" : {
+      "comment" : "Laundry filter chip with how many pieces are in the wash",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dirty (%lld)"
+          }
+        }
+      }
+    },
+    "Dress" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dress"
+          }
+        }
+      }
+    },
+    "Dresses" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dresses"
           }
         }
       }
@@ -223,6 +520,28 @@
         }
       }
     },
+    "Gray" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gray"
+          }
+        }
+      }
+    },
+    "Green" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Green"
+          }
+        }
+      }
+    },
     "Hamper: Laundry" : {
       "comment" : "VoiceOver label for the hamper",
       "localizations" : {
@@ -267,6 +586,17 @@
         }
       }
     },
+    "Hide filters" : {
+      "comment" : "Button at large text sizes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide filters"
+          }
+        }
+      }
+    },
     "Home" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -296,6 +626,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ignored"
+          }
+        }
+      }
+    },
+    "In %@" : {
+      "comment" : "Spoken on a packed closet piece: the suitcases it's in, as in In Weekend and Gym",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %@"
+          }
+        }
+      }
+    },
+    "In a suitcase" : {
+      "comment" : "Suitcase filter choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In a suitcase"
           }
         }
       }
@@ -344,6 +696,17 @@
         }
       }
     },
+    "Kind of piece" : {
+      "comment" : "Name of the piece chips row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kind of piece"
+          }
+        }
+      }
+    },
     "Laptop: Style Me" : {
       "comment" : "VoiceOver label for the laptop",
       "localizations" : {
@@ -351,6 +714,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laptop: Style Me"
+          }
+        }
+      }
+    },
+    "Last worn %@" : {
+      "comment" : "When a piece was last worn, a week ago or more: a date such as 3 Oct",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last worn %@"
+          }
+        }
+      }
+    },
+    "Last worn %lld days ago" : {
+      "comment" : "When a piece was last worn, 2 to 6 days ago",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last worn %lld days ago"
+          }
+        }
+      }
+    },
+    "Last worn today" : {
+      "comment" : "When a piece was last worn",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last worn today"
+          }
+        }
+      }
+    },
+    "Last worn yesterday" : {
+      "comment" : "When a piece was last worn",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last worn yesterday"
           }
         }
       }
@@ -410,6 +817,28 @@
         }
       }
     },
+    "Layer" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layer"
+          }
+        }
+      }
+    },
+    "Layers" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layers"
+          }
+        }
+      }
+    },
     "Main closet" : {
       "comment" : "Source plate: the whole closet",
       "localizations" : {
@@ -428,6 +857,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Middle drawer: Send feedback"
+          }
+        }
+      }
+    },
+    "Multicolour" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multicolour"
           }
         }
       }
@@ -454,6 +894,17 @@
         }
       }
     },
+    "Navy" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navy"
+          }
+        }
+      }
+    },
     "Nifty Outfit Nook" : {
       "comment" : "The app's name, as the Home title",
       "localizations" : {
@@ -461,6 +912,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nifty Outfit Nook"
+          }
+        }
+      }
+    },
+    "No pieces match" : {
+      "comment" : "Closet: nothing matches the filters",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pieces match"
+          }
+        }
+      }
+    },
+    "No pieces yet" : {
+      "comment" : "Closet count when it's empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pieces yet"
           }
         }
       }
@@ -487,6 +960,17 @@
         }
       }
     },
+    "Not packed" : {
+      "comment" : "Suitcase filter choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not packed"
+          }
+        }
+      }
+    },
     "Nothing is erased" : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -494,6 +978,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing is erased"
+          }
+        }
+      }
+    },
+    "Nothing was lost. Try again in a moment." : {
+      "comment" : "Closet error message",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was lost. Try again in a moment."
           }
         }
       }
@@ -527,6 +1022,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Off · tap to learn more"
+          }
+        }
+      }
+    },
+    "Olive" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olive"
+          }
+        }
+      }
+    },
+    "Opening your closet" : {
+      "comment" : "Closet loading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening your closet"
           }
         }
       }
@@ -619,6 +1136,17 @@
         }
       }
     },
+    "Opens the piece." : {
+      "comment" : "Hint on a closet piece",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the piece."
+          }
+        }
+      }
+    },
     "Opens your closet." : {
       "comment" : "VoiceOver hint",
       "localizations" : {
@@ -641,6 +1169,17 @@
         }
       }
     },
+    "Orange" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orange"
+          }
+        }
+      }
+    },
     "Part of your room didn’t load. Everything still opens." : {
       "comment" : "Home banner when a store failed",
       "localizations" : {
@@ -659,6 +1198,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pieces you mark stay marked while it’s off."
+          }
+        }
+      }
+    },
+    "Pink" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink"
           }
         }
       }
@@ -696,6 +1246,39 @@
         }
       }
     },
+    "Purple" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purple"
+          }
+        }
+      }
+    },
+    "Recently deleted" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recently deleted"
+          }
+        }
+      }
+    },
+    "Red" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Red"
+          }
+        }
+      }
+    },
     "Saved Looks" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -703,6 +1286,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saved Looks"
+          }
+        }
+      }
+    },
+    "Search your closet" : {
+      "comment" : "Closet search field prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search your closet"
           }
         }
       }
@@ -725,6 +1319,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Shelf: Saved Looks"
+          }
+        }
+      }
+    },
+    "Shoe" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shoe"
+          }
+        }
+      }
+    },
+    "Shoes" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shoes"
+          }
+        }
+      }
+    },
+    "Show filters" : {
+      "comment" : "Button at large text sizes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show filters"
           }
         }
       }
@@ -762,6 +1389,28 @@
         }
       }
     },
+    "Suitcase" : {
+      "comment" : "Suitcase filter chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suitcase"
+          }
+        }
+      }
+    },
+    "Suitcase and laundry" : {
+      "comment" : "Name of the third filter row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suitcase and laundry"
+          }
+        }
+      }
+    },
     "Suitcase only" : {
       "comment" : "Source plate: styling uses this suitcase only",
       "localizations" : {
@@ -791,6 +1440,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suitcases"
+          }
+        }
+      }
+    },
+    "Tan" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tan"
           }
         }
       }
@@ -839,6 +1499,17 @@
         }
       }
     },
+    "Top" : {
+      "comment" : "One piece of this kind, used in search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top"
+          }
+        }
+      }
+    },
     "Top drawer: Help" : {
       "comment" : "VoiceOver label for a desk drawer",
       "localizations" : {
@@ -846,6 +1517,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Top drawer: Help"
+          }
+        }
+      }
+    },
+    "Tops" : {
+      "comment" : "Piece chip",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tops"
           }
         }
       }
@@ -927,6 +1609,17 @@
         }
       }
     },
+    "White" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "White"
+          }
+        }
+      }
+    },
     "Whole closet" : {
       "comment" : "Source plate: styling uses the whole closet",
       "localizations" : {
@@ -993,6 +1686,17 @@
         }
       }
     },
+    "Yellow" : {
+      "comment" : "Colour name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yellow"
+          }
+        }
+      }
+    },
     "You can change this in Profile" : {
       "comment" : "Link from the laundry tracking sheet to the Profile switch",
       "localizations" : {
@@ -1034,6 +1738,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Your closet didn’t load" : {
+      "comment" : "Closet error title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet didn’t load"
+          }
+        }
+      }
+    },
+    "Your closet is empty" : {
+      "comment" : "Empty closet title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet is empty"
           }
         }
       }
@@ -1133,6 +1859,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "sunny"
+          }
+        }
+      }
+    },
+    "“%@”" : {
+      "comment" : "Typed search, in quotes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”"
           }
         }
       }

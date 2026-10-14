@@ -65,26 +65,45 @@ public struct NookSearchField: View {
                 .foregroundStyle(text.isEmpty ? Color.nook.textSecondary : Color.nook.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
-            // Vertical, so a long prompt or query wraps at large text sizes instead of scrolling
-            // out of sight. Return still means "search", never a new line.
-            TextField(text: $text, prompt: Text(prompt).foregroundStyle(.nook.textSecondary), axis: .vertical) {
-                Text(prompt)
+            // Vertical, so a long query wraps at large text sizes instead of scrolling out of
+            // sight. Return still means "search", never a new line. The system draws a field's
+            // prompt on one line and truncates it ("Search yo..." at AX5), so the prompt is a
+            // wrapping text behind the field instead; the field's label still names it.
+            ZStack(alignment: .topLeading) {
+                if text.isEmpty {
+                    Text(prompt)
+                        .nookTextStyle(.body)
+                        .foregroundStyle(.nook.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityHidden(true)
+                        .allowsHitTesting(false)
+                }
+                textField
             }
-            .lineLimit(1...4)
-            .nookTextStyle(.body)
-            .foregroundStyle(.nook.textPrimary)
-            .focused($isFocused)
-            .submitLabel(.search)
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .onSubmit(onSubmit)
-            .onChange(of: text) { _, newValue in
-                guard newValue.contains("\n") else { return }
-                text = newValue.replacing("\n", with: "")
-                isFocused = false
-                onSubmit()
-            }
-            .accessibilityAddTraits(.isSearchField)
         }
+    }
+
+    private var textField: some View {
+        TextField(text: $text, prompt: Text(verbatim: ""), axis: .vertical) {
+            Text(prompt)
+        }
+        .lineLimit(1...4)
+        .nookTextStyle(.body)
+        .foregroundStyle(.nook.textPrimary)
+        .focused($isFocused)
+        .submitLabel(.search)
+        .autocorrectionDisabled()
+        .textInputAutocapitalization(.never)
+        .onSubmit(onSubmit)
+        .onChange(of: text) { _, newValue in
+            guard newValue.contains("\n") else { return }
+            text = newValue.replacing("\n", with: "")
+            isFocused = false
+            onSubmit()
+        }
+        // The visible prompt is a separate text, so name the field here.
+        .accessibilityLabel(Text(prompt))
+        .accessibilityAddTraits(.isSearchField)
     }
 }

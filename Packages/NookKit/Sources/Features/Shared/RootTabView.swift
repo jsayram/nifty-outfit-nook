@@ -6,10 +6,13 @@ import SwiftUI
 public struct RootTabView: View {
     @State private var selection: AppTab = .home
     private let services: NookServices?
+    /// Garment pictures, shared by every screen so they're cached once.
+    @State private var garmentImages: GarmentImageLoader?
 
     /// - Parameter services: what every screen below reads its data from.
     public init(services: NookServices?) {
         self.services = services
+        _garmentImages = State(initialValue: services.map { GarmentImageLoader(provider: $0.images) })
     }
 
     public var body: some View {
@@ -27,6 +30,7 @@ public struct RootTabView: View {
         }
         .tint(.nook.accent)
         .environment(\.services, services)
+        .environment(\.garmentImages, garmentImages)
     }
 }
 
