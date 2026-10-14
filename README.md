@@ -85,6 +85,8 @@ scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-r
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
 docs/models.md               The models, rules, store protocols and fixture sets.
+docs/home-room.md            The Home room, its layouts and states.
+docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
 website/                     The app's static website.
 ```
 

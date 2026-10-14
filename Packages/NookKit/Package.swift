@@ -68,7 +68,7 @@ let package = Package(
                 "DesignSystem",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
-            exclude: ["Home/__Snapshots__"],
+            exclude: ["Home/__Snapshots__", "Closet/__Snapshots__"],
             swiftSettings: strictSettings
         ),
     ],
