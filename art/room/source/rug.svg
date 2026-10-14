@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 312 152" width="312" height="152">
+  <!-- Oval pink rug lying flat on the floor. Rug: fill #F3BCC8, rim #EDA9B9, outline #E294A8, highlight #F8D2DB.
+       The whole field is flat and quiet, so labels can sit on it with a plate. One soft lighter patch, no steps. -->
+  <defs>
+    <radialGradient id="rugLight" cx="134" cy="62" r="112" gradientUnits="userSpaceOnUse" gradientTransform="translate(134 62) scale(1 .42) translate(-134 -62)">
+      <stop offset="0" stop-color="#F8D2DB" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#F8D2DB" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- pile thickness showing along the near edge -->
+    <ellipse cx="156" cy="78.4" rx="154.3" ry="71.6" fill="#E294A8"/>
+    <!-- rim -->
+    <ellipse cx="156" cy="75.5" rx="154.3" ry="71.6" fill="#EDA9B9" stroke="#E294A8" stroke-width="1.4"/>
+    <!-- field -->
+    <ellipse cx="156" cy="75.5" rx="145" ry="63" fill="#F3BCC8" stroke="#E294A8" stroke-width="1.1" stroke-opacity=".5"/>
+    <!-- one very soft light patch toward the upper left -->
+    <ellipse cx="156" cy="75.5" rx="144" ry="62" fill="url(#rugLight)"/>
+    <!-- one stitched ring -->
+    <ellipse cx="156" cy="75.5" rx="134" ry="53" fill="none" stroke="#F8D2DB" stroke-width="1.25" stroke-dasharray="4.2 3.4" opacity=".9"/>
+  </g>
+</svg>

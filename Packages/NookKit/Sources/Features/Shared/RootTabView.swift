@@ -1,3 +1,4 @@
+import DesignSystem
 import Models
 import SwiftUI
 
@@ -14,7 +15,8 @@ public struct RootTabView: View {
     public var body: some View {
         TabView(selection: $selection) {
             Tab(AppTab.home.title, systemImage: AppTab.home.systemImage, value: AppTab.home) {
-                HomeScreen()
+                // The wardrobe and the shelf in the room switch tabs.
+                HomeScreen { selection = $0 }
             }
             Tab(AppTab.closet.title, systemImage: AppTab.closet.systemImage, value: AppTab.closet) {
                 ClosetScreen()
@@ -23,6 +25,7 @@ public struct RootTabView: View {
                 SavedLooksScreen()
             }
         }
+        .tint(.nook.accent)
         .environment(\.services, services)
     }
 }

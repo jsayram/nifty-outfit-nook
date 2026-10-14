@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 10" width="34" height="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- The nude pointed flats (g-nude-flats) standing as a pair on the wardrobe's interior floor board, toes left.
+       Same shoe outline as garments.js, drawn at 0.18 so one shoe is 17 px long. Soles rest on y 8.6.
+       Tones from garments.js: fill #F1DCC6, shade #E2C8AC, highlight #F9ECDD, outline #B48F68, lining #C9A684 / #F6E6D2, sole #C8A27C.
+       Ids are prefixed hf-. -->
+  <defs>
+    <path id="hf-upper" d="M1.6 31.6C3 27 12 22.6 22 19.6C28 17.8 33 17 38 17.2C40 22.4 46.5 25.8 56 25.8C68 25.8 80 21.2 86.5 13.2C88.2 10.4 90.6 8.6 92.4 9.8C94.6 11.6 95.2 16 95.2 20L94.8 31C94.8 33.2 93.2 34.2 90.6 34.2L8 34.2C4 34.2 1 33.6 1.6 31.6Z"/>
+    <path id="hf-open" d="M38 17.2C46 10 68 4.5 84 5.8C88 6.1 91 7.4 92.4 9.8C90.6 8.6 88.2 10.4 86.5 13.2C80 21.2 68 25.8 56 25.8C46.5 25.8 40 22.4 38 17.2Z"/>
+    <clipPath id="hf-clip-u"><use href="#hf-upper"/></clipPath>
+    <clipPath id="hf-clip-o"><use href="#hf-open"/></clipPath>
+    <g id="hf-shoe">
+      <!-- sole -->
+      <path d="M2.4 33.6H94.6V35.4Q94.6 36.8 93 36.8H7C4 36.8 2 35.8 2.4 33.6Z" fill="#C8A27C" stroke="#B48F68" stroke-width="4.6"/>
+      <!-- opening with its lining -->
+      <use href="#hf-open" fill="#C9A684"/>
+      <g clip-path="url(#hf-clip-o)"><path d="M44 22C56 13.5 76 10.5 90 12.5L90 30L44 30Z" fill="#F6E6D2"/></g>
+      <use href="#hf-open" stroke="#B48F68" stroke-width="4.4"/>
+      <!-- upper: fill, lower shade band, one highlight -->
+      <use href="#hf-upper" fill="#F1DCC6"/>
+      <g clip-path="url(#hf-clip-u)">
+        <path d="M0 27H100V40H0Z" fill="#E2C8AC"/>
+        <path d="M10 26.6C15 23.4 20 21.4 26 20.2" stroke="#F9ECDD" stroke-width="5"/>
+      </g>
+      <use href="#hf-upper" stroke="#B48F68" stroke-width="5.6"/>
+      <!-- bow at the throat -->
+      <path d="M31.5 19.6c-3-5.5-9.5-5.5-9.5-1c0 4 6 4 9.5 1Z M31.5 19.6c3-5.5 9.5-5.5 9.5-1c0 4-6 4-9.5 1Z" fill="#F9ECDD" stroke="#B48F68" stroke-width="3.2"/>
+      <circle cx="31.5" cy="19.6" r="2.6" fill="#F1DCC6" stroke="#B48F68" stroke-width="3"/>
+    </g>
+  </defs>
+
+  <!-- contact shadow on the floor board (board blue darkened) -->
+  <ellipse cx="17" cy="8.8" rx="16" ry="1.1" fill="#2E4F80" opacity=".16"/>
+
+  <!-- far shoe, set back and to the right; its toe tucks behind the near heel -->
+  <use href="#hf-shoe" transform="translate(13.6 1.2) scale(.18)"/>
+  <!-- near shoe -->
+  <use href="#hf-shoe" transform="translate(1.2 2) scale(.18)"/>
+</svg>
