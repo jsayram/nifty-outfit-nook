@@ -4,8 +4,12 @@ import SwiftUI
 
 /// Style Me until Phase 10a builds the whole request screen (RD-02). It has the one row that
 /// exists already, Weather (LR-04), above the usual "still being built" note. Nothing here
-/// sends a request.
+/// sends a request. From a garment's Style with this it also names the starting piece.
 struct StyleMeStubScreen: View {
+    /// The piece she chose Style with this on, by name. Phase 10a makes it the request's
+    /// starting piece.
+    var startingPiece: String?
+
     @Environment(\.services) private var services
     /// For this request only: a new Style Me starts on Use today's weather (LR-04.2).
     @State private var weatherChoice: WeatherChoice = .useToday
@@ -14,6 +18,14 @@ struct StyleMeStubScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: NookSpacing.groupGap) {
+                if let startingPiece {
+                    NookRow(
+                        String(localized: "Starting piece", bundle: .module, comment: "Style Me row"),
+                        value: startingPiece, systemImage: "hanger"
+                    )
+                    .background(Color.nook.tint, in: NookRadius.shape(NookRadius.group))
+                    .accessibilityIdentifier("styleMe.startingPiece")
+                }
                 WeatherRow(choice: $weatherChoice, reading: reading)
                 NookEmptyState(
                     String(localized: "Style Me", bundle: .module, comment: "Screen title"),
