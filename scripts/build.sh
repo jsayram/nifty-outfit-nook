@@ -12,5 +12,6 @@ xcodebuild build \
     -configuration "$configuration" \
     -destination "generic/platform=iOS Simulator" \
     -derivedDataPath build/DerivedData \
+    -onlyUsePackageVersionsFromResolvedFile \
     -quiet
 echo "Build succeeded ($configuration)"

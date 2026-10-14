@@ -28,6 +28,11 @@ let package = Package(
         .library(name: "Fixtures", targets: ["Fixtures"]),
         .library(name: "Features", targets: ["Features"]),
     ],
+    // Test-only. Never add a dependency to a non-test target (decision 0001, items 8 and 10;
+    // vetting in docs/decisions/0002-snapshot-testing.md).
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6")
+    ],
     targets: [
         .target(
             name: "DesignSystem",
@@ -43,7 +48,15 @@ let package = Package(
             resources: [.process("Resources")],
             swiftSettings: uiSettings
         ),
-        .testTarget(name: "DesignSystemTests", dependencies: ["DesignSystem"], swiftSettings: strictSettings),
+        .testTarget(
+            name: "DesignSystemTests",
+            dependencies: [
+                "DesignSystem",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
+            exclude: ["__Snapshots__"],
+            swiftSettings: strictSettings
+        ),
         .testTarget(name: "ModelsTests", dependencies: ["Models"], swiftSettings: strictSettings),
         .testTarget(name: "FixturesTests", dependencies: ["Fixtures"], swiftSettings: strictSettings),
         .testTarget(name: "FeaturesTests", dependencies: ["Features"], swiftSettings: strictSettings),

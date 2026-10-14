@@ -1,6 +1,7 @@
-# DesignSystem tokens
+# DesignSystem
 
-Colour, type, spacing, corner and shadow tokens for Nifty Outfit Nook (Phase 2a). Components come in Phase 2b.
+Colour, type, spacing, corner and shadow tokens for Nifty Outfit Nook (Phase 2a), and the shared components built
+on them (Phase 2b, see [Components](#components) below).
 
 The source is the room-direction mockups in the planning repo (`closet/prototypes/RoomDirectionMockups`):
 `css/palette.css` (`html.palette-warm`, Lily's pick on 13 October 2026), `css/soft.css` (the soft no-box style),
@@ -196,3 +197,58 @@ draws: the shape shrunk by the spread, moved down, blurred by half the CSS blur 
 a see-through tint on top stays clean. A test checks that both shadows start below the shape's top edge.
 
 Contact shadows under garments (the radial ellipse in Closet) belong to the garment component in a later phase.
+
+## Components
+
+Phase 2b. Every component follows the soft no-box rules: no outlines or borders, separation by space, tints and
+shadows that fall only below. Each one is checked at the default text size, at AX5 (the largest), and in dark mode,
+keeps tap targets at 44 points or more, and turns its animation into a plain change or a fade when Reduce Motion is
+on. Text that a component shows comes in already localized, as a `String`; the few words the components own
+("Try again", "Close", "Clear search", "Loading", "You’re offline.", "Retry") are in
+`Resources/Localizable.xcstrings`.
+
+| Component | Mockup source | Notes |
+|---|---|---|
+| `NookButton`, `.buttonStyle(.nook(_:size:))` | `.btn`, `.btn.ghost`, `.btn.small`, `.shuffle`, `.lnk` | Kinds: `primary` (solid accent, radius 18), `soft` (tint), `pill` (strong tint capsule), `text`. Sizes `regular` (50 pt) and `small` (44 pt). Pressed darkens and shrinks 3% (no shrink with Reduce Motion). Disabled fades to 45% and drops its shadow. `isLoading` swaps the icon for the dots, ignores taps, keeps its colour, and adds "Loading" as the VoiceOver value. At large sizes the icon moves above the title. |
+| `NookAdaptiveStack` | `.grid4` at the largest size | Side by side normally, stacked at the accessibility sizes. For pairs of buttons. |
+| `NookChip`, `NookChipBar` | `.chip`, `.chip.on`, filters (Lily's L9, L11) | Tint pill, selected is a solid accent pill. 36 pt pill inside a 44 pt target. `.isSelected` trait. The bar scrolls sideways, and wraps (`NookFlowLayout`) at the accessibility sizes so no chip is hidden off screen. The bar is a VoiceOver container named by its title. |
+| `NookSegmentedPicker` | `.seg` (Looks / Pictures), `.vers` (Simple · Dressed up · Something new) | Tint track, accent pill on the chosen option, which slides (moves without sliding under Reduce Motion). Options stack when their labels don't fit side by side. Each option is a button with `.isSelected`. |
+| `NookRow`, `.buttonStyle(.nookRow)` | `.item` (Profile), `.erow` | Round tinted icon, title, subtitle, value, chevron. No separators. Pressed shows a tint. At the accessibility sizes the icon goes above the title and the value under it. One VoiceOver element. |
+| `NookSection`, `NookSectionHeader`, `NookDivider` | `.sec-h`, `.grp`, `.note`, `.soft-div` | Headers are VoiceOver headings. The divider fades at both ends and goes between groups, never between rows. Secondary text in headers and notes must not sit on the bare floor (see Contrast). |
+| `.nookCard(_:)` | `.tile`, `.sec`, `.r` | Tint (or strong tint, or butter) with radius 22 and the small shadow. Use sparingly. |
+| `NookSearchField` | `.search` | Strong tint, radius 18, magnifier, 44 pt "Clear search" button. Wraps a long query or prompt at large sizes; Return still searches. |
+| `.nookSheet(isPresented:…)`, `.nookSheet(item:…)`, `NookSheetContainer` | `.sheet-w`, `.wxsheet` | System sheet with grabber, radius 28 and the wall behind it. Serif title, optional line, Close button. Content scrolls. At the accessibility sizes it opens full height. |
+| `NookEmptyState`, `NookLoadingState`, `NookErrorState` | `.empty` (Closet), `.state` (Your looks) | Centred, at most 360 pt wide, title is a heading. Error has a retry button ("Try again") and room for more actions. Loading reads as one VoiceOver element. |
+| `NookLoadingIndicator` | new | Three soft dots. Fades only under Reduce Motion. |
+| `NookBanner`, `NookOfflineBanner` | `.banner` (Your looks) | Butter or neutral, with an optional action that moves under the text at large sizes. |
+| `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. |
+| `NookBadge` | `.sim`, `.pill`, `.dirty` | Small capsule label in four tones. Always words, never colour alone. |
+
+New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
+toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter.
+
+### The catalog
+
+A debug-only catalog shows every component and state on one page, with switches for light, dark and text sizes up
+to AX5. Launch a Debug build with `-catalog` (in Xcode: scheme, Run, Arguments). The code is in `Catalog/` and is
+wrapped in `#if DEBUG`, so a Release build doesn't contain it. CI checks that with `scripts/check-release.sh`.
+
+### Snapshot tests
+
+`ComponentSnapshotTests` draws every catalog page in light, dark and AX5 on a 390 pt canvas, and five pages on an
+820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 44 images,
+about 4 MB at 2x.
+
+- **How they're drawn.** With SwiftUI's `ImageRenderer`, not the library's UIKit host. The UIKit host's
+  `layer.render(in:)` drops SwiftUI blurs, so the soft shadows vanished, and it measured AX5 layouts at the default
+  size and cut them off. `ImageRenderer` can't draw UIKit-backed views (text fields, scroll views) and shows a
+  placeholder instead, so components check `nookStaticRendering` and draw plain SwiftUI that looks the same. The
+  real text field and scroll views are checked by the UI tests and on the simulator.
+- **Determinism.** Colour scheme, text size, locale and scale (2x) are set on the view, not taken from the device.
+  The references were recorded on the iOS 26.5 simulator, which `scripts/simulator.sh` picks by default locally and
+  on CI, and a test fails with a clear message on any other runtime. The comparison allows 0.5% of pixels to differ
+  and each pixel to be 98% alike, which absorbs anti-aliasing differences between Macs but still catches a changed
+  colour, shadow or line of text.
+- **Recording.** A missing reference is recorded and the test fails once. To re-record everything after a deliberate
+  change, run `TEST_RUNNER_SNAPSHOT_TESTING_RECORD=all scripts/test.sh`, look at every changed PNG in the diff, then
+  run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.

@@ -11,7 +11,7 @@ This repo holds the shipping app (the Xcode project, Swift packages, tests and C
 ## Requirements
 
 - Xcode 26.6 or later (Swift 6.3), with an iOS 26 simulator installed.
-- Nothing else. The app has no third-party dependencies, and swift-format ships with Xcode.
+- Nothing else to install. The app has no third-party dependencies, and swift-format ships with Xcode. The tests use one test-only package, `swift-snapshot-testing`, which Xcode fetches on first build (see `docs/decisions/0002-snapshot-testing.md`).
 
 ## Open, build and run
 
@@ -24,7 +24,9 @@ From the command line:
 ```sh
 scripts/build.sh            # Debug build for the simulator
 scripts/build.sh Release    # Release build
-scripts/test.sh             # package tests and UI tests on an iPhone simulator
+scripts/test.sh             # package tests, snapshot tests and UI tests on an iPhone simulator
+scripts/check-release.sh    # after a Release build: no catalog or snapshot-testing code in the app
+scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding)
 scripts/format.sh --fix     # rewrite files, then lint
 scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
@@ -32,11 +34,15 @@ scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
 
 The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commit whose staged changes look like they contain a secret.
 
-`scripts/test.sh` picks the newest iOS 26 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`. Results land in `build/TestResults.xcresult`.
+`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator.
 
 Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Configs/Base.xcconfig` for the app and UI tests, and `.treatAllWarnings(as: .error)` in `Package.swift` for NookKit.
+
+## Component catalog
+
+Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
 
 ## Sample data
 
@@ -50,7 +56,7 @@ NiftyOutfitNook.xctestplan   Runs the NookKit tests and the UI tests.
 NiftyOutfitNook/             App target: entry point, assets, entitlements, privacy manifest.
 NiftyOutfitNookUITests/      XCUITest UI tests.
 Packages/NookKit/            Almost all of the code.
-  Sources/DesignSystem/      Tokens and shared components (Phase 2).
+  Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
   Sources/Models/            Domain types and service protocols (Phase 3).
   Sources/Fixtures/          Sample data sets and the -fixtures launch argument.
   Sources/Features/          Screens and view models, one folder per feature.
@@ -63,14 +69,15 @@ Configs/                     Build settings as xcconfig files.
   App.xcconfig               App target: bundle ID, Info.plist keys, entitlements.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
-scripts/                     build.sh, test.sh, format.sh, simulator.sh, install-hooks.sh, merge-pr.sh.
+scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-release.sh, check-package-pins.sh,
+                             install-hooks.sh, merge-pr.sh.
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
 website/                     The app's static website.
 ```
 
-Features depend on DesignSystem and Models. Fixtures depends on Models. The app target links Features and Fixtures and only wires them together.
+Features depend on DesignSystem and Models. Fixtures depends on Models. The app target links Features, Fixtures and DesignSystem (for the debug catalog) and only wires them together.
 
 The local package is added to the project as a folder reference rather than a package reference. That keeps it editable in Xcode, lets the test plan run its test targets, and stops Xcode building it with warnings suppressed.
 
@@ -92,7 +99,7 @@ Rulesets on `main` and `develop` enforce this for everyone, administrators inclu
 GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`. Its three checks are all required:
 
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
-- `build-and-test`: a Release build, then `scripts/test.sh` with Xcode 26.6 on the newest iOS 26 simulator the runner has.
+- `build-and-test`: checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs `scripts/test.sh` with Xcode 26.6 on the iOS 26.5 simulator. Builds only use the versions in `Package.resolved`. A failed run uploads the test results and any failed snapshots.
 - `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
 
 Actions are pinned to full commit SHAs and the workflow token is read-only. Dependabot keeps the pins current.

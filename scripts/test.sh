@@ -14,4 +14,5 @@ xcodebuild test \
     -scheme NiftyOutfitNook \
     -destination "id=$simulator_id" \
     -derivedDataPath build/DerivedData \
+    -onlyUsePackageVersionsFromResolvedFile \
     -resultBundlePath "$result_bundle"

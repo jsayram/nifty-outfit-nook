@@ -48,16 +48,25 @@ jobs:
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
           xcrun simctl list runtimes available
+      - name: Check the two Package.resolved files agree
+        run: scripts/check-package-pins.sh
       - name: Build (Release)
         run: scripts/build.sh Release
-      - name: Test (package tests and UI tests)
+      - name: Check the Release build has no debug or test code
+        run: scripts/check-release.sh
+      - name: Test (package tests, snapshot tests and UI tests)
+        env:
+          # Failed snapshots write the new image and a diff here (passed through to the simulator).
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
         run: scripts/test.sh
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: TestResults
-          path: build/TestResults.xcresult
+          path: |
+            build/TestResults.xcresult
+            build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
 
