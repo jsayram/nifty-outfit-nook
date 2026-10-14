@@ -51,7 +51,8 @@ struct RoomArtTests {
 
     /// Dark is the light drawing in lamplight: the same shapes, each colour dimmed by the rule in
     /// DesignSystem/README.md. Garments are only dimmed to 92%, since they stand for real clothes.
-    @Test(arguments: RoomArt.allCases)
+    /// The faded hamper has its own dark rule (checked below).
+    @Test(arguments: RoomArt.allCases.filter { $0 != .hamperFaded })
     func darkIsTheLightDrawingDimmed(art: RoomArt) throws {
         let folder = Self.catalog.appending(path: "\(art.rawValue).imageset")
         let light = try String(contentsOf: folder.appending(path: "\(art.rawValue).svg"), encoding: .utf8)
@@ -126,6 +127,26 @@ struct RoomArtTests {
             let spread = { (bytes: [UInt8]) in Int(bytes.max() ?? 0) - Int(bytes.min() ?? 0) }
             #expect(spread(pale.bytes) <= spread(plain.bytes), "\(pale.text) should be greyer than \(plain.text)")
         }
+    }
+
+    /// In dark the faded hamper stays quieter than the lit one: the same shapes, greyer, and
+    /// darker on average (Phase 5b). Lamplight on the pale light version made it the brightest
+    /// thing on the floor.
+    @Test func fadedHamperStaysQuietInDark() throws {
+        let folder = { (art: RoomArt) in
+            Self.catalog.appending(path: "\(art.rawValue).imageset/\(art.rawValue)-dark.svg")
+        }
+        let empty = try String(contentsOf: folder(.hamper), encoding: .utf8)
+        let faded = try String(contentsOf: folder(.hamperFaded), encoding: .utf8)
+        #expect(Self.removingHexColours(empty) == Self.removingHexColours(faded))
+        let plain = Self.hexColours(in: empty)
+        let pale = Self.hexColours(in: faded)
+        let spread = { (bytes: [UInt8]) in Int(bytes.max() ?? 0) - Int(bytes.min() ?? 0) }
+        for (lit, quiet) in zip(plain, pale) {
+            #expect(spread(quiet.bytes) <= spread(lit.bytes), "\(quiet.text) should be greyer than \(lit.text)")
+        }
+        let brightness = { (colours: [Hex]) in colours.map { $0.channels.reduce(0, +) }.reduce(0, +) }
+        #expect(brightness(pale) < brightness(plain), "The faded hamper is brighter than the lit one in dark")
     }
 
     static let keepsItsColours: Set<RoomArt> = [.wardrobeRail, .maya]

@@ -70,21 +70,25 @@ struct LampGlow: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
+    /// Full at night in either appearance; a low glow in dark appearance by day, since the dark
+    /// room is lamplit anyway.
     private var strength: Double? {
-        if colorScheme == .dark { return 0.32 }
-        return isNight ? 0.55 : nil
+        if isNight { return 0.55 }
+        return colorScheme == .dark ? 0.32 : nil
     }
 
     var body: some View {
         if let strength {
             let light = Color(red: 1, green: 228 / 255, blue: 150 / 255)
-            RadialGradient(
-                colors: [light.opacity(strength), light.opacity(0)],
-                center: .center,
-                startRadius: 0,
-                endRadius: 60
-            )
-            .clipShape(Circle())
+            // Fades to nothing at the frame's edge (`closest-side`), at any size.
+            GeometryReader { proxy in
+                RadialGradient(
+                    colors: [light.opacity(strength), light.opacity(0)],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: min(proxy.size.width, proxy.size.height) / 2
+                )
+            }
             .allowsHitTesting(false)
             .accessibilityHidden(true)
         }

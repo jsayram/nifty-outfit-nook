@@ -24,7 +24,8 @@ What it changes on the way:
   lamplight as the rest of the room.
 - Some drawings are made from another one here rather than drawn twice (see DERIVED): the
   faded hamper for when laundry tracking is off is the empty hamper with the mockup's
-  "faded" filter baked in.
+  "faded" filter baked in. Its dark version follows the mockups' darker "off" filter instead of
+  plain lamplight, so it stays quieter than the lit hamper (see `faded_dark`).
 - `<use>` elements are replaced by copies of what they point to, and comments are dropped, so
   the system's SVG renderer doesn't have to support references.
 
@@ -164,27 +165,47 @@ def garment_dark(light: str) -> str:
     return dim(light, (0.92, 0.92, 0.92))
 
 
-def faded(light: str) -> str:
-    """The mockup's faded hamper, `filter: saturate(.4) brightness(1.1) contrast(.8)`, baked in."""
-    r, g, b = parse_hex(light)
-    s = 0.4
-    # CSS saturate() matrix
-    rgb = (
+def _saturate(rgb: tuple[float, float, float], s: float) -> tuple[float, float, float]:
+    """CSS saturate() matrix."""
+    r, g, b = rgb
+    return (
         (0.213 + 0.787 * s) * r + (0.715 - 0.715 * s) * g + (0.072 - 0.072 * s) * b,
         (0.213 - 0.213 * s) * r + (0.715 + 0.285 * s) * g + (0.072 - 0.072 * s) * b,
         (0.213 - 0.213 * s) * r + (0.715 - 0.715 * s) * g + (0.072 + 0.928 * s) * b,
     )
+
+
+def _contrast(rgb: tuple[float, float, float], amount: float) -> tuple[float, float, float]:
+    """CSS contrast(): towards or away from middle grey."""
+    return tuple((c / 255 - 0.5) * amount * 255 + 127.5 for c in rgb)
+
+
+def faded(light: str) -> str:
+    """The mockup's faded hamper, `filter: saturate(.4) brightness(1.1) contrast(.8)`, baked in."""
+    rgb = _saturate(parse_hex(light), 0.4)
     rgb = tuple(min(255.0, c * 1.1) for c in rgb)
-    rgb = tuple((c / 255 - 0.5) * 0.8 * 255 + 127.5 for c in rgb)
-    return to_hex(rgb)
+    return to_hex(_contrast(rgb, 0.8))
+
+
+def faded_dark(light: str) -> str:
+    """The faded hamper in dark. Lamplight on the pale light version would make it the brightest
+    thing on the floor, the opposite of quiet. The mockups' dark rule for it is
+    `brightness(.6) saturate(.4) contrast(.85)` where the rest of the art gets brightness .74, so
+    here it's greyed, put in lamplight, and then a further .81 (.6 / .74) dimmer than the lit
+    hamper."""
+    rgb = _saturate(parse_hex(light), 0.4)
+    rgb = parse_hex(dim(to_hex(rgb)))
+    rgb = tuple(c * 0.81 for c in rgb)
+    return to_hex(_contrast(rgb, 0.85))
 
 
 # Drawings whose blues are sky, not furniture: they keep a little of their colour (see `sky`).
 SKIES = {"window-cloudy", "window-night", "window-plain", "window-rain", "window-snow", "window-sun"}
 
-# Drawings made from another drawing: name -> (source drawing, colour change after the warm map).
+# Drawings made from another drawing: name -> (source drawing, colour change after the warm map
+# for light, and the whole dark colour from the warm-mapped light one, or None for lamplight).
 DERIVED = {
-    "home-hamper-faded": ("home-hamper", faded),
+    "home-hamper-faded": ("home-hamper", faded, faded_dark),
 }
 
 
@@ -281,9 +302,11 @@ def main() -> None:
         old.rmdir()
 
     palette = {}
-    drawings = [(source.stem, source, None) for source in sources]
-    drawings += [(name, SOURCE / f"{base}.svg", change) for name, (base, change) in sorted(DERIVED.items())]
-    for name, source, change in drawings:
+    drawings = [(source.stem, source, None, None) for source in sources]
+    drawings += [
+        (name, SOURCE / f"{base}.svg", change, dark_change) for name, (base, change, dark_change) in sorted(DERIVED.items())
+    ]
+    for name, source, change, dark_change in drawings:
         light = ET.parse(source).getroot()
         inline_uses(light)
         dark = copy.deepcopy(light)
@@ -295,7 +318,8 @@ def main() -> None:
             shade = change or (lambda c: c)
             base = sky if name in SKIES else warm
             colours = recolour(light, lambda c: shade(base(c)))
-            recolour(dark, lambda c: dim(shade(base(c))))
+            darken = dark_change or (lambda c: dim(shade(c)))
+            recolour(dark, lambda c: darken(base(c)))
             for colour in colours:
                 entry = palette.setdefault(colour, {"light": warm(colour), "dark": dim(warm(colour))})
                 if colour in TOKEN_COLOURS:
@@ -304,6 +328,8 @@ def main() -> None:
                     entry["sky"] = sky(colour)
                 if change:
                     entry["faded"] = shade(base(colour))
+                if dark_change:
+                    entry["fadedDark"] = dark_change(base(colour))
         imageset = CATALOG / f"{name}.imageset"
         imageset.mkdir()
         write_svg(light, imageset / f"{name}.svg")
