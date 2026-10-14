@@ -87,6 +87,7 @@ docs/decisions/              Technical decision notes.
 docs/models.md               The models, rules, store protocols and fixture sets.
 docs/home-room.md            The Home room, its layouts and states.
 docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
+docs/garment-detail.md       Garment detail, Remove from closet and Recently deleted.
 website/                     The app's static website.
 ```
 
