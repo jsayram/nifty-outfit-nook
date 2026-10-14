@@ -1,0 +1,21 @@
+# Dependabot version updates. Security updates are switched on in the repo settings.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: develop
+    commit-message:
+      prefix: CI
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: swift
+    directory: /Packages/NookKit
+    schedule:
+      interval: weekly
+    target-branch: develop
+    commit-message:
+      prefix: Packages

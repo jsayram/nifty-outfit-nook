@@ -1,0 +1,11 @@
+# Jose owns everything, including the security-sensitive paths below.
+# They're listed on their own so ownership stays explicit if more people join.
+*                                  @jsayram
+
+/.github/                          @jsayram
+/.githooks/                        @jsayram
+/scripts/                          @jsayram
+/Configs/                          @jsayram
+/NiftyOutfitNook/*.entitlements    @jsayram
+/NiftyOutfitNook/PrivacyInfo.xcprivacy @jsayram
+/Packages/NookKit/Package.swift    @jsayram
