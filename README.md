@@ -111,10 +111,11 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
 
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
 - `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
-  - `release-build` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code;
-  - `tests (package)` runs every package test target, and `tests (ui-catalog)`, `tests (ui-home)` and `tests (ui-rest)` run the UI tests in three parts, each with `scripts/test.sh` on the iOS 26.5 simulator. `ui-rest` is every UI test class the other two don't name, so a new class is never skipped.
+  - `release-and-package-tests` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs every package test target;
+  - `ui-tests (ui-catalog)`, `(ui-home)`, `(ui-home-variants)` and `(ui-rest)` run the UI tests in parts. `ui-rest` is every UI test class the others don't name, so a new class is never skipped.
 
-  Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
+  Tests run through `scripts/test.sh` on the iOS 26.5 simulator. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
+
 - `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
 
 Actions are pinned to full commit SHAs and the workflow token is read-only. Dependabot keeps the pins current.

@@ -19,24 +19,35 @@ struct HomeScreen: View {
     @State private var sheet: HomeSheet?
     @State private var toast: NookToastMessage?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
+    private var layout: HomeLayout {
+        HomeLayout(dynamicTypeSize: dynamicTypeSize, verticalSizeClass: verticalSizeClass)
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
-            HomeRoomView(content: model.content, open: open)
-                .overlay(alignment: .bottom) { errorBanner }
+            home
                 .navigationTitle(Text("Home", bundle: .module, comment: "Navigation title on Home"))
                 .navigationBarTitleDisplayMode(.inline)
+                // Sideways, the bar would take a third of the screen; the title and Profile move
+                // into the controls column instead.
+                .toolbar(layout == .sideways ? .hidden : .automatic, for: .navigationBar)
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            path.append(.profile)
-                        } label: {
-                            Label {
-                                Text("Profile", bundle: .module, comment: "Button: opens Profile")
-                            } icon: {
-                                Image(systemName: "person.crop.circle")
+                    if layout != .sideways {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                path.append(.profile)
+                            } label: {
+                                Label {
+                                    Text("Profile", bundle: .module, comment: "Button: opens Profile")
+                                } icon: {
+                                    Image(systemName: "person.crop.circle")
+                                }
                             }
+                            .accessibilityIdentifier("home.profile")
                         }
-                        .accessibilityIdentifier("home.profile")
                     }
                 }
                 .navigationDestination(for: HomeDestination.self) { destination in
@@ -61,6 +72,30 @@ struct HomeScreen: View {
         .task { await model.load(from: services) }
     }
 
+    /// The room, the large-text rows or the sideways room (`HomeLayout`). Each draws the same
+    /// content and opens the same places, so turning the phone or changing the text size keeps
+    /// whatever is open.
+    @ViewBuilder
+    private var home: some View {
+        switch layout {
+        case .room:
+            HomeRoomView(content: model.content, open: open)
+                .overlay(alignment: .bottom) {
+                    errorBanner
+                        .padding(.horizontal, NookSpacing.screenMargin)
+                        .padding(.bottom, NookSpacing.small)
+                }
+        case .largeText:
+            HomeLargeTextView(content: model.content, open: open) {
+                errorBanner.padding(.top, 14)
+            }
+        case .sideways:
+            HomeSidewaysView(
+                content: model.content, open: open, openProfile: { path.append(.profile) },
+                notice: { errorBanner })
+        }
+    }
+
     private func turnOnLaundryTracking() async -> Bool {
         let saved = await model.turnOnLaundryTracking(using: services)
         if saved {
@@ -82,8 +117,6 @@ struct HomeScreen: View {
                 actionTitle: String(localized: "Try again", bundle: .module, comment: "Button on the Home banner"),
                 action: { Task { await model.load(from: services) } }
             )
-            .padding(.horizontal, NookSpacing.screenMargin)
-            .padding(.bottom, NookSpacing.small)
         }
     }
 

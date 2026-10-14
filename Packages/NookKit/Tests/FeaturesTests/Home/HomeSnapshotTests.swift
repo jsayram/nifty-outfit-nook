@@ -9,7 +9,8 @@ import UIKit
 
 /// The room on three phone sizes in light appearance, compared with the PNGs in
 /// `__Snapshots__/HomeSnapshotTests`, plus every window and hamper state in light and dark on
-/// one sheet each (Phase 5a). Dark rooms and the large-text layout come with Phase 5b.
+/// one sheet each (Phase 5a), and the dark room (Phase 5b). The large-text and sideways layouts are
+/// in `HomeLayoutSnapshotTests`.
 ///
 /// The canvas is drawn the way the screen draws it, between bars of the measured height; the
 /// system navigation bar and tab bar themselves aren't in the picture. The iPhone SE room is
@@ -57,6 +58,12 @@ struct HomeSnapshotTests {
         assertRoomSnapshot(content, on: .iPhone17, named: "night-full-hamper")
     }
 
+    /// Dark appearance (Phase 5b): the same room at night, with the lamp's low glow, the dimmed
+    /// art and the quiet faded hamper.
+    @Test func darkRoom() {
+        assertRoomSnapshot(Self.demo, on: .iPhone17, colorScheme: .dark, named: "dark")
+    }
+
     /// Sun, cloudy, rain, snow, night and plain, light above dark (RD-01.4).
     @Test func windows() {
         let row = HStack(spacing: 12) {
@@ -102,6 +109,7 @@ struct HomeSnapshotTests {
     private func assertRoomSnapshot(
         _ content: HomeRoomContent,
         on phone: PhoneScreen,
+        colorScheme: ColorScheme = .light,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,
@@ -112,7 +120,7 @@ struct HomeSnapshotTests {
         let layout = phone.layout
         let view = RoomCanvas(layout: layout, content: content, open: { _ in })
             .environment(\.roomIsStillImage, true)
-            .environment(\.colorScheme, .light)
+            .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, .large)
             .environment(\.locale, Locale(identifier: "en_US"))
         let renderer = ImageRenderer(content: view)
