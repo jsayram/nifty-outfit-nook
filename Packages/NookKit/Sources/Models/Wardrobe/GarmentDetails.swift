@@ -85,7 +85,8 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
 
     /// Writes these details onto a garment, leaving its states (ownership, laundry, wear and so
     /// on) alone. Empty optional text becomes `nil`. Call it with checked details
-    /// (`GarmentRules.checked`); a missing kind keeps the garment's own.
+    /// (`GarmentRules.checked`); a missing kind keeps the garment's own. A new photo drops the
+    /// old photo's cutout, which no longer matches it.
     public func apply(to garment: inout Garment) {
         garment.name = name
         if let category { garment.category = category }
@@ -99,6 +100,7 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
         garment.brand = brand.isEmpty ? nil : brand
         garment.sizeLabel = sizeLabel.isEmpty ? nil : sizeLabel
         garment.notes = notes
+        if garment.photo != photo { garment.cutout = nil }
         garment.photo = photo
     }
 
