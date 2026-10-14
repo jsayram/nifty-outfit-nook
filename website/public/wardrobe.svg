@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 394" width="164" height="394" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Blue armoire. Cabinet oblique: depth runs 6 right and 3 up, so the right side and the top faces of the mouldings show.
+       Contract: label zone x 20-152 / y 26-98 is plain blue. Opening x 24-150 / y 102-208, interior floor board top at y 199.
+       Rail centre y 112, x 26-148: five garments 60 wide (hook loop on the rail) hang to about y 190.
+       Doors y 218-378 with an upper and a lower panel each, knobs at y 272 between them. Feet end at y 392.5. Floor shadow to y 394. -->
+  <defs>
+    <clipPath id="wd-open"><rect x="24" y="102" width="126" height="106"/></clipPath>
+    <linearGradient id="wd-shade" x1="0" y1="102" x2="0" y2="142" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C78B2" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#4C78B2" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- contact shadow on the floor -->
+  <ellipse cx="88" cy="391" rx="80" ry="3" fill="#8A5A48" opacity=".13"/>
+
+  <!-- right side (depth) -->
+  <path d="M154 24 L160 21 V383 L154 386 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M157 30 V378" stroke="#7FA8D8" stroke-width="1" opacity=".6"/>
+
+  <!-- body front -->
+  <rect x="16" y="24" width="138" height="362" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <!-- thin shadow the cornice bead throws on the frieze -->
+  <rect x="16.75" y="24.75" width="136.5" height="1.6" fill="#8FB8E6"/>
+  <!-- light on the left stile, shade on the right stile -->
+  <path d="M18.6 104 V204 M18.6 228 V372" stroke="#CFE2F8" stroke-width="1.3"/>
+  <path d="M151.6 104 V204 M151.6 228 V372" stroke="#8FB8E6" stroke-width="1.3"/>
+
+  <!-- open section -->
+  <g clip-path="url(#wd-open)">
+    <rect x="24" y="102" width="126" height="106" fill="#7FA8D8"/>
+    <!-- inner left wall, seen in perspective -->
+    <path d="M24 102 H31 V199 L24 208 Z" fill="#6590C6"/>
+    <path d="M31 102 V199" stroke="#557FB6" stroke-width="1" opacity=".8"/>
+    <!-- back panel seam -->
+    <path d="M90 124 V199" stroke="#6F9BD0" stroke-width="1" opacity=".55"/>
+    <!-- soft shadow under the top -->
+    <rect x="24" y="102" width="126" height="40" fill="url(#wd-shade)"/>
+    <!-- rail shadow on the back wall -->
+    <path d="M32 119 H150" stroke="#6590C6" stroke-width="2.4" opacity=".7"/>
+    <!-- interior floor board -->
+    <path d="M31 199 H150 V208 H24 Z" fill="#8FB8E6"/>
+    <path d="M31 199 H150" stroke="#557FB6" stroke-width="1.1"/>
+    <path d="M33 201.4 H148" stroke="#A9CBEF" stroke-width="1" opacity=".7"/>
+  </g>
+  <!-- gold hanging rail with round end brackets -->
+  <path d="M27 112 H147" stroke="#B98632" stroke-width="5.4"/>
+  <path d="M27 112 H147" stroke="#E7BC6E" stroke-width="3.1"/>
+  <path d="M30 111 H144" stroke="#F6DC9C" stroke-width="1"/>
+  <circle cx="26.5" cy="112" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+  <circle cx="25.7" cy="111.1" r="1" fill="#F6DC9C"/>
+  <circle cx="147.5" cy="112" r="3.3" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+  <circle cx="146.7" cy="111.1" r="1" fill="#F6DC9C"/>
+  <!-- opening edge -->
+  <rect x="24" y="102" width="126" height="106" stroke="#557FB6" stroke-width="1.5"/>
+  <path d="M22.4 103.5 V206.5 M25.5 209.6 H148.5" stroke="#CFE2F8" stroke-width="1" opacity=".9"/>
+
+  <!-- divider ledge: side return, top face, front, shadow -->
+  <path d="M154 208 L160 205 V212 L154 215 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M14 208 H154 L160 205 H20 Z" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.4"/>
+  <rect x="14" y="208" width="140" height="7" rx="1.2" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <rect x="16.75" y="215.6" width="136.5" height="3.2" fill="#8FB8E6"/>
+
+  <!-- lower doors -->
+  <rect x="24" y="218" width="126" height="160" rx="1.6" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M87 218 V378" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M85.6 220 V376" stroke="#8FB8E6" stroke-width="1.2"/>
+  <!-- recessed panels, an upper and a lower one per door: outline, dark top-left bevel, light bottom-right bevel -->
+  <g>
+    <rect x="31" y="226" width="49" height="42" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M32 229 Q32 227 34 227 H78 L75 230.2 H35.2 V264 L32 267 Z" fill="#8FB8E6"/>
+    <path d="M35.6 264.4 H76.2 Q77.3 264.4 77.3 263.3 V230.6" stroke="#DCEBFB" stroke-width="1.2"/>
+    <rect x="94" y="226" width="49" height="42" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M95 229 Q95 227 97 227 H141 L138 230.2 H98.2 V264 L95 267 Z" fill="#8FB8E6"/>
+    <path d="M98.6 264.4 H139.2 Q140.3 264.4 140.3 263.3 V230.6" stroke="#DCEBFB" stroke-width="1.2"/>
+    <rect x="31" y="276" width="49" height="94" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M32 279 Q32 277 34 277 H78 L75 280.2 H35.2 V366 L32 369 Z" fill="#8FB8E6"/>
+    <path d="M35.6 366.4 H76.2 Q77.3 366.4 77.3 365.3 V280.6" stroke="#DCEBFB" stroke-width="1.2"/>
+    <rect x="94" y="276" width="49" height="94" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M95 279 Q95 277 97 277 H141 L138 280.2 H98.2 V366 L95 369 Z" fill="#8FB8E6"/>
+    <path d="M98.6 366.4 H139.2 Q140.3 366.4 140.3 365.3 V280.6" stroke="#DCEBFB" stroke-width="1.2"/>
+  </g>
+  <!-- knobs: shadow, body, highlight -->
+  <g>
+    <circle cx="83.4" cy="273.4" r="3.6" fill="#6C9AD0" opacity=".55"/>
+    <circle cx="82.5" cy="272" r="3.5" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="81.4" cy="270.9" r="1.1" fill="#F6DC9C"/>
+    <circle cx="92.4" cy="273.4" r="3.6" fill="#6C9AD0" opacity=".55"/>
+    <circle cx="91.5" cy="272" r="3.5" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+    <circle cx="90.4" cy="270.9" r="1.1" fill="#F6DC9C"/>
+  </g>
+
+  <!-- plinth with bracket feet -->
+  <path d="M18 386 V392.5 H34 C35.5 388.6 39.5 387.6 46 387.6 H122 C128.5 387.6 132.5 388.6 134 392.5 H150 V386 Z" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M150 386 L156 383 V389.5 L150 392.5 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M154 378 L160 375 V383 L154 386 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M14 378 H154 L160 375 H20 Z" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.4"/>
+  <rect x="14" y="378" width="140" height="8" rx="1.2" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M17 380.4 H151" stroke="#CFE2F8" stroke-width="1"/>
+
+  <!-- crown cornice: cap board, cove, bead. Each piece shows its side return; the cap also shows its top face. -->
+  <!-- bead -->
+  <path d="M156 20 L162 17 V21 L156 24 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.3"/>
+  <rect x="13" y="20" width="143" height="4.2" rx="2.1" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.4"/>
+  <!-- cove -->
+  <path d="M155.5 10 L161.5 7 V17 L155.5 20 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M9 10 C9 15 11.5 19.3 15.5 20 H155.5 V10 Z" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M10.4 14.5 C11.2 17.4 13 19.2 15.5 19.3 H155 V14.5 Z" fill="#8FB8E6"/>
+  <!-- cap board -->
+  <path d="M158 4 L164 1 V7 L158 10 Z" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.4"/>
+  <path d="M5 4 H158 L164 1 H11 Z" fill="#CFE2F8" stroke="#6C9AD0" stroke-width="1.4"/>
+  <rect x="5" y="4" width="153" height="6" rx="1.3" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M8 5.8 H155" stroke="#CFE2F8" stroke-width="1"/>
+</svg>

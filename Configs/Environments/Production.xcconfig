@@ -1,0 +1,4 @@
+// The Production environment. Non-secret settings only; the backend holds every real secret.
+// Stage A has no backend, so this only names the environment for now.
+
+NOOK_ENVIRONMENT = Production

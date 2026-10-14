@@ -1,0 +1,21 @@
+/* Coming-soon page, using the existing app illustration and plum identity.
+   Native CSS; no new dependencies. Design variance 4, motion 1, density 2.
+   One soft radius scale (24px), system appearance, no automatic animation. */
+:root{color-scheme:light dark;--surface:#fcf6f8;--tint:#f3e7ed;--ink:#2b1b27;--muted:#6b5563;--accent:#6a1f58;font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);min-height:100dvh;-webkit-font-smoothing:antialiased}
+header,main,footer{width:min(1080px,100% - 64px);margin-inline:auto}
+header{padding-block:28px;font-size:20px;font-weight:700;color:var(--accent)}
+.intro{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;padding-block:48px 64px}
+.status{color:var(--accent);font-weight:650;font-size:15px;margin:0 0 20px}
+h1{font-size:clamp(40px,4.8vw,58px);font-weight:750;line-height:1.13;letter-spacing:-1.8px;margin:0 0 24px}
+.description{color:var(--muted);font-size:20px;line-height:1.6;max-width:440px;margin:0}
+.illustration{display:grid;place-items:center;background:var(--tint);border-radius:24px;min-height:430px;padding:24px}
+.illustration img{display:block;width:164px;height:394px;max-width:100%;object-fit:contain}
+.about{padding-block:12px 56px;max-width:650px}
+h2{font-size:26px;line-height:1.25;letter-spacing:-.5px;margin:0 0 14px}
+.about p{font-size:17px;line-height:1.75;color:var(--muted);margin:0}
+footer{padding-block:24px 32px;display:flex;justify-content:space-between;gap:24px;color:var(--muted);font-size:14px}
+footer p{margin:0}
+@media(prefers-color-scheme:dark){:root{--surface:#231d23;--tint:#342932;--ink:#f6eaf2;--muted:#d0bdca;--accent:#ecb6dc}}
+@media(max-width:767px){header,main,footer{width:calc(100% - 40px)}header{font-size:18px;padding-block:24px}.intro{grid-template-columns:1fr;gap:32px;padding-block:24px 40px}h1{font-size:clamp(36px,8vw,52px);letter-spacing:-1.2px}.description{font-size:18px;max-width:36ch}.illustration{min-height:320px;padding:20px}.illustration img{width:120px;height:288px}.about{padding-block:0 32px}h2{font-size:24px}footer{flex-direction:column;gap:8px}}

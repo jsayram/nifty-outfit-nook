@@ -1,0 +1,68 @@
+import XCTest
+
+final class LaunchTests: XCTestCase {
+    override func setUp() {
+        continueAfterFailure = false
+    }
+
+    @MainActor
+    func testLaunchShowsTheTabBar() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-fixtures", "demo"]
+        app.launch()
+
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 10))
+        for label in ["Home", "Closet", "Saved Looks"] {
+            XCTAssertTrue(tabBar.buttons[label].exists, "Missing tab: \(label)")
+        }
+        XCTAssertTrue(tabBar.buttons["Home"].isSelected)
+    }
+
+    /// Each fixture set reaches the screens: the Closet placeholder shows its piece count.
+    @MainActor
+    func testFixtureSetsReachTheScreens() {
+        let expected = [
+            ("demo", "17 pieces in the sample closet"),
+            ("demo:offline", "17 pieces in the sample closet"),
+            ("empty", "0 pieces in the sample closet"),
+        ]
+        for (fixtures, text) in expected {
+            let app = launchOnCloset(fixtures)
+            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 10), "No piece count for \(fixtures)")
+            app.terminate()
+        }
+    }
+
+    /// The large closet loads, and a failing store still leaves a working screen with no count.
+    @MainActor
+    func testLargeAndFailingFixturesLaunch() {
+        let large = launchOnCloset("large")
+        let detail = pieceCount(in: large)
+        XCTAssertTrue(detail.waitForExistence(timeout: 10))
+        // The number is formatted for the locale, for example "2,117".
+        let count = Int(detail.label.prefix { $0 != " " }.filter(\.isNumber)) ?? 0
+        XCTAssertGreaterThanOrEqual(count, 2_000, detail.label)
+        large.terminate()
+
+        let failing = launchOnCloset("demo:stores-fail")
+        XCTAssertTrue(failing.staticTexts["This part of the app is still being built."].waitForExistence(timeout: 10))
+        XCTAssertFalse(pieceCount(in: failing).waitForExistence(timeout: 2))
+    }
+
+    @MainActor
+    private func launchOnCloset(_ fixtures: String) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-fixtures", fixtures]
+        app.launch()
+        let closet = app.tabBars.firstMatch.buttons["Closet"]
+        XCTAssertTrue(closet.waitForExistence(timeout: 10))
+        closet.tap()
+        return app
+    }
+
+    @MainActor
+    private func pieceCount(in app: XCUIApplication) -> XCUIElement {
+        app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "in the sample closet")).firstMatch
+    }
+}

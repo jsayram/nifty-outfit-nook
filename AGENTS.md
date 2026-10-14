@@ -1,0 +1,17 @@
+# Agent notes
+
+The spec for this app lives in the separate planning repo, `closet` (https://github.com/jsayram/closet). Read these there before working here:
+
+- `SWIFT_BUILD_PLAN.md`: the phase list, how we work, the definition of done, and branching.
+- `SECURITY_STANDARD.md`: required, with no exceptions unless Jose approves one in writing.
+- `IOS_APP_PLAYBOOK.md`: reusable lessons. Add only things that were verified.
+- `Nifty_Outfit_Nook_PRD_v2.md` and `PRD_Amendment_Room_Direction.md`: the product requirements.
+
+In this repo:
+
+- `docs/decisions/0001-technical-decisions.md` is approved and binding.
+- This repo is public. No backend code, prompts, fit or styling rules, model config, keys, tokens or secrets.
+- Run `scripts/install-hooks.sh` once per clone, so the gitleaks pre-commit hook runs.
+- Work on `feature/<phase>-<name>` off `develop`. `main` and `develop` are protected for everyone: open a PR into `develop`, wait for CI with `gh pr checks <number> --watch`, then merge with `scripts/merge-pr.sh <number>`.
+- Why the script: with the ruleset on, `gh pr merge` refuses on its own side ("base branch policy prohibits the merge") even when every check has passed. GitHub reports the PR as blocked, most likely because the branch's own commits are unsigned, while the squash commit GitHub makes is signed and passes the ruleset. The script squash-merges through the REST API instead, and GitHub then deletes the branch. Never use `--admin`.
+- Before a PR: `scripts/format.sh` and `scripts/test.sh` pass.
