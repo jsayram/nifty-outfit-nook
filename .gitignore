@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.moved-aside
+
+# Swift Package Manager (Package.resolved is committed on purpose)
+.build/
+.swiftpm/
+
+# Secrets and local config: never commit
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+.env
+.env.*
+Secrets.xcconfig
+*.local.xcconfig
+
+# Test and tool output
+fastlane/report.xml
+fastlane/test_output/
+*.xcresult
