@@ -69,16 +69,24 @@ nonisolated enum LastWornText {
                 localized: "Last worn \(days) days ago", bundle: .module,
                 comment: "When a piece was last worn, 2 to 6 days ago")
         default:
-            var style = Date.FormatStyle(date: .omitted, time: .omitted, locale: locale, calendar: calendar)
-                .day().month(.abbreviated)
-            if !calendar.isDate(date, equalTo: now, toGranularity: .year) {
-                style = style.year()
-            }
-            style.timeZone = calendar.timeZone
-            let formatted = date.formatted(style)
+            let formatted = ShortDateText.format(date, now: now, calendar: calendar, locale: locale)
             return String(
                 localized: "Last worn \(formatted)", bundle: .module,
                 comment: "When a piece was last worn, a week ago or more: a date such as 3 Oct")
         }
+    }
+}
+
+/// A day and short month ("Oct 3", or "3 Oct" where that's the order), with the year only when
+/// it isn't this year's. For Last worn, Away until and Recently deleted's deadlines.
+nonisolated enum ShortDateText {
+    static func format(_ date: Date, now: Date, calendar: Calendar, locale: Locale) -> String {
+        var style = Date.FormatStyle(date: .omitted, time: .omitted, locale: locale, calendar: calendar)
+            .day().month(.abbreviated)
+        if !calendar.isDate(date, equalTo: now, toGranularity: .year) {
+            style = style.year()
+        }
+        style.timeZone = calendar.timeZone
+        return date.formatted(style)
     }
 }
