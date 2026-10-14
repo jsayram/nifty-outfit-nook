@@ -41,13 +41,29 @@ public struct VisionCutoutService: CutoutService {
         let clock = ContinuousClock()
         var timings = CutoutTimings()
 
-        var start = clock.now
+        let start = clock.now
         let image = try ImageDownsampler.image(
             from: imageData, maxPixelSize: options.maxPixelSize, maxSourcePixels: options.maxSourcePixels)
         timings.decode = clock.now - start
         if Task.isCancelled { throw .cancelled }
+        #if targetEnvironment(simulator)
+            // The simulator can't be trusted with this request. On an Apple-silicon Mac (iOS 26.5
+            // and 27.0) Vision fails with "Could not create inference context"; on GitHub's macOS
+            // runners it runs and finds no subject in a plain flat lay. Saying "unsupported" every
+            // time is honest and the same everywhere. The photo is still read first, so bad input
+            // gets the same answer as on a device.
+            throw .unsupported
+        #else
+            return try await lift(image, timings: timings, clock: clock)
+        #endif
+    }
 
-        start = clock.now
+    /// Lifts, masks, measures and encodes. Only reached on a device.
+    private func lift(_ image: CGImage, timings: CutoutTimings, clock: ContinuousClock) async throws(CutoutError)
+        -> CutoutResult
+    {
+        var timings = timings
+        var start = clock.now
         let request = VNGenerateForegroundInstanceMaskRequest()
         let handler = VNImageRequestHandler(cgImage: image, orientation: .up)
         try await Self.perform(request, on: handler)
@@ -114,14 +130,7 @@ public struct VisionCutoutService: CutoutService {
         case .unsupportedRequest, .unsupportedRevision, .unsupportedComputeStage, .unsupportedComputeDevice:
             return .unsupported
         case .invalidImage, .invalidFormat: return .unreadableImage
-        default:
-            #if targetEnvironment(simulator)
-                // The iOS 26.5 and 27.0 simulators fail here with `internalError`, "Could not
-                // create inference context": they have no Neural Engine and no CPU fallback.
-                return .unsupported
-            #else
-                return .failed
-            #endif
+        default: return .failed
         }
     }
 

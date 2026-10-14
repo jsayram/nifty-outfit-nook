@@ -10,7 +10,7 @@ import Vision
 
 /// The Vision cutout pipeline, end to end, on drawn garments.
 ///
-/// Vision's foreground mask can't run on the iOS simulator, so the tests that need a real
+/// The service doesn't use Vision on the iOS simulator, so the tests that need a real
 /// cutout skip themselves there (`VisionSupport`) and run on a device. The rest run everywhere.
 struct VisionCutoutServiceTests {
     private let service = VisionCutoutService()
@@ -42,12 +42,12 @@ struct VisionCutoutServiceTests {
         await #expect(throws: CutoutError.cancelled) { try await task.value }
     }
 
-    /// On the simulator the service must say "unsupported", not "failed", so a screen can tell
-    /// a missing feature from a bad photo.
+    /// On the simulator the service must say "unsupported", not "failed" or "no subject", so a
+    /// screen can tell a missing feature from a bad photo.
     @Test func theSimulatorReportsUnsupported() async throws {
         #if targetEnvironment(simulator)
             let available = await VisionSupport.isAvailable
-            try #require(!available, "Vision now runs on this simulator; this test can go.")
+            #expect(!available)
             await #expect(throws: CutoutError.unsupported) {
                 try await service.cutout(from: SyntheticGarmentPhotos.jpeg(.flatLayTee))
             }

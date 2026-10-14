@@ -49,13 +49,12 @@ These are a starting point, not a decision (`CutoutThresholds.proposed`). The be
 
 ## What was measured without her phone
 
-### The simulator can't run it
+### The simulator can't be trusted with it
 
-Verified on the iOS 26.5 and 27.0 simulators (Xcode 26.6, Apple-silicon Mac): the request fails with Vision error 9, "Could not create inference context". The simulator offers only its GPU as a compute device for this request (`supportedComputeStageDevices`), and there's no CPU fallback to choose. So on the simulator:
+- On the iOS 26.5 and 27.0 simulators on an Apple-silicon Mac (Xcode 26.6), the request fails with Vision error 9, "Could not create inference context". The simulator offers only its GPU as a compute device for this request (`supportedComputeStageDevices`), and there's no CPU fallback to choose.
+- On GitHub's `macos-26` runners the same request runs without an error but finds no subject, even in the plain drawn flat lay. That showed up in CI on this phase's first run.
 
-- the service reports `unsupported` (not `failed`), and the benchmark says "Subject lifting isn't supported here";
-- the five tests that need a real cutout skip themselves with that reason (Swift Testing's `.enabled(_:_:)` with an async probe), and run on a device;
-- everything else is tested on the simulator: reading and shrinking photos, the orientation flag, the pixel limit, unreadable data, cancellation, error mapping, the signal arithmetic on hand-made masks and pixel buffers, the thresholds, the stand-in, the benchmark's report and runs, and a UI test of the benchmark screen.
+So on any simulator the service reads the photo (bad input still gets `unreadableImage` or `imageTooLarge`) and then reports `unsupported` without asking Vision. The benchmark says "Subject lifting isn't supported here". The five tests that need a real cutout skip themselves with that reason (Swift Testing's `.enabled(_:_:)` with an async probe) and run on a device. Everything else is tested on the simulator: reading and shrinking photos, the orientation flag, the pixel limit, unreadable data, cancellation, error mapping, the signal arithmetic on hand-made masks and pixel buffers, the thresholds, the stand-in, the benchmark's report and runs, and a UI test of the benchmark screen. A build for a real device (`generic/platform=iOS`, no signing) compiles the device-only path.
 
 ### On the Mac
 
