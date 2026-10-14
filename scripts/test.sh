@@ -15,6 +15,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 simulator_id="$(scripts/simulator.sh)"
+
+# On CI (GitHub Actions sets CI), tell the tests so the speed checks allow for a slower, shared
+# runner. xcodebuild passes TEST_RUNNER_* variables to the tests without the prefix.
+if [[ -n "${CI:-}" ]]; then
+    export TEST_RUNNER_NOOK_CI=1
+fi
 result_bundle="${NOOK_RESULT_BUNDLE:-build/TestResults.xcresult}"
 echo "Testing on simulator $simulator_id"
 
