@@ -58,7 +58,7 @@ let package = Package(
             swiftSettings: strictSettings
         ),
         .testTarget(name: "ModelsTests", dependencies: ["Models"], swiftSettings: strictSettings),
-        .testTarget(name: "FixturesTests", dependencies: ["Fixtures"], swiftSettings: strictSettings),
+        .testTarget(name: "FixturesTests", dependencies: ["Fixtures", "Models"], swiftSettings: strictSettings),
         .testTarget(name: "FeaturesTests", dependencies: ["Features"], swiftSettings: strictSettings),
     ],
     swiftLanguageModes: [.v6]
