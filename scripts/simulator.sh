@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Prints the UDID of an available iPhone simulator.
 #
-# Picks the newest iOS runtime whose version starts with NOOK_SIM_OS (default 26),
+# Picks the newest iOS runtime whose version starts with NOOK_SIM_OS (default 26.5),
 # preferring NOOK_SIM_NAME (default "iPhone 17") and falling back to any iPhone.
+# The default runtime is pinned because the snapshot test references were recorded on it
+# (see Packages/NookKit/Sources/DesignSystem/README.md, "Snapshot tests").
 # Set NOOK_SIM_ID to skip the search and use a specific simulator.
 set -euo pipefail
 
@@ -14,7 +16,7 @@ fi
 xcrun simctl list devices available --json | python3 -c '
 import json, os, sys
 
-wanted_os = os.environ.get("NOOK_SIM_OS", "26")
+wanted_os = os.environ.get("NOOK_SIM_OS", "26.5")
 wanted_name = os.environ.get("NOOK_SIM_NAME", "iPhone 17")
 prefix = "com.apple.CoreSimulator.SimRuntime.iOS-"
 
