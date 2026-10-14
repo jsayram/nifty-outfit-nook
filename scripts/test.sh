@@ -8,8 +8,9 @@
 #   scripts/test.sh -skip-testing:NiftyOutfitNookUITests          # package tests only
 #   scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests # one UI test class
 #
-# It builds once with build-for-testing, then boots the simulator and tests without building.
-# Each step prints how long it took, so slow CI runs are easy to read.
+# It builds once with build-for-testing, then tests without building, and prints how long each
+# step took. xcodebuild boots the simulator itself: waiting for a full boot first with
+# `simctl bootstatus` took 2 to 4 minutes on CI, against about a minute for xcodebuild's own boot.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -30,7 +31,8 @@ xcodebuild build-for-testing "${common[@]}" -quiet
 echo "Built for testing in ${SECONDS}s"
 
 SECONDS=0
-xcrun simctl bootstatus "$simulator_id" -b >/dev/null
-echo "Simulator booted in ${SECONDS}s"
 rm -rf "$result_bundle"
-xcodebuild test-without-building "${common[@]}" -resultBundlePath "$result_bundle" "$@"
+status=0
+xcodebuild test-without-building "${common[@]}" -resultBundlePath "$result_bundle" "$@" || status=$?
+echo "Tested in ${SECONDS}s"
+exit $status
