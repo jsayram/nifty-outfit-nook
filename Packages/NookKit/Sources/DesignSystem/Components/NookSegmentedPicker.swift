@@ -52,6 +52,7 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
             track(HStack(spacing: NookSpacing.xSmall) { segments(sideBySide: true) })
             track(VStack(spacing: NookSpacing.xSmall) { segments(sideBySide: false) })
         }
+        .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: selection)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(title))
     }
@@ -70,11 +71,7 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
         ForEach(options) { option in
             let isSelected = option.value == selection
             Button {
-                if reduceMotion {
-                    selection = option.value
-                } else {
-                    withAnimation(.snappy(duration: 0.25)) { selection = option.value }
-                }
+                selection = option.value
             } label: {
                 HStack(spacing: 6) {
                     if let systemImage = option.systemImage {

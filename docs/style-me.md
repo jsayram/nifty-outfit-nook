@@ -97,4 +97,4 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 - **10b (done):** Your looks replaced the stand-in. It calls the stylist with `StylingContext.make`, marks the suitcase as used, and shows partial, insufficient, failed and offline results.
 - **13 (done):** remembering the source (FR-67) and the occasion, Add pieces opening the real suitcase, and "Style me from this suitcase" (`docs/suitcases-and-laundry.md`).
 - **14a:** her usual fit and Preferences in Profile.
-- **15a:** iPad layouts. Style Me already keeps to 600 points and centres.
+- **15b (done):** on a wide iPad the request sits beside the options (`docs/ipad.md`).

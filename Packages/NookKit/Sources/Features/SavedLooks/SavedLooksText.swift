@@ -124,4 +124,33 @@ enum SavedLooksText {
     static var openHint: String {
         String(localized: "Opens this look.", bundle: .module, comment: "Hint on a saved look")
     }
+
+    /// In a wide window, where the look shows beside the grid (Phase 15b).
+    static var showBesideHint: String {
+        String(
+            localized: "Shows this look beside your looks.", bundle: .module,
+            comment: "Hint on a saved look on iPad, where its detail opens beside the grid")
+    }
+
+    // MARK: Beside the grid (Phase 15b)
+
+    static var pickLookTitle: String {
+        String(localized: "Pick a look", bundle: .module, comment: "Beside Saved Looks' grid on iPad")
+    }
+
+    static var pickLookMessage: String {
+        String(
+            localized: "It shows here, next to your looks.", bundle: .module,
+            comment: "Beside Saved Looks' grid on iPad, before she picks a look")
+    }
+
+    static var pickPictureTitle: String {
+        String(localized: "Pick a picture", bundle: .module, comment: "Beside the Pictures tab's grid on iPad")
+    }
+
+    static var pickPictureMessage: String {
+        String(
+            localized: "It shows here, next to your pictures.", bundle: .module,
+            comment: "Beside the Pictures tab's grid on iPad, before she picks a picture")
+    }
 }

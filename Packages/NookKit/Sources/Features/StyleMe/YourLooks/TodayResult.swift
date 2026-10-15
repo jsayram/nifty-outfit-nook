@@ -5,6 +5,10 @@ import SwiftUI
 /// The Today tab with a result (`results-versions.html`): the request line, the version switch
 /// with the selected version's description, the bundle and its piece list, the four actions,
 /// and Try a different outfit.
+///
+/// In a wide window (iPad, Phase 15b) the version switch and the look sit on the left, larger,
+/// with the notes, the pieces and the buttons beside them (`WidePanes`), as the mockups' tablet
+/// layout has it. The order is the same, so VoiceOver reads it as on a phone.
 struct TodayResult: View {
     let model: YourLooksModel
     let text: YourLooksText
@@ -13,6 +17,9 @@ struct TodayResult: View {
     @Environment(\.calendar) private var calendar
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// The widest the look gets beside its pieces.
+    static let wideBundleMaximumWidth: CGFloat = 420
+
     var body: some View {
         if let result = model.result, let look = model.currentLook {
             let content = LookBundleContent(
@@ -20,6 +27,7 @@ struct TodayResult: View {
             VStack(spacing: NookSpacing.medium) {
                 if let problem = model.problem {
                     ProblemBanner(problem: problem, retry: actions.retry)
+                        .readablePane()
                 }
                 Text(text.requestLine)
                     .nookTextStyle(.note)
@@ -37,34 +45,64 @@ struct TodayResult: View {
                             : nil,
                         action: model.request.source.isSuitcase ? actions.useMainCloset : nil
                     )
+                    .readablePane()
                 }
-                versionSwitch(look: look)
-                notes(result, look: look)
-                LookBundle(
-                    content, size: .large, title: YourLooksText.title(of: model.shownVersion), animatesEntrance: true
-                )
-                // A new result lays its pieces down again; switching versions doesn't.
-                .id(result.id)
-                .padding(.vertical, NookSpacing.small)
-                LookPieceList(
-                    content: content,
-                    showsSameAsSimple: model.shownVersion != .simple,
-                    changes: YourLooksText.changes(
-                        in: look, simple: result.simple, original: model.originalLook, garments: model.garments),
-                    onFindOne: actions.findOne
-                )
-                if model.canUndoChange {
-                    changedLine
+                WidePanes(spacing: NookSpacing.medium) { isWide in
+                    versionSwitch(look: look)
+                    if !isWide {
+                        notes(result, look: look)
+                    }
+                    bundle(content, result: result, isWide: isWide)
+                } trailing: { isWide in
+                    if isWide {
+                        notes(result, look: look)
+                    }
+                    LookPieceList(
+                        content: content,
+                        showsSameAsSimple: model.shownVersion != .simple,
+                        changes: YourLooksText.changes(
+                            in: look, simple: result.simple, original: model.originalLook, garments: model.garments),
+                        onFindOne: actions.findOne
+                    )
+                    if model.canUndoChange {
+                        changedLine
+                    }
+                    ResultActions(
+                        isSaved: model.isSaved(look),
+                        needsConnection: model.problem == .offline,
+                        look: look,
+                        actions: actions
+                    )
+                    tryDifferent
                 }
-                ResultActions(
-                    isSaved: model.isSaved(look),
-                    needsConnection: model.problem == .offline,
-                    look: look,
-                    actions: actions
-                )
-                tryDifferent
             }
         }
+    }
+
+    /// The look, large; beside its pieces it grows to fill its pane, up to
+    /// `wideBundleMaximumWidth`.
+    @ViewBuilder
+    private func bundle(_ content: LookBundleContent, result: StyleResult, isWide: Bool) -> some View {
+        let title = YourLooksText.title(of: model.shownVersion)
+        Group {
+            if isWide {
+                Color.clear
+                    .aspectRatio(StickerBundleLayout.aspectRatio, contentMode: .fit)
+                    .frame(maxWidth: Self.wideBundleMaximumWidth)
+                    .overlay {
+                        GeometryReader { proxy in
+                            LookBundle(
+                                content, size: LookBundleSize(width: proxy.size.width), title: title,
+                                animatesEntrance: true)
+                        }
+                    }
+            } else {
+                LookBundle(content, size: .large, title: title, animatesEntrance: true)
+            }
+        }
+        // A new result lays its pieces down again; switching versions doesn't.
+        .id(result.id)
+        .padding(.vertical, NookSpacing.small)
     }
 
     // MARK: Versions
@@ -88,6 +126,8 @@ struct TodayResult: View {
                             identifier: "results.version.\(version.rawValue)")
                     }
                 )
+                // Beside the pieces on iPad it stays as wide as the look under it.
+                .frame(maxWidth: Self.wideBundleMaximumWidth)
             }
             Text(description)
                 .nookTextStyle(.note)

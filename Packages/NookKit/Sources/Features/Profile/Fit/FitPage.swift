@@ -57,8 +57,7 @@ struct FitPage: View {
                 .padding(.horizontal, NookSpacing.screenMargin)
                 .padding(.top, NookSpacing.large)
                 .padding(.bottom, NookSpacing.xxxLarge)
-                .frame(maxWidth: ProfilePage.maximumWidth)
-                .frame(maxWidth: .infinity)
+                .readablePane()
                 .background(Color.nook.floor)
         }
     }
@@ -98,7 +97,8 @@ struct FitPage: View {
         .padding(.trailing, NookSpacing.xLarge)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xLarge)
-        .frame(maxWidth: .infinity)
+        // The title and the trousers line up with the rows below on a wide window.
+        .readablePane()
         .background(Color.nook.wallGradient)
         .overlay(alignment: .bottom) {
             Rectangle()

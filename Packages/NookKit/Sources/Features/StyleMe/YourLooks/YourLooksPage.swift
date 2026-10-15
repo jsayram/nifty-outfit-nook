@@ -24,7 +24,9 @@ struct YourLooksActions {
 /// Your looks (`results-versions.html`, LR-05a, LR-06): the Today and Saved tabs, then the
 /// result, its styling progress, or a state that says plainly what happened and what to do.
 ///
-/// One calm column at most 600 points wide, so it centres on iPad (full iPad layouts are 15a).
+/// One calm column on a phone. In a wide window (Phase 15b) the result's look sits beside its
+/// pieces and buttons, the Saved tab's looks fill the width, and the states keep to a readable
+/// column in the middle.
 struct YourLooksPage: View {
     let model: YourLooksModel
     var actions = YourLooksActions()
@@ -58,7 +60,6 @@ struct YourLooksPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
         .frame(maxWidth: .infinity)
     }
 
@@ -79,12 +80,15 @@ struct YourLooksPage: View {
         switch model.status {
         case .notStarted, .styling:
             StylingProgress(model: model, text: text, cancel: actions.cancel)
+                .readablePane()
         case .showing:
             TodayResult(model: model, text: text, actions: actions)
         case .insufficient(let wardrobe):
             InsufficientState(wardrobe: wardrobe, usablePieces: model.usablePieces, text: text, actions: actions)
+                .readablePane()
         case .failed(let failure):
             FailureState(failure: failure, actions: actions, openSaved: { model.tab = .saved })
+                .readablePane()
         }
     }
 }

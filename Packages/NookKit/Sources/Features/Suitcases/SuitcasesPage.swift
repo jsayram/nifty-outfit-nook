@@ -26,8 +26,6 @@ struct SuitcasesPage: View {
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    static let maximumWidth: CGFloat = 560
-
     var body: some View {
         if isStillImage {
             page
@@ -59,8 +57,7 @@ struct SuitcasesPage: View {
                 .padding(.horizontal, NookSpacing.screenMargin)
                 .padding(.top, NookSpacing.medium)
                 .padding(.bottom, NookSpacing.xxxLarge)
-                .frame(maxWidth: Self.maximumWidth)
-                .frame(maxWidth: .infinity)
+                .readablePane()
                 .background(Color.nook.floor)
         }
     }

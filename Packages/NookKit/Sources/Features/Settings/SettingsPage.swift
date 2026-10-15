@@ -57,7 +57,8 @@ struct SettingsHeader: View {
         }
         .padding(.leading, NookSpacing.xLarge)
         .padding(.trailing, showsArt ? NookSpacing.medium : NookSpacing.xLarge)
-        .frame(maxWidth: .infinity)
+        // The title and the chest line up with the rows below on a wide window.
+        .readablePane()
         .background(Color.nook.wallGradient)
         .overlay(alignment: .bottom) {
             Rectangle()
@@ -103,8 +104,7 @@ struct SettingsPage<Content: View>: View {
             )
             .padding(.top, NookSpacing.small)
             .padding(.bottom, NookSpacing.xxxLarge)
-            .frame(maxWidth: ProfilePage.maximumWidth)
-            .frame(maxWidth: .infinity)
+            .readablePane()
             .background(Color.nook.floor)
         }
     }

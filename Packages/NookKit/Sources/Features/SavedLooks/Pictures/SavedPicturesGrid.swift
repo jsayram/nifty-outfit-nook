@@ -8,10 +8,16 @@ import SwiftUI
 /// The picture and the link are separate buttons, as in the mockup: the picture opens picture
 /// detail, the link opens the look (RD-08.2). Lazy, like the looks grid. Two or more columns of
 /// at least 150 points; at the accessibility sizes one picture per row, beside its words.
+///
+/// In a wide window (Phase 15b) a picture opens beside the grid, and that picture stands on a
+/// soft tint and reads as selected.
 struct SavedPicturesGrid: View {
     let items: [SavedPictureItem]
     /// When the pictures loaded, for "Today" and "28 Aug".
     let now: Date
+    /// The picture showing beside the grid.
+    var current: TryOnPicture.ID?
+    var opensBeside = false
     let open: (SavedPictureItem) -> Void
     let openLook: (Look) -> Void
 
@@ -20,7 +26,9 @@ struct SavedPicturesGrid: View {
 
     private var rows: some View {
         ForEach(items) { item in
-            SavedPictureCell(item: item, now: now, style: .row, open: { open(item) }, openLook: openLook)
+            SavedPictureCell(
+                item: item, now: now, style: .row, isCurrent: item.id == current, opensBeside: opensBeside,
+                open: { open(item) }, openLook: openLook)
         }
     }
 
@@ -39,7 +47,9 @@ struct SavedPicturesGrid: View {
                 spacing: NookSpacing.large
             ) {
                 ForEach(items) { item in
-                    SavedPictureCell(item: item, now: now, style: .tile, open: { open(item) }, openLook: openLook)
+                    SavedPictureCell(
+                        item: item, now: now, style: .tile, isCurrent: item.id == current, opensBeside: opensBeside,
+                        open: { open(item) }, openLook: openLook)
                 }
             }
         }
@@ -57,6 +67,9 @@ struct SavedPictureCell: View {
     let item: SavedPictureItem
     let now: Date
     let style: Style
+    /// Its detail is showing beside the grid (iPad, Phase 15b).
+    var isCurrent = false
+    var opensBeside = false
     let open: () -> Void
     let openLook: (Look) -> Void
 
@@ -67,6 +80,11 @@ struct SavedPictureCell: View {
     static let rowPictureWidth: CGFloat = 104
 
     var body: some View {
+        cell
+            .background { CurrentItemTint(isCurrent: isCurrent) }
+    }
+
+    @ViewBuilder private var cell: some View {
         switch style {
         case .tile:
             VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
@@ -81,7 +99,10 @@ struct SavedPictureCell: View {
                         }
                 }
                 .buttonStyle(PictureRowPressStyle())
-                .modifier(PictureButtonAccessibility(item: item, date: date))
+                .modifier(
+                    PictureButtonAccessibility(item: item, date: date, isCurrent: isCurrent, opensBeside: opensBeside)
+                )
+                .hoverEffect(.highlight)
                 words
             }
         case .row:
@@ -90,7 +111,10 @@ struct SavedPictureCell: View {
                     TryOnPictureView(content: item.content, lookName: item.lookName, width: Self.rowPictureWidth)
                 }
                 .buttonStyle(PictureRowPressStyle())
-                .modifier(PictureButtonAccessibility(item: item, date: date))
+                .modifier(
+                    PictureButtonAccessibility(item: item, date: date, isCurrent: isCurrent, opensBeside: opensBeside)
+                )
+                .hoverEffect(.highlight)
                 words
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -163,6 +187,8 @@ struct SavedPictureCell: View {
 private struct PictureButtonAccessibility: ViewModifier {
     let item: SavedPictureItem
     let date: String
+    let isCurrent: Bool
+    let opensBeside: Bool
 
     @Environment(\.locale) private var locale
 
@@ -173,8 +199,8 @@ private struct PictureButtonAccessibility: ViewModifier {
                 Text(TryOnText.spokenPicture(of: item.content, lookName: item.lookName, locale: locale))
             )
             .accessibilityValue(Text(value))
-            .accessibilityHint(Text(TryOnText.openHint))
-            .accessibilityAddTraits(.isButton)
+            .accessibilityHint(Text(opensBeside ? TryOnText.showBesideHint : TryOnText.openHint))
+            .accessibilityAddTraits(isCurrent ? [.isButton, .isSelected] : .isButton)
             .accessibilityIdentifier("savedLooks.picture.\(item.id)")
     }
 

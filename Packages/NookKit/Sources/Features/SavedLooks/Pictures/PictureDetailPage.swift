@@ -16,8 +16,8 @@ struct PictureDetailActions {
 /// The mockup's Favorite has no Stage A screen (RD-08), and its delete confirmation is replaced
 /// by Undo, as Delete look does (Phase 12a).
 ///
-/// One column at most 600 points wide. Separate from `PictureDetailScreen` so snapshot tests can
-/// draw it without navigation.
+/// One readable column, or the column beside the Pictures grid on iPad (Phase 15b). Separate from
+/// `PictureDetailScreen` so snapshot tests can draw it without navigation.
 struct PictureDetailPage: View {
     let model: PictureDetailModel
     var actions = PictureDetailActions()
@@ -60,8 +60,7 @@ struct PictureDetailPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
-        .frame(maxWidth: .infinity)
+        .readablePane()
     }
 
     @ViewBuilder

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Every layout choice that depends on the window's size, in one place (Phase 15a).
+/// Every layout choice that depends on the window's size, in one place (Phases 15a and 15b).
 ///
 /// Screens decide from the window they're actually in: its width and height, its size classes
 /// and the text size. Never from the device. An iPad app in a narrow Split View, Slide Over or
@@ -32,46 +32,87 @@ nonisolated enum WindowLayout {
         return RoomLayout(plan: .upright, size: size, insets: insets)
     }
 
-    // MARK: Closet
+    // MARK: Closet and Saved Looks
 
-    /// Below this width a window is too narrow for the grid and a piece's detail side by side.
-    static let closetDetailMinimumWidth: CGFloat = 760
-    /// From this width the filters move into a sidebar of their own.
-    static let closetSidebarMinimumWidth: CGFloat = 1080
+    /// Below this width a window is too narrow for a grid and the detail beside it.
+    static let browseDetailMinimumWidth: CGFloat = 760
+    /// From this width the search and filters move into a sidebar of their own.
+    static let browseSidebarMinimumWidth: CGFloat = 1080
 
-    /// How Closet lays out in a window `width` points wide.
-    static func closet(
+    /// How a screen with a grid and a detail lays out in a window `width` points wide: Closet
+    /// (Phase 15a) and Saved Looks (Phase 15b).
+    static func browse(
         width: CGFloat, horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize
-    ) -> ClosetLayout {
-        // At the accessibility sizes the columns would be too narrow for the words, so Closet
-        // keeps the one-column page, which already wraps and folds its filters for them.
+    ) -> BrowseLayout {
+        // At the accessibility sizes the columns would be too narrow for the words, so the
+        // screen keeps the one-column page, which already wraps and folds its filters for them.
         guard horizontalSizeClass == .regular, !dynamicTypeSize.isAccessibilitySize else { return .stack }
-        if width >= closetSidebarMinimumWidth { return .sidebar }
-        if width >= closetDetailMinimumWidth { return .pageAndDetail }
+        if width >= browseSidebarMinimumWidth { return .sidebar }
+        if width >= browseDetailMinimumWidth { return .pageAndDetail }
         return .stack
     }
 
-    /// The detail column beside Closet's grid: about a third of the window, 340 to 420 points.
-    static func closetDetailWidth(for width: CGFloat) -> CGFloat {
+    /// The detail column beside a grid: about a third of the window, 340 to 420 points.
+    static func browseDetailWidth(for width: CGFloat) -> CGFloat {
         min(420, max(340, (width * 0.32).rounded()))
     }
 
-    /// Closet's sidebar: about a quarter of the window, 280 to 340 points.
-    static func closetSidebarWidth(for width: CGFloat) -> CGFloat {
+    /// The sidebar: about a quarter of the window, 280 to 340 points.
+    static func browseSidebarWidth(for width: CGFloat) -> CGFloat {
         min(340, max(280, (width * 0.24).rounded()))
+    }
+
+    // MARK: Pages (Phase 15b)
+
+    /// The widest a column of words, rows or form fields gets. Wider windows keep it in the
+    /// middle, so nothing stretches from edge to edge (`View.readablePane()`).
+    static let readableWidth: CGFloat = 640
+
+    /// The narrowest content that two panes side by side fit in: a 300-point look and its
+    /// pieces or buttons beside it. An upright 11-inch iPad (834 points less its margins) has
+    /// room; the iPad mini upright (744) and every compact window don't.
+    static let panesMinimumWidth: CGFloat = 720
+
+    /// Rows with a title, a line and a value beside them need more: two columns of rows only
+    /// from an iPad held sideways (or the 13-inch upright). Upright on the 11-inch they stay in
+    /// one readable column.
+    static let rowPanesMinimumWidth: CGFloat = 960
+
+    /// The widest two panes side by side get, together, as in the mockups' tablet layout.
+    static let panesMaximumWidth: CGFloat = 1120
+
+    /// The space between two panes side by side.
+    static let panesGap: CGFloat = 40
+
+    /// Whether a window may show two panes side by side at all: never in a compact window, and
+    /// never at the accessibility sizes, where a half-width column would squeeze the words.
+    static func allowsPanesSideBySide(
+        horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize
+    ) -> Bool {
+        horizontalSizeClass == .regular && !dynamicTypeSize.isAccessibilitySize
+    }
+
+    /// Whether a page `width` points wide (its content, inside its margins) shows two panes
+    /// side by side (`WidePanes`), or one above the other as on a phone.
+    static func showsPanesSideBySide(
+        width: CGFloat, horizontalSizeClass: UserInterfaceSizeClass?, dynamicTypeSize: DynamicTypeSize
+    ) -> Bool {
+        allowsPanesSideBySide(horizontalSizeClass: horizontalSizeClass, dynamicTypeSize: dynamicTypeSize)
+            && width >= panesMinimumWidth
     }
 }
 
-/// Closet's three layouts (Phase 15a, `ipad-closet.html`).
-nonisolated enum ClosetLayout: String, CaseIterable, Hashable, Sendable {
-    /// One column, as on a phone: the page, and a piece's detail pushed over it.
+/// The three layouts of a screen with a grid and a detail: Closet (Phase 15a,
+/// `ipad-closet.html`) and Saved Looks (Phase 15b, `ipad-saved.html`).
+nonisolated enum BrowseLayout: String, CaseIterable, Hashable, Sendable {
+    /// One column, as on a phone: the page, and the detail pushed over it.
     case stack
-    /// The page in one column with the selected piece's detail beside it (an upright iPad).
+    /// The page in one column with the selected item's detail beside it (an upright iPad).
     case pageAndDetail
-    /// Three columns: a sidebar with the header, search, filters, Suitcases and Laundry; the
-    /// grid; and the selected piece's detail (an iPad held sideways).
+    /// Three columns: a sidebar with the header, search and filters; the grid; and the
+    /// selected item's detail (an iPad held sideways).
     case sidebar
 
-    /// True when a piece opens beside the grid rather than over it.
+    /// True when an item opens beside the grid rather than over it.
     var showsDetailBeside: Bool { self != .stack }
 }

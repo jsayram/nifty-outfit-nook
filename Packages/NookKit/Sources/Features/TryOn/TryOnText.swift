@@ -163,6 +163,13 @@ enum TryOnText {
         String(localized: "Opens the picture.", bundle: .module, comment: "Hint on a try-on picture")
     }
 
+    /// In a wide window, where the picture shows beside the grid (Phase 15b).
+    static var showBesideHint: String {
+        String(
+            localized: "Shows the picture beside your pictures.", bundle: .module,
+            comment: "Hint on a try-on picture on iPad, where its detail opens beside the grid")
+    }
+
     // MARK: Look detail
 
     static var picturesHeading: String {

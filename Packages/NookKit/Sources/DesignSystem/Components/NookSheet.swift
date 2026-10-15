@@ -8,6 +8,12 @@ extension View {
     /// At the accessibility text sizes the sheet always opens full height, so nothing is hidden
     /// below a half-height sheet.
     ///
+    /// In a regular-width window (iPad, Phase 15b) the sheet is a form in the middle of the
+    /// screen instead. One that may rest at half height is only as tall as its content, so a
+    /// short sheet isn't a tall empty card; one that only opens full height (a list with search)
+    /// keeps the form's full height, so it doesn't jump as the list changes. The detents would
+    /// stop the form fitting its content, so they're only set in a compact window.
+    ///
     /// - Parameters:
     ///   - title: The sheet's heading, already localized. So is `subtitle`.
     ///   - detents: The heights it can rest at. Defaults to half and full height.
@@ -19,10 +25,10 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> SheetContent
     ) -> some View {
-        sheet(isPresented: isPresented, onDismiss: onDismiss) {
-            NookSheetContainer(title: title, subtitle: subtitle, content: content)
-                .modifier(NookSheetPresentation(detents: detents))
-        }
+        modifier(
+            NookSheetModifier(
+                isPresented: isPresented, title: title, subtitle: subtitle, detents: detents, onDismiss: onDismiss,
+                sheetContent: content))
     }
 
     /// Presents a styled bottom sheet for an item, like `sheet(item:)`. See
@@ -35,24 +41,73 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping (Item) -> SheetContent
     ) -> some View {
-        sheet(item: item, onDismiss: onDismiss) { item in
-            NookSheetContainer(title: title(item), subtitle: subtitle?(item)) { content(item) }
-                .modifier(NookSheetPresentation(detents: detents))
+        modifier(
+            NookItemSheetModifier(
+                item: item, title: title, subtitle: subtitle, detents: detents, onDismiss: onDismiss,
+                sheetContent: content))
+    }
+}
+
+/// `nookSheet(isPresented:…)`. A modifier, so it can read the width class of the window the
+/// sheet opens over, which picks a bottom sheet or a form.
+private struct NookSheetModifier<SheetContent: View>: ViewModifier {
+    @Binding var isPresented: Bool
+    let title: String
+    let subtitle: String?
+    let detents: Set<PresentationDetent>
+    let onDismiss: (() -> Void)?
+    let sheetContent: () -> SheetContent
+
+    @Environment(\.horizontalSizeClass) private var windowSizeClass
+
+    func body(content: Content) -> some View {
+        content.sheet(isPresented: $isPresented, onDismiss: onDismiss) {
+            NookSheetContainer(title: title, subtitle: subtitle, content: sheetContent)
+                .modifier(NookSheetPresentation(detents: detents, isForm: windowSizeClass == .regular))
+        }
+    }
+}
+
+/// `nookSheet(item:…)`, as `NookSheetModifier`.
+private struct NookItemSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {
+    @Binding var item: Item?
+    let title: (Item) -> String
+    let subtitle: ((Item) -> String?)?
+    let detents: Set<PresentationDetent>
+    let onDismiss: (() -> Void)?
+    let sheetContent: (Item) -> SheetContent
+
+    @Environment(\.horizontalSizeClass) private var windowSizeClass
+
+    func body(content: Content) -> some View {
+        content.sheet(item: $item, onDismiss: onDismiss) { item in
+            NookSheetContainer(title: title(item), subtitle: subtitle?(item)) { sheetContent(item) }
+                .modifier(NookSheetPresentation(detents: detents, isForm: windowSizeClass == .regular))
         }
     }
 }
 
 private struct NookSheetPresentation: ViewModifier {
     let detents: Set<PresentationDetent>
+    /// Over a regular-width window, where the system shows a form rather than a bottom sheet.
+    let isForm: Bool
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     func body(content: Content) -> some View {
-        content
-            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : detents)
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(NookRadius.sheet)
-            .presentationBackground { Color.nook.wallGradient }
+        Group {
+            if isForm {
+                // Detents would stop the form fitting its content.
+                content
+                    .presentationSizing(.form.fitted(horizontal: false, vertical: detents != [.large]))
+            } else {
+                content
+                    .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : detents)
+            }
+        }
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(NookRadius.sheet)
+        .presentationBackground { Color.nook.wallGradient }
     }
 }
 
@@ -66,6 +121,9 @@ public struct NookSheetContainer<Content: View>: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .title2) private var closeSize: CGFloat = 32
+    @Environment(\.nookStaticRendering) private var isStatic
+    /// The header and content's height, which a form sheet on iPad sizes itself to.
+    @State private var contentHeight: CGFloat = 0
 
     public init(title: String, subtitle: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
@@ -74,16 +132,30 @@ public struct NookSheetContainer<Content: View>: View {
     }
 
     public var body: some View {
-        StaticAwareScrollView {
-            VStack(alignment: .leading, spacing: NookSpacing.large) {
-                header
-                content
+        if isStatic {
+            // A still image draws the whole content without a scroll view.
+            column
+        } else {
+            ScrollView {
+                column
+                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { contentHeight = $0 })
             }
-            .padding(.horizontal, NookSpacing.xLarge)
-            .padding(.top, NookSpacing.xxLarge)
-            .padding(.bottom, NookSpacing.xxxLarge)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .scrollIndicators(.hidden)
+            // A scroll view has no height of its own to offer, so a fitted form sheet (iPad,
+            // Phase 15b) is told its content's.
+            .frame(idealHeight: contentHeight > 0 ? contentHeight : nil)
         }
+    }
+
+    private var column: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.large) {
+            header
+            content
+        }
+        .padding(.horizontal, NookSpacing.xLarge)
+        .padding(.top, NookSpacing.xxLarge)
+        .padding(.bottom, NookSpacing.xxxLarge)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var header: some View {

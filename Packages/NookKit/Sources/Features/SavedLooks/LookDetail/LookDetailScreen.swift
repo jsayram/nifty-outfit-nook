@@ -17,6 +17,8 @@ struct LookDetailScreen: View {
     /// Opens one of the look's try-on pictures.
     let openPicture: (TryOnPicture.ID) -> Void
     let deleted: (SavedLookRemoval) -> Void
+    /// Shown beside Saved Looks' grid on iPad (Phase 15b) rather than pushed: no bar of its own.
+    var isBeside = false
 
     @Environment(\.services) private var services
     @State private var model: LookDetailModel
@@ -29,12 +31,14 @@ struct LookDetailScreen: View {
     init(
         lookID: Look.ID, changes: Int = 0, openGarment: @escaping (Garment.ID, String) -> Void,
         openPicture: @escaping (TryOnPicture.ID) -> Void = { _ in },
-        deleted: @escaping (SavedLookRemoval) -> Void
+        deleted: @escaping (SavedLookRemoval) -> Void,
+        isBeside: Bool = false
     ) {
         self.changes = changes
         self.openGarment = openGarment
         self.openPicture = openPicture
         self.deleted = deleted
+        self.isBeside = isBeside
         _model = State(initialValue: LookDetailModel(lookID: lookID))
     }
 
@@ -58,14 +62,8 @@ struct LookDetailScreen: View {
                 openPicture: openPicture
             )
         )
-        .navigationTitle(model.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // The name is the big title on the page instead.
-            ToolbarItem(placement: .principal) {
-                Text(verbatim: "").accessibilityHidden(true)
-            }
-        }
+        // The name is the big title on the page instead.
+        .pagedTitle(model.name, isPushed: !isBeside)
         .navigationDestination(item: $swapping) { route in
             SwapScreen(model: route.model, finish: finishSwap)
         }

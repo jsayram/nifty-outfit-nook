@@ -71,9 +71,15 @@ final class HomeVariantTests: XCTestCase {
         let tabBar = app.tabBars.firstMatch
         let wardrobe = app.buttons["home.wardrobe"]
         reveal(wardrobe, in: app)
-        wardrobe.tap()
-        XCTAssertTrue(tabBar.buttons["Closet"].waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(tabBar.buttons["Closet"].isSelected, "The wardrobe didn't switch to Closet")
+        // The tap follows the swipes that revealed the wardrobe. On a slow runner the page can
+        // still be moving and the tap only stops it, so wait for the tab, and tap once more if
+        // it didn't switch.
+        let closetTab = tabBar.buttons["Closet"]
+        for _ in 0..<2 where !closetTab.isSelected {
+            wardrobe.tapWhenHittable(timeout: Self.wait)
+            _ = closetTab.waitUntilSelected(timeout: Self.wait)
+        }
+        XCTAssertTrue(closetTab.isSelected, "The wardrobe didn't switch to Closet")
         tabBar.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))

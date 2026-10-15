@@ -35,17 +35,8 @@ struct ProfileHeader: View {
                 .padding(.top, NookSpacing.xLarge)
                 .padding(.bottom, NookSpacing.xxLarge + Self.floorBand)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(alignment: .bottom) {
-            VStack(spacing: 0) {
-                Color.nook.wallGradient
-                Rectangle()
-                    .fill(Color.nook.floorLine)
-                    .frame(height: 2)
-                Color.nook.floor
-                    .frame(height: Self.floorBand)
-            }
-        }
+        // The title, the sign and the plant line up with the rows below on a wide window.
+        .frame(maxWidth: WindowLayout.readableWidth, alignment: .leading)
         .overlay(alignment: .bottomTrailing) {
             if !dynamicTypeSize.isAccessibilitySize {
                 // The pot's foot rests on the floor strip, as in the mockup.
@@ -54,6 +45,17 @@ struct ProfileHeader: View {
                     .padding(.trailing, NookSpacing.large)
                     .padding(.bottom, Self.floorBand / 2)
                     .accessibilityHidden(true)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .background(alignment: .bottom) {
+            VStack(spacing: 0) {
+                Color.nook.wallGradient
+                Rectangle()
+                    .fill(Color.nook.floorLine)
+                    .frame(height: 2)
+                Color.nook.floor
+                    .frame(height: Self.floorBand)
             }
         }
     }

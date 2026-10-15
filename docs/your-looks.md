@@ -103,6 +103,6 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 - **11 (done):** Swap a piece and Remove this piece, with Undo (`docs/swap-and-editor.md`).
 - **12a (done):** Saved Looks and look detail, renaming, Wear today (`docs/saved-looks.md`). Saving now records `savedAt`, and a piece that has left her closet shows faded on the Saved tab too.
 - **12b (done), 33:** Try it on with simulated pictures (`docs/try-on-pictures.md`), then real ones.
-- **15a:** iPad results with the versions beside the look. The page keeps to 600 points and centres.
+- **15b (done):** on iPad the version switch and the look sit beside the pieces and buttons, and the Saved tab is a grid (`docs/ipad.md`).
 - **27a:** the real stylist contract, the history check, and the explanation line.
 - **34:** Find one.

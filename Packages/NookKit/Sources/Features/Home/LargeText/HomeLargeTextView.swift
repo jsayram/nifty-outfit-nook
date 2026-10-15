@@ -19,7 +19,7 @@ struct HomeLargeTextView<Notice: View>: View {
     @Environment(\.roomIsStillImage) private var isStillImage
 
     /// Rows wider than this read badly; on a phone held sideways or an iPad the page centres.
-    static var maximumWidth: CGFloat { 640 }
+    static var maximumWidth: CGFloat { WindowLayout.readableWidth }
 
     var body: some View {
         if isStillImage {
