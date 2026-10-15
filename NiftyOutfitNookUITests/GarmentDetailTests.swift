@@ -64,10 +64,14 @@ final class GarmentDetailTests: XCTestCase {
         XCTAssertEqual(status.value as? String, "Dirty")
 
         // Style with this offers the two choices; Style me with it opens Style Me with the piece.
+        // It's in the wash now and tracking is on, so Style Me says it can't start a look.
         tap("garment.styleWithThis", in: app)
         tap("styleWithThis.styleMe", in: app)
-        XCTAssertTrue(element("stub.styleMe", in: app).waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(element("styleMe.startingPiece", in: app).label.contains("Navy dress pants"))
+        let start = app.buttons["styleMe.startingPiece"]
+        XCTAssertTrue(start.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(start.label.contains("Navy dress pants"), start.label)
+        XCTAssertTrue(start.label.contains("In the wash"), start.label)
+        XCTAssertFalse(app.buttons["styleMe.go"].isEnabled)
         app.navigationBars.firstMatch.buttons.firstMatch.tap()
 
         // I don't have it any more, then Undo from the toast.
