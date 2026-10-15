@@ -80,8 +80,8 @@ jobs:
   # first launch), so a part should hold several minutes of tests, and four parts plus the job
   # above stay within the five macOS runners the free plan allows at once.
   # Balanced in October 2026 from the classes' times on CI (in seconds, from the test log):
-  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20, then IPadTests on
-  #                             an iPad simulator (about 170 locally, new in Phase 15a)
+  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20, then IPadTests 367
+  #                             on an iPad simulator (the iPad step took 12 minutes with its boot)
   #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75, SettingsTests about 260
   #                             locally (new in Phase 14b, no CI time yet)
   #   ui-add-and-catalog        AddPieceTests 367, CatalogTests about 175
@@ -148,7 +148,8 @@ jobs:
         # first failure stays in the test results. Package tests and local runs never retry.
         run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
       # The iPad UI tests (Phase 15a) run on an iPad simulator after the lightest part's own tests,
-      # reusing its build. They take about 3 minutes locally. On an iPhone they skip themselves,
+      # reusing its build. The step took 12 minutes on CI (October 2026), which brought this part
+      # level with ui-variants-and-style-me at about 30. On an iPhone they skip themselves,
       # so ui-rest passes over them in seconds.
       - name: Test (iPad)
         if: matrix.part == 'ui-home-and-results'

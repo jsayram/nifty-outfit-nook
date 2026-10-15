@@ -91,7 +91,7 @@ Every `IPadTests` test skips itself on an iPhone, so the phone runs aren't slowe
 NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests
 ```
 
-They take about three minutes. CI runs them in the `ui-home-and-results` part after its phone tests, on the iPad Pro 11-inch (M5) simulator, which keeps that part about as long as the slowest of the four.
+They take about three minutes locally. CI runs them in the `ui-home-and-results` part after its phone tests, on the iPad Pro 11-inch (M5) simulator. On the first run that step took 12 minutes (6 of them tests, the rest the iPad simulator's boot and first launch), which brought the part to about 30 minutes, level with `ui-variants-and-style-me`, so the check takes no longer than before. The narrow-window test passed there too, so the hosted runner's simulator has Windowed Apps on.
 
 The narrow-window test drags the window's corner, which needs iPadOS 26's Windowed Apps (on by default on a new iOS 26.5 simulator). If a simulator has it off, the test skips with a message instead of failing. iPadOS 26 resizes a window about its centre, so the corner only moves half the change in width.
 
