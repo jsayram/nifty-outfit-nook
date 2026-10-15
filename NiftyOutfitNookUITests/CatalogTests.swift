@@ -95,14 +95,40 @@ final class CatalogTests: XCTestCase {
         XCTAssertTrue(app.buttons["Undo"].firstMatch.exists)
     }
 
-    /// Swipes up until `element` is on screen and can be tapped.
+    /// The look bundle page (Phase 9), at the end of the catalog: a bundle is one VoiceOver
+    /// element naming its pieces, a thumbnail is one button, and Find one names its piece.
+    @MainActor
+    func testLookBundlesReadAsOneElement() {
+        let app = launchCatalog()
+        let thumbnail = app.buttons["Simple: Cream blouse, Navy trousers, Tan loafers"]
+        scrollTo(thumbnail, in: app, swipes: 40, velocity: .fast)
+
+        // One element that names every piece. (The catalog page's identifier replaces the
+        // bundle's own inside the catalog, so match the words.)
+        let somethingNew = app.otherElements.matching(
+            NSPredicate(
+                format: "label == %@",
+                "Office, something new: Camel blazer (not in your closet), Cream blouse, Navy trousers, Tan loafers"))
+        XCTAssertEqual(somethingNew.count, 1)
+
+        thumbnail.tap()
+        XCTAssertTrue(app.staticTexts["Tapped: Simple"].waitForExistence(timeout: 5))
+
+        let findOne = app.buttons["Find one like Camel blazer"]
+        scrollTo(findOne, in: app, swipes: 10, up: false)
+        findOne.tap()
+        XCTAssertTrue(app.staticTexts["Tapped: Find one: Camel blazer"].waitForExistence(timeout: 5))
+    }
+
+    /// Swipes until `element` is on screen and can be tapped.
     @MainActor
     private func scrollTo(
-        _ element: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+        _ element: XCUIElement, in app: XCUIApplication, swipes: Int = 15,
+        velocity: XCUIGestureVelocity = .slow, up: Bool = true, file: StaticString = #filePath, line: UInt = #line
     ) {
         XCTAssertTrue(app.navigationBars["Component catalog"].waitForExistence(timeout: 10), file: file, line: line)
-        for _ in 0..<15 where !(element.exists && element.isHittable) {
-            app.swipeUp(velocity: .slow)
+        for _ in 0..<swipes where !(element.exists && element.isHittable) {
+            if up { app.swipeUp(velocity: velocity) } else { app.swipeDown(velocity: .slow) }
         }
         XCTAssertTrue(element.isHittable, "Couldn't scroll to \(element)", file: file, line: line)
     }

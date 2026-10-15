@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Checks that a Release build carries no debug-only or test-only code: the component catalog
-# (DesignSystem/Catalog, compiled only in Debug), the cutout benchmark (Features/Debug, Phase 8a)
+# (DesignSystem/Catalog, compiled only in Debug, and the look bundle page in Features/Debug/Catalog),
+# the cutout benchmark (Features/Debug, Phase 8a)
 # and swift-snapshot-testing (test targets only).
 # Run after scripts/build.sh Release.
 set -euo pipefail
@@ -13,7 +14,7 @@ if [[ ! -f "$binary" ]]; then
 fi
 
 failed=0
-for pattern in NookCatalog CatalogDemo CutoutBench SnapshotTesting; do
+for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting; do
     if nm "$binary" | grep -q "$pattern"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1

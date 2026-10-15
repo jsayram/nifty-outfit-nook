@@ -20,7 +20,10 @@ struct NiftyOutfitNookApp: App {
             #if DEBUG
                 // `-catalog` opens the component catalog instead of the app (debug builds only).
                 if ProcessInfo.processInfo.arguments.contains("-catalog") {
-                    NookCatalogView()
+                    NookCatalogView(extraPages: [
+                        LookBundleCatalog.page(
+                            sampleGarments: SamplePhotoGarments.garments(now: .now), images: SamplePhotoProvider())
+                    ])
                 } else if ProcessInfo.processInfo.arguments.contains("-cutout-bench") {
                     // `-cutout-bench` opens the cutout benchmark (Phase 8a, debug builds only).
                     CutoutBenchScreen(
