@@ -11,6 +11,9 @@ import SwiftUI
 /// looks come first.
 struct SavedLooksFilters: View {
     let model: SavedLooksModel
+    /// Wrapped onto as many lines as they need in the sidebar of a wide window (Phase 15b), so
+    /// none hides off the edge of the narrow column.
+    var chipLayout: NookChipBarLayout = .automatic
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -50,7 +53,10 @@ struct SavedLooksFilters: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
-            NookChipBar(String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row")) {
+            NookChipBar(
+                String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row"),
+                layout: chipLayout
+            ) {
                 ForEach(model.pieceKinds, id: \.self) { kind in
                     NookChip(kind.chipTitle, isSelected: model.filter.categories.contains(kind)) {
                         model.toggle(kind)
@@ -59,7 +65,10 @@ struct SavedLooksFilters: View {
                 }
             }
             if !model.colorChoices.isEmpty {
-                NookChipBar(String(localized: "Colour", bundle: .module, comment: "Name of the colour swatches row")) {
+                NookChipBar(
+                    String(localized: "Colour", bundle: .module, comment: "Name of the colour swatches row"),
+                    layout: chipLayout
+                ) {
                     ForEach(model.colorChoices, id: \.self) { color in
                         NookChip(
                             color.title, swatch: GarmentColor.swatch(for: color).color(in: colorScheme),

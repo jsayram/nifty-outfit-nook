@@ -11,16 +11,21 @@ import SwiftUI
 struct PictureDetailScreen: View {
     let seeLook: (Look) -> Void
     let deleted: (PictureRemoval) -> Void
+    /// Shown beside the Pictures tab's grid on iPad (Phase 15b) rather than pushed: no bar of
+    /// its own.
+    var isBeside = false
 
     @Environment(\.services) private var services
     @State private var model: PictureDetailModel
     @State private var toast: NookToastMessage?
 
     init(
-        pictureID: TryOnPicture.ID, seeLook: @escaping (Look) -> Void, deleted: @escaping (PictureRemoval) -> Void
+        pictureID: TryOnPicture.ID, seeLook: @escaping (Look) -> Void, deleted: @escaping (PictureRemoval) -> Void,
+        isBeside: Bool = false
     ) {
         self.seeLook = seeLook
         self.deleted = deleted
+        self.isBeside = isBeside
         _model = State(initialValue: PictureDetailModel(pictureID: pictureID))
     }
 
@@ -29,14 +34,8 @@ struct PictureDetailScreen: View {
             model: model,
             actions: PictureDetailActions(seeLook: seeLook, delete: delete, retry: reload)
         )
-        .navigationTitle(TryOnText.pictureTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // The title is big on the page instead.
-            ToolbarItem(placement: .principal) {
-                Text(verbatim: "").accessibilityHidden(true)
-            }
-        }
+        // The title is big on the page instead.
+        .pagedTitle(TryOnText.pictureTitle, isPushed: !isBeside)
         .overlay {
             Color.clear
                 .nookToast($toast)

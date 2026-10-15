@@ -16,20 +16,60 @@ struct SavedLooksActions {
     var undoPictureDelete: () -> Void = {}
 }
 
+/// What shows beside the grid in a wide window (Phase 15b): a look's detail or a picture's.
+nonisolated enum SavedLooksSelection: Hashable, Sendable {
+    case look(Look.ID)
+    case picture(TryOnPicture.ID)
+
+    /// The same screen pushed, for a narrow window.
+    var destination: SavedLooksDestination {
+        switch self {
+        case .look(let id): .look(id)
+        case .picture(let id): .picture(id)
+        }
+    }
+
+    var lookID: Look.ID? {
+        if case .look(let id) = self { id } else { nil }
+    }
+
+    var pictureID: TryOnPicture.ID? {
+        if case .picture(let id) = self { id } else { nil }
+    }
+
+    /// A pushed look or picture, which a wide window shows beside the grid instead.
+    init?(_ destination: SavedLooksDestination) {
+        switch destination {
+        case .look(let id): self = .look(id)
+        case .picture(let id): self = .picture(id)
+        case .makeYourOwnLook, .closet: return nil
+        }
+    }
+}
+
 /// Saved Looks' content, top to bottom (`saved.html`, RD-08): the title and count, the Looks and
 /// Pictures switch, then the search field, the piece and colour filters (LR-09), the count line
 /// with Clear, and the grid of looks or of pictures. An empty Saved Looks explains how to save a
 /// look (RD-08.4), and an empty Pictures tab what pictures are and that they need a look; a
 /// search with no matches names the filters, with Clear filters (LR-09.3).
 ///
+/// On a wide iPad window (Phase 15b, `ipad-saved.html`) the page splits like Closet's: the
+/// sidebar holds the title, the switch, search and filters, and the grid column holds the looks
+/// or pictures, or the state that stands in for them. `part` says which this view draws.
+///
 /// Separate from `SavedLooksScreen` so snapshot tests can draw it from a model without navigation.
 struct SavedLooksPage: View {
     @Bindable var model: SavedLooksModel
     var actions = SavedLooksActions()
+    var part = BrowsePart.whole
+    /// The look or picture showing beside the grid (iPad, Phase 15b). Tapping one then shows it
+    /// there instead of opening it over the grid.
+    var current: SavedLooksSelection?
+    var opensBeside = false
 
     @Environment(\.closetIsStillImage) private var isStillImage
 
-    /// Past this the controls read badly; the grid keeps the full width (iPad's own layout is 15b).
+    /// Past this the controls read badly; the grid keeps the full width.
     static let controlsMaximumWidth: CGFloat = 640
 
     var body: some View {
@@ -44,7 +84,49 @@ struct SavedLooksPage: View {
         .background(Color.nook.wallGradient.ignoresSafeArea())
     }
 
-    private var page: some View {
+    @ViewBuilder private var page: some View {
+        switch part {
+        case .whole:
+            VStack(alignment: .leading, spacing: 0) {
+                top
+                switch model.tab {
+                case .looks:
+                    looksControls(chipLayout: .automatic)
+                    looksBody
+                case .pictures:
+                    picturesControls(chipLayout: .automatic)
+                    picturesBody
+                }
+            }
+            .padding(.top, NookSpacing.small)
+            .padding(.bottom, NookSpacing.xxxLarge)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        case .sidebar:
+            VStack(alignment: .leading, spacing: 0) {
+                top
+                switch model.tab {
+                case .looks: looksControls(chipLayout: .wrap)
+                case .pictures: picturesControls(chipLayout: .wrap)
+                }
+            }
+            .padding(.top, NookSpacing.small)
+            .padding(.bottom, NookSpacing.xxxLarge)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        case .grid:
+            VStack(alignment: .leading, spacing: 0) {
+                switch model.tab {
+                case .looks: looksBody
+                case .pictures: picturesBody
+                }
+            }
+            .padding(.top, NookSpacing.small)
+            .padding(.bottom, NookSpacing.xxxLarge)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// The title and count, then Looks and Pictures.
+    private var top: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
                 .padding(.horizontal, NookSpacing.screenMargin)
@@ -63,14 +145,7 @@ struct SavedLooksPage: View {
             .frame(maxWidth: 420)
             .padding(.horizontal, NookSpacing.screenMargin)
             .padding(.top, NookSpacing.medium)
-            switch model.tab {
-            case .looks: looks
-            case .pictures: pictures
-            }
         }
-        .padding(.top, NookSpacing.small)
-        .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var header: some View {
@@ -98,17 +173,9 @@ struct SavedLooksPage: View {
 
     // MARK: Looks
 
-    @ViewBuilder private var looks: some View {
-        switch model.phase {
-        case .loading:
-            NookLoadingState(SavedLooksText.loading)
-                .stateCard()
-                .padding(.top, NookSpacing.large)
-        case .failed:
-            NookErrorState(SavedLooksText.failedTitle, message: SavedLooksText.failedMessage, retry: actions.retry)
-                .stateCard()
-                .padding(.top, NookSpacing.large)
-        case .loaded:
+    /// The line about a look she just deleted, then search and the filters.
+    @ViewBuilder private func looksControls(chipLayout: NookChipBarLayout) -> some View {
+        if model.phase == .loaded {
             if let removal = model.lastRemoval {
                 NookBanner(
                     LookDetailText.deleted(removal), systemImage: "trash", tone: .neutral,
@@ -120,28 +187,46 @@ struct SavedLooksPage: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("savedLooks.deleted")
             }
+            if !model.isEmpty {
+                controls(prompt: SavedLooksText.searchPrompt, count: model.countText, chipLayout: chipLayout)
+            }
+        }
+    }
+
+    /// The looks, or the state that stands in for them.
+    @ViewBuilder private var looksBody: some View {
+        switch model.phase {
+        case .loading:
+            NookLoadingState(SavedLooksText.loading)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .failed:
+            NookErrorState(SavedLooksText.failedTitle, message: SavedLooksText.failedMessage, retry: actions.retry)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .loaded:
             if model.isEmpty {
                 empty
+            } else if model.hasNoMatches {
+                noMatches(SavedLooksText.noMatchesTitle)
             } else {
-                controls(prompt: SavedLooksText.searchPrompt, count: model.countText)
-                if model.hasNoMatches {
-                    noMatches(SavedLooksText.noMatchesTitle)
-                } else {
-                    SavedLooksGrid(items: model.shown, now: model.loadedAt, open: actions.open)
-                        .padding(.horizontal, NookSpacing.screenMargin)
-                        .padding(.top, NookSpacing.medium)
-                }
+                SavedLooksGrid(
+                    items: model.shown, now: model.loadedAt, current: current.flatMap(\.lookID),
+                    opensBeside: opensBeside, open: actions.open
+                )
+                .padding(.horizontal, NookSpacing.screenMargin)
+                .padding(.top, NookSpacing.medium)
             }
         }
     }
 
     /// The search field, the filters and, while filtering, the count line. One search and one
     /// set of chips for both tabs.
-    private func controls(prompt: String, count: String) -> some View {
+    private func controls(prompt: String, count: String, chipLayout: NookChipBarLayout) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             NookSearchField(prompt, text: $model.searchText, onSubmit: model.applySearchNow)
                 .padding(.horizontal, NookSpacing.screenMargin)
-            SavedLooksFilters(model: model)
+            SavedLooksFilters(model: model, chipLayout: chipLayout)
                 .padding(.top, NookSpacing.small)
             if model.filter.isActive {
                 countLine(count)
@@ -215,17 +300,9 @@ struct SavedLooksPage: View {
 
     // MARK: Pictures (12b)
 
-    @ViewBuilder private var pictures: some View {
-        switch model.picturesPhase {
-        case .loading:
-            NookLoadingState(TryOnText.loading)
-                .stateCard()
-                .padding(.top, NookSpacing.large)
-        case .failed:
-            NookErrorState(TryOnText.failedTitle, message: SavedLooksText.failedMessage, retry: actions.retry)
-                .stateCard()
-                .padding(.top, NookSpacing.large)
-        case .loaded:
+    /// The line about a picture she just deleted, then search and the filters.
+    @ViewBuilder private func picturesControls(chipLayout: NookChipBarLayout) -> some View {
+        if model.picturesPhase == .loaded {
             if model.lastPictureRemoval != nil {
                 NookBanner(
                     TryOnText.deleted, systemImage: "trash", tone: .neutral, actionTitle: YourLooksText.undo,
@@ -237,20 +314,35 @@ struct SavedLooksPage: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("savedLooks.pictureDeleted")
             }
+            if !model.hasNoPictures {
+                controls(prompt: TryOnText.searchPrompt, count: model.picturesCountText, chipLayout: chipLayout)
+            }
+        }
+    }
+
+    /// The pictures, or the state that stands in for them.
+    @ViewBuilder private var picturesBody: some View {
+        switch model.picturesPhase {
+        case .loading:
+            NookLoadingState(TryOnText.loading)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .failed:
+            NookErrorState(TryOnText.failedTitle, message: SavedLooksText.failedMessage, retry: actions.retry)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .loaded:
             if model.hasNoPictures {
                 picturesEmpty
+            } else if model.picturesHaveNoMatches {
+                noMatches(TryOnText.noMatchesTitle)
             } else {
-                controls(prompt: TryOnText.searchPrompt, count: model.picturesCountText)
-                if model.picturesHaveNoMatches {
-                    noMatches(TryOnText.noMatchesTitle)
-                } else {
-                    SavedPicturesGrid(
-                        items: model.shownPictures, now: model.loadedAt, open: actions.openPicture,
-                        openLook: actions.openLook
-                    )
-                    .padding(.horizontal, NookSpacing.screenMargin)
-                    .padding(.top, NookSpacing.medium)
-                }
+                SavedPicturesGrid(
+                    items: model.shownPictures, now: model.loadedAt, current: current.flatMap(\.pictureID),
+                    opensBeside: opensBeside, open: actions.openPicture, openLook: actions.openLook
+                )
+                .padding(.horizontal, NookSpacing.screenMargin)
+                .padding(.top, NookSpacing.medium)
             }
         }
     }

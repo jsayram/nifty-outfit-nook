@@ -2480,6 +2480,12 @@
     "It may have been deleted on another screen." : {
       "comment" : "Look detail: the look is gone"
     },
+    "It shows here, next to your looks." : {
+      "comment" : "Beside Saved Looks' grid on iPad, before she picks a look"
+    },
+    "It shows here, next to your pictures." : {
+      "comment" : "Beside the Pictures tab's grid on iPad, before she picks a picture"
+    },
     "It starts on your usual choice each time." : {
       "comment" : "Preferences sheet note: the choice is for this request"
     },
@@ -4082,6 +4088,12 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Pick a look" : {
+      "comment" : "Beside Saved Looks' grid on iPad"
+    },
+    "Pick a picture" : {
+      "comment" : "Beside the Pictures tab's grid on iPad"
+    },
     "Pick a piece" : {
       "comment" : "Beside Closet's grid on iPad"
     },
@@ -4683,8 +4695,14 @@
     "Shows the answer." : {
       "comment" : "VoiceOver hint on a closed Help topic"
     },
+    "Shows the picture beside your pictures." : {
+      "comment" : "Hint on a try-on picture on iPad, where its detail opens beside the grid"
+    },
     "Shows the piece beside your closet." : {
       "comment" : "Hint on a closet piece on iPad, where its detail opens beside the grid"
+    },
+    "Shows this look beside your looks." : {
+      "comment" : "Hint on a saved look on iPad, where its detail opens beside the grid"
     },
     "Shows three more of your pieces. Nothing is sent." : {
       "comment" : "Swap hint"

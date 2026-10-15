@@ -9,10 +9,16 @@ import SwiftUI
 /// worked out when the looks loaded (`SavedLookItem`), and a bundle is a few cached stickers or
 /// drawings, so scrolling stays cheap. Two or more columns of at least 150 points; at the
 /// accessibility sizes one look per row, the bundle beside its name.
+///
+/// In a wide window (Phase 15b) a look opens beside the grid, and that look stands on a soft
+/// tint and reads as selected.
 struct SavedLooksGrid: View {
     let items: [SavedLookItem]
     /// When the looks loaded, for "Last worn 3 days ago".
     let now: Date
+    /// The look showing beside the grid.
+    var current: Look.ID?
+    var opensBeside = false
     let open: (SavedLookItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -20,7 +26,9 @@ struct SavedLooksGrid: View {
 
     private var rows: some View {
         ForEach(items) { item in
-            SavedLookCell(item: item, now: now, style: .row) { open(item) }
+            SavedLookCell(
+                item: item, now: now, style: .row, isCurrent: item.id == current, opensBeside: opensBeside
+            ) { open(item) }
         }
     }
 
@@ -41,7 +49,9 @@ struct SavedLooksGrid: View {
                 spacing: NookSpacing.large
             ) {
                 ForEach(items) { item in
-                    SavedLookCell(item: item, now: now, style: .tile) { open(item) }
+                    SavedLookCell(
+                        item: item, now: now, style: .tile, isCurrent: item.id == current, opensBeside: opensBeside
+                    ) { open(item) }
                 }
             }
         }
@@ -59,6 +69,9 @@ struct SavedLookCell: View {
     let item: SavedLookItem
     let now: Date
     let style: Style
+    /// Its detail is showing beside the grid (iPad, Phase 15b).
+    var isCurrent = false
+    var opensBeside = false
     let action: () -> Void
 
     @Environment(\.locale) private var locale
@@ -97,11 +110,14 @@ struct SavedLookCell: View {
             }
         }
         .buttonStyle(SavedLookPressStyle())
+        // A pointer on iPad shows which look it's over (PRD §7.2).
+        .hoverEffect(.highlight)
+        .background { CurrentItemTint(isCurrent: isCurrent) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(LookBundleText.summary(of: item.content, title: item.name, locale: locale)))
         .accessibilityValue(Text(SavedLooksText.spokenDetail(of: item, lastWorn: lastWorn)))
-        .accessibilityHint(Text(SavedLooksText.openHint))
-        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(Text(opensBeside ? SavedLooksText.showBesideHint : SavedLooksText.openHint))
+        .accessibilityAddTraits(isCurrent ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("savedLooks.look.\(item.id)")
     }
 
@@ -142,6 +158,22 @@ struct SavedLookCell: View {
     private var detail: String? {
         let parts = [item.occasion, lastWorn].compactMap(\.self)
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+}
+
+/// The look or picture showing beside the grid stands on a soft tint, as Closet's piece does
+/// (Phase 15a, `ipad-saved.html`).
+struct CurrentItemTint: View {
+    let isCurrent: Bool
+
+    var body: some View {
+        if isCurrent {
+            NookRadius.shape(NookRadius.tile)
+                .fill(Color.nook.tintStrong)
+                .softShadow(.drop, in: NookRadius.shape(NookRadius.tile))
+                .padding(-NookSpacing.small)
+                .accessibilityHidden(true)
+        }
     }
 }
 

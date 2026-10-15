@@ -23,7 +23,7 @@ struct LookDetailActions {
 /// try-on pictures (each opens picture detail, RD-08.2), the pieces (each opens its garment), and
 /// Delete look, quiet, at the end.
 ///
-/// One column at most 600 points wide, so it centres on iPad (full iPad layouts are 15b).
+/// One readable column, or the column beside Saved Looks' grid on iPad (Phase 15b).
 /// Separate from `LookDetailScreen` so snapshot tests can draw it without navigation.
 struct LookDetailPage: View {
     let model: LookDetailModel
@@ -65,8 +65,7 @@ struct LookDetailPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
-        .frame(maxWidth: .infinity)
+        .readablePane()
     }
 
     @ViewBuilder
