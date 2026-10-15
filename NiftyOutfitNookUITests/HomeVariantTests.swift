@@ -47,11 +47,10 @@ final class HomeVariantTests: XCTestCase {
             if identifier == "home.occasion" {
                 // The calendar opens Style Me on the Occasion sheet (Phase 10a); close it first.
                 XCTAssertTrue(app.buttons["occasion.office"].waitForExistence(timeout: Self.wait), "No Occasion sheet")
-                app.buttons["Close"].tap()
+                app.buttons["Close"].tapUntilGone(timeout: Self.wait)
                 XCTAssertTrue(app.buttons["occasion.office"].waitForNonExistence(timeout: Self.wait))
             }
-            app.navigationBars[title].buttons.firstMatch.tap()
-            XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "No way back from \(title)")
+            app.goBack(from: title, to: "Home", timeout: Self.wait)
         }
 
         // Laundry tracking is off in the demo, so the Laundry row opens the short sheet.
@@ -60,9 +59,14 @@ final class HomeVariantTests: XCTestCase {
         XCTAssertEqual(laundry.label, "Laundry: Off")
         laundry.tap()
         let notNow = app.buttons["Not now"]
-        reveal(notNow, in: app)
-        notNow.tap()
-        XCTAssertTrue(notNow.waitForNonExistence(timeout: Self.wait))
+        XCTAssertTrue(notNow.waitForExistence(timeout: Self.wait), "The laundry sheet didn't open")
+        // The sheet opens full height here, with Not now below the fold. Only swipe up: a swipe
+        // down on a sheet can start closing it. In one CI failure Not now stayed on screen after
+        // its tap, following swipes both ways.
+        for _ in 0..<6 where !notNow.isHittable {
+            app.swipeUp(velocity: .slow)
+        }
+        notNow.tapUntilGone(timeout: Self.wait)
 
         // The wardrobe's edge in the banner opens Closet; Saved Looks is the tab.
         let tabBar = app.tabBars.firstMatch
@@ -71,10 +75,9 @@ final class HomeVariantTests: XCTestCase {
         wardrobe.tap()
         XCTAssertTrue(tabBar.buttons["Closet"].waitForExistence(timeout: Self.wait))
         XCTAssertTrue(tabBar.buttons["Closet"].isSelected, "The wardrobe didn't switch to Closet")
-        tabBar.buttons["Saved Looks"].tap()
-        XCTAssertTrue(tabBar.buttons["Saved Looks"].isSelected)
-        tabBar.buttons["Home"].tap()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
+        tabBar.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
+        tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
     }
 
     /// Sideways, the controls sit beside the room with the title and Profile at their top.
@@ -105,8 +108,7 @@ final class HomeVariantTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait))
         XCUIDevice.shared.orientation = .portrait
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait), "Turning the phone closed Help")
-        app.navigationBars["Help"].buttons.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
+        app.goBack(from: "Help", to: "Home", timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: source, containing: "Suitcase: Source"), "Upright again, it's the room")
     }
 

@@ -34,11 +34,10 @@ final class HomeTests: XCTestCase {
             if identifier == "home.occasion" {
                 // The calendar opens Style Me on the Occasion sheet (Phase 10a); close it first.
                 XCTAssertTrue(app.buttons["occasion.office"].waitForExistence(timeout: Self.wait), "No Occasion sheet")
-                app.buttons["Close"].tap()
+                app.buttons["Close"].tapUntilGone(timeout: Self.wait)
                 XCTAssertTrue(app.buttons["occasion.office"].waitForNonExistence(timeout: Self.wait))
             }
-            app.navigationBars[title].buttons.firstMatch.tap()
-            XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "No way back from \(title)")
+            app.goBack(from: title, to: "Home", timeout: Self.wait)
         }
 
         // The wardrobe and the shelf switch tabs.
@@ -49,8 +48,8 @@ final class HomeTests: XCTestCase {
             control.tap()
             XCTAssertTrue(tabBar.buttons[tab].waitForExistence(timeout: Self.wait))
             XCTAssertTrue(tabBar.buttons[tab].isSelected, "\(identifier) didn't switch to \(tab)")
-            tabBar.buttons["Home"].tap()
-            XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
+            tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
+            XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
         }
     }
 
@@ -84,16 +83,15 @@ final class HomeTests: XCTestCase {
         let notNow = app.buttons["Not now"]
         XCTAssertTrue(notNow.waitForExistence(timeout: Self.wait), "The laundry sheet didn't open")
         XCTAssertTrue(app.staticTexts["Laundry tracking is off"].exists)
-        notNow.tap()
-        XCTAssertTrue(notNow.waitForNonExistence(timeout: Self.wait))
+        notNow.tapUntilGone(timeout: Self.wait)
         XCTAssertEqual(hamper.label, "Hamper: Laundry, Off")
 
         reveal(hamper, in: app)
         hamper.tap()
         let turnOn = app.buttons["laundryTracking.turnOn"]
         XCTAssertTrue(turnOn.waitForExistence(timeout: Self.wait))
-        turnOn.tap()
-        XCTAssertTrue(turnOn.waitForNonExistence(timeout: Self.wait), "The sheet should close once tracking is on")
+        // The sheet closes once tracking is on.
+        turnOn.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(
             waitForLabel(of: hamper, containing: "Hamper: Laundry, 2 to wash"),
             "The hamper didn't update: \(hamper.label)")
@@ -141,7 +139,7 @@ final class HomeTests: XCTestCase {
         row.tap()
         app.buttons["weather.indoors"].tap()
         XCTAssertTrue(waitForLabel(of: row, containing: "Indoors"), row.label)
-        app.navigationBars["Style Me"].buttons.firstMatch.tap()
+        app.goBack(from: "Style Me", to: "Home", timeout: Self.wait)
         reveal(laptop, in: app)
         laptop.tap()
         XCTAssertTrue(row.waitForExistence(timeout: Self.wait))
