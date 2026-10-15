@@ -46,7 +46,7 @@ Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Config
 
 ## Component catalog
 
-Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
+Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. Its last page shows look bundles (Phase 9, `docs/look-bundles.md`), which Features adds through `NookCatalogView(extraPages:)`. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
 
 ## Cutout benchmark
 
@@ -100,6 +100,7 @@ docs/garment-detail.md       Garment detail, Remove from closet and Recently del
 docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and Describe in words.
 docs/cutout-feasibility.md   Lifting garments out of photos: the pipeline, the benchmark and the go/no-go.
 docs/stickers.md             Stickers and the photo tile: choosing, drawing, caching and the sample photos.
+docs/look-bundles.md         Look bundles: the flat-lay layout, the view, the piece list and the idea tag.
 website/                     The app's static website.
 ```
 

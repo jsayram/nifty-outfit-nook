@@ -226,6 +226,7 @@ on. Text that a component shows comes in already localized, as a `String`; the f
 | `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. |
 | `NookBadge` | `.sim`, `.pill`, `.dirty` | Small capsule label in four tones. Always words, never colour alone. |
 | `NookSticker`, `StickerRenderer`, `StickerCache` | `.stk` in `results.html` and `garment.html` | Phase 8b. See [Stickers](#stickers). |
+| `StickerBundleLayout`, `BundleRole`, `BundlePlacement` | `spots()` in `results.html` | Phase 9. The flat-lay arrangement of a look bundle: where 2 to 6 stickers lie by what they are, their tilt from a seed, and fitting the whole inside the 300 x 356 box. Pure arithmetic, tested for every mix of pieces. The view, `LookBundle`, is in Features since it draws garments; see `docs/look-bundles.md`. |
 | `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
 
 New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
@@ -261,7 +262,7 @@ The catalog's "Stickers and photo tiles" page shows three sizes, the tile fallba
 
 ### The catalog
 
-A debug-only catalog shows every component and state on one page, with switches for light, dark and text sizes up
+A debug-only catalog shows every component and state on one page (plus pages other modules pass to `NookCatalogView(extraPages:)`, such as Features' look bundles), with switches for light, dark and text sizes up
 to AX5. Launch a Debug build with `-catalog` (in Xcode: scheme, Run, Arguments). The code is in `Catalog/` and is
 wrapped in `#if DEBUG`, so a Release build doesn't contain it. CI checks that with `scripts/check-release.sh`.
 
