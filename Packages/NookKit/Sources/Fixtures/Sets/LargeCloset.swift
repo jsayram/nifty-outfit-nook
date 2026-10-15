@@ -1,8 +1,9 @@
 import Foundation
 import Models
 
-/// A generated closet for performance and layout checks: 2,400 garments, 600 looks and 40
-/// suitcases, with every state mixed in at realistic rates.
+/// A generated closet for performance and layout checks: 2,400 garments, 600 looks, 40
+/// suitcases and a simulated try-on picture for every third saved look, with every state mixed
+/// in at realistic rates.
 ///
 /// Generated from a fixed seed, so every run makes the same closet (for the same `now`).
 enum LargeCloset {
@@ -22,8 +23,20 @@ enum LargeCloset {
             looks: looks,
             suitcases: suitcases,
             profile: DemoCloset.profile,
-            weather: FixtureWeather.rainyDay(at: now)
+            weather: FixtureWeather.rainyDay(at: now),
+            pictures: pictures(of: looks)
         )
+    }
+
+    /// A simulated picture of every third saved look, made the day it was saved. No random
+    /// numbers, so the garments, suitcases and looks stay exactly as before pictures existed.
+    static func pictures(of looks: [Look]) -> [TryOnPicture] {
+        looks.filter(\.isSaved).enumerated().compactMap { index, look in
+            guard index.isMultiple(of: 3) else { return nil }
+            return TryOnPicture(
+                id: TryOnPicture.ID("p-large-\(look.id.rawValue)"), of: look, image: .simulated,
+                createdAt: look.savedDate)
+        }
     }
 
     // MARK: Garments

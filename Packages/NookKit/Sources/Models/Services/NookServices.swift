@@ -21,6 +21,10 @@ public struct NookServices: Sendable {
     public var cutouts: any CutoutService
     /// The unsaved Make your own look draft (Phase 11, LR-08.4).
     public var lookDrafts: any LookDraftStore
+    /// Her try-on pictures (Phase 12b).
+    public var pictures: any TryOnPictureStore
+    /// Try it on (simulated in Stage A; the gated image service is Phase 33).
+    public var tryOn: any TryOnService
 
     public init(
         closet: any ClosetStore,
@@ -34,7 +38,9 @@ public struct NookServices: Sendable {
         photos: any PhotoIntake,
         descriptions: any GarmentDescriptionReader,
         cutouts: any CutoutService,
-        lookDrafts: any LookDraftStore
+        lookDrafts: any LookDraftStore,
+        pictures: any TryOnPictureStore,
+        tryOn: any TryOnService
     ) {
         self.closet = closet
         self.looks = looks
@@ -48,5 +54,7 @@ public struct NookServices: Sendable {
         self.descriptions = descriptions
         self.cutouts = cutouts
         self.lookDrafts = lookDrafts
+        self.pictures = pictures
+        self.tryOn = tryOn
     }
 }

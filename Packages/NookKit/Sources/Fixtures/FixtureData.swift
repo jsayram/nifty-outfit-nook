@@ -12,19 +12,23 @@ public struct FixtureData: Sendable {
     public var suitcases: [Suitcase]
     public var profile: Profile
     public var weather: WeatherSnapshot
+    /// Try-on pictures (Phase 12b). Simulated: drawn from their looks' pieces, with no person.
+    public var pictures: [TryOnPicture]
 
     public init(
         garments: [Garment],
         looks: [Look],
         suitcases: [Suitcase],
         profile: Profile,
-        weather: WeatherSnapshot
+        weather: WeatherSnapshot,
+        pictures: [TryOnPicture] = []
     ) {
         self.garments = garments
         self.looks = looks
         self.suitcases = suitcases
         self.profile = profile
         self.weather = weather
+        self.pictures = pictures
     }
 }
 

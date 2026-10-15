@@ -54,8 +54,14 @@ public enum FixtureServices {
         case .stylistFails: stylistMode = .failing(.notCompleted)
         case .stylistPartial: stylistMode = .partial
         case .stylistInsufficient: stylistMode = .insufficient
-        case .normal, .slow, .stylistWaits, .storesFail, .photoFails: stylistMode = .normal
+        case .normal, .slow, .stylistWaits, .storesFail, .photoFails, .pictureFails: stylistMode = .normal
         }
+        let tryOnMode: SimulatedTryOn.Mode =
+            switch behavior {
+            case .offline: .failing(.offline)
+            case .pictureFails: .failing(.notCompleted)
+            default: .normal
+            }
         let stylistLatency: Duration =
             switch behavior {
             case .slow: .seconds(3)
@@ -82,7 +88,10 @@ public enum FixtureServices {
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
             descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),
             cutouts: StandInCutoutService(latency: slow ? .seconds(1) : .zero),
-            lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores)
+            lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores),
+            pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: stores),
+            // A moment, so the making state shows; a real picture takes much longer (Phase 33).
+            tryOn: SimulatedTryOn(mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800))
         )
     }
 }

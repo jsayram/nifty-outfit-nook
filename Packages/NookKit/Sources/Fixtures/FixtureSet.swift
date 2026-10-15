@@ -28,7 +28,8 @@ public enum FixtureBehavior: String, CaseIterable, Sendable {
     case normal
     /// Every call waits: stores about half a second, weather a second, the stylist a few seconds.
     case slow
-    /// No connection: the stylist throws `offline` and the weather can't be read. Local stores work.
+    /// No connection: the stylist and Try it on throw `offline`, and the weather can't be read.
+    /// Local stores work.
     case offline
     /// The stylist runs but doesn't finish (`StylistError.notCompleted`).
     case stylistFails = "stylist-fails"
@@ -46,6 +47,8 @@ public enum FixtureBehavior: String, CaseIterable, Sendable {
     case storesFail = "stores-fail"
     /// The Add a piece photo stand-in says the photo couldn't be read (Phase 7b).
     case photoFails = "photo-fails"
+    /// Try it on doesn't finish (`TryOnError.notCompleted`, Phase 12b).
+    case pictureFails = "picture-fails"
 }
 
 /// The weather the fixture weather service reports, to force each Home window (RD-01.4).

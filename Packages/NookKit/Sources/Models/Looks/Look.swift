@@ -7,6 +7,9 @@ import Foundation
 /// A styling result is one base outfit in three versions (LR-05a). Each version is its own
 /// `Look`, linked to the others by `resultID`. A look she built herself has no result and no
 /// version. Unsaved results are kept too (background history, LR-06), with `isSaved` false.
+///
+/// Its try-on pictures point at the look (`TryOnPicture.lookID`), not the other way round, so a
+/// look can have several, and deleting a picture never changes the look (Phase 12b).
 public struct Look: Identifiable, Hashable, Sendable, Codable {
     public typealias ID = EntityID<Look>
 
@@ -27,8 +30,6 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     public var savedAt: Date?
     /// Days she chose Wear today for this look (LR-10), oldest first, at most one per day.
     public var wornOn: [Date]
-    /// The simulated try-on picture made for this look, if any (RD-06).
-    public var tryOnPictureID: TryOnPicture.ID?
     public var createdAt: Date
 
     public init(
@@ -42,7 +43,6 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         isSaved: Bool = false,
         savedAt: Date? = nil,
         wornOn: [Date] = [],
-        tryOnPictureID: TryOnPicture.ID? = nil,
         createdAt: Date
     ) {
         self.id = id
@@ -55,7 +55,6 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         self.isSaved = isSaved
         self.savedAt = savedAt
         self.wornOn = wornOn
-        self.tryOnPictureID = tryOnPictureID
         self.createdAt = createdAt
     }
 
@@ -133,25 +132,5 @@ public struct PieceIdea: Hashable, Sendable, Codable {
         self.name = name
         self.category = category
         self.colors = colors
-    }
-}
-
-/// A simulated picture of her wearing a look (RD-06). Always labelled Simulated.
-///
-/// Data tier: **Sensitive** (a picture of a person). Stage A only has the placeholder; real
-/// pictures wait for Phase 33's gates.
-public struct TryOnPicture: Identifiable, Hashable, Sendable, Codable {
-    public typealias ID = EntityID<TryOnPicture>
-
-    public let id: ID
-    public var lookID: Look.ID
-    public var image: PhotoReference
-    public var createdAt: Date
-
-    public init(id: ID, lookID: Look.ID, image: PhotoReference, createdAt: Date) {
-        self.id = id
-        self.lookID = lookID
-        self.image = image
-        self.createdAt = createdAt
     }
 }

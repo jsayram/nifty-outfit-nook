@@ -34,3 +34,25 @@ public protocol ImageProvider: Sendable {
     /// Image bytes no larger than `maxPixelSize` on the long side, or `nil` when there's no picture.
     func imageData(for reference: PhotoReference, maxPixelSize: Int) async throws(ImageError) -> Data?
 }
+
+/// Why a try-on picture wasn't made. Nothing is kept and nothing is used either way.
+public enum TryOnError: Error, Hashable, Sendable {
+    /// No connection. Real pictures are made by a service (Phase 33).
+    case offline
+    /// The picture didn't finish.
+    case notCompleted
+    case cancelled
+}
+
+/// Makes a try-on picture of one look, only when she taps Try it on (RD-06.2).
+///
+/// Stage A's version (`SimulatedTryOn` in Fixtures) draws nothing and sends nothing: it returns a
+/// `.simulated` picture, which the screens draw on the phone from the look's pieces, with no
+/// person in it. Phase 33 puts the real, gated image service behind the same protocol, with its
+/// permission, cost check and reuse of matching pictures (PRD §9.2, FR-59).
+///
+/// The screen keeps the picture in `TryOnPictureStore` before it says the picture is ready
+/// (PRD §9.2.1 step 5).
+public protocol TryOnService: Sendable {
+    func makePicture(of look: Look, at date: Date) async throws(TryOnError) -> TryOnPicture
+}
