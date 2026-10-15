@@ -56,8 +56,7 @@ struct SuitcaseDetailPage: View {
                 .padding(.horizontal, NookSpacing.screenMargin)
                 .padding(.top, NookSpacing.large)
                 .padding(.bottom, NookSpacing.xxxLarge)
-                .frame(maxWidth: SuitcasesPage.maximumWidth)
-                .frame(maxWidth: .infinity)
+                .readablePane()
                 .background(Color.nook.floor)
         }
     }

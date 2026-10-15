@@ -60,8 +60,7 @@ struct GarmentEditorPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: Self.maximumWidth)
-        .frame(maxWidth: .infinity)
+        .readablePane(maxWidth: Self.maximumWidth)
     }
 
     private var header: some View {

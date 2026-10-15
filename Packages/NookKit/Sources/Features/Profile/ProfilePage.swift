@@ -27,9 +27,6 @@ struct ProfilePage: View {
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// Rows stay a comfortable reading width on a wide screen.
-    static let maximumWidth: CGFloat = 640
-
     var body: some View {
         if isStillImage {
             page
@@ -53,8 +50,7 @@ struct ProfilePage: View {
                 )
                 .padding(.top, NookSpacing.large)
                 .padding(.bottom, NookSpacing.xxxLarge)
-                .frame(maxWidth: Self.maximumWidth)
-                .frame(maxWidth: .infinity)
+                .readablePane()
                 .background(Color.nook.floor)
         }
     }

@@ -65,8 +65,7 @@ struct RecentlyDeletedPage: View {
         content
             .padding(.horizontal, NookSpacing.screenMargin)
             .padding(.vertical, NookSpacing.large)
-            .frame(maxWidth: GarmentDetailPage.maximumWidth)
-            .frame(maxWidth: .infinity)
+            .readablePane(maxWidth: GarmentDetailPage.maximumWidth)
     }
 
     @ViewBuilder private var content: some View {

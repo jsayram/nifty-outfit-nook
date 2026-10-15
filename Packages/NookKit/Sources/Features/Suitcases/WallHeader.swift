@@ -38,7 +38,8 @@ struct WallHeader<Art: View>: View {
         }
         .padding(.leading, NookSpacing.xLarge)
         .padding(.trailing, NookSpacing.medium)
-        .frame(maxWidth: .infinity)
+        // The title and the drawing line up with the page below on a wide window.
+        .readablePane()
         .background {
             if hasBackground { Color.nook.wallGradient }
         }
