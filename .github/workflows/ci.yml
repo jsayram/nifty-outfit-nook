@@ -48,7 +48,8 @@ jobs:
   # cold simulator boot and the first launch.
   #
   # The Release check and the package tests share a runner, then the same runner and simulator
-  # run two UI test classes, which costs no second build or boot.
+  # run SettingsTests, which costs no second build or boot (the first UI launch still takes
+  # about 3 minutes).
   release-and-package-tests:
     name: release-and-package-tests
     runs-on: macos-26
@@ -72,15 +73,13 @@ jobs:
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
         run: scripts/test.sh -skip-testing:NiftyOutfitNookUITests
-      # UI tests on the simulator the package tests booted. ui-rest skips these classes.
+      # UI tests on the simulator the package tests booted. ui-rest skips this class.
       # A failed UI test runs once more, as in the ui-tests job below.
-      - name: Test (UI, SettingsTests and LaunchTests)
+      - name: Test (UI, SettingsTests)
         env:
           NOOK_RESULT_BUNDLE: build/TestResults-UI.xcresult
         run: >-
-          scripts/test.sh
-          -only-testing:NiftyOutfitNookUITests/SettingsTests
-          -only-testing:NiftyOutfitNookUITests/LaunchTests
+          scripts/test.sh -only-testing:NiftyOutfitNookUITests/SettingsTests
           -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
@@ -97,15 +96,16 @@ jobs:
   # The rest of the UI tests in four parts of about the same length, by test class: three on an
   # iPhone simulator and one, the iPad layouts, on an iPad simulator.
   # Balanced in October 2026 (Phase 15b) from the classes' times on CI, in seconds, from the
-  # test log ("Test Case ... passed (N seconds)"):
-  #   ui-home-and-results     HomeTests 273, YourLooksTests 163, StyleMeTests 157, CutoutBenchTests 101,
-  #                           ClosetTests 67
-  #   ui-add-and-variants     AddPieceTests 266, HomeVariantTests 217, CatalogTests 130, SwapTests 125,
-  #                           MakeYourOwnLookTests 102
-  #   ui-rest                 SavedLooksTests 251, GarmentDetailTests 177, SuitcasesAndLaundryTests 172,
-  #                           ProfileTests 161, and any new class
-  #   ui-ipad                 IPadTests 296 and IPadStyleMeAndSavedTests (new in 15b, about 90 locally)
-  #   (release-and-package-tests above: SettingsTests 323, LaunchTests 60)
+  # test log ("Test Case ... passed (N seconds)"). The same class took up to 1.5 times as long
+  # from one run to the next:
+  #   ui-home-and-results     HomeTests 206, ClosetTests 191, StyleMeTests 182, YourLooksTests 170,
+  #                           LaunchTests 85, CutoutBenchTests 20 (job about 20 minutes)
+  #   ui-add-and-variants     AddPieceTests 300, HomeVariantTests 207, SwapTests 125, CatalogTests 124,
+  #                           MakeYourOwnLookTests 77 (about 20)
+  #   ui-rest                 SavedLooksTests 244, GarmentDetailTests 210, ProfileTests 193,
+  #                           SuitcasesAndLaundryTests 158, and any new class (about 22)
+  #   ui-ipad                 IPadStyleMeAndSavedTests 290, IPadTests 195 (about 14)
+  #   (release-and-package-tests above: SettingsTests 479, about 22 with the Release build)
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
   ui-tests:
@@ -125,6 +125,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/StyleMeTests
               -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -only-testing:NiftyOutfitNookUITests/ClosetTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
           - part: ui-add-and-variants
             family: iPhone
             selection: >-
