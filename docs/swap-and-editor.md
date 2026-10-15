@@ -17,11 +17,11 @@ Spec: amendment LR-07 (the explanation line, Show 3 more, See all, Find one) and
 | `Features/Swap/` | `SwapModel`, `SwapPage`, `SwapScreen` and `SwapText` |
 | `Features/LookBuilder/` | `LookBuilderModel`, `LookBuilderPage`, `LookBuilderScreen` and `LookBuilderText` |
 | `Features/Shared/PiecePicker/PiecePicker.swift` | See all and Add a piece: Closet's search, filters and grid over a chosen set of pieces |
-| `Features/SavedLooks/SavedLooksScreen.swift` | The Saved Looks stand-in, now with "+ Make your own" |
+| `Features/SavedLooks/SavedLooksScreen.swift` | Saved Looks, with "+ Make your own" (built in Phase 12a, `docs/saved-looks.md`) |
 
 ## Swap a piece
 
-Your looks' Swap a piece pushes it, on the version on screen (results today; saved looks get Swap it in 12a). Top to bottom, as in `swap.html`:
+Your looks' Swap a piece pushes it, on the version on screen. Since 12a, look detail on Saved Looks pushes it too, and Swap it on a piece that left her closet opens it on that piece (`docs/saved-looks.md`). Top to bottom, as in `swap.html`:
 
 - **Which piece**: a chip per piece ("Layer", "Top", "Bottom", "Shoes", and the idea's kind on Something new). It opens on the first main piece. VoiceOver reads each chip with the piece's name.
 - **The look**, its bundle with the piece being changed at full strength and the others stepped back, and a line under it: "Top now: Cream knit sweater", or "Trying Brick knit top".
@@ -59,7 +59,7 @@ On Today, a piece she swapped in is marked "Swapped" (or "Added" if the stylist'
 
 ## Make your own look
 
-It opens from a garment's Style with this, Make my own look (starting with that piece, if she can wear it today), and from "+ Make your own" on Saved Looks (RD-08; the Saved Looks screen itself is 12a, so for now the button sits on its stand-in). No path leads to it from a result or a saved look (LR-08.1). Top to bottom, as in `editor.html`:
+It opens from a garment's Style with this, Make my own look (starting with that piece, if she can wear it today), and from "+ Make your own" on Saved Looks (RD-08), in its toolbar and on its empty state since 12a. No path leads to it from a result or a saved look (LR-08.1). Top to bottom, as in `editor.html`:
 
 - "Build an outfit yourself, piece by piece." (LR-08's tour line).
 - **Continue your look?** when a half-built look is waiting, with Resume and Start over.
@@ -102,11 +102,11 @@ It opens from a garment's Style with this, Make my own look (starting with that 
 7. **Make your own look uses the main closet only.** Choosing a suitcase as its source can come later.
 8. **Shoes aren't required** in a look she makes. The shape rule is a dress, or a top and a bottom, as the mockup said ("A look needs at least a top and a bottom").
 9. **One piece of each kind** in Make your own look; adding another top replaces the first.
-10. **"+ Make your own" sits on the Saved Looks stand-in** until 12a builds that screen.
+10. **"+ Make your own" sat on the Saved Looks stand-in** until 12a built that screen; it's now in the toolbar.
 
 ## Left for later phases
 
-- **12a:** Swap it on a saved look's faded piece (LR-16) and Swap a piece from look detail; saved looks list and renaming.
+- **12a (done):** Swap it on a saved look's faded piece (LR-16) and Swap a piece from look detail, which change the saved look in place; the saved looks list and renaming.
 - **16a, 16b:** the Make your own look tour, starting "Build an outfit yourself, piece by piece."
 - **21a:** durable storage behind `LookDraftStore`.
 - **34:** Find one.

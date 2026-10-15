@@ -96,12 +96,12 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 7. **No "why" line under the bundle.** The mockup's explanation text needs the stylist to write one; the mock stylist doesn't. The description and notes cover it for now.
 8. **"From your history" (FR-58) isn't built.** The history check before paid inference belongs with the real stylist (27a); results are already kept for it.
 9. **The recent-wear note counts days** ("You wore this 5 days ago") rather than the amendment's example "last week".
-10. **The saved look sheet is read-only** (bundle and pieces). Look detail, Wear today and Swap it are 12a.
+10. **The saved look sheet is read-only** (bundle and pieces). Look detail, Wear today and Swap it live on Saved Looks (Phase 12a, `docs/saved-looks.md`).
 
 ## Left for later phases
 
 - **11 (done):** Swap a piece and Remove this piece, with Undo (`docs/swap-and-editor.md`).
-- **12a:** Saved Looks and look detail, renaming, Wear today.
+- **12a (done):** Saved Looks and look detail, renaming, Wear today (`docs/saved-looks.md`). Saving now records `savedAt`, and a piece that has left her closet shows faded on the Saved tab too.
 - **12b, 33:** Try it on with simulated, then real, pictures.
 - **15a:** iPad results with the versions beside the look. The page keeps to 600 points and centres.
 - **27a:** the real stylist contract, the history check, and the explanation line.

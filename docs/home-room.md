@@ -37,7 +37,8 @@ Style Me's Weather row and its sheet live in `Features/StyleMe` (see below).
 | Object | Opens | How |
 |---|---|---|
 | Wardrobe | Closet | Switches tab |
-| Shelf ("Saved Looks" plate, and the frames under it) | Saved Looks | Switches tab |
+| Shelf ("Saved Looks" plate, and any empty frame under it) | Saved Looks | Switches tab |
+| A frame with a saved look in it (Phase 12a) | That look's detail on Saved Looks | Switches tab and opens the look |
 | Laptop | Style Me | Push |
 | Calendar | Style Me, on the Occasion sheet | Push (`choosingOccasion: true`) |
 | Suitcase | Suitcases | Push |
@@ -46,6 +47,8 @@ Style Me's Weather row and its sheet live in `Features/StyleMe` (see below).
 | Name sign, and the top-right button | Profile | Push |
 
 Closet and Saved Looks are tabs in the mockup (the wardrobe link lands on the Closet tab), so the room switches tabs for them rather than pushing a second copy.
+
+**The shelf frames (Phase 12a).** The three frames under the shelf show her three most recently saved looks, newest on the left (`HomeModel.framedLooks`, by the date she saved them). Each one draws the look's main pieces small, as `home.html` does: a top (or a layer) over a bottom, or a dress (`FramedLookArt`). A framed look is a button, "Saved look: Interview navy and pink", read right after the shelf; it switches to Saved Looks with that look open (`RootTabView` keeps Saved Looks' path, so it can push the look). Empty frames stay empty and a tap on one does what the plate does. Each frame's tap area is its column of the strip, 35 x 62 stage units, so about 36 points wide on iPhone 17: the cards sit 35 units apart and the window is right beside them, so they can't reach 44 points without overlapping. The plate above them is a full 44-point target to Saved Looks, and VoiceOver reaches each frame by name. The large-text and sideways layouts have no shelf, so they don't show the frames.
 
 ## Sizing
 
@@ -170,7 +173,6 @@ Everything else held up: the plates use the strong tint with light text, the sig
 ## Left for later phases
 
 - **13:** the occasion on the calendar (`HomeRoomContent.occasion`) and under "Occasion" on the large-text row and the sideways tile, with the remembered source. Phase 10a opens Style Me on the Occasion sheet; remembering her last occasion waits for remembered request defaults (`docs/style-me.md`).
-- **12a:** her saved looks in the shelf frames, which are empty for now.
 - **13:** the remembered source (`HomeModel.source`, FR-67). Until the source picker exists, Home shows the main closet. The suitcase plate already knows how to show a suitcase source (green, or butter when empty).
 - **14a:** "Name on your sign" in Profile, and reloading Home when it changes (RD-03.1).
 - **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.

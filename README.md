@@ -104,6 +104,7 @@ docs/look-bundles.md         Look bundles: the flat-lay layout, the view, the pi
 docs/style-me.md             The Style Me request: the screen, its sheets and the checks.
 docs/your-looks.md           Your looks: one outfit in three versions, the Saved tab, saving and every styling state.
 docs/swap-and-editor.md      Swap a piece (ranking, See all, Remove and Undo) and Make your own look with its draft.
+docs/saved-looks.md          Saved Looks: the grid, search and filters, look detail, and the Home shelf frames.
 website/                     The app's static website.
 ```
 
