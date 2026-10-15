@@ -409,6 +409,20 @@ final class YourLooksModel {
         return .saved(look.id)
     }
 
+    /// Saves the look for Try it on, which needs a saved look to link its picture to (Phase 12b),
+    /// and returns it as stored. A saved look is returned as it is.
+    func saveForPicture(_ look: Look, name: String) async throws(StoreError) -> Look {
+        if !isSaved(look) {
+            try await setSaved(true, look: look, name: name)
+        }
+        return looks.first { $0.id == look.id } ?? look
+    }
+
+    /// The look as stored, when it is: saved looks carry their name.
+    func stored(_ look: Look) -> Look? {
+        looks.first { $0.id == look.id }
+    }
+
     /// Undo for a save or unsave.
     func undo(_ change: SaveChange, name: String) async throws(StoreError) {
         let id: Look.ID

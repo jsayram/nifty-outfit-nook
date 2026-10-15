@@ -6,14 +6,20 @@ import SwiftUI
 nonisolated enum SavedLooksDestination: Hashable, Sendable {
     /// "+ Make your own" (LR-08.3, Phase 11).
     case makeYourOwnLook
-    /// Look detail (Phase 12a), from the grid or a frame on the Home shelf.
+    /// Look detail (Phase 12a), from the grid, a picture, or a frame on the Home shelf.
     case look(Look.ID)
+    /// Picture detail (Phase 12b), from the Pictures tab, a look, or Try it on.
+    case picture(TryOnPicture.ID)
     /// A screen Closet also shows, opened from a look's piece: garment detail and what it opens.
     case closet(ClosetDestination)
 }
 
-/// Saved Looks (RD-08, LR-09): her saved looks with search and filters, look detail, and
-/// "+ Make your own" (LR-08.3). The Pictures tab is a stand-in until 12b.
+/// Saved Looks (RD-08, LR-09): her saved looks and her try-on pictures with search and filters,
+/// look detail, picture detail, and "+ Make your own" (LR-08.3).
+///
+/// A picture opens its look and a look its pictures (RD-08.2). Going from one to the other and
+/// back goes back rather than piling up copies: See the look on a picture opened from that look
+/// is Back.
 ///
 /// The path is the root view's, so a frame on the Home shelf can open a look here. The looks
 /// reload each time the tab appears and each time a pushed screen closes, so a look saved on Your
@@ -37,7 +43,10 @@ struct SavedLooksScreen: View {
                     open: { path.append(.look($0.id)) },
                     undoDelete: undoDelete,
                     makeYourOwn: { path.append(.makeYourOwnLook) },
-                    retry: reload
+                    retry: reload,
+                    openPicture: { openPicture($0.id) },
+                    openLook: { openLook($0.id) },
+                    undoPictureDelete: undoPictureDelete
                 )
             )
             .navigationTitle(SavedLooksText.title)
@@ -79,11 +88,16 @@ struct SavedLooksScreen: View {
         }
         .nookToast($toast)
         .task { await model.load(from: services) }
-        .onDisappear { model.lastRemoval = nil }
-        .onChange(of: path) { old, new in
-            // Back from a pushed screen: it may have saved or changed a look.
-            if new.count < old.count { reload() }
+        .onDisappear {
+            model.lastRemoval = nil
+            model.lastPictureRemoval = nil
         }
+        .onChange(of: path) { old, new in
+            // Back from a pushed screen: it may have saved or changed a look or a picture.
+            if new.count < old.count { reload() }
+            if old.isEmpty { showPicturesIfOpeningOne() }
+        }
+        .onAppear(perform: showPicturesIfOpeningOne)
     }
 
     @ViewBuilder private func screen(for destination: SavedLooksDestination) -> some View {
@@ -95,7 +109,10 @@ struct SavedLooksScreen: View {
                 lookID: id,
                 changes: changes,
                 openGarment: { garmentID, name in path.append(.closet(.garment(garmentID, name: name))) },
+                openPicture: openPicture,
                 deleted: lookDeleted)
+        case .picture(let id):
+            PictureDetailScreen(pictureID: id, seeLook: { openLook($0.id) }, deleted: pictureDeleted)
         case .closet(let destination):
             closetScreen(destination)
         }
@@ -126,12 +143,56 @@ struct SavedLooksScreen: View {
         }
     }
 
+    /// Try it on's See the picture opens a picture here from another tab, before this tab may
+    /// have appeared. Back from it should land on the pictures.
+    private func showPicturesIfOpeningOne() {
+        if case .picture = path.first { model.tab = .pictures }
+    }
+
     private func reload() {
         Task { await model.load(from: services) }
     }
 
     private func goBack() {
         if !path.isEmpty { path.removeLast() }
+    }
+
+    /// Opens a look, or goes back to it when the screen under this one is that look.
+    private func openLook(_ id: Look.ID) {
+        if path.count >= 2, path[path.count - 2] == .look(id) {
+            path.removeLast()
+        } else {
+            path.append(.look(id))
+        }
+    }
+
+    /// Opens a picture, or goes back to it when the screen under this one is that picture.
+    private func openPicture(_ id: TryOnPicture.ID) {
+        if path.count >= 2, path[path.count - 2] == .picture(id) {
+            path.removeLast()
+        } else {
+            path.append(.picture(id))
+        }
+    }
+
+    /// Delete picture: back to where she came from, with Undo in a toast and, on the Pictures
+    /// tab, on a line over the pictures.
+    private func pictureDeleted(_ removal: PictureRemoval) {
+        if case .picture(let id) = path.last, id == removal.picture.id {
+            path.removeLast()
+        }
+        model.lastPictureRemoval = removal
+        reload()
+        toast = NookToastMessage(
+            TryOnText.deleted, systemImage: "trash", actionTitle: YourLooksText.undo, action: undoPictureDelete)
+    }
+
+    private func undoPictureDelete() {
+        toast = nil
+        Task {
+            await model.undoLastPictureRemoval(using: services)
+            changes += 1
+        }
     }
 
     /// Delete look: back to the grid, with Undo in a toast and on a line over the looks, which
@@ -143,7 +204,7 @@ struct SavedLooksScreen: View {
         model.lastRemoval = removal
         reload()
         toast = NookToastMessage(
-            LookDetailText.deleted(removal.name), systemImage: "trash", actionTitle: YourLooksText.undo,
+            LookDetailText.deleted(removal), systemImage: "trash", actionTitle: YourLooksText.undo,
             action: undoDelete)
     }
 

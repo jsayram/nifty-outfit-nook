@@ -102,19 +102,6 @@ enum SavedLooksText {
         String(localized: "Clear filters", bundle: .module, comment: "Button: clears every filter and the search")
     }
 
-    // MARK: Pictures tab (12b)
-
-    static var picturesTitle: String {
-        String(localized: "No try-on pictures yet", bundle: .module, comment: "Saved Looks Pictures tab, empty")
-    }
-
-    static var picturesMessage: String {
-        String(
-            localized:
-                "Pictures are made one look at a time, only when you ask, and they’re simulated. They’ll show here with the look each one came from.",
-            bundle: .module, comment: "Saved Looks Pictures tab, empty")
-    }
-
     // MARK: Grid
 
     /// What VoiceOver says after a look's name and pieces: "Office, Last worn 5 days ago, 1 piece

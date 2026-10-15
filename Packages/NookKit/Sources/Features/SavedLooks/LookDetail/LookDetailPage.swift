@@ -14,11 +14,14 @@ struct LookDetailActions {
     var openPiece: (LookBundlePiece) -> Void = { _ in }
     var findOne: (LookBundlePiece) -> Void = { _ in }
     var retry: () -> Void = {}
+    /// One of the look's try-on pictures (RD-08.2).
+    var openPicture: (TryOnPicture.ID) -> Void = { _ in }
 }
 
 /// Look detail's content, top to bottom (`look.html`): the name and its facts, the look large,
-/// a kind note when pieces left her closet, Wear today, Swap a piece, Try it on and Rename, the
-/// pieces (each opens its garment), and Delete look, quiet, at the end.
+/// a kind note when pieces left her closet, Wear today, Swap a piece, Try it on and Rename, its
+/// try-on pictures (each opens picture detail, RD-08.2), the pieces (each opens its garment), and
+/// Delete look, quiet, at the end.
 ///
 /// One column at most 600 points wide, so it centres on iPad (full iPad layouts are 15b).
 /// Separate from `LookDetailScreen` so snapshot tests can draw it without navigation.
@@ -74,6 +77,9 @@ struct LookDetailPage: View {
             removedNote(content.removed)
         }
         buttons
+        if !model.pictures.isEmpty {
+            pictures
+        }
         VStack(alignment: .leading, spacing: NookSpacing.small) {
             NookSectionHeader(LookDetailText.piecesHeading)
             LookPieceList(
@@ -90,6 +96,49 @@ struct LookDetailPage: View {
             .accessibilityHint(Text(LookDetailText.deleteHint))
             .accessibilityIdentifier("lookDetail.delete")
     }
+
+    /// The look's try-on pictures, newest first: a small picture, "Try-on picture" and
+    /// "Simulated · Made 28 Aug", each opening picture detail.
+    private var pictures: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            NookSectionHeader(TryOnText.picturesHeading)
+            ForEach(model.pictures) { picture in
+                Button {
+                    actions.openPicture(picture.id)
+                } label: {
+                    HStack(spacing: NookSpacing.medium) {
+                        TryOnPictureView(
+                            content: model.pictureContent(picture), lookName: model.name, width: Self.thumbnailWidth)
+                        VStack(alignment: .leading, spacing: NookSpacing.xxSmall) {
+                            Text(TryOnText.pictureTitle)
+                                .nookTextStyle(.label)
+                                .foregroundStyle(.nook.textPrimary)
+                            Text(model.pictureFacts(picture, locale: locale))
+                                .nookTextStyle(.note)
+                                .foregroundStyle(.nook.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.nook.chevron)
+                            .accessibilityHidden(true)
+                    }
+                    .nookCard(.tint, padding: NookSpacing.small)
+                }
+                .buttonStyle(PictureRowPressStyle())
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(TryOnText.pictureTitle))
+                .accessibilityValue(Text(model.pictureFacts(picture, locale: locale)))
+                .accessibilityHint(Text(TryOnText.openHint))
+                .accessibilityAddTraits(.isButton)
+                .accessibilityIdentifier("lookDetail.picture.\(picture.id)")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// A picture's width in the look's list of pictures.
+    static let thumbnailWidth: CGFloat = 56
 
     /// The name, big, and the facts under it.
     private var header: some View {

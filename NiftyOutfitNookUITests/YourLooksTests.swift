@@ -48,11 +48,12 @@ final class YourLooksTests: XCTestCase {
         // The demo's two saved Office looks are there too.
         XCTAssertTrue(app.buttons["results.saved.o-interview"].exists)
 
-        // Back on Today, the stand-ins open without sending anything.
+        // Back on Today, Try it on says what it will do and makes nothing until asked (RD-06.2;
+        // making a picture is in SavedLooksTests).
         tap("results.tab.today", in: app)
         tap("results.tryOn", in: app)
-        XCTAssertTrue(element("results.stub.tryOn", in: app).waitForExistence(timeout: Self.wait))
-        app.buttons["Close"].tap()
+        XCTAssertTrue(element("tryOn.ready", in: app).waitForExistence(timeout: Self.wait))
+        app.buttons["Close"].tapUntilGone(timeout: Self.wait)
         // Swap a piece opens Swap (Phase 11); Back leaves the look as it was.
         tap("results.swap", in: app)
         XCTAssertTrue(app.navigationBars["Swap a piece"].waitForExistence(timeout: Self.wait))

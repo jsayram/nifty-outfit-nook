@@ -7,12 +7,15 @@ import SwiftUI
 ///
 /// Wear today, Swap a piece and Rename change the look here, each with a toast and Undo. Delete
 /// look hands the removal back to Saved Looks, which goes back to the grid and offers Undo there
-/// (playbook, Phase 7a). Try it on and Find one open stand-ins until 12b and 34.
+/// (playbook, Phase 7a). Try it on opens its sheet (Phase 12b); a new picture shows in the look's
+/// pictures when the sheet closes. Find one opens a stand-in until Phase 34.
 struct LookDetailScreen: View {
     /// Changes when another screen changed something the look shows, so it reads again.
     let changes: Int
     /// Opens one of the look's pieces.
     let openGarment: (Garment.ID, String) -> Void
+    /// Opens one of the look's try-on pictures.
+    let openPicture: (TryOnPicture.ID) -> Void
     let deleted: (SavedLookRemoval) -> Void
 
     @Environment(\.services) private var services
@@ -21,13 +24,16 @@ struct LookDetailScreen: View {
     @State private var stub: ResultStub?
     @State private var renaming: RenameDraft?
     @State private var toast: NookToastMessage?
+    @State private var tryingOn: TryOnRoute?
 
     init(
         lookID: Look.ID, changes: Int = 0, openGarment: @escaping (Garment.ID, String) -> Void,
+        openPicture: @escaping (TryOnPicture.ID) -> Void = { _ in },
         deleted: @escaping (SavedLookRemoval) -> Void
     ) {
         self.changes = changes
         self.openGarment = openGarment
+        self.openPicture = openPicture
         self.deleted = deleted
         _model = State(initialValue: LookDetailModel(lookID: lookID))
     }
@@ -39,7 +45,7 @@ struct LookDetailScreen: View {
                 wearToday: toggleWear,
                 swap: { openSwap(at: nil) },
                 swapIt: { piece in openSwap(at: LookPiece.ID(piece.id)) },
-                tryOn: { stub = .tryOn(model.lookID) },
+                tryOn: openTryOn,
                 rename: { renaming = RenameDraft(text: model.name) },
                 delete: delete,
                 openPiece: { piece in
@@ -48,7 +54,8 @@ struct LookDetailScreen: View {
                     openGarment(id, piece.name)
                 },
                 findOne: { stub = .findOne(pieceName: $0.name) },
-                retry: reload
+                retry: reload,
+                openPicture: openPicture
             )
         )
         .navigationTitle(model.name)
@@ -64,6 +71,11 @@ struct LookDetailScreen: View {
         }
         .nookSheet(item: $stub, title: { $0.title }, subtitle: { $0.subtitle }) { stub in
             ResultStubContent(stub: stub)
+        }
+        .tryOnSheet($tryingOn, seePicture: { openPicture($0.id) })
+        .onChange(of: tryingOn == nil) { _, closed in
+            // A picture made in the sheet joins the look's pictures.
+            if closed { reload() }
         }
         .nookSheet(item: $renaming, title: { _ in LookDetailText.renameTitle }) { draft in
             RenameLookSheet(draft: draft, problem: model.renameProblem) { name in
@@ -81,6 +93,10 @@ struct LookDetailScreen: View {
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    private func openTryOn() {
+        tryingOn = model.tryOnModel().map { TryOnRoute(model: $0) }
     }
 
     // MARK: Wear today
