@@ -56,7 +56,7 @@ Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) 
 
 Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
-- a behaviour for loading, error and offline states: `slow`, `offline`, `stylist-fails`, `stylist-partial`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`;
+- a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
 - `draft=` with `add` or `edit`, to start with an unsaved Add a piece or Edit draft, as if the app had been closed mid-way;
@@ -101,7 +101,8 @@ docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and
 docs/cutout-feasibility.md   Lifting garments out of photos: the pipeline, the benchmark and the go/no-go.
 docs/stickers.md             Stickers and the photo tile: choosing, drawing, caching and the sample photos.
 docs/look-bundles.md         Look bundles: the flat-lay layout, the view, the piece list and the idea tag.
-docs/style-me.md             The Style Me request: the screen, its sheets, the checks and the stand-in results.
+docs/style-me.md             The Style Me request: the screen, its sheets and the checks.
+docs/your-looks.md           Your looks: one outfit in three versions, the Saved tab, saving and every styling state.
 website/                     The app's static website.
 ```
 
