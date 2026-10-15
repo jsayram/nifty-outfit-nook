@@ -14,6 +14,9 @@ public struct StylingContext: Hashable, Sendable {
     public var usualFit: Comfort?
     /// Main-piece combinations worn inside the repeat window, with the last day each was worn.
     public var recentCombinations: [Set<Garment.ID>: Date]
+    /// Main-piece combinations already shown for this request. Try a different outfit asks for a
+    /// new base, so the stylist starts from something else when it can (LR-05a.4).
+    public var shownCombinations: Set<Set<Garment.ID>>
     /// When the request is styled. Results and looks are stamped with it.
     public var now: Date
     public var calendar: Calendar
@@ -23,6 +26,7 @@ public struct StylingContext: Hashable, Sendable {
         eligibleGarments: [Garment],
         usualFit: Comfort? = nil,
         recentCombinations: [Set<Garment.ID>: Date] = [:],
+        shownCombinations: Set<Set<Garment.ID>> = [],
         now: Date,
         calendar: Calendar
     ) {
@@ -30,6 +34,7 @@ public struct StylingContext: Hashable, Sendable {
         self.eligibleGarments = eligibleGarments.sorted { $0.id < $1.id }
         self.usualFit = usualFit
         self.recentCombinations = recentCombinations
+        self.shownCombinations = shownCombinations
         self.now = now
         self.calendar = calendar
     }
@@ -37,12 +42,15 @@ public struct StylingContext: Hashable, Sendable {
     /// Builds the context from everything in the stores.
     ///
     /// Throws when the suitcase is missing or archived, or the starting piece can't be used.
+    /// - Parameter shown: main-piece combinations already shown for this request, for Try a
+    ///   different outfit.
     public static func make(
         request: StyleRequest,
         garments: [Garment],
         suitcases: [Suitcase],
         looks: [Look],
         usualFit: Comfort?,
+        shown: Set<Set<Garment.ID>> = [],
         now: Date,
         calendar: Calendar
     ) throws(StylingContextError) -> StylingContext {
@@ -74,6 +82,7 @@ public struct StylingContext: Hashable, Sendable {
             eligibleGarments: eligible,
             usualFit: usualFit,
             recentCombinations: recent,
+            shownCombinations: shown,
             now: now,
             calendar: calendar
         )

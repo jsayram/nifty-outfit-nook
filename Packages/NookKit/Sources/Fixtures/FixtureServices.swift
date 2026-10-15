@@ -50,10 +50,19 @@ public enum FixtureServices {
         let stylistMode: MockStylist.Mode
         switch behavior {
         case .offline: stylistMode = .failing(.offline)
+        case .offlineOnce: stylistMode = .failingOnce(.offline)
         case .stylistFails: stylistMode = .failing(.notCompleted)
         case .stylistPartial: stylistMode = .partial
-        case .normal, .slow, .storesFail, .photoFails: stylistMode = .normal
+        case .stylistInsufficient: stylistMode = .insufficient
+        case .normal, .slow, .stylistWaits, .storesFail, .photoFails: stylistMode = .normal
         }
+        let stylistLatency: Duration =
+            switch behavior {
+            case .slow: .seconds(3)
+            // Long enough that only cancelling ends it.
+            case .stylistWaits: .seconds(3600)
+            default: .zero
+            }
         let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
 
         return NookServices(
@@ -61,7 +70,7 @@ public enum FixtureServices {
             looks: InMemoryLookStore(looks: data.looks, calendar: calendar, options: stores),
             suitcases: InMemorySuitcaseStore(suitcases: data.suitcases, options: stores),
             profile: InMemoryProfileStore(profile: data.profile, options: stores),
-            stylist: MockStylist(mode: stylistMode, latency: slow ? .seconds(3) : .zero),
+            stylist: MockStylist(mode: stylistMode, latency: stylistLatency),
             weather: FixtureWeatherProvider(
                 snapshot: snapshot,
                 isOffline: behavior == .offline || weather == .unavailable,
