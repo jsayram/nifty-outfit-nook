@@ -1,19 +1,20 @@
 # iPad
 
-Phase 15a, 15 October 2026. iPad layouts for Home and Closet, the tab bar at the bottom, and windows of any size. Spec: amendment RD-01.6 (the wide room with bottom tabs in both orientations; rotating or resizing loses nothing and starts no request), the mockup README's decision 12 (use the space, never a phone layout centred in a tablet frame), PRD §7.2 (no state loss on resize, keyboard and pointer). Visual references: `ipad-home.html` and `css/home-wide.css` (sideways), the room in `ipad-home-portrait.html` (upright), and `ipad-closet.html`, in `closet/prototypes/RoomDirectionMockups`.
-
-Style Me's results and Saved Looks get their iPad layouts in 15b. Until then they show their phone pages at full width, as before.
+Phase 15a, 15 October 2026. iPad layouts for Home and Closet, the tab bar at the bottom, and windows of any size. Phase 15b, the same day, added Style Me, Your looks, Saved Looks and every other screen; see [Style Me, Saved Looks and the other screens](#style-me-saved-looks-and-the-other-screens). Spec: amendment RD-01.6 (the wide room with bottom tabs in both orientations; rotating or resizing loses nothing and starts no request), the mockup README's decision 12 (use the space, never a phone layout centred in a tablet frame), PRD §7.2 (no state loss on resize, keyboard and pointer). Visual references: `ipad-home.html` and `css/home-wide.css` (sideways), the room in `ipad-home-portrait.html` (upright), and `ipad-closet.html`, in `closet/prototypes/RoomDirectionMockups`.
 
 ## What's where
 
 | File | Holds |
 |---|---|
-| `Features/Shared/WindowLayout.swift` | Every layout choice that depends on the window, in one place: which room a window gets, Closet's three layouts, and Closet's column widths |
+| `Features/Shared/WindowLayout.swift` | Every layout choice that depends on the window, in one place: which room a window gets, the three layouts of Closet and Saved Looks and their column widths, the readable width, and when two panes sit side by side |
+| `Features/Shared/BrowseColumns.swift` | The columns of Closet and Saved Looks for a layout, the note beside the grid before she picks something, and `pagedTitle` for a screen that's either pushed or beside the grid |
+| `Features/Shared/WidePanes.swift` | `WidePanes` (two panes side by side, or stacked as on a phone) and `.readablePane()` |
 | `Features/Shared/RootTabView.swift` | The tab bar at the bottom (see below) |
 | `Features/Home/Room/RoomPlan.swift` | The three arrangements of the room: the phone's, the upright iPad's (`tall`) and the sideways iPad's (`wide`) |
 | `Features/Home/Room/RoomStage.swift` | The phone room's rects, and `RoomLayout`, which scales a plan to a window |
-| `Features/Closet/ClosetScreen.swift` | The layouts, `ClosetColumns`, the piece beside the grid, and keeping it across a change of layout |
+| `Features/Closet/ClosetScreen.swift` | Closet's layout, the piece beside the grid, and keeping it across a change of layout |
 | `Features/Closet/ClosetPage.swift` | The page as a whole, or split into the sidebar and the grid column |
+| `Features/SavedLooks/SavedLooksScreen.swift`, `SavedLooksPage.swift` | The same for Saved Looks, with a look or a picture beside the grid (15b) |
 
 ## Decided by the window, not the device
 
@@ -67,11 +68,59 @@ The sidebar is about a quarter of the window (280 to 340 points) and the detail 
 
 **Keeping what's open.** Turning the iPad or resizing the window keeps the piece: when the layout changes to the phone page, the piece beside the grid is pushed, and when it widens again a pushed piece moves back beside the grid. The search and the filters live in the model, so they survive too. The grid's scroll position goes back to the top when the columns change.
 
-This is two columns of the screen's own, not a `NavigationSplitView`. Closet's navigation stack is shared with Home (the suitcase and hamper open Suitcases and Laundry in it), and a split view inside a tab whose width class we override would bring its own column rules; the plain columns keep one stack and one set of rules, and they're drawn by the snapshot tests exactly as the screen draws them (`ClosetColumns`).
+This is two columns of the screen's own, not a `NavigationSplitView`. Closet's navigation stack is shared with Home (the suitcase and hamper open Suitcases and Laundry in it), and a split view inside a tab whose width class we override would bring its own column rules; the plain columns keep one stack and one set of rules, and they're drawn by the snapshot tests exactly as the screen draws them (`BrowseColumns`, shared with Saved Looks since 15b).
+
+## Style Me, Saved Looks and the other screens
+
+Phase 15b. Spec: the plan's "Results and Saved Looks with side-by-side detail and centered panes", the mockup README's decision 12 and its tablet notes R10 and R11 (two panes where useful, centred), and `ipad-saved.html`. `ipad-results.html` still shows Current, Earlier and Shuffle, which Lily's sign-off replaced, so Your looks follows the tablet layout of `results.html` with today's versions.
+
+### Two panes, and a readable column
+
+Two shared pieces, both deciding from the window like everything else here:
+
+- **`.readablePane()`** keeps a column of rows, words or fields to 640 points in the middle of the window (`WindowLayout.readableWidth`). Every page that was a phone column now uses it instead of its own width (they were 560 to 640), so nothing runs from edge to edge. A phone is narrower, so phones don't change. Garment detail, Edit and Recently deleted keep their 560.
+- **`WidePanes`** puts two panes side by side, sharing at most 1,120 points (`panesMaximumWidth`) with 40 between them, when the window is regular width, the text is below the accessibility sizes, and the page's content is at least 720 points wide (`panesMinimumWidth`). Otherwise the panes stack in one readable column, as the same views with the same spacing as before, so the phone snapshots didn't change. Each pane is told which arrangement it's in, so a look can grow beside its controls. The choice is made from the space the page is offered (`ViewThatFits`), which a still image sees the same way as the screen.
+
+Measured content widths (the window less two 16-point margins): 1,178 on the 11-inch held sideways, 802 upright, 763 at two thirds of it sideways, 1,000 on the 13-inch upright, and 712 on the iPad mini upright, which stays one column.
+
+| Screen | In a wide window |
+|---|---|
+| Your looks, Today | The version switch and the look on the left, up to 420 points wide; the notes, the pieces, Undo, the four buttons and Try a different outfit on the right. The tabs, the request line and any banner stay above both |
+| Your looks, Saved | A grid of the saved looks, each bundle on a soft mat with its name and "4 pieces · Last worn …" under it, 180 to 240 points a column |
+| Style Me | Your request on the left, the options and Style me on the right, from 960 points of content (`rowPanesMinimumWidth`): the option rows need more room than a look does. Upright on the 11-inch it stays one column. Short content sits in the middle of the window's height, as the mockups centre their panes |
+| Swap a piece | The pieces and the look on the left, 320 points wide; the options and buttons on the right |
+| Make your own look | The look on the left, 320 points wide; the lead, the name and the pieces on the right |
+| States (styling, not enough pieces, didn't finish, offline, loading, errors) | One readable column |
+
+VoiceOver reads the left pane, then the right, which is the phone's order except on Make your own look, where the look comes before the lead and the name.
+
+### Saved Looks
+
+Laid out like Closet, from the same widths (`WindowLayout.browse`):
+
+- **Sideways (from 1,080 points):** the sidebar has the title and count, Looks and Pictures, search, the chips and swatches wrapped onto as many lines as they need, and the line about a deleted look or picture with Undo. The grid fills the middle. The look or picture she picks shows on the right.
+- **Upright (from 760 points):** the phone page on the left, with the look or picture beside it.
+- Narrower windows and the accessibility sizes keep the phone page.
+
+The look beside the grid is look detail without a bar of its own, everything else as on a phone; a picture is picture detail. Before she picks one the right side says "Pick a look" or "Pick a picture". The look or picture beside the grid stands on a soft tint and VoiceOver reads it as selected, with the hint "Shows this look beside your looks."
+
+**Each tab keeps its own.** The Looks tab remembers its look and the Pictures tab its picture, so what's beside the grid is always one of the grid's own. See the look on a picture switches to Looks with that look beside the grid, and a picture in a look's list switches to Pictures. Everything else (a piece's garment detail, Swap a piece, Make your own look) opens over the whole width, and Back returns to the same look.
+
+**Keeping what's open.** A look or picture beside the grid is pushed when the window gets narrow, under anything it had opened, and a pushed one moves back beside the grid when it widens again. A frame on the Home shelf and Try it on's See the picture open their look or picture beside the grid when the window is wide.
+
+### Sheets
+
+In a regular-width window the system shows a sheet as a form in the middle of the screen. A sheet that can rest at half height on a phone is now only as tall as its content there (`presentationSizing(.form.fitted(…))`), so Occasion or Rename is no longer a tall card that's mostly empty. Sheets that only open full height (the piece pickers, packing, Try it on) keep the form's full height, so they don't jump as their content changes. Two things were needed: the form ignores fitting while detents are set, so detents are only set over a compact window, read from the window the sheet opens over; and a scroll view offers no height of its own, so the sheet tells the form its content's height. Over a compact window (a phone, or a narrow iPad window) sheets are bottom sheets with detents, as before.
+
+### The segmented switch
+
+`NookSegmentedPicker` used to change its value inside `withAnimation`, which animated everything the value changed, such as the whole of Saved Looks when she switched between Looks and Pictures. With a look beside the grid that crashed the app on the iPad simulator: SwiftUI drew the animated change on its own render thread (`com.apple.SwiftUI.AsyncRenderer`), called the switch's `ForEach` content there, and Swift 6's check that main-actor code runs on the main thread stopped the app. Now the switch changes its value plainly and animates only its own pill (`.animation(_:value:)`), so the page changes at once. The crash didn't come back in any orientation or window size.
 
 ## Pointer and keyboard
 
-Room controls and pieces in the grid show the system's pointer highlight (`.hoverEffect(.highlight)`). Everything else is standard buttons, fields and the system tab bar, which take the keyboard and pointer as they do anywhere. No keyboard shortcuts are added yet.
+Room controls, pieces in Closet's grid, and looks and pictures in Saved Looks' grids show the system's pointer highlight (`.hoverEffect(.highlight)`). Everything else is standard buttons, fields and the system tab bar, which take the keyboard and pointer as they do anywhere.
+
+No keyboard shortcuts yet. Command-F for search and Escape to close a sheet were tried in 15b (`.keyboardShortcut`), but neither did anything when the UI tests pressed the keys on the iPad simulator, so they were left out rather than shipped unchecked. They need a look on a real iPad with a keyboard.
 
 ## Tests
 
@@ -79,19 +128,23 @@ Room controls and pieces in the grid show the system's pointer highlight (`.hove
 - `RoomPlanTests`: the phone plan is unchanged; each iPad window gets the room for its shape without scrolling; every control is 44 points or more, between the bars and not overlapping its neighbours on six iPad windows and two Split View sizes; every plate stays on its furniture; the title is clear of the wall.
 - `HomeIPadSnapshotTests`: the tall and wide rooms on the 11- and 13-inch iPads, the wide room in dark, a compact third-width window, and the large-text page at AX5 on an iPad.
 - `ClosetIPadSnapshotTests`: the sidebar layout on the 11-inch and (in dark) the 13-inch held sideways, the page with the piece beside it on both upright, nothing picked yet, a compact third-width window and AX3 on an iPad.
+- `WindowLayoutTests` (15b): when two panes sit side by side, for each measured width, compact windows and every text size, and that a pane has room for a look.
+- Snapshots of each main screen on the 11-inch iPad sideways and upright and in a window a third of its width (`SnapshotWindow`), drawn by `assertWindowSnapshot`: `StyleMeIPadSnapshotTests` (Your looks, also in dark and at AX3, its Saved tab, Style Me, Swap a piece), `SavedLooksIPadSnapshotTests` (a look beside the grid, also in dark and at AX3, nothing picked, a picture beside the Pictures grid, Make your own look), `SuitcasesIPadSnapshotTests` (Suitcases, a suitcase, Laundry) and `ProfileIPadSnapshotTests` (Profile, Fit and measurements, Help, Privacy and terms).
 - `IPadTests` (UI, iPad only): the tab bar at the bottom in both orientations, the tall and wide rooms and their furniture, turning with Style Me open (nothing sent), the Closet sidebar with a filter, search, a piece beside the grid and Edit, turning upright with the piece kept, and a window dragged to a third of the screen falling back to the phone layouts and widening back with the piece moved beside the grid.
+- `IPadStyleMeAndSavedTests` (UI, iPad only, 15b): Style Me's request beside its options, Style me, the look beside its buttons in both orientations (turning sends nothing), Save look, the Saved tab's tile, then the look beside the Saved Looks grid upright and with the sidebar sideways; a picture beside the Pictures grid, See the look switching to Looks; a third-width window pushing the look, and widening moving a pushed look beside the grid. The two classes share their helpers in `IPadTestCase`.
 
 iPad snapshots are drawn at 1x: a 2x picture of a 13-inch window is several megabytes, and 1x still catches a moved drawing or a changed plate.
 
 ### Running the iPad UI tests
 
-Every `IPadTests` test skips itself on an iPhone, so the phone runs aren't slower. On an iPad simulator:
+Every iPad UI test skips itself on an iPhone, so the phone runs aren't slower. On an iPad simulator:
 
 ```sh
-NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests
+NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests \
+  -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
 ```
 
-They take about three minutes locally. CI runs them in the `ui-home-and-results` part after its phone tests, on the iPad Pro 11-inch (M5) simulator. On the first run that step took 12 minutes (6 of them tests, the rest the iPad simulator's boot and first launch), which brought the part to about 30 minutes, level with `ui-variants-and-style-me`, the slowest part in the same run, so the check didn't get longer. The narrow-window test passed there too, so the hosted runner's simulator has Windowed Apps on.
+They take about five minutes locally. In 15a CI ran `IPadTests` in the `ui-home-and-results` part after its phone tests. That step took 12 minutes (6 of them tests, the rest the iPad simulator's boot and first launch) and made that part the slowest, so the whole check grew to 27 to 30 minutes. Since 15b both iPad classes have a part of their own, `ui-ipad`, and the parts were balanced again (see README, CI). The narrow-window tests passed on the hosted runner too, so its simulator has Windowed Apps on.
 
 The narrow-window test drags the window's corner, which needs iPadOS 26's Windowed Apps (on by default on a new iOS 26.5 simulator). If a simulator has it off, the test skips with a message instead of failing. iPadOS 26 resizes a window about its centre, so the corner only moves half the change in width.
 
@@ -105,9 +158,15 @@ The phone UI tests (`HomeTests`, `ClosetTests` and the rest) are written for the
 4. **The tall room's window sits lower and its suitcase a little higher** than the mockup, for the longer title and to keep the suitcase's and hamper's tap areas apart.
 5. **At the accessibility text sizes Closet keeps the phone page** even on a wide window, since the columns would squeeze the words.
 6. **The iPad mini upright (744 points) gets the phone page in Closet,** a little narrower than the detail needs beside the grid. Home there gets the tall room.
-7. **No keyboard shortcuts yet.** Pointer highlights are in; shortcuts (for example Command-F for search) can come with 15b.
+7. **No keyboard shortcuts yet.** Pointer highlights are in. Command-F and Escape were tried in 15b and left out (see Pointer and keyboard).
+8. **Saved Looks is laid out like Closet** (15b): the mockup's sidebar repeats the tabs, so the sidebar holds Saved Looks' own controls, and the detail is a third of the window, as on Closet.
+9. **Each Saved Looks tab keeps its own look or picture beside the grid** (15b), and going between a picture and its look switches tab, rather than showing a look beside the pictures.
+10. **Your looks' tabs and request line stay above the two panes** (15b), with only the version switch beside the look, so switching versions or tabs doesn't move them.
+11. **Style Me goes side by side only from 960 points** (15b). Upright on the 11-inch, two columns squeezed the option rows' words, so it stays one centred column there; Your looks and Swap a piece do go side by side upright.
+12. **Suitcases, Laundry, Profile and the settings screens keep the wall on top** (15b), with the title, the drawing and the rows lined up in one readable column, rather than the mockups' wall beside the rows. The wall and floor read as one room, and side by side would cut it in two.
+13. **The segmented switch no longer animates the page it changes** (15b), only its own pill, which fixed a crash (see The segmented switch).
 
 ## Left for later phases
 
-- **15b:** Style Me's results and Saved Looks on iPad, with side-by-side detail.
 - **16a, 16b:** the tours on iPad layouts.
+- **Later:** keyboard shortcuts, checked on a real iPad with a keyboard.

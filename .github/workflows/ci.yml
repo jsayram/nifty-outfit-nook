@@ -39,8 +39,16 @@ jobs:
   # only when every one of them passed. Splitting them took the check from about 18 minutes to
   # the length of the slowest job. Nothing is cached between runs, so a pull request can't
   # leave build output behind for a later run on develop or main to pick up.
-  # The Release check and the package tests share a runner: together they take about as long as
-  # one UI part, and it keeps a run within the five macOS runners the free plan allows at once.
+  #
+  # The free plan runs at most five macOS jobs at once, and swift-format takes one for its first
+  # half minute, so a sixth build job would wait for a whole job to finish. Instead the five jobs
+  # below are balanced to about the same length (Phase 15b, October 2026; before that the check
+  # took 27 to 30 minutes, as the iPad tests rode in one UI part and the Release job had time to
+  # spare). Each job's fixed cost on the hosted runner is about 6 minutes: setup, the build, a
+  # cold simulator boot and the first launch.
+  #
+  # The Release check and the package tests share a runner, then the same runner and simulator
+  # run two UI test classes, which costs no second build or boot.
   release-and-package-tests:
     name: release-and-package-tests
     runs-on: macos-26
@@ -64,6 +72,16 @@ jobs:
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
         run: scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      # UI tests on the simulator the package tests booted. ui-rest skips these classes.
+      # A failed UI test runs once more, as in the ui-tests job below.
+      - name: Test (UI, SettingsTests and LaunchTests)
+        env:
+          NOOK_RESULT_BUNDLE: build/TestResults-UI.xcresult
+        run: >-
+          scripts/test.sh
+          -only-testing:NiftyOutfitNookUITests/SettingsTests
+          -only-testing:NiftyOutfitNookUITests/LaunchTests
+          -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -71,23 +89,25 @@ jobs:
           name: TestResults-package
           path: |
             build/TestResults.xcresult
+            build/TestResults-UI.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
 
-  # The UI tests in four parts of about the same length, by test class. Each part has a fixed
-  # cost of about 6 minutes on the hosted runner (setup, build, a cold simulator boot and the
-  # first launch), so a part should hold several minutes of tests, and four parts plus the job
-  # above stay within the five macOS runners the free plan allows at once.
-  # Balanced in October 2026 from the classes' times on CI (in seconds, from the test log):
-  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20, then IPadTests 367
-  #                             on an iPad simulator (the iPad step took 12 minutes with its boot)
-  #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75, SettingsTests about 260
-  #                             locally (new in Phase 14b, no CI time yet)
-  #   ui-add-and-catalog        AddPieceTests 367, CatalogTests about 175
-  #   ui-rest                   the rest, about 580, and any new class
-  # When a part grows well past the others, move a class. Each class's time is in the job log
-  # ("Test Case ... passed (N seconds)").
+  # The rest of the UI tests in four parts of about the same length, by test class: three on an
+  # iPhone simulator and one, the iPad layouts, on an iPad simulator.
+  # Balanced in October 2026 (Phase 15b) from the classes' times on CI, in seconds, from the
+  # test log ("Test Case ... passed (N seconds)"):
+  #   ui-home-and-results     HomeTests 273, YourLooksTests 163, StyleMeTests 157, CutoutBenchTests 101,
+  #                           ClosetTests 67
+  #   ui-add-and-variants     AddPieceTests 266, HomeVariantTests 217, CatalogTests 130, SwapTests 125,
+  #                           MakeYourOwnLookTests 102
+  #   ui-rest                 SavedLooksTests 251, GarmentDetailTests 177, SuitcasesAndLaundryTests 172,
+  #                           ProfileTests 161, and any new class
+  #   ui-ipad                 IPadTests 296 and IPadStyleMeAndSavedTests (new in 15b, about 90 locally)
+  #   (release-and-package-tests above: SettingsTests 323, LaunchTests 60)
+  # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
+  # in ui-rest it would only skip itself on the iPhone.
   ui-tests:
     name: ui-tests (${{ matrix.part }})
     runs-on: macos-26
@@ -98,33 +118,47 @@ jobs:
       matrix:
         include:
           - part: ui-home-and-results
+            family: iPhone
             selection: >-
               -only-testing:NiftyOutfitNookUITests/HomeTests
               -only-testing:NiftyOutfitNookUITests/YourLooksTests
-              -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
-          - part: ui-variants-and-style-me
-            selection: >-
-              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/StyleMeTests
-              -only-testing:NiftyOutfitNookUITests/LaunchTests
-              -only-testing:NiftyOutfitNookUITests/SettingsTests
-          - part: ui-add-and-catalog
+              -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -only-testing:NiftyOutfitNookUITests/ClosetTests
+          - part: ui-add-and-variants
+            family: iPhone
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
+              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/CatalogTests
+              -only-testing:NiftyOutfitNookUITests/SwapTests
+              -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
+            family: iPhone
             selection: >-
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
               -skip-testing:NiftyOutfitNookUITests/YourLooksTests
-              -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
-              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/StyleMeTests
-              -skip-testing:NiftyOutfitNookUITests/LaunchTests
-              -skip-testing:NiftyOutfitNookUITests/SettingsTests
+              -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -skip-testing:NiftyOutfitNookUITests/ClosetTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
+              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
+              -skip-testing:NiftyOutfitNookUITests/SwapTests
+              -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -skip-testing:NiftyOutfitNookUITests/SettingsTests
+              -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/IPadTests
+              -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
+          # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
+          # one of these skips itself on an iPhone.
+          - part: ui-ipad
+            family: iPad
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/IPadTests
+              -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -136,6 +170,7 @@ jobs:
           xcrun simctl list runtimes available
       - name: Test (${{ matrix.part }})
         env:
+          NOOK_SIM_FAMILY: ${{ matrix.family }}
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
           SELECTION: ${{ matrix.selection }}
@@ -147,19 +182,6 @@ jobs:
         # which no wait in a test can catch. A test that fails twice still fails the job, and the
         # first failure stays in the test results. Package tests and local runs never retry.
         run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
-      # The iPad UI tests (Phase 15a) run on an iPad simulator after the lightest part's own tests,
-      # reusing its build. The step took 12 minutes on CI (October 2026), which brought this part
-      # level with ui-variants-and-style-me at about 30. On an iPhone they skip themselves,
-      # so ui-rest passes over them in seconds.
-      - name: Test (iPad)
-        if: matrix.part == 'ui-home-and-results'
-        env:
-          NOOK_SIM_FAMILY: iPad
-          NOOK_RESULT_BUNDLE: build/TestResults-iPad.xcresult
-          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
-        run: >-
-          scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests
-          -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -167,7 +189,6 @@ jobs:
           name: TestResults-${{ matrix.part }}
           path: |
             build/TestResults.xcresult
-            build/TestResults-iPad.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore

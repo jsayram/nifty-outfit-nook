@@ -104,5 +104,5 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 ## Left for later phases
 
 - **12b (done):** the Pictures tab, its search and filters, picture detail, and each look's pictures (`docs/try-on-pictures.md`).
-- **15b:** iPad Saved Looks with filters beside a wide grid. The page keeps to readable widths and the grid takes more columns until then.
+- **15b (done):** on iPad the search and filters sit in a sidebar beside the grid, and a look opens beside it (`docs/ipad.md`).
 - **Later (no Stage A screen):** Favorites, collections and Archive (RD-08, LR-16).

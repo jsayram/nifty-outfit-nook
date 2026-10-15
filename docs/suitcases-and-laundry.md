@@ -150,5 +150,5 @@ Everything here is local, so offline doesn't apply.
 ## Left for later phases
 
 - **14b (done):** the Track laundry switch in Profile, including turning tracking off. The source stays the remembered one from Style Me rather than a separate Settings default.
-- **Later (15b or after):** iPad layouts (the hall beside the list). Phase 15a covered Home and Closet's own page; Suitcases and Laundry still show their phone pages on iPad.
+- **15b (done):** on iPad the wall runs the full width and the title, the hall and the rows keep to one readable column in the middle. The mockups' hall beside the list wasn't built; `docs/ipad.md` says why.
 - **21a:** the remembered source and occasion kept across launches.
