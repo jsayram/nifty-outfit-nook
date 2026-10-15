@@ -23,7 +23,7 @@ public enum FixtureServices {
 
     /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
     /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
-    /// `draft` puts an unsaved Add a piece or Edit draft in the draft store. `photos` adds the
+    /// `draft` puts an unsaved Add a piece, Edit or Make your own look draft in its store. `photos` adds the
     /// sample photo pieces and the provider that draws their pictures.
     public static func make(
         set: FixtureSet,
@@ -64,6 +64,7 @@ public enum FixtureServices {
             default: .zero
             }
         let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
+        let lookDraft = draft == .look ? FixtureDrafts.lookDraft(in: data, now: now) : nil
 
         return NookServices(
             closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: stores),
@@ -80,7 +81,8 @@ public enum FixtureServices {
             drafts: InMemoryDraftStore(drafts: drafts, options: stores),
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
             descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),
-            cutouts: StandInCutoutService(latency: slow ? .seconds(1) : .zero)
+            cutouts: StandInCutoutService(latency: slow ? .seconds(1) : .zero),
+            lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores)
         )
     }
 }
