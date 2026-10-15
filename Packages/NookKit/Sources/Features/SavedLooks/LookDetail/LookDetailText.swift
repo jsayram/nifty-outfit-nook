@@ -134,6 +134,15 @@ enum LookDetailText {
             comment: "Toast after Delete look, with the look's name")
     }
 
+    /// "Deleted Lace date night", and when the look had pictures, that they stay (Phase 12b).
+    static func deleted(_ removal: SavedLookRemoval) -> String {
+        guard removal.pictureCount > 0 else { return deleted(removal.name) }
+        return String(
+            localized: "Deleted \(removal.name). Its \(removal.pictureCount) pictures stay in Pictures.",
+            bundle: .module,
+            comment: "Toast after Delete look when the look had try-on pictures: the name, then how many pictures")
+    }
+
     static var renamed: String {
         String(localized: "Name saved", bundle: .module, comment: "Toast after renaming a look")
     }

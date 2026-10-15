@@ -4,10 +4,10 @@ import Observation
 
 /// One saved look, opened from Saved Looks or a frame on the Home shelf (Phase 12a).
 ///
-/// It shows the look large with its pieces and facts, and offers Wear today (LR-10), Swap a piece
-/// (LR-08), Try it on (a stand-in until 12b), Rename and Delete look. Every change is one store
-/// call and comes back with Undo. Nothing here sends a request or uses a picture allowance
-/// (RD-08.1).
+/// It shows the look large with its pieces, facts and try-on pictures (RD-08.2), and offers Wear
+/// today (LR-10), Swap a piece (LR-08), Try it on (Phase 12b), Rename and Delete look. Every
+/// change is one store call and comes back with Undo. Nothing but Try it on makes a picture, and
+/// nothing here sends a request (RD-08.1).
 ///
 /// Swap a piece changes this saved look in place: same ID, name and saved date, so it stays where
 /// it is in Saved Looks and on the shelf. Undo puts back exactly the look before (LR-08.2).
@@ -31,6 +31,8 @@ final class LookDetailModel {
     private(set) var looks: [Look] = []
     private(set) var suitcases: [Suitcase] = []
     private(set) var profile = Profile()
+    /// The look's try-on pictures, newest first (RD-08.2).
+    private(set) var pictures: [TryOnPicture] = []
 
     private var services: NookServices?
     private let now: () -> Date
@@ -69,7 +71,41 @@ final class LookDetailModel {
             show(looks: looks, garments: garments, suitcases: suitcases, profile: try await profile)
         } catch {
             phase = .failed
+            return
         }
+        // The look works without its pictures, so a picture store that can't be read only hides them.
+        showPictures((try? await services.pictures.pictures()) ?? [])
+    }
+
+    /// Sets the look's pictures from every picture.
+    func showPictures(_ all: [TryOnPicture]) {
+        pictures = TryOnLinks.pictures(of: lookID, in: all)
+    }
+
+    /// True when a picture shows an earlier version of the look (it changed since).
+    func isEarlierVersion(_ picture: TryOnPicture) -> Bool {
+        guard let look else { return false }
+        return !TryOnLinks.samePieces(picture.captured.pieces, look.pieces)
+    }
+
+    /// What a picture shows: its pieces when it was made.
+    func pictureContent(_ picture: TryOnPicture) -> LookBundleContent {
+        LookBundleContent(picture: picture, garments: garments)
+    }
+
+    /// "Simulated · Made 28 Aug", with "Earlier version" when the look changed since.
+    func pictureFacts(_ picture: TryOnPicture, locale: Locale) -> String {
+        var facts = [
+            TryOnText.simulated, TryOnText.made(picture.createdAt, now: now(), calendar: calendar, locale: locale),
+        ]
+        if isEarlierVersion(picture) { facts.append(TryOnText.earlierVersionShort) }
+        return facts.joined(separator: " · ")
+    }
+
+    /// Try it on for this look. It's saved already, so nothing else is saved.
+    func tryOnModel() -> TryOnModel? {
+        guard let look else { return nil }
+        return TryOnModel(look: look, lookName: name, garments: garments, now: now)
     }
 
     /// Sets everything from loaded data. Separate from `load` so tests can hand data straight in.
@@ -262,7 +298,7 @@ final class LookDetailModel {
     /// Delete look: takes it out of Saved Looks. Returns what Undo needs.
     func delete() async throws(StoreError) -> SavedLookRemoval {
         guard let services, let look else { throw .unavailable }
-        let removal = SavedLookRemoval(look: look)
+        let removal = SavedLookRemoval(look: look, pictureCount: pictures.count)
         try await removal.apply(in: services.looks)
         self.look = nil
         phase = .missing
@@ -291,8 +327,14 @@ final class LookDetailModel {
 /// A version of a styling result goes back to background history, unsaved and unnamed, as
 /// unsaving on Your looks does (LR-06). A look she made herself has nowhere else to live, so it's
 /// deleted. Undo saves the exact look again either way.
+///
+/// Its try-on pictures stay (Phase 12b): every picture is kept until she deletes it (PRD §7.5,
+/// §9.2.4), still showing the look as it was. Undo brings the look back under the same ID, so
+/// the pictures link to it again.
 struct SavedLookRemoval: Hashable {
     let look: Look
+    /// How many try-on pictures the look had, for the toast.
+    var pictureCount = 0
 
     var name: String {
         look.name ?? SavedLooksText.unnamed(occasion: nil)

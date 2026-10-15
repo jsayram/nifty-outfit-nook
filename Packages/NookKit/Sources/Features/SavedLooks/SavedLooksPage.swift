@@ -9,12 +9,18 @@ struct SavedLooksActions {
     var undoDelete: () -> Void = {}
     var makeYourOwn: () -> Void = {}
     var retry: () -> Void = {}
+    /// The Pictures tab (Phase 12b): a picture, and the look a picture came from.
+    var openPicture: (SavedPictureItem) -> Void = { _ in }
+    var openLook: (Look) -> Void = { _ in }
+    /// Undo on the line about a picture she just deleted.
+    var undoPictureDelete: () -> Void = {}
 }
 
 /// Saved Looks' content, top to bottom (`saved.html`, RD-08): the title and count, the Looks and
-/// Pictures switch, then on Looks the search field, the piece and colour filters (LR-09), the
-/// count line with Clear, and the grid. An empty Saved Looks explains how to save a look
-/// (RD-08.4); a search with no matches names the filters, with Clear filters (LR-09.3).
+/// Pictures switch, then the search field, the piece and colour filters (LR-09), the count line
+/// with Clear, and the grid of looks or of pictures. An empty Saved Looks explains how to save a
+/// look (RD-08.4), and an empty Pictures tab what pictures are and that they need a look; a
+/// search with no matches names the filters, with Clear filters (LR-09.3).
 ///
 /// Separate from `SavedLooksScreen` so snapshot tests can draw it from a model without navigation.
 struct SavedLooksPage: View {
@@ -73,13 +79,21 @@ struct SavedLooksPage: View {
                 .nookTextStyle(.display)
                 .foregroundStyle(.nook.textPrimary)
                 .accessibilityAddTraits(.isHeader)
-            if !model.items.isEmpty {
-                Text(SavedLooksText.looks(model.items.count))
+            if let count = headerCount {
+                Text(count)
                     .nookTextStyle(.note)
                     .foregroundStyle(.nook.textSecondary)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// "5 looks", or on Pictures "3 pictures".
+    private var headerCount: String? {
+        switch model.tab {
+        case .looks: model.items.isEmpty ? nil : SavedLooksText.looks(model.items.count)
+        case .pictures: model.pictureItems.isEmpty ? nil : TryOnText.pictures(model.pictureItems.count)
+        }
     }
 
     // MARK: Looks
@@ -97,7 +111,7 @@ struct SavedLooksPage: View {
         case .loaded:
             if let removal = model.lastRemoval {
                 NookBanner(
-                    LookDetailText.deleted(removal.name), systemImage: "trash", tone: .neutral,
+                    LookDetailText.deleted(removal), systemImage: "trash", tone: .neutral,
                     actionTitle: YourLooksText.undo, action: actions.undoDelete
                 )
                 .padding(.horizontal, NookSpacing.screenMargin)
@@ -109,9 +123,9 @@ struct SavedLooksPage: View {
             if model.isEmpty {
                 empty
             } else {
-                controls
+                controls(prompt: SavedLooksText.searchPrompt, count: model.countText)
                 if model.hasNoMatches {
-                    noMatches
+                    noMatches(SavedLooksText.noMatchesTitle)
                 } else {
                     SavedLooksGrid(items: model.shown, now: model.loadedAt, open: actions.open)
                         .padding(.horizontal, NookSpacing.screenMargin)
@@ -121,14 +135,16 @@ struct SavedLooksPage: View {
         }
     }
 
-    private var controls: some View {
+    /// The search field, the filters and, while filtering, the count line. One search and one
+    /// set of chips for both tabs.
+    private func controls(prompt: String, count: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            NookSearchField(SavedLooksText.searchPrompt, text: $model.searchText, onSubmit: model.applySearchNow)
+            NookSearchField(prompt, text: $model.searchText, onSubmit: model.applySearchNow)
                 .padding(.horizontal, NookSpacing.screenMargin)
             SavedLooksFilters(model: model)
                 .padding(.top, NookSpacing.small)
             if model.filter.isActive {
-                countLine
+                countLine(count)
                     .padding(.horizontal, NookSpacing.screenMargin)
                     .padding(.top, NookSpacing.xSmall)
             }
@@ -139,9 +155,9 @@ struct SavedLooksPage: View {
     }
 
     /// "2 of 5 looks", with Clear (LR-09).
-    private var countLine: some View {
+    private func countLine(_ count: String) -> some View {
         HStack(spacing: NookSpacing.small) {
-            Text(model.countText)
+            Text(count)
                 .nookTextStyle(.note)
                 .foregroundStyle(.nook.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -157,9 +173,9 @@ struct SavedLooksPage: View {
         }
     }
 
-    /// No looks match: says which filters are on, with Clear filters (LR-09.3).
-    private var noMatches: some View {
-        NookEmptyState(SavedLooksText.noMatchesTitle, message: model.filterSummary, systemImage: "magnifyingglass") {
+    /// Nothing matches: says which filters are on, with Clear filters (LR-09.3).
+    private func noMatches(_ title: String) -> some View {
+        NookEmptyState(title, message: model.filterSummary, systemImage: "magnifyingglass") {
             NookButton(SavedLooksText.clearFilters, systemImage: "xmark", kind: .soft, fillsWidth: true) {
                 model.clearFilters()
             }
@@ -199,11 +215,73 @@ struct SavedLooksPage: View {
 
     // MARK: Pictures (12b)
 
-    private var pictures: some View {
-        NookEmptyState(SavedLooksText.picturesTitle, message: SavedLooksText.picturesMessage, systemImage: "camera")
-            .stateCard()
-            .padding(.top, NookSpacing.large)
-            .accessibilityIdentifier("savedLooks.pictures")
+    @ViewBuilder private var pictures: some View {
+        switch model.picturesPhase {
+        case .loading:
+            NookLoadingState(TryOnText.loading)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .failed:
+            NookErrorState(TryOnText.failedTitle, message: SavedLooksText.failedMessage, retry: actions.retry)
+                .stateCard()
+                .padding(.top, NookSpacing.large)
+        case .loaded:
+            if model.lastPictureRemoval != nil {
+                NookBanner(
+                    TryOnText.deleted, systemImage: "trash", tone: .neutral, actionTitle: YourLooksText.undo,
+                    action: actions.undoPictureDelete
+                )
+                .padding(.horizontal, NookSpacing.screenMargin)
+                .padding(.top, NookSpacing.medium)
+                .frame(maxWidth: Self.controlsMaximumWidth, alignment: .leading)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("savedLooks.pictureDeleted")
+            }
+            if model.hasNoPictures {
+                picturesEmpty
+            } else {
+                controls(prompt: TryOnText.searchPrompt, count: model.picturesCountText)
+                if model.picturesHaveNoMatches {
+                    noMatches(TryOnText.noMatchesTitle)
+                } else {
+                    SavedPicturesGrid(
+                        items: model.shownPictures, now: model.loadedAt, open: actions.openPicture,
+                        openLook: actions.openLook
+                    )
+                    .padding(.horizontal, NookSpacing.screenMargin)
+                    .padding(.top, NookSpacing.medium)
+                }
+            }
+        }
+    }
+
+    /// No pictures yet: what a picture is, that it needs a saved look, and how to make one.
+    private var picturesEmpty: some View {
+        NookEmptyState(TryOnText.emptyTitle, message: TryOnText.emptyMessage, systemImage: "camera") {
+            VStack(alignment: .leading, spacing: NookSpacing.small) {
+                ForEach(Array(TryOnText.emptySteps.enumerated()), id: \.offset) { index, step in
+                    HStack(alignment: .firstTextBaseline, spacing: NookSpacing.small) {
+                        Text(verbatim: "\(index + 1).")
+                            .nookTextStyle(.label)
+                            .foregroundStyle(.nook.accent)
+                            .accessibilityHidden(true)
+                        Text(step)
+                            .nookTextStyle(.body)
+                            .foregroundStyle(.nook.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            NookButton(TryOnText.seeYourLooks, systemImage: "bookmark", kind: .soft, fillsWidth: true) {
+                model.tab = .looks
+            }
+            .accessibilityIdentifier("savedLooks.pictures.seeLooks")
+        }
+        .stateCard()
+        .padding(.top, NookSpacing.large)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("savedLooks.pictures.empty")
     }
 }
 

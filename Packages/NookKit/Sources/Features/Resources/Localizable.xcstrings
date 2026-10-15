@@ -245,6 +245,29 @@
         }
       }
     },
+    "%lld pictures" : {
+      "comment" : "How many try-on pictures",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld picture"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pictures"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld pieces" : {
       "comment" : "Source plate: how many pieces the source has",
       "localizations" : {
@@ -437,6 +460,9 @@
           }
         }
       }
+    },
+    "A picture shows one of your looks. Pictures are made one look at a time, only when you ask." : {
+      "comment" : "Saved Looks Pictures tab, empty"
     },
     "A piece or suitcase in it changed since you asked. Nothing was sent." : {
       "comment" : "Your looks when the suitcase or starting piece changed"
@@ -1187,8 +1213,34 @@
     "Delete look" : {
       "comment" : "Look detail button: takes it out of Saved Looks"
     },
+    "Delete picture" : {
+      "comment" : "Button on picture detail"
+    },
     "Deleted %@" : {
       "comment" : "Toast after Delete look, with the look's name"
+    },
+    "Deleted %@. Its %lld pictures stay in Pictures." : {
+      "comment" : "Toast after Delete look when the look had try-on pictures: the name, then how many pictures",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Deleted %1$@. Its picture stays in Pictures."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Deleted %1$@. Its %2$lld pictures stay in Pictures."
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Deleted pieces stay here for 30 days. After that they’re deleted for good." : {
       "comment" : "Recently deleted: how long pieces stay",
@@ -1383,6 +1435,9 @@
         }
       }
     },
+    "Earlier version" : {
+      "comment" : "A picture of an earlier version of its look"
+    },
     "Easy and safe" : {
       "comment" : "Under the version switch: Simple"
     },
@@ -1571,6 +1626,9 @@
     },
     "From a suitcase, every piece is one you packed." : {
       "comment" : "Style Me Preferences line when the source is a suitcase (LR-05b)"
+    },
+    "From the look" : {
+      "comment" : "Over the name of the look a picture came from"
     },
     "Getting Style Me ready" : {
       "comment" : "Style Me while it loads"
@@ -1875,6 +1933,9 @@
         }
       }
     },
+    "In this test build the picture is simulated: your pieces on a plain background, with no person in it. Nothing leaves your phone." : {
+      "comment" : "Try it on sheet"
+    },
     "In your own words" : {
       "comment" : "Describe in words: field label",
       "localizations" : {
@@ -1938,6 +1999,9 @@
           }
         }
       }
+    },
+    "Its look isn’t in Saved Looks any more. The picture stays until you delete it." : {
+      "comment" : "Picture detail: its look was deleted"
     },
     "It’s optional, and off for now." : {
       "comment" : "Under the laundry tracking sheet's title",
@@ -2276,6 +2340,9 @@
         }
       }
     },
+    "Look deleted" : {
+      "comment" : "Under a picture whose look was deleted"
+    },
     "Looks" : {
       "comment" : "Saved Looks tab: her saved looks (RD-08)"
     },
@@ -2291,6 +2358,9 @@
     "Looks you saved for %@ from %@. Opening them sends nothing." : {
       "comment" : "Saved tab lead: the occasion and the source"
     },
+    "Made %@" : {
+      "comment" : "When a try-on picture was made, a date such as 28 Aug"
+    },
     "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it." : {
       "comment" : "Describe in words: under the suggestions",
       "localizations" : {
@@ -2302,6 +2372,12 @@
         }
       }
     },
+    "Made today" : {
+      "comment" : "When a try-on picture was made"
+    },
+    "Made yesterday" : {
+      "comment" : "When a try-on picture was made"
+    },
     "Main closet" : {
       "comment" : "Source plate: the whole closet",
       "localizations" : {
@@ -2312,6 +2388,12 @@
           }
         }
       }
+    },
+    "Make a picture" : {
+      "comment" : "Try it on sheet button"
+    },
+    "Make another" : {
+      "comment" : "Try it on sheet button"
     },
     "Make it preferred" : {
       "comment" : "Style Me button: colour wish"
@@ -2343,6 +2425,12 @@
     },
     "Makes a simulated picture of this look." : {
       "comment" : "VoiceOver hint on Try it on"
+    },
+    "Making a picture" : {
+      "comment" : "Try it on sheet, while making"
+    },
+    "Making a picture also saves this look, so the picture has a look to go with." : {
+      "comment" : "Try it on sheet, from Your looks for a look that isn't saved"
     },
     "Mark as clean" : {
       "comment" : "Button on garment detail",
@@ -2552,6 +2640,9 @@
           }
         }
       }
+    },
+    "No pictures match" : {
+      "comment" : "Pictures tab: nothing matches"
     },
     "No pieces match" : {
       "comment" : "Closet: nothing matches the filters",
@@ -2769,6 +2860,9 @@
         }
       }
     },
+    "Nothing was made or used. Try again when you’re online." : {
+      "comment" : "Try it on sheet: offline"
+    },
     "Nothing was saved. You can try another photo, or describe the piece in words instead." : {
       "comment" : "Add a piece: after a photo couldn't be read",
       "localizations" : {
@@ -2782,6 +2876,9 @@
     },
     "Nothing was sent. Try again in a moment." : {
       "comment" : "Your looks when the stores fail"
+    },
+    "Nothing was used. Try again in a moment." : {
+      "comment" : "Try it on sheet: failed"
     },
     "Occasion" : {
       "comment" : "Label on the calendar",
@@ -2944,6 +3041,9 @@
     "Open Style Me from the laptop on Home and ask for a look." : {
       "comment" : "Saved Looks empty state: step 1"
     },
+    "Open the look and tap Try it on. Pictures in this test build are simulated." : {
+      "comment" : "Pictures tab empty state: step 2"
+    },
     "Opening Recently deleted" : {
       "comment" : "Loading",
       "localizations" : {
@@ -2976,6 +3076,9 @@
           }
         }
       }
+    },
+    "Opening your pictures" : {
+      "comment" : "Pictures tab loading"
     },
     "Opening your saved looks" : {
       "comment" : "Saved Looks loading"
@@ -3067,6 +3170,9 @@
           }
         }
       }
+    },
+    "Opens the picture." : {
+      "comment" : "Hint on a try-on picture"
     },
     "Opens the piece." : {
       "comment" : "Hint on a closet piece",
@@ -3200,11 +3306,14 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Picture deleted" : {
+      "comment" : "Toast after Delete picture"
+    },
     "Pictures" : {
       "comment" : "Saved Looks tab: her try-on pictures (RD-08)"
     },
-    "Pictures are made one look at a time, only when you ask, and they’re simulated. They’ll show here with the look each one came from." : {
-      "comment" : "Saved Looks Pictures tab, empty"
+    "Pictures need a connection" : {
+      "comment" : "Try it on sheet: offline"
     },
     "Piece to swap" : {
       "comment" : "Swap: VoiceOver name of the piece chips"
@@ -3385,6 +3494,9 @@
     "Remove this piece" : {
       "comment" : "Swap: button (LR-08)"
     },
+    "Removes this picture. The look stays saved. You can undo it." : {
+      "comment" : "Hint on Delete picture"
+    },
     "Rename" : {
       "comment" : "Look detail button: renames the look"
     },
@@ -3463,6 +3575,9 @@
         }
       }
     },
+    "Save a look, from Style Me or with Make your own." : {
+      "comment" : "Pictures tab empty state: step 1"
+    },
     "Save changes" : {
       "comment" : "Button: saves an edited piece",
       "localizations" : {
@@ -3531,6 +3646,9 @@
     "Saved looks work without pictures or credits. An empty name is filled in from the colours." : {
       "comment" : "Make your own look: under Save while it can be saved"
     },
+    "Saved to Pictures" : {
+      "comment" : "Try it on sheet: the picture is ready"
+    },
     "Saved to Saved Looks" : {
       "comment" : "Toast after Save look"
     },
@@ -3571,6 +3689,9 @@
     "Search your looks" : {
       "comment" : "Saved Looks search field prompt (RD-08)"
     },
+    "Search your pictures" : {
+      "comment" : "Pictures tab search field prompt"
+    },
     "Seasons" : {
       "comment" : "Garment fact label",
       "localizations" : {
@@ -3587,6 +3708,21 @@
     },
     "See saved looks" : {
       "comment" : "Your looks: opens the Saved tab"
+    },
+    "See the look" : {
+      "comment" : "Button: opens the look a picture came from"
+    },
+    "See the look: %@" : {
+      "comment" : "Spoken label of the link from a picture to its look"
+    },
+    "See the picture" : {
+      "comment" : "Button: opens a try-on picture"
+    },
+    "See your looks" : {
+      "comment" : "Button: switches to the Looks tab"
+    },
+    "Seeing it again doesn’t make a new one." : {
+      "comment" : "Try it on sheet: a picture of exactly this look exists (FR-59)"
     },
     "Send feedback" : {
       "comment" : "Screen title",
@@ -3678,8 +3814,17 @@
     "Simulated" : {
       "comment" : "Badge: a stand-in, not the real thing"
     },
+    "Simulated pictures are free in this test build." : {
+      "comment" : "Try it on sheet: no picture allowance is used"
+    },
     "Simulated stylist" : {
       "comment" : "Styling step detail"
+    },
+    "Simulated try-on picture of %@: %@. No person is shown." : {
+      "comment" : "Spoken for a simulated try-on picture: the look's name, then its pieces"
+    },
+    "Simulated. Leaving stops it, and nothing is kept." : {
+      "comment" : "Try it on sheet, while making"
     },
     "Size" : {
       "comment" : "Garment fact label: size on the label",
@@ -4162,6 +4307,18 @@
     "The look" : {
       "comment" : "Swap: spoken name of the look"
     },
+    "The look has changed since. This picture shows an earlier version." : {
+      "comment" : "Picture detail: its look changed after the picture was made"
+    },
+    "The look it came from didn’t change." : {
+      "comment" : "Picture detail: picture gone"
+    },
+    "The picture couldn’t be kept" : {
+      "comment" : "Try it on sheet: not saved"
+    },
+    "The picture didn’t finish" : {
+      "comment" : "Try it on sheet: failed"
+    },
     "The piece you started adding isn’t in your closet yet." : {
       "comment" : "Draft card: a new piece with no name yet",
       "localizations" : {
@@ -4254,6 +4411,12 @@
           }
         }
       }
+    },
+    "This picture is simulated: it shows the look’s pieces, not you. In a later version, Try it on will show you wearing the look. Pictures show the style, not the exact fit." : {
+      "comment" : "Picture detail: what a simulated picture is"
+    },
+    "This picture was deleted" : {
+      "comment" : "Picture detail: picture gone"
     },
     "This piece can only be swapped." : {
       "comment" : "Swap: why Remove this piece is off, in general"
@@ -4376,14 +4539,14 @@
     "Try it on and Ask stylist need a connection. Save and Swap work offline." : {
       "comment" : "Under the results buttons while offline"
     },
-    "Try it on will make one simulated picture of this look, labelled Simulated. Pictures show the style, not the exact fit." : {
-      "comment" : "Try it on stand-in"
+    "Try it on makes one picture of this look, only now that you ask." : {
+      "comment" : "Try it on sheet"
+    },
+    "Try-on picture" : {
+      "comment" : "Title of one try-on picture"
     },
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons (RD-06)"
-    },
-    "Try-on pictures come later" : {
-      "comment" : "Try it on stand-in"
     },
     "Trying %@" : {
       "comment" : "Swap: under the look while she tries one"
@@ -4670,6 +4833,12 @@
         }
       }
     },
+    "Yesterday" : {
+      "comment" : "A picture made yesterday"
+    },
+    "You already have a picture of this look" : {
+      "comment" : "Try it on sheet: a picture of exactly this look exists (FR-59)"
+    },
     "You can change this in Profile" : {
       "comment" : "Link from the laundry tracking sheet to the Profile switch",
       "localizations" : {
@@ -4847,6 +5016,9 @@
           }
         }
       }
+    },
+    "Your pictures didn’t load" : {
+      "comment" : "Pictures tab error title"
     },
     "Your request" : {
       "comment" : "Style Me section"

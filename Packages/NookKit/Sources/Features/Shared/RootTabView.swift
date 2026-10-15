@@ -34,6 +34,7 @@ public struct RootTabView: View {
             }
         }
         .tint(.nook.accent)
+        .environment(\.openInSavedLooks, OpenInSavedLooksAction { path in openInSavedLooks(path) })
         .environment(\.services, services)
         .environment(\.garmentImages, garmentImages)
         .environment(\.stickerCache, stickers)
@@ -41,7 +42,12 @@ public struct RootTabView: View {
 
     /// Switches to Saved Looks with this look open, on top of the grid.
     private func openSavedLook(_ id: Look.ID) {
-        savedLooksPath = [.look(id)]
+        openInSavedLooks([.look(id)])
+    }
+
+    /// Switches to Saved Looks with these screens open, on top of the grid.
+    private func openInSavedLooks(_ path: [SavedLooksDestination]) {
+        savedLooksPath = path
         selection = .savedLooks
     }
 }

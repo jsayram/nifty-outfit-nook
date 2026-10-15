@@ -34,9 +34,11 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 
 **GarmentCutout** (Personal, Phase 8b). A garment's `cutout`: the cutout picture's reference and its `CutoutQuality`. `nil` until a cutout is made. A new photo on Edit drops it. See `docs/stickers.md`.
 
-**Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, when it was saved (`savedAt`, Phase 12a, for "Saved 3 Oct" and Saved Looks' order), wear days, and a link to a try-on picture. A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
+**Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, when it was saved (`savedAt`, Phase 12a, for "Saved 3 Oct" and Saved Looks' order), and wear days. Its try-on pictures point at it, not the other way round (Phase 12b). A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
 
 A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a described piece she doesn't own, shown as "Not in your closet" with Find one. An idea never becomes owned by being in a look. Each piece records whether it's the same as in Simple ("Same as Simple", LR-05a.3).
+
+**TryOnPicture** (Sensitive, Phase 12b). A try-on picture of one look: the look's ID, the look as it was when the picture was made (`CapturedLook`: pieces, name, occasion), the image (`.simulated` in Stage A, drawn on the phone with no person; `.generated` from Phase 33) and when it was made. It stays until she deletes it, whatever happens to its look. See `docs/try-on-pictures.md`.
 
 **LookDraft** (Personal, Phase 11). A look she started in Make your own look and hasn't saved: her name for it so far, the source, the pieces, the starting piece, when it was written. One at a time, in `LookDraftStore`. See `docs/swap-and-editor.md`.
 
@@ -75,6 +77,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker. `current` is 8a's proposal until the benchmark on her phone | RD-07, Phase 8a |
 | `GarmentArtChoice` | How a piece's picture shows: its drawing (no photo), its cutout (clean), or its photo in a tile (no cutout yet, or a concern) | RD-07, Phase 8b |
 | `SwapRanking` | Swap a piece's options: her pieces of the same kind she can wear from the look's source, good matches (occasion, weather, colours that sit with the rest) best first, weaker ones and outfits worn lately set aside for See all | LR-07, LR-10, Phase 11 |
+| `TryOnLinks` | Where a picture's look is now (current, changed since, not in Saved Looks), a look's pictures newest first, and the picture of exactly this look to offer before making another | RD-08.2, PRD §7.5, FR-59 |
 | `LookEditing` | One piece replaced or removed, as a new look that keeps its version, occasion, source and other pieces | FR-09, LR-08 |
 | `LookRules` | A hand-made or hand-changed look: 2 to 6 pieces, a dress or a top and a bottom, one of each kind in Make your own look, every piece wearable | RD-07.1, LR-08 |
 | `EditHistory` | Undo and Redo of whole values, up to 20 | PRD §7.3, LR-08.2 |
@@ -118,7 +121,13 @@ protocol CutoutService: Sendable { func cutout(from: Data) async throws(CutoutEr
 
 // Phase 11, Make your own look
 protocol LookDraftStore: Sendable { draft, save, discard }      // the one unsaved look
+
+// Phase 12b, Try it on and the Pictures tab
+protocol TryOnPictureStore: Sendable { pictures, picture, save, delete }   // every picture, newest first
+protocol TryOnService: Sendable { func makePicture(of: Look, at: Date) async throws(TryOnError) -> TryOnPicture }
 ```
+
+Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture after a moment and sends nothing. The screen keeps the picture in the store before it says it's ready.
 
 `CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
 
@@ -133,14 +142,14 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | Set | Contents |
 |---|---|
 | `empty` | A fresh install: nothing, default preferences, empty sign name |
-| `demo` | The prototype's 21 garments in the new model (every state: wishlist, bought not arrived, no longer owned, Recently deleted, archived, at the tailor, dirty, text-only, worn recently and long ago), six looks (including a saved Something new with an idea piece, one she made herself, and an unsaved result), six suitcases (one empty, one archived, five active so See all shows), and a profile named Lily. Weather: 58° and rain |
-| `large` | 2,400 generated garments, 600 looks and 40 suitcases from a fixed seed, so every run is the same |
+| `demo` | The prototype's 21 garments in the new model (every state: wishlist, bought not arrived, no longer owned, Recently deleted, archived, at the tailor, dirty, text-only, worn recently and long ago), six looks (including a saved Something new with an idea piece, one she made herself, and an unsaved result), three simulated try-on pictures (two of Interview, one of an earlier version), six suitcases (one empty, one archived, five active so See all shows), and a profile named Lily. Weather: 58° and rain |
+| `large` | 2,400 generated garments, 600 looks, 40 suitcases and a simulated picture for every third saved look, from a fixed seed, so every run is the same |
 
 | Behaviour | What happens |
 |---|---|
 | `normal` | Everything answers at once |
 | `slow` | Stores wait 0.6 s, weather 1 s, the stylist 3 s (loading states) |
-| `offline` | The stylist throws `offline` and weather can't be read; local stores still work |
+| `offline` | The stylist and Try it on throw `offline` and weather can't be read; local stores still work |
 | `stylist-fails` | The stylist throws `notCompleted` |
 | `stylist-partial` | The stylist returns Simple and Dressed up only |
 | `stylist-insufficient` | The stylist says the source can't make a look (a bottom and shoes missing) |
@@ -148,6 +157,7 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | `offline-once` | The first styling request fails as offline and later ones work, as if the connection came back. Weather and stores work |
 | `stores-fail` | Every store call throws `unavailable` (error states) |
 | `photo-fails` | Add a piece's photo stand-in says the photo couldn't be read |
+| `picture-fails` | Try it on doesn't finish (Phase 12b) |
 
 `photos=samples` adds eight pieces with drawn sample photos and stand-in cutouts, and an image provider (`SamplePhotoProvider`) that draws them, so stickers and tiles can be seen without real photos (Phase 8b, `docs/stickers.md`).
 

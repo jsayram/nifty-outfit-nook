@@ -34,7 +34,7 @@ Top to bottom, as in `results-versions.html`:
 | Button | Does |
 |---|---|
 | Save look | Saves the version on screen and names it, then says "Saved to Saved Looks" with Undo. The button becomes Saved; tapping it takes the look out again, also with Undo. An idea piece stays an idea (LR-05b.3) |
-| Try it on | A stand-in sheet labelled Simulated. Real simulated pictures are Phases 12b and 33 |
+| Try it on | The Try it on sheet for the version on screen (Phase 12b, `docs/try-on-pictures.md`). Making a picture saves the look first if it isn't saved; See the picture opens it on Saved Looks. Real pictures are Phase 33 |
 | Swap a piece | Swap a piece on the version on screen (Phase 11, `docs/swap-and-editor.md`). A swap or Remove this piece comes back here marked "Swapped", with Undo in a toast and under the pieces |
 | Ask stylist | A stand-in sheet. RD-06 keeps Ask stylist on results; there's still no Ask stylist link on swap |
 | Find one | A stand-in sheet: "Nothing was searched" (LR-05b.4). Phase 34 |
@@ -102,7 +102,7 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 
 - **11 (done):** Swap a piece and Remove this piece, with Undo (`docs/swap-and-editor.md`).
 - **12a (done):** Saved Looks and look detail, renaming, Wear today (`docs/saved-looks.md`). Saving now records `savedAt`, and a piece that has left her closet shows faded on the Saved tab too.
-- **12b, 33:** Try it on with simulated, then real, pictures.
+- **12b (done), 33:** Try it on with simulated pictures (`docs/try-on-pictures.md`), then real ones.
 - **15a:** iPad results with the versions beside the look. The page keeps to 600 points and centres.
 - **27a:** the real stylist contract, the history check, and the explanation line.
 - **34:** Find one.

@@ -66,6 +66,20 @@ public protocol LookStore: Sendable {
     func removeWear(of id: Look.ID, on date: Date) async throws(StoreError)
 }
 
+/// Her try-on pictures (RD-08, Phase 12b). Sensitive: a real one is a picture of her.
+///
+/// Every picture stays until she deletes it, whatever happens to its look (PRD §7.5, §9.2.4).
+/// The rules for how pictures and looks link are in `TryOnLinks`.
+public protocol TryOnPictureStore: Sendable {
+    /// Every picture, newest first.
+    func pictures() async throws(StoreError) -> [TryOnPicture]
+    func picture(_ id: TryOnPicture.ID) async throws(StoreError) -> TryOnPicture
+    /// Keeps a new picture, or puts back the one with the same ID (Undo after Delete picture).
+    func save(_ picture: TryOnPicture) async throws(StoreError)
+    /// Delete picture. Stage B also removes its image file (Phase 22b).
+    func delete(_ id: TryOnPicture.ID) async throws(StoreError)
+}
+
 /// Her suitcases and what's in them (PRD §7.7, RD-09, LR-11, LR-17).
 public protocol SuitcaseStore: Sendable {
     /// Every suitcase, archived ones included. `SuitcaseShelf` arranges them.

@@ -16,15 +16,18 @@ struct YourLooksRoutes {
 ///
 /// The request goes to the stylist when the screen first appears, and leaving the screen
 /// cancels it if it's still running. Saving happens here, with Undo. Swap a piece opens Swap
-/// (Phase 11), and its changes come back here with Undo. Try it on, Ask stylist and Find one open
-/// stand-ins until their phases (12b and 33, later, 34).
+/// (Phase 11), and its changes come back here with Undo. Try it on opens its sheet (Phase 12b),
+/// which saves the look first if it isn't saved, and See the picture opens it on Saved Looks.
+/// Ask stylist and Find one open stand-ins until their phases (later, 34).
 struct YourLooksScreen: View {
     var routes = YourLooksRoutes()
 
     @Environment(\.services) private var services
     @Environment(\.locale) private var locale
+    @Environment(\.openInSavedLooks) private var openInSavedLooks
     @State private var model: YourLooksModel
     @State private var stub: ResultStub?
+    @State private var tryingOn: TryOnRoute?
     @State private var toast: NookToastMessage?
     @State private var swapping: SwapRoute?
 
@@ -38,7 +41,7 @@ struct YourLooksScreen: View {
             model: model,
             actions: YourLooksActions(
                 toggleSave: toggleSave,
-                tryOn: { stub = .tryOn($0.id) },
+                tryOn: openTryOn,
                 swap: { _ in openSwap() },
                 undoChange: undoChange,
                 askStylist: { stub = .askStylist($0.id) },
@@ -58,6 +61,7 @@ struct YourLooksScreen: View {
         .nookSheet(item: $stub, title: { sheetTitle($0) }, subtitle: { $0.subtitle }) { stub in
             sheetContent(stub)
         }
+        .tryOnSheet($tryingOn, seePicture: { openInSavedLooks([.picture($0.id)]) })
         .navigationDestination(item: $swapping) { route in
             SwapScreen(model: route.model, finish: finishSwap)
         }
@@ -132,6 +136,22 @@ struct YourLooksScreen: View {
                 toast = NookToastMessage(YourLooksText.saveFailed, systemImage: "exclamationmark.circle")
             }
         }
+    }
+
+    // MARK: Try it on
+
+    /// Try it on for the version on screen. A look that isn't saved yet is saved when the picture
+    /// is made, under the name Save look would give it, and the sheet says so first.
+    private func openTryOn(_ look: Look) {
+        let text = YourLooksText(request: model.request, suitcaseName: model.suitcaseName, locale: locale)
+        let name = model.stored(look)?.name ?? text.name(for: look, garments: model.garments)
+        let model = model
+        let saveLook: (() async throws(StoreError) -> Look)? =
+            model.isSaved(look)
+            ? nil
+            : { () async throws(StoreError) -> Look in try await model.saveForPicture(look, name: name) }
+        tryingOn = TryOnRoute(
+            model: TryOnModel(look: look, lookName: name, garments: model.garments, saveLook: saveLook))
     }
 
     // MARK: Swap a piece

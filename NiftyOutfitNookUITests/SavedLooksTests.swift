@@ -1,9 +1,11 @@
 import XCTest
 
 /// Saved Looks (Phase 12a, RD-08, LR-09, LR-10): a look saved on Your looks found again by search
-/// and opened, Delete look with Undo, and a frame on the Home shelf opening its look. Search, the
-/// filters, renaming, Wear today's records and the swap rules are covered by the package and
-/// snapshot tests; these check the real screens, their navigation and buttons.
+/// and opened, Delete look with Undo, and a frame on the Home shelf opening its look. Phase 12b:
+/// Try it on makes a picture that opens its look and back, and a picture deleted from a look
+/// comes back with Undo on the Pictures tab. Search, the filters, renaming, Wear today's records,
+/// the swap rules and the picture links are covered by the package and snapshot tests; these
+/// check the real screens, their navigation and buttons.
 final class SavedLooksTests: XCTestCase {
     static let wait: TimeInterval = 15
 
@@ -86,6 +88,82 @@ final class SavedLooksTests: XCTestCase {
         tap("lookPieces.swapIt.o-blazer-office-g-gray-blazer", in: app)
         XCTAssertTrue(app.navigationBars["Swap a piece"].waitForExistence(timeout: Self.wait))
         XCTAssertTrue(app.buttons["swap.piece.layer"].isSelected)
+    }
+
+    /// Phase 12b: save a look on Your looks, Try it on, then See the picture opens it on Saved
+    /// Looks; See the look opens the look, which lists the picture; Back returns to the picture,
+    /// and Back again to the Pictures tab with the new picture first.
+    @MainActor
+    func testTryItOnMakesAPictureThatOpensItsLook() {
+        let app = launch()
+        tap("home.laptop", in: app)
+        XCTAssertTrue(app.navigationBars["Style Me"].waitForExistence(timeout: Self.wait))
+        tap("styleMe.go", in: app)
+        XCTAssertTrue(app.buttons["results.version.simple"].waitForExistence(timeout: Self.wait))
+        tap("results.save", in: app)
+        XCTAssertTrue(waitForLabel(of: app.buttons["results.save"], containing: "Saved"))
+
+        tap("results.tryOn", in: app)
+        XCTAssertTrue(element("tryOn.ready", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("tryOn.free", in: app).exists, "No note that simulated pictures are free")
+        tap("tryOn.make", in: app)
+        XCTAssertTrue(element("tryOn.made", in: app).waitForExistence(timeout: Self.wait), "No picture was made")
+        tap("tryOn.seePicture", in: app)
+
+        // Saved Looks, on the new picture.
+        XCTAssertTrue(element("picture.title", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.tabBars.firstMatch.buttons["Saved Looks"].isSelected)
+        XCTAssertTrue(element("picture.facts", in: app).label.contains("Made today"))
+        let seeLook = app.buttons["picture.seeLook"]
+        XCTAssertTrue(seeLook.waitForExistence(timeout: Self.wait))
+        let name = String(seeLook.label.dropFirst("See the look: ".count))
+        XCTAssertFalse(name.isEmpty, seeLook.label)
+
+        // Its look, which lists the picture.
+        tap("picture.seeLook", in: app)
+        let title = element("lookDetail.name", in: app)
+        XCTAssertTrue(title.waitForExistence(timeout: Self.wait))
+        XCTAssertEqual(title.label, name)
+        let pictureRow = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "lookDetail.picture."))
+        XCTAssertTrue(pictureRow.firstMatch.waitForExistence(timeout: Self.wait), "The look doesn't list its picture")
+        let pictureID = String(pictureRow.firstMatch.identifier.dropFirst("lookDetail.picture.".count))
+
+        // Back to the picture, then back to the Pictures tab, newest first.
+        app.goBack(from: name, to: "Try-on picture", timeout: Self.wait)
+        XCTAssertTrue(app.buttons["picture.seeLook"].waitForExistence(timeout: Self.wait))
+        app.goBack(from: "Try-on picture", to: "Saved Looks", timeout: Self.wait)
+        XCTAssertTrue(app.buttons["savedLooks.tab.pictures"].isSelected)
+        XCTAssertTrue(app.buttons["savedLooks.picture.\(pictureID)"].waitForExistence(timeout: Self.wait))
+    }
+
+    /// Phase 12b: a look's picture opens from the look, See the look goes back to it, and Delete
+    /// picture comes back to the look without it. Undo on the Pictures tab brings it back.
+    @MainActor
+    func testDeleteAPictureFromItsLookWithUndo() {
+        let app = launch()
+        app.tabBars.firstMatch.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
+        tap("savedLooks.look.o-lace-date", in: app)
+        XCTAssertTrue(element("lookDetail.name", in: app).waitForExistence(timeout: Self.wait))
+        tap("lookDetail.picture.p-lace", in: app)
+        XCTAssertTrue(element("picture.title", in: app).waitForExistence(timeout: Self.wait))
+
+        // See the look is Back here, not a second copy of the look.
+        tap("picture.seeLook", in: app)
+        XCTAssertTrue(app.navigationBars["Try-on picture"].waitForNonExistence(timeout: Self.wait))
+        XCTAssertTrue(element("lookDetail.name", in: app).waitForExistence(timeout: Self.wait))
+        tap("lookDetail.picture.p-lace", in: app)
+        tap("picture.delete", in: app)
+        XCTAssertTrue(element("lookDetail.name", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.buttons["lookDetail.picture.p-lace"].waitForNonExistence(timeout: Self.wait))
+
+        app.goBack(from: "Lace date night", to: "Saved Looks", timeout: Self.wait)
+        app.buttons["savedLooks.tab.pictures"].tapUntilSelected(timeout: Self.wait)
+        let banner = element("savedLooks.pictureDeleted", in: app)
+        XCTAssertTrue(banner.waitForExistence(timeout: Self.wait))
+        XCTAssertFalse(app.buttons["savedLooks.picture.p-lace"].exists)
+        banner.buttons["Undo"].tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(
+            app.buttons["savedLooks.picture.p-lace"].waitForExistence(timeout: Self.wait), "Undo didn't bring it back")
     }
 
     // MARK: Helpers
