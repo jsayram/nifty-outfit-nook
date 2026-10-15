@@ -17,17 +17,18 @@ struct RoomControlTests {
         #expect(routes[.helpDrawer] == .push(.help))
         #expect(routes[.feedbackDrawer] == .push(.feedback))
         #expect(routes[.privacyDrawer] == .push(.privacy))
-        #expect(routes[.suitcase] == .push(.suitcases))
-        #expect(routes[.hamper] == .push(.laundry))
+        // Suitcases and Laundry live in Closet, so they open on the Closet tab (Phase 13).
+        #expect(routes[.suitcase] == .closet(.suitcases))
+        #expect(routes[.hamper] == .closet(.laundry))
     }
 
     /// RD-11.3: Laundry when tracking is on, the short sheet about it when it's off. Before the
     /// closet loads it opens Laundry rather than claim tracking is off.
     @Test func hamperFollowsLaundryTracking() {
-        #expect(RoomControl.hamper.route(hamper: .toWash(2)) == .push(.laundry))
-        #expect(RoomControl.hamper.route(hamper: .allClean) == .push(.laundry))
+        #expect(RoomControl.hamper.route(hamper: .toWash(2)) == .closet(.laundry))
+        #expect(RoomControl.hamper.route(hamper: .allClean) == .closet(.laundry))
         #expect(RoomControl.hamper.route(hamper: .off) == .sheet(.laundryTracking))
-        #expect(RoomControl.hamper.route(hamper: nil) == .push(.laundry))
+        #expect(RoomControl.hamper.route(hamper: nil) == .closet(.laundry))
     }
 
     /// RD-01.2 and RD-10.2: each label names the object and where it goes.
@@ -113,15 +114,17 @@ struct HomeModelTests {
         #expect(model.content.hamper == .off)
     }
 
-    /// RD-01.3: the plate shows a suitcase source's name and count.
+    /// RD-01.3: the plate shows a suitcase source's name and count, and the room shows its
+    /// drawing (Phase 13).
     @Test func suitcaseSourceShowsItsNameAndCount() async throws {
         let services = FixtureServices.make(set: .demo, now: now)
         let suitcase = try #require(
             try await services.suitcases.suitcases().first { !$0.isArchived && !$0.garmentIDs.isEmpty })
+        try await services.profile.change { $0.remembered.source = .suitcase(suitcase.id) }
         let model = HomeModel()
-        model.source = .suitcase(suitcase.id)
         await model.load(from: services)
-        #expect(model.content.source.kind == .suitcase(name: suitcase.name))
+        #expect(model.content.source.kind == .suitcase(name: suitcase.name, icon: suitcase.icon))
+        #expect(model.content.source.icon == suitcase.icon)
         let expected = try await services.closet.garments().count { $0.isInCloset && suitcase.contains($0.id) }
         #expect(model.content.source.pieceCount == expected)
         #expect(model.content.source.scopeText == "Suitcase only")

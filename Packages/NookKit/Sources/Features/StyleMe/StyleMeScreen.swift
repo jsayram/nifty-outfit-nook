@@ -7,8 +7,10 @@ import SwiftUI
 struct StyleMeRoutes {
     /// Add a piece, from the empty closet.
     var addPiece: () -> Void = {}
-    /// Suitcases, to pack an empty or small suitcase (a stand-in until Phase 13).
+    /// Suitcases, to choose or pack a suitcase.
     var openSuitcases: () -> Void = {}
+    /// One suitcase, to pack it when it's empty or small (Phase 13).
+    var openSuitcase: (Suitcase.ID, String) -> Void = { _, _ in }
 }
 
 /// Style Me (RD-02): what the desk laptop and the calendar on Home open, and where a garment's
@@ -28,10 +30,15 @@ struct StyleMeScreen: View {
     @State private var sent: StyleRequest?
     @State private var askedForOccasion = false
 
-    init(startingPieceID: Garment.ID? = nil, choosingOccasion: Bool = false, routes: StyleMeRoutes = StyleMeRoutes()) {
+    /// - Parameter source: a suitcase's "Style me from this suitcase" (Phase 13). Without it,
+    ///   Style Me starts from the source she chose last.
+    init(
+        startingPieceID: Garment.ID? = nil, source: WardrobeSource? = nil, choosingOccasion: Bool = false,
+        routes: StyleMeRoutes = StyleMeRoutes()
+    ) {
         self.choosingOccasion = choosingOccasion
         self.routes = routes
-        _model = State(initialValue: StyleMeModel(startingPieceID: startingPieceID))
+        _model = State(initialValue: StyleMeModel(startingPieceID: startingPieceID, source: source))
     }
 
     var body: some View {
@@ -68,8 +75,9 @@ struct StyleMeScreen: View {
     private func sheetContent(_ sheet: StyleMeSheet) -> some View {
         let sourceName = model.text(locale: locale).sourceName
         switch sheet {
-        case .source: SourceChoices(model: model, close: close)
-        case .occasion: OccasionChoices(model: model, close: close)
+        // A source or occasion she picks is remembered for next time (FR-67, Phase 13).
+        case .source: SourceChoices(model: model, close: closeAndRemember)
+        case .occasion: OccasionChoices(model: model, close: closeAndRemember)
         case .startingPiece: StartingPieceChoices(model: model, sourceName: sourceName, close: close)
         case .comfort: ComfortChoices(model: model, close: close)
         case .color: ColorChoices(model: model)
@@ -79,6 +87,15 @@ struct StyleMeScreen: View {
 
     private func close() {
         sheet = nil
+    }
+
+    private func closeAndRemember() {
+        sheet = nil
+        remember()
+    }
+
+    private func remember() {
+        Task { await model.remember(in: services) }
     }
 
     /// The calendar on Home asks for the occasion once, when the screen first has its data.
@@ -93,7 +110,7 @@ struct StyleMeScreen: View {
     private func perform(_ action: StyleMeNoticeAction) {
         switch action {
         case .addPiece: routes.addPiece()
-        case .addPieces: routes.openSuitcases()
+        case .addPieces: openSuitcase(of: model.draft.source)
         case .chooseSource: sheet = .source
         case .chooseStartingPiece: sheet = .startingPiece
         case .clearStartingPiece: model.update { $0.startingPieceID = nil }
@@ -105,7 +122,17 @@ struct StyleMeScreen: View {
     /// Style me: opens Your looks, which sends the request. Nothing else sends it (RD-02.1).
     private func styleMe() {
         guard let request = model.makeRequest() else { return }
+        remember()
         sent = request
+    }
+
+    /// The suitcase to pack, or Suitcases when it can't be found.
+    private func openSuitcase(of source: WardrobeSource) {
+        if let suitcase = model.suitcase, suitcase.id == source.suitcaseID {
+            routes.openSuitcase(suitcase.id, suitcase.name)
+        } else {
+            routes.openSuitcases()
+        }
     }
 
     /// Your looks' ways back: to Style Me with her choices kept, or on to adding pieces.
@@ -114,11 +141,12 @@ struct StyleMeScreen: View {
             backToStyleMe: { sent = nil },
             useMainCloset: {
                 model.choose(source: .mainCloset)
+                remember()
                 sent = nil
             },
             addPieces: { source in
                 sent = nil
-                if source.isSuitcase { routes.openSuitcases() } else { routes.addPiece() }
+                if source.isSuitcase { openSuitcase(of: source) } else { routes.addPiece() }
             }
         )
     }

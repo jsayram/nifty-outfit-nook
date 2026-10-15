@@ -37,7 +37,12 @@ extension RoomControl {
         case .savedLooks:
             return String(localized: "Saved Looks", bundle: .module, comment: "VoiceOver label: opens Saved Looks")
         case .occasion:
-            return String(localized: "Occasion", bundle: .module, comment: "Row on Home: opens Style Me's occasion")
+            guard let occasion = content.occasion else {
+                return String(localized: "Occasion", bundle: .module, comment: "Row on Home: opens Style Me's occasion")
+            }
+            return String(
+                localized: "Occasion: \(occasion.title)", bundle: .module,
+                comment: "Row on Home: opens Style Me's occasion, with her last occasion, as in Occasion: Office")
         case .laptop:
             return String(localized: "Style Me", bundle: .module, comment: "Button on Home: opens Style Me")
         case .helpDrawer:

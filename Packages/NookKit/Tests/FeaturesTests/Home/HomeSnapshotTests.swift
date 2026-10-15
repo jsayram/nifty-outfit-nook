@@ -46,6 +46,16 @@ struct HomeSnapshotTests {
         assertRoomSnapshot(content, on: .iPhoneSE, named: "long-name-suitcase")
     }
 
+    /// A suitcase source takes the suitcase's own drawing, and the calendar shows her last
+    /// occasion (Phase 13), in light and dark.
+    @Test func suitcaseSourceAndOccasion() {
+        var content = Self.demo
+        content.source = SourcePlate(kind: .suitcase(name: "Weekend", icon: .duffel), pieceCount: 8)
+        content.occasion = .dateNight
+        assertRoomSnapshot(content, on: .iPhone17, named: "suitcase-source")
+        assertRoomSnapshot(content, on: .iPhone17, colorScheme: .dark, named: "suitcase-source-dark")
+    }
+
     /// Her three newest saved looks in the frames under the shelf (Phase 12a), light and dark.
     @Test func framedLooks() {
         let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)

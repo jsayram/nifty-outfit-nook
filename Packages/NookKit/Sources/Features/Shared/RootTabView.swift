@@ -7,6 +7,9 @@ public struct RootTabView: View {
     @State private var selection: AppTab = .home
     /// Saved Looks' navigation, kept here so a frame on the Home shelf can open a look in it.
     @State private var savedLooksPath: [SavedLooksDestination] = []
+    /// Closet's navigation, kept here so Home's suitcase and hamper can open Suitcases and
+    /// Laundry in it (Phase 13).
+    @State private var closetPath: [ClosetDestination] = []
     private let services: NookServices?
     /// Garment pictures, shared by every screen so they're cached once.
     @State private var garmentImages: GarmentImageLoader?
@@ -27,7 +30,7 @@ public struct RootTabView: View {
                 HomeScreen(openTab: { selection = $0 }, openLook: openSavedLook)
             }
             Tab(AppTab.closet.title, systemImage: AppTab.closet.systemImage, value: AppTab.closet) {
-                ClosetScreen()
+                ClosetScreen(path: $closetPath)
             }
             Tab(AppTab.savedLooks.title, systemImage: AppTab.savedLooks.systemImage, value: AppTab.savedLooks) {
                 SavedLooksScreen(path: $savedLooksPath)
@@ -35,6 +38,7 @@ public struct RootTabView: View {
         }
         .tint(.nook.accent)
         .environment(\.openInSavedLooks, OpenInSavedLooksAction { path in openInSavedLooks(path) })
+        .environment(\.openInCloset, OpenInClosetAction { path in openInCloset(path) })
         .environment(\.services, services)
         .environment(\.garmentImages, garmentImages)
         .environment(\.stickerCache, stickers)
@@ -43,6 +47,12 @@ public struct RootTabView: View {
     /// Switches to Saved Looks with this look open, on top of the grid.
     private func openSavedLook(_ id: Look.ID) {
         openInSavedLooks([.look(id)])
+    }
+
+    /// Switches to Closet with these screens open, on top of the grid.
+    private func openInCloset(_ path: [ClosetDestination]) {
+        closetPath = path
+        selection = .closet
     }
 
     /// Switches to Saved Looks with these screens open, on top of the grid.

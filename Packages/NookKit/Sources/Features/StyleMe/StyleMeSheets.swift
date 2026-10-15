@@ -78,8 +78,8 @@ struct StyleMeChoiceRow: View {
 
 // MARK: - Source
 
-/// Main closet or one of her suitcases (FR-67). The choice is for this request; remembering it
-/// for next time comes with the source picker (Phase 13).
+/// Main closet or one of her suitcases (FR-67). The choice is remembered for next time and shows
+/// on Home's suitcase (Phase 13).
 struct SourceChoices: View {
     let model: StyleMeModel
     let close: () -> Void

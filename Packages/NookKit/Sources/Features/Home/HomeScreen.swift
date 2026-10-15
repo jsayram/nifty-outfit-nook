@@ -5,9 +5,9 @@ import SwiftUI
 /// Home: the illustrated bedroom, where each piece of furniture opens part of the app (RD-01).
 ///
 /// The wardrobe and the shelf switch to the Closet and Saved Looks tabs, and a saved look in a
-/// frame under the shelf opens on Saved Looks. Everything else is
-/// pushed here: Style Me from the laptop and the calendar, Suitcases from the suitcase, Laundry
-/// from the hamper, Help, Send feedback and Privacy and terms from the desk drawers, and
+/// frame under the shelf opens on Saved Looks. The suitcase and the hamper open Suitcases and
+/// Laundry on the Closet tab (Phase 13). Everything else is
+/// pushed here: Style Me from the laptop and the calendar, Help, Send feedback and Privacy and terms from the desk drawers, and
 /// Profile from the name sign and the top-right button. While laundry tracking is off, the
 /// hamper opens a short sheet about it instead (RD-11).
 struct HomeScreen: View {
@@ -17,6 +17,7 @@ struct HomeScreen: View {
     var openLook: (Look.ID) -> Void = { _ in }
 
     @Environment(\.services) private var services
+    @Environment(\.openInCloset) private var openInCloset
     @State private var model = HomeModel()
     @State private var path: [HomeDestination] = []
     @State private var sheet: HomeSheet?
@@ -59,7 +60,9 @@ struct HomeScreen: View {
                         StyleMeScreen(
                             choosingOccasion: choosingOccasion,
                             routes: StyleMeRoutes(
-                                addPiece: { path.append(.addPiece) }, openSuitcases: { path.append(.suitcases) }))
+                                addPiece: { path.append(.addPiece) },
+                                openSuitcases: { openInCloset([.suitcases]) },
+                                openSuitcase: { id, name in openInCloset([.suitcases, .suitcase(id, name: name)]) }))
                     case .addPiece:
                         // From Style Me's empty closet. Saving goes back to Style Me, which reloads.
                         GarmentEditorScreen(target: .newPiece, saved: { _ in goBack() }, close: goBack)
@@ -79,7 +82,13 @@ struct HomeScreen: View {
                 }
                 .nookToast($toast)
         }
+        // Each time the tab appears, so a change made on another tab shows: a new source, pieces
+        // marked clean in Laundry (Phase 13).
         .task { await model.load(from: services) }
+        .onChange(of: path) { old, new in
+            // Back from a pushed screen: Style Me may have changed the source or the occasion.
+            if new.count < old.count { Task { await model.load(from: services) } }
+        }
     }
 
     /// The room, the large-text rows or the sideways room (`HomeLayout`). Each draws the same
@@ -137,6 +146,7 @@ struct HomeScreen: View {
     private func open(_ control: RoomControl) {
         switch control.route(hamper: model.content.hamper) {
         case .tab(let tab): openTab(tab)
+        case .closet(let destination): openInCloset([destination])
         case .push(let destination): path.append(destination)
         case .sheet(let sheet): self.sheet = sheet
         }

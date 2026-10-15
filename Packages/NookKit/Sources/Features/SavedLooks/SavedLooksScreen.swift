@@ -130,11 +130,19 @@ struct SavedLooksScreen: View {
         case .makeYourOwnLook(let id, _):
             LookBuilderScreen(startingPieceID: id)
         case .styleMe(let id, _):
-            StyleMeScreen(
-                startingPieceID: id,
-                routes: StyleMeRoutes(
-                    addPiece: { path.append(.closet(.addPiece(.photo))) },
-                    openSuitcases: { path.append(.closet(.suitcases)) }))
+            StyleMeScreen(startingPieceID: id, routes: styleMeRoutes)
+        case .styleMeFrom(let source):
+            StyleMeScreen(source: source, routes: styleMeRoutes)
+        case .suitcases:
+            SuitcasesScreen(open: { path.append(.closet($0)) })
+        case .allSuitcases:
+            AllSuitcasesScreen(open: { path.append(.closet($0)) })
+        case .suitcase(let id, let name, let startsPacking):
+            SuitcaseDetailScreen(
+                suitcaseID: id, name: name, startsPacking: startsPacking, open: { path.append(.closet($0)) },
+                back: goBack, deleted: suitcaseDeleted)
+        case .laundry:
+            LaundryScreen(open: { path.append(.closet($0)) })
         case .addPiece:
             GarmentEditorScreen(target: .newPiece, saved: { _ in goBack() }, close: goBack)
         default:
@@ -151,6 +159,25 @@ struct SavedLooksScreen: View {
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    private var styleMeRoutes: StyleMeRoutes {
+        StyleMeRoutes(
+            addPiece: { path.append(.closet(.addPiece(.photo))) },
+            openSuitcases: { path.append(.closet(.suitcases)) },
+            openSuitcase: { id, name in path.append(.closet(.suitcase(id, name: name))) })
+    }
+
+    /// Delete suitcase, from a suitcase opened on a piece's detail: back to the piece, with Undo.
+    private func suitcaseDeleted(_ change: SuitcaseChange) {
+        goBack()
+        guard let services else { return }
+        toast = NookToastMessage(
+            change.message, systemImage: "checkmark",
+            actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
+        ) {
+            Task { try? await change.undo(in: services) }
+        }
     }
 
     private func goBack() {

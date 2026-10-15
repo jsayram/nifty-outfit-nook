@@ -83,7 +83,7 @@ extension Season {
 }
 
 extension Occasion {
-    var title: String {
+    nonisolated var title: String {
         switch self {
         case .office: String(localized: "Office", bundle: .module, comment: "Occasion")
         case .casual: String(localized: "Casual", bundle: .module, comment: "Occasion")

@@ -9,6 +9,7 @@ struct GarmentDetailActions {
     var openSuitcase: (Suitcase) -> Void = { _ in }
     var styleWithThis: () -> Void = {}
     var toggleLaundry: () -> Void = {}
+    var addToSuitcase: () -> Void = {}
     var remove: () -> Void = {}
 }
 
@@ -132,6 +133,15 @@ struct GarmentDetailPage: View {
                     comment: "Hint on Style with this")
             )
             .accessibilityIdentifier("garment.styleWithThis")
+            NookButton(
+                String(localized: "Add to a suitcase", bundle: .module, comment: "Button on garment detail (Phase 13)"),
+                systemImage: "suitcase", kind: .soft, fillsWidth: true, action: actions.addToSuitcase
+            )
+            .accessibilityHint(
+                Text(
+                    "Choose the suitcases it’s packed in.", bundle: .module, comment: "Hint on Add to a suitcase")
+            )
+            .accessibilityIdentifier("garment.addToSuitcase")
             if model.showsLaundryAction {
                 NookButton(
                     text.isInTheWash

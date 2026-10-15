@@ -24,6 +24,8 @@ final class GarmentDetailModel {
     private(set) var garment: Garment?
     /// Her active suitcases that hold it, by name (LR-11). Archived suitcases don't count.
     private(set) var suitcases: [Suitcase] = []
+    /// Every suitcase that isn't archived, in Suitcases' order, for "Add to a suitcase" (Phase 13).
+    private(set) var activeSuitcases: [Suitcase] = []
     /// Her saved looks that use it, newest first. Delete it lists them first (LR-16.2).
     private(set) var savedLooks: [Look] = []
     private(set) var tracksLaundry = false
@@ -75,6 +77,7 @@ final class GarmentDetailModel {
         self.garment = garment
         suitcases = allSuitcases.filter { !$0.isArchived && $0.contains(garment.id) }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        activeSuitcases = SuitcaseShelf(allSuitcases).all
         savedLooks = looks.filter { $0.isSaved && $0.garmentIDs.contains(garment.id) }
         phase = .loaded
     }
@@ -104,6 +107,24 @@ final class GarmentDetailModel {
     }
 
     // MARK: Changes
+
+    /// "Add to a suitcase" (Phase 13, PRD §7.7): packs it in a suitcase, or takes it out. It's the
+    /// same piece either way; nothing is copied. Returns true when it's now packed.
+    @discardableResult
+    func toggleSuitcase(_ id: Suitcase.ID, in services: NookServices?) async throws(StoreError) -> Bool {
+        guard let services, let garment else { throw .unavailable }
+        let packing = !(activeSuitcases.first { $0.id == id }?.contains(garment.id) ?? false)
+        if packing {
+            try await services.suitcases.add([garment.id], to: id)
+        } else {
+            try await services.suitcases.remove([garment.id], from: id)
+        }
+        let all = try await services.suitcases.suitcases()
+        suitcases = all.filter { !$0.isArchived && $0.contains(garment.id) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        activeSuitcases = SuitcaseShelf(all).all
+        return packing
+    }
 
     /// Marks it dirty or clean (RD-11). Returns the state it had, for Undo.
     @discardableResult

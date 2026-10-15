@@ -18,6 +18,11 @@ struct GarmentGrid: View {
     var hint: String?
     /// The start of each cell's UI test identifier.
     var identifierPrefix = "closet.garment"
+    /// Picking several (the packing sheet, Phase 13): the ticked pieces. `nil` for none.
+    var selection: Set<Garment.ID>?
+    /// A small minus on each piece that takes it out (a suitcase's pieces, Phase 13), with
+    /// VoiceOver's words for it. `nil` for none.
+    var remove: GarmentRemoveAction?
     let open: (ClosetItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -43,7 +48,10 @@ struct GarmentGrid: View {
     }
 
     private func cell(_ item: ClosetItem, style: GarmentCell.Style) -> some View {
-        GarmentCell(item: item, now: now, style: style, hint: hint, identifierPrefix: identifierPrefix) {
+        GarmentCell(
+            item: item, now: now, style: style, hint: hint, identifierPrefix: identifierPrefix,
+            isSelected: selection.map { $0.contains(item.id) }, remove: remove
+        ) {
             open(item)
         }
     }
@@ -75,6 +83,13 @@ nonisolated enum GarmentGridLayout: Equatable {
     }
 }
 
+/// The minus on each piece of a suitcase (Phase 13): its VoiceOver label and what it does.
+struct GarmentRemoveAction {
+    /// "Remove Navy dress pants from Weekend".
+    let label: (ClosetItem) -> String
+    let action: (ClosetItem) -> Void
+}
+
 /// One piece: its picture on a soft shadow, the name under it (or beside it in rows), a tiny
 /// suitcase when it's packed (LR-11) and Dirty while tracking is on (RD-11). One VoiceOver
 /// button: "Navy dress pants", then "In Jose's house and Weekend, Last worn 5 days ago".
@@ -89,6 +104,9 @@ struct GarmentCell: View {
     let style: Style
     var hint: String?
     var identifierPrefix = "closet.garment"
+    /// Ticked or not, when the grid picks several. `nil` when it doesn't.
+    var isSelected: Bool?
+    var remove: GarmentRemoveAction?
     let action: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -122,7 +140,30 @@ struct GarmentCell: View {
         .accessibilityHint(
             hint.map { Text($0) } ?? Text("Opens the piece.", bundle: .module, comment: "Hint on a closet piece")
         )
+        .accessibilityAddTraits(isSelected == true ? [.isSelected] : [])
         .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue)")
+        .overlay(alignment: .topTrailing) {
+            if let remove {
+                Button {
+                    remove.action(item)
+                } label: {
+                    Image(systemName: "minus")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.nook.accent)
+                        .frame(width: 26, height: 26)
+                        .background {
+                            Circle().fill(Color.nook.tintStrong)
+                                .softShadow(.drop, in: Circle())
+                        }
+                        .frame(width: NookSpacing.minimumTapTarget, height: NookSpacing.minimumTapTarget)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(ClosetPressStyle())
+                .offset(x: NookSpacing.small, y: -NookSpacing.small)
+                .accessibilityLabel(Text(remove.label(item)))
+                .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue).remove")
+            }
+        }
     }
 
     private var size: CGSize { GarmentGridLayout(dynamicTypeSize).pictureSize }
@@ -136,6 +177,12 @@ struct GarmentCell: View {
                 photo: item.photo, cutout: item.cutout, category: item.category, colors: item.colors, size: size)
         }
         .frame(width: size.width, height: size.height)
+        .overlay(alignment: .topTrailing) {
+            if let isSelected {
+                SelectionTick(isSelected: isSelected)
+                    .offset(x: NookSpacing.small, y: -NookSpacing.xSmall)
+            }
+        }
         .overlay(alignment: .topLeading) {
             if item.isDirty {
                 NookBadge(
@@ -168,6 +215,27 @@ struct GarmentCell: View {
                     .accessibilityHidden(true)
             }
         }
+    }
+}
+
+/// The round tick on a piece in a grid that picks several: a solid accent circle with a check
+/// when it's picked, an empty ring when it isn't. VoiceOver hears Selected from the cell.
+struct SelectionTick: View {
+    let isSelected: Bool
+
+    var body: some View {
+        ZStack {
+            Circle().fill(isSelected ? Color.nook.accent : Color.nook.tintStrong)
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.nook.onAccent)
+            } else {
+                Circle().strokeBorder(Color.nook.chevron, lineWidth: 2)
+            }
+        }
+        .frame(width: 26, height: 26)
+        .accessibilityHidden(true)
     }
 }
 
