@@ -88,6 +88,8 @@ extension ContrastRequirement {
             ContrastRequirement(.accentPressed, on: .track, kind: .text),
             ContrastRequirement(.background, on: .textPrimary, kind: .text),
             ContrastRequirement(.accent, on: .tintStrong, over: .warningSurface, kind: .text),
+            // Delete my data's button: words on the error colour (Phase 14b).
+            ContrastRequirement(.onAccent, on: .error, kind: .text),
         ]
 
     private static let statusPairs: [ContrastRequirement] = [
@@ -106,6 +108,8 @@ extension ContrastRequirement {
             ContrastRequirement(.accent, on: .track, kind: .largeTextOrGraphic),
             // Icons on a butter row (Phase 5b).
             ContrastRequirement(.accent, on: .warningSurface, kind: .largeTextOrGraphic),
+            // Delete my data's button stands out from the floor by its fill (Phase 14b).
+            ContrastRequirement(.error, on: .floor, kind: .largeTextOrGraphic),
         ]
         + [ColorToken.background, .backgroundLow, .surface].map {
             ContrastRequirement(.chevron, on: $0, kind: .largeTextOrGraphic)

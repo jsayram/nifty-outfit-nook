@@ -246,6 +246,29 @@
     "%@′ %@″" : {
       "comment" : "A height in feet and inches, like 4′ 11″. Keep the prime marks."
     },
+    "%lld drafts" : {
+      "comment" : "Delete my data: how many unsaved drafts",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld draft"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld drafts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld looks" : {
       "comment" : "Saved Looks: how many looks she saved",
       "localizations" : {
@@ -582,8 +605,17 @@
         }
       }
     },
+    "A private note to the developer. It isn’t posted anywhere." : {
+      "comment" : "Send feedback, under the title"
+    },
+    "A rough location for the forecast. Never your exact address." : {
+      "comment" : "Privacy and terms: what weather would send"
+    },
     "A suitcase is a smaller set of your pieces, for a trip or a second home. Style Me can then pick from just what’s packed." : {
       "comment" : "Suitcases: empty message"
+    },
+    "A suitcase is a smaller set of your pieces, for a trip or a second home. Tap the suitcase in your room to choose one." : {
+      "comment" : "Help: Suitcases"
     },
     "A top" : {
       "comment" : "What a look needs"
@@ -598,6 +630,9 @@
           }
         }
       }
+    },
+    "About: %@" : {
+      "comment" : "Send feedback: the note's second line, with what it's about"
     },
     "Accept" : {
       "comment" : "Suggestion chip",
@@ -741,6 +776,9 @@
     "Adds it to the look." : {
       "comment" : "Make your own look: hint on a piece"
     },
+    "Afterwards" : {
+      "comment" : "Delete my data: section header"
+    },
     "All %@" : {
       "comment" : "Name of a saved look whose top and bottom are one colour"
     },
@@ -778,6 +816,9 @@
     "An approximate number is fine. It never decides a size on its own." : {
       "comment" : "Measurement help for weight (PRD §10)"
     },
+    "An idea" : {
+      "comment" : "Send feedback: kind chip"
+    },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
       "localizations" : {
@@ -792,8 +833,8 @@
     "Any one piece" : {
       "comment" : "Colour sheet: applies to"
     },
-    "App tours" : {
-      "comment" : "Profile row and screen title"
+    "App version: %@ (%@)" : {
+      "comment" : "Send feedback: app details line, version and build"
     },
     "Applies to" : {
       "comment" : "Colour sheet group"
@@ -1309,6 +1350,9 @@
     "Clear search" : {
       "comment" : "Button: empties the search"
     },
+    "Closed" : {
+      "comment" : "VoiceOver: a Help topic hides its answer"
+    },
     "Closet" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -1398,6 +1442,9 @@
         }
       }
     },
+    "Dark Mode" : {
+      "comment" : "Accessibility: a setting"
+    },
     "Date night" : {
       "comment" : "Occasion",
       "localizations" : {
@@ -1409,6 +1456,9 @@
         }
       }
     },
+    "Default" : {
+      "comment" : "Accessibility: text size value"
+    },
     "Delete %@?" : {
       "comment" : "Remove from closet: asks before Delete it",
       "localizations" : {
@@ -1419,6 +1469,12 @@
           }
         }
       }
+    },
+    "Delete everything" : {
+      "comment" : "Delete my data: the question's button"
+    },
+    "Delete everything?" : {
+      "comment" : "Delete my data: the question's title"
     },
     "Delete it" : {
       "comment" : "Remove from closet choice",
@@ -1491,6 +1547,9 @@
         }
       }
     },
+    "Deleting" : {
+      "comment" : "VoiceOver value while data is being deleted"
+    },
     "Denim" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1545,6 +1604,12 @@
           }
         }
       }
+    },
+    "Details you don’t know can stay empty. This test build uses sample photos instead of your camera." : {
+      "comment" : "Help: Add a piece, the quieter line"
+    },
+    "Device: %@" : {
+      "comment" : "Send feedback: app details line, the model identifier such as iPhone13,2"
     },
     "Dirty" : {
       "comment" : "Spoken on a closet piece in the wash",
@@ -1733,6 +1798,9 @@
         }
       }
     },
+    "Every button, and everything in your room, says what it is and where it goes." : {
+      "comment" : "Accessibility: what the app does with VoiceOver"
+    },
     "Every piece counts as available to Style Me." : {
       "comment" : "Laundry, tracking off"
     },
@@ -1770,6 +1838,29 @@
         }
       }
     },
+    "Every piece counts as available. Your %lld dirty marks are kept." : {
+      "comment" : "Under the Track laundry switch while it's off: dirty marks are kept for later (RD-11)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Every piece counts as available. Your %lld dirty mark is kept."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Every piece counts as available. Your %lld dirty marks are kept."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Every piece here counts as available to Style Me." : {
       "comment" : "Laundry: all clean"
     },
@@ -1779,14 +1870,32 @@
     "Every piece you own, packed or not." : {
       "comment" : "Laundry: what the Main closet chip shows"
     },
+    "Every piece, with its pictures and details, and Recently deleted" : {
+      "comment" : "Delete my data: under Your closet"
+    },
+    "Every screen’s words grow with it. At the largest sizes, Home turns into big rows." : {
+      "comment" : "Accessibility: what the app does with Text size"
+    },
+    "Everyday" : {
+      "comment" : "Help section header"
+    },
     "Everything here is optional. It stays private, on this iPhone." : {
       "comment" : "Fit and measurements: under the title"
     },
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
     },
+    "Everything you add stays on this iPhone. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
+      "comment" : "Help: Your data"
+    },
     "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
       "comment" : "Swap: under the See all title, with the source's name"
+    },
+    "Everything you’ve added, from this iPhone" : {
+      "comment" : "Privacy and terms: under the Delete my data row"
+    },
+    "Everything you’ve added, from this iPhone." : {
+      "comment" : "Delete my data, under the title"
     },
     "Example photo · Simulated" : {
       "comment" : "Under the example try-on photo"
@@ -1883,6 +1992,9 @@
     "Fit and measurements" : {
       "comment" : "Profile row and screen title"
     },
+    "Fit and measurements and your try-on pictures are hidden when you switch apps. This test build keeps everything only while the app is open, so closing it brings back the sample closet." : {
+      "comment" : "Privacy and terms: under what stays on the iPhone"
+    },
     "Fits well" : {
       "comment" : "How a piece fits"
     },
@@ -1913,6 +2025,9 @@
     },
     "For example, museum visit" : {
       "comment" : "Prompt for Other's words"
+    },
+    "For example: the hamper didn’t open Laundry." : {
+      "comment" : "Send feedback: the empty field's prompt"
     },
     "For example: your favourite jeans or a blazer that fits perfectly." : {
       "comment" : "Shown only while she has no fitting pieces (LR-13.3)"
@@ -1948,6 +2063,9 @@
     },
     "From your closet of %lld" : {
       "comment" : "Packing sheet: how many pieces she can pack from"
+    },
+    "Get outfit ideas" : {
+      "comment" : "Help topic"
     },
     "Getting Style Me ready" : {
       "comment" : "Style Me while it loads"
@@ -1993,6 +2111,9 @@
           }
         }
       }
+    },
+    "Good to know" : {
+      "comment" : "Help section header"
     },
     "Gray" : {
       "comment" : "Colour name",
@@ -2082,6 +2203,9 @@
           }
         }
       }
+    },
+    "Hides the answer." : {
+      "comment" : "VoiceOver hint on an open Help topic"
     },
     "Hip / seat" : {
       "comment" : "Measurement"
@@ -2212,6 +2336,9 @@
         }
       }
     },
+    "In Closet, tap Add a piece. Choose a photo, or describe the piece in words. Only a name and a kind are needed." : {
+      "comment" : "Help: Add a piece"
+    },
     "In Recently deleted" : {
       "comment" : "Mark on a saved look's piece she deleted, which is in Recently deleted (LR-16)"
     },
@@ -2282,6 +2409,9 @@
         }
       }
     },
+    "In this test build nothing needs a connection, and nothing you add is sent anywhere." : {
+      "comment" : "Help: What needs a connection"
+    },
     "In this test build the picture is simulated: your pieces on a plain background, with no person in it. Nothing leaves your phone." : {
       "comment" : "Try it on sheet"
     },
@@ -2304,6 +2434,9 @@
     },
     "Inches go from 0 to 11. Put whole feet in the first box." : {
       "comment" : "Height: the inches part is 12 or more"
+    },
+    "Include app details" : {
+      "comment" : "Send feedback: the switch"
     },
     "Indoors" : {
       "comment" : "Weather row value: she'll be indoors",
@@ -2415,6 +2548,12 @@
         }
       }
     },
+    "Keep it about the app. There’s no need to add your measurements, photos or closet details." : {
+      "comment" : "Send feedback: under the field"
+    },
+    "Keep it to %lld characters or fewer." : {
+      "comment" : "Send feedback: the note is too long"
+    },
     "Keep it to %lld characters." : {
       "comment" : "Problem with the words for Other"
     },
@@ -2493,6 +2632,12 @@
         }
       }
     },
+    "Larger" : {
+      "comment" : "Accessibility: text size value"
+    },
+    "Largest" : {
+      "comment" : "Accessibility: text size value"
+    },
     "Last changed %@" : {
       "comment" : "Draft card: when the draft last changed, like 5 minutes ago",
       "localizations" : {
@@ -2551,6 +2696,12 @@
         }
       }
     },
+    "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline." : {
+      "comment" : "Help: What needs a connection, the quieter line"
+    },
+    "Later, sent only if you allow it" : {
+      "comment" : "Privacy and terms: section header"
+    },
     "Laundry" : {
       "comment" : "Plate on the hamper",
       "localizations" : {
@@ -2561,6 +2712,9 @@
           }
         }
       }
+    },
+    "Laundry tracking is a switch in Profile. When it’s on, the hamper shows what’s in the wash and Style Me skips those pieces until you mark them clean." : {
+      "comment" : "Help: Laundry"
     },
     "Laundry tracking is off" : {
       "comment" : "Sheet title",
@@ -2573,6 +2727,32 @@
         }
       }
     },
+    "Laundry tracking is off." : {
+      "comment" : "Toast after turning laundry tracking off"
+    },
+    "Laundry tracking is off. Your %lld dirty marks are kept." : {
+      "comment" : "Toast after turning laundry tracking off, with dirty marks kept for later (RD-11)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Laundry tracking is off. Your %lld dirty mark is kept."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Laundry tracking is off. Your %lld dirty marks are kept."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Laundry tracking is on." : {
       "comment" : "Toast after turning it on",
       "localizations" : {
@@ -2580,6 +2760,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laundry tracking is on."
+          }
+        }
+      }
+    },
+    "Laundry tracking is on. %lld pieces are back in the wash." : {
+      "comment" : "Toast after turning laundry tracking on, with the kept dirty marks back (RD-11.2)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Laundry tracking is on. %lld piece is back in the wash."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Laundry tracking is on. %lld pieces are back in the wash."
+                }
+              }
+            }
           }
         }
       }
@@ -2948,6 +3151,9 @@
     "More" : {
       "comment" : "Button: opens a suitcase's menu"
     },
+    "Most of your data is deleted, but not: %@. Try again to finish." : {
+      "comment" : "Delete my data: some parts failed, with their names"
+    },
     "Multicolour" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2978,6 +3184,9 @@
     },
     "Name on your sign" : {
       "comment" : "Profile row (RD-03)"
+    },
+    "Name on your sign, Preferences, fit, measurements and try-on photo" : {
+      "comment" : "Delete my data: under Your profile"
     },
     "Name on your sign, no name yet" : {
       "comment" : "VoiceOver: Profile's sign when no name is set"
@@ -3027,6 +3236,9 @@
     "Never measured" : {
       "comment" : "Try-on photo sheet point"
     },
+    "Never your closet, photos, measurements, looks or name." : {
+      "comment" : "Send feedback: under the preview"
+    },
     "Next" : {
       "comment" : "VoiceOver: a styling step still to come"
     },
@@ -3040,6 +3252,12 @@
           }
         }
       }
+    },
+    "Nifty Outfit Nook feedback" : {
+      "comment" : "Send feedback: the first line of the note, and the email subject"
+    },
+    "Nifty Outfit Nook · %@ (%@) · test build with sample data" : {
+      "comment" : "Help: the app's version at the bottom, with its build number"
     },
     "No %@ %@ in %@ can be used today." : {
       "comment" : "Style Me warning. Example: No navy shoes in Weekend can be used today."
@@ -3153,6 +3371,9 @@
     },
     "None" : {
       "comment" : "Style Me: no starting piece"
+    },
+    "None of these is in this test build. Each will ask first, and allowing one never allows another." : {
+      "comment" : "Privacy and terms: above what later features would send"
     },
     "None of your other %@ in %@ go with this look." : {
       "comment" : "Swap: no good matches, with the kind of piece and the source's name"
@@ -3277,6 +3498,9 @@
         }
       }
     },
+    "Nothing about you is kept anywhere else. This test build has no account and sends nothing." : {
+      "comment" : "Delete my data: nothing is held off the iPhone in Stage A"
+    },
     "Nothing here" : {
       "comment" : "Recently deleted is empty",
       "localizations" : {
@@ -3325,6 +3549,9 @@
     },
     "Nothing was charged, and nothing was made up to fill the gap." : {
       "comment" : "Your looks: insufficient wardrobe"
+    },
+    "Nothing was deleted. Try again in a moment." : {
+      "comment" : "Delete my data: every part failed"
     },
     "Nothing was lost. Try again in a moment." : {
       "comment" : "Closet error message",
@@ -3393,6 +3620,9 @@
         }
       }
     },
+    "Off unless you turn it on." : {
+      "comment" : "Send feedback: under the Include app details switch"
+    },
     "Off · tap to learn more" : {
       "comment" : "Home's Laundry row while laundry tracking is off",
       "localizations" : {
@@ -3434,6 +3664,9 @@
     },
     "On Your looks, tap Save look." : {
       "comment" : "Saved Looks empty state: step 2"
+    },
+    "On the website" : {
+      "comment" : "Privacy and terms: under a policy row"
     },
     "On this iPhone" : {
       "comment" : "Styling step detail"
@@ -3521,8 +3754,14 @@
     "Only the top changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
     },
+    "Open" : {
+      "comment" : "VoiceOver: a Help topic shows its answer"
+    },
     "Open %@" : {
       "comment" : "Button on a suitcase's row: opens it"
+    },
+    "Open Settings" : {
+      "comment" : "Accessibility: the button"
     },
     "Open Style Me from the laptop on Home and ask for a look." : {
       "comment" : "Saved Looks empty state: step 1"
@@ -3672,6 +3911,9 @@
         }
       }
     },
+    "Opens the page on the app’s website." : {
+      "comment" : "VoiceOver hint on the privacy policy and terms rows"
+    },
     "Opens the picture." : {
       "comment" : "Hint on a try-on picture"
     },
@@ -3696,6 +3938,9 @@
           }
         }
       }
+    },
+    "Opens this app’s page in the Settings app." : {
+      "comment" : "VoiceOver hint on Open Settings"
     },
     "Opens this look." : {
       "comment" : "Hint on a saved look"
@@ -3852,11 +4097,17 @@
     "Pictures need a connection" : {
       "comment" : "Try it on sheet: offline"
     },
+    "Piece names, kinds and colours, the occasion and the weather, when you tap Style me. Never your photos or your name." : {
+      "comment" : "Privacy and terms: what Style Me would send"
+    },
     "Piece to swap" : {
       "comment" : "Swap: VoiceOver name of the piece chips"
     },
     "Pieces" : {
       "comment" : "Look detail: heading over the piece list"
+    },
+    "Pieces and looks you started but didn’t save" : {
+      "comment" : "Delete my data: under Unsaved work"
     },
     "Pieces from Main closet that you can wear today. Nothing is sent, and no styling request is used." : {
       "comment" : "Make your own look: where the pieces come from (FR-32)"
@@ -3906,8 +4157,14 @@
         }
       }
     },
+    "Policies" : {
+      "comment" : "Privacy and terms: section header"
+    },
     "Preferences" : {
       "comment" : "Style Me row (LR-03)"
+    },
+    "Preferences and what Style Me remembers" : {
+      "comment" : "Privacy and terms: what stays on the iPhone"
     },
     "Preferred" : {
       "comment" : "Colour sheet: how strongly"
@@ -3936,6 +4193,9 @@
           }
         }
       }
+    },
+    "Privacy policy" : {
+      "comment" : "Privacy and terms: a row"
     },
     "Private. Saved only on this iPhone, and nothing here is sent anywhere in this test build. Changing it never restyles a saved look." : {
       "comment" : "Fit and measurements: the privacy line at the bottom"
@@ -4003,6 +4263,9 @@
     },
     "Redo" : {
       "comment" : "Make your own look: redoes a change"
+    },
+    "Reduce Motion" : {
+      "comment" : "Accessibility: a setting"
     },
     "Regular" : {
       "comment" : "How a piece is cut",
@@ -4072,9 +4335,6 @@
     },
     "Rename look" : {
       "comment" : "Sheet title"
-    },
-    "Replay the tips for any screen" : {
-      "comment" : "Under the App tours row"
     },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
@@ -4213,6 +4473,9 @@
         }
       }
     },
+    "Saved looks and try-on pictures" : {
+      "comment" : "Privacy and terms: what stays on the iPhone"
+    },
     "Saved looks didn’t load" : {
       "comment" : "Saved tab error title"
     },
@@ -4221,6 +4484,9 @@
     },
     "Saved looks work without pictures or credits. An empty name is filled in from the colours." : {
       "comment" : "Make your own look: under Save while it can be saved"
+    },
+    "Saved looks, looks you made, and earlier results" : {
+      "comment" : "Delete my data: under Looks"
     },
     "Saved to Pictures" : {
       "comment" : "Try it on sheet: the picture is ready"
@@ -4315,6 +4581,9 @@
     "Selected in %@" : {
       "comment" : "Laundry confirmation: cleaning the ticked pieces, with where"
     },
+    "Send a private note to the developer." : {
+      "comment" : "Help: under Still stuck?"
+    },
     "Send feedback" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -4325,6 +4594,9 @@
           }
         }
       }
+    },
+    "Send privately" : {
+      "comment" : "Send feedback: the button"
     },
     "Send the request" : {
       "comment" : "Styling step 2"
@@ -4376,6 +4648,9 @@
     "Shopping comes later" : {
       "comment" : "Find one stand-in"
     },
+    "Short answers that work offline. Opening help never changes what you’re doing." : {
+      "comment" : "Help, under the title"
+    },
     "Show" : {
       "comment" : "Spoken name of the Looks and Pictures switch"
     },
@@ -4399,11 +4674,17 @@
     "Shows it in the look." : {
       "comment" : "Swap: hint on an option"
     },
+    "Shows the answer." : {
+      "comment" : "VoiceOver hint on a closed Help topic"
+    },
     "Shows three more of your pieces. Nothing is sent." : {
       "comment" : "Swap hint"
     },
     "Simple" : {
       "comment" : "Look version (LR-05a)"
+    },
+    "Simple and Dressed up use only your pieces. Something new can add one idea if Preferences allows it. If there aren’t enough pieces, Style Me says what’s missing." : {
+      "comment" : "Help: Get outfit ideas, the quieter line"
     },
     "Simulated" : {
       "comment" : "Badge: a stand-in, not the real thing"
@@ -4481,6 +4762,9 @@
         }
       }
     },
+    "Smaller" : {
+      "comment" : "Accessibility: text size value"
+    },
     "Smart" : {
       "comment" : "How dressy a piece is",
       "localizations" : {
@@ -4497,6 +4781,9 @@
     },
     "Something new may add one idea" : {
       "comment" : "Style Me Preferences line for Mine + one idea"
+    },
+    "Something’s wrong" : {
+      "comment" : "Send feedback: kind chip"
     },
     "Source" : {
       "comment" : "Plate on the suitcase, above the source's name",
@@ -4565,8 +4852,14 @@
         }
       }
     },
+    "Stays on this iPhone" : {
+      "comment" : "Privacy and terms: section header"
+    },
     "Step %lld of 3" : {
       "comment" : "VoiceOver value of the styling progress bar"
+    },
+    "Still stuck?" : {
+      "comment" : "Help: the last card"
     },
     "Style Me" : {
       "comment" : "Words on the laptop screen; opens Style Me",
@@ -4578,6 +4871,9 @@
           }
         }
       }
+    },
+    "Style Me and swaps" : {
+      "comment" : "Privacy and terms: a later feature"
     },
     "Style Me builds an outfit around it." : {
       "comment" : "Style with this choice: what Style me with it does",
@@ -4604,6 +4900,9 @@
     },
     "Style Me puts looks together from your own clothes. Add a few pieces first." : {
       "comment" : "Style Me when the closet is empty"
+    },
+    "Style Me skips pieces in the wash until they’re clean." : {
+      "comment" : "Under the Track laundry switch while it's on"
     },
     "Style Me skips pieces in the wash. A piece in two suitcases is one piece, so cleaning it cleans it everywhere." : {
       "comment" : "Laundry: what being in the wash means"
@@ -4698,6 +4997,9 @@
     },
     "Styling didn’t finish" : {
       "comment" : "Your looks failed state title"
+    },
+    "Styling from a suitcase uses only its pieces. Deleting a suitcase keeps every piece." : {
+      "comment" : "Help: Suitcases, the quieter line"
     },
     "Styling from this one" : {
       "comment" : "Under the chosen suitcase in the hall"
@@ -4805,6 +5107,9 @@
         }
       }
     },
+    "Suitcases and laundry marks" : {
+      "comment" : "Privacy and terms: what stays on the iPhone"
+    },
     "Summer" : {
       "comment" : "Season",
       "localizations" : {
@@ -4822,8 +5127,14 @@
     "Swap a piece" : {
       "comment" : "Results button (RD-06, LR-08)"
     },
+    "Swap changes one piece and keeps the rest. Save look keeps it in Saved Looks, where you can wear it again." : {
+      "comment" : "Help: Swap, save and try on"
+    },
     "Swap it" : {
       "comment" : "Button on a saved look's piece that left her closet (LR-16.4)"
+    },
+    "Swap, save and try on a look" : {
+      "comment" : "Help topic"
     },
     "Swapped" : {
       "comment" : "Mark on a piece that replaces one in Simple"
@@ -4885,6 +5196,21 @@
     "Tap one to see it in the look." : {
       "comment" : "Swap: under the buttons before she picks an option"
     },
+    "Tap the laptop on your desk. Check the occasion, then tap Style me. You’ll see one outfit in three versions: Simple, Dressed up and Something new." : {
+      "comment" : "Help: Get outfit ideas"
+    },
+    "Terms of use" : {
+      "comment" : "Privacy and terms: a row"
+    },
+    "Text size" : {
+      "comment" : "Accessibility: a setting"
+    },
+    "Text size, VoiceOver and Reduce Motion are in Settings, under Accessibility. Per-App Settings there can change them for this app only." : {
+      "comment" : "Accessibility: under the button"
+    },
+    "Thank you" : {
+      "comment" : "Send feedback: after sending"
+    },
     "That didn’t save. Nothing changed." : {
       "comment" : "Toast when a change to a piece couldn't be saved",
       "localizations" : {
@@ -4912,6 +5238,9 @@
     },
     "That look couldn’t be saved. Try again." : {
       "comment" : "Toast when saving a look fails"
+    },
+    "That look’s piece photos and your try-on photo, only when you tap Try it on, with its own permission." : {
+      "comment" : "Privacy and terms: what Try it on would send"
     },
     "That photo couldn’t be read" : {
       "comment" : "Add a piece: the photo stand-in failed",
@@ -4941,6 +5270,15 @@
     "That’s every outfit %@ can make for this request, so this one came round again." : {
       "comment" : "Note on Your looks after Try a different outfit: the source's name"
     },
+    "The app doesn’t send anything itself. Send opens the share sheet, and you choose where the note goes, like Messages or Mail." : {
+      "comment" : "Send feedback: under the button, in this test build"
+    },
+    "The app follows your iPhone’s settings." : {
+      "comment" : "Accessibility, under the title"
+    },
+    "The app starts fresh, as if it were just installed: an empty closet, and a sign that says Hello." : {
+      "comment" : "Delete my data: what happens after"
+    },
     "The first one you picked is the main colour." : {
       "comment" : "Add a piece: under the colours when several are picked",
       "localizations" : {
@@ -4951,6 +5289,9 @@
           }
         }
       }
+    },
+    "The full privacy policy and terms are still being written." : {
+      "comment" : "Privacy and terms: under the policy rows, before the pages exist"
     },
     "The inside leg length you like, from a pair of trousers that fits." : {
       "comment" : "Measurement help"
@@ -5013,8 +5354,8 @@
     "The suitcase you were styling from isn’t there any more, so Style Me uses Main closet." : {
       "comment" : "Suitcases: the remembered suitcase was deleted or archived"
     },
-    "The switch comes in the next update. For now, turn tracking on from the hamper on Home or from Laundry." : {
-      "comment" : "Profile: the Track laundry row's stand-in"
+    "The version, iOS and device model. Never anything about you." : {
+      "comment" : "Send feedback: under the Include app details switch while it's on"
     },
     "The weather can’t be read right now, so your looks won’t use it." : {
       "comment" : "Under the Weather row when the weather can't be read",
@@ -5047,6 +5388,9 @@
     "They become available to Style Me again. You can undo this." : {
       "comment" : "Laundry confirmation: what cleaning does"
     },
+    "Things fade instead of sliding, and Maya’s z’s stay still." : {
+      "comment" : "Accessibility: what the app does with Reduce Motion"
+    },
     "This choice is for this request only." : {
       "comment" : "Weather sheet: the choice doesn't stick",
       "localizations" : {
@@ -5057,6 +5401,9 @@
           }
         }
       }
+    },
+    "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics." : {
+      "comment" : "Privacy and terms: the banner at the top"
     },
     "This is the photo of you that try-on pictures will start from, once they’re ready. It’s optional: styling never needs it." : {
       "comment" : "Try-on photo sheet: what the photo is for"
@@ -5069,9 +5416,6 @@
     },
     "This look isn’t saved any more" : {
       "comment" : "Look detail: the look is gone"
-    },
-    "This part of Profile comes in the next update." : {
-      "comment" : "Profile: a row whose screen isn't built yet"
     },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
@@ -5244,11 +5588,23 @@
     "Try it on and Ask stylist need a connection. Save and Swap work offline." : {
       "comment" : "Under the results buttons while offline"
     },
+    "Try it on makes a simulated picture of the look, only when you ask. In this test build it’s drawn on your iPhone." : {
+      "comment" : "Help: Swap, save and try on, the quieter line"
+    },
     "Try it on makes one picture of this look, only now that you ask." : {
       "comment" : "Try it on sheet"
     },
     "Try-on picture" : {
       "comment" : "Title of one try-on picture"
+    },
+    "Try-on pictures" : {
+      "comment" : "Delete my data: a part"
+    },
+    "Try-on pictures and real fit" : {
+      "comment" : "Help topic"
+    },
+    "Try-on pictures are previews. They can’t show how something actually fits. Your measurements and the pieces that fit you well are the better guide." : {
+      "comment" : "Help: Try-on pictures and real fit"
     },
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons (RD-06)"
@@ -5266,6 +5622,9 @@
           }
         }
       }
+    },
+    "Turning it off keeps your marks, and every piece counts as available." : {
+      "comment" : "Help: Laundry, the quieter line"
     },
     "Type a few words about the piece first." : {
       "comment" : "Describe in words: Suggest details with nothing typed",
@@ -5291,6 +5650,9 @@
     },
     "Units" : {
       "comment" : "VoiceOver name of the units switch"
+    },
+    "Unsaved work" : {
+      "comment" : "Delete my data: a part"
     },
     "Use %@" : {
       "comment" : "Swap: commits the swap, as in Use this top"
@@ -5354,6 +5716,9 @@
     "Versions of this outfit" : {
       "comment" : "VoiceOver name of the Simple, Dressed up, Something new switch"
     },
+    "VoiceOver" : {
+      "comment" : "Accessibility: a setting"
+    },
     "Waist" : {
       "comment" : "Measurement"
     },
@@ -5402,6 +5767,21 @@
     "What Style Me starts with" : {
       "comment" : "Under the Preferences row in Profile"
     },
+    "What happened?" : {
+      "comment" : "Send feedback: the field's name"
+    },
+    "What is it about?" : {
+      "comment" : "Send feedback: above the kind chips"
+    },
+    "What needs a connection" : {
+      "comment" : "Help topic"
+    },
+    "What stays here, what would be sent, and when." : {
+      "comment" : "Privacy and terms, under the title"
+    },
+    "What would you like to say?" : {
+      "comment" : "Send feedback: the field's name"
+    },
     "What you’ve filled in so far won’t be kept." : {
       "comment" : "Add a piece: under the discard question",
       "localizations" : {
@@ -5413,8 +5793,17 @@
         }
       }
     },
+    "What’s deleted" : {
+      "comment" : "Delete my data: section header"
+    },
+    "What’s sent" : {
+      "comment" : "Send feedback: above the preview"
+    },
     "What’s the occasion?" : {
       "comment" : "Label for Other's words"
+    },
+    "What’s your idea?" : {
+      "comment" : "Send feedback: the field's name"
     },
     "When it’s on" : {
       "comment" : "Laundry tracking sheet",
@@ -5558,6 +5947,12 @@
     "Worn together lately" : {
       "comment" : "Swap: mark in See all on a piece that would repeat an outfit she wore recently (LR-10)"
     },
+    "Write a few words to send the note." : {
+      "comment" : "Send feedback: the note is empty"
+    },
+    "Write another" : {
+      "comment" : "Button: starts a new note"
+    },
     "Yellow" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -5672,6 +6067,9 @@
         }
       }
     },
+    "Your closet" : {
+      "comment" : "Delete my data: a part"
+    },
     "Your closet couldn’t be read" : {
       "comment" : "Your looks when the stores fail"
     },
@@ -5700,8 +6098,20 @@
         }
       }
     },
+    "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
+      "comment" : "Delete my data: the question"
+    },
+    "Your data" : {
+      "comment" : "Help topic"
+    },
+    "Your data is deleted. The app is starting fresh." : {
+      "comment" : "Toast on Home after Delete my data"
+    },
     "Your first name" : {
       "comment" : "Name on your sign: the empty field's prompt"
+    },
+    "Your iPhone’s settings now" : {
+      "comment" : "Accessibility: section header"
     },
     "Your laundry didn’t load" : {
       "comment" : "Laundry error title"
@@ -5762,6 +6172,15 @@
         }
       }
     },
+    "Your name, measurements, weight and fit" : {
+      "comment" : "Privacy and terms: what stays on the iPhone"
+    },
+    "Your note shows here, exactly as it will be sent." : {
+      "comment" : "Send feedback: the preview before she has written anything"
+    },
+    "Your note went where you sent it. This is what it said." : {
+      "comment" : "Send feedback: after sending"
+    },
     "Your own clothes first. Something new adds one piece you don’t have, marked “Not in your closet”." : {
       "comment" : "Preferences sheet: Mine + one idea"
     },
@@ -5779,6 +6198,12 @@
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
     },
+    "Your pieces, their pictures and details" : {
+      "comment" : "Privacy and terms: what stays on the iPhone"
+    },
+    "Your profile" : {
+      "comment" : "Delete my data: a part"
+    },
     "Your profile didn’t load" : {
       "comment" : "Profile error title"
     },
@@ -5790,6 +6215,9 @@
     },
     "Your request needs another look" : {
       "comment" : "Your looks when the suitcase or starting piece changed"
+    },
+    "Your room changes to evening, with the lamp on." : {
+      "comment" : "Accessibility: what the app does in Dark Mode"
     },
     "Your saved looks didn’t load" : {
       "comment" : "Saved Looks error title"
@@ -5817,6 +6245,9 @@
     },
     "You’ll be able to ask about this look in your own words." : {
       "comment" : "Ask stylist stand-in"
+    },
+    "You’ll be asked once more. Deleting can’t be undone." : {
+      "comment" : "Delete my data: under the button"
     },
     "accessories" : {
       "comment" : "Swap: kind of piece, plural"
@@ -5884,6 +6315,9 @@
     },
     "ft" : {
       "comment" : "Unit after a box: feet"
+    },
+    "iOS: %@" : {
+      "comment" : "Send feedback: app details line, the iOS version"
     },
     "in" : {
       "comment" : "Unit after a box: inches"

@@ -230,7 +230,8 @@ on. Text that a component shows comes in already localized, as a `String`; the f
 | `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
 
 New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
-toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter.
+toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter. Phase 14b added
+Delete my data's button: `onAccent` words on the `error` fill (6.8:1 light, 8.6:1 dark), and that fill against the floor.
 
 ### Stickers
 

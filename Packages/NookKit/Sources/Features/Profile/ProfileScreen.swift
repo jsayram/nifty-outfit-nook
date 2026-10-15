@@ -6,26 +6,22 @@ import SwiftUI
 nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     /// Fit and measurements (Phase 14a).
     case fit
-    // Stand-ins until Phase 14b (16a for App tours).
-    case trackLaundry
+    // Phase 14b. App tours joins them in Phase 16b, when there are tours to replay.
     case accessibility
-    case tours
     case help
     case feedback
     case privacy
     case deleteData
 
     /// The Help and privacy group, in order.
-    static let later: [ProfileDestination] = [.accessibility, .tours, .help, .feedback, .privacy, .deleteData]
+    static let helpAndPrivacy: [ProfileDestination] = [.accessibility, .help, .feedback, .privacy, .deleteData]
 
     var id: Self { self }
 
     var title: String {
         switch self {
         case .fit: ProfileText.fitRow
-        case .trackLaundry: ProfileText.laundryRow
         case .accessibility: ProfileText.accessibilityRow
-        case .tours: ProfileText.toursRow
         case .help: ProfileText.helpRow
         case .feedback: ProfileText.feedbackRow
         case .privacy: ProfileText.privacyRow
@@ -36,9 +32,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     var systemImage: String {
         switch self {
         case .fit: "ruler"
-        case .trackLaundry: "washer"
         case .accessibility: "accessibility"
-        case .tours: "wand.and.sparkles"
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
         case .privacy: "hand.raised"
@@ -50,9 +44,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     var identifier: String {
         switch self {
         case .fit: "fit"
-        case .trackLaundry: "laundry"
         case .accessibility: "accessibility"
-        case .tours: "tours"
         case .help: "help"
         case .feedback: "feedback"
         case .privacy: "privacy"
@@ -92,9 +84,10 @@ nonisolated enum ProfileSheet: String, Identifiable, Hashable, Sendable {
 ///
 /// Name on your sign, Preferences and Avoid repeating outfits for open small sheets and save
 /// when she picks. Fit and measurements is pushed. Your try-on photo is a sheet that explains
-/// the photo and, in Stage A, offers an example instead of the camera or her photos. The other
-/// rows open stand-ins until Phase 14b. Home reloads when Profile closes, so a new name is on
-/// the sign straight away (RD-03.1).
+/// the photo and, in Stage A, offers an example instead of the camera or her photos. Track
+/// laundry is a switch (Phase 14b). Accessibility, Help, Send feedback, Privacy and terms and
+/// Delete my data are pushed (14b). Home reloads when Profile closes, so a new name is on the
+/// sign and the hamper follows Track laundry straight away (RD-03.1, RD-11).
 struct ProfileScreen: View {
     @Environment(\.services) private var services
     @Environment(\.locale) private var locale
@@ -110,7 +103,8 @@ struct ProfileScreen: View {
                 retry: { Task { await model.load(from: services, locale: locale) } },
                 editName: { sheet = .name },
                 open: { pushed = $0 },
-                openSheet: { sheet = $0 }
+                openSheet: { sheet = $0 },
+                setTracksLaundry: { isOn in Task { await setTracksLaundry(isOn) } }
             )
         )
         .navigationTitle(ProfileText.title)
@@ -123,16 +117,12 @@ struct ProfileScreen: View {
         }
         .navigationDestination(item: $pushed) { destination in
             switch destination {
-            case .fit:
-                FitScreen(model: model)
-            case .trackLaundry:
-                StubScreen(
-                    title: destination.title, systemImage: destination.systemImage,
-                    identifier: "profile.\(destination.identifier)", message: ProfileText.laundryLaterMessage)
-            default:
-                StubScreen(
-                    title: destination.title, systemImage: destination.systemImage,
-                    identifier: "profile.\(destination.identifier)", message: ProfileText.laterMessage)
+            case .fit: FitScreen(model: model)
+            case .accessibility: AccessibilityScreen()
+            case .help: HelpScreen()
+            case .feedback: FeedbackScreen()
+            case .privacy: PrivacyScreen()
+            case .deleteData: DeleteDataScreen()
             }
         }
         .nookSheet(
@@ -195,6 +185,18 @@ struct ProfileScreen: View {
                 await model.removePhoto(in: services)
             }
         }
+    }
+
+    /// Track laundry: saves the switch and says what happened to her dirty marks (RD-11). When it
+    /// doesn't save, the switch stays as it was and a toast says so.
+    private func setTracksLaundry(_ isOn: Bool) async {
+        let saved = await model.setTracksLaundry(isOn, in: services)
+        toast =
+            saved
+            ? NookToastMessage(
+                ProfileText.laundryToast(isOn: isOn, kept: model.keptDirtyCount),
+                systemImage: isOn ? "basket" : "checkmark")
+            : NookToastMessage(ProfileText.failed, systemImage: "exclamationmark.triangle")
     }
 
     /// Closes the sheet once its change is saved. When it isn't, the sheet stays and says so.

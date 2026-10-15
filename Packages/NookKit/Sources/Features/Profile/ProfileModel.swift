@@ -29,6 +29,9 @@ final class ProfileModel {
     private(set) var profile = Profile()
     /// The region, for the units she starts with and how numbers are written.
     private(set) var locale = Locale.current
+    /// Pieces in her closet still marked as in the wash, kept while tracking is off (RD-11).
+    /// Track laundry's line and toast mention them.
+    private(set) var keptDirtyCount = 0
 
     // MARK: Loading
 
@@ -43,7 +46,22 @@ final class ProfileModel {
             show(try await services.profile.profile(), locale: locale)
         } catch {
             if phase != .loaded { phase = .failed }
+            return
         }
+        // Only for Track laundry's words, so Profile still shows if the closet can't be read.
+        if let garments = try? await services.closet.garments() {
+            keptDirtyCount = Self.dirtyCount(in: garments)
+        }
+    }
+
+    /// Pieces in her closet marked as in the wash, whether or not tracking is on.
+    nonisolated static func dirtyCount(in garments: [Garment]) -> Int {
+        garments.count { $0.isInCloset && $0.laundry == .dirty }
+    }
+
+    /// Sets the dirty marks count directly, for tests that hand data straight in.
+    func show(keptDirtyCount: Int) {
+        self.keptDirtyCount = keptDirtyCount
     }
 
     /// Sets the profile directly. Separate from `load` so tests can hand data straight in.
@@ -93,6 +111,13 @@ final class ProfileModel {
 
     func setUsualFit(_ fit: Comfort, in services: NookServices?) async -> Bool {
         await change(in: services) { $0.usualFit = fit } != nil
+    }
+
+    /// Track laundry (RD-11). Turning it off keeps every dirty mark, so turning it on again
+    /// brings them back (RD-11.2). Home's hamper and Closet's Laundry tile follow when they next
+    /// appear, which is as soon as Profile closes.
+    func setTracksLaundry(_ isOn: Bool, in services: NookServices?) async -> Bool {
+        await change(in: services) { $0.preferences.tracksLaundry = isOn } != nil
     }
 
     func setUnits(_ units: MeasurementUnits, in services: NookServices?) async -> Bool {

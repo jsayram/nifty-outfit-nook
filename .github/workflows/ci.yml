@@ -81,7 +81,8 @@ jobs:
   # above stay within the five macOS runners the free plan allows at once.
   # Balanced in October 2026 from the classes' times on CI (in seconds, from the test log):
   #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20
-  #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75
+  #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75, SettingsTests about 260
+  #                             locally (new in Phase 14b, no CI time yet)
   #   ui-add-and-catalog        AddPieceTests 367, CatalogTests about 175
   #   ui-rest                   the rest, about 580, and any new class
   # When a part grows well past the others, move a class. Each class's time is in the job log
@@ -105,6 +106,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/StyleMeTests
               -only-testing:NiftyOutfitNookUITests/LaunchTests
+              -only-testing:NiftyOutfitNookUITests/SettingsTests
           - part: ui-add-and-catalog
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
@@ -119,6 +121,7 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/StyleMeTests
               -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
     steps:

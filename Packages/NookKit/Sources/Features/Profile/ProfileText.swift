@@ -88,14 +88,6 @@ nonisolated enum ProfileText {
         String(localized: "Accessibility", bundle: .module, comment: "Profile row and screen title")
     }
 
-    static var toursRow: String {
-        String(localized: "App tours", bundle: .module, comment: "Profile row and screen title")
-    }
-
-    static var toursRowDetail: String {
-        String(localized: "Replay the tips for any screen", bundle: .module, comment: "Under the App tours row")
-    }
-
     static var helpRow: String {
         String(localized: "Help", bundle: .module, comment: "Screen title")
     }
@@ -112,17 +104,43 @@ nonisolated enum ProfileText {
         String(localized: "Delete my data", bundle: .module, comment: "Profile row and screen title")
     }
 
-    static var laterMessage: String {
-        String(
-            localized: "This part of Profile comes in the next update.", bundle: .module,
-            comment: "Profile: a row whose screen isn't built yet")
+    // MARK: Track laundry (RD-11, Phase 14b)
+
+    /// The line under the switch: what it does now, and the marks kept while it's off.
+    static func laundryDetail(isOn: Bool, kept: Int) -> String {
+        if isOn {
+            return String(
+                localized: "Style Me skips pieces in the wash until they’re clean.", bundle: .module,
+                comment: "Under the Track laundry switch while it's on")
+        }
+        guard kept > 0 else {
+            return String(
+                localized: "Every piece counts as available.", bundle: .module,
+                comment: "Under the Track laundry switch while it's off, with no dirty marks")
+        }
+        return String(
+            localized: "Every piece counts as available. Your \(kept) dirty marks are kept.", bundle: .module,
+            comment: "Under the Track laundry switch while it's off: dirty marks are kept for later (RD-11)")
     }
 
-    static var laundryLaterMessage: String {
-        String(
-            localized:
-                "The switch comes in the next update. For now, turn tracking on from the hamper on Home or from Laundry.",
-            bundle: .module, comment: "Profile: the Track laundry row's stand-in")
+    /// The toast after the switch changes.
+    static func laundryToast(isOn: Bool, kept: Int) -> String {
+        switch (isOn, kept > 0) {
+        case (true, false):
+            String(localized: "Laundry tracking is on.", bundle: .module, comment: "Toast after turning it on")
+        case (true, true):
+            String(
+                localized: "Laundry tracking is on. \(kept) pieces are back in the wash.", bundle: .module,
+                comment: "Toast after turning laundry tracking on, with the kept dirty marks back (RD-11.2)")
+        case (false, false):
+            String(
+                localized: "Laundry tracking is off.", bundle: .module,
+                comment: "Toast after turning laundry tracking off")
+        case (false, true):
+            String(
+                localized: "Laundry tracking is off. Your \(kept) dirty marks are kept.", bundle: .module,
+                comment: "Toast after turning laundry tracking off, with dirty marks kept for later (RD-11)")
+        }
     }
 
     // MARK: Name on your sign
