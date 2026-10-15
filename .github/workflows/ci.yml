@@ -47,9 +47,9 @@ jobs:
   # spare). Each job's fixed cost on the hosted runner is about 6 minutes: setup, the build, a
   # cold simulator boot and the first launch.
   #
-  # The Release check and the package tests share a runner, then the same runner and simulator
-  # run SettingsTests, which costs no second build or boot (the first UI launch still takes
-  # about 3 minutes).
+  # The Release check and the package tests share a runner, then the same runner runs
+  # SettingsTests. That costs no second build or boot, but the first UI launch there still took
+  # 3 to 7 minutes, so this job is now the longest (22 to 26 minutes in October 2026).
   release-and-package-tests:
     name: release-and-package-tests
     runs-on: macos-26
@@ -105,7 +105,7 @@ jobs:
   #   ui-rest                 SavedLooksTests 244, GarmentDetailTests 210, ProfileTests 193,
   #                           SuitcasesAndLaundryTests 158, and any new class (about 22)
   #   ui-ipad                 IPadStyleMeAndSavedTests 290, IPadTests 195 (about 14)
-  #   (release-and-package-tests above: SettingsTests 479, about 22 with the Release build)
+  #   (release-and-package-tests above: SettingsTests 454 to 479, 22 to 26 with the Release build)
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
   ui-tests:
