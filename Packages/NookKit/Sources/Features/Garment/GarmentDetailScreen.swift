@@ -5,7 +5,7 @@ import SwiftUI
 /// Garment detail (Phase 7a): one piece, its facts, and what she can do with it.
 ///
 /// Edit opens Edit piece (7b). Style with this asks whether to Style Me with it (10a) or make her
-/// own look (a stand-in until 11). Each suitcase name opens that suitcase
+/// own look (11). Each suitcase name opens that suitcase
 /// (a stand-in until 13). Remove from closet asks first, then hands the removal back to Closet,
 /// which goes back to the grid and offers Undo (LR-16.1).
 struct GarmentDetailScreen: View {
@@ -104,7 +104,12 @@ struct GarmentDetailScreen: View {
                 confirmDelete: { remove(deleting: true) }
             )
         }
-        .nookToast($toast)
+        // The page's scroll view runs under the floating tab bar, so the toast sits on a clear
+        // layer that keeps to the safe area and stays above the tab bar (as on Your looks).
+        .overlay {
+            Color.clear
+                .nookToast($toast)
+        }
         .task { await model.load(from: services) }
     }
 
