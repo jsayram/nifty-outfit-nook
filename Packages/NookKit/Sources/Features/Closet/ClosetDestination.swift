@@ -1,7 +1,7 @@
 import Models
 
 /// A screen Closet pushes. Garment detail and Recently deleted (Phase 7a), Add a piece and Edit
-/// (Phase 7b), and Suitcases and Laundry (Phase 13) are built; Profile is a stand-in until 14a.
+/// (Phase 7b), Suitcases and Laundry (Phase 13) and Profile (Phase 14a) are built.
 nonisolated enum ClosetDestination: Hashable, Sendable {
     /// Garment detail (Phase 7a). Carries the name so the title shows before the piece loads.
     case garment(Garment.ID, name: String)

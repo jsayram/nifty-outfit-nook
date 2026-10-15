@@ -36,6 +36,9 @@
     "%@ can’t be your starting piece. %@." : {
       "comment" : "Style Me: the starting piece can't be used; its name, then why, such as In the wash"
     },
+    "%@ cleared. Nothing is guessed in its place." : {
+      "comment" : "Toast after clearing a measurement (PRD §10.2)"
+    },
     "%@ dress" : {
       "comment" : "Name of a saved look: a dress's colour"
     },
@@ -50,6 +53,18 @@
     },
     "%@ has no other piece to make another version." : {
       "comment" : "Why a version is missing: the source's name"
+    },
+    "%@ in centimetres" : {
+      "comment" : "VoiceOver: a measurement box"
+    },
+    "%@ in inches" : {
+      "comment" : "VoiceOver: a measurement box"
+    },
+    "%@ in kilograms" : {
+      "comment" : "VoiceOver: a measurement box"
+    },
+    "%@ in pounds" : {
+      "comment" : "VoiceOver: a measurement box"
     },
     "%@ is archived." : {
       "comment" : "Toast after archiving a suitcase"
@@ -153,6 +168,9 @@
     "%@ now: %@" : {
       "comment" : "Swap: under the look, the kind of piece and the piece in it now"
     },
+    "%@ saved on this iPhone." : {
+      "comment" : "Toast after saving a measurement"
+    },
     "%@ stays as it was." : {
       "comment" : "Edit: under the discard question, with the piece's saved name",
       "localizations" : {
@@ -224,6 +242,9 @@
           }
         }
       }
+    },
+    "%@′ %@″" : {
+      "comment" : "A height in feet and inches, like 4′ 11″. Keep the prime marks."
     },
     "%lld looks" : {
       "comment" : "Saved Looks: how many looks she saved",
@@ -471,6 +492,15 @@
     "+ Make your own" : {
       "comment" : "Saved Looks: opens Make your own look (RD-08, LR-08)"
     },
+    "0 Petite, S, 26…" : {
+      "comment" : "Size field prompt on the fitting piece sheet"
+    },
+    "1 week" : {
+      "comment" : "Repeat setting value (LR-10)"
+    },
+    "2 weeks" : {
+      "comment" : "Repeat setting value (LR-10)"
+    },
     "A bag" : {
       "comment" : "What a look needs"
     },
@@ -591,6 +621,9 @@
         }
       }
     },
+    "Accessibility" : {
+      "comment" : "Profile row and screen title"
+    },
     "Accessories" : {
       "comment" : "Piece chip",
       "localizations" : {
@@ -612,6 +645,12 @@
           }
         }
       }
+    },
+    "Add" : {
+      "comment" : "Button on a measurement row with no value"
+    },
+    "Add %@" : {
+      "comment" : "VoiceOver: button that adds a measurement"
     },
     "Add a photo" : {
       "comment" : "Button on the Add a piece form",
@@ -646,6 +685,9 @@
         }
       }
     },
+    "Add a piece that fits you well" : {
+      "comment" : "Button and sheet title (LR-13)"
+    },
     "Add a suitcase" : {
       "comment" : "Button: makes a new suitcase (LR-17)"
     },
@@ -670,6 +712,12 @@
     "Add pieces to your closet first, then pack them here." : {
       "comment" : "Packing sheet: nothing in the closet"
     },
+    "Add the brand." : {
+      "comment" : "Fitting piece sheet: brand is empty"
+    },
+    "Add the size as printed." : {
+      "comment" : "Fitting piece sheet: size is empty"
+    },
     "Add to a suitcase" : {
       "comment" : "Button on garment detail (Phase 13)"
     },
@@ -686,6 +734,9 @@
     },
     "Added %@" : {
       "comment" : "Make your own look: status after adding"
+    },
+    "Added %@." : {
+      "comment" : "Toast after adding a fitting piece"
     },
     "Adds it to the look." : {
       "comment" : "Make your own look: hint on a piece"
@@ -724,6 +775,9 @@
     "An accessory" : {
       "comment" : "What a look needs"
     },
+    "An approximate number is fine. It never decides a size on its own." : {
+      "comment" : "Measurement help for weight (PRD §10)"
+    },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
       "localizations" : {
@@ -737,6 +791,9 @@
     },
     "Any one piece" : {
       "comment" : "Colour sheet: applies to"
+    },
+    "App tours" : {
+      "comment" : "Profile row and screen title"
     },
     "Applies to" : {
       "comment" : "Colour sheet group"
@@ -759,6 +816,9 @@
     "Ask stylist comes later" : {
       "comment" : "Ask stylist stand-in"
     },
+    "Asked first" : {
+      "comment" : "Try-on photo sheet point"
+    },
     "Available" : {
       "comment" : "Garment status: nothing in the way",
       "localizations" : {
@@ -769,6 +829,9 @@
           }
         }
       }
+    },
+    "Avoid repeating outfits for" : {
+      "comment" : "Profile row (LR-10), value after it"
     },
     "Away for now" : {
       "comment" : "Garment status: away, no return date",
@@ -847,6 +910,9 @@
           }
         }
       }
+    },
+    "Before a picture is made from it, the app asks you and says where it would go." : {
+      "comment" : "Try-on photo sheet point (PRD §9.2.1)"
     },
     "Beige" : {
       "comment" : "Colour name",
@@ -997,6 +1063,9 @@
         }
       }
     },
+    "Bust" : {
+      "comment" : "Measurement"
+    },
     "Calendar: Occasion" : {
       "comment" : "VoiceOver label for the calendar",
       "localizations" : {
@@ -1044,6 +1113,9 @@
         }
       }
     },
+    "Centimetres and kilograms" : {
+      "comment" : "VoiceOver: units choice"
+    },
     "Change" : {
       "comment" : "Make your own look: changes a piece"
     },
@@ -1057,6 +1129,9 @@
           }
         }
       }
+    },
+    "Change example photo" : {
+      "comment" : "Try-on photo sheet button"
     },
     "Change photo" : {
       "comment" : "Button on the Add a piece form",
@@ -1092,6 +1167,9 @@
         }
       }
     },
+    "Changes the name." : {
+      "comment" : "VoiceOver hint on Profile's sign"
+    },
     "Check %@ ready to wear" : {
       "comment" : "Styling step 1: how many pieces can be used"
     },
@@ -1120,6 +1198,9 @@
     },
     "Choose another source" : {
       "comment" : "Style Me button"
+    },
+    "Choose example photo" : {
+      "comment" : "Try-on photo sheet button"
     },
     "Choose from Photos" : {
       "comment" : "Add a piece choice",
@@ -1292,6 +1373,9 @@
     "Continue your look?" : {
       "comment" : "Make your own look: draft card title"
     },
+    "Couldn’t save that. Try again." : {
+      "comment" : "Profile toast: a setting didn't save"
+    },
     "Couldn’t turn it on. Try again." : {
       "comment" : "Laundry tracking sheet: saving the setting failed",
       "localizations" : {
@@ -1349,6 +1433,9 @@
     },
     "Delete look" : {
       "comment" : "Look detail button: takes it out of Saved Looks"
+    },
+    "Delete my data" : {
+      "comment" : "Profile row and screen title"
     },
     "Delete picture" : {
       "comment" : "Button on picture detail"
@@ -1595,6 +1682,9 @@
         }
       }
     },
+    "Edit %@" : {
+      "comment" : "VoiceOver: button that edits a measurement"
+    },
     "Edit piece" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -1616,6 +1706,21 @@
           }
         }
       }
+    },
+    "Enter a height between 3 and 8 feet, or leave both boxes empty." : {
+      "comment" : "Height in feet and inches isn't a number or is out of range"
+    },
+    "Enter a number of centimetres between %lld and %lld, or leave it empty." : {
+      "comment" : "A measurement isn't a number or is out of range"
+    },
+    "Enter a number of inches between %lld and %lld, or leave it empty." : {
+      "comment" : "A measurement isn't a number or is out of range"
+    },
+    "Enter a number of kilograms between %lld and %lld, or leave it empty." : {
+      "comment" : "Weight isn't a number or is out of range"
+    },
+    "Enter a number of pounds between %lld and %lld, or leave it empty." : {
+      "comment" : "Weight isn't a number or is out of range"
     },
     "Event" : {
       "comment" : "Occasion",
@@ -1674,11 +1779,20 @@
     "Every piece you own, packed or not." : {
       "comment" : "Laundry: what the Main closet chip shows"
     },
+    "Everything here is optional. It stays private, on this iPhone." : {
+      "comment" : "Fit and measurements: under the title"
+    },
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
     },
     "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
       "comment" : "Swap: under the See all title, with the source's name"
+    },
+    "Example photo · Simulated" : {
+      "comment" : "Under the example try-on photo"
+    },
+    "Example try-on photo, simulated. It isn’t a photo of you." : {
+      "comment" : "VoiceOver: the example try-on photo"
     },
     "Explains laundry tracking." : {
       "comment" : "VoiceOver hint",
@@ -1715,6 +1829,9 @@
           }
         }
       }
+    },
+    "Feet" : {
+      "comment" : "Height field: the feet part"
     },
     "Fill this in." : {
       "comment" : "Add a piece: a field is empty",
@@ -1763,6 +1880,12 @@
         }
       }
     },
+    "Fit and measurements" : {
+      "comment" : "Profile row and screen title"
+    },
+    "Fits well" : {
+      "comment" : "How a piece fits"
+    },
     "Fitted" : {
       "comment" : "How a piece is cut",
       "localizations" : {
@@ -1791,6 +1914,9 @@
     "For example, museum visit" : {
       "comment" : "Prompt for Other's words"
     },
+    "For example: your favourite jeans or a blazer that fits perfectly." : {
+      "comment" : "Shown only while she has no fitting pieces (LR-13.3)"
+    },
     "For now each choice adds a sample picture." : {
       "comment" : "Photo source question while photos are a stand-in",
       "localizations" : {
@@ -1802,8 +1928,14 @@
         }
       }
     },
+    "For one outfit only, pick a Comfort on Style Me." : {
+      "comment" : "Under the usual fit choices: where today-only comfort lives (LR-18)"
+    },
     "For this request only" : {
       "comment" : "Style Me section detail"
+    },
+    "For try-on pictures later" : {
+      "comment" : "Under the Your try-on photo row"
     },
     "From %@" : {
       "comment" : "Look detail: the suitcase the look was made from"
@@ -1909,6 +2041,9 @@
     "Hasn’t arrived yet" : {
       "comment" : "Style Me: bought, not arrived"
     },
+    "Height" : {
+      "comment" : "Measurement"
+    },
     "Hello" : {
       "comment" : "Name sign when no name is set. A neutral greeting, not a name.",
       "localizations" : {
@@ -1931,6 +2066,12 @@
         }
       }
     },
+    "Help and privacy" : {
+      "comment" : "Profile section header"
+    },
+    "Hidden while the app is in the background" : {
+      "comment" : "Cover over sensitive screens in the app switcher"
+    },
     "Hide filters" : {
       "comment" : "Button at large text sizes",
       "localizations" : {
@@ -1941,6 +2082,9 @@
           }
         }
       }
+    },
+    "Hip / seat" : {
+      "comment" : "Measurement"
     },
     "Home" : {
       "comment" : "Tab bar label",
@@ -1967,6 +2111,9 @@
         }
       }
     },
+    "How it fits" : {
+      "comment" : "Field label on the fitting piece sheet"
+    },
     "How strongly" : {
       "comment" : "Colour sheet group"
     },
@@ -1992,6 +2139,9 @@
         }
       }
     },
+    "How you like clothes to sit. Saved until you change it." : {
+      "comment" : "Under the usual fit choices (LR-18)"
+    },
     "I don’t have it any more" : {
       "comment" : "Remove from closet choice",
       "localizations" : {
@@ -2002,6 +2152,9 @@
           }
         }
       }
+    },
+    "I don’t mind" : {
+      "comment" : "Repeat setting value (LR-10)"
     },
     "Ignore the weather" : {
       "comment" : "Weather sheet option",
@@ -2112,6 +2265,9 @@
         }
       }
     },
+    "In the finished app you’d pick a photo here: a clear, full-length photo, standing naturally in fitted clothes, in good light. For now, try this example." : {
+      "comment" : "Try-on photo sheet: the example step"
+    },
     "In the look" : {
       "comment" : "Swap: mark on the piece the look has now"
     },
@@ -2140,6 +2296,15 @@
         }
       }
     },
+    "Inches" : {
+      "comment" : "Height field: the inches part"
+    },
+    "Inches and pounds" : {
+      "comment" : "VoiceOver: units choice"
+    },
+    "Inches go from 0 to 11. Put whole feet in the first box." : {
+      "comment" : "Height: the inches part is 12 or more"
+    },
     "Indoors" : {
       "comment" : "Weather row value: she'll be indoors",
       "localizations" : {
@@ -2150,6 +2315,9 @@
           }
         }
       }
+    },
+    "Inseam" : {
+      "comment" : "Measurement"
     },
     "It goes to Recently deleted for 30 days. You can bring it back until then." : {
       "comment" : "Remove from closet: what Delete it does",
@@ -2193,11 +2361,17 @@
         }
       }
     },
+    "It stays with your profile and is hidden when you switch apps." : {
+      "comment" : "Try-on photo sheet point"
+    },
     "Its look isn’t in Saved Looks any more. The picture stays until you delete it." : {
       "comment" : "Picture detail: its look was deleted"
     },
     "Its pieces are still in your closet." : {
       "comment" : "Suitcase gone: the pieces stay"
+    },
+    "It’s never used to guess your size or measurements." : {
+      "comment" : "Try-on photo sheet point (PRD §10.1)"
     },
     "It’s optional, and off for now." : {
       "comment" : "Under the laundry tracking sheet's title",
@@ -2244,6 +2418,9 @@
     "Keep it to %lld characters." : {
       "comment" : "Problem with the words for Other"
     },
+    "Keep photo" : {
+      "comment" : "Try-on photo sheet button"
+    },
     "Keep this on one line." : {
       "comment" : "Add a piece: a one-line field has a line break in it",
       "localizations" : {
@@ -2268,6 +2445,9 @@
     },
     "Keeps this version in Saved Looks." : {
       "comment" : "VoiceOver hint on Save look"
+    },
+    "Kept on this iPhone" : {
+      "comment" : "Try-on photo sheet point"
     },
     "Kept until %@" : {
       "comment" : "Recently deleted: the day a piece is deleted for good, such as Nov 13",
@@ -2447,6 +2627,12 @@
           }
         }
       }
+    },
+    "Leave it empty and the sign says “Hello”." : {
+      "comment" : "Name on your sign: what an empty name does (RD-03.2)"
+    },
+    "Leave it empty if you don’t know." : {
+      "comment" : "Measurement sheet, after the help"
     },
     "Leaving this screen stops it, and nothing is used." : {
       "comment" : "Your looks while styling: leaving cancels the request"
@@ -2722,6 +2908,18 @@
     "May not match" : {
       "comment" : "Swap: mark on a weaker match in See all (LR-07.3)"
     },
+    "Measured on your body, at the fullest part." : {
+      "comment" : "Measurement help"
+    },
+    "Measured on your body, at your natural waist." : {
+      "comment" : "Measurement help"
+    },
+    "Measured standing, without shoes." : {
+      "comment" : "Measurement help"
+    },
+    "Measurements" : {
+      "comment" : "Fit and measurements section"
+    },
     "Medium" : {
       "comment" : "How warm a piece is to wear",
       "localizations" : {
@@ -2778,6 +2976,15 @@
     "Name and picture" : {
       "comment" : "Sheet title: edit a suitcase"
     },
+    "Name on your sign" : {
+      "comment" : "Profile row (RD-03)"
+    },
+    "Name on your sign, no name yet" : {
+      "comment" : "VoiceOver: Profile's sign when no name is set"
+    },
+    "Name on your sign: %@" : {
+      "comment" : "VoiceOver: Profile's sign, with the name"
+    },
     "Name saved" : {
       "comment" : "Toast after renaming a look"
     },
@@ -2816,6 +3023,9 @@
           }
         }
       }
+    },
+    "Never measured" : {
+      "comment" : "Try-on photo sheet point"
     },
     "Next" : {
       "comment" : "VoiceOver: a styling step still to come"
@@ -2946,6 +3156,9 @@
     },
     "None of your other %@ in %@ go with this look." : {
       "comment" : "Swap: no good matches, with the kind of piece and the source's name"
+    },
+    "Not added" : {
+      "comment" : "Your try-on photo row value: no photo"
     },
     "Not available" : {
       "comment" : "Weather row value when the weather can't be read",
@@ -3202,6 +3415,9 @@
         }
       }
     },
+    "Old Navy, Zara…" : {
+      "comment" : "Brand field prompt on the fitting piece sheet"
+    },
     "Olive" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -3212,6 +3428,9 @@
           }
         }
       }
+    },
+    "On" : {
+      "comment" : "A switch's value on a row"
     },
     "On Your looks, tap Save look." : {
       "comment" : "Saved Looks empty state: step 2"
@@ -3355,6 +3574,9 @@
     },
     "Opening your pictures" : {
       "comment" : "Pictures tab loading"
+    },
+    "Opening your profile" : {
+      "comment" : "Profile loading"
     },
     "Opening your saved looks" : {
       "comment" : "Saved Looks loading"
@@ -3503,8 +3725,14 @@
         }
       }
     },
+    "Optional · approximate is fine" : {
+      "comment" : "Under the Weight row"
+    },
     "Optional · from %@" : {
       "comment" : "Style Me: no starting piece yet; the source's name"
+    },
+    "Optional · stays on this iPhone" : {
+      "comment" : "Under the Fit and measurements row"
     },
     "Optional, for this request only." : {
       "comment" : "Colour sheet"
@@ -3548,6 +3776,9 @@
     },
     "Other: %@" : {
       "comment" : "Style Me occasion: Other, with her own words"
+    },
+    "Outfits can come back any time." : {
+      "comment" : "Repeat setting: I don't mind"
     },
     "Overall palette" : {
       "comment" : "Colour sheet: applies to"
@@ -3603,6 +3834,12 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Pick something you own that fits just right. We’ll use its brand and size to suggest sizes for you." : {
+      "comment" : "Under the pieces that fit section header (LR-13)"
+    },
+    "Pick the kind of piece." : {
+      "comment" : "Fitting piece sheet: no kind chosen"
+    },
     "Picture" : {
       "comment" : "Label over the suitcase pictures"
     },
@@ -3632,6 +3869,9 @@
     },
     "Pieces stay in your closet too. A suitcase only lists them, nothing is copied." : {
       "comment" : "Under Add and pack"
+    },
+    "Pieces that fit you well" : {
+      "comment" : "Fit and measurements section (LR-13)"
     },
     "Pieces you delete stay here for 30 days, so you can bring them back." : {
       "comment" : "Recently deleted, empty",
@@ -3696,6 +3936,9 @@
           }
         }
       }
+    },
+    "Private. Saved only on this iPhone, and nothing here is sent anywhere in this test build. Changing it never restyles a saved look." : {
+      "comment" : "Fit and measurements: the privacy line at the bottom"
     },
     "Profile" : {
       "comment" : "Button: opens Profile",
@@ -3800,8 +4043,20 @@
         }
       }
     },
+    "Remove it any time. Pictures you saved stay." : {
+      "comment" : "Try-on photo sheet point"
+    },
+    "Remove photo" : {
+      "comment" : "Try-on photo sheet button"
+    },
     "Remove this piece" : {
       "comment" : "Swap: button (LR-08)"
+    },
+    "Remove your try-on photo? Try-on pictures you saved will stay." : {
+      "comment" : "Try-on photo sheet: asks before removing"
+    },
+    "Removed %@." : {
+      "comment" : "Toast after removing a fitting piece"
     },
     "Removed %@. It’s still in your closet." : {
       "comment" : "Toast after taking a piece out of a suitcase"
@@ -3817,6 +4072,9 @@
     },
     "Rename look" : {
       "comment" : "Sheet title"
+    },
+    "Replay the tips for any screen" : {
+      "comment" : "Under the App tours row"
     },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
@@ -4135,6 +4393,9 @@
         }
       }
     },
+    "Shown in your room" : {
+      "comment" : "Under the Name on your sign row"
+    },
     "Shows it in the look." : {
       "comment" : "Swap: hint on an option"
     },
@@ -4159,6 +4420,9 @@
     "Simulated. Leaving stops it, and nothing is kept." : {
       "comment" : "Try it on sheet, while making"
     },
+    "Single favourite pieces can still come back. Only whole outfits are spaced out." : {
+      "comment" : "Profile's repeat sheet note (LR-10)"
+    },
     "Size" : {
       "comment" : "Garment fact label: size on the label",
       "localizations" : {
@@ -4169,6 +4433,9 @@
           }
         }
       }
+    },
+    "Size as printed" : {
+      "comment" : "Field label on the fitting piece sheet"
     },
     "Size on the label" : {
       "comment" : "Add a piece: field label",
@@ -4344,6 +4611,9 @@
     "Style Me source" : {
       "comment" : "Suitcases: the chosen source's mark"
     },
+    "Style Me starts with this each time. You can change it there for one request." : {
+      "comment" : "Profile's Preferences sheet note (LR-03)"
+    },
     "Style Me uses your whole closet until you pack a suitcase." : {
       "comment" : "Suitcases: under the main closet when there are no suitcases"
     },
@@ -4379,6 +4649,12 @@
           }
         }
       }
+    },
+    "Style Me won’t suggest an outfit you wore in the last 2 weeks." : {
+      "comment" : "Repeat setting: 2 weeks"
+    },
+    "Style Me won’t suggest an outfit you wore in the last week." : {
+      "comment" : "Repeat setting: 1 week"
     },
     "Style again" : {
       "comment" : "Sends the request again"
@@ -4676,6 +4952,9 @@
         }
       }
     },
+    "The inside leg length you like, from a pair of trousers that fits." : {
+      "comment" : "Measurement help"
+    },
     "The look" : {
       "comment" : "Swap: spoken name of the look"
     },
@@ -4725,11 +5004,17 @@
     "The same outfit, plus one piece you don’t have" : {
       "comment" : "Under the version switch: Something new with a piece she doesn't own"
     },
+    "The sign in your room shows this name. It stays on this iPhone." : {
+      "comment" : "Name on your sign sheet, under the title"
+    },
     "The stylist didn’t answer. Nothing was charged, and your request is kept as you left it." : {
       "comment" : "Your looks failed state"
     },
     "The suitcase you were styling from isn’t there any more, so Style Me uses Main closet." : {
       "comment" : "Suitcases: the remembered suitcase was deleted or archived"
+    },
+    "The switch comes in the next update. For now, turn tracking on from the hamper on Home or from Laundry." : {
+      "comment" : "Profile: the Track laundry row's stand-in"
     },
     "The weather can’t be read right now, so your looks won’t use it." : {
       "comment" : "Under the Weather row when the weather can't be read",
@@ -4773,6 +5058,9 @@
         }
       }
     },
+    "This is the photo of you that try-on pictures will start from, once they’re ready. It’s optional: styling never needs it." : {
+      "comment" : "Try-on photo sheet: what the photo is for"
+    },
     "This look can’t be kept as a draft right now. Save it to keep it." : {
       "comment" : "Make your own look: the draft couldn't be written"
     },
@@ -4781,6 +5069,9 @@
     },
     "This look isn’t saved any more" : {
       "comment" : "Look detail: the look is gone"
+    },
+    "This part of Profile comes in the next update." : {
+      "comment" : "Profile: a row whose screen isn't built yet"
     },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
@@ -4830,6 +5121,9 @@
     "This suitcase isn’t there any more" : {
       "comment" : "Style Me when the suitcase source was removed or archived"
     },
+    "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded." : {
+      "comment" : "Try-on photo sheet: Stage A note"
+    },
     "Throws away the look you didn’t save. Saved Looks don’t change." : {
       "comment" : "Hint on Start over"
     },
@@ -4858,6 +5152,18 @@
     },
     "Today’s comfort" : {
       "comment" : "Style Me sheet title"
+    },
+    "Too long" : {
+      "comment" : "How a piece fits"
+    },
+    "Too loose" : {
+      "comment" : "How a piece fits"
+    },
+    "Too short" : {
+      "comment" : "How a piece fits"
+    },
+    "Too tight" : {
+      "comment" : "How a piece fits"
     },
     "Took out %@" : {
       "comment" : "Toast after Remove this piece"
@@ -4900,6 +5206,9 @@
     },
     "Tote bag" : {
       "comment" : "A suitcase picture"
+    },
+    "Track laundry" : {
+      "comment" : "Profile row (RD-11)"
     },
     "Tracking off" : {
       "comment" : "Laundry: under the title while tracking is off"
@@ -4980,6 +5289,9 @@
         }
       }
     },
+    "Units" : {
+      "comment" : "VoiceOver name of the units switch"
+    },
     "Use %@" : {
       "comment" : "Swap: commits the swap, as in Use this top"
     },
@@ -4988,6 +5300,9 @@
     },
     "Use Main closet" : {
       "comment" : "Partial result banner action: style from the whole closet"
+    },
+    "Use example photo" : {
+      "comment" : "Try-on photo sheet button"
     },
     "Use for Style Me" : {
       "comment" : "Button: makes this suitcase the source"
@@ -5015,6 +5330,9 @@
     "Used %lld weeks ago" : {
       "comment" : "Suitcases: when it was last used, 2 or 3 weeks ago"
     },
+    "Used for fit checks when you’re thinking of buying." : {
+      "comment" : "Under her fitting pieces (LR-13, LR-12)"
+    },
     "Used last week" : {
       "comment" : "Suitcases: when it was last used"
     },
@@ -5035,6 +5353,9 @@
     },
     "Versions of this outfit" : {
       "comment" : "VoiceOver name of the Simple, Dressed up, Something new switch"
+    },
+    "Waist" : {
+      "comment" : "Measurement"
     },
     "Wardrobe: Closet" : {
       "comment" : "VoiceOver label for the wardrobe",
@@ -5074,6 +5395,12 @@
     },
     "Weekender" : {
       "comment" : "A suitcase picture"
+    },
+    "Weight" : {
+      "comment" : "Measurement"
+    },
+    "What Style Me starts with" : {
+      "comment" : "Under the Preferences row in Profile"
     },
     "What you’ve filled in so far won’t be kept." : {
       "comment" : "Add a piece: under the discard question",
@@ -5273,6 +5600,9 @@
         }
       }
     },
+    "You can leave this empty and add it later." : {
+      "comment" : "Try-on photo sheet with no photo"
+    },
     "You changed this look. Undo goes back one change." : {
       "comment" : "Your looks: under the pieces after a swap or removal (LR-08.2)"
     },
@@ -5370,6 +5700,9 @@
         }
       }
     },
+    "Your first name" : {
+      "comment" : "Name on your sign: the empty field's prompt"
+    },
     "Your laundry didn’t load" : {
       "comment" : "Laundry error title"
     },
@@ -5446,6 +5779,9 @@
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
     },
+    "Your profile didn’t load" : {
+      "comment" : "Profile error title"
+    },
     "Your request" : {
       "comment" : "Style Me section"
     },
@@ -5458,14 +5794,26 @@
     "Your saved looks didn’t load" : {
       "comment" : "Saved Looks error title"
     },
+    "Your sign" : {
+      "comment" : "Name on your sign: above the live preview"
+    },
+    "Your sign now says %@." : {
+      "comment" : "Toast after changing the name on the sign, with what it shows"
+    },
     "Your suitcases didn’t load" : {
       "comment" : "Suitcases error title"
     },
     "Your three most recently used." : {
       "comment" : "Suitcases: under Favourites, how they're chosen (RD-09: no star)"
     },
+    "Your try-on photo" : {
+      "comment" : "Profile row and sheet title (RD-06)"
+    },
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"
+    },
+    "Yours to remove" : {
+      "comment" : "Try-on photo sheet point"
     },
     "You’ll be able to ask about this look in your own words." : {
       "comment" : "Ask stylist stand-in"
@@ -5504,6 +5852,12 @@
         }
       }
     },
+    "cm" : {
+      "comment" : "Unit after a box: centimetres"
+    },
+    "cm · kg" : {
+      "comment" : "Units choice: centimetres and kilograms"
+    },
     "dresses" : {
       "comment" : "As in: No navy dresses in Weekend"
     },
@@ -5528,6 +5882,12 @@
     "every top" : {
       "comment" : "Swap: That's every …"
     },
+    "ft" : {
+      "comment" : "Unit after a box: feet"
+    },
+    "in" : {
+      "comment" : "Unit after a box: inches"
+    },
     "in one piece" : {
       "comment" : "Colour place, as in navy in one piece"
     },
@@ -5549,6 +5909,9 @@
     "in your closet" : {
       "comment" : "Laundry: where an unpacked piece is"
     },
+    "in · lb" : {
+      "comment" : "Units choice: inches and pounds"
+    },
     "just now" : {
       "comment" : "Draft card: changed less than a minute ago",
       "localizations" : {
@@ -5560,8 +5923,14 @@
         }
       }
     },
+    "kg" : {
+      "comment" : "Unit after a box: kilograms"
+    },
     "layers" : {
       "comment" : "As in: No navy layers in Weekend"
+    },
+    "lb" : {
+      "comment" : "Unit after a box: pounds"
     },
     "optional" : {
       "comment" : "Add a piece: after an optional field's name",

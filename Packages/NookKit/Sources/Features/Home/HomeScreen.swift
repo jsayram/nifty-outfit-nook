@@ -66,6 +66,10 @@ struct HomeScreen: View {
                     case .addPiece:
                         // From Style Me's empty closet. Saving goes back to Style Me, which reloads.
                         GarmentEditorScreen(target: .newPiece, saved: { _ in goBack() }, close: goBack)
+                    case .profile:
+                        // A new name shows on the sign as soon as Profile closes: Home reloads
+                        // when its path gets shorter (RD-03.1).
+                        ProfileScreen()
                     default: HomeStubScreen(destination: destination)
                     }
                 }

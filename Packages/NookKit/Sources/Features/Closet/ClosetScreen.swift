@@ -99,10 +99,8 @@ struct ClosetScreen: View {
             GarmentEditorScreen(target: .garment(id), resumesDraft: resumesDraft, saved: pieceSaved, close: goBack)
         case .makeYourOwnLook(let id, _):
             LookBuilderScreen(startingPieceID: id)
-        default:
-            StubScreen(
-                title: destination.title, systemImage: destination.systemImage,
-                identifier: destination.identifier)
+        case .profile:
+            ProfileScreen()
         }
     }
 
