@@ -18,21 +18,9 @@ nonisolated enum RoomControl: String, CaseIterable, Hashable, Sendable {
     case suitcase
     case hamper
 
-    /// The tap area in stage units, before it's grown to 44 x 44 points.
-    var stageRect: CGRect {
-        switch self {
-        case .wardrobe: RoomStage.wardrobe
-        case .savedLooks: RoomStage.savedLooks
-        case .nameSign: RoomStage.sign
-        case .occasion: RoomStage.occasion
-        case .laptop: RoomStage.laptopScreen
-        case .helpDrawer: RoomStage.drawers[0]
-        case .feedbackDrawer: RoomStage.drawers[1]
-        case .privacyDrawer: RoomStage.drawers[2]
-        case .suitcase: RoomStage.suitcase
-        case .hamper: RoomStage.hamper
-        }
-    }
+    /// The tap area in the phone room's stage units, before it's grown to 44 x 44 points. The
+    /// iPad rooms have their own (`RoomPlan.rect(for:)`).
+    var stageRect: CGRect { RoomPlan.upright.rect(for: self) }
 
     /// Where it goes. Suitcases and Laundry live in Closet (RD-13), so the suitcase and the
     /// hamper open them on the Closet tab, as the wardrobe opens Closet. The hamper depends on whether laundry tracking is on (RD-11.3): Laundry when

@@ -14,7 +14,7 @@ Phase 7a, 14 October 2026. Garment detail shows one piece and what she can do wi
 | `Features/Garment/GarmentDetailText.swift` | Every line of words, from stored facts with a given clock, calendar and locale |
 | `Features/Closet/RecentlyDeleted/` | Recently deleted: its model, screen and rows |
 
-Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. Edit opens the Add a piece form filled in with the piece (Phase 7b, see `docs/add-a-piece.md`). Style Me (10a) and Make your own look (11) are built; each suitcase is still a stand-in.
+Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. On a wide iPad window it shows the detail beside the grid instead, with Edit on the page rather than in a bar (Phase 15a, `docs/ipad.md`). Edit opens the Add a piece form filled in with the piece (Phase 7b, see `docs/add-a-piece.md`). Style Me (10a) and Make your own look (11) are built; each suitcase is still a stand-in.
 
 ## The page
 

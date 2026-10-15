@@ -23,6 +23,8 @@ struct GarmentGrid: View {
     /// A small minus on each piece that takes it out (a suitcase's pieces, Phase 13), with
     /// VoiceOver's words for it. `nil` for none.
     var remove: GarmentRemoveAction?
+    /// The piece whose detail shows beside the grid on iPad (Phase 15a), marked on a soft tint.
+    var current: Garment.ID?
     let open: (ClosetItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -50,7 +52,7 @@ struct GarmentGrid: View {
     private func cell(_ item: ClosetItem, style: GarmentCell.Style) -> some View {
         GarmentCell(
             item: item, now: now, style: style, hint: hint, identifierPrefix: identifierPrefix,
-            isSelected: selection.map { $0.contains(item.id) }, remove: remove
+            isSelected: selection.map { $0.contains(item.id) }, remove: remove, isCurrent: item.id == current
         ) {
             open(item)
         }
@@ -107,6 +109,8 @@ struct GarmentCell: View {
     /// Ticked or not, when the grid picks several. `nil` when it doesn't.
     var isSelected: Bool?
     var remove: GarmentRemoveAction?
+    /// Its detail is showing beside the grid (iPad, Phase 15a).
+    var isCurrent = false
     let action: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -135,12 +139,25 @@ struct GarmentCell: View {
             }
         }
         .buttonStyle(ClosetPressStyle())
+        // A pointer on iPad shows which piece it's over (PRD §7.2).
+        .hoverEffect(.highlight)
+        // The piece showing beside the grid stands on a soft tint, as in `ipad-closet.html`.
+        .background {
+            if isCurrent {
+                NookRadius.shape(NookRadius.tile)
+                    .fill(Color.nook.tintStrong)
+                    .softShadow(.drop, in: NookRadius.shape(NookRadius.tile))
+                    .padding(.horizontal, -NookSpacing.xxSmall)
+                    .padding(.bottom, -NookSpacing.small)
+                    .accessibilityHidden(true)
+            }
+        }
         .accessibilityLabel(Text(item.name))
         .accessibilityValue(Text(item.spokenDetails(now: now, calendar: calendar, locale: locale)))
         .accessibilityHint(
             hint.map { Text($0) } ?? Text("Opens the piece.", bundle: .module, comment: "Hint on a closet piece")
         )
-        .accessibilityAddTraits(isSelected == true ? [.isSelected] : [])
+        .accessibilityAddTraits(isSelected == true || isCurrent ? [.isSelected] : [])
         .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue)")
         .overlay(alignment: .topTrailing) {
             if let remove {

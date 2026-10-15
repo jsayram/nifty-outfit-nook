@@ -14,6 +14,9 @@ struct GarmentDetailScreen: View {
     let open: (ClosetDestination) -> Void
     let back: () -> Void
     let removed: (GarmentRemoval) -> Void
+    /// Shown beside Closet's grid on iPad (Phase 15a) rather than pushed: no title or bar of its
+    /// own, and Edit sits on the page.
+    var isBeside = false
 
     @Environment(\.services) private var services
     @Environment(\.calendar) private var calendar
@@ -31,13 +34,15 @@ struct GarmentDetailScreen: View {
         name: String,
         open: @escaping (ClosetDestination) -> Void,
         back: @escaping () -> Void,
-        removed: @escaping (GarmentRemoval) -> Void
+        removed: @escaping (GarmentRemoval) -> Void,
+        isBeside: Bool = false
     ) {
         self.garmentID = garmentID
         self.name = name
         self.open = open
         self.back = back
         self.removed = removed
+        self.isBeside = isBeside
         _model = State(initialValue: GarmentDetailModel(garmentID: garmentID))
     }
 
@@ -53,32 +58,11 @@ struct GarmentDetailScreen: View {
                 styleWithThis: { showsStyleChoice = true },
                 toggleLaundry: toggleLaundry,
                 addToSuitcase: { showsSuitcases = true },
-                remove: { showsRemove = true }
+                remove: { showsRemove = true },
+                edit: pageEdit
             )
         )
-        .navigationTitle(currentName)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // The name is the big title on the page instead.
-            ToolbarItem(placement: .principal) {
-                Text(verbatim: "").accessibilityHidden(true)
-            }
-            if model.isInCloset {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        open(.editPiece(garmentID, name: currentName))
-                    } label: {
-                        // Words as well as the icon, as in the mockup.
-                        HStack(spacing: NookSpacing.xSmall) {
-                            Image(systemName: "pencil")
-                            Text("Edit", bundle: .module, comment: "Button: edits a piece")
-                        }
-                        .padding(.horizontal, NookSpacing.xSmall)
-                    }
-                    .accessibilityIdentifier("garment.edit")
-                }
-            }
-        }
+        .modifier(DetailBar(isPushed: !isBeside, title: currentName, showsEdit: model.isInCloset, edit: openEditor))
         .nookSheet(
             isPresented: $showsStyleChoice,
             title: String(localized: "Style with this", bundle: .module, comment: "Sheet title"),
@@ -125,6 +109,16 @@ struct GarmentDetailScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+    }
+
+    /// Edit on the page, only beside the grid.
+    private var pageEdit: (() -> Void)? {
+        guard isBeside else { return nil }
+        return { openEditor() }
+    }
+
+    private func openEditor() {
+        open(.editPiece(garmentID, name: currentName))
     }
 
     private func reload() {
@@ -205,5 +199,43 @@ struct GarmentDetailScreen: View {
                 localized: "That didn’t save. Nothing changed.", bundle: .module,
                 comment: "Toast when a change to a piece couldn't be saved"),
             systemImage: "exclamationmark.circle")
+    }
+}
+
+/// A pushed detail's bar: the title (hidden, since the name is the page's big title) and Edit.
+/// Beside Closet's grid there's no bar, and Edit is on the page.
+private struct DetailBar: ViewModifier {
+    let isPushed: Bool
+    let title: String
+    let showsEdit: Bool
+    let edit: () -> Void
+
+    func body(content: Content) -> some View {
+        if isPushed {
+            content
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    // The name is the big title on the page instead.
+                    ToolbarItem(placement: .principal) {
+                        Text(verbatim: "").accessibilityHidden(true)
+                    }
+                    if showsEdit {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(action: edit) {
+                                // Words as well as the icon, as in the mockup.
+                                HStack(spacing: NookSpacing.xSmall) {
+                                    Image(systemName: "pencil")
+                                    Text("Edit", bundle: .module, comment: "Button: edits a piece")
+                                }
+                                .padding(.horizontal, NookSpacing.xSmall)
+                            }
+                            .accessibilityIdentifier("garment.edit")
+                        }
+                    }
+                }
+        } else {
+            content
+        }
     }
 }

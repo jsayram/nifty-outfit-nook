@@ -169,22 +169,26 @@ struct HomeScreen: View {
     }
 }
 
-/// The room sized to the screen: it fills the space between the bars and runs under them, and
-/// scrolls only on a phone too short to show it at a size with 44 pt targets.
+/// The room sized to the window: it fills the space between the bars and runs under them, and
+/// scrolls only on a phone too short to show it at a size with 44 pt targets. A regular-width
+/// window gets the iPad's tall or wide room (`WindowLayout.room`, Phase 15a).
 struct HomeRoomView: View {
     let content: HomeRoomContent
     let open: (RoomControl) -> Void
     var openLook: (Look.ID) -> Void = { _ in }
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     var body: some View {
         GeometryReader { proxy in
             let insets = proxy.safeAreaInsets
-            let layout = RoomLayout(
+            let layout = WindowLayout.room(
                 size: CGSize(
                     width: proxy.size.width + insets.leading + insets.trailing,
                     height: proxy.size.height + insets.top + insets.bottom
                 ),
-                insets: EdgeInsets(top: insets.top, leading: 0, bottom: insets.bottom, trailing: 0)
+                insets: EdgeInsets(top: insets.top, leading: 0, bottom: insets.bottom, trailing: 0),
+                horizontalSizeClass: horizontalSizeClass
             )
             ScrollView(.vertical) {
                 RoomCanvas(layout: layout, content: content, open: open, openLook: openLook)

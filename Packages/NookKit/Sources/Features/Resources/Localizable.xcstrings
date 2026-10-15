@@ -2497,6 +2497,9 @@
     "It stays with your profile and is hidden when you switch apps." : {
       "comment" : "Try-on photo sheet point"
     },
+    "Its details show here, next to your closet." : {
+      "comment" : "Beside Closet's grid on iPad, before she picks a piece"
+    },
     "Its look isn’t in Saved Looks any more. The picture stays until you delete it." : {
       "comment" : "Picture detail: its look was deleted"
     },
@@ -4079,6 +4082,9 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Pick a piece" : {
+      "comment" : "Beside Closet's grid on iPad"
+    },
     "Pick something you own that fits just right. We’ll use its brand and size to suggest sizes for you." : {
       "comment" : "Under the pieces that fit section header (LR-13)"
     },
@@ -4676,6 +4682,9 @@
     },
     "Shows the answer." : {
       "comment" : "VoiceOver hint on a closed Help topic"
+    },
+    "Shows the piece beside your closet." : {
+      "comment" : "Hint on a closet piece on iPad, where its detail opens beside the grid"
     },
     "Shows three more of your pieces. Nothing is sent." : {
       "comment" : "Swap hint"

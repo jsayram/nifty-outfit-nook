@@ -11,6 +11,9 @@ struct GarmentDetailActions {
     var toggleLaundry: () -> Void = {}
     var addToSuitcase: () -> Void = {}
     var remove: () -> Void = {}
+    /// Edit, on the page itself. Set when the detail shows beside Closet's grid on iPad, where
+    /// there's no navigation bar of its own to hold it (Phase 15a).
+    var edit: (() -> Void)?
 }
 
 /// Garment detail's content, top to bottom (`garment.html`, with LR-10, LR-11 and LR-16):
@@ -27,7 +30,7 @@ struct GarmentDetailPage: View {
     @Environment(\.calendar) private var calendar
     @Environment(\.locale) private var locale
 
-    /// Past this the page reads badly; iPad's own layout comes in Phase 15a.
+    /// Past this the page reads badly. On iPad it's narrower anyway, beside Closet's grid (15a).
     static let maximumWidth: CGFloat = 560
 
     var body: some View {
@@ -93,6 +96,9 @@ struct GarmentDetailPage: View {
 
     private func loaded(_ garment: Garment, text: GarmentDetailText) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            if let edit = actions.edit, model.isInCloset {
+                editRow(edit)
+            }
             GarmentDetailHeader(
                 name: garment.name, text: text, suitcases: model.suitcases, openSuitcase: actions.openSuitcase)
             GarmentStage(garment: garment, isInTheWash: text.isInTheWash)
@@ -119,6 +125,23 @@ struct GarmentDetailPage: View {
                 .padding(.top, NookSpacing.xLarge)
             }
         }
+    }
+
+    /// Beside Closet's grid: Edit at the top right, where the bar would have it (`ipad-closet.html`).
+    private func editRow(_ edit: @escaping () -> Void) -> some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button(action: edit) {
+                Label {
+                    Text("Edit", bundle: .module, comment: "Button: edits a piece")
+                } icon: {
+                    Image(systemName: "pencil")
+                }
+            }
+            .buttonStyle(.nook(.pill, size: .small))
+            .accessibilityIdentifier("garment.edit")
+        }
+        .padding(.bottom, NookSpacing.xSmall)
     }
 
     private func buttons(_ text: GarmentDetailText) -> some View {

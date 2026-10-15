@@ -51,6 +51,10 @@ private struct RootTabs: View {
     /// A Send feedback note she hasn't sent yet, kept while she moves around the app (Phase 14b).
     /// In memory only, like every Stage A draft.
     @State private var feedback = FeedbackModel()
+    /// The window's real width class, read above the tab view. The tab view itself is told the
+    /// width is compact so it puts its bar at the bottom on iPad (RD-01.6), and every tab gets
+    /// the real class back (`windowSizeClass(_:)`).
+    @Environment(\.horizontalSizeClass) private var windowSizeClass
 
     init(services: NookServices?, notice: String?) {
         self.services = services
@@ -64,15 +68,23 @@ private struct RootTabs: View {
                 // The wardrobe and the shelf in the room switch tabs; a frame on the shelf opens
                 // its look on Saved Looks.
                 HomeScreen(openTab: { selection = $0 }, openLook: openSavedLook, notice: notice)
+                    .windowSizeClass(windowSizeClass)
             }
             Tab(AppTab.closet.title, systemImage: AppTab.closet.systemImage, value: AppTab.closet) {
                 ClosetScreen(path: $closetPath)
+                    .windowSizeClass(windowSizeClass)
             }
             Tab(AppTab.savedLooks.title, systemImage: AppTab.savedLooks.systemImage, value: AppTab.savedLooks) {
                 SavedLooksScreen(path: $savedLooksPath)
+                    .windowSizeClass(windowSizeClass)
             }
         }
         .tint(.nook.accent)
+        // iPadOS 26 puts a tab view's bar at the top of a regular-width window, and SwiftUI has
+        // no style that keeps it at the bottom (`.tabBarOnly` still floats it at the top). The tab
+        // view draws the bottom bar whenever its width class is compact, so it's told that here;
+        // the tabs' contents get the real class back above. See docs/ipad.md.
+        .environment(\.horizontalSizeClass, .compact)
         .environment(\.openInSavedLooks, OpenInSavedLooksAction { path in openInSavedLooks(path) })
         .environment(\.openInCloset, OpenInClosetAction { path in openInCloset(path) })
         .environment(\.services, services)
@@ -96,6 +108,14 @@ private struct RootTabs: View {
     private func openInSavedLooks(_ path: [SavedLooksDestination]) {
         savedLooksPath = path
         selection = .savedLooks
+    }
+}
+
+extension View {
+    /// Gives a tab's content the window's real width class, which the tab view hides from it to
+    /// keep its bar at the bottom (RD-01.6).
+    fileprivate func windowSizeClass(_ sizeClass: UserInterfaceSizeClass?) -> some View {
+        environment(\.horizontalSizeClass, sizeClass)
     }
 }
 

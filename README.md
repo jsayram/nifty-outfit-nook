@@ -38,7 +38,7 @@ The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commi
 
 On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet speed checks allow three times their local bound. Each speed check also takes the fastest of three runs, so a stall from tests running in parallel doesn't fail it.
 
-`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
+`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator.
 
@@ -110,6 +110,7 @@ docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and ho
 docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
 docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
+docs/ipad.md                 iPad: the tab bar at the bottom, the wide and tall rooms, Closet's columns, and window sizes.
 website/                     The app's static website.
 ```
 
@@ -137,7 +138,7 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
 - `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
   - `release-and-package-tests` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs every package test target;
-  - `ui-tests (ui-home-and-results)`, `(ui-variants-and-style-me)`, `(ui-add-and-catalog)` and `(ui-rest)` run the UI tests in four parts of about the same length, by test class. `ui-rest` is every UI test class the others don't name, so a new class is never skipped. The workflow lists each part's classes with their CI times; move a class when one part grows well past the others.
+  - `ui-tests (ui-home-and-results)`, `(ui-variants-and-style-me)`, `(ui-add-and-catalog)` and `(ui-rest)` run the UI tests in four parts of about the same length, by test class. `ui-home-and-results` then runs `IPadTests` on an iPad simulator (Phase 15a). `ui-rest` is every UI test class the others don't name, so a new class is never skipped. The workflow lists each part's classes with their CI times; move a class when one part grows well past the others.
 
   Tests run through `scripts/test.sh` on the iOS 26.5 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 

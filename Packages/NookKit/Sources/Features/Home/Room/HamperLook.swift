@@ -34,9 +34,7 @@ nonisolated enum HamperLook: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// Where the drawing sits. The full hamper is taller, for the heap above the rim; its basket
-    /// lands in the same place as the others.
-    var stageRect: CGRect {
-        self == .full ? RoomStage.hamperFullArt : RoomStage.hamperArt
-    }
+    /// Where the drawing sits in the phone room. The full hamper is taller, for the heap above the
+    /// rim; its basket lands in the same place as the others.
+    var stageRect: CGRect { RoomPlan.upright.hamperArt(for: self) }
 }

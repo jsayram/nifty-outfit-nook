@@ -286,3 +286,5 @@ about 4 MB at 2x.
 - **Recording.** A missing reference is recorded and the test fails once. To re-record everything after a deliberate
   change, run `TEST_RUNNER_SNAPSHOT_TESTING_RECORD=all scripts/test.sh`, look at every changed PNG in the diff, then
   run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.
+- **iPad screens** (Phase 15a, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
+  2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.

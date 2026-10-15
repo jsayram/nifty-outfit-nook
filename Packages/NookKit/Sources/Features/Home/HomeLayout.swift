@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Which of Home's three layouts the screen shows (RD-01, RD-01.5).
 ///
-/// - `room`: the illustrated bedroom (`home.html`), on a phone held upright and on iPad.
+/// - `room`: the illustrated bedroom (`home.html`), on a phone held upright and on iPad. A
+///   regular-width window gets the iPad's tall or wide arrangement of it (`WindowLayout.room`).
 /// - `largeText`: at the accessibility text sizes, a banner of the room and large rows for
 ///   every control (`home-ax.html`). It wins in any orientation, since it scrolls.
 /// - `sideways`: on a phone held sideways, a closer view of the room with the controls as

@@ -90,13 +90,17 @@ nonisolated enum RoomStage {
     static let drawerPitch: CGFloat = 46
 }
 
-/// The stage scaled and placed for one screen.
+/// A room plan scaled and placed for one screen.
 ///
 /// The room scales to fit between the navigation bar and the tab bar, so the whole room shows
 /// without scrolling. It never shrinks below the scale that keeps every control 44 points
 /// tall; on a short phone (iPhone SE) it scrolls a little instead. The wall and the floor run
-/// to both edges when the room is narrower than the screen.
+/// to both edges when the room is narrower than the screen, and when the room is narrower than
+/// the space between the bars it sits in the middle of that space (an iPad window that's tall
+/// for its width).
 nonisolated struct RoomLayout: Equatable, Sendable {
+    /// Which arrangement of the room this is (Phase 15a).
+    let plan: RoomPlan
     /// The whole area the room draws in, including what sits under the bars.
     let size: CGSize
     /// The bars' heights: navigation bar at the top, tab bar at the bottom.
@@ -109,24 +113,30 @@ nonisolated struct RoomLayout: Equatable, Sendable {
     /// The canvas height: the screen, or more when the room has to scroll.
     let contentHeight: CGFloat
 
-    /// The smallest scale that still gives every control a 44 pt target.
+    /// The smallest scale that still gives every control in the phone room a 44 pt target.
     static let minimumScale = NookSpacing.minimumTapTarget / RoomStage.drawerPitch
 
-    init(size: CGSize, insets: EdgeInsets) {
+    init(plan: RoomPlan = .upright, size: CGSize, insets: EdgeInsets) {
+        self.plan = plan
         self.size = size
         self.insets = insets
         let available = max(0, size.height - insets.top - insets.bottom)
-        let widthScale = size.width / RoomStage.width
-        let heightScale = available / RoomStage.visibleHeight
+        let widthScale = size.width / plan.width
+        let heightScale = available / plan.visibleHeight
         // Fit the height, but keep targets big enough, and never wider than the screen.
-        scale = max(0.01, min(widthScale, max(heightScale, Self.minimumScale)))
-        originX = (size.width - RoomStage.width * scale) / 2
-        originY = insets.top - RoomStage.visibleTop * scale
-        contentHeight = max(size.height, insets.top + RoomStage.visibleHeight * scale + insets.bottom)
+        scale = max(0.01, min(widthScale, max(heightScale, plan.minimumScale)))
+        originX = (size.width - plan.width * scale) / 2
+        let band = plan.visibleHeight * scale
+        originY = insets.top + max(0, (available - band) / 2) - plan.visibleTop * scale
+        contentHeight = max(size.height, insets.top + band + insets.bottom)
     }
 
     /// True when the room is taller than the screen and scrolls.
     var scrolls: Bool { contentHeight > size.height + 0.5 }
+
+    /// True when every control gets a full 44 pt target without scrolling: the scale isn't
+    /// below the plan's minimum and the room fits between the bars.
+    var fitsWithFullTargets: Bool { scale >= plan.minimumScale - 0.001 && !scrolls }
 
     /// A stage rect in points on the canvas.
     func rect(_ stage: CGRect) -> CGRect {
@@ -146,14 +156,19 @@ nonisolated struct RoomLayout: Equatable, Sendable {
         return CGRect(x: frame.midX - width / 2, y: frame.midY - height / 2, width: width, height: height)
     }
 
-    var floorY: CGFloat { originY + RoomStage.floorY * scale }
+    /// A control's tap area in this plan.
+    func target(for control: RoomControl) -> CGRect {
+        target(plan.rect(for: control))
+    }
+
+    var floorY: CGFloat { originY + plan.floorY * scale }
 
     /// The bed, in the canvas's bottom-right corner. On a screen shorter than the mockup's, its
     /// foot runs off the bottom, under the tab bar.
     var bed: CGRect {
-        let width = RoomStage.bedSize.width * scale
-        let height = RoomStage.bedSize.height * scale
-        let top = max(originY + RoomStage.bedTop * scale, contentHeight - height)
+        let width = plan.bedSize.width * scale
+        let height = plan.bedSize.height * scale
+        let top = max(originY + plan.bedTop * scale, contentHeight - height)
         return CGRect(x: size.width - width, y: top, width: width, height: height)
     }
 }

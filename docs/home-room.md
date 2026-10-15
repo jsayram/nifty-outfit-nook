@@ -20,7 +20,8 @@ All of it is in `Packages/NookKit/Sources/Features/Home`.
 | `HomeRoomContent.swift` | What the plates say, and the sign's fallback |
 | `HomeDestination.swift` | The screens Home pushes |
 | `LaundryTrackingSheet.swift` | The short sheet the hamper opens while laundry tracking is off |
-| `Room/RoomStage.swift` | Every rect from the mockup's 390 x 844 stage, and `RoomLayout`, which scales them |
+| `Room/RoomStage.swift` | Every rect from the mockup's 390 x 844 stage, and `RoomLayout`, which scales a plan to the window |
+| `Room/RoomPlan.swift` | The phone, tall (upright iPad) and wide (sideways iPad) arrangements of the room (Phase 15a, `docs/ipad.md`) |
 | `Room/RoomControl.swift` | The ten things that do something: where each goes, its VoiceOver label and hint, reading order |
 | `Room/RoomCanvas.swift` | Draws the room and puts a button over each control |
 | `Room/RoomPlates.swift`, `Room/NameSignView.swift` | The live-text plates and the name on the sign |
@@ -133,7 +134,7 @@ Phase 5b. `HomeLayout` picks one of three layouts from the text size and the ver
 
 | Layout | When | Mockup |
 |---|---|---|
-| Room | Upright phone, and iPad, at the standard text sizes | `home.html` |
+| Room | Upright phone, and iPad, at the standard text sizes. A regular-width window gets the iPad's tall or wide room (Phase 15a, `docs/ipad.md`) | `home.html`, `ipad-home-portrait.html`, `home-wide.css` |
 | Large text | Any accessibility text size (AX1 to AX5), in any orientation | `home-ax.html` |
 | Sideways | A phone held sideways (compact height) at the standard sizes | `home-landscape.html` |
 
@@ -176,4 +177,4 @@ Everything else held up: the plates use the strong tint with light text, the sig
 - **13 (done):** the remembered source and occasion on the suitcase and the calendar, and Suitcases and Laundry behind them (`docs/suitcases-and-laundry.md`).
 - **14a (done):** "Name on your sign" in Profile; Home reloads when Profile closes, so the sign shows the new name (RD-03.1, `docs/profile.md`).
 - **14b (done):** the drawers open Help, Send feedback and Privacy and terms (RD-10.1, `docs/settings.md`), and Delete my data starts the app fresh on Home with a toast.
-- **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.
+- **15a (done):** the iPad's wide room sideways and tall room upright, with the tab bar at the bottom (RD-01.6). See `docs/ipad.md`.
