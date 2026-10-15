@@ -73,7 +73,7 @@ struct ClosetIPadSnapshotTests {
 
     private func assertWindow(
         _ window: IPadWindow,
-        expected: ClosetLayout,
+        expected: BrowseLayout,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
         picksPiece: Bool = true,
@@ -93,7 +93,7 @@ struct ClosetIPadSnapshotTests {
     private func assertWindow(
         size: CGSize,
         sizeClass: UserInterfaceSizeClass,
-        expected: ClosetLayout,
+        expected: BrowseLayout,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
         picksPiece: Bool = true,
@@ -104,13 +104,13 @@ struct ClosetIPadSnapshotTests {
         line: UInt = #line,
         column: UInt = #column
     ) throws {
-        let layout = WindowLayout.closet(
+        let layout = WindowLayout.browse(
             width: size.width, horizontalSizeClass: sizeClass, dynamicTypeSize: dynamicTypeSize)
         #expect(layout == expected, "\(name) got \(layout)")
         let model = closetModel()
         let detail = try detailModel()
         let current = picksPiece && layout.showsDetailBeside ? Self.trousers : nil
-        let view = ClosetColumns(layout: layout, width: size.width) { part in
+        let view = BrowseColumns(layout: layout, width: size.width, identifier: "closet") { part in
             ClosetPage(
                 model: model, open: { _ in }, retry: {}, part: part, current: current,
                 opensBeside: layout.showsDetailBeside)

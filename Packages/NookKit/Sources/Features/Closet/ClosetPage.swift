@@ -13,15 +13,10 @@ import SwiftUI
 ///
 /// Separate from `ClosetScreen` so snapshot tests can draw it from a model without navigation.
 struct ClosetPage: View {
-    /// Which part of the page to draw.
-    enum Part {
-        /// The whole page in one column (a phone, an upright iPad).
-        case whole
-        /// The header, search, filters, Suitcases and Laundry, the draft and Recently deleted.
-        case sidebar
-        /// Her pieces, or the loading, error, empty or no-match state.
-        case grid
-    }
+    /// Which part of the page to draw: the whole page, or the sidebar (the header, search,
+    /// filters, Suitcases and Laundry, the draft and Recently deleted) or the grid column (her
+    /// pieces, or the loading, error, empty or no-match state).
+    typealias Part = BrowsePart
 
     @Bindable var model: ClosetModel
     let open: (ClosetDestination) -> Void
