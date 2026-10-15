@@ -101,6 +101,7 @@ docs/add-a-piece.md          Add a piece and Edit, the form's checks, drafts and
 docs/cutout-feasibility.md   Lifting garments out of photos: the pipeline, the benchmark and the go/no-go.
 docs/stickers.md             Stickers and the photo tile: choosing, drawing, caching and the sample photos.
 docs/look-bundles.md         Look bundles: the flat-lay layout, the view, the piece list and the idea tag.
+docs/style-me.md             The Style Me request: the screen, its sheets, the checks and the stand-in results.
 website/                     The app's static website.
 ```
 
