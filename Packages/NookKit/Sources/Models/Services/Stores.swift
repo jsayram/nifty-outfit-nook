@@ -96,6 +96,9 @@ public protocol SuitcaseStore: Sendable {
     func markUsed(_ id: Suitcase.ID, at date: Date) async throws(StoreError)
     /// Deletes the suitcase only. Its garments and looks stay (PRD §12).
     func delete(_ id: Suitcase.ID) async throws(StoreError)
+    /// Undo after a delete: puts back exactly this suitcase, with its ID, name and pieces
+    /// (Phase 13). Fails with `invalidName` if another suitcase took the name meanwhile.
+    func restore(_ suitcase: Suitcase) async throws(StoreError)
 }
 
 /// Her one profile.
@@ -103,4 +106,16 @@ public protocol ProfileStore: Sendable {
     func profile() async throws(StoreError) -> Profile
     /// Saves the profile after checking the sign name and measurements.
     func save(_ profile: Profile) async throws(StoreError)
+}
+
+extension ProfileStore {
+    /// Reads the profile, changes it and saves it, for one setting at a time (Track laundry, the
+    /// remembered source). Returns what was saved.
+    @discardableResult
+    public func change(_ edit: @Sendable (inout Profile) -> Void) async throws(StoreError) -> Profile {
+        var profile = try await profile()
+        edit(&profile)
+        try await save(profile)
+        return profile
+    }
 }

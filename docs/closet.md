@@ -125,5 +125,5 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 
 ## Left for later phases
 
-- **13:** Suitcases and Laundry behind their tiles.
+- **13 (done):** Suitcases and Laundry behind their tiles (`docs/suitcases-and-laundry.md`). The grid can also tick several pieces (the packing sheet) and show a minus on each (a suitcase's pieces).
 - **15a:** iPad's sidebar and wide grid. Until then iPad shows this page full width with more columns, and the controls stop at 640 pt.

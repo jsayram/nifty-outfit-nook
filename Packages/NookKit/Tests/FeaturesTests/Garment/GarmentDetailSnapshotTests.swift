@@ -100,6 +100,17 @@ struct GarmentDetailSnapshotTests {
             named: "style-with-this")
     }
 
+    /// Add to a suitcase (Phase 13): every active suitcase, with a tick where it's packed.
+    @Test func addToSuitcaseSheet() throws {
+        let model = try model("g-navy-trousers")
+        assertSnapshot(
+            NookSheetContainer(title: "Add to a suitcase", subtitle: "The piece stays in your closet.") {
+                AddToSuitcaseSheet(model: model, toggle: { _ in }, openSuitcases: {})
+            }
+            .background(Color.nook.wallGradient),
+            named: "add-to-suitcase")
+    }
+
     @Test func recentlyDeleted() {
         var data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
         if let index = data.garments.firstIndex(where: { $0.id == "g-navy-trousers" }) {

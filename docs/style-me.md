@@ -29,16 +29,16 @@ Every row shows its current value and opens its own small sheet (RD-02.2). Singl
 
 | Sheet | What it offers |
 |---|---|
-| Source | Main closet, then her active suitcases by name, each with its piece count. The choice is for this request; remembering it is Phase 13 (FR-67) |
+| Source | Main closet, then her active suitcases by name, each with its piece count. The choice is remembered for next time (Phase 13, FR-67) |
 | Occasion | The FR-03 chips: Office, Date night, Brunch, Concert, Casual, Event, Other. Other asks "What's the occasion?" in up to 40 characters, kept with this request only |
 | Starting piece | No starting piece, then the pieces in the source that can be used today, with search. A piece that can't be used isn't offered |
 | Today's comfort | Usual fit (named, "Usual fit (Relaxed)"), Fitted, Comfortable, Relaxed |
 | Colour | Any or a colour family, then How strongly (Preferred, Required) and Applies to (Any one piece, Top, Bottom, Dress, Layer, Shoes, Overall palette), with a sentence saying what it means. Strength and place wait until a colour is picked |
 | Preferences | Exactly the two values, Mine + one idea and Only mine (LR-03.2). From a suitcase both are dimmed under a "Suitcase only" note with Style from Main closet (LR-05b) |
 
-The defaults are good enough to tap Style me straight away (RD-02.3): Main closet, Office, no starting piece, today's weather, her usual fit, any colour, and her saved Preferences (Mine + one idea for Lily, LR-03.3).
+The defaults are good enough to tap Style me straight away (RD-02.3): the source and occasion she chose last (Main closet and Office on a fresh install, Phase 13), no starting piece, today's weather, her usual fit, any colour, and her saved Preferences (Mine + one idea for Lily, LR-03.3).
 
-**Request scope.** The draft lives as long as the screen. Coming back from a pushed screen (Add a piece, the results) reloads the closet and keeps every choice. A new Style Me starts on the defaults again, so Comfort, Colour and Weather reset (RD-02.4, LR-04.2, LR-18.2), and Preferences starts from her saved choice.
+**Request scope.** The draft lives as long as the screen. Coming back from a pushed screen (Add a piece, the results) reloads the closet and keeps every choice. A new Style Me starts on the defaults again, so Comfort, Colour and Weather reset (RD-02.4, LR-04.2, LR-18.2), Preferences starts from her saved choice, and the source and occasion start from the ones she chose last (Phase 13).
 
 **Where it opens from.** The laptop opens it. The calendar opens it on the Occasion sheet. A garment's Style with this, then Style me with it, opens it with that piece as the starting piece (decision 2).
 
@@ -85,7 +85,7 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 ## Decisions for Jose
 
 1. **An empty main closet can't style.** PRD §8.1 allows clearly labelled hypothetical ideas with zero inventory. Stage A's mock stylist and `ResultCheck` need an owned Simple, so for now the empty closet offers Add a piece instead.
-2. **The occasion starts on Office every time**, as in the mockup. Remembering her last occasion (and showing it on the calendar) needs remembered request defaults, which arrive with the remembered source in Phase 13.
+2. **The occasion and source are remembered** since Phase 13: Style Me starts from the ones she chose last (`Profile.remembered`), and Other isn't remembered. A remembered suitcase that's gone still shows "This suitcase isn't there any more", so nothing styles from everything without her choosing it.
 3. **Preferences on Style Me is for this request.** It starts from her saved choice each time; changing the saved one is Profile's job (14a). FR-05 asks to keep "refine this request" and "update a usual preference" apart.
 4. **"Colour", not "Color"**, to match the rest of the app (Closet's filters, Add a piece). The amendment writes Color.
 5. **A Dress place for colour.** The mockup's Applies to has no Dress; the closet has dresses, so it's there.
@@ -95,6 +95,6 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 ## Left for later phases
 
 - **10b (done):** Your looks replaced the stand-in. It calls the stylist with `StylingContext.make`, marks the suitcase as used, and shows partial, insufficient, failed and offline results.
-- **13:** remembering the source (FR-67) and the occasion, Add pieces opening a real suitcase.
+- **13 (done):** remembering the source (FR-67) and the occasion, Add pieces opening the real suitcase, and "Style me from this suitcase" (`docs/suitcases-and-laundry.md`).
 - **14a:** her usual fit and Preferences in Profile.
 - **15a:** iPad layouts. Style Me already keeps to 600 points and centres.

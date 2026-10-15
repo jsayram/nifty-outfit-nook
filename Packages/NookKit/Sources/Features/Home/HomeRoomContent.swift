@@ -9,7 +9,8 @@ nonisolated struct HomeRoomContent: Hashable, Sendable {
     var source: SourcePlate
     /// `nil` until the closet and profile have loaded.
     var hamper: HamperState?
-    /// The occasion on the calendar. `nil` until Style Me remembers one (Phase 10a).
+    /// The occasion on the calendar: the one she picked last on Style Me (Phase 13). `nil` until
+    /// the profile has loaded.
     var occasion: Occasion?
     /// Today's weather for the window. `nil` while it loads or when it can't be read.
     var weather: WeatherSnapshot?
@@ -40,7 +41,9 @@ nonisolated struct HomeRoomContent: Hashable, Sendable {
 nonisolated struct SourcePlate: Hashable, Sendable {
     enum Kind: Hashable, Sendable {
         case mainCloset
-        case suitcase(name: String)
+        /// A suitcase, with the drawing that stands for it, which takes the suitcase's place in
+        /// the room (Phase 13).
+        case suitcase(name: String, icon: SuitcaseIcon = .rolling)
     }
 
     var kind: Kind
@@ -61,8 +64,15 @@ nonisolated struct SourcePlate: Hashable, Sendable {
     var name: String {
         switch kind {
         case .mainCloset: String(localized: "Main closet", bundle: .module, comment: "Source plate: the whole closet")
-        case .suitcase(let name): name
+        case .suitcase(let name, _): name
         }
+    }
+
+    /// The drawing on Home: the room's own suitcase for the main closet, or the chosen
+    /// suitcase's drawing.
+    var icon: SuitcaseIcon? {
+        if case .suitcase(_, let icon) = kind { return icon }
+        return nil
     }
 
     /// "17 pieces", "1 piece" or "Empty". `nil` while there's no count.

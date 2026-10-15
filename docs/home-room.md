@@ -41,12 +41,14 @@ Style Me's Weather row and its sheet live in `Features/StyleMe` (see below).
 | A frame with a saved look in it (Phase 12a) | That look's detail on Saved Looks | Switches tab and opens the look |
 | Laptop | Style Me | Push |
 | Calendar | Style Me, on the Occasion sheet | Push (`choosingOccasion: true`) |
-| Suitcase | Suitcases | Push |
-| Hamper | Laundry when tracking is on (or before the closet has loaded); the laundry tracking sheet when it's off | Push, or a sheet |
+| Suitcase | Suitcases | The Closet tab, with Suitcases open (Phase 13) |
+| Hamper | Laundry when tracking is on (or before the closet has loaded); the laundry tracking sheet when it's off | The Closet tab with Laundry open, or a sheet |
 | Top, middle and bottom drawers | Help, Send feedback, Privacy and terms | Push |
 | Name sign, and the top-right button | Profile | Push |
 
-Closet and Saved Looks are tabs in the mockup (the wardrobe link lands on the Closet tab), so the room switches tabs for them rather than pushing a second copy.
+Closet and Saved Looks are tabs in the mockup (the wardrobe link lands on the Closet tab), so the room switches tabs for them rather than pushing a second copy. Since Phase 13 Suitcases and Laundry do the same: they live in Closet (RD-13) and the mockups' versions go back to Closet, so the suitcase and the hamper open them on the Closet tab (`openInCloset`). Home reloads when its tab appears and when a pushed screen closes, so the source, the occasion and the hamper are always current.
+
+**The suitcase and the calendar (Phase 13).** The suitcase shows the source she chose last (`Profile.remembered`), with that suitcase's own drawing in place of the room's suitcase; a suitcase that's been deleted or archived shows the main closet (PRD §7.7). The calendar shows her last occasion under "Occasion" ("Office ▾"), and VoiceOver reads "Calendar: Occasion, Office". See `docs/suitcases-and-laundry.md`.
 
 **The shelf frames (Phase 12a).** The three frames under the shelf show her three most recently saved looks, newest on the left (`HomeModel.framedLooks`, by the date she saved them). Each one draws the look's main pieces small, as `home.html` does: a top (or a layer) over a bottom, or a dress (`FramedLookArt`). A framed look is a button, "Saved look: Interview navy and pink", read right after the shelf; it switches to Saved Looks with that look open (`RootTabView` keeps Saved Looks' path, so it can push the look). Empty frames stay empty and a tap on one does what the plate does. Each frame's tap area is its column of the strip, 35 x 62 stage units, so about 36 points wide on iPhone 17: the cards sit 35 units apart and the window is right beside them, so they can't reach 44 points without overlapping. The plate above them is a full 44-point target to Saved Looks, and VoiceOver reaches each frame by name. The large-text and sideways layouts have no shelf, so they don't show the frames.
 
@@ -172,7 +174,6 @@ Everything else held up: the plates use the strong tint with light text, the sig
 
 ## Left for later phases
 
-- **13:** the occasion on the calendar (`HomeRoomContent.occasion`) and under "Occasion" on the large-text row and the sideways tile, with the remembered source. Phase 10a opens Style Me on the Occasion sheet; remembering her last occasion waits for remembered request defaults (`docs/style-me.md`).
-- **13:** the remembered source (`HomeModel.source`, FR-67). Until the source picker exists, Home shows the main closet. The suitcase plate already knows how to show a suitcase source (green, or butter when empty).
+- **13 (done):** the remembered source and occasion on the suitcase and the calendar, and Suitcases and Laundry behind them (`docs/suitcases-and-laundry.md`).
 - **14a:** "Name on your sign" in Profile, and reloading Home when it changes (RD-03.1).
 - **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.

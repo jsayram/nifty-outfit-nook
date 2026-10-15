@@ -1,6 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {},
     "%@ & %@" : {
       "comment" : "Name of a saved look: the top's colour and the bottom's"
     },
@@ -50,6 +51,12 @@
     "%@ has no other piece to make another version." : {
       "comment" : "Why a version is missing: the source's name"
     },
+    "%@ is archived." : {
+      "comment" : "Toast after archiving a suitcase"
+    },
+    "%@ is archived. Style Me now uses Main closet." : {
+      "comment" : "Toast after archiving the source suitcase"
+    },
     "%@ is back in your closet" : {
       "comment" : "Toast after Restore, with the piece's name",
       "localizations" : {
@@ -61,8 +68,20 @@
         }
       }
     },
+    "%@ is back." : {
+      "comment" : "Toast after bringing back an archived suitcase"
+    },
+    "%@ is deleted. Its pieces are still in your closet." : {
+      "comment" : "Toast after deleting a suitcase"
+    },
+    "%@ is deleted. Style Me now uses Main closet." : {
+      "comment" : "Toast after deleting the source suitcase; its pieces stay in the closet"
+    },
     "%@ is empty" : {
       "comment" : "Style Me when the suitcase has nothing packed; the suitcase's name"
+    },
+    "%@ is empty. Pack something first." : {
+      "comment" : "Toast after choosing an empty suitcase as the source; the source stays as it was"
     },
     "%@ is in Recently deleted" : {
       "comment" : "Toast after Delete it, with the piece's name",
@@ -97,6 +116,9 @@
         }
       }
     },
+    "%@ is your Style Me source. Only what’s packed in it." : {
+      "comment" : "Laundry: what the suitcase chip shows"
+    },
     "%@ isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is." : {
       "comment" : "Look detail: one piece left her closet (LR-16.4)"
     },
@@ -124,6 +146,9 @@
     },
     "%@ look" : {
       "comment" : "Name of a saved look with no main colours: the occasion"
+    },
+    "%@ marked clean" : {
+      "comment" : "Toast after marking one piece clean"
     },
     "%@ now: %@" : {
       "comment" : "Swap: under the look, the kind of piece and the piece in it now"
@@ -245,6 +270,9 @@
         }
       }
     },
+    "%lld packed" : {
+      "comment" : "Packing sheet: how many pieces are packed, as in 5 packed"
+    },
     "%lld pictures" : {
       "comment" : "How many try-on pictures",
       "localizations" : {
@@ -307,6 +335,52 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld pieces aren’t in your closet any more. Swap them for your own, or keep the look as it is."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pieces in the wash" : {
+      "comment" : "Laundry: under the title, how many pieces are dirty",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece in the wash"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces in the wash"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pieces marked clean" : {
+      "comment" : "Toast after marking several pieces clean",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece marked clean"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces marked clean"
                 }
               }
             }
@@ -478,6 +552,9 @@
         }
       }
     },
+    "A suitcase is a smaller set of your pieces, for a trip or a second home. Style Me can then pick from just what’s packed." : {
+      "comment" : "Suitcases: empty message"
+    },
     "A top" : {
       "comment" : "What a look needs"
     },
@@ -569,11 +646,32 @@
         }
       }
     },
+    "Add a suitcase" : {
+      "comment" : "Button: makes a new suitcase (LR-17)"
+    },
+    "Add a suitcase in Suitcases, then pack this piece in it." : {
+      "comment" : "Add to a suitcase: she has none"
+    },
+    "Add and pack" : {
+      "comment" : "Button: makes the suitcase, then packs it"
+    },
+    "Add or remove" : {
+      "comment" : "Button: opens the packing sheet"
+    },
     "Add pieces" : {
       "comment" : "Style Me button: opens Suitcases to pack"
     },
+    "Add pieces from your closet. They stay in your closet too, and nothing is copied." : {
+      "comment" : "Suitcase: empty message"
+    },
     "Add pieces to %@" : {
       "comment" : "Your looks: insufficient wardrobe in a suitcase, its name"
+    },
+    "Add pieces to your closet first, then pack them here." : {
+      "comment" : "Packing sheet: nothing in the closet"
+    },
+    "Add to a suitcase" : {
+      "comment" : "Button on garment detail (Phase 13)"
     },
     "Added" : {
       "comment" : "Mark: a suggestion chip once accepted, or a piece a look version adds to Simple",
@@ -595,6 +693,9 @@
     "All %@" : {
       "comment" : "Name of a saved look whose top and bottom are one colour"
     },
+    "All %lld pieces" : {
+      "comment" : "Suitcases: the main closet's row, every piece in her closet (always 2 or more)"
+    },
     "All clean" : {
       "comment" : "Hamper plate: nothing to wash",
       "localizations" : {
@@ -605,6 +706,9 @@
           }
         }
       }
+    },
+    "All suitcases" : {
+      "comment" : "Screen title: every suitcase (RD-09)"
     },
     "All year" : {
       "comment" : "Garment detail: worn in every season",
@@ -636,6 +740,18 @@
     },
     "Applies to" : {
       "comment" : "Colour sheet group"
+    },
+    "Archive suitcase" : {
+      "comment" : "Button: archives a suitcase"
+    },
+    "Archived" : {
+      "comment" : "All suitcases: heading and filter for archived ones"
+    },
+    "Archived · %lld" : {
+      "comment" : "All suitcases: filter that shows archived suitcases, with how many"
+    },
+    "Archived. Its pieces are kept, but it isn’t offered as a source." : {
+      "comment" : "Suitcase: it's archived"
     },
     "Ask stylist" : {
       "comment" : "Results button (RD-06)"
@@ -706,6 +822,9 @@
     },
     "Back to how it was" : {
       "comment" : "Toast after undoing a swap or removal"
+    },
+    "Backpack" : {
+      "comment" : "A suitcase picture"
     },
     "Bag" : {
       "comment" : "One piece of this kind, used in search",
@@ -828,6 +947,9 @@
         }
       }
     },
+    "Bring it back" : {
+      "comment" : "Button: unarchives a suitcase"
+    },
     "Brown" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -885,6 +1007,9 @@
           }
         }
       }
+    },
+    "Calendar: Occasion, %@" : {
+      "comment" : "VoiceOver label for the calendar, with her last occasion, as in Calendar: Occasion, Office"
     },
     "Cancel" : {
       "comment" : "Button: closes Add a piece or Edit",
@@ -1024,6 +1149,9 @@
     "Choose the occasion." : {
       "comment" : "VoiceOver hint for Occasion"
     },
+    "Choose the suitcases it’s packed in." : {
+      "comment" : "Hint on Add to a suitcase"
+    },
     "Choose today’s comfort." : {
       "comment" : "VoiceOver hint for Comfort"
     },
@@ -1069,6 +1197,12 @@
         }
       }
     },
+    "Clean %lld selected" : {
+      "comment" : "Button: marks the ticked pieces clean, with how many"
+    },
+    "Clean selected" : {
+      "comment" : "Button: marks the ticked pieces clean"
+    },
     "Clear" : {
       "comment" : "Clears every filter and the search",
       "localizations" : {
@@ -1090,6 +1224,9 @@
           }
         }
       }
+    },
+    "Clear search" : {
+      "comment" : "Button: empties the search"
     },
     "Closet" : {
       "comment" : "Tab bar label",
@@ -1215,6 +1352,9 @@
     },
     "Delete picture" : {
       "comment" : "Button on picture detail"
+    },
+    "Delete suitcase" : {
+      "comment" : "Button: deletes a suitcase, not its pieces"
     },
     "Deleted %@" : {
       "comment" : "Toast after Delete look, with the look's name"
@@ -1435,6 +1575,9 @@
         }
       }
     },
+    "Duffel bag" : {
+      "comment" : "A suitcase picture"
+    },
     "Earlier version" : {
       "comment" : "A picture of an earlier version of its look"
     },
@@ -1485,6 +1628,32 @@
         }
       }
     },
+    "Every piece counts as available to Style Me." : {
+      "comment" : "Laundry, tracking off"
+    },
+    "Every piece counts as available to Style Me. The %lld pieces you marked as in the wash are kept. Turn tracking on and they come back." : {
+      "comment" : "Laundry, tracking off, with marks kept",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Every piece counts as available to Style Me. The %lld piece you marked as in the wash is kept. Turn tracking on and it comes back."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Every piece counts as available to Style Me. The %lld pieces you marked as in the wash are kept. Turn tracking on and they come back."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Every piece counts as available." : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -1496,8 +1665,17 @@
         }
       }
     },
+    "Every piece here counts as available to Style Me." : {
+      "comment" : "Laundry: all clean"
+    },
     "Every piece in every version is one you own." : {
       "comment" : "Preferences sheet: Only mine"
+    },
+    "Every piece you own, packed or not." : {
+      "comment" : "Laundry: what the Main closet chip shows"
+    },
+    "Everything in the wash in %@" : {
+      "comment" : "Laundry confirmation: cleaning all, with where"
     },
     "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
       "comment" : "Swap: under the See all title, with the source's name"
@@ -1523,6 +1701,9 @@
           }
         }
       }
+    },
+    "Favourites" : {
+      "comment" : "Suitcases: heading over the three favourites"
     },
     "Feedback" : {
       "comment" : "Plate on the middle desk drawer; opens Send feedback",
@@ -1604,6 +1785,9 @@
         }
       }
     },
+    "For example, Beach week" : {
+      "comment" : "Prompt in a new suitcase's name field"
+    },
     "For example, museum visit" : {
       "comment" : "Prompt for Other's words"
     },
@@ -1630,6 +1814,9 @@
     "From the look" : {
       "comment" : "Over the name of the look a picture came from"
     },
+    "From your closet of %lld" : {
+      "comment" : "Packing sheet: how many pieces she can pack from"
+    },
     "Getting Style Me ready" : {
       "comment" : "Style Me while it loads"
     },
@@ -1644,6 +1831,9 @@
         }
       }
     },
+    "Give it a name and a picture, then pick what goes in." : {
+      "comment" : "Under the Add a suitcase sheet's title"
+    },
     "Give it a name." : {
       "comment" : "Add a piece: the name is empty",
       "localizations" : {
@@ -1657,6 +1847,9 @@
     },
     "Give the look a name." : {
       "comment" : "Rename look: the name is empty"
+    },
+    "Give the suitcase a name." : {
+      "comment" : "Suitcase name: empty"
     },
     "Go back" : {
       "comment" : "Button: back to the two choices",
@@ -2003,6 +2196,9 @@
     "Its look isn’t in Saved Looks any more. The picture stays until you delete it." : {
       "comment" : "Picture detail: its look was deleted"
     },
+    "Its pieces are still in your closet." : {
+      "comment" : "Suitcase gone: the pieces stay"
+    },
     "It’s optional, and off for now." : {
       "comment" : "Under the laundry tracking sheet's title",
       "localizations" : {
@@ -2127,6 +2323,9 @@
           }
         }
       }
+    },
+    "Last used %@" : {
+      "comment" : "Suitcases: when it was last used, a date such as Jul 3"
     },
     "Last worn %@" : {
       "comment" : "When a piece was last worn, a week ago or more: a date such as 3 Oct",
@@ -2426,11 +2625,46 @@
     "Makes a simulated picture of this look." : {
       "comment" : "VoiceOver hint on Try it on"
     },
+    "Makes it the source for Style Me." : {
+      "comment" : "Hint on a source in Suitcases"
+    },
     "Making a picture" : {
       "comment" : "Try it on sheet, while making"
     },
     "Making a picture also saves this look, so the picture has a look to go with." : {
       "comment" : "Try it on sheet, from Your looks for a look that isn't saved"
+    },
+    "Mark %@ clean" : {
+      "comment" : "Laundry: marks one piece clean"
+    },
+    "Mark %lld clean" : {
+      "comment" : "Button: confirms cleaning several, with how many"
+    },
+    "Mark %lld pieces clean?" : {
+      "comment" : "Laundry: asks before cleaning several, with how many",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mark %lld piece clean?"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mark %lld pieces clean?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Mark all clean" : {
+      "comment" : "Button: marks every piece in the wash clean"
     },
     "Mark as clean" : {
       "comment" : "Button on garment detail",
@@ -2453,6 +2687,9 @@
           }
         }
       }
+    },
+    "Mark clean" : {
+      "comment" : "Button: marks one piece clean"
     },
     "Marked as dirty" : {
       "comment" : "Toast after Mark as dirty",
@@ -2510,6 +2747,9 @@
     "Mine + one idea" : {
       "comment" : "Preferences value"
     },
+    "More" : {
+      "comment" : "Button: opens a suitcase's menu"
+    },
     "Multicolour" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2534,6 +2774,9 @@
           }
         }
       }
+    },
+    "Name and picture" : {
+      "comment" : "Sheet title: edit a suitcase"
     },
     "Name saved" : {
       "comment" : "Toast after renaming a look"
@@ -2689,6 +2932,12 @@
     "No starting piece" : {
       "comment" : "Style Me button and sheet choice"
     },
+    "No suitcases match" : {
+      "comment" : "All suitcases: nothing matches"
+    },
+    "No suitcases yet" : {
+      "comment" : "Suitcases: empty title"
+    },
     "No try-on pictures yet" : {
       "comment" : "Saved Looks Pictures tab, empty"
     },
@@ -2776,6 +3025,9 @@
     "Not packed in %@" : {
       "comment" : "Style Me: the starting piece isn't in the suitcase being styled from"
     },
+    "Not ready for Style Me" : {
+      "comment" : "Suitcase: it's empty"
+    },
     "Not saved yet. Check %@." : {
       "comment" : "VoiceOver, after Save found problems, with the fields to check, like Name and Kind",
       "localizations" : {
@@ -2797,6 +3049,9 @@
           }
         }
       }
+    },
+    "Not used yet" : {
+      "comment" : "Suitcases: a suitcase never used for Style Me"
     },
     "Notes" : {
       "comment" : "Garment fact label: her own notes",
@@ -2832,6 +3087,12 @@
     "Nothing in %@ matches “%@”." : {
       "comment" : "Starting piece search with no match"
     },
+    "Nothing in the wash" : {
+      "comment" : "Laundry: all clean"
+    },
+    "Nothing in the wash in %@" : {
+      "comment" : "Laundry: all clean in a suitcase"
+    },
     "Nothing is erased" : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -2842,6 +3103,9 @@
           }
         }
       }
+    },
+    "Nothing packed yet" : {
+      "comment" : "Packing sheet: nothing packed"
     },
     "Nothing saved yet" : {
       "comment" : "Saved Looks with no looks (RD-08.4)"
@@ -3038,8 +3302,14 @@
     "Only the top changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
     },
+    "Open %@" : {
+      "comment" : "Button on a suitcase's row: opens it"
+    },
     "Open Style Me from the laptop on Home and ask for a look." : {
       "comment" : "Saved Looks empty state: step 1"
+    },
+    "Open Suitcases" : {
+      "comment" : "Button: opens Suitcases"
     },
     "Open the look and tap Try it on. Pictures in this test build are simulated." : {
       "comment" : "Pictures tab empty state: step 2"
@@ -3066,6 +3336,9 @@
         }
       }
     },
+    "Opening this suitcase" : {
+      "comment" : "Suitcase loading"
+    },
     "Opening your closet" : {
       "comment" : "Closet loading",
       "localizations" : {
@@ -3077,11 +3350,17 @@
         }
       }
     },
+    "Opening your laundry" : {
+      "comment" : "Laundry loading"
+    },
     "Opening your pictures" : {
       "comment" : "Pictures tab loading"
     },
     "Opening your saved looks" : {
       "comment" : "Saved Looks loading"
+    },
+    "Opening your suitcases" : {
+      "comment" : "Suitcases loading"
     },
     "Opens Help." : {
       "comment" : "VoiceOver hint",
@@ -3264,11 +3543,29 @@
         }
       }
     },
+    "Other suitcases" : {
+      "comment" : "All suitcases: heading after the favourites"
+    },
     "Other: %@" : {
       "comment" : "Style Me occasion: Other, with her own words"
     },
     "Overall palette" : {
       "comment" : "Colour sheet: applies to"
+    },
+    "Pack %@" : {
+      "comment" : "Packing sheet title, with the suitcase's name"
+    },
+    "Pack at least one piece first. Style Me keeps using %@ until then." : {
+      "comment" : "Suitcase: empty, with the source now"
+    },
+    "Pack it" : {
+      "comment" : "Toast action: opens the empty suitcase to pack it"
+    },
+    "Packed" : {
+      "comment" : "Suitcase: heading over its pieces"
+    },
+    "Packs it, or takes it out." : {
+      "comment" : "Hint on a piece in the packing sheet"
     },
     "Part of your room didn’t load. Everything still opens." : {
       "comment" : "Home banner when a store failed",
@@ -3306,6 +3603,9 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Picture" : {
+      "comment" : "Label over the suitcase pictures"
+    },
     "Picture deleted" : {
       "comment" : "Toast after Delete picture"
     },
@@ -3324,8 +3624,14 @@
     "Pieces from Main closet that you can wear today. Nothing is sent, and no styling request is used." : {
       "comment" : "Make your own look: where the pieces come from (FR-32)"
     },
+    "Pieces in the wash" : {
+      "comment" : "Laundry: name of the list"
+    },
     "Pieces in the wash or away don’t show here. Add a piece in Closet to build a look." : {
       "comment" : "Make your own look: empty picker"
+    },
+    "Pieces stay in your closet too. A suitcase only lists them, nothing is copied." : {
+      "comment" : "Under Add and pack"
     },
     "Pieces you delete stay here for 30 days, so you can bring them back." : {
       "comment" : "Recently deleted, empty",
@@ -3480,6 +3786,9 @@
     "Remove %@" : {
       "comment" : "Spoken label of a piece's remove button"
     },
+    "Remove %@ from %@" : {
+      "comment" : "Button on a packed piece: takes it out of this suitcase"
+    },
     "Remove from closet" : {
       "comment" : "Button on garment detail (LR-16)",
       "localizations" : {
@@ -3494,8 +3803,14 @@
     "Remove this piece" : {
       "comment" : "Swap: button (LR-08)"
     },
+    "Removed %@. It’s still in your closet." : {
+      "comment" : "Toast after taking a piece out of a suitcase"
+    },
     "Removes this picture. The look stays saved. You can undo it." : {
       "comment" : "Hint on Delete picture"
+    },
+    "Removing a piece only takes it out of this suitcase. It stays in your closet and in any other suitcase." : {
+      "comment" : "Suitcase: what removing a piece does"
     },
     "Rename" : {
       "comment" : "Look detail button: renames the look"
@@ -3541,6 +3856,9 @@
           }
         }
       }
+    },
+    "Rolling case" : {
+      "comment" : "A suitcase picture"
     },
     "Same as Simple" : {
       "comment" : "Mark on a piece also in the Simple version",
@@ -3672,6 +3990,9 @@
     "Search %@" : {
       "comment" : "Starting piece sheet search; the source's name"
     },
+    "Search suitcases" : {
+      "comment" : "All suitcases search prompt"
+    },
     "Search these pieces" : {
       "comment" : "Search prompt in a piece picker"
     },
@@ -3706,6 +4027,12 @@
     "See all %@" : {
       "comment" : "Swap: button at the end (LR-07.3)"
     },
+    "See all %lld" : {
+      "comment" : "Suitcases: opens every suitcase, with how many there are"
+    },
+    "See all suitcases" : {
+      "comment" : "Suitcases: opens every suitcase"
+    },
     "See saved looks" : {
       "comment" : "Your looks: opens the Saved tab"
     },
@@ -3723,6 +4050,12 @@
     },
     "Seeing it again doesn’t make a new one." : {
       "comment" : "Try it on sheet: a picture of exactly this look exists (FR-59)"
+    },
+    "Select %@" : {
+      "comment" : "Laundry: ticks a piece to clean with others"
+    },
+    "Selected in %@" : {
+      "comment" : "Laundry confirmation: cleaning the ticked pieces, with where"
     },
     "Send feedback" : {
       "comment" : "Screen title",
@@ -3909,6 +4242,9 @@
         }
       }
     },
+    "Source for Style Me" : {
+      "comment" : "Suitcases: name of the list of sources"
+    },
     "Source: %@" : {
       "comment" : "VoiceOver label for the Source row. The values are the source name, piece count and scope.",
       "localizations" : {
@@ -3990,8 +4326,26 @@
     "Style Me didn’t load" : {
       "comment" : "Style Me error state title"
     },
+    "Style Me is using this suitcase" : {
+      "comment" : "Suitcase: it's the source"
+    },
+    "Style Me now uses %@." : {
+      "comment" : "Toast after choosing a source, with its name"
+    },
+    "Style Me picks only from the suitcase you choose. Main closet uses everything." : {
+      "comment" : "Suitcases: what choosing a source does"
+    },
     "Style Me puts looks together from your own clothes. Add a few pieces first." : {
       "comment" : "Style Me when the closet is empty"
+    },
+    "Style Me skips pieces in the wash. A piece in two suitcases is one piece, so cleaning it cleans it everywhere." : {
+      "comment" : "Laundry: what being in the wash means"
+    },
+    "Style Me source" : {
+      "comment" : "Suitcases: the chosen source's mark"
+    },
+    "Style Me uses your whole closet until you pack a suitcase." : {
+      "comment" : "Suitcases: under the main closet when there are no suitcases"
     },
     "Style Me with it, or make your own look with it." : {
       "comment" : "Hint on Style with this",
@@ -4029,11 +4383,17 @@
     "Style again" : {
       "comment" : "Sends the request again"
     },
+    "Style from %@" : {
+      "comment" : "Suitcase: card title when it isn't the source, with its name"
+    },
     "Style from Main closet" : {
       "comment" : "Preferences sheet button"
     },
     "Style me" : {
       "comment" : "The button that sends the Style Me request"
+    },
+    "Style me from this suitcase" : {
+      "comment" : "Button: opens Style Me with this suitcase as the source"
     },
     "Style me with it" : {
       "comment" : "Style with this choice",
@@ -4062,6 +4422,9 @@
     },
     "Styling didn’t finish" : {
       "comment" : "Your looks failed state title"
+    },
+    "Styling from this one" : {
+      "comment" : "Under the chosen suitcase in the hall"
     },
     "Styling needs a connection" : {
       "comment" : "Your looks offline state title"
@@ -4137,6 +4500,12 @@
           }
         }
       }
+    },
+    "Suitcase only: Style Me picks from these %@ and nothing else." : {
+      "comment" : "Suitcase: what being the source means, with its piece count"
+    },
+    "Suitcase only: Style Me would pick from these %@ and nothing else. Now it uses %@." : {
+      "comment" : "Suitcase: what using it would mean, and the source now"
     },
     "Suitcase: Source, %@" : {
       "comment" : "VoiceOver label for the suitcase. The values are the source name, piece count and scope.",
@@ -4234,6 +4603,9 @@
     "Tap Retry when you’re back online. Nothing was charged, and your saved looks still work." : {
       "comment" : "Your looks offline state"
     },
+    "Tap a piece for details." : {
+      "comment" : "Suitcase: under Packed"
+    },
     "Tap one to see it in the look." : {
       "comment" : "Swap: under the buttons before she picks an option"
     },
@@ -4319,6 +4691,9 @@
     "The picture didn’t finish" : {
       "comment" : "Try it on sheet: failed"
     },
+    "The piece stays in your closet. A suitcase only lists it, no copy is made." : {
+      "comment" : "Under the Add to a suitcase sheet's title"
+    },
     "The piece you started adding isn’t in your closet yet." : {
       "comment" : "Draft card: a new piece with no name yet",
       "localizations" : {
@@ -4353,6 +4728,9 @@
     "The stylist didn’t answer. Nothing was charged, and your request is kept as you left it." : {
       "comment" : "Your looks failed state"
     },
+    "The suitcase you were styling from isn’t there any more, so Style Me uses Main closet." : {
+      "comment" : "Suitcases: the remembered suitcase was deleted or archived"
+    },
     "The weather can’t be read right now, so your looks won’t use it." : {
       "comment" : "Under the Weather row when the weather can't be read",
       "localizations" : {
@@ -4380,6 +4758,9 @@
           }
         }
       }
+    },
+    "They become available to Style Me again. You can undo this." : {
+      "comment" : "Laundry confirmation: what cleaning does"
     },
     "This choice is for this request only." : {
       "comment" : "Weather sheet: the choice doesn't stick",
@@ -4443,6 +4824,9 @@
         }
       }
     },
+    "This suitcase didn’t load" : {
+      "comment" : "Suitcase error title"
+    },
     "This suitcase isn’t there any more" : {
       "comment" : "Style Me when the suitcase source was removed or archived"
     },
@@ -4459,6 +4843,12 @@
           }
         }
       }
+    },
+    "Tick the circles to clean a few together." : {
+      "comment" : "Laundry: how to clean several at once"
+    },
+    "Tick what goes in. A piece can be in more than one suitcase. It’s the same piece, so nothing is copied." : {
+      "comment" : "Packing sheet: how it works"
     },
     "Today" : {
       "comment" : "Your looks tab: the current result (LR-06)"
@@ -4507,6 +4897,12 @@
           }
         }
       }
+    },
+    "Tote bag" : {
+      "comment" : "A suitcase picture"
+    },
+    "Tracking off" : {
+      "comment" : "Laundry: under the title while tracking is off"
     },
     "Try a different outfit" : {
       "comment" : "Your looks button (LR-05a)"
@@ -4593,6 +4989,9 @@
     "Use Main closet" : {
       "comment" : "Partial result banner action: style from the whole closet"
     },
+    "Use for Style Me" : {
+      "comment" : "Button: makes this suitcase the source"
+    },
     "Use one line of letters, numbers and spaces." : {
       "comment" : "Make your own look: the name has line breaks or tabs"
     },
@@ -4609,6 +5008,21 @@
           }
         }
       }
+    },
+    "Used %lld days ago" : {
+      "comment" : "Suitcases: when it was last used, 2 to 6 days ago"
+    },
+    "Used %lld weeks ago" : {
+      "comment" : "Suitcases: when it was last used, 2 or 3 weeks ago"
+    },
+    "Used last week" : {
+      "comment" : "Suitcases: when it was last used"
+    },
+    "Used today" : {
+      "comment" : "Suitcases: when it was last used"
+    },
+    "Used yesterday" : {
+      "comment" : "Suitcases: when it was last used"
     },
     "Uses 1 styling request." : {
       "comment" : "Under the Style me button"
@@ -4658,6 +5072,9 @@
         }
       }
     },
+    "Weekender" : {
+      "comment" : "A suitcase picture"
+    },
     "What you’ve filled in so far won’t be kept." : {
       "comment" : "Add a piece: under the discard question",
       "localizations" : {
@@ -4691,6 +5108,9 @@
     },
     "Where your looks come from." : {
       "comment" : "Source sheet"
+    },
+    "Which clothes" : {
+      "comment" : "Laundry: name of the scope chips"
     },
     "Which looks" : {
       "comment" : "VoiceOver name of the Today and Saved switch"
@@ -4839,6 +5259,9 @@
     "You already have a picture of this look" : {
       "comment" : "Try it on sheet: a picture of exactly this look exists (FR-59)"
     },
+    "You already have a suitcase with this name." : {
+      "comment" : "Suitcase name: another suitcase has it"
+    },
     "You can change this in Profile" : {
       "comment" : "Link from the laundry tracking sheet to the Profile switch",
       "localizations" : {
@@ -4947,6 +5370,9 @@
         }
       }
     },
+    "Your laundry didn’t load" : {
+      "comment" : "Laundry error title"
+    },
     "Your look shows here as you add pieces." : {
       "comment" : "Make your own look: before any piece is added"
     },
@@ -5032,6 +5458,12 @@
     "Your saved looks didn’t load" : {
       "comment" : "Saved Looks error title"
     },
+    "Your suitcases didn’t load" : {
+      "comment" : "Suitcases error title"
+    },
+    "Your three most recently used." : {
+      "comment" : "Suitcases: under Favourites, how they're chosen (RD-09: no star)"
+    },
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"
     },
@@ -5114,6 +5546,9 @@
     "in the top" : {
       "comment" : "Colour place, as in navy in the top"
     },
+    "in your closet" : {
+      "comment" : "Laundry: where an unpacked piece is"
+    },
     "just now" : {
       "comment" : "Draft card: changed less than a minute ago",
       "localizations" : {
@@ -5138,6 +5573,9 @@
           }
         }
       }
+    },
+    "packed in %@" : {
+      "comment" : "Laundry: the suitcases a piece is packed in, as in packed in Jose's house"
     },
     "pieces" : {
       "comment" : "As in: No navy pieces in Weekend"

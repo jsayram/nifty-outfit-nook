@@ -64,8 +64,15 @@ struct HomeLargeTextView<Notice: View>: View {
             }
 
             LargeRow(control: .occasion, content: content, systemImage: "calendar", fill: .warning, open: open) {
-                // The chosen occasion goes under the caption once Style Me remembers one (Phase 10a).
-                LargeRowText(caption: nil, title: control(.occasion))
+                // Her last occasion under the caption, once the profile has loaded (Phase 13).
+                if let occasion = content.occasion {
+                    LargeRowText(
+                        caption: String(
+                            localized: "Occasion", bundle: .module, comment: "Row on Home: opens Style Me's occasion"),
+                        title: occasion.title)
+                } else {
+                    LargeRowText(caption: nil, title: control(.occasion))
+                }
             }
 
             NookButton(control(.laptop), systemImage: "sparkles", fillsWidth: true) { open(.laptop) }

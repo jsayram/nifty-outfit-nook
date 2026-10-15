@@ -31,7 +31,6 @@ final class HomeVariantTests: XCTestCase {
         let pushed = [
             ("home.nameSign", "Profile"),
             ("home.profile", "Profile"),
-            ("home.suitcase", "Suitcases"),
             ("home.occasion", "Style Me"),
             ("home.laptop", "Style Me"),
             ("home.helpDrawer", "Help"),
@@ -78,6 +77,12 @@ final class HomeVariantTests: XCTestCase {
         tabBar.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
+
+        // The Source row opens Suitcases on the Closet tab (Phase 13).
+        reveal(source, in: app)
+        source.tap()
+        XCTAssertTrue(app.navigationBars["Suitcases"].waitForExistence(timeout: Self.wait), "No Suitcases")
+        XCTAssertTrue(tabBar.buttons["Closet"].isSelected)
     }
 
     /// Sideways, the controls sit beside the room with the title and Profile at their top.

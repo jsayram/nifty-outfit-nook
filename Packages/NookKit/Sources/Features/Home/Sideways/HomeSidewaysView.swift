@@ -159,7 +159,14 @@ struct HomeSidewaysView<Notice: View>: View {
 
     private var occasionTile: some View {
         SidewaysTile(control: .occasion, content: content, systemImage: "calendar", fill: .warning, open: open) {
-            LargeRowText(caption: nil, title: RoomControl.occasion.rowLabel(for: content), style: .compact)
+            if let occasion = content.occasion {
+                LargeRowText(
+                    caption: String(
+                        localized: "Occasion", bundle: .module, comment: "Row on Home: opens Style Me's occasion"),
+                    title: occasion.title, style: .compact)
+            } else {
+                LargeRowText(caption: nil, title: RoomControl.occasion.rowLabel(for: content), style: .compact)
+            }
         }
     }
 
@@ -326,7 +333,7 @@ struct SidewaysScene: View {
                     .roomFrame(layout.rect(SidewaysStage.mayaZs))
             }
             .allowsHitTesting(false)
-            tappable(.suitcase) { art(.suitcase, at: SidewaysStage.suitcase) }
+            tappable(.suitcase) { art(content.source.icon?.art ?? .suitcase, at: SidewaysStage.suitcase) }
             tappable(.hamper) { art(look.art, at: SidewaysStage.hamperArt(look)) }
         }
         .dynamicTypeSize(...RoomCanvas.largestTextSize)

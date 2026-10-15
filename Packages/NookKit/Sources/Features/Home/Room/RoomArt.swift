@@ -1,3 +1,4 @@
+import Models
 import SwiftUI
 
 /// The room's drawings in `Room.xcassets`. Each is a vector image with a light and a dark
@@ -48,6 +49,37 @@ nonisolated enum RoomArt: String, CaseIterable, Sendable {
     case closetBasketEmpty = "closet-basket-empty"
     /// A rail of empty hangers, above the empty closet's message.
     case closetEmptyHangers = "closet-empty-hangers"
+    // Suitcases (Phase 13). The five drawings a suitcase can have, each 104 x 182 with the same
+    // plain face at y 30 to 124, where the hall's luggage tags and Home's plates sit.
+    case suitcaseRolling = "suitcase-rolling"
+    case suitcaseWeekender = "suitcase-weekender"
+    case suitcaseDuffel = "suitcase-duffel"
+    case suitcaseBackpack = "suitcase-backpack"
+    case suitcaseTote = "suitcase-tote"
+    /// The entry hall behind the favourites on Suitcases.
+    case hallDoor = "travel-hall-door"
+    case hallHooks = "travel-hall-hooks"
+    case hallPeg = "travel-hall-peg"
+    case hallMirror = "travel-hall-mirror"
+    case hallConsole = "travel-hall-console"
+    case hallRunner = "travel-hall-runner"
+    // Laundry's corner (Phase 13), with the hamper from Home.
+    case washer = "travel-washer"
+    case laundryShelf = "travel-laundry-shelf"
+    case floorPlant = "plant-floor"
+}
+
+extension SuitcaseIcon {
+    /// The drawing that stands for a suitcase in the hall, on its rows and on Home.
+    nonisolated var art: RoomArt {
+        switch self {
+        case .rolling: .suitcaseRolling
+        case .weekender: .suitcaseWeekender
+        case .duffel: .suitcaseDuffel
+        case .backpack: .suitcaseBackpack
+        case .tote: .suitcaseTote
+        }
+    }
 }
 
 /// A room drawing, stretched to the frame it's given. Decorative: hidden from VoiceOver, since

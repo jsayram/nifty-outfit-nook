@@ -34,7 +34,8 @@ nonisolated enum RoomControl: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// Where it goes. The hamper depends on whether laundry tracking is on (RD-11.3): Laundry when
+    /// Where it goes. Suitcases and Laundry live in Closet (RD-13), so the suitcase and the
+    /// hamper open them on the Closet tab, as the wardrobe opens Closet. The hamper depends on whether laundry tracking is on (RD-11.3): Laundry when
     /// it's on, the short sheet about tracking when it's off. Before the closet has loaded it
     /// opens Laundry, which handles its own loading, rather than claim tracking is off.
     func route(hamper: HamperState?) -> HomeRoute {
@@ -47,10 +48,10 @@ nonisolated enum RoomControl: String, CaseIterable, Hashable, Sendable {
         case .helpDrawer: .push(.help)
         case .feedbackDrawer: .push(.feedback)
         case .privacyDrawer: .push(.privacy)
-        case .suitcase: .push(.suitcases)
+        case .suitcase: .closet(.suitcases)
         case .hamper:
             switch hamper {
-            case .allClean, .toWash, nil: .push(.laundry)
+            case .allClean, .toWash, nil: .closet(.laundry)
             case .off: .sheet(.laundryTracking)
             }
         }
@@ -80,7 +81,13 @@ nonisolated enum RoomControl: String, CaseIterable, Hashable, Sendable {
             return String(
                 localized: "Name sign: \(stored)", bundle: .module, comment: "VoiceOver label for the name sign")
         case .occasion:
-            return String(localized: "Calendar: Occasion", bundle: .module, comment: "VoiceOver label for the calendar")
+            guard let occasion = content.occasion else {
+                return String(
+                    localized: "Calendar: Occasion", bundle: .module, comment: "VoiceOver label for the calendar")
+            }
+            return String(
+                localized: "Calendar: Occasion, \(occasion.title)", bundle: .module,
+                comment: "VoiceOver label for the calendar, with her last occasion, as in Calendar: Occasion, Office")
         case .laptop:
             return String(localized: "Laptop: Style Me", bundle: .module, comment: "VoiceOver label for the laptop")
         case .helpDrawer:

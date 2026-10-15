@@ -79,7 +79,7 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 
 1. **LR-18's two lines aren't on garment detail.** "Saved until you change it." belongs to her fit profile (14a) and "Just for this outfit." to Style Me's Comfort (10a), as the amendment's phase table says. Detail shows the piece's own cut (Fitted, Regular, Relaxed) as a fact.
 2. **The recent-wear note names the setting** rather than repeating "You wore this last week", which LR-10 puts on Your looks. Last worn already says when.
-3. **"Add to a suitcase" from the mockup is left for Phase 13**, with the rest of suitcase membership.
+3. **"Add to a suitcase"** came in Phase 13: a soft button under Style with this opens a sheet of her suitcases with a tick each (`docs/suitcases-and-laundry.md`). The suitcase names open the real suitcase.
 4. **Undo after Delete it** as well as after "I don't have it any more". LR-16 only asks for the first, but both ask first and Undo is cheap and safe.
 5. **No "Delete permanently now"** in Recently deleted yet. PRD §7.4 asks for it with a preview of what's purged, which belongs with real storage (Phases 21a and 21b).
 6. **"I don't have it any more" keeps suitcase membership** in the data. The piece no longer shows in Closet or styling, and Undo needs nothing else. Suitcases (13) must filter with `isInCloset`.

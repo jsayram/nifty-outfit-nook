@@ -7,8 +7,8 @@ import SwiftUI
 /// The title sits on the wall in the page's header, as in `closet.html`, so the navigation bar
 /// only carries Add a piece and Profile. Tapping a piece opens its detail (7a), and the row at
 /// the bottom opens Recently deleted, and Add a piece and Edit open the form (7b); Make your own
-/// look opens from a piece's Style with this (11); Suitcases and Laundry open stand-ins until
-/// Phase 13. The closet reloads each time the tab appears and each
+/// look opens from a piece's Style with this (11); Suitcases and Laundry live here too (13), and
+/// Home's suitcase and hamper open them on this tab. The closet reloads each time the tab appears and each
 /// time a pushed screen closes, so changes made there show up.
 ///
 /// When she removes a piece on its detail, Closet goes back to the grid and shows a toast with
@@ -16,8 +16,11 @@ import SwiftUI
 struct ClosetScreen: View {
     @Environment(\.services) private var services
     @State private var model = ClosetModel()
-    @State private var path: [ClosetDestination] = []
+    /// Kept by the root view, so another tab can open Suitcases or Laundry here (Phase 13).
+    @Binding var path: [ClosetDestination]
     @State private var toast: NookToastMessage?
+    /// Bumped after Undo on a deleted suitcase, so Suitcases reads its list again.
+    @State private var suitcaseChanges = 0
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -75,10 +78,19 @@ struct ClosetScreen: View {
         case .recentlyDeleted:
             RecentlyDeletedScreen()
         case .styleMe(let id, _):
-            StyleMeScreen(
-                startingPieceID: id,
-                routes: StyleMeRoutes(
-                    addPiece: { path.append(.addPiece(.photo)) }, openSuitcases: { path.append(.suitcases) }))
+            StyleMeScreen(startingPieceID: id, routes: styleMeRoutes)
+        case .styleMeFrom(let source):
+            StyleMeScreen(source: source, routes: styleMeRoutes)
+        case .suitcases:
+            SuitcasesScreen(open: { path.append($0) }, changes: suitcaseChanges)
+        case .allSuitcases:
+            AllSuitcasesScreen(open: { path.append($0) })
+        case .suitcase(let id, let name, let startsPacking):
+            SuitcaseDetailScreen(
+                suitcaseID: id, name: name, startsPacking: startsPacking, open: { path.append($0) }, back: goBack,
+                deleted: suitcaseDeleted)
+        case .laundry:
+            LaundryScreen(open: { path.append($0) })
         case .addPiece(let start):
             GarmentEditorScreen(
                 target: .newPiece, firstStep: start == .words ? .words : .choose, resumesDraft: start == .resume,
@@ -96,6 +108,32 @@ struct ClosetScreen: View {
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    private var styleMeRoutes: StyleMeRoutes {
+        StyleMeRoutes(
+            addPiece: { path.append(.addPiece(.photo)) },
+            openSuitcases: { path.append(.suitcases) },
+            openSuitcase: { id, name in path.append(.suitcase(id, name: name)) })
+    }
+
+    /// Delete suitcase: back to where she came from, with Undo, which puts back the same
+    /// suitcase and the source it was.
+    private func suitcaseDeleted(_ change: SuitcaseChange) {
+        if case .suitcase(let id, _, _) = path.last, id == change.suitcase.id {
+            path.removeLast()
+        }
+        guard let services else { return }
+        toast = NookToastMessage(
+            change.message, systemImage: "checkmark",
+            actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
+        ) {
+            Task {
+                try? await change.undo(in: services)
+                suitcaseChanges += 1
+                await model.load(from: services)
+            }
+        }
     }
 
     private func discardDraft() {

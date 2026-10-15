@@ -42,9 +42,11 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 
 **LookDraft** (Personal, Phase 11). A look she started in Make your own look and hasn't saved: her name for it so far, the source, the pieces, the starting piece, when it was written. One at a time, in `LookDraftStore`. See `docs/swap-and-editor.md`.
 
-**Suitcase** (Personal). Name, icon (which drawing stands for it in the hall), the set of garment IDs it holds (it never copies a garment), `lastUsedAt`, archived, created. Favourites come from `lastUsedAt`.
+**Suitcase** (Personal). Name, icon (which drawing stands for it in the hall), the set of garment IDs it holds (it never copies a garment), `lastUsedAt`, archived, created. Favourites come from `lastUsedAt`. A piece she no longer has keeps its link, but screens only show and count pieces in her closet (`SourceChoice.pieces`, Phase 13).
 
 **Profile**. The sign name (Personal, may be empty), Preferences (Personal), usual fit, liked and avoided colours, and three Sensitive groups: body measurements (all optional, each with its unit), "pieces that fit you well" (LR-13), and the try-on photo. The doc comment on each field names its tier.
+
+**RememberedChoices** (Personal, Phase 13), `Profile.remembered`: the source and occasion she chose last, which Style Me starts from and Home's suitcase and calendar show (FR-67). See `docs/suitcases-and-laundry.md`.
 
 **Preferences**: piece mode (Mine + one idea by default, or Only mine), repeat window (1 week by default, 2 weeks, I don't mind), Track laundry (off by default). These are Lily's defaults from the amendment (LR-03, LR-10, RD-11).
 
@@ -70,6 +72,8 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `ResultCheck` | Checks a result before it's shown: Simple present, 2 to 6 pieces, only eligible pieces, ideas only in Something new and only when allowed, at most one, the starting piece in every version, every version shares a piece with Simple, "Same as Simple" marks right | PRD §8, LR-05a, LR-05b |
 | `SuitcaseShelf` | Three favourites by most recent use, See all only above three, archived only under their filter | RD-09, LR-17 |
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
+| `LaundryBasket` | What's in the wash (pieces in her closet only), in the whole closet or one suitcase, and which pieces Mark clean and its Undo may change | PRD §7.3, FR-65 |
+| `SourceChoice` | The source to show: the remembered one, or the main closet once its suitcase is deleted or archived; and the pieces of her closet in a source | FR-67, PRD §7.7, LR-16.1 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
 | `StyleRequestBuilder` | Checks a Style Me draft before it's sent: an empty closet or suitcase, a missing suitcase, too few usable pieces (stops it), a small suitcase (warns), a starting piece that can't be used, Other's words, a required colour nothing usable has (warns). Builds the request | RD-02, FR-67, PRD §8.1, §8.3 |
 | `LookFilter` | Saved Looks' piece chips, colour swatches and typed search. A chip and a swatch match one piece together ("black bottoms"); every typed word must match the look's name, a piece's name, or the screen's words for the occasion, kinds and colours | RD-08, LR-09 |
@@ -102,8 +106,9 @@ protocol ClosetStore: Sendable {
 }
 
 protocol LookStore: Sendable { looks, look, save, update, delete, recordWear, removeWear }
-protocol SuitcaseStore: Sendable { suitcases, suitcase, create(name:icon:at:), update, add, remove, markUsed, delete }
+protocol SuitcaseStore: Sendable { suitcases, suitcase, create(name:icon:at:), update, add, remove, markUsed, delete, restore }
 protocol ProfileStore: Sendable { profile, save }   // save checks the sign name, measurements and fit pieces
+// ProfileStore.change { } reads, changes and saves, for one setting at a time (Phase 13)
 
 protocol Stylist: Sendable {
     func style(_ context: StylingContext) async throws(StylistError) -> StyleOutcome
@@ -137,7 +142,7 @@ A store returns everything it holds and leaves filtering to the rules: Closet sh
 
 ## Fixtures
 
-Pick a set with `-fixtures <set>`, and optionally options after colons: a behaviour (`-fixtures demo:offline`), `weather=<state>` and `laundry=<state>` (`-fixtures demo:weather=night:laundry=full`). The README lists every value. Unknown values fall back to `demo`, `normal` and the set's own weather and laundry.
+Pick a set with `-fixtures <set>`, and optionally options after colons: a behaviour (`-fixtures demo:offline`), `weather=<state>` and `laundry=<state>` (`-fixtures demo:weather=night:laundry=full`), and `source=suitcase` for a remembered suitcase source (Phase 13). The README lists every value. Unknown values fall back to `demo`, `normal` and the set's own weather and laundry.
 
 | Set | Contents |
 |---|---|
@@ -184,4 +189,4 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 1. **No body measurements in the demo profile.** The repo is public and DATA_MAP.md asks fixtures to stay synthetic, so Lily's real height isn't in it. Tests use made-up values.
 2. **Comfort and fit share three words.** Today's Comfort (fitted, comfortable, relaxed) maps one to one onto a garment's cut (fitted, regular, relaxed). It's a word match, not a fit rule.
 3. **A mock outfit needs shoes plus a dress, or a top and a bottom.** So the demo Gym suitcase (a tee and sneakers) comes back insufficient, missing a bottom. The real stylist will decide this for itself.
-4. **Suitcase icon** is a fixed set of five drawings (rolling, duffel, weekender, backpack, tote). The art comes in Phase 13.
+4. **Suitcase icon** is a fixed set of five drawings (rolling, duffel, weekender, backpack, tote). Phase 13 drew them; see `docs/suitcases-and-laundry.md`.

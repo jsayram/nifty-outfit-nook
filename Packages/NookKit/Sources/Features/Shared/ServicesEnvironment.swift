@@ -21,3 +21,19 @@ struct OpenInSavedLooksAction: Sendable {
 extension EnvironmentValues {
     @Entry var openInSavedLooks = OpenInSavedLooksAction { _ in }
 }
+
+/// Opens Closet from another tab with screens pushed on it (Phase 13): Home's suitcase opens
+/// Suitcases and its hamper opens Laundry there, since both live in Closet (RD-13), and the
+/// mockups' Suitcases and Laundry go back to Closet. The root view sets it; elsewhere it does
+/// nothing.
+struct OpenInClosetAction: Sendable {
+    let open: @MainActor @Sendable ([ClosetDestination]) -> Void
+
+    @MainActor func callAsFunction(_ path: [ClosetDestination]) {
+        open(path)
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var openInCloset = OpenInClosetAction { _ in }
+}

@@ -18,7 +18,6 @@ final class HomeTests: XCTestCase {
         let pushed = [
             ("home.laptop", "Style Me"),
             ("home.occasion", "Style Me"),
-            ("home.suitcase", "Suitcases"),
             ("home.helpDrawer", "Help"),
             ("home.feedbackDrawer", "Send feedback"),
             ("home.privacyDrawer", "Privacy and terms"),
@@ -42,6 +41,16 @@ final class HomeTests: XCTestCase {
 
         // The wardrobe and the shelf switch tabs.
         let tabBar = app.tabBars.firstMatch
+
+        // The suitcase opens Suitcases on the Closet tab, where Suitcases lives (Phase 13).
+        let suitcase = app.buttons["home.suitcase"]
+        reveal(suitcase, in: app)
+        suitcase.tap()
+        XCTAssertTrue(app.navigationBars["Suitcases"].waitForExistence(timeout: Self.wait), "No Suitcases")
+        XCTAssertTrue(tabBar.buttons["Closet"].isSelected)
+        tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
+
         for (identifier, tab) in [("home.wardrobe", "Closet"), ("home.savedLooks", "Saved Looks")] {
             let control = app.buttons[identifier]
             reveal(control, in: app)

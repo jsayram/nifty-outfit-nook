@@ -60,9 +60,10 @@ Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
 - `draft=` with `add`, `edit` or `look`, to start with an unsaved Add a piece, Edit or Make your own look draft, as if the app had been closed mid-way;
-- `photos=samples`, to add eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`).
+- `photos=samples`, to add eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`);
+- `source=suitcase`, to start with her most recently used suitcase as Style Me's remembered source, on Home's suitcase and in Suitcases (Phase 13, `docs/suitcases-and-laundry.md`).
 
-For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, and no draft.
+For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, no draft and the main closet.
 
 The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
@@ -106,6 +107,7 @@ docs/your-looks.md           Your looks: one outfit in three versions, the Saved
 docs/swap-and-editor.md      Swap a piece (ranking, See all, Remove and Undo) and Make your own look with its draft.
 docs/saved-looks.md          Saved Looks: the grid, search and filters, look detail, and the Home shelf frames.
 docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and how pictures link to their looks.
+docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
 website/                     The app's static website.
 ```
 

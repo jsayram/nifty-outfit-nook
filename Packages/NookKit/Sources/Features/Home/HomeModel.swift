@@ -1,7 +1,9 @@
 import Models
 import Observation
 
-/// Loads what the room shows from the stores and the weather service.
+/// Loads what the room shows from the stores and the weather service: the sign, the source she
+/// chose last on the suitcase, her last occasion on the calendar (Phase 13), the hamper, the
+/// shelf frames and the window.
 ///
 /// The room itself never waits: the furniture works at once, and the sign, the piece count,
 /// the hamper and the window fill in when the services answer. If a store fails, the room
@@ -21,10 +23,6 @@ final class HomeModel {
     /// Pieces in her closet marked as in the wash, counted even while tracking is off, since
     /// the marks are kept (RD-11). The laundry sheet mentions them.
     private(set) var keptDirtyCount = 0
-
-    /// The source on the suitcase. Hook: the remembered source arrives with the source picker
-    /// (Phase 13, FR-67). Until then Home shows the main closet.
-    var source: WardrobeSource = .mainCloset
 
     func load(from services: NookServices?) async {
         guard let services else {
@@ -53,23 +51,16 @@ final class HomeModel {
             failed = true
         }
 
-        var plate = SourcePlate()
-        switch source {
-        case .mainCloset:
-            plate.pieceCount = garments.map { $0.count(where: \.isInCloset) }
-        case .suitcase(let id):
-            do {
-                let suitcase = try await services.suitcases.suitcase(id)
-                plate.kind = .suitcase(name: suitcase.name)
-                if let garments {
-                    plate.pieceCount = garments.count { $0.isInCloset && suitcase.contains($0.id) }
-                }
-            } catch {
-                // A missing suitcase falls back to the main closet (PRD §7.7); the picker
-                // phase decides how to tell her.
-                failed = true
-            }
+        let suitcases: [Suitcase]?
+        do {
+            suitcases = try await services.suitcases.suitcases()
+        } catch {
+            suitcases = nil
+            failed = true
         }
+        content.source = Self.sourcePlate(
+            remembered: profile?.remembered.source ?? .mainCloset, garments: garments, suitcases: suitcases)
+        content.occasion = profile?.remembered.occasion
 
         do {
             let looks = try await services.looks.looks()
@@ -79,7 +70,6 @@ final class HomeModel {
         }
 
         content.signName = profile?.signName ?? (failed ? "" : nil)
-        content.source = plate
         if let garments, let profile {
             content.hamper = HamperState(garments: garments, tracksLaundry: profile.preferences.tracksLaundry)
         } else {
@@ -103,6 +93,19 @@ final class HomeModel {
         }
         await load(from: services)
         return true
+    }
+
+    /// The suitcase's plates for the source she chose last (FR-67, RD-01.3). A suitcase that's
+    /// been deleted or archived shows the main closet instead (PRD §7.7); Style Me then asks her
+    /// to choose. Pieces she no longer has don't count (LR-16.1). Without the suitcases, the
+    /// main closet shows with its count.
+    static func sourcePlate(remembered: WardrobeSource, garments: [Garment]?, suitcases: [Suitcase]?) -> SourcePlate {
+        let source = suitcases.map { SourceChoice.shown(remembered, among: $0) } ?? .mainCloset
+        let count = garments.map { SourceChoice.pieces(in: source, garments: $0, suitcases: suitcases ?? []).count }
+        guard let id = source.suitcaseID, let suitcase = suitcases?.first(where: { $0.id == id }) else {
+            return SourcePlate(kind: .mainCloset, pieceCount: count)
+        }
+        return SourcePlate(kind: .suitcase(name: suitcase.name, icon: suitcase.icon), pieceCount: count)
     }
 
     /// Her three most recently saved looks for the shelf frames, newest first (Phase 12a).

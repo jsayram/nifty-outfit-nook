@@ -16,6 +16,7 @@ public enum FixtureServices {
             laundry: configuration.laundry,
             draft: configuration.draft,
             photos: configuration.photos,
+            source: configuration.source,
             now: now,
             calendar: calendar
         )
@@ -24,7 +25,8 @@ public enum FixtureServices {
     /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
     /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
     /// `draft` puts an unsaved Add a piece, Edit or Make your own look draft in its store. `photos` adds the
-    /// sample photo pieces and the provider that draws their pictures.
+    /// sample photo pieces and the provider that draws their pictures. `source` sets the
+    /// remembered source.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
@@ -32,6 +34,7 @@ public enum FixtureServices {
         laundry: FixtureLaundryState? = nil,
         draft: FixtureDraftState? = nil,
         photos: FixturePhotoState = .drawn,
+        source: FixtureSourceState? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -41,6 +44,9 @@ public enum FixtureServices {
         }
         if let laundry {
             data = data.applying(laundry: laundry)
+        }
+        if let source {
+            data = data.applying(source: source)
         }
         // `unavailable` has no snapshot: the provider throws instead, so any snapshot will do.
         let snapshot = weather.flatMap { FixtureWeather.snapshot($0, at: now) } ?? data.weather

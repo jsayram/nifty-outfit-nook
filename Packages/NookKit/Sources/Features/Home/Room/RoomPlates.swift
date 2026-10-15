@@ -192,7 +192,7 @@ struct DrawerPlate: View {
     }
 }
 
-/// "Occasion" on the calendar's flat face (`.cal`). Words on drawn surfaces keep dark ink in
+/// "Occasion" and her last occasion on the calendar's flat face (`.cal`). Words on drawn surfaces keep dark ink in
 /// dark mode, because the art is dimmed, not inverted.
 struct OccasionLabel: View {
     let occasion: Occasion?
@@ -206,9 +206,15 @@ struct OccasionLabel: View {
                     .nookTextStyle(.chip)
                     .fontWeight(.bold)
             }
-            // The chosen occasion appears here once Style Me remembers one (Phase 10a).
-            Image(systemName: "chevron.down")
-                .font(.caption2.weight(.bold))
+            // Her last occasion (Phase 13), or a chevron until the profile has loaded.
+            HStack(spacing: 2) {
+                if let occasion {
+                    Text(occasion.title)
+                        .nookTextStyle(.chip)
+                }
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.bold))
+            }
         }
         .foregroundStyle(.nook.signText)
         .lineLimit(1)

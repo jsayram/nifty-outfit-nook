@@ -227,7 +227,9 @@ struct RoomCanvas: View {
     private var suitcase: some View {
         control(.suitcase) {
             ZStack(alignment: .topLeading) {
-                art(.suitcase, at: RoomStage.suitcaseArt)
+                // The room's own suitcase for the main closet; the chosen suitcase's drawing for a
+                // suitcase (Phase 13). Every drawing keeps its face where the plates sit.
+                art(content.source.icon?.art ?? .suitcase, at: RoomStage.suitcaseArt)
                 SourceNamePlate(source: content.source).roomFrame(layout.rect(RoomStage.sourcePlate))
                 ScopePlate(source: content.source).roomFrame(layout.rect(RoomStage.scopePlate))
             }

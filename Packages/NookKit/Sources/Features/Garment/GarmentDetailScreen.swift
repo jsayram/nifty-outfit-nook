@@ -5,8 +5,7 @@ import SwiftUI
 /// Garment detail (Phase 7a): one piece, its facts, and what she can do with it.
 ///
 /// Edit opens Edit piece (7b). Style with this asks whether to Style Me with it (10a) or make her
-/// own look (11). Each suitcase name opens that suitcase
-/// (a stand-in until 13). Remove from closet asks first, then hands the removal back to Closet,
+/// own look (11). Each suitcase name opens that suitcase, and Add to a suitcase packs it (13). Remove from closet asks first, then hands the removal back to Closet,
 /// which goes back to the grid and offers Undo (LR-16.1).
 struct GarmentDetailScreen: View {
     let garmentID: Garment.ID
@@ -23,6 +22,7 @@ struct GarmentDetailScreen: View {
     @State private var showsStyleChoice = false
     @State private var pendingStyleChoice: StyleWithThisChoice?
     @State private var showsRemove = false
+    @State private var showsSuitcases = false
     @State private var pendingRemoval: GarmentRemoval?
     @State private var toast: NookToastMessage?
 
@@ -52,6 +52,7 @@ struct GarmentDetailScreen: View {
                 openSuitcase: { open(.suitcase($0.id, name: $0.name)) },
                 styleWithThis: { showsStyleChoice = true },
                 toggleLaundry: toggleLaundry,
+                addToSuitcase: { showsSuitcases = true },
                 remove: { showsRemove = true }
             )
         )
@@ -87,6 +88,19 @@ struct GarmentDetailScreen: View {
             StyleWithThisChoices { choice in
                 pendingStyleChoice = choice
                 showsStyleChoice = false
+            }
+        }
+        .nookSheet(
+            isPresented: $showsSuitcases,
+            title: String(
+                localized: "Add to a suitcase", bundle: .module, comment: "Button on garment detail (Phase 13)"),
+            subtitle: String(
+                localized: "The piece stays in your closet. A suitcase only lists it, no copy is made.",
+                bundle: .module, comment: "Under the Add to a suitcase sheet's title")
+        ) {
+            AddToSuitcaseSheet(model: model, toggle: toggleSuitcase) {
+                showsSuitcases = false
+                open(.suitcases)
             }
         }
         .nookSheet(
@@ -143,6 +157,18 @@ struct GarmentDetailScreen: View {
                     Task { try? await model.setLaundry(previous, in: closet) }
                 }
             } catch {
+                toast = Self.failureToast
+            }
+        }
+    }
+
+    /// Packs it in a suitcase or takes it out, from Add to a suitcase (Phase 13).
+    private func toggleSuitcase(_ suitcase: Suitcase) {
+        Task {
+            do {
+                try await model.toggleSuitcase(suitcase.id, in: services)
+            } catch {
+                showsSuitcases = false
                 toast = Self.failureToast
             }
         }

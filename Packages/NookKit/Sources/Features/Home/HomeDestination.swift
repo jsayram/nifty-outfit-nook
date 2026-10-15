@@ -1,16 +1,14 @@
 import Models
 
 /// A screen Home opens by pushing it. Closet and Saved Looks are tabs, so the wardrobe and the
-/// shelf switch tabs instead (see `RoomControl.route(for:)`).
+/// shelf switch tabs instead, and the suitcase and the hamper open Suitcases and Laundry on the
+/// Closet tab (see `RoomControl.route(hamper:)`).
 nonisolated enum HomeDestination: Hashable, Sendable {
     /// The Style Me request (RD-02). `choosingOccasion` comes from the calendar, which opens it
     /// on the Occasion sheet.
     case styleMe(choosingOccasion: Bool)
     /// Add a piece, from Style Me when the closet is empty (Phase 10a).
     case addPiece
-    case suitcases
-    /// Laundry, when tracking is on (RD-11).
-    case laundry
     case help
     case feedback
     case privacy
@@ -21,8 +19,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         switch self {
         case .styleMe: String(localized: "Style Me", bundle: .module, comment: "Screen title")
         case .addPiece: String(localized: "Add a piece", bundle: .module, comment: "Screen title")
-        case .suitcases: String(localized: "Suitcases", bundle: .module, comment: "Screen title")
-        case .laundry: String(localized: "Laundry", bundle: .module, comment: "Screen title")
         case .help: String(localized: "Help", bundle: .module, comment: "Screen title")
         case .feedback: String(localized: "Send feedback", bundle: .module, comment: "Screen title")
         case .privacy: String(localized: "Privacy and terms", bundle: .module, comment: "Screen title")
@@ -35,8 +31,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         switch self {
         case .styleMe: "sparkles"
         case .addPiece: "camera"
-        case .suitcases: "suitcase.rolling"
-        case .laundry: "basket"
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
         case .privacy: "hand.raised"
@@ -49,8 +43,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         switch self {
         case .styleMe: "styleMe"
         case .addPiece: "addPiece"
-        case .suitcases: "suitcases"
-        case .laundry: "laundry"
         case .help: "help"
         case .feedback: "feedback"
         case .privacy: "privacy"
@@ -86,6 +78,9 @@ nonisolated enum HomeSheet: String, Identifiable, Hashable, Sendable {
 /// Where tapping something in the room goes.
 nonisolated enum HomeRoute: Hashable, Sendable {
     case tab(AppTab)
+    /// The Closet tab with this screen open on it: Suitcases from the suitcase, Laundry from the
+    /// hamper (Phase 13).
+    case closet(ClosetDestination)
     case push(HomeDestination)
     case sheet(HomeSheet)
 }

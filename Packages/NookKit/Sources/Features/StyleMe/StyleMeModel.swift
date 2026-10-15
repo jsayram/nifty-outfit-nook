@@ -27,10 +27,18 @@ final class StyleMeModel {
     private(set) var usualFit: Comfort?
     /// True once the draft has been set up from her preferences, so a reload keeps her choices.
     private var hasDraft = false
+    /// The source the opening screen asked for, such as a suitcase's "Style me from this
+    /// suitcase" (Phase 13). `nil` starts from the source she chose last.
+    private let requestedSource: WardrobeSource?
 
-    /// - Parameter startingPieceID: from a garment's "Style with this" (amendment, decision 2).
-    init(startingPieceID: Garment.ID? = nil) {
-        draft = StyleRequestDraft(preferences: Preferences(), startingPieceID: startingPieceID)
+    /// - Parameters:
+    ///   - startingPieceID: from a garment's "Style with this" (amendment, decision 2).
+    ///   - source: from a suitcase's "Style me from this suitcase". Without it, Style Me starts
+    ///     from the source she chose last (FR-67).
+    init(startingPieceID: Garment.ID? = nil, source: WardrobeSource? = nil) {
+        requestedSource = source
+        draft = StyleRequestDraft(
+            preferences: Preferences(), source: source ?? .mainCloset, startingPieceID: startingPieceID)
     }
 
     // MARK: Loading
@@ -63,9 +71,12 @@ final class StyleMeModel {
             garments: garments, suitcases: suitcases, preferences: profile.preferences, now: now)
         usualFit = profile.usualFit
         if !hasDraft {
+            // The source and occasion she chose last (FR-67, Phase 13). A remembered suitcase that
+            // has gone stays as it is, so the screen asks her to choose instead of quietly
+            // styling from everything (PRD §7.7).
             draft = StyleRequestDraft(
-                preferences: profile.preferences, source: draft.source, occasion: draft.occasion,
-                startingPieceID: draft.startingPieceID)
+                preferences: profile.preferences, source: requestedSource ?? profile.remembered.source,
+                occasion: profile.remembered.occasion, startingPieceID: draft.startingPieceID)
             hasDraft = true
         }
         recheck()
@@ -96,6 +107,25 @@ final class StyleMeModel {
     /// never loses a choice without seeing why.
     func choose(source: WardrobeSource) {
         update { $0.source = source }
+    }
+
+    /// Remembers the source and occasion for next time, as she chose them here (FR-67): Home's
+    /// suitcase and calendar show them, and the next Style Me starts from them. A suitcase she
+    /// chooses counts as used, so it moves into her favourites (RD-09.2). Other isn't
+    /// remembered, since its words are for this request only. Nothing is saved for a suitcase
+    /// that has gone. A store that can't save just means nothing is remembered.
+    func remember(in services: NookServices?, now: Date = .now) async {
+        guard let services, let builder else { return }
+        let source = draft.source
+        let sourceIsThere = SourceChoice.isAvailable(source, among: builder.suitcases)
+        let occasion = draft.occasion
+        _ = try? await services.profile.change { profile in
+            if sourceIsThere { profile.remembered.source = source }
+            if occasion != .other { profile.remembered.occasion = occasion }
+        }
+        if sourceIsThere, let id = source.suitcaseID {
+            try? await services.suitcases.markUsed(id, at: now)
+        }
     }
 
     private func recheck() {

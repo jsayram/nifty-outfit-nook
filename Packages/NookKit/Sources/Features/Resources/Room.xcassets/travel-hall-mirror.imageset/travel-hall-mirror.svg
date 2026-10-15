@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 78" width="64" height="78" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <linearGradient id="tm-glass" x1="0" y1="23" x2="0" y2="69" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EFEBE7" />
+      <stop offset="1" stop-color="#DED5CD" />
+    </linearGradient>
+    <clipPath id="tm-clip">
+      <circle cx="32" cy="46" r="23" />
+    </clipPath>
+  </defs>
+  <path d="M32 4.6L21 22M32 4.6L43 22" stroke="#AE9A89" stroke-width="3" />
+  <path d="M32 4.6L21 22M32 4.6L43 22" stroke="#E3D3C6" stroke-width="1.6" />
+  <circle cx="32" cy="4.2" r="2.6" fill="#D5C0A0" stroke="#A48D6D" stroke-width="1.1" />
+  <circle cx="32" cy="46" r="30" fill="#DCD3CA" stroke="#AC9988" stroke-width="1.5" />
+  <path d="M52.6 67.6A28 28 0 0 1 10.4 64.6" stroke="#C4B5A7" stroke-width="2.6" />
+  <path d="M6.6 38A27 27 0 0 1 40 20.2" stroke="#EDE7E1" stroke-width="1.5" />
+  <circle cx="32" cy="46" r="26.4" stroke="#C4B5A7" stroke-width=".7" opacity=".9" />
+  <circle cx="32" cy="46" r="23" fill="url(#tm-glass)" />
+  <g clip-path="url(#tm-clip)">
+    <path d="M14 58L44 24L50 28L20 62Z" fill="#FFFFFF" opacity=".5" />
+    <path d="M24 66L54 32L56 35L27 68Z" fill="#FFFFFF" opacity=".4" />
+  </g>
+  <circle cx="32" cy="46" r="23" stroke="#AC9988" stroke-width="1.3" />
+  <circle cx="21.4" cy="21.6" r="2.2" fill="#E3D3C6" stroke="#AE9A89" stroke-width="1" />
+  <circle cx="42.6" cy="21.6" r="2.2" fill="#E3D3C6" stroke="#AE9A89" stroke-width="1" />
+</svg>
