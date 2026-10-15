@@ -108,4 +108,10 @@ public actor InMemoryClosetStore: ClosetStore {
             }
         }
     }
+
+    /// Delete my data: every piece, Recently deleted included.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        garmentsByID = [:]
+    }
 }

@@ -31,4 +31,10 @@ public actor InMemoryProfileStore: ProfileStore {
         guard problems.isEmpty else { throw .invalidMeasurements(problems) }
         stored = profile
     }
+
+    /// Delete my data: a fresh profile, as on a new install.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        stored = Profile()
+    }
 }

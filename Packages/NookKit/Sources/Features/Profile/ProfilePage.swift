@@ -8,17 +8,17 @@ struct ProfileActions {
     var editName: () -> Void = {}
     var open: (ProfileDestination) -> Void = { _ in }
     var openSheet: (ProfileSheet) -> Void = { _ in }
+    var setTracksLaundry: @MainActor @Sendable (Bool) -> Void = { _ in }
 }
 
 /// Profile, top to bottom (`settings.html`, Phase 14a): the wall with her name sign, then three
 /// groups of rows on the floor.
 ///
 /// 1. Name on your sign, Fit and measurements, Your try-on photo.
-/// 2. Style Me: Preferences, Avoid repeating outfits for, Track laundry.
-/// 3. Help and privacy: Accessibility, App tours, Help, Send feedback, Privacy and terms, Delete
-///    my data.
+/// 2. Style Me: Preferences, Avoid repeating outfits for, and the Track laundry switch (14b).
+/// 3. Help and privacy: Accessibility, Help, Send feedback, Privacy and terms, Delete my data
+///    (14b). App tours joins them in Phase 16b.
 ///
-/// Track laundry and the third group are stand-ins until Phase 14b (and 16a for App tours).
 /// Separate from `ProfileScreen` so snapshot tests can draw it from a model.
 struct ProfilePage: View {
     let model: ProfileModel
@@ -113,22 +113,21 @@ struct ProfilePage: View {
             ) {
                 actions.openSheet(.repeatWindow)
             }
-            row(
-                ProfileText.laundryRow,
-                value: model.profile.preferences.tracksLaundry ? ProfileText.on : ProfileText.off,
-                systemImage: "washer", identifier: "profile.laundry"
-            ) {
-                actions.open(.trackLaundry)
-            }
+            SettingsSwitchRow(
+                title: ProfileText.laundryRow,
+                detail: ProfileText.laundryDetail(
+                    isOn: model.profile.preferences.tracksLaundry, kept: model.keptDirtyCount),
+                systemImage: "washer", isOn: model.profile.preferences.tracksLaundry,
+                identifier: "profile.laundry", set: actions.setTracksLaundry)
         }
     }
 
     private var help: some View {
         group(ProfileText.helpSection) {
-            ForEach(ProfileDestination.later, id: \.self) { destination in
+            ForEach(ProfileDestination.helpAndPrivacy, id: \.self) { destination in
                 row(
-                    destination.title, subtitle: destination == .tours ? ProfileText.toursRowDetail : nil,
-                    systemImage: destination.systemImage, identifier: "profile.\(destination.identifier)"
+                    destination.title, systemImage: destination.systemImage,
+                    identifier: "profile.\(destination.identifier)"
                 ) {
                     actions.open(destination)
                 }

@@ -32,4 +32,10 @@ public actor InMemoryTryOnPictureStore: TryOnPictureStore {
         try await options.begin()
         guard picturesByID.removeValue(forKey: id) != nil else { throw .notFound }
     }
+
+    /// Delete my data: every picture.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        picturesByID = [:]
+    }
 }

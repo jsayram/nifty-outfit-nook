@@ -15,6 +15,8 @@ struct HomeScreen: View {
     let openTab: (AppTab) -> Void
     /// Opens a saved look on Saved Looks, from its frame under the shelf (Phase 12a).
     var openLook: (Look.ID) -> Void = { _ in }
+    /// Said once in a toast when Home opens, after Delete my data (Phase 14b).
+    var notice: String?
 
     @Environment(\.services) private var services
     @Environment(\.openInCloset) private var openInCloset
@@ -22,6 +24,7 @@ struct HomeScreen: View {
     @State private var path: [HomeDestination] = []
     @State private var sheet: HomeSheet?
     @State private var toast: NookToastMessage?
+    @State private var noticeShown = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -70,7 +73,10 @@ struct HomeScreen: View {
                         // A new name shows on the sign as soon as Profile closes: Home reloads
                         // when its path gets shorter (RD-03.1).
                         ProfileScreen()
-                    default: HomeStubScreen(destination: destination)
+                    // The desk drawers (RD-10, Phase 14b). The same screens open from Profile.
+                    case .help: HelpScreen()
+                    case .feedback: FeedbackScreen()
+                    case .privacy: PrivacyScreen()
                     }
                 }
                 .nookSheet(item: $sheet, title: { $0.title }, subtitle: { $0.subtitle }) { sheet in
@@ -88,7 +94,13 @@ struct HomeScreen: View {
         }
         // Each time the tab appears, so a change made on another tab shows: a new source, pieces
         // marked clean in Laundry (Phase 13).
-        .task { await model.load(from: services) }
+        .task {
+            await model.load(from: services)
+            if let notice, !noticeShown {
+                noticeShown = true
+                toast = NookToastMessage(notice, systemImage: "checkmark")
+            }
+        }
         .onChange(of: path) { old, new in
             // Back from a pushed screen: Style Me may have changed the source or the occasion.
             if new.count < old.count { Task { await model.load(from: services) } }

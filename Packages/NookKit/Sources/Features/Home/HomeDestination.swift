@@ -26,18 +26,6 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         }
     }
 
-    /// The SF Symbol on the screen's placeholder, matching the mockup icons.
-    var systemImage: String {
-        switch self {
-        case .styleMe: "sparkles"
-        case .addPiece: "camera"
-        case .help: "questionmark.circle"
-        case .feedback: "bubble.left"
-        case .privacy: "hand.raised"
-        case .profile: "person.crop.circle"
-        }
-    }
-
     /// A stable name for UI tests.
     var identifier: String {
         switch self {

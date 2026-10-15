@@ -96,7 +96,7 @@ Top to bottom, as `laundry.html`:
 
 Cleaning only changes pieces still in her closet and still in the wash; the rest are skipped (`LaundryBasket.cleanable`, FR-65). Undo only puts back pieces that are still clean, so a piece she marked dirty again in the meantime isn't touched.
 
-**Tracking off** shows "Laundry tracking is off", that every piece counts, how many marks are kept, and Turn on. Turning it on brings the kept marks back (RD-11.2). The switch itself belongs in Profile (14b); for now tracking turns on from the hamper's sheet and from Laundry, and stays on.
+**Tracking off** shows "Laundry tracking is off", that every piece counts, how many marks are kept, and Turn on. Turning it on brings the kept marks back (RD-11.2). Since 14b the switch is on Profile, where tracking also turns off, keeping every mark (`docs/settings.md`).
 
 **Nothing in the wash** says "Every piece here counts as available to Style Me."
 
@@ -149,6 +149,6 @@ Everything here is local, so offline doesn't apply.
 
 ## Left for later phases
 
-- **14b:** the Track laundry switch in Profile, including turning tracking off, and the source as a Settings default.
+- **14b (done):** the Track laundry switch in Profile, including turning tracking off. The source stays the remembered one from Style Me rather than a separate Settings default.
 - **15a:** iPad layouts (the hall beside the list).
 - **21a:** the remembered source and occasion kept across launches.

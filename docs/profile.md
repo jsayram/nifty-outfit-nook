@@ -28,10 +28,10 @@ Top to bottom, as `settings.html`:
 
 1. **The wall.** "Profile" in display type, her name sign in the middle (the Home drawing at 1.3 times, her name as live text) and a floor plant. The sign is a button that opens the name sheet. An empty name shows "Hello" (RD-03.2). At the accessibility sizes the plant goes; the row below carries the name at full size.
 2. **Name on your sign** (value: the name, or Hello), **Fit and measurements**, **Your try-on photo** (Added or Not added).
-3. **Style Me:** Preferences (Mine + one idea or Only mine), Avoid repeating outfits for (1 week, 2 weeks, I don't mind), Track laundry (On or Off).
-4. **Help and privacy:** Accessibility, App tours, Help, Send feedback, Privacy and terms, Delete my data.
+3. **Style Me:** Preferences (Mine + one idea or Only mine), Avoid repeating outfits for (1 week, 2 weeks, I don't mind), and the Track laundry switch.
+4. **Help and privacy:** Accessibility, Help, Send feedback, Privacy and terms, Delete my data.
 
-Track laundry and the whole third group open stand-ins until 14b (App tours until 16a). The Track laundry stand-in says where tracking can be turned on meanwhile.
+Since Phase 14b, Track laundry is a switch and the fourth group opens real screens (`docs/settings.md`). App tours comes back in 16b, with tours to replay.
 
 **Name on your sign.** One field, a small sign above it that shows what she types as she types, the note "Leave it empty and the sign says Hello", and Save. `NameRules.signName`: trimmed, one line, at most 20 characters. A problem shows under the field and Save is dimmed. Saving closes the sheet with "Your sign now says Lily."
 
@@ -111,13 +111,13 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 5. **Units follow the region until she picks.** The UK gets inches and pounds.
 6. **Height in inches has two boxes**, feet and inches, instead of the mockup's one box of inches.
 7. **The example try-on photo shows no person,** like 12b's pictures, though the README's exception allows a generic one here.
-8. **Rows stand in for 14b**, including Track laundry, which says where to turn tracking on meanwhile. Styling access, Closet and suitcases and Demo controls from the mockup aren't on Profile.
+8. **Rows stood in for 14b**, which built them (`docs/settings.md`). Styling access, Closet and suitcases and Demo controls from the mockup aren't on Profile.
 9. **A fitting piece's kind is required** and starts empty, as on Add a piece.
 
 ## Left for later phases
 
-- **14b:** Track laundry, Accessibility, Help, Send feedback, Privacy and terms, Delete my data, and the default wardrobe view.
-- **16a:** App tours.
+- **14b (done):** Track laundry, Accessibility, Help, Send feedback, Privacy and terms, Delete my data (`docs/settings.md`). The default wardrobe view stays with Style Me's remembered source (Phase 13).
+- **16b:** App tours.
 - **21a:** keeping the profile across launches, with Data Protection `complete`.
 - **22a, 33:** a real try-on photo through the system picker, its metadata stripped, then the image service behind its gate.
 - **34:** fit checks that use the pieces that fit her well (LR-12).

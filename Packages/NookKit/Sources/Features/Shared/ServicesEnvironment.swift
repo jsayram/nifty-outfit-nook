@@ -37,3 +37,20 @@ struct OpenInClosetAction: Sendable {
 extension EnvironmentValues {
     @Entry var openInCloset = OpenInClosetAction { _ in }
 }
+
+/// Starts the app fresh after Delete my data (Phase 14b): the root view builds every tab again
+/// and opens Home. The root view sets it; elsewhere it does nothing.
+struct DataDeletedAction: Sendable {
+    let action: @MainActor @Sendable () -> Void
+
+    @MainActor func callAsFunction() {
+        action()
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var dataDeleted = DataDeletedAction {}
+    /// The unsent Send feedback note, kept by the root view (Phase 14b). `nil` in previews and
+    /// snapshot tests, where each screen keeps its own.
+    @Entry var feedbackDraft: FeedbackModel?
+}

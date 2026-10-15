@@ -34,4 +34,10 @@ public actor InMemoryDraftStore: DraftStore {
         try await options.begin()
         draftsByTarget[target] = nil
     }
+
+    /// Delete my data: every unsaved add and edit.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        draftsByTarget = [:]
+    }
 }

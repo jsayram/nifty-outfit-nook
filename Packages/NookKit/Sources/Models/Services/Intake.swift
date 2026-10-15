@@ -11,7 +11,7 @@ import Foundation
 /// Stage A keeps drafts in memory only, like every other store, so they last until the app is
 /// closed. Phase 21a puts durable storage behind this protocol, with the same file protection
 /// as the rest of her closet (`docs/add-a-piece.md` explains why it waits).
-public protocol DraftStore: Sendable {
+public protocol DraftStore: ErasableStore {
     /// Every draft, most recently saved first.
     func drafts() async throws(StoreError) -> [GarmentDraft]
     func draft(for target: GarmentDraft.Target) async throws(StoreError) -> GarmentDraft?

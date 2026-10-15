@@ -75,4 +75,10 @@ public actor InMemoryLookStore: LookStore {
         }
         return look
     }
+
+    /// Delete my data: every look, saved or not.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        looksByID = [:]
+    }
 }

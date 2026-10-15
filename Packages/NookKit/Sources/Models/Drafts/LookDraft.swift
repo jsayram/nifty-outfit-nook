@@ -46,7 +46,7 @@ public struct LookDraft: Hashable, Sendable, Codable {
 /// Stage A keeps it in memory, like every other store, so it lasts until the app is closed. UI
 /// tests seed one at launch with `-fixtures demo:draft=look`. Phase 21a puts durable storage
 /// behind this protocol.
-public protocol LookDraftStore: Sendable {
+public protocol LookDraftStore: ErasableStore {
     func draft() async throws(StoreError) -> LookDraft?
     /// Replaces the draft.
     func save(_ draft: LookDraft) async throws(StoreError)

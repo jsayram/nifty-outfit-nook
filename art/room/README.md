@@ -21,6 +21,8 @@ Phase 13 added Suitcases and Laundry:
 - **Copied as they are** from the mockups: the entry hall behind the favourites (`travel-hall-door.svg`, `travel-hall-hooks.svg`, `travel-hall-peg.svg`, `travel-hall-mirror.svg`, `travel-hall-console.svg`, `travel-hall-runner.svg`) and Laundry's corner (`travel-laundry-shelf.svg`, `travel-washer.svg`, `plant-floor.svg`). The corner's hamper is Home's, so its states match the room. The camel trench the mockup hangs on the hooks comes from `js/garments.js` and isn't exported.
 - **The five suitcase pictures.** `source/suitcase-rolling.svg` is the mockups' `travel-suitcase-pink.svg` with nothing changed but its name. `suitcase-weekender.svg`, `suitcase-duffel.svg`, `suitcase-backpack.svg` and `suitcase-tote.svg` were drawn for this project in Phase 13, in the spinner's style: the same 104 x 182 box, line weights, contact shadow and luggage-tag strap, and the same plain face at y 30 to 124, where the hall's tags and Home's plates sit. They're drawn in mockup pastels (tan, sage, butter, blue) and the script warms them like everything else, so they come out oak, sage, butter and stone beside the sand rolling case.
 
+Phase 14b added the desk's drawers as a small chest, copied as they are: `acct-drawers-help.svg`, `acct-drawers-feedback.svg` and `acct-drawers-privacy.svg`, one with each drawer pulled open, for the headers of Help, Send feedback and Privacy and terms.
+
 `source/maya.svg` is Maya as the mockups draw her, from Jose's own illustration. It's heavy (about 1,300 small shapes of fur), but it's drawn once into the asset cache and only her z's move, so it stays as it is.
 
 ## How it gets into the app
