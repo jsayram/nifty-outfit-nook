@@ -67,6 +67,11 @@ nonisolated enum RoomArt: String, CaseIterable, Sendable {
     case washer = "travel-washer"
     case laundryShelf = "travel-laundry-shelf"
     case floorPlant = "plant-floor"
+    // The desk's three drawers as a small chest, with one drawer pulled open, on Help, Send
+    // feedback and Privacy and terms (Phase 14b). Each is 136 x 156, feet at y 148.
+    case drawersHelp = "acct-drawers-help"
+    case drawersFeedback = "acct-drawers-feedback"
+    case drawersPrivacy = "acct-drawers-privacy"
 }
 
 extension SuitcaseIcon {
