@@ -62,10 +62,17 @@ public struct NookRow: View {
                 icon
             }
             VStack(alignment: .leading, spacing: NookSpacing.xxSmall) {
-                // At the accessibility sizes the icon sits above the title, so the words get
-                // the whole width instead of breaking mid-word.
+                // At the accessibility sizes the icon sits above the title, with the chevron on
+                // its line, so the words get the whole width instead of breaking mid-word.
                 if stacked {
-                    icon.padding(.bottom, NookSpacing.xSmall)
+                    HStack(alignment: .center) {
+                        icon
+                        if chevronBesideIcon {
+                            Spacer(minLength: NookSpacing.small)
+                            chevron
+                        }
+                    }
+                    .padding(.bottom, NookSpacing.xSmall)
                 }
                 Text(title)
                     .nookTextStyle(.label)
@@ -85,11 +92,8 @@ public struct NookRow: View {
             if !stacked, let value {
                 valueText(value)
             }
-            if accessory == .chevron {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.nook.chevron)
-                    .accessibilityHidden(true)
+            if accessory == .chevron, !(stacked && chevronBesideIcon) {
+                chevron
             }
         }
         .padding(.horizontal, NookSpacing.medium)
@@ -97,6 +101,20 @@ public struct NookRow: View {
         .frame(minHeight: max(minHeight, NookSpacing.minimumTapTarget))
         .contentShape(NookRadius.shape(NookRadius.group))
         .accessibilityElement(children: .combine)
+    }
+
+    /// At the accessibility sizes a row with an icon puts its chevron beside the icon, above the
+    /// words, instead of in a column of its own (Phase 14a: "Fit and measurements" broke as
+    /// "measure-ments" at AX5).
+    private var chevronBesideIcon: Bool {
+        accessory == .chevron && systemImage != nil
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.right")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.nook.chevron)
+            .accessibilityHidden(true)
     }
 
     @ViewBuilder private var icon: some View {
