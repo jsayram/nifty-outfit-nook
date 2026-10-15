@@ -16,6 +16,7 @@ public enum NameRules {
     public static let garmentNameMaximum = 60
     public static let lookNameMaximum = 60
     public static let suitcaseNameMaximum = 40
+    public static let occasionNoteMaximum = 40
 
     /// Name on your sign (RD-03). Empty is allowed: the sign shows a neutral fallback.
     public static func signName(_ text: String) throws(NameProblem) -> String {
@@ -29,6 +30,12 @@ public enum NameRules {
     /// Looks are named when saved (LR-08).
     public static func lookName(_ text: String) throws(NameProblem) -> String {
         try checked(text, maximum: lookNameMaximum, allowsEmpty: false)
+    }
+
+    /// Her words for an Other occasion on Style Me ("museum visit"). Empty is allowed: the
+    /// occasion is then just Other.
+    public static func occasionNote(_ text: String) throws(NameProblem) -> String {
+        try checked(text, maximum: occasionNoteMaximum, allowsEmpty: true)
     }
 
     /// A suitcase name must be unique among her suitcases, ignoring case.
