@@ -2,10 +2,11 @@ import DesignSystem
 import Models
 import SwiftUI
 
-/// The bedroom: wall, floor, furniture and the plates, drawn at one size (`screens/home.html`).
+/// The bedroom: wall, floor, furniture and the plates (`screens/home.html`, and on iPad
+/// `ipad-home-portrait.html` and `home-wide.css`).
 ///
-/// Everything is placed from `RoomStage` through `layout`, so the art and the tap areas stay
-/// together at every phone size. The drawings are decorative; each control is one button with
+/// Everything is placed from the layout's `RoomPlan`, so the art and the tap areas stay
+/// together at every size and in every arrangement. The drawings are decorative; each control is one button with
 /// its own label and hint (RD-01.2).
 struct RoomCanvas: View {
     static let largestTextSize = DynamicTypeSize.xxxLarge
@@ -18,6 +19,9 @@ struct RoomCanvas: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.roomIsStillImage) private var isStillImage
+
+    /// Where everything sits: the phone's room, or the iPad's tall or wide room (Phase 15a).
+    private var plan: RoomPlan { layout.plan }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -34,6 +38,8 @@ struct RoomCanvas: View {
         // shows the banner and large rows instead (`HomeLayout`, `home-ax.html`, RD-01.5).
         .dynamicTypeSize(...Self.largestTextSize)
         .accessibilityElement(children: .contain)
+        // Which arrangement shows, for the UI tests: home.room.upright, .tall or .wide.
+        .accessibilityIdentifier("home.room.\(plan.kind.rawValue)")
     }
 
     // MARK: - Wall and floor
@@ -55,9 +61,9 @@ struct RoomCanvas: View {
     private var wall: some View {
         ZStack(alignment: .topLeading) {
             window
-            art(.shelfTop, at: RoomStage.shelfTop)
+            art(.shelfTop, at: plan.shelfTop)
             shelfFrames
-            art(.calendar, at: RoomStage.calendar)
+            art(.calendar, at: plan.calendar)
             wardrobe
             nameSign
         }
@@ -65,13 +71,13 @@ struct RoomCanvas: View {
 
     private var floor: some View {
         ZStack(alignment: .topLeading) {
-            art(.rug, at: RoomStage.rug)
+            art(.rug, at: plan.rug)
             LampGlow(isNight: content.window.lightsTheLamp)
-                .roomFrame(layout.rect(RoomStage.lampGlow))
-            art(.desk, at: RoomStage.desk)
-            art(.laptop, at: RoomStage.laptop)
-            art(.lamp, at: RoomStage.lamp)
-            art(.chair, at: RoomStage.chair)
+                .roomFrame(layout.rect(plan.lampGlow))
+            art(.desk, at: plan.desk)
+            art(.laptop, at: plan.laptop)
+            art(.lamp, at: plan.lamp)
+            art(.chair, at: plan.chair)
             maya
             suitcase
             hamper
@@ -94,7 +100,7 @@ struct RoomCanvas: View {
                 .transition(.opacity)
         }
         .animation(.easeInOut(duration: 0.4), value: window)
-        .roomFrame(layout.rect(RoomStage.window))
+        .roomFrame(layout.rect(plan.window))
         .allowsHitTesting(false)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(window.accessibilityLabel ?? "")
@@ -108,9 +114,9 @@ struct RoomCanvas: View {
     /// taps go through her to nothing.
     private var maya: some View {
         ZStack(alignment: .topLeading) {
-            art(.maya, at: RoomStage.maya)
-            SleepyZs(scale: layout.scale, animates: !reduceMotion && !isStillImage)
-                .roomFrame(layout.rect(RoomStage.mayaZs))
+            art(.maya, at: plan.maya)
+            SleepyZs(scale: layout.scale * plan.mayaScale, animates: !reduceMotion && !isStillImage)
+                .roomFrame(layout.rect(plan.mayaZs))
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -119,10 +125,10 @@ struct RoomCanvas: View {
     private var wardrobe: some View {
         control(.wardrobe) {
             ZStack(alignment: .topLeading) {
-                art(.wardrobe, at: RoomStage.wardrobe)
-                art(.wardrobeRail, at: RoomStage.wardrobeRail)
-                art(.flats, at: RoomStage.wardrobeFlats)
-                ClosetPlate().roomFrame(layout.rect(RoomStage.closetPlate))
+                art(.wardrobe, at: plan.wardrobe)
+                art(.wardrobeRail, at: plan.wardrobeRail)
+                art(.flats, at: plan.wardrobeFlats)
+                ClosetPlate().roomFrame(layout.rect(plan.closetPlate))
             }
         }
     }
@@ -130,9 +136,9 @@ struct RoomCanvas: View {
     private var nameSign: some View {
         control(.nameSign) {
             ZStack(alignment: .topLeading) {
-                art(.nameSign, at: RoomStage.sign)
+                art(.nameSign, at: plan.sign)
                 NameSignText(stored: content.signName)
-                    .roomFrame(layout.rect(RoomStage.signName))
+                    .roomFrame(layout.rect(plan.signName))
             }
         }
     }
@@ -142,11 +148,11 @@ struct RoomCanvas: View {
     /// does, and VoiceOver skips it, since the plate is already there.
     private var shelfFrames: some View {
         ZStack(alignment: .topLeading) {
-            art(.shelfFrames, at: RoomStage.shelfFrames)
+            art(.shelfFrames, at: plan.shelfFrames)
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture { open(.savedLooks) }
-                .roomFrame(layout.rect(RoomStage.framedLooks))
+                .roomFrame(layout.rect(plan.framedLooks))
                 .accessibilityHidden(true)
             ForEach(Array(content.framedLooks.prefix(FramedLook.frameCount).enumerated()), id: \.element.id) {
                 index, look in
@@ -157,8 +163,8 @@ struct RoomCanvas: View {
 
     private func framedLook(_ look: FramedLook, at index: Int) -> some View {
         ZStack(alignment: .topLeading) {
-            FramedLookArt(look: look, scale: layout.scale)
-                .roomFrame(layout.rect(RoomStage.frameWindows[index]))
+            FramedLookArt(look: look, scale: layout.scale * plan.shelfScale)
+                .roomFrame(layout.rect(plan.frameWindows[index]))
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
             Button {
@@ -167,7 +173,9 @@ struct RoomCanvas: View {
                 Color.clear.contentShape(Rectangle())
             }
             .buttonStyle(RoomControlButtonStyle())
-            .roomFrame(layout.rect(RoomStage.frameTargets[index]))
+            // A pointer on iPad shows what it's over (PRD §7.2).
+            .hoverEffect(.highlight)
+            .roomFrame(layout.rect(plan.frameTargets[index]))
             .accessibilityLabel(
                 Text(
                     "Saved look: \(look.name)", bundle: .module,
@@ -182,19 +190,19 @@ struct RoomCanvas: View {
 
     private var savedLooksPlate: some View {
         control(.savedLooks) {
-            SavedLooksPlate().roomFrame(layout.rect(RoomStage.savedPlate))
+            SavedLooksPlate().roomFrame(layout.rect(plan.savedPlate))
         }
     }
 
     private var occasion: some View {
         control(.occasion) {
-            OccasionLabel(occasion: content.occasion).roomFrame(layout.rect(RoomStage.occasion))
+            OccasionLabel(occasion: content.occasion).roomFrame(layout.rect(plan.occasion))
         }
     }
 
     private var laptopScreen: some View {
         control(.laptop) {
-            LaptopLabel().roomFrame(layout.rect(RoomStage.laptopScreen))
+            LaptopLabel().roomFrame(layout.rect(plan.laptopScreen))
         }
     }
 
@@ -210,12 +218,12 @@ struct RoomCanvas: View {
         let controls: [RoomControl] = [.helpDrawer, .feedbackDrawer, .privacyDrawer]
         return ZStack(alignment: .topLeading) {
             ForEach(Array(zip(controls, titles)), id: \.0) { control, title in
-                let drawer = control.stageRect
+                let drawer = plan.rect(for: control)
                 let plate = CGRect(
-                    x: drawer.minX + RoomStage.drawerPlateInset.minX,
-                    y: drawer.minY + RoomStage.drawerPlateInset.minY,
-                    width: RoomStage.drawerPlateInset.width,
-                    height: RoomStage.drawerPlateInset.height
+                    x: drawer.minX + plan.drawerPlateInset.minX,
+                    y: drawer.minY + plan.drawerPlateInset.minY,
+                    width: plan.drawerPlateInset.width,
+                    height: plan.drawerPlateInset.height
                 )
                 self.control(control) {
                     DrawerPlate(title: title).roomFrame(layout.rect(plate))
@@ -229,9 +237,9 @@ struct RoomCanvas: View {
             ZStack(alignment: .topLeading) {
                 // The room's own suitcase for the main closet; the chosen suitcase's drawing for a
                 // suitcase (Phase 13). Every drawing keeps its face where the plates sit.
-                art(content.source.icon?.art ?? .suitcase, at: RoomStage.suitcaseArt)
-                SourceNamePlate(source: content.source).roomFrame(layout.rect(RoomStage.sourcePlate))
-                ScopePlate(source: content.source).roomFrame(layout.rect(RoomStage.scopePlate))
+                art(content.source.icon?.art ?? .suitcase, at: plan.suitcaseArt)
+                SourceNamePlate(source: content.source).roomFrame(layout.rect(plan.sourcePlate))
+                ScopePlate(source: content.source).roomFrame(layout.rect(plan.scopePlate))
             }
         }
     }
@@ -242,8 +250,8 @@ struct RoomCanvas: View {
         let look = HamperLook(hamper: content.hamper)
         return control(.hamper) {
             ZStack(alignment: .topLeading) {
-                art(look.art, at: look.stageRect)
-                LaundryPlate(hamper: content.hamper).roomFrame(layout.rect(RoomStage.laundryPlate))
+                art(look.art, at: plan.hamperArt(for: look))
+                LaundryPlate(hamper: content.hamper).roomFrame(layout.rect(plan.laundryPlate))
             }
         }
     }
@@ -261,7 +269,7 @@ struct RoomCanvas: View {
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .roomFrame(layout.rect(RoomStage.title))
+            .roomFrame(layout.rect(plan.title))
             .accessibilityAddTraits(.isHeader)
             .accessibilitySortPriority(Double(RoomControl.allCases.count + 1))
     }
@@ -284,7 +292,9 @@ struct RoomCanvas: View {
                 Color.clear.contentShape(Rectangle())
             }
             .buttonStyle(RoomControlButtonStyle())
-            .roomFrame(layout.target(control.stageRect))
+            // A pointer on iPad shows what it's over (PRD §7.2).
+            .hoverEffect(.highlight)
+            .roomFrame(layout.target(plan.rect(for: control)))
             .accessibilityLabel(control.accessibilityLabel(for: content))
             .accessibilityHint(control.accessibilityHint(for: content))
             .accessibilityIdentifier(control.identifier)
