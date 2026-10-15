@@ -27,7 +27,7 @@ Below 120 points the badge is left off and the words next to the picture say Sim
 
 ## Try it on
 
-From Your looks (the version on screen) and from look detail. A sheet titled Try it on, Simulated:
+From Your looks (the version on screen) and from look detail. A full-height sheet titled Try it on, Simulated:
 
 | Step | What she sees |
 |---|---|
@@ -91,7 +91,7 @@ Keeping pictures follows PRD §7.5 and §9.2.4: every delivered picture is kept 
 
 ## Fixtures
 
-The demo has three pictures, as in the mockups: two of Interview navy and pink (the newer of the look as it is, the older of an earlier version with the cream sweater) and one of Lace date night. The large set has one for every third saved look (163). Empty has none.
+The demo has three pictures, as in the mockups: two of Interview navy and pink (the newer of the look as it is, the older of an earlier version with the cream sweater) and one of Lace date night. The large set has one for every third saved look (165). Empty has none.
 
 `-fixtures demo:offline` makes Try it on fail offline, `demo:picture-fails` makes it not finish, `demo:slow` takes three seconds, and `demo:stores-fail` fails the picture store too.
 
@@ -105,7 +105,7 @@ The demo has three pictures, as in the mockups: two of Interview navy and pink (
 
 ## Performance
 
-The large set's 163 pictures load in a few milliseconds and filter with the looks (`SavedPicturesTests.largeSetStaysQuick`, 250 ms bounds, three times that on CI). Each picture's bundle, name and search words are worked out once when the pictures load. The grid is lazy.
+The large set's 165 pictures load and filter well inside the test's bounds (`SavedPicturesTests.largeSetStaysQuick`, 250 ms bounds, three times that on CI). Each picture's bundle, name and search words are worked out once when the pictures load. The grid is lazy.
 
 ## Tests
 

@@ -12,7 +12,7 @@ struct TryOnRoute: Identifiable, Hashable {
 }
 
 extension View {
-    /// The Try it on sheet: titled Try it on, with Simulated under the title.
+    /// The Try it on sheet: titled Try it on, with Simulated under the title, full height.
     func tryOnSheet(
         _ route: Binding<TryOnRoute?>, seePicture: @escaping (TryOnPicture) -> Void
     ) -> some View {
@@ -20,6 +20,8 @@ extension View {
             item: route,
             title: { _ in TryOnText.tryOn },
             subtitle: { _ in TryOnText.simulated },
+            // Full height: the picture and its two buttons don't fit a half-height sheet.
+            detents: [.large],
             content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture) }
         )
     }
