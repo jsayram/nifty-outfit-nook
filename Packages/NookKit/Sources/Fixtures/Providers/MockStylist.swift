@@ -88,7 +88,7 @@ struct MockStyling {
         if let season, garment.seasons.contains(season) { score += 1 }
         if let band, band.suitableWarmth.contains(garment.warmth) { score += 1 }
         if let comfortFit, garment.fit == comfortFit { score += 1 }
-        if let color = request.color, garment.colors.contains(color) { score += 2 }
+        if let color = request.color, color.fits(garment) { score += 2 }
         return score
     }
 

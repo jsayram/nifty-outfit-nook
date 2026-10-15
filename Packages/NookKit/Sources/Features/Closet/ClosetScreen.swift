@@ -73,8 +73,11 @@ struct ClosetScreen: View {
                 garmentID: id, name: name, open: { path.append($0) }, back: goBack, removed: pieceRemoved)
         case .recentlyDeleted:
             RecentlyDeletedScreen()
-        case .styleMe(_, let name):
-            StyleMeStubScreen(startingPiece: name)
+        case .styleMe(let id, _):
+            StyleMeScreen(
+                startingPieceID: id,
+                routes: StyleMeRoutes(
+                    addPiece: { path.append(.addPiece(.photo)) }, openSuitcases: { path.append(.suitcases) }))
         case .addPiece(let start):
             GarmentEditorScreen(
                 target: .newPiece, firstStep: start == .words ? .words : .choose, resumesDraft: start == .resume,

@@ -35,7 +35,7 @@ A piece she no longer has can still be shown (saved looks will link to it in 12a
 
 A sheet with two choices (amendment, drafting decision 2):
 
-- **Style me with it**: Style Me with the piece as the starting piece. Until 10a this opens the Style Me stand-in with a "Starting piece" row.
+- **Style me with it**: Style Me with the piece as the starting piece. Since 10a it opens the Style Me request with the piece set (`docs/style-me.md`).
 - **Make my own look**: Make your own look starting from it (LR-08.3). A stand-in until 11.
 
 ## Remove from closet (LR-16)
@@ -83,4 +83,4 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 4. **Undo after Delete it** as well as after "I don't have it any more". LR-16 only asks for the first, but both ask first and Undo is cheap and safe.
 5. **No "Delete permanently now"** in Recently deleted yet. PRD §7.4 asks for it with a preview of what's purged, which belongs with real storage (Phases 21a and 21b).
 6. **"I don't have it any more" keeps suitcase membership** in the data. The piece no longer shows in Closet or styling, and Undo needs nothing else. Suitcases (13) must filter with `isInCloset`.
-7. **Style me with it is offered for any piece in her closet**, even one in the wash or away. Phase 10a decides what Style Me says when the starting piece can't be used (`StylingContext` already rejects it).
+7. **Style me with it is offered for any piece in her closet**, even one in the wash or away. Style Me then says why it can't start a look ("In the wash") and offers another (Phase 10a, `docs/style-me.md`).

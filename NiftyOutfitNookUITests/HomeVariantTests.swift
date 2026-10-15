@@ -44,6 +44,12 @@ final class HomeVariantTests: XCTestCase {
             control.tap()
             XCTAssertTrue(
                 app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(identifier) didn't open \(title)")
+            if identifier == "home.occasion" {
+                // The calendar opens Style Me on the Occasion sheet (Phase 10a); close it first.
+                XCTAssertTrue(app.buttons["occasion.office"].waitForExistence(timeout: Self.wait), "No Occasion sheet")
+                app.buttons["Close"].tap()
+                XCTAssertTrue(app.buttons["occasion.office"].waitForNonExistence(timeout: Self.wait))
+            }
             app.navigationBars[title].buttons.firstMatch.tap()
             XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "No way back from \(title)")
         }

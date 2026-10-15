@@ -64,6 +64,7 @@ public struct NookSheetContainer<Content: View>: View {
     private let content: Content
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .title2) private var closeSize: CGFloat = 32
 
     public init(title: String, subtitle: String? = nil, @ViewBuilder content: () -> Content) {
@@ -87,14 +88,16 @@ public struct NookSheetContainer<Content: View>: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: NookSpacing.small) {
-            HStack(alignment: .top, spacing: NookSpacing.medium) {
-                Text(title)
-                    .nookTextStyle(.title)
-                    .foregroundStyle(.nook.textPrimary)
-                    .accessibilityAddTraits(.isHeader)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                closeButton
+            if dynamicTypeSize.isAccessibilitySize {
+                // At the largest sizes Close sits on its own line above the title, so a one-word
+                // title like "Preferences" gets the full width instead of breaking mid-word.
+                closeButton.frame(maxWidth: .infinity, alignment: .trailing)
+                titleText
+            } else {
+                HStack(alignment: .top, spacing: NookSpacing.medium) {
+                    titleText
+                    closeButton
+                }
             }
             // Under the title row, so it gets the full width.
             if let subtitle {
@@ -104,6 +107,15 @@ public struct NookSheetContainer<Content: View>: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    private var titleText: some View {
+        Text(title)
+            .nookTextStyle(.title)
+            .foregroundStyle(.nook.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var closeButton: some View {

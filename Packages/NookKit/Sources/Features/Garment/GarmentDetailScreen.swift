@@ -4,8 +4,8 @@ import SwiftUI
 
 /// Garment detail (Phase 7a): one piece, its facts, and what she can do with it.
 ///
-/// Edit opens a stand-in until Phase 7b. Style with this asks whether to Style Me with it or
-/// make her own look (both stand-ins until 10a and 11). Each suitcase name opens that suitcase
+/// Edit opens Edit piece (7b). Style with this asks whether to Style Me with it (10a) or make her
+/// own look (a stand-in until 11). Each suitcase name opens that suitcase
 /// (a stand-in until 13). Remove from closet asks first, then hands the removal back to Closet,
 /// which goes back to the grid and offers Undo (LR-16.1).
 struct GarmentDetailScreen: View {

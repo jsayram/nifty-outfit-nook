@@ -33,7 +33,9 @@ struct StyleRequestTests {
     @Test func aRequestSurvivesEncoding() throws {
         var request = Make.request(source: .suitcase("s-1"), startingPieceID: "g-1")
         request.comfort = .fitted
-        request.color = .navy
+        request.color = ColorWish(.navy, strength: .required, scope: .shoes)
+        request.occasion = .other
+        request.occasionNote = "Museum visit"
         request.weather = WeatherSnapshot(
             condition: .snow, temperatureCelsius: -2, isNight: true, observedAt: TestTime.now)
         #expect(try JSONDecoder().decode(StyleRequest.self, from: JSONEncoder().encode(request)) == request)

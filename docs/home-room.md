@@ -39,7 +39,7 @@ Style Me's Weather row and its sheet live in `Features/StyleMe` (see below).
 | Wardrobe | Closet | Switches tab |
 | Shelf ("Saved Looks" plate, and the frames under it) | Saved Looks | Switches tab |
 | Laptop | Style Me | Push |
-| Calendar | Style Me, asking for the occasion | Push (`choosingOccasion: true` for Phase 10a) |
+| Calendar | Style Me, on the Occasion sheet | Push (`choosingOccasion: true`) |
 | Suitcase | Suitcases | Push |
 | Hamper | Laundry when tracking is on (or before the closet has loaded); the laundry tracking sheet when it's off | Push, or a sheet |
 | Top, middle and bottom drawers | Help, Send feedback, Privacy and terms | Push |
@@ -85,7 +85,7 @@ The weather loads alongside the stores, not after them, because from Phase 29 it
 
 ### The weather line: on Style Me, not on Home
 
-`home.html` has a weather line under the title ("58°F · Rain today") with a small detail sheet. The amendment doesn't keep it: LR-04 puts the weather on Style Me, as a **Weather** row with "Your looks are picked for today's weather." under it, and a sheet with Use today's weather, I'll be indoors and Ignore the weather. So Home's part is the window, and the row and sheet are built on Style Me's stand-in screen (`StyleMeStubScreen`) until Phase 10a builds the rest of Style Me around them. The choice is for one request: the screen starts on Use today's weather every time it opens (LR-04.2). When the weather can't be read the row says "Not available" with "The weather can't be read right now, so your looks won't use it.", and the sheet still works (LR-04.3).
+`home.html` has a weather line under the title ("58°F · Rain today") with a small detail sheet. The amendment doesn't keep it: LR-04 puts the weather on Style Me, as a **Weather** row with "Your looks are picked for today's weather." under it, and a sheet with Use today's weather, I'll be indoors and Ignore the weather. So Home's part is the window, and the row and sheet are on Style Me (`docs/style-me.md`). The choice is for one request: the screen starts on Use today's weather every time it opens (LR-04.2). When the weather can't be read the row says "Not available" with "The weather can't be read right now, so your looks won't use it.", and the sheet still works (LR-04.3).
 
 The temperature is in her locale's unit ("58°" in the US, "15°" in the UK).
 
@@ -169,7 +169,7 @@ Everything else held up: the plates use the strong tint with light text, the sig
 
 ## Left for later phases
 
-- **10a:** the occasion on the calendar (`HomeRoomContent.occasion`) and under "Occasion" on the large-text row and the sideways tile, and opening Style Me on the Occasion sheet.
+- **13:** the occasion on the calendar (`HomeRoomContent.occasion`) and under "Occasion" on the large-text row and the sideways tile, with the remembered source. Phase 10a opens Style Me on the Occasion sheet; remembering her last occasion waits for remembered request defaults (`docs/style-me.md`).
 - **12a:** her saved looks in the shelf frames, which are empty for now.
 - **13:** the remembered source (`HomeModel.source`, FR-67). Until the source picker exists, Home shows the main closet. The suitcase plate already knows how to show a suitcase source (green, or butter when empty).
 - **14a:** "Name on your sign" in Profile, and reloading Home when it changes (RD-03.1).

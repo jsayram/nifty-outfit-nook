@@ -23,6 +23,12 @@
         }
       }
     },
+    "%@ can’t be your starting piece. %@." : {
+      "comment" : "Style Me: the starting piece can't be used; its name, then why, such as In the wash"
+    },
+    "%@ has %lld pieces you can use today, so you may get fewer than three versions." : {
+      "comment" : "Style Me warning: a small suitcase; its name and a count"
+    },
     "%@ is back in your closet" : {
       "comment" : "Toast after Restore, with the piece's name",
       "localizations" : {
@@ -33,6 +39,9 @@
           }
         }
       }
+    },
+    "%@ is empty" : {
+      "comment" : "Style Me when the suitcase has nothing packed; the suitcase's name"
     },
     "%@ is in Recently deleted" : {
       "comment" : "Toast after Delete it, with the piece's name",
@@ -245,6 +254,12 @@
         }
       }
     },
+    "A missing piece" : {
+      "comment" : "Style Me: the starting piece is gone"
+    },
+    "A missing suitcase" : {
+      "comment" : "Style Me source when it's gone"
+    },
     "A photo you copied from somewhere else" : {
       "comment" : "Add a piece choice: under Paste",
       "localizations" : {
@@ -355,6 +370,9 @@
         }
       }
     },
+    "Add pieces" : {
+      "comment" : "Style Me button: opens Suitcases to pack"
+    },
     "Added" : {
       "comment" : "Suggestion chip once accepted",
       "localizations" : {
@@ -388,6 +406,9 @@
         }
       }
     },
+    "Allowed in Something new" : {
+      "comment" : "Request summary: an unowned piece may appear"
+    },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
       "localizations" : {
@@ -398,6 +419,12 @@
           }
         }
       }
+    },
+    "Any one piece" : {
+      "comment" : "Colour sheet: applies to"
+    },
+    "Applies to" : {
+      "comment" : "Colour sheet group"
     },
     "Available" : {
       "comment" : "Garment status: nothing in the way",
@@ -420,6 +447,9 @@
           }
         }
       }
+    },
+    "Away right now" : {
+      "comment" : "Style Me: the starting piece is away"
     },
     "Away until %@" : {
       "comment" : "Garment status: lent out or at the tailor until a date, such as Oct 23",
@@ -685,6 +715,9 @@
         }
       }
     },
+    "Change the occasion" : {
+      "comment" : "Style Me button"
+    },
     "Changes saved" : {
       "comment" : "Toast after editing a piece",
       "localizations" : {
@@ -706,6 +739,18 @@
           }
         }
       }
+    },
+    "Choose a colour for this look." : {
+      "comment" : "VoiceOver hint for Colour"
+    },
+    "Choose a piece to build your looks around." : {
+      "comment" : "VoiceOver hint"
+    },
+    "Choose another" : {
+      "comment" : "Style Me button: another starting piece"
+    },
+    "Choose another source" : {
+      "comment" : "Style Me button"
     },
     "Choose from Photos" : {
       "comment" : "Add a piece choice",
@@ -729,6 +774,12 @@
         }
       }
     },
+    "Choose the occasion." : {
+      "comment" : "VoiceOver hint for Occasion"
+    },
+    "Choose today’s comfort." : {
+      "comment" : "VoiceOver hint for Comfort"
+    },
     "Choose what kind of piece it is." : {
       "comment" : "Add a piece: no kind of piece chosen",
       "localizations" : {
@@ -739,6 +790,12 @@
           }
         }
       }
+    },
+    "Choose where your looks come from." : {
+      "comment" : "VoiceOver hint for Source"
+    },
+    "Choose whether looks may add a piece you don’t own." : {
+      "comment" : "VoiceOver hint for Preferences"
     },
     "Choose whether you don’t have it any more, or want to delete it." : {
       "comment" : "Hint on Remove from closet",
@@ -806,6 +863,12 @@
         }
       }
     },
+    "Comfort" : {
+      "comment" : "Style Me row"
+    },
+    "Comfortable" : {
+      "comment" : "Comfort choice"
+    },
     "Concert" : {
       "comment" : "Occasion",
       "localizations" : {
@@ -871,6 +934,9 @@
           }
         }
       }
+    },
+    "Debug builds only" : {
+      "comment" : "Debug section detail"
     },
     "Delete %@?" : {
       "comment" : "Remove from closet: asks before Delete it",
@@ -1048,6 +1114,9 @@
         }
       }
     },
+    "Done" : {
+      "comment" : "Closes the Occasion sheet"
+    },
     "Dress" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -1135,6 +1204,9 @@
           }
         }
       }
+    },
+    "Every piece in every version is one you own." : {
+      "comment" : "Preferences sheet: Only mine"
     },
     "Explains laundry tracking." : {
       "comment" : "VoiceOver hint",
@@ -1235,6 +1307,9 @@
         }
       }
     },
+    "For example, museum visit" : {
+      "comment" : "Prompt for Other's words"
+    },
     "For now each choice adds a sample picture." : {
       "comment" : "Photo source question while photos are a stand-in",
       "localizations" : {
@@ -1245,6 +1320,15 @@
           }
         }
       }
+    },
+    "For this request only" : {
+      "comment" : "Style Me section detail"
+    },
+    "From a suitcase, every piece is one you packed." : {
+      "comment" : "Style Me Preferences line when the source is a suitcase (LR-05b)"
+    },
+    "Getting Style Me ready" : {
+      "comment" : "Style Me while it loads"
     },
     "Getting your photo" : {
       "comment" : "Add a piece: the photo step is busy",
@@ -1323,6 +1407,9 @@
         }
       }
     },
+    "Hasn’t arrived yet" : {
+      "comment" : "Style Me: bought, not arrived"
+    },
     "Hello" : {
       "comment" : "Name sign when no name is set. A neutral greeting, not a name.",
       "localizations" : {
@@ -1367,6 +1454,9 @@
         }
       }
     },
+    "How closely your looks stick to your own clothes." : {
+      "comment" : "Preferences sheet (LR-03)"
+    },
     "How dressy" : {
       "comment" : "Add a piece: field label",
       "localizations" : {
@@ -1377,6 +1467,9 @@
           }
         }
       }
+    },
+    "How strongly" : {
+      "comment" : "Colour sheet group"
     },
     "How warm" : {
       "comment" : "Add a piece: field label",
@@ -1555,6 +1648,9 @@
         }
       }
     },
+    "It isn’t in your closet any more" : {
+      "comment" : "Style Me: the starting piece was removed"
+    },
     "It leaves your closet, suitcases and styling. Your saved looks keep it." : {
       "comment" : "Remove from closet: what I don't have it any more does",
       "localizations" : {
@@ -1565,6 +1661,9 @@
           }
         }
       }
+    },
+    "It starts on your usual choice each time." : {
+      "comment" : "Preferences sheet note: the choice is for this request"
     },
     "It stays in Recently deleted until %@. After that it’s deleted for good." : {
       "comment" : "Remove from closet: the Recently deleted deadline, such as Nov 13",
@@ -1599,6 +1698,12 @@
         }
       }
     },
+    "Just for this outfit." : {
+      "comment" : "Style Me Comfort line (LR-18)"
+    },
+    "Just for this outfit. Your usual fit stays the same." : {
+      "comment" : "Comfort sheet (LR-18)"
+    },
     "Keep editing" : {
       "comment" : "Button: closes the discard question",
       "localizations" : {
@@ -1609,6 +1714,9 @@
           }
         }
       }
+    },
+    "Keep it to %lld characters." : {
+      "comment" : "Problem with the words for Other"
     },
     "Keep this on one line." : {
       "comment" : "Add a piece: a one-line field has a line break in it",
@@ -1896,6 +2004,9 @@
         }
       }
     },
+    "Looks from a suitcase only use what’s packed in it. Pack a few pieces, or style from somewhere else." : {
+      "comment" : "Style Me when the suitcase has nothing packed"
+    },
     "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it." : {
       "comment" : "Describe in words: under the suggestions",
       "localizations" : {
@@ -1917,6 +2028,9 @@
           }
         }
       }
+    },
+    "Make it preferred" : {
+      "comment" : "Style Me button: colour wish"
     },
     "Make my own look" : {
       "comment" : "Style with this choice (LR-08)",
@@ -2006,6 +2120,9 @@
         }
       }
     },
+    "Mine + one idea" : {
+      "comment" : "Preferences value"
+    },
     "Multicolour" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2061,6 +2178,9 @@
         }
       }
     },
+    "New-piece idea" : {
+      "comment" : "Request summary row (LR-05b)"
+    },
     "Nifty Outfit Nook" : {
       "comment" : "The app's name, as the Home title",
       "localizations" : {
@@ -2071,6 +2191,9 @@
           }
         }
       }
+    },
+    "No %@ %@ in %@ can be used today." : {
+      "comment" : "Style Me warning. Example: No navy shoes in Weekend can be used today."
     },
     "No details found in those words. You can fill them in on the next step." : {
       "comment" : "Describe in words: nothing recognised",
@@ -2149,6 +2272,12 @@
         }
       }
     },
+    "No starting piece" : {
+      "comment" : "Style Me button and sheet choice"
+    },
+    "None" : {
+      "comment" : "Style Me: no starting piece"
+    },
     "Not available" : {
       "comment" : "Weather row value when the weather can't be read",
       "localizations" : {
@@ -2160,6 +2289,9 @@
         }
       }
     },
+    "Not enough to style yet" : {
+      "comment" : "Style Me when too few pieces can be used"
+    },
     "Not in a saved look yet" : {
       "comment" : "Garment detail: no saved looks use it",
       "localizations" : {
@@ -2170,6 +2302,9 @@
           }
         }
       }
+    },
+    "Not in this request" : {
+      "comment" : "Request summary: no unowned piece"
     },
     "Not in your closet" : {
       "comment" : "Tag on a look's piece she doesn't own",
@@ -2215,6 +2350,9 @@
         }
       }
     },
+    "Not packed in %@" : {
+      "comment" : "Style Me: the starting piece isn't in the suitcase being styled from"
+    },
     "Not saved yet. Check %@." : {
       "comment" : "VoiceOver, after Save found problems, with the fields to check, like Name and Kind",
       "localizations" : {
@@ -2259,6 +2397,15 @@
         }
       }
     },
+    "Nothing in %@ can be used today." : {
+      "comment" : "Starting piece sheet with no usable pieces; the source's name"
+    },
+    "Nothing in %@ can be used today. Pieces in the wash or away don’t count." : {
+      "comment" : "Style Me: no usable pieces in the source; the source's name"
+    },
+    "Nothing in %@ matches “%@”." : {
+      "comment" : "Starting piece search with no match"
+    },
     "Nothing is erased" : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -2302,6 +2449,9 @@
           }
         }
       }
+    },
+    "Occasion: %@" : {
+      "comment" : "VoiceOver label for Occasion"
     },
     "Occasions" : {
       "comment" : "Garment fact label",
@@ -2380,6 +2530,9 @@
         }
       }
     },
+    "Only %lld of %lld pieces in %@ can be used today. A look needs at least %lld." : {
+      "comment" : "Style Me: too few usable pieces; counts and the source's name"
+    },
     "Only a name and the kind of piece are needed. Everything else can wait." : {
       "comment" : "Add a piece details: line under the title",
       "localizations" : {
@@ -2390,6 +2543,15 @@
           }
         }
       }
+    },
+    "Only clothes packed in %@ are used, so Something new is another look from the suitcase. For a new-piece idea, style from Main closet." : {
+      "comment" : "Preferences sheet when the source is a suitcase (LR-05b)"
+    },
+    "Only mine" : {
+      "comment" : "Preferences value"
+    },
+    "Only pieces you own" : {
+      "comment" : "Style Me Preferences line for Only mine"
     },
     "Only the picture you pick is shared with the app" : {
       "comment" : "Add a piece choice: under Choose from Photos",
@@ -2567,6 +2729,21 @@
         }
       }
     },
+    "Optional · from %@" : {
+      "comment" : "Style Me: no starting piece yet; the source's name"
+    },
+    "Optional, for this request only." : {
+      "comment" : "Colour sheet"
+    },
+    "Optional. Kept with this request only." : {
+      "comment" : "Under Other's words"
+    },
+    "Optional. Your looks are built around it. From %@ only." : {
+      "comment" : "Starting piece sheet; the source's name"
+    },
+    "Options" : {
+      "comment" : "Style Me section"
+    },
     "Orange" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2588,6 +2765,12 @@
           }
         }
       }
+    },
+    "Other: %@" : {
+      "comment" : "Style Me occasion: Other, with her own words"
+    },
+    "Overall palette" : {
+      "comment" : "Colour sheet: applies to"
     },
     "Part of your room didn’t load. Everything still opens." : {
       "comment" : "Home banner when a store failed",
@@ -2622,6 +2805,9 @@
         }
       }
     },
+    "Pick a colour to set how strongly it’s used and where." : {
+      "comment" : "Colour sheet note before a colour is picked"
+    },
     "Pieces you delete stay here for 30 days, so you can bring them back." : {
       "comment" : "Recently deleted, empty",
       "localizations" : {
@@ -2654,6 +2840,15 @@
           }
         }
       }
+    },
+    "Preferences" : {
+      "comment" : "Style Me row (LR-03)"
+    },
+    "Preferred" : {
+      "comment" : "Colour sheet: how strongly"
+    },
+    "Preferred: %@ %@ is used when it works. Looks without it can still appear." : {
+      "comment" : "Colour sheet note. Example: navy in the shoes"
     },
     "Privacy" : {
       "comment" : "Plate on the bottom desk drawer; opens Privacy and terms",
@@ -2764,6 +2959,15 @@
           }
         }
       }
+    },
+    "Request preview" : {
+      "comment" : "Debug section on the stand-in"
+    },
+    "Required" : {
+      "comment" : "Colour sheet: how strongly"
+    },
+    "Required: every look has %@ %@, using your own pieces. If nothing fits, you’ll see why." : {
+      "comment" : "Colour sheet note. Example: navy in the shoes"
     },
     "Restore" : {
       "comment" : "Button: brings a deleted piece back",
@@ -2885,6 +3089,9 @@
           }
         }
       }
+    },
+    "Search %@" : {
+      "comment" : "Starting piece sheet search; the source's name"
     },
     "Search your closet" : {
       "comment" : "Closet search field prompt",
@@ -3040,6 +3247,9 @@
         }
       }
     },
+    "Something new may add one idea" : {
+      "comment" : "Style Me Preferences line for Mine + one idea"
+    },
     "Source" : {
       "comment" : "Plate on the suitcase, above the source's name",
       "localizations" : {
@@ -3062,6 +3272,9 @@
         }
       }
     },
+    "Source: %@, %@" : {
+      "comment" : "VoiceOver label for Style Me's Source row: the source's name and its pieces"
+    },
     "Spring" : {
       "comment" : "Season",
       "localizations" : {
@@ -3083,6 +3296,9 @@
           }
         }
       }
+    },
+    "Starting piece: %@, %@" : {
+      "comment" : "VoiceOver label for Starting piece: the piece and its line"
     },
     "Status" : {
       "comment" : "Garment fact label",
@@ -3117,6 +3333,12 @@
         }
       }
     },
+    "Style Me didn’t load" : {
+      "comment" : "Style Me error state title"
+    },
+    "Style Me puts looks together from your own clothes. Add a few pieces first." : {
+      "comment" : "Style Me when the closet is empty"
+    },
     "Style Me with it, or make your own look with it." : {
       "comment" : "Hint on Style with this",
       "localizations" : {
@@ -3150,6 +3372,12 @@
         }
       }
     },
+    "Style from Main closet" : {
+      "comment" : "Preferences sheet button"
+    },
+    "Style me" : {
+      "comment" : "The button that sends the Style Me request"
+    },
     "Style me with it" : {
       "comment" : "Style with this choice",
       "localizations" : {
@@ -3160,6 +3388,9 @@
           }
         }
       }
+    },
+    "Style me works once the note above is sorted." : {
+      "comment" : "Under the Style me button while something stops it"
     },
     "Style with this" : {
       "comment" : "Button on garment detail",
@@ -3447,6 +3678,9 @@
         }
       }
     },
+    "This suitcase isn’t there any more" : {
+      "comment" : "Style Me when the suitcase source was removed or archived"
+    },
     "Throws away what you started. Your closet doesn’t change." : {
       "comment" : "Hint on a draft's Discard",
       "localizations" : {
@@ -3457,6 +3691,12 @@
           }
         }
       }
+    },
+    "Today: %@ (you usually like %@)" : {
+      "comment" : "Style Me Comfort line when today's comfort differs from her usual fit (LR-18)"
+    },
+    "Today’s comfort" : {
+      "comment" : "Style Me sheet title"
     },
     "Top" : {
       "comment" : "One piece of this kind, used in search",
@@ -3546,6 +3786,9 @@
         }
       }
     },
+    "Use one line, without line breaks." : {
+      "comment" : "Problem with the words for Other"
+    },
     "Use today’s weather" : {
       "comment" : "Weather sheet option",
       "localizations" : {
@@ -3556,6 +3799,15 @@
           }
         }
       }
+    },
+    "Uses 1 styling request." : {
+      "comment" : "Under the Style me button"
+    },
+    "Usual fit" : {
+      "comment" : "Style Me Comfort: her usual fit from Profile"
+    },
+    "Usual fit (%@)" : {
+      "comment" : "Comfort chip: her usual fit, named"
     },
     "Wardrobe: Closet" : {
       "comment" : "VoiceOver label for the wardrobe",
@@ -3601,6 +3853,9 @@
         }
       }
     },
+    "What’s the occasion?" : {
+      "comment" : "Label for Other's words"
+    },
     "When it’s on" : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -3611,6 +3866,12 @@
           }
         }
       }
+    },
+    "Where are you going?" : {
+      "comment" : "Occasion sheet"
+    },
+    "Where your looks come from." : {
+      "comment" : "Source sheet"
     },
     "While it’s off" : {
       "comment" : "Laundry tracking sheet",
@@ -3800,6 +4061,9 @@
         }
       }
     },
+    "Your closet couldn’t be read just now. Nothing was sent." : {
+      "comment" : "Style Me error state"
+    },
     "Your closet didn’t load" : {
       "comment" : "Closet error title",
       "localizations" : {
@@ -3821,6 +4085,12 @@
           }
         }
       }
+    },
+    "Your looks" : {
+      "comment" : "Screen title"
+    },
+    "Your looks are built around it" : {
+      "comment" : "Style Me: starting piece line"
     },
     "Your looks are picked for a day indoors." : {
       "comment" : "Under the Weather row when she'll be indoors",
@@ -3866,6 +4136,9 @@
         }
       }
     },
+    "Your own clothes first. Something new adds one piece you don’t have, marked “Not in your closet”." : {
+      "comment" : "Preferences sheet: Mine + one idea"
+    },
     "Your photo" : {
       "comment" : "Add a piece form: her own photo",
       "localizations" : {
@@ -3876,6 +4149,21 @@
           }
         }
       }
+    },
+    "Your request" : {
+      "comment" : "Style Me section"
+    },
+    "Your request is ready. Your looks come in the next build." : {
+      "comment" : "Stand-in results screen until Phase 10b"
+    },
+    "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
+      "comment" : "Comfort sheet note (LR-18)"
+    },
+    "across the look" : {
+      "comment" : "Colour place, as in navy across the look"
+    },
+    "bottoms" : {
+      "comment" : "As in: No navy bottoms in Weekend"
     },
     "clear" : {
       "comment" : "Weather at night with no clouds, as in 61° and clear",
@@ -3899,6 +4187,27 @@
         }
       }
     },
+    "dresses" : {
+      "comment" : "As in: No navy dresses in Weekend"
+    },
+    "in one piece" : {
+      "comment" : "Colour place, as in navy in one piece"
+    },
+    "in the bottom" : {
+      "comment" : "Colour place, as in navy in the bottom"
+    },
+    "in the dress" : {
+      "comment" : "Colour place, as in navy in the dress"
+    },
+    "in the layer" : {
+      "comment" : "Colour place, as in navy in the layer"
+    },
+    "in the shoes" : {
+      "comment" : "Colour place, as in navy in the shoes"
+    },
+    "in the top" : {
+      "comment" : "Colour place, as in navy in the top"
+    },
     "just now" : {
       "comment" : "Draft card: changed less than a minute ago",
       "localizations" : {
@@ -3909,6 +4218,9 @@
           }
         }
       }
+    },
+    "layers" : {
+      "comment" : "As in: No navy layers in Weekend"
     },
     "optional" : {
       "comment" : "Add a piece: after an optional field's name",
@@ -3921,6 +4233,9 @@
         }
       }
     },
+    "pieces" : {
+      "comment" : "As in: No navy pieces in Weekend"
+    },
     "rain" : {
       "comment" : "Weather, as in 58° and rain",
       "localizations" : {
@@ -3931,6 +4246,12 @@
           }
         }
       }
+    },
+    "required" : {
+      "comment" : "Style Me Colour value: a must"
+    },
+    "shoes" : {
+      "comment" : "As in: No navy shoes in Weekend"
     },
     "snow" : {
       "comment" : "Weather, as in 30° and snow",
@@ -3953,6 +4274,9 @@
           }
         }
       }
+    },
+    "tops" : {
+      "comment" : "As in: No navy tops in Weekend"
     },
     "“%@”" : {
       "comment" : "Typed search, in quotes",

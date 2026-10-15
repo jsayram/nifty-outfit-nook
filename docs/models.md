@@ -44,7 +44,7 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 
 **Preferences**: piece mode (Mine + one idea by default, or Only mine), repeat window (1 week by default, 2 weeks, I don't mind), Track laundry (off by default). These are Lily's defaults from the amendment (LR-03, LR-10, RD-11).
 
-**StyleRequest** (Sensitive when it carries today's comfort). Source, occasion, weather choice (use today's, indoors, ignore) with the weather snapshot, today's comfort, a colour wish, a copy of Preferences, and the starting piece. `allowsNewPieceIdea` is computed, not stored: true only with Mine + one idea and the main closet, so a suitcase request can never ask for an unowned piece.
+**StyleRequest** (Sensitive when it carries today's comfort). Source, occasion (with her words for Other, at most 40 characters), weather choice (use today's, indoors, ignore) with the weather snapshot, today's comfort, a colour wish (`ColorWish`: a family, preferred or required, and where: any one piece, a kind of piece, or the overall palette), a copy of Preferences, and the starting piece. Style Me builds it from a `StyleRequestDraft` with `StyleRequestBuilder` (Phase 10a, `docs/style-me.md`). `allowsNewPieceIdea` is computed, not stored: true only with Mine + one idea and the main closet, so a suitcase request can never ask for an unowned piece.
 
 **Results.** The stylist returns a `StyleOutcome`:
 
@@ -67,6 +67,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `SuitcaseShelf` | Three favourites by most recent use, See all only above three, archived only under their filter | RD-09, LR-17 |
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
+| `StyleRequestBuilder` | Checks a Style Me draft before it's sent: an empty closet or suitcase, a missing suitcase, too few usable pieces (stops it), a small suitcase (warns), a starting piece that can't be used, Other's words, a required colour nothing usable has (warns). Builds the request | RD-02, FR-67, PRD §8.1, §8.3 |
 | `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
 | `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker. `current` is 8a's proposal until the benchmark on her phone | RD-07, Phase 8a |
 | `GarmentArtChoice` | How a piece's picture shows: its drawing (no photo), its cutout (clean), or its photo in a tile (no cutout yet, or a concern) | RD-07, Phase 8b |
@@ -143,7 +144,7 @@ Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample pi
 
 Dates in the demo and large sets are relative to launch time, so "Last worn" reads naturally; tests pass a fixed date.
 
-The **mock stylist** is deterministic and uses plain matching on stored facts only: occasion tags, season, warmth against the temperature, fit against comfort, and the colour wish. It pairs the best-matching main pieces with shoes, adds a layer in rain or cool weather, skips main-piece combinations worn inside the repeat window, swaps in a dressier owned piece for Dressed up, and adds one idea (or swaps another owned piece) for Something new. It has no real fit or styling rules; those stay in the private backend.
+The **mock stylist** is deterministic and uses plain matching on stored facts only: occasion tags, season, warmth against the temperature, fit against comfort, and the colour wish where she asked for it (a required colour counts the same as a preferred one for now; 10b decides how a result says it couldn't be met). It pairs the best-matching main pieces with shoes, adds a layer in rain or cool weather, skips main-piece combinations worn inside the repeat window, swaps in a dressier owned piece for Dressed up, and adds one idea (or swaps another owned piece) for Something new. It has no real fit or styling rules; those stay in the private backend.
 
 Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in Debug: generating the large set 36 ms, five filters over it 35 ms, building a styling context 6 ms, styling 41 ms. The tests allow 1 s, 500 ms, 500 ms and 500 ms, so a failure means something got many times slower. Each check takes the fastest of three runs and allows three times as long on CI, after two checks went over once on a busy CI runner (a context build took 862 ms there, against 6 ms locally).
 
@@ -152,7 +153,7 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 - **Persistence, revisions and sync.** The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork.
 - **Favourites and collections** (PRD §8.2) have no Stage A screen (RD-08), so no type yet.
 - **Find One, shopping and the fit check** (Phase 34). Wishlist pieces exist as an ownership state only.
-- **Required versus preferred colour.** The request has one preferred colour for now. PRD §8.3's required colours and their scope come with the Style Me request phase (10a) if Lily needs them.
+- **More than one colour.** Since 10a the request has one colour wish, preferred or required, with its place (PRD §8.3). Several colours at once, or explicit monochrome, can come later if Lily asks.
 - **Swap ranking.** The result carries ranked alternatives; the on-phone swap list (LR-07) is built in Phase 11 from the same stored facts.
 
 ## Decisions for Jose
