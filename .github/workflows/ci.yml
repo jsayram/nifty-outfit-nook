@@ -80,7 +80,8 @@ jobs:
   # first launch), so a part should hold several minutes of tests, and four parts plus the job
   # above stay within the five macOS runners the free plan allows at once.
   # Balanced in October 2026 from the classes' times on CI (in seconds, from the test log):
-  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20
+  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20, then IPadTests on
+  #                             an iPad simulator (about 170 locally, new in Phase 15a)
   #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75, SettingsTests about 260
   #                             locally (new in Phase 14b, no CI time yet)
   #   ui-add-and-catalog        AddPieceTests 367, CatalogTests about 175
@@ -146,6 +147,18 @@ jobs:
         # which no wait in a test can catch. A test that fails twice still fails the job, and the
         # first failure stays in the test results. Package tests and local runs never retry.
         run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
+      # The iPad UI tests (Phase 15a) run on an iPad simulator after the lightest part's own tests,
+      # reusing its build. They take about 3 minutes locally. On an iPhone they skip themselves,
+      # so ui-rest passes over them in seconds.
+      - name: Test (iPad)
+        if: matrix.part == 'ui-home-and-results'
+        env:
+          NOOK_SIM_FAMILY: iPad
+          NOOK_RESULT_BUNDLE: build/TestResults-iPad.xcresult
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
+        run: >-
+          scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests
+          -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -153,6 +166,7 @@ jobs:
           name: TestResults-${{ matrix.part }}
           path: |
             build/TestResults.xcresult
+            build/TestResults-iPad.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore

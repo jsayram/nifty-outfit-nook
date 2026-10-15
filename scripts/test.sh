@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Runs every test: the NookKit package tests and the UI tests, on an iPhone simulator.
-# See scripts/simulator.sh for how the simulator is chosen.
+# See scripts/simulator.sh for how the simulator is chosen. NOOK_SIM_FAMILY=iPad picks an iPad
+# instead, for the iPad UI tests (Phase 15a, docs/ipad.md):
+#   NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests
 #
 # Usage: scripts/test.sh [xcodebuild test selection...]
 # With no arguments it runs the whole test plan. Arguments go to `xcodebuild test-without-building`,
