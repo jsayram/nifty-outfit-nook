@@ -120,11 +120,24 @@ public enum MeasurementRules {
         }
     }
 
+    public static let fitBrandMaximum = 40
+    public static let fitSizeMaximum = 20
+
+    /// A fit piece's brand: required, one line, at most 40 characters (LR-13).
+    public static func fitBrand(_ text: String) throws(NameProblem) -> String {
+        try NameRules.checked(text, maximum: fitBrandMaximum, allowsEmpty: false)
+    }
+
+    /// A fit piece's size as printed ("0 Petite", "S"): required, one line, at most 20 characters.
+    public static func fitSize(_ text: String) throws(NameProblem) -> String {
+        try NameRules.checked(text, maximum: fitSizeMaximum, allowsEmpty: false)
+    }
+
     /// A fit piece needs a brand and a size label (LR-13).
     public static func checkedFitPiece(_ piece: FitPiece) throws(NameProblem) -> FitPiece {
         var piece = piece
-        piece.brand = try NameRules.checked(piece.brand, maximum: 40, allowsEmpty: false)
-        piece.sizeLabel = try NameRules.checked(piece.sizeLabel, maximum: 20, allowsEmpty: false)
+        piece.brand = try fitBrand(piece.brand)
+        piece.sizeLabel = try fitSize(piece.sizeLabel)
         return piece
     }
 }

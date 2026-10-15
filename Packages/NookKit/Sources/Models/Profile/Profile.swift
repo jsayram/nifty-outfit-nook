@@ -20,6 +20,10 @@ public struct Profile: Hashable, Sendable, Codable {
     public var avoidedColors: [ColorName]
     /// Optional body measurements. **Sensitive.**
     public var measurements: BodyMeasurements
+    /// The units Fit and measurements shows: inches and pounds, or centimetres and kilograms.
+    /// `nil` until she picks, which means the region's usual units
+    /// (`MeasurementUnits.preferred(for:)`). **Personal.**
+    public var units: MeasurementUnits?
     /// "Add a piece that fits you well" (LR-13). **Sensitive.**
     public var fitPieces: [FitPiece]
     /// "Your try-on photo" (RD-06). **Sensitive**: a photo of her.
@@ -35,6 +39,7 @@ public struct Profile: Hashable, Sendable, Codable {
         likedColors: [ColorName] = [],
         avoidedColors: [ColorName] = [],
         measurements: BodyMeasurements = BodyMeasurements(),
+        units: MeasurementUnits? = nil,
         fitPieces: [FitPiece] = [],
         tryOnPhoto: PhotoReference? = nil,
         remembered: RememberedChoices = RememberedChoices()
@@ -45,6 +50,7 @@ public struct Profile: Hashable, Sendable, Codable {
         self.likedColors = likedColors
         self.avoidedColors = avoidedColors
         self.measurements = measurements
+        self.units = units
         self.fitPieces = fitPieces
         self.tryOnPhoto = tryOnPhoto
         self.remembered = remembered
@@ -256,4 +262,18 @@ public enum FitResult: String, CaseIterable, Hashable, Sendable, Codable {
     case tooShort
     case tooTight
     case tooLoose
+}
+
+/// Measurements never show their values in a string, so a stray `print`, a log line or a crash
+/// report that interpolates them can't leak her body details (SECURITY_STANDARD §1 and §4: no
+/// Sensitive data in logs). `dump` and debuggers see no children either.
+extension BodyMeasurements: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String {
+        let filled = MeasurementField.allCases.count { checkedValue(of: $0) != nil }
+        return "BodyMeasurements(redacted, \(filled) filled in)"
+    }
+
+    public var debugDescription: String { description }
+
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
 }
