@@ -150,3 +150,23 @@ struct FixtureStateTests {
         try await services.closet.garments().count { $0.isInCloset && $0.laundry == .dirty }
     }
 }
+
+/// `source=` sets the remembered source (Phase 13).
+struct FixtureSourceTests {
+    @Test func readsTheSourceOption() {
+        let configuration = FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:source=suitcase"])
+        #expect(configuration == FixtureConfiguration(set: .demo, source: .suitcase))
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:source=nope"]).source == nil)
+    }
+
+    @Test func suitcaseRemembersHerMostRecentlyUsedSuitcase() async throws {
+        let services = FixtureServices.make(
+            set: .demo, source: .suitcase, now: TestTime.now, calendar: TestTime.calendar)
+        #expect(try await services.profile.profile().remembered.source == .suitcase("s-jose"))
+        let empty = FixtureServices.make(set: .empty, source: .suitcase, now: TestTime.now, calendar: TestTime.calendar)
+        #expect(try await empty.profile.profile().remembered.source == .mainCloset)
+        // Every set starts on the main closet and Office.
+        let demo = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
+        #expect(try await demo.profile.profile().remembered == RememberedChoices())
+    }
+}

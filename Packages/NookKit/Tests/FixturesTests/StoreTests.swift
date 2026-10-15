@@ -161,6 +161,20 @@ struct SuitcaseStoreTests {
         #expect(try await store.suitcase(DemoCloset.springTrip).garmentIDs.isEmpty)
     }
 
+    @Test func restoreAfterDeleteBringsBackTheSameSuitcase() async throws {
+        // Phase 13: Undo after Delete suitcase.
+        let store = store
+        let weekend = try await store.suitcase(DemoCloset.weekend)
+        try await store.delete(DemoCloset.weekend)
+        await #expect(throws: StoreError.notFound) { try await store.suitcase(DemoCloset.weekend) }
+        try await store.restore(weekend)
+        #expect(try await store.suitcase(DemoCloset.weekend) == weekend)
+        // A suitcase that took the name meanwhile wins; the restore is refused.
+        try await store.delete(DemoCloset.weekend)
+        _ = try await store.create(name: "Weekend", icon: .tote, at: TestTime.now)
+        await #expect(throws: StoreError.invalidName(.duplicate)) { try await store.restore(weekend) }
+    }
+
     @Test func usingASuitcaseMakesItAFavourite() async throws {
         // RD-09.2
         let store = store

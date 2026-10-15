@@ -79,6 +79,15 @@ public enum FixtureLaundryState: String, CaseIterable, Sendable {
     case full
 }
 
+/// The source Style Me remembers at launch (Phase 13, FR-67), to show Home's suitcase and
+/// Suitcases with a suitcase chosen.
+public enum FixtureSourceState: String, CaseIterable, Sendable {
+    /// The main closet, every set's default.
+    case main
+    /// Her most recently used suitcase that isn't archived ("Jose's house" in the demo).
+    case suitcase
+}
+
 /// An unsaved draft waiting at launch, as if the app had been closed in the middle of Add a piece
 /// or Edit (Phase 7b), or Make your own look (Phase 11). Stage A keeps drafts in memory only,
 /// so UI tests use this to check what she sees after a relaunch.
@@ -108,7 +117,8 @@ public enum FixturePhotoState: String, CaseIterable, Sendable {
 /// - `weather=<state>` (`FixtureWeatherState`), such as `weather=snow`;
 /// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`;
 /// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`;
-/// - `photos=<state>` (`FixturePhotoState`), such as `photos=samples`.
+/// - `photos=<state>` (`FixturePhotoState`), such as `photos=samples`;
+/// - `source=<state>` (`FixtureSourceState`), such as `source=suitcase`.
 ///
 /// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
 public struct FixtureConfiguration: Hashable, Sendable {
@@ -122,6 +132,8 @@ public struct FixtureConfiguration: Hashable, Sendable {
     public var draft: FixtureDraftState?
     /// Whether sample photos are added to the closet.
     public var photos: FixturePhotoState
+    /// `nil` keeps the set's own remembered source (the main closet).
+    public var source: FixtureSourceState?
 
     public init(
         set: FixtureSet = .demo,
@@ -129,7 +141,8 @@ public struct FixtureConfiguration: Hashable, Sendable {
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
         draft: FixtureDraftState? = nil,
-        photos: FixturePhotoState = .drawn
+        photos: FixturePhotoState = .drawn,
+        source: FixtureSourceState? = nil
     ) {
         self.set = set
         self.behavior = behavior
@@ -137,6 +150,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
         self.laundry = laundry
         self.draft = draft
         self.photos = photos
+        self.source = source
     }
 
     /// Unknown or missing parts fall back to `demo`, `normal`, the set's own weather and laundry,
@@ -163,6 +177,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
             case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
             case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
             case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
+            case "source": source = FixtureSourceState(rawValue: pair[1]) ?? source
             default: continue
             }
         }

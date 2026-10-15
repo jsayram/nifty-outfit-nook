@@ -92,6 +92,23 @@ extension FixtureData {
     }
 }
 
+extension FixtureData {
+    /// The same records with the remembered source set to `state`. A set with no suitcases
+    /// keeps the main closet.
+    func applying(source state: FixtureSourceState) -> FixtureData {
+        var data = self
+        switch state {
+        case .main:
+            data.profile.remembered.source = .mainCloset
+        case .suitcase:
+            if let suitcase = SuitcaseShelf(suitcases).favorites.first {
+                data.profile.remembered.source = .suitcase(suitcase.id)
+            }
+        }
+        return data
+    }
+}
+
 /// A fresh install.
 enum EmptyCloset {
     static func make(now: Date) -> FixtureData {

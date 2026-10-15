@@ -24,6 +24,9 @@ public struct Profile: Hashable, Sendable, Codable {
     public var fitPieces: [FitPiece]
     /// "Your try-on photo" (RD-06). **Sensitive**: a photo of her.
     public var tryOnPhoto: PhotoReference?
+    /// What Style Me starts from next time: the source and occasion she chose last (FR-67,
+    /// Phase 13). **Personal**: a suitcase can say where she'll be.
+    public var remembered: RememberedChoices
 
     public init(
         signName: String = "",
@@ -33,7 +36,8 @@ public struct Profile: Hashable, Sendable, Codable {
         avoidedColors: [ColorName] = [],
         measurements: BodyMeasurements = BodyMeasurements(),
         fitPieces: [FitPiece] = [],
-        tryOnPhoto: PhotoReference? = nil
+        tryOnPhoto: PhotoReference? = nil,
+        remembered: RememberedChoices = RememberedChoices()
     ) {
         self.signName = signName
         self.preferences = preferences
@@ -43,6 +47,26 @@ public struct Profile: Hashable, Sendable, Codable {
         self.measurements = measurements
         self.fitPieces = fitPieces
         self.tryOnPhoto = tryOnPhoto
+        self.remembered = remembered
+    }
+}
+
+/// The choices Style Me remembers between requests (FR-67, PRD §7.7).
+///
+/// The source is the one she chose last, in Suitcases, on a suitcase, or on Style Me; Home's
+/// suitcase shows it. The occasion is the one she picked last on Style Me, and Home's calendar
+/// shows it. Comfort, colour and weather are never remembered: they're for one request only
+/// (RD-02.4). Her words for Other aren't kept either, so choosing Other leaves the remembered
+/// occasion as it was.
+///
+/// Data tier: **Personal**.
+public struct RememberedChoices: Hashable, Sendable, Codable {
+    public var source: WardrobeSource
+    public var occasion: Occasion
+
+    public init(source: WardrobeSource = .mainCloset, occasion: Occasion = .office) {
+        self.source = source
+        self.occasion = occasion
     }
 }
 
