@@ -16,8 +16,10 @@ struct SwapActions {
 /// three of her pieces at a time, Show 3 more, the end of the list with See all and Find one,
 /// then Keep current and Use this top, and Remove this piece.
 ///
-/// One calm column at most 600 points wide. No outlines: options sit on soft tints and the
-/// chosen one gets a solid name pill and the Selected trait.
+/// One calm column on a phone. In a wide window (iPad, Phase 15b) the pieces and the look sit on
+/// the left, larger, with the options and buttons beside them (`WidePanes`), as the mockups'
+/// tablet layout has it. No outlines: options sit on soft tints and the chosen one gets a solid
+/// name pill and the Selected trait.
 struct SwapPage: View {
     let model: SwapModel
     var actions = SwapActions()
@@ -41,10 +43,15 @@ struct SwapPage: View {
         .background(Color.nook.wallGradient.ignoresSafeArea())
     }
 
+    /// The look's width on a phone, and beside the options in a wide window.
+    static let bundleWidth: CGFloat = 220
+    static let wideBundleWidth: CGFloat = 320
+
     private var content: some View {
-        VStack(spacing: NookSpacing.medium) {
+        WidePanes(spacing: NookSpacing.medium) { isWide in
             whichPiece
-            preview
+            preview(width: isWide ? Self.wideBundleWidth : Self.bundleWidth)
+        } trailing: { _ in
             optionsSection
             commit
             removeSection
@@ -52,7 +59,6 @@ struct SwapPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
         .frame(maxWidth: .infinity)
     }
 
@@ -76,7 +82,7 @@ struct SwapPage: View {
 
     // MARK: The look
 
-    private var preview: some View {
+    private func preview(width: CGFloat) -> some View {
         let look = model.shownLook
         let content = LookBundleContent(look: look, garments: model.setup.garments, layoutSeed: model.setup.layoutSeed)
         let focus = model.preview.map { "\(look.id)-\($0)" } ?? model.pieceID.rawValue
@@ -84,7 +90,7 @@ struct SwapPage: View {
         let tryingName = model.preview.flatMap { model.setup.garments[$0]?.name }
         return VStack(spacing: NookSpacing.xSmall) {
             LookBundle(
-                content, size: LookBundleSize(width: 220),
+                content, size: LookBundleSize(width: width),
                 title: String(localized: "The look", bundle: .module, comment: "Swap: spoken name of the look"),
                 focusedPieceID: focus
             )

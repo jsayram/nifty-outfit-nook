@@ -27,6 +27,9 @@ struct StyleMeActions {
 /// Preferences), and one Style me button. Each row shows its current value and opens its own
 /// small sheet. Anything that stops or limits the request is said in words next to the row it's
 /// about, with a way forward.
+///
+/// In a wide window (iPad, Phase 15b) the request sits on the left and the options with Style me
+/// on the right, as the mockups' tablet layout has it (`WidePanes`).
 struct StyleMePage: View {
     let model: StyleMeModel
     var actions = StyleMeActions()
@@ -40,6 +43,7 @@ struct StyleMePage: View {
                 content
             } else {
                 ScrollView { content }
+                    .centersShortContentInWideWindows()
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -50,7 +54,9 @@ struct StyleMePage: View {
             switch model.phase {
             case .loading:
                 NookLoadingState(
-                    String(localized: "Getting Style Me ready", bundle: .module, comment: "Style Me while it loads"))
+                    String(localized: "Getting Style Me ready", bundle: .module, comment: "Style Me while it loads")
+                )
+                .readablePane()
             case .failed:
                 NookErrorState(
                     String(
@@ -58,10 +64,13 @@ struct StyleMePage: View {
                     message: String(
                         localized: "Your closet couldn’t be read just now. Nothing was sent.", bundle: .module,
                         comment: "Style Me error state"),
-                    retry: actions.retry)
+                    retry: actions.retry
+                )
+                .readablePane()
             case .loaded:
                 if model.check.issues.contains(.closetEmpty) {
                     closetEmpty
+                        .readablePane()
                 } else {
                     form(model.text(locale: locale))
                 }
@@ -70,7 +79,6 @@ struct StyleMePage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.medium)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
         .frame(maxWidth: .infinity)
     }
 
@@ -89,8 +97,19 @@ struct StyleMePage: View {
 
     // MARK: The form
 
-    @ViewBuilder
     private func form(_ text: StyleMeText) -> some View {
+        WidePanes(
+            spacing: NookSpacing.groupGap, alignment: .leading, verticalAlignment: .top,
+            minimumWidth: WindowLayout.rowPanesMinimumWidth
+        ) { _ in
+            request(text)
+        } trailing: { _ in
+            options(text)
+            styleMeButton(text)
+        }
+    }
+
+    private func request(_ text: StyleMeText) -> some View {
         VStack(alignment: .leading, spacing: NookSpacing.medium) {
             NookSectionHeader(String(localized: "Your request", bundle: .module, comment: "Style Me section"))
             sourceCard(text)
@@ -100,6 +119,9 @@ struct StyleMePage: View {
             startingPieceCard(text)
             notices(text, for: .startingPiece)
         }
+    }
+
+    private func options(_ text: StyleMeText) -> some View {
         VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
             NookSectionHeader(
                 String(localized: "Options", bundle: .module, comment: "Style Me section"),
@@ -124,7 +146,6 @@ struct StyleMePage: View {
                     comment: "VoiceOver hint for Preferences"))
             notices(text, for: .options)
         }
-        styleMeButton(text)
     }
 
     private var weatherChoice: Binding<WeatherChoice> {

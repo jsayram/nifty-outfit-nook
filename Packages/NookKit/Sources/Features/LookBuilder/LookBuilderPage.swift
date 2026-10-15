@@ -19,7 +19,9 @@ enum LookBuilderFocus: Hashable {
 /// there is one, the name, the live bundle with Undo and Redo, one soft row per piece with
 /// Change and Remove, Add a piece, what still stops Save, and Save look.
 ///
-/// One calm column at most 600 points wide. Rows sit on a pale tint with no edges (RD-05).
+/// One calm column on a phone. In a wide window (iPad, Phase 15b) the look sits on the left,
+/// larger, with everything else beside it (`WidePanes`), as the mockups' tablet layout has it.
+/// Rows sit on a pale tint with no edges (RD-05).
 struct LookBuilderPage: View {
     @Bindable var model: LookBuilderModel
     var actions = LookBuilderActions()
@@ -45,14 +47,18 @@ struct LookBuilderPage: View {
             switch model.phase {
             case .loading:
                 NookLoadingState(
-                    String(localized: "Opening your closet", bundle: .module, comment: "Closet loading"))
+                    String(localized: "Opening your closet", bundle: .module, comment: "Closet loading")
+                )
+                .readablePane()
             case .failed:
                 NookErrorState(
                     String(localized: "Your closet didn’t load", bundle: .module, comment: "Closet error title"),
                     message: String(
                         localized: "Nothing was lost. Try again in a moment.", bundle: .module,
                         comment: "Closet error message"),
-                    retry: actions.retry)
+                    retry: actions.retry
+                )
+                .readablePane()
             case .loaded:
                 loaded
             }
@@ -60,11 +66,36 @@ struct LookBuilderPage: View {
         .padding(.horizontal, NookSpacing.screenMargin)
         .padding(.top, NookSpacing.small)
         .padding(.bottom, NookSpacing.xxxLarge)
-        .frame(maxWidth: 600)
         .frame(maxWidth: .infinity)
     }
 
-    @ViewBuilder private var loaded: some View {
+    /// The look's width on a phone, and beside the pieces in a wide window.
+    static let bundleWidth: CGFloat = 220
+    static let wideBundleWidth: CGFloat = 320
+
+    /// Top to bottom on a phone. Side by side, the look is alone on the left.
+    private var loaded: some View {
+        WidePanes(spacing: NookSpacing.medium, alignment: .leading) { isWide in
+            if !isWide {
+                intro
+            }
+            stage(width: isWide ? Self.wideBundleWidth : Self.bundleWidth)
+        } trailing: { isWide in
+            if isWide {
+                intro
+            }
+            pieceRows
+            NookButton(
+                LookBuilderText.addPiece, systemImage: "plus", kind: .soft, fillsWidth: true,
+                action: { actions.pick(nil) }
+            )
+            .accessibilityIdentifier("builder.add")
+            saveSection
+        }
+    }
+
+    /// The lead, a draft to continue, the name and where the pieces come from.
+    @ViewBuilder private var intro: some View {
         Text(LookBuilderText.lead)
             .nookTextStyle(.lookTitle)
             .foregroundStyle(.nook.textPrimary)
@@ -81,14 +112,6 @@ struct LookBuilderPage: View {
             .nookTextStyle(.note)
             .foregroundStyle(.nook.textSecondary)
             .fixedSize(horizontal: false, vertical: true)
-        stage
-        pieceRows
-        NookButton(
-            LookBuilderText.addPiece, systemImage: "plus", kind: .soft, fillsWidth: true,
-            action: { actions.pick(nil) }
-        )
-        .accessibilityIdentifier("builder.add")
-        saveSection
     }
 
     // MARK: Draft
@@ -129,7 +152,7 @@ struct LookBuilderPage: View {
 
     // MARK: The look
 
-    private var stage: some View {
+    private func stage(width: CGFloat) -> some View {
         let look = model.look
         let content = LookBundleContent(look: look, garments: model.garments)
         return VStack(spacing: NookSpacing.small) {
@@ -146,11 +169,11 @@ struct LookBuilderPage: View {
                         .accessibilityIdentifier("builder.emptyLook")
                 } else {
                     LookBundle(
-                        content, size: LookBundleSize(width: 220),
+                        content, size: LookBundleSize(width: width),
                         title: model.name.isEmpty ? LookBuilderText.title : model.name)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: content.pieces.isEmpty ? 0 : LookBundleSize(width: 220).height)
+            .frame(maxWidth: .infinity, minHeight: content.pieces.isEmpty ? 0 : LookBundleSize(width: width).height)
             if model.canUndo || model.canRedo {
                 undoRedo
             }

@@ -4,6 +4,10 @@ import SwiftUI
 
 /// The Saved tab (LR-06): looks she saved for this source and occasion, free to open. Unsaved
 /// earlier results aren't listed (LR-06.4), and there's no Shuffle (LR-06.3).
+///
+/// In a regular-width window (iPad, Phase 15b) the looks fill the width as a grid, each bundle
+/// on a soft mat with its name under it, as on Saved Looks; otherwise they're one list in a
+/// readable column.
 struct SavedLooksTab: View {
     let model: YourLooksModel
     let text: YourLooksText
@@ -11,6 +15,15 @@ struct SavedLooksTab: View {
 
     @Environment(\.locale) private var locale
     @Environment(\.calendar) private var calendar
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// The narrowest and widest column of saved looks in a wide window.
+    static let tileWidths: ClosedRange<CGFloat> = 180...240
+
+    private var fillsTheWidth: Bool {
+        horizontalSizeClass == .regular && !dynamicTypeSize.isAccessibilitySize
+    }
 
     var body: some View {
         VStack(spacing: NookSpacing.medium) {
@@ -30,13 +43,29 @@ struct SavedLooksTab: View {
                     .foregroundStyle(.nook.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                VStack(spacing: NookSpacing.xSmall) {
-                    ForEach(model.savedLooks) { look in
-                        row(look)
+                if fillsTheWidth {
+                    LazyVGrid(
+                        columns: [
+                            GridItem(
+                                .adaptive(minimum: Self.tileWidths.lowerBound, maximum: Self.tileWidths.upperBound),
+                                spacing: NookSpacing.medium, alignment: .top)
+                        ],
+                        spacing: NookSpacing.large
+                    ) {
+                        ForEach(model.savedLooks) { look in
+                            tile(look)
+                        }
+                    }
+                } else {
+                    VStack(spacing: NookSpacing.xSmall) {
+                        ForEach(model.savedLooks) { look in
+                            row(look)
+                        }
                     }
                 }
             }
         }
+        .readablePane(maxWidth: fillsTheWidth ? WindowLayout.panesMaximumWidth : WindowLayout.readableWidth)
     }
 
     private func row(_ look: Look) -> some View {
@@ -67,6 +96,52 @@ struct SavedLooksTab: View {
             .padding(.vertical, NookSpacing.small)
         }
         .buttonStyle(.nookRow)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(LookBundleText.summary(of: content, title: name, locale: locale)))
+        .accessibilityValue(Text(detail))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("results.saved.\(look.id)")
+    }
+
+    /// A look in the wide grid: its bundle on a soft mat, its name and detail under it. One
+    /// VoiceOver button, like a row.
+    private func tile(_ look: Look) -> some View {
+        let content = LookBundleContent(look: look, garments: model.garments)
+        let name = look.name ?? text.name(for: look, garments: model.garments)
+        let detail = detail(for: look, content: content)
+        return Button {
+            actions.openSaved(look)
+        } label: {
+            VStack(alignment: .leading, spacing: NookSpacing.small) {
+                Color.clear
+                    .aspectRatio(StickerBundleLayout.aspectRatio, contentMode: .fit)
+                    .overlay {
+                        GeometryReader { proxy in
+                            LookBundle(content, size: LookBundleSize(width: proxy.size.width), title: name)
+                        }
+                    }
+                    .padding(NookSpacing.small)
+                    .background {
+                        NookRadius.shape(NookRadius.tile)
+                            .fill(Color.nook.tint)
+                            .softShadow(.drop, in: NookRadius.shape(NookRadius.tile))
+                    }
+                VStack(alignment: .leading, spacing: NookSpacing.xxSmall) {
+                    Text(name)
+                        .nookTextStyle(.label)
+                        .foregroundStyle(.nook.textPrimary)
+                    Text(detail)
+                        .nookTextStyle(.note)
+                        .foregroundStyle(.nook.textSecondary)
+                }
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, NookSpacing.xxSmall)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PictureRowPressStyle())
+        .hoverEffect(.highlight)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(LookBundleText.summary(of: content, title: name, locale: locale)))
         .accessibilityValue(Text(detail))
