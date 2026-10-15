@@ -1,6 +1,6 @@
 # Saved Looks
 
-Phase 12a, 15 October 2026. Saved Looks is the third tab: every look she saved, as its sticker bundle, with search, piece and colour filters, and a detail screen for each look. It works offline and uses no picture allowance (RD-08.1). The Pictures tab is a stand-in until 12b.
+Phase 12a, 15 October 2026. Saved Looks is the third tab: every look she saved, as its sticker bundle, with search, piece and colour filters, and a detail screen for each look. It works offline and uses no picture allowance (RD-08.1). The Pictures tab, picture detail and Try it on came in Phase 12b and are described in `docs/try-on-pictures.md`.
 
 Spec: amendment RD-08 (Looks and Pictures tabs, search, "+ Make your own", no Favorites or collections in Stage A), LR-09 (piece and colour filters), LR-10 (Wear today, Last worn), LR-16.4 (a removed piece faded with Swap it) and LR-08 (Swap for every piece change, no path to the editor from a saved look). The visual references are `saved.html` and `look.html` in `closet/prototypes/RoomDirectionMockups/screens`; their Favorites, collections, star and "Add to collection" are a proposal with no Stage A screen, and their Edit button is replaced by Swap a piece (LR-08.1).
 
@@ -49,7 +49,7 @@ Top to bottom, as in `look.html`:
 | Wear today | Records today on the look and on its pieces still in her closet (LR-10.1). Laundry doesn't change. Toast with Undo. The button then says Worn today; tapping it takes today off again |
 | Swap a piece | Swap a piece (Phase 11) on this look, with options from the look's source. Use or Remove change the saved look in place, with Undo in a toast |
 | Swap it | The same, starting on the faded piece |
-| Try it on | The stand-in sheet, labelled Simulated, until 12b |
+| Try it on | The Try it on sheet (Phase 12b, `docs/try-on-pictures.md`). A new picture shows under Pictures on the look |
 | Rename | A sheet with the name. `NameRules.lookName`: trimmed, one line, 1 to 60 characters, with the problem in words |
 | Find one | The stand-in (Phase 34) |
 | Delete look | Back to the grid. Undo is in a toast and on a line over the looks that stays until she leaves the tab |
@@ -62,7 +62,7 @@ Top to bottom, as in `look.html`:
 
 ## The Pictures tab
 
-"No try-on pictures yet" and how pictures will work. Phase 12b fills it.
+Her try-on pictures, each linked to its look, with the same search and chips as Looks. See `docs/try-on-pictures.md`. Since 12b, look detail lists the look's pictures under its buttons, and Delete look keeps them, saying so in the toast.
 
 ## The Home shelf
 
@@ -99,10 +99,10 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 6. **Search also finds kind and colour words** ("shoes", "navy"), as Closet's does, besides names and the occasion.
 7. **Looks are ordered by when she saved them** (`Look.savedAt`, new in this phase). Looks saved before it existed use when they were made.
 8. **The shelf frames' tap areas are about 36 points wide**, not 44 (`docs/home-room.md`).
-9. **No "pictures" link on a look yet.** RD-08.2's look-to-pictures link comes with the Pictures tab in 12b.
+9. **No "pictures" link on a look yet.** Done in 12b: a look lists its pictures, and each picture links back (RD-08.2).
 
 ## Left for later phases
 
-- **12b:** the Pictures tab, its search and filters, picture detail, and each look's pictures.
+- **12b (done):** the Pictures tab, its search and filters, picture detail, and each look's pictures (`docs/try-on-pictures.md`).
 - **15b:** iPad Saved Looks with filters beside a wide grid. The page keeps to readable widths and the grid takes more columns until then.
 - **Later (no Stage A screen):** Favorites, collections and Archive (RD-08, LR-16).

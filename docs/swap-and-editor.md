@@ -51,7 +51,7 @@ Ranking runs once when she picks a piece. Show 3 more only shows more of the sam
 
 ### The changed look
 
-`LookEditing` makes the changed look a new look with its own ID. It keeps the result and version it came from (it's still Simple, Dressed up or Something new), the occasion, the source and every other piece in its place (FR-09). It starts unsaved, unnamed and never worn, with no try-on picture (that showed the earlier look). The stylist's look stays as it was in background history.
+`LookEditing` makes the changed look a new look with its own ID. It keeps the result and version it came from (it's still Simple, Dressed up or Something new), the occasion, the source and every other piece in its place (FR-09). It starts unsaved, unnamed and never worn. It has no try-on pictures: those point at the earlier look's ID (Phase 12b). The stylist's look stays as it was in background history.
 
 `YourLooksModel` keeps the changed look per version and an `EditHistory` per version. Undo gives back exactly the look before (LR-08.2), one change at a time, back to the stylist's look. Try a different outfit starts clean. The bundle keeps the first look's layout seed, so a swap doesn't toss the other pieces around.
 

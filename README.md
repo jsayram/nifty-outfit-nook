@@ -56,7 +56,7 @@ Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) 
 
 Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
-- a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
+- a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail`, `photo-fails` or `picture-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
 - `draft=` with `add`, `edit` or `look`, to start with an unsaved Add a piece, Edit or Make your own look draft, as if the app had been closed mid-way;
@@ -105,6 +105,7 @@ docs/style-me.md             The Style Me request: the screen, its sheets and th
 docs/your-looks.md           Your looks: one outfit in three versions, the Saved tab, saving and every styling state.
 docs/swap-and-editor.md      Swap a piece (ranking, See all, Remove and Undo) and Make your own look with its draft.
 docs/saved-looks.md          Saved Looks: the grid, search and filters, look detail, and the Home shelf frames.
+docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and how pictures link to their looks.
 website/                     The app's static website.
 ```
 
