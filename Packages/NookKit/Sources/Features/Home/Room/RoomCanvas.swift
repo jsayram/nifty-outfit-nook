@@ -13,6 +13,8 @@ struct RoomCanvas: View {
     let layout: RoomLayout
     let content: HomeRoomContent
     let open: (RoomControl) -> Void
+    /// Opens a saved look from its frame under the shelf (Phase 12a).
+    var openLook: (Look.ID) -> Void = { _ in }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.roomIsStillImage) private var isStillImage
@@ -135,16 +137,47 @@ struct RoomCanvas: View {
         }
     }
 
-    /// The three frames under the shelf. Phase 12a puts her saved looks in them; until then
-    /// they're empty and decorative, and a tap does what the shelf plate does.
+    /// The three frames under the shelf, holding her most recently saved looks (Phase 12a). Each
+    /// look's frame is a button that opens it. A tap on an empty frame does what the shelf plate
+    /// does, and VoiceOver skips it, since the plate is already there.
     private var shelfFrames: some View {
-        art(.shelfFrames, at: RoomStage.shelfFrames)
-            .overlay {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture { open(.savedLooks) }
-                    .roomFrame(layout.rect(RoomStage.framedLooks))
+        ZStack(alignment: .topLeading) {
+            art(.shelfFrames, at: RoomStage.shelfFrames)
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { open(.savedLooks) }
+                .roomFrame(layout.rect(RoomStage.framedLooks))
+                .accessibilityHidden(true)
+            ForEach(Array(content.framedLooks.prefix(FramedLook.frameCount).enumerated()), id: \.element.id) {
+                index, look in
+                framedLook(look, at: index)
             }
+        }
+    }
+
+    private func framedLook(_ look: FramedLook, at index: Int) -> some View {
+        ZStack(alignment: .topLeading) {
+            FramedLookArt(look: look, scale: layout.scale)
+                .roomFrame(layout.rect(RoomStage.frameWindows[index]))
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            Button {
+                openLook(look.id)
+            } label: {
+                Color.clear.contentShape(Rectangle())
+            }
+            .buttonStyle(RoomControlButtonStyle())
+            .roomFrame(layout.rect(RoomStage.frameTargets[index]))
+            .accessibilityLabel(
+                Text(
+                    "Saved look: \(look.name)", bundle: .module,
+                    comment: "VoiceOver label for a frame under the shelf, with the look's name")
+            )
+            .accessibilityHint(Text("Opens this look.", bundle: .module, comment: "Hint on a saved look"))
+            .accessibilityIdentifier("home.frame.\(index)")
+            // Right after the shelf, in frame order.
+            .accessibilitySortPriority(RoomControl.savedLooks.sortPriority - 0.1 * Double(index + 1))
+        }
     }
 
     private var savedLooksPlate: some View {

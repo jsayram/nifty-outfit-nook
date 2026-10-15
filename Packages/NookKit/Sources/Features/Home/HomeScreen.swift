@@ -4,7 +4,8 @@ import SwiftUI
 
 /// Home: the illustrated bedroom, where each piece of furniture opens part of the app (RD-01).
 ///
-/// The wardrobe and the shelf switch to the Closet and Saved Looks tabs. Everything else is
+/// The wardrobe and the shelf switch to the Closet and Saved Looks tabs, and a saved look in a
+/// frame under the shelf opens on Saved Looks. Everything else is
 /// pushed here: Style Me from the laptop and the calendar, Suitcases from the suitcase, Laundry
 /// from the hamper, Help, Send feedback and Privacy and terms from the desk drawers, and
 /// Profile from the name sign and the top-right button. While laundry tracking is off, the
@@ -12,6 +13,8 @@ import SwiftUI
 struct HomeScreen: View {
     /// Switches the tab bar to another tab.
     let openTab: (AppTab) -> Void
+    /// Opens a saved look on Saved Looks, from its frame under the shelf (Phase 12a).
+    var openLook: (Look.ID) -> Void = { _ in }
 
     @Environment(\.services) private var services
     @State private var model = HomeModel()
@@ -86,7 +89,7 @@ struct HomeScreen: View {
     private var home: some View {
         switch layout {
         case .room:
-            HomeRoomView(content: model.content, open: open)
+            HomeRoomView(content: model.content, open: open, openLook: openLook)
                 .overlay(alignment: .bottom) {
                     errorBanner
                         .padding(.horizontal, NookSpacing.screenMargin)
@@ -145,6 +148,7 @@ struct HomeScreen: View {
 struct HomeRoomView: View {
     let content: HomeRoomContent
     let open: (RoomControl) -> Void
+    var openLook: (Look.ID) -> Void = { _ in }
 
     var body: some View {
         GeometryReader { proxy in
@@ -157,7 +161,7 @@ struct HomeRoomView: View {
                 insets: EdgeInsets(top: insets.top, leading: 0, bottom: insets.bottom, trailing: 0)
             )
             ScrollView(.vertical) {
-                RoomCanvas(layout: layout, content: content, open: open)
+                RoomCanvas(layout: layout, content: content, open: open, openLook: openLook)
             }
             .scrollDisabled(!layout.scrolls)
             .scrollIndicators(.hidden)

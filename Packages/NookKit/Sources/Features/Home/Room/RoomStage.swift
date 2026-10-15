@@ -66,6 +66,15 @@ nonisolated enum RoomStage {
     static let savedLooks = CGRect(x: 252.4, y: 94, width: 132, height: 44)
     static let savedPlate = CGRect(x: 252.4, y: 101, width: 132, height: 30)
     static let framedLooks = CGRect(x: 266, y: 154, width: 104, height: 62)
+    /// Inside each frame's card, where a saved look's pieces sit (`.card-ov` in `home.html`).
+    static let frameWindows = [3.5, 38.7, 73.9].map { CGRect(x: 266 + $0, y: 158, width: 27, height: 55) }
+    /// Each frame's tap area: a column of the frames' strip, centred on its card. The cards are
+    /// 35.2 apart, so the columns meet without overlapping.
+    static let frameTargets = frameWindows.map { CGRect(x: $0.midX - 17.6, y: 154, width: 35.2, height: 62) }
+    /// In a frame window: the upper piece, the lower piece, or a dress (`data-box` in `home.html`).
+    static let frameUpper = CGRect(x: 2, y: 2, width: 23, height: 21)
+    static let frameLower = CGRect(x: 5, y: 22, width: 17, height: 31)
+    static let frameDress = CGRect(x: 2, y: 2, width: 23, height: 51)
     static let occasion = CGRect(x: 208, y: 313, width: 80, height: 45)
     /// The three desk drawers, top to bottom. Each drawer front is 80 x 44, 46 apart.
     static let drawers = [455.0, 501.0, 547.0].map { CGRect(x: 297, y: $0, width: 80, height: 44) }
