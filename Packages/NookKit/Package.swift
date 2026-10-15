@@ -76,6 +76,7 @@ let package = Package(
             ],
             exclude: [
                 "Home/__Snapshots__", "Closet/__Snapshots__", "Garment/__Snapshots__", "AddPiece/__Snapshots__",
+                "Looks/__Snapshots__",
             ],
             swiftSettings: strictSettings
         ),

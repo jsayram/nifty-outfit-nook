@@ -29,8 +29,13 @@
         @State private var appearance = AppearanceChoice.system
         @State private var textSize = TextSizeChoice.system
         @State private var stickers = StickerCache()
+        private let extraPages: [NookCatalogPage]
 
-        public init() {}
+        /// - Parameter extraPages: pages from other modules, shown after the components. Features
+        ///   adds its look bundles this way, since DesignSystem can't see garments.
+        public init(extraPages: [NookCatalogPage] = []) {
+            self.extraPages = extraPages
+        }
 
         public var body: some View {
             NavigationStack {
@@ -46,6 +51,16 @@
                                 demo.content
                             }
                             .accessibilityIdentifier("catalog.\(demo.rawValue)")
+                        }
+                        ForEach(extraPages) { page in
+                            VStack(alignment: .leading, spacing: NookSpacing.medium) {
+                                Text(page.title)
+                                    .nookTextStyle(.lookTitle)
+                                    .foregroundStyle(.nook.textPrimary)
+                                    .accessibilityAddTraits(.isHeader)
+                                page.content
+                            }
+                            .accessibilityIdentifier("catalog.\(page.id)")
                         }
                     }
                     .padding(.horizontal, NookSpacing.screenMargin)
@@ -91,6 +106,19 @@
             case .light: .light
             case .dark: .dark
             }
+        }
+    }
+
+    /// A catalog page from another module.
+    public struct NookCatalogPage: Identifiable {
+        public let id: String
+        public let title: String
+        public let content: AnyView
+
+        public init(id: String, title: String, @ViewBuilder content: () -> some View) {
+            self.id = id
+            self.title = title
+            self.content = AnyView(content())
         }
     }
 

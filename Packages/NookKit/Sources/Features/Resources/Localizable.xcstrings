@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ (not in your closet)" : {
+      "comment" : "Spoken name of a look's piece she doesn't own",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (not in your closet)"
+          }
+        }
+      }
+    },
     "%@ and %@" : {
       "comment" : "Today's weather: a temperature and a condition, as in 58° and rain",
       "localizations" : {
@@ -100,6 +111,17 @@
         }
       }
     },
+    "%@, %@" : {
+      "comment" : "Spoken row in a look's piece list: the piece's name, then a mark such as Same as Simple",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
     "%@, optional" : {
       "comment" : "VoiceOver name of an optional field, like Brand, optional",
       "localizations" : {
@@ -107,6 +129,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, optional"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "comment" : "Spoken for a look bundle: the look's title, then its pieces, as in Look: Black tee, Jeans",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: %@"
+          }
+        }
+      }
+    },
+    "%@: no pieces" : {
+      "comment" : "Spoken for a look with no pieces left. The look's title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: no pieces"
           }
         }
       }
@@ -1136,6 +1180,28 @@
         }
       }
     },
+    "Find one" : {
+      "comment" : "Button on a look's piece she doesn't own",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find one"
+          }
+        }
+      }
+    },
+    "Find one like %@" : {
+      "comment" : "Spoken label of Find one, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find one like %@"
+          }
+        }
+      }
+    },
     "Fit" : {
       "comment" : "Garment fact label: how it's cut",
       "localizations" : {
@@ -1819,6 +1885,17 @@
         }
       }
     },
+    "Look" : {
+      "comment" : "Spoken before a look's pieces when it has no name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look"
+          }
+        }
+      }
+    },
     "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it." : {
       "comment" : "Describe in words: under the suggestions",
       "localizations" : {
@@ -2090,6 +2167,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not in a saved look yet"
+          }
+        }
+      }
+    },
+    "Not in your closet" : {
+      "comment" : "Tag on a look's piece she doesn't own",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not in your closet"
           }
         }
       }
@@ -2706,6 +2794,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resume"
+          }
+        }
+      }
+    },
+    "Same as Simple" : {
+      "comment" : "Mark on a piece also in the Simple version",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as Simple"
           }
         }
       }
