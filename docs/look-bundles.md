@@ -41,7 +41,7 @@ Tests (`StickerBundleLayoutTests`) run every mix of 2 to 6 pieces, kinds repeati
 
 ## The piece list
 
-`LookPieceList(content:showsSameAsSimple:onFindOne:)` is the text list under a bundle (RD-07), on a soft tint with no lines between rows. A piece she doesn't own says "Not in your closet", and with `onFindOne` gets a Find one button (spoken "Find one like Camel blazer"). With `showsSameAsSimple`, pieces shared with the Simple version say "Same as Simple". An idea's tag sits under its name so Find one keeps its room. At the accessibility text sizes the marks and the button move under the name too. Swapped and Added marks wait for 10b, which knows the other versions.
+`LookPieceList(content:showsSameAsSimple:onFindOne:)` is the text list under a bundle (RD-07), on a soft tint with no lines between rows. A piece she doesn't own says "Not in your closet", and with `onFindOne` gets a Find one button (spoken "Find one like Camel blazer"). With `showsSameAsSimple`, pieces shared with the Simple version say "Same as Simple", and `changes` (Phase 10b) marks the others "Swapped" or "Added", in words. An idea's tag sits under its name so Find one keeps its room. At the accessibility text sizes the marks and the button move under the name too. Your looks (10b) works out Swapped and Added, since it knows Simple.
 
 ## Catalog
 

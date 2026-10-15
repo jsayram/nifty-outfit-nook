@@ -1,6 +1,6 @@
 # Style Me request
 
-Phase 10a, 14 October 2026. Style Me is the screen the desk laptop opens (RD-02): one calm column with the request, the options for this request, and one Style me button. Phase 10a builds the request; Your looks, the results, come in 10b.
+Phase 10a, 14 October 2026. Style Me is the screen the desk laptop opens (RD-02): one calm column with the request, the options for this request, and one Style me button. Phase 10a builds the request; Your looks, the results, came in 10b (`docs/your-looks.md`).
 
 Spec: amendment RD-02, LR-03 (Preferences), LR-04 (Weather), LR-18 (the Comfort line), decision 2 (Style with this); PRD §8.1 (sources and strict suitcases), §8.3 (today's comfort and colour), FR-03, FR-05, FR-48 and FR-67. The visual reference is `styleme.html` in `closet/prototypes/RoomDirectionMockups/screens`, with Lily's sign-off sheet where they differ ("Preferences", not "Mode"; the Weather row).
 
@@ -15,7 +15,6 @@ Spec: amendment RD-02, LR-03 (Preferences), LR-04 (Weather), LR-18 (the Comfort 
 | `Features/StyleMe/StyleMePage.swift` | The page: request cards, option rows, notices and the Style me button |
 | `Features/StyleMe/StyleMeSheets.swift` | The sheets: Source, Occasion, Starting piece, Comfort, Colour, Preferences |
 | `Features/StyleMe/StyleMeScreen.swift` | Navigation, the sheets and Style me |
-| `Features/StyleMe/StyleRequestSummary.swift` | The stand-in results: the request in words, and as JSON in Debug builds |
 | `Features/StyleMe/WeatherRow.swift`, `WeatherRowContent.swift` | The Weather row and its sheet, from Phase 5a, unchanged |
 
 ## The screen
@@ -66,7 +65,7 @@ Weather that can't be read isn't an issue: the Weather row says so and Style me 
 
 ## Style me
 
-Opening Style Me sends nothing; only the button does (RD-02.1). In 10a the button builds the request and opens a stand-in for Your looks that shows it in words: source, occasion, starting piece, weather, comfort, colour, Preferences, and whether a new-piece idea is allowed. Debug builds also show the request as JSON under "Request preview", for the checkpoint. It's shown on screen only and never logged, since it can hold today's comfort (Sensitive). The request holds IDs, not names: no suitcase name, piece name or sign name goes into it (DATA_MAP.md).
+Opening Style Me sends nothing; only the button does (RD-02.1). The button builds the request and opens Your looks, which sends it (`docs/your-looks.md`). Coming back keeps every choice, and Your looks can send her back with the source set to Main closet. In 10a the button opened a stand-in that showed the request in words and as JSON; 10b replaced it. The request is never logged, since it can hold today's comfort (Sensitive). It holds IDs, not names: no suitcase name, piece name or sign name goes into it (DATA_MAP.md, `StyleMeModelTests.theRequestHoldsNoNames`).
 
 ## Accessibility
 
@@ -80,7 +79,6 @@ Opening Style Me sends nothing; only the button does (RD-02.1). In 10a the butto
 
 - `StyleRequestBuilderTests` and `StyleRequestDraftTests` (Models): the defaults, every option carried, weather choices, Other's words, sources of every size, every reason a starting piece can't be used, colour wishes by place, and the combinations test.
 - `StyleMeModelTests`: loading the demo, nothing sent until Style me (a counting stylist), every choice in the request, Style with this, a starting piece in the wash or outside the suitcase, each suitcase state, the empty closet, unreadable weather, a store failure, request scope, Preferences from her profile, and checking the large closet quickly.
-- `StyleRequestSummaryTests`: the summary rows, the JSON decoding back to the request, and no names in it.
 - `StyleMeSnapshotTests`: the default request in light, dark and AX5; every choice set; the empty closet, empty suitcase, small suitcase with problems, unreadable weather (dark) and error states; each sheet, the Colour sheet in dark, two sheets at AX5; the stand-in results.
 - `StyleMeTests` (UI): set every option from the laptop and check the results; the calendar's Occasion sheet with Other's words; an empty suitcase; the empty closet's Add a piece; Style with this into the request. `GarmentDetailTests` checks a piece in the wash can't start a look.
 
@@ -96,7 +94,7 @@ Opening Style Me sends nothing; only the button does (RD-02.1). In 10a the butto
 
 ## Left for later phases
 
-- **10b:** Your looks replaces the stand-in, calls the stylist with `StylingContext.make`, marks the suitcase as used, and shows partial, insufficient, failed and offline results.
+- **10b (done):** Your looks replaced the stand-in. It calls the stylist with `StylingContext.make`, marks the suitcase as used, and shows partial, insufficient, failed and offline results.
 - **13:** remembering the source (FR-67) and the occasion, Add pieces opening a real suitcase.
 - **14a:** her usual fit and Preferences in Profile.
 - **15a:** iPad layouts. Style Me already keeps to 600 points and centres.

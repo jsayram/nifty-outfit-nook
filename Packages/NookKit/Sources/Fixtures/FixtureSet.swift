@@ -34,6 +34,14 @@ public enum FixtureBehavior: String, CaseIterable, Sendable {
     case stylistFails = "stylist-fails"
     /// The stylist returns two versions instead of three.
     case stylistPartial = "stylist-partial"
+    /// The stylist says the source can't make a look (Phase 10b).
+    case stylistInsufficient = "stylist-insufficient"
+    /// The stylist never answers until it's cancelled, so Your looks stays on its styling
+    /// state (Phase 10b).
+    case stylistWaits = "stylist-waits"
+    /// The stylist is offline for the first request only, so Retry works, as if the
+    /// connection came back (Phase 10b). Weather and stores work.
+    case offlineOnce = "offline-once"
     /// Every store call fails with `StoreError.unavailable`, for error states.
     case storesFail = "stores-fail"
     /// The Add a piece photo stand-in says the photo couldn't be read (Phase 7b).

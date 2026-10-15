@@ -108,6 +108,18 @@ struct StyleMeModelTests {
         #expect(text.preferencesValue == "Only mine")
     }
 
+    /// No names go into the request: the suitcase and the piece are IDs only (DATA_MAP.md).
+    @Test func theRequestHoldsNoNames() async throws {
+        let model = await loadedStyleMe(startingPieceID: "g-navy-trousers")
+        model.choose(source: .suitcase("s-jose"))
+        let request = try #require(model.makeRequest(id: "r-1", now: ClosetTestTime.now))
+        let json = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
+        #expect(json.contains("s-jose"))
+        #expect(!json.contains("Jose"))
+        #expect(!json.contains("Navy dress pants"))
+        #expect(!json.contains("Lily"))
+    }
+
     /// "Style me with it" from garment detail: the piece is the starting piece.
     @Test func styleWithThisSetsTheStartingPiece() async throws {
         let model = await loadedStyleMe(startingPieceID: "g-navy-trousers")

@@ -55,6 +55,24 @@ public struct StyleRequest: Identifiable, Hashable, Sendable, Codable {
         self.createdAt = createdAt
     }
 
+    /// The same choices as a new request, for Try a different outfit (LR-05a.4): one more styling
+    /// request with its own ID.
+    public func again(id: ID, createdAt: Date) -> StyleRequest {
+        StyleRequest(
+            id: id,
+            source: source,
+            occasion: occasion,
+            occasionNote: occasionNote,
+            weatherChoice: weatherChoice,
+            weather: weather,
+            comfort: comfort,
+            color: color,
+            preferences: preferences,
+            startingPieceID: startingPieceID,
+            createdAt: createdAt
+        )
+    }
+
     /// Whether Something new may add one piece she doesn't own.
     ///
     /// Only with Mine + one idea and the main closet. A suitcase source always styles from owned

@@ -52,7 +52,7 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 - `partial(StyleResult, missing:)`: one or two versions, each missing one with a reason (no dressier piece, no other owned piece);
 - `insufficient(InsufficientWardrobe)`: no valid outfit, with the kinds of piece that are missing.
 
-A `StyleResult` has the versions, ranked owned alternatives per piece (for Swap and Show 3 more), and quiet notes ("You wore this last week", "Something new stays owned in a suitcase", "weather unavailable"). A failure to finish is not an outcome: the stylist throws `StylistError` (not completed, offline, timed out, cancelled), so a model or network problem can never be shown as "your closet is too small".
+A `StyleResult` has the versions, ranked owned alternatives per piece (for Swap and Show 3 more), and quiet notes ("You wore this last week", "Something new stays owned in a suitcase", "weather unavailable", and since 10b a required colour nothing could meet, and "every outfit has been shown"). A failure to finish is not an outcome: the stylist throws `StylistError` (not completed, offline, timed out, cancelled), so a model or network problem can never be shown as "your closet is too small".
 
 ## The rules
 
@@ -61,7 +61,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | Rule | What it decides | Spec |
 |---|---|---|
 | `Eligibility` | Which pieces may be styled: owned or arrived, not deleted, archived or unavailable, not dirty while tracking, and inside the suitcase | PRD §8.1, RD-11.2, LR-12.1 |
-| `StylingContext.make` | Builds what the stylist gets: the request, eligible pieces from the source, and main-piece combinations worn inside the repeat window. Rejects a missing or archived suitcase and an unusable starting piece | PRD §8.1, LR-10 |
+| `StylingContext.make` | Builds what the stylist gets: the request, eligible pieces from the source, main-piece combinations worn inside the repeat window, and (since 10b) those already shown for this request, so Try a different outfit gets a new base. Rejects a missing or archived suitcase and an unusable starting piece | PRD §8.1, LR-10, LR-05a.4 |
 | `WearRules` | Calendar-day wear windows (1 week = today and the 6 days before), one wear per day, Undo, and recent main-piece combinations (tops, bottoms, dresses; shoes and single favourites can repeat) | LR-10 |
 | `ResultCheck` | Checks a result before it's shown: Simple present, 2 to 6 pieces, only eligible pieces, ideas only in Something new and only when allowed, at most one, the starting piece in every version, every version shares a piece with Simple, "Same as Simple" marks right | PRD §8, LR-05a, LR-05b |
 | `SuitcaseShelf` | Three favourites by most recent use, See all only above three, archived only under their filter | RD-09, LR-17 |
@@ -133,6 +133,9 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | `offline` | The stylist throws `offline` and weather can't be read; local stores still work |
 | `stylist-fails` | The stylist throws `notCompleted` |
 | `stylist-partial` | The stylist returns Simple and Dressed up only |
+| `stylist-insufficient` | The stylist says the source can't make a look (a bottom and shoes missing) |
+| `stylist-waits` | The stylist never answers until cancelled, for Your looks' styling state |
+| `offline-once` | The first styling request fails as offline and later ones work, as if the connection came back. Weather and stores work |
 | `stores-fail` | Every store call throws `unavailable` (error states) |
 | `photo-fails` | Add a piece's photo stand-in says the photo couldn't be read |
 
@@ -144,7 +147,7 @@ Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample pi
 
 Dates in the demo and large sets are relative to launch time, so "Last worn" reads naturally; tests pass a fixed date.
 
-The **mock stylist** is deterministic and uses plain matching on stored facts only: occasion tags, season, warmth against the temperature, fit against comfort, and the colour wish where she asked for it (a required colour counts the same as a preferred one for now; 10b decides how a result says it couldn't be met). It pairs the best-matching main pieces with shoes, adds a layer in rain or cool weather, skips main-piece combinations worn inside the repeat window, swaps in a dressier owned piece for Dressed up, and adds one idea (or swaps another owned piece) for Something new. It has no real fit or styling rules; those stay in the private backend.
+The **mock stylist** is deterministic and uses plain matching on stored facts only: occasion tags, season, warmth against the temperature, fit against comfort, and the colour wish where she asked for it (a required colour counts the same as a preferred one when matching; since 10b a result says when a required colour couldn't be met). It pairs the best-matching main pieces with shoes, adds a layer in rain or cool weather, skips main-piece combinations worn inside the repeat window, swaps in a dressier owned piece for Dressed up, and adds one idea (or swaps another owned piece) for Something new. For Try a different outfit it starts from a base not shown yet, and says so when every base has been shown. It has no real fit or styling rules; those stay in the private backend.
 
 Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in Debug: generating the large set 36 ms, five filters over it 35 ms, building a styling context 6 ms, styling 41 ms. The tests allow 1 s, 500 ms, 500 ms and 500 ms, so a failure means something got many times slower. Each check takes the fastest of three runs and allows three times as long on CI, after two checks went over once on a busy CI runner (a context build took 862 ms there, against 6 ms locally).
 

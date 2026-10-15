@@ -40,6 +40,25 @@ struct StyleRequestTests {
             condition: .snow, temperatureCelsius: -2, isNight: true, observedAt: TestTime.now)
         #expect(try JSONDecoder().decode(StyleRequest.self, from: JSONEncoder().encode(request)) == request)
     }
+
+    /// LR-05a.4: Try a different outfit is a new request with the same choices.
+    @Test func againKeepsEveryChoiceWithANewID() {
+        var request = Make.request(source: .suitcase("s-1"), startingPieceID: "g-1")
+        request.comfort = .fitted
+        request.color = ColorWish(.navy, strength: .required, scope: .shoes)
+        request.occasion = .other
+        request.occasionNote = "Museum visit"
+        request.weatherChoice = .indoors
+        let later = TestTime.day(1)
+        let again = request.again(id: "req-2", createdAt: later)
+        #expect(again.id == "req-2")
+        #expect(again.createdAt == later)
+        let expected = StyleRequest(
+            id: request.id, source: again.source, occasion: again.occasion, occasionNote: again.occasionNote,
+            weatherChoice: again.weatherChoice, weather: again.weather, comfort: again.comfort, color: again.color,
+            preferences: again.preferences, startingPieceID: again.startingPieceID, createdAt: request.createdAt)
+        #expect(expected == request)
+    }
 }
 
 struct StylingContextTests {
@@ -70,6 +89,15 @@ struct StylingContextTests {
     @Test func mainClosetUsesEveryEligiblePieceInIDOrder() throws {
         let context = try make(Make.request())
         #expect(context.eligibleGarments.map(\.id) == ["g-bottom", "g-dirty", "g-shoes", "g-top"])
+    }
+
+    @Test func carriesTheBasesAlreadyShown() throws {
+        let shown: Set<Set<Garment.ID>> = [["g-top", "g-bottom"]]
+        let context = try StylingContext.make(
+            request: Make.request(), garments: garments, suitcases: suitcases, looks: [], usualFit: nil,
+            shown: shown, now: TestTime.now, calendar: TestTime.calendar)
+        #expect(context.shownCombinations == shown)
+        #expect(try make(Make.request()).shownCombinations.isEmpty)
     }
 
     @Test func trackingLaundryDropsDirtyPieces() throws {

@@ -2,8 +2,8 @@ import XCTest
 
 /// The Style Me request (Phase 10a, RD-02): opening it from the laptop, the calendar and a
 /// garment's Style with this, setting each option in its sheet, the states that stop it, and
-/// Style me leading to the stand-in results with the request. The words and rules are covered by
-/// the package tests; these check the real screen, sheets and navigation.
+/// Style me leading to Your looks with the request. The words and rules are covered by the
+/// package tests; these check the real screen, sheets and navigation.
 final class StyleMeTests: XCTestCase {
     static let wait: TimeInterval = 15
 
@@ -59,25 +59,16 @@ final class StyleMeTests: XCTestCase {
         XCTAssertTrue(waitForLabel(of: source, containing: "Weekend"), source.label)
         XCTAssertTrue(occasion.label.contains("Brunch"))
 
-        // Style me: the stand-in results show the request.
+        // Style me: Your looks repeats the request (LR-05a), and Only mine from a suitcase means
+        // Something new has no piece she doesn't own (LR-05b.2).
         tap("styleMe.go", in: app)
         XCTAssertTrue(app.navigationBars["Your looks"].waitForExistence(timeout: Self.wait))
-        let expected = [
-            ("summary.source", "Weekend · Suitcase only"),
-            ("summary.occasion", "Brunch"),
-            ("summary.weather", "Indoors"),
-            ("summary.comfort", "Fitted"),
-            ("summary.color", "Navy · shoes · required"),
-            ("summary.preferences", "Only mine"),
-            ("summary.newPieceIdea", "Not in this request"),
-        ]
-        for (identifier, value) in expected {
-            let row = element(identifier, in: app)
-            XCTAssertTrue(row.waitForExistence(timeout: Self.wait), "No \(identifier)")
-            XCTAssertTrue(row.label.contains(value), "\(identifier): \(row.label)")
-        }
-        // Debug builds show the request as JSON.
-        XCTAssertTrue(element("styleMe.requestJSON", in: app).waitForExistence(timeout: Self.wait))
+        let line = element("results.request", in: app)
+        XCTAssertTrue(line.waitForExistence(timeout: Self.wait))
+        XCTAssertEqual(line.label, "Brunch · Weekend · Indoors")
+        tap("results.version.somethingNew", in: app)
+        let description = element("results.versionDescription", in: app)
+        XCTAssertTrue(waitForLabel(of: description, containing: "another way with your own pieces"), description.label)
 
         // Back on Style Me, every choice is still there.
         app.navigationBars["Your looks"].buttons.firstMatch.tap()
@@ -144,10 +135,10 @@ final class StyleMeTests: XCTestCase {
         let start = app.buttons["styleMe.startingPiece"]
         XCTAssertTrue(start.waitForExistence(timeout: Self.wait))
         XCTAssertTrue(waitForLabel(of: start, containing: "Navy dress pants"), start.label)
+        // Every version is built around it.
         tap("styleMe.go", in: app)
-        let row = element("summary.startingPiece", in: app)
-        XCTAssertTrue(row.waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(row.label.contains("Navy dress pants"), row.label)
+        let piece = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Navy dress pants")).firstMatch
+        XCTAssertTrue(piece.waitForExistence(timeout: Self.wait), "The starting piece isn't in the look")
     }
 
     // MARK: Helpers

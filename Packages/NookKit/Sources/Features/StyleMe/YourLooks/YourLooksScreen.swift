@@ -1,0 +1,164 @@
+import DesignSystem
+import Models
+import SwiftUI
+
+/// Where Your looks' ways out lead. Style Me, which pushed it, supplies them.
+struct YourLooksRoutes {
+    /// Back to Style Me with every choice kept.
+    var backToStyleMe: () -> Void = {}
+    /// Back to Style Me with the source set to Main closet (a partial result from a suitcase).
+    var useMainCloset: () -> Void = {}
+    /// Add a piece, or a suitcase's pieces, when the source can't make a look.
+    var addPieces: (WardrobeSource) -> Void = { _ in }
+}
+
+/// Your looks: what Style me opens (LR-05a, LR-05b, LR-06, RD-06).
+///
+/// The request goes to the stylist when the screen first appears, and leaving the screen
+/// cancels it if it's still running. Saving happens here, with Undo. Try it on, Swap a piece, Ask
+/// stylist and Find one open stand-ins until their phases (12b and 33, 11, later, 34).
+struct YourLooksScreen: View {
+    var routes = YourLooksRoutes()
+
+    @Environment(\.services) private var services
+    @Environment(\.locale) private var locale
+    @State private var model: YourLooksModel
+    @State private var stub: ResultStub?
+    @State private var toast: NookToastMessage?
+
+    init(request: StyleRequest, routes: YourLooksRoutes = YourLooksRoutes()) {
+        self.routes = routes
+        _model = State(initialValue: YourLooksModel(request: request))
+    }
+
+    var body: some View {
+        YourLooksPage(
+            model: model,
+            actions: YourLooksActions(
+                toggleSave: toggleSave,
+                tryOn: { stub = .tryOn($0.id) },
+                swap: { stub = .swap($0.id) },
+                askStylist: { stub = .askStylist($0.id) },
+                findOne: { stub = .findOne(pieceName: $0.name) },
+                tryDifferentOutfit: { model.tryDifferentOutfit() },
+                retry: { model.retry() },
+                cancel: cancel,
+                backToStyleMe: routes.backToStyleMe,
+                useMainCloset: routes.useMainCloset,
+                addPieces: { routes.addPieces(model.request.source) },
+                openSaved: { stub = .saved($0.id) },
+                reloadSaved: { Task { await model.reloadLooks() } }
+            )
+        )
+        .navigationTitle(Text("Your looks", bundle: .module, comment: "Screen title"))
+        .navigationBarTitleDisplayMode(.inline)
+        .nookSheet(item: $stub, title: { sheetTitle($0) }, subtitle: { $0.subtitle }) { stub in
+            sheetContent(stub)
+        }
+        // The page's scroll view runs under the floating tab bar, so the toast sits on a clear
+        // layer that keeps to the safe area and stays above the tab bar.
+        .overlay {
+            Color.clear
+                .nookToast($toast)
+        }
+        .task {
+            model.start(with: services)
+        }
+        .onDisappear {
+            // Leaving stops a request that's still running (Cancel generation on leaving).
+            model.cancel()
+        }
+        .onChange(of: model.status) { old, new in
+            announce(from: old, to: new)
+        }
+        .onChange(of: model.version) {
+            guard let look = model.currentLook else { return }
+            let title = YourLooksText.title(of: model.shownVersion)
+            let description = YourLooksText.description(of: model.shownVersion, hasIdea: !look.ideas.isEmpty)
+            AccessibilityNotification.Announcement("\(title). \(description)").post()
+        }
+    }
+
+    // MARK: Sheets
+
+    private func sheetTitle(_ stub: ResultStub) -> String {
+        if case .saved(let id) = stub, let name = model.looks.first(where: { $0.id == id })?.name {
+            return name
+        }
+        return stub.title
+    }
+
+    @ViewBuilder
+    private func sheetContent(_ stub: ResultStub) -> some View {
+        if case .saved(let id) = stub, let look = model.looks.first(where: { $0.id == id }) {
+            SavedLookSheet(look: look, garments: model.garments) { piece in
+                self.stub = .findOne(pieceName: piece.name)
+            }
+        } else {
+            ResultStubContent(stub: stub)
+        }
+    }
+
+    // MARK: Actions
+
+    private func cancel() {
+        let hadResult = model.result != nil
+        model.cancel()
+        if !hadResult { routes.backToStyleMe() }
+    }
+
+    private func toggleSave(_ look: Look) {
+        let text = YourLooksText(request: model.request, suitcaseName: model.suitcaseName, locale: locale)
+        let name = text.name(for: look, garments: model.garments)
+        Task {
+            do {
+                let change = try await model.toggleSave(look, name: name)
+                let message: String =
+                    switch change {
+                    case .saved: YourLooksText.saved
+                    case .unsaved: YourLooksText.unsaved
+                    }
+                toast = NookToastMessage(
+                    message, systemImage: change == .saved(look.id) ? "heart.fill" : "heart",
+                    actionTitle: YourLooksText.undo,
+                    action: { undo(change, name: name) })
+            } catch {
+                toast = NookToastMessage(YourLooksText.saveFailed, systemImage: "exclamationmark.circle")
+            }
+        }
+    }
+
+    private func undo(_ change: YourLooksModel.SaveChange, name: String) {
+        Task {
+            do {
+                try await model.undo(change, name: name)
+            } catch {
+                toast = NookToastMessage(YourLooksText.saveFailed, systemImage: "exclamationmark.circle")
+            }
+        }
+    }
+
+    /// Says when the looks are ready, or what happened, for VoiceOver.
+    private func announce(from old: YourLooksModel.Status, to new: YourLooksModel.Status) {
+        guard case .styling = old else { return }
+        let message: String? =
+            switch new {
+            case .showing:
+                model.problem == nil
+                    ? String(localized: "Your looks are ready.", bundle: .module, comment: "VoiceOver announcement")
+                    : nil
+            case .insufficient:
+                String(
+                    localized: "Not enough pieces for a look", bundle: .module,
+                    comment: "Your looks: insufficient wardrobe")
+            case .failed(.offline):
+                String(
+                    localized: "Styling needs a connection", bundle: .module, comment: "Your looks offline state title")
+            case .failed(.notCompleted):
+                String(localized: "Styling didn’t finish", bundle: .module, comment: "Your looks failed state title")
+            default:
+                nil
+            }
+        if let message { AccessibilityNotification.Announcement(message).post() }
+    }
+}
