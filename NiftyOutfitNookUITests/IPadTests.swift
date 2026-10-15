@@ -6,14 +6,8 @@ import XCTest
 ///
 /// Every test is skipped on an iPhone, so the class costs nothing in the phone runs. Run them on
 /// an iPad simulator: `NOOK_SIM_ID=<iPad udid> scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests`
-/// (see docs/ipad.md).
-final class IPadTests: XCTestCase {
-    static let wait: TimeInterval = 15
-
-    override func setUp() {
-        continueAfterFailure = false
-    }
-
+/// (see docs/ipad.md). The helpers are in `IPadTestCase`.
+final class IPadTests: IPadTestCase {
     /// RD-01.6: the tab bar sits at the bottom in both orientations, the room is the tall one
     /// upright and the wide one sideways, and turning the iPad keeps a pushed screen.
     @MainActor
@@ -130,67 +124,5 @@ final class IPadTests: XCTestCase {
         XCTAssertTrue(name.waitForExistence(timeout: Self.wait))
         XCTAssertEqual(name.label, "Navy dress pants")
         XCTAssertFalse(app.navigationBars["Navy dress pants"].exists)
-    }
-
-    // MARK: - Helpers
-
-    @MainActor
-    private func launch(orientation: UIDeviceOrientation) throws -> XCUIApplication {
-        guard UIDevice.current.userInterfaceIdiom == .pad else {
-            throw XCTSkip("iPad layouts are checked on an iPad simulator.")
-        }
-        XCUIDevice.shared.orientation = orientation
-        let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo"]
-        app.launch()
-        // A window size left by an earlier run survives a relaunch, so start full screen.
-        // SpringBoard's frame is the screen in portrait.
-        let screen = XCUIApplication(bundleIdentifier: "com.apple.springboard").frame.size
-        let long = max(screen.width, screen.height)
-        let short = min(screen.width, screen.height)
-        resize(app, toWidth: orientation.isLandscape ? long : short)
-        return app
-    }
-
-    /// Drags the window's bottom-right corner. iPadOS 26 resizes a window about its centre, so
-    /// the corner moves half the change in width. Stops when the width is within 8 points.
-    @MainActor
-    private func resize(_ app: XCUIApplication, toWidth target: CGFloat) {
-        let origin = app.coordinate(withNormalizedOffset: .zero)
-        for _ in 0..<4 {
-            let frame = app.windows.firstMatch.frame
-            guard abs(frame.width - target) >= 8 else { return }
-            let corner = origin.withOffset(CGVector(dx: frame.maxX - 5, dy: frame.maxY - 5))
-            let goal = origin.withOffset(CGVector(dx: frame.maxX - 5 + (target - frame.width) / 2, dy: frame.maxY - 5))
-            corner.press(forDuration: 0.4, thenDragTo: goal)
-            _ = app.windows.firstMatch.waitForExistence(timeout: 2)
-        }
-    }
-
-    @MainActor
-    private func assertTabBarAtTheBottom(in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
-        let bar = app.tabBars.firstMatch
-        XCTAssertTrue(bar.waitForExistence(timeout: Self.wait), "No tab bar", file: file, line: line)
-        let window = app.windows.firstMatch.frame
-        XCTAssertGreaterThan(bar.frame.minY, window.midY, "The tab bar isn't at the bottom", file: file, line: line)
-    }
-
-    @MainActor
-    private func room(_ kind: String, in app: XCUIApplication) -> XCUIElement {
-        element("home.room.\(kind)", in: app)
-    }
-
-    @MainActor
-    private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any)[identifier].firstMatch
-    }
-}
-
-extension XCUIElement {
-    /// Waits until a tab or other selectable button says it's selected.
-    @MainActor
-    fileprivate func waitUntilSelected(timeout: TimeInterval) -> Bool {
-        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: self)
-        return XCTWaiter().wait(for: [selected], timeout: timeout) == .completed
     }
 }
