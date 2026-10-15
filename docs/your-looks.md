@@ -35,7 +35,7 @@ Top to bottom, as in `results-versions.html`:
 |---|---|
 | Save look | Saves the version on screen and names it, then says "Saved to Saved Looks" with Undo. The button becomes Saved; tapping it takes the look out again, also with Undo. An idea piece stays an idea (LR-05b.3) |
 | Try it on | A stand-in sheet labelled Simulated. Real simulated pictures are Phases 12b and 33 |
-| Swap a piece | A stand-in sheet. Swap is Phase 11 |
+| Swap a piece | Swap a piece on the version on screen (Phase 11, `docs/swap-and-editor.md`). A swap or Remove this piece comes back here marked "Swapped", with Undo in a toast and under the pieces |
 | Ask stylist | A stand-in sheet. RD-06 keeps Ask stylist on results; there's still no Ask stylist link on swap |
 | Find one | A stand-in sheet: "Nothing was searched" (LR-05b.4). Phase 34 |
 | Try a different outfit | One more request with the same choices and a new ID. All three versions are replaced and Simple is selected again (LR-05a.4) |
@@ -100,7 +100,7 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 
 ## Left for later phases
 
-- **11:** Swap a piece and Remove this piece, with Undo.
+- **11 (done):** Swap a piece and Remove this piece, with Undo (`docs/swap-and-editor.md`).
 - **12a:** Saved Looks and look detail, renaming, Wear today.
 - **12b, 33:** Try it on with simulated, then real, pictures.
 - **15a:** iPad results with the versions beside the look. The page keeps to 600 points and centres.

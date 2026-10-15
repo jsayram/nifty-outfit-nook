@@ -38,6 +38,8 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 
 A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a described piece she doesn't own, shown as "Not in your closet" with Find one. An idea never becomes owned by being in a look. Each piece records whether it's the same as in Simple ("Same as Simple", LR-05a.3).
 
+**LookDraft** (Personal, Phase 11). A look she started in Make your own look and hasn't saved: her name for it so far, the source, the pieces, the starting piece, when it was written. One at a time, in `LookDraftStore`. See `docs/swap-and-editor.md`.
+
 **Suitcase** (Personal). Name, icon (which drawing stands for it in the hall), the set of garment IDs it holds (it never copies a garment), `lastUsedAt`, archived, created. Favourites come from `lastUsedAt`.
 
 **Profile**. The sign name (Personal, may be empty), Preferences (Personal), usual fit, liked and avoided colours, and three Sensitive groups: body measurements (all optional, each with its unit), "pieces that fit you well" (LR-13), and the try-on photo. The doc comment on each field names its tier.
@@ -71,6 +73,10 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
 | `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker. `current` is 8a's proposal until the benchmark on her phone | RD-07, Phase 8a |
 | `GarmentArtChoice` | How a piece's picture shows: its drawing (no photo), its cutout (clean), or its photo in a tile (no cutout yet, or a concern) | RD-07, Phase 8b |
+| `SwapRanking` | Swap a piece's options: her pieces of the same kind she can wear from the look's source, good matches (occasion, weather, colours that sit with the rest) best first, weaker ones and outfits worn lately set aside for See all | LR-07, LR-10, Phase 11 |
+| `LookEditing` | One piece replaced or removed, as a new look that keeps its version, occasion, source and other pieces | FR-09, LR-08 |
+| `LookRules` | A hand-made or hand-changed look: 2 to 6 pieces, a dress or a top and a bottom, one of each kind in Make your own look, every piece wearable | RD-07.1, LR-08 |
+| `EditHistory` | Undo and Redo of whole values, up to 20 | PRD §7.3, LR-08.2 |
 | `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
 
 ## The store protocol
@@ -108,6 +114,9 @@ protocol GarmentDescriptionReader: Sendable { func suggestions(for: String) asyn
 
 // Phase 8a, cutouts
 protocol CutoutService: Sendable { func cutout(from: Data) async throws(CutoutError) -> CutoutResult }
+
+// Phase 11, Make your own look
+protocol LookDraftStore: Sendable { draft, save, discard }      // the one unsaved look
 ```
 
 `CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
@@ -141,7 +150,7 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 
 `photos=samples` adds eight pieces with drawn sample photos and stand-in cutouts, and an image provider (`SamplePhotoProvider`) that draws them, so stickers and tiles can be seen without real photos (Phase 8b, `docs/stickers.md`).
 
-`draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). Stage A drafts live in memory, so UI tests use it after a relaunch.
+`draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). `draft=look` puts a half-built Make your own look in the look draft store ("Pink for Friday": the pink shirt and the navy dress pants, Phase 11). Stage A drafts live in memory, so UI tests use it after a relaunch.
 
 Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample picture for every source, no permission asked) and `WordMatchDescriptionReader` (Describe in words, a deterministic word matcher on the phone with no style rules).
 
@@ -157,7 +166,7 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 - **Favourites and collections** (PRD §8.2) have no Stage A screen (RD-08), so no type yet.
 - **Find One, shopping and the fit check** (Phase 34). Wishlist pieces exist as an ownership state only.
 - **More than one colour.** Since 10a the request has one colour wish, preferred or required, with its place (PRD §8.3). Several colours at once, or explicit monochrome, can come later if Lily asks.
-- **Swap ranking.** The result carries ranked alternatives; the on-phone swap list (LR-07) is built in Phase 11 from the same stored facts.
+- **Swap ranking on the server.** Phase 11 ranks swaps on the phone with `SwapRanking` (plain matching on stored facts). The stylist's own `alternates` aren't used by Swap yet; better ranking that needs the private rules would be a server call later.
 
 ## Decisions for Jose
 

@@ -59,7 +59,7 @@ Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty
 - a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail` or `photo-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
-- `draft=` with `add` or `edit`, to start with an unsaved Add a piece or Edit draft, as if the app had been closed mid-way;
+- `draft=` with `add`, `edit` or `look`, to start with an unsaved Add a piece, Edit or Make your own look draft, as if the app had been closed mid-way;
 - `photos=samples`, to add eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`).
 
 For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, and no draft.
@@ -103,6 +103,7 @@ docs/stickers.md             Stickers and the photo tile: choosing, drawing, cac
 docs/look-bundles.md         Look bundles: the flat-lay layout, the view, the piece list and the idea tag.
 docs/style-me.md             The Style Me request: the screen, its sheets and the checks.
 docs/your-looks.md           Your looks: one outfit in three versions, the Saved tab, saving and every styling state.
+docs/swap-and-editor.md      Swap a piece (ranking, See all, Remove and Undo) and Make your own look with its draft.
 website/                     The app's static website.
 ```
 
