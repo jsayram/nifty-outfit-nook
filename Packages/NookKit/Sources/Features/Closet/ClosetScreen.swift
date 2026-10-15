@@ -13,18 +13,33 @@ import SwiftUI
 ///
 /// When she removes a piece on its detail, Closet goes back to the grid and shows a toast with
 /// Undo (LR-16.1).
+///
+/// In a wide window (iPad, Phase 15a) a piece's detail shows beside the grid instead of over
+/// it, and from 1,080 points the filters move into a sidebar (`WindowLayout.closet`). Every
+/// other screen still opens over the whole width. Changing between layouts keeps what's open:
+/// a piece beside the grid becomes a pushed detail in a narrow window, and back again.
 struct ClosetScreen: View {
     @Environment(\.services) private var services
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model = ClosetModel()
     /// Kept by the root view, so another tab can open Suitcases or Laundry here (Phase 13).
     @Binding var path: [ClosetDestination]
     @State private var toast: NookToastMessage?
     /// Bumped after Undo on a deleted suitcase, so Suitcases reads its list again.
     @State private var suitcaseChanges = 0
+    /// The window's width, which picks the layout.
+    @State private var width: CGFloat = 0
+    /// The piece showing beside the grid, in the wide layouts.
+    @State private var current: CurrentPiece?
+
+    private var layout: ClosetLayout {
+        WindowLayout.closet(width: width, horizontalSizeClass: horizontalSizeClass, dynamicTypeSize: dynamicTypeSize)
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
-            ClosetPage(model: model, open: { path.append($0) }, retry: reload, discardDraft: discardDraft)
+            root
                 .navigationTitle(Text("Closet", bundle: .module, comment: "Navigation title on Closet"))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -62,11 +77,67 @@ struct ClosetScreen: View {
                 }
                 .navigationDestination(for: ClosetDestination.self, destination: screen)
         }
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { width = $0 })
+        .onChange(of: layout) { old, new in keepWhatsOpen(from: old, to: new) }
         .nookToast($toast)
         .task { await model.load(from: services) }
         .onChange(of: path) { old, new in
             // Back from a pushed screen: it may have changed a piece.
             if new.count < old.count { reload() }
+        }
+    }
+
+    // MARK: - Layouts
+
+    private var root: some View {
+        ClosetColumns(layout: layout, width: width, page: page) { detail }
+    }
+
+    private func page(_ part: ClosetPage.Part) -> some View {
+        ClosetPage(
+            model: model, open: open, retry: reload, discardDraft: discardDraft, part: part,
+            current: layout.showsDetailBeside ? current?.id : nil, opensBeside: layout.showsDetailBeside)
+    }
+
+    /// The piece beside the grid, or a quiet note until she picks one.
+    @ViewBuilder private var detail: some View {
+        if let current {
+            GarmentDetailScreen(
+                garmentID: current.id, name: current.name, open: { path.append($0) },
+                back: { self.current = nil }, removed: pieceRemoved, isBeside: true
+            )
+            .id(current.id)
+        } else {
+            ClosetDetailPlaceholder()
+        }
+    }
+
+    /// A piece opens beside the grid in the wide layouts, and over it otherwise.
+    private func open(_ destination: ClosetDestination) {
+        if layout.showsDetailBeside, case .garment(let id, let name) = destination {
+            current = CurrentPiece(id: id, name: name)
+        } else {
+            path.append(destination)
+        }
+    }
+
+    /// Turning the iPad or resizing the window keeps what she's looking at (PRD §7.2): a piece
+    /// beside the grid is pushed when the window gets narrow, and a pushed piece moves back
+    /// beside the grid when it gets wide again.
+    private func keepWhatsOpen(from old: ClosetLayout, to new: ClosetLayout) {
+        switch (old.showsDetailBeside, new.showsDetailBeside) {
+        case (true, false):
+            if let current, path.isEmpty {
+                path = [.garment(current.id, name: current.name)]
+            }
+            current = nil
+        case (false, true):
+            if path.count == 1, case .garment(let id, let name) = path[0] {
+                current = CurrentPiece(id: id, name: name)
+                path = []
+            }
+        default:
+            break
         }
     }
 
@@ -167,6 +238,9 @@ struct ClosetScreen: View {
         if case .garment(let id, _) = path.last, id == removal.garmentID {
             path.removeLast()
         }
+        if current?.id == removal.garmentID {
+            current = nil
+        }
         reload()
         guard let closet = services?.closet else { return }
         toast = NookToastMessage(
@@ -179,6 +253,68 @@ struct ClosetScreen: View {
             }
         }
     }
+}
+
+/// Closet's columns for a layout (Phase 15a): the page alone, the page with the detail beside
+/// it, or the sidebar, the grid and the detail. Separate from the screen so snapshot tests can
+/// draw each layout from a model.
+struct ClosetColumns<Page: View, Detail: View>: View {
+    let layout: ClosetLayout
+    /// The window's width, which sets the columns' widths.
+    let width: CGFloat
+    let page: (ClosetPage.Part) -> Page
+    @ViewBuilder let detail: Detail
+
+    var body: some View {
+        switch layout {
+        case .stack:
+            page(.whole)
+        case .pageAndDetail:
+            HStack(alignment: .top, spacing: 0) {
+                page(.whole)
+                detailColumn
+            }
+        case .sidebar:
+            HStack(alignment: .top, spacing: 0) {
+                page(.sidebar)
+                    .frame(width: WindowLayout.closetSidebarWidth(for: width))
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("closet.sidebar")
+                page(.grid)
+                detailColumn
+            }
+        }
+    }
+
+    private var detailColumn: some View {
+        detail
+            .frame(width: WindowLayout.closetDetailWidth(for: width))
+            .frame(maxHeight: .infinity, alignment: .top)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("closet.detail")
+    }
+}
+
+/// Beside the grid before she picks a piece.
+struct ClosetDetailPlaceholder: View {
+    var body: some View {
+        NookEmptyState(
+            String(localized: "Pick a piece", bundle: .module, comment: "Beside Closet's grid on iPad"),
+            message: String(
+                localized: "Its details show here, next to your closet.", bundle: .module,
+                comment: "Beside Closet's grid on iPad, before she picks a piece"),
+            systemImage: "hanger"
+        )
+        .padding(.horizontal, NookSpacing.screenMargin)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.nook.wallGradient.ignoresSafeArea())
+    }
+}
+
+/// The piece showing beside the grid: its ID, and the name to show until it loads.
+private struct CurrentPiece: Equatable {
+    let id: Garment.ID
+    let name: String
 }
 
 #Preview {

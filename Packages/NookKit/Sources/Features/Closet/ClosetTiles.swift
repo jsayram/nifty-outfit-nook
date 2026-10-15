@@ -8,33 +8,41 @@ struct ClosetTiles: View {
     let suitcaseCount: Int
     let tracksLaundry: Bool
     let dirtyCount: Int
+    /// One above the other at any text size (iPad's narrow sidebar, Phase 15a).
+    var isStacked = false
     let open: (ClosetDestination) -> Void
 
     var body: some View {
-        NookAdaptiveStack(spacing: NookSpacing.medium) {
+        if isStacked {
+            VStack(spacing: NookSpacing.small) { tiles }
+        } else {
+            NookAdaptiveStack(spacing: NookSpacing.medium) { tiles }
+        }
+    }
+
+    @ViewBuilder private var tiles: some View {
+        ClosetTile(
+            art: .closetSuitcase,
+            title: String(localized: "Suitcases", bundle: .module, comment: "Closet tile"),
+            detail: String(
+                localized: "\(suitcaseCount) suitcases", bundle: .module,
+                comment: "Closet tile: how many suitcases she has"),
+            identifier: "closet.suitcases"
+        ) {
+            open(.suitcases)
+        }
+        if tracksLaundry {
             ClosetTile(
-                art: .closetSuitcase,
-                title: String(localized: "Suitcases", bundle: .module, comment: "Closet tile"),
-                detail: String(
-                    localized: "\(suitcaseCount) suitcases", bundle: .module,
-                    comment: "Closet tile: how many suitcases she has"),
-                identifier: "closet.suitcases"
+                art: dirtyCount > 0 ? .closetBasket : .closetBasketEmpty,
+                title: String(localized: "Laundry", bundle: .module, comment: "Closet tile"),
+                detail: dirtyCount > 0
+                    ? String(
+                        localized: "\(dirtyCount) to wash", bundle: .module,
+                        comment: "Hamper plate: how many pieces are dirty")
+                    : String(localized: "All clean", bundle: .module, comment: "Hamper plate: nothing to wash"),
+                identifier: "closet.laundry"
             ) {
-                open(.suitcases)
-            }
-            if tracksLaundry {
-                ClosetTile(
-                    art: dirtyCount > 0 ? .closetBasket : .closetBasketEmpty,
-                    title: String(localized: "Laundry", bundle: .module, comment: "Closet tile"),
-                    detail: dirtyCount > 0
-                        ? String(
-                            localized: "\(dirtyCount) to wash", bundle: .module,
-                            comment: "Hamper plate: how many pieces are dirty")
-                        : String(localized: "All clean", bundle: .module, comment: "Hamper plate: nothing to wash"),
-                    identifier: "closet.laundry"
-                ) {
-                    open(.laundry)
-                }
+                open(.laundry)
             }
         }
     }

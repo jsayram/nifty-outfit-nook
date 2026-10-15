@@ -7,17 +7,36 @@ import SwiftUI
 /// at the bottom when anything is in it (LR-16). An empty closet explains how to add a piece
 /// instead (RD-13.2).
 ///
+/// On a wide iPad window the page splits in two (Phase 15a, `ipad-closet.html`): the sidebar
+/// holds everything but her pieces, and the grid column holds the pieces or the state that
+/// stands in for them. `part` says which of the three this view draws.
+///
 /// Separate from `ClosetScreen` so snapshot tests can draw it from a model without navigation.
 struct ClosetPage: View {
+    /// Which part of the page to draw.
+    enum Part {
+        /// The whole page in one column (a phone, an upright iPad).
+        case whole
+        /// The header, search, filters, Suitcases and Laundry, the draft and Recently deleted.
+        case sidebar
+        /// Her pieces, or the loading, error, empty or no-match state.
+        case grid
+    }
+
     @Bindable var model: ClosetModel
     let open: (ClosetDestination) -> Void
     let retry: () -> Void
     /// Discard on "Continue where you left off?".
     var discardDraft: () -> Void = {}
+    var part = Part.whole
+    /// The piece whose detail shows beside the grid (iPad, Phase 15a). Tapping a piece then
+    /// shows it there instead of opening it over the grid.
+    var current: Garment.ID?
+    var opensBeside = false
 
     @Environment(\.closetIsStillImage) private var isStillImage
 
-    /// Past this the controls read badly; the grid keeps the full width (iPad's own layout is 15a).
+    /// Past this the controls read badly; the grid keeps the full width.
     static let controlsMaximumWidth: CGFloat = 640
 
     var body: some View {
@@ -31,7 +50,9 @@ struct ClosetPage: View {
             .background {
                 // The wall runs up under the navigation bar; the floor carries on below.
                 VStack(spacing: 0) {
-                    Color.nook.background.frame(height: 400)
+                    if part != .grid {
+                        Color.nook.background.frame(height: 400)
+                    }
                     Color.nook.floor
                 }
                 .ignoresSafeArea()
@@ -39,11 +60,22 @@ struct ClosetPage: View {
         }
     }
 
-    private var page: some View {
-        VStack(spacing: 0) {
-            ClosetHeader(countText: model.countText, showsClothes: !model.isEmpty && model.phase == .loaded)
-            floor
+    @ViewBuilder private var page: some View {
+        switch part {
+        case .whole, .sidebar:
+            VStack(spacing: 0) {
+                ClosetHeader(countText: model.countText, showsClothes: !model.isEmpty && model.phase == .loaded)
+                Group {
+                    if part == .whole { floor } else { sidebarFloor }
+                }
                 .padding(.top, NookSpacing.medium)
+                .padding(.bottom, NookSpacing.xxxLarge)
+                .frame(maxWidth: .infinity, alignment: .top)
+                .background(Color.nook.floor)
+            }
+        case .grid:
+            pieces
+                .padding(.top, NookSpacing.small)
                 .padding(.bottom, NookSpacing.xxxLarge)
                 .frame(maxWidth: .infinity, alignment: .top)
                 .background(Color.nook.floor)
@@ -53,17 +85,9 @@ struct ClosetPage: View {
     @ViewBuilder private var floor: some View {
         switch model.phase {
         case .loading:
-            NookLoadingState(String(localized: "Opening your closet", bundle: .module, comment: "Closet loading"))
-                .stateCard()
+            loadingState
         case .failed:
-            NookErrorState(
-                String(localized: "Your closet didn’t load", bundle: .module, comment: "Closet error title"),
-                message: String(
-                    localized: "Nothing was lost. Try again in a moment.", bundle: .module,
-                    comment: "Closet error message"),
-                retry: retry
-            )
-            .stateCard()
+            errorState
         case .loaded:
             VStack(spacing: 0) {
                 if let draft = model.draft {
@@ -72,15 +96,11 @@ struct ClosetPage: View {
                 if model.isEmpty {
                     emptyCloset
                 } else {
-                    controls
+                    controls(chipLayout: .automatic)
                     if model.hasNoMatches {
                         noMatches
                     } else {
-                        GarmentGrid(items: model.shown, now: model.loadedAt) { item in
-                            open(.garment(item.id, name: item.name))
-                        }
-                        .padding(.horizontal, NookSpacing.screenMargin)
-                        .padding(.top, 14)
+                        grid
                     }
                 }
                 if model.deletedCount > 0 {
@@ -91,7 +111,75 @@ struct ClosetPage: View {
         }
     }
 
-    private var controls: some View {
+    /// The sidebar under the header: everything but the pieces, which the grid column shows.
+    @ViewBuilder private var sidebarFloor: some View {
+        if model.phase == .loaded {
+            VStack(spacing: 0) {
+                if let draft = model.draft {
+                    draftCard(draft)
+                }
+                if !model.isEmpty {
+                    controls(chipLayout: .wrap, stacksTiles: true)
+                }
+                if model.deletedCount > 0 {
+                    recentlyDeleted
+                        .padding(.top, NookSpacing.xLarge)
+                }
+            }
+        }
+    }
+
+    /// The grid column: her pieces, or what stands in for them.
+    @ViewBuilder private var pieces: some View {
+        switch model.phase {
+        case .loading:
+            loadingState.padding(.top, NookSpacing.large)
+        case .failed:
+            errorState.padding(.top, NookSpacing.large)
+        case .loaded:
+            if model.isEmpty {
+                emptyCloset
+            } else if model.hasNoMatches {
+                noMatches
+            } else {
+                grid
+            }
+        }
+    }
+
+    private var loadingState: some View {
+        NookLoadingState(String(localized: "Opening your closet", bundle: .module, comment: "Closet loading"))
+            .stateCard()
+    }
+
+    private var errorState: some View {
+        NookErrorState(
+            String(localized: "Your closet didn’t load", bundle: .module, comment: "Closet error title"),
+            message: String(
+                localized: "Nothing was lost. Try again in a moment.", bundle: .module,
+                comment: "Closet error message"),
+            retry: retry
+        )
+        .stateCard()
+    }
+
+    private var grid: some View {
+        GarmentGrid(
+            items: model.shown, now: model.loadedAt,
+            hint: opensBeside
+                ? String(
+                    localized: "Shows the piece beside your closet.", bundle: .module,
+                    comment: "Hint on a closet piece on iPad, where its detail opens beside the grid")
+                : nil,
+            current: current
+        ) { item in
+            open(.garment(item.id, name: item.name))
+        }
+        .padding(.horizontal, NookSpacing.screenMargin)
+        .padding(.top, 14)
+    }
+
+    private func controls(chipLayout: NookChipBarLayout, stacksTiles: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             NookSearchField(
                 String(localized: "Search your closet", bundle: .module, comment: "Closet search field prompt"),
@@ -99,11 +187,11 @@ struct ClosetPage: View {
                 onSubmit: model.applySearchNow
             )
             .padding(.horizontal, NookSpacing.screenMargin)
-            ClosetFilters(model: model)
+            ClosetFilters(model: model, chipLayout: chipLayout)
                 .padding(.top, NookSpacing.small)
             ClosetTiles(
                 suitcaseCount: model.suitcases.count, tracksLaundry: model.tracksLaundry,
-                dirtyCount: model.dirtyCount, open: open
+                dirtyCount: model.dirtyCount, isStacked: stacksTiles, open: open
             )
             .padding(.horizontal, NookSpacing.screenMargin)
             .padding(.top, NookSpacing.small)

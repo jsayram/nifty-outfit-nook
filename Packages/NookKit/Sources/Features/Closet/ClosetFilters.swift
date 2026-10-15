@@ -11,6 +11,9 @@ import SwiftUI
 /// and her pieces come first.
 struct ClosetFilters: View {
     let model: ClosetModel
+    /// Scroll sideways (the page) or always wrap (iPad's sidebar, Phase 15a, where every chip
+    /// shows at once in a narrow column).
+    var chipLayout: NookChipBarLayout = .automatic
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -54,7 +57,8 @@ struct ClosetFilters: View {
         VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
             if !model.pieceKinds.isEmpty {
                 NookChipBar(
-                    String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row")
+                    String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row"),
+                    layout: chipLayout
                 ) {
                     ForEach(model.pieceKinds, id: \.self) { kind in
                         NookChip(kind.chipTitle, isSelected: model.filter.categories.contains(kind)) {
@@ -65,7 +69,10 @@ struct ClosetFilters: View {
                 }
             }
             if !model.colorChoices.isEmpty {
-                NookChipBar(String(localized: "Colour", bundle: .module, comment: "Name of the colour swatches row")) {
+                NookChipBar(
+                    String(localized: "Colour", bundle: .module, comment: "Name of the colour swatches row"),
+                    layout: chipLayout
+                ) {
                     ForEach(model.colorChoices, id: \.self) { color in
                         NookChip(
                             color.title, swatch: swatch(color), isSelected: model.filter.colors.contains(color)
@@ -77,7 +84,8 @@ struct ClosetFilters: View {
                 }
             }
             NookChipBar(
-                String(localized: "Suitcase and laundry", bundle: .module, comment: "Name of the third filter row")
+                String(localized: "Suitcase and laundry", bundle: .module, comment: "Name of the third filter row"),
+                layout: chipLayout
             ) {
                 suitcaseMenu
                 if model.showsLaundryFilter {
