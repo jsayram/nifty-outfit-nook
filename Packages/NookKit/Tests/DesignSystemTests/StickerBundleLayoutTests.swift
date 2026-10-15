@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import DesignSystem
@@ -176,12 +177,25 @@ struct StickerBundleLayoutTests {
         #expect(placement.frame(forWidth: 300) == placement.frame)
     }
 
-    /// The whole check for every mix runs in well under a frame per look.
-    @Test func placingIsQuick() {
+    /// A list of thumbnails places each look as it draws, so a typical look must be quick: up to
+    /// 0.1 ms in a Debug build on a Mac. The fastest of three runs, with three times the bound on
+    /// CI (`scripts/test.sh` sets `NOOK_CI` there), so a busy runner doesn't fail it.
+    @Test func placingATypicalLookIsQuick() {
+        let looks: [[BundleRole]] = [
+            [.layer, .top, .bottom, .shoes, .bag, .accessory], [.top, .bottom, .shoes], [.dress, .layer, .shoes, .bag],
+        ]
         let clock = ContinuousClock()
-        let elapsed = clock.measure {
-            for mix in Self.everyMix { _ = StickerBundleLayout.place(mix, seed: "o-interview") }
+        var fastest = Duration.seconds(60)
+        for _ in 0..<3 {
+            let elapsed = clock.measure {
+                for number in 0..<100 {
+                    for look in looks { _ = StickerBundleLayout.place(look, seed: "look-\(number)") }
+                }
+            }
+            fastest = min(fastest, elapsed)
         }
-        #expect(elapsed < .seconds(10), "Placing 1,708 looks took \(elapsed)")
+        let isOnCI = ProcessInfo.processInfo.environment["NOOK_CI"] != nil
+        let bound: Duration = isOnCI ? .milliseconds(1_500) : .milliseconds(500)
+        #expect(fastest < bound, "Placing 300 looks took \(fastest)")
     }
 }

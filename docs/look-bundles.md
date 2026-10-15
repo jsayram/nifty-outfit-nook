@@ -25,7 +25,7 @@ The visual reference is `results.html` (the open look and the other looks as sma
 - **Filling the box.** The whole arrangement, tilted corners included, is scaled and centred inside a 6 point margin, growing at most 1.25 times. Nothing is clipped, and a two-piece look isn't lost in empty space.
 - **Stacking.** Back to front: dress and trousers, layer, top, accessory, bag, shoes. So the top's hem lies over the trousers and the shoes over the trousers' hem.
 
-Tests (`StickerBundleLayoutTests`) run every mix of 2 to 6 pieces, kinds repeating (1,708 mixes), with three seeds: every piece inside the box with its tilt, no two frames overlapping more than 30% of the smaller one (the worst is 24%), one placement per piece, the same placements for the same seed, a fixed first number from the seed, different tilts for different looks, worn order, stacking, and a dress look. Placing all 1,708 takes about 1.2 s in a Debug build on a Mac, about 0.1 ms for a typical six-piece look.
+Tests (`StickerBundleLayoutTests`) run every mix of 2 to 6 pieces, kinds repeating (1,708 mixes), with three seeds: every piece inside the box with its tilt, no two frames overlapping more than 30% of the smaller one (the worst is 24%), one placement per piece, the same placements for the same seed, a fixed first number from the seed, different tilts for different looks, worn order, stacking, and a dress look. A six-piece look takes about 0.1 ms to place in a Debug build on a Mac, three pieces about 0.02 ms (all 1,708 mixes about 1.2 s, the odd ones being slower); the speed test allows 300 typical looks 500 ms, three times that on CI.
 
 ## The view
 
