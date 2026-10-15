@@ -52,7 +52,14 @@ struct HomeScreen: View {
                 }
                 .navigationDestination(for: HomeDestination.self) { destination in
                     switch destination {
-                    case .styleMe: StyleMeStubScreen()
+                    case .styleMe(let choosingOccasion):
+                        StyleMeScreen(
+                            choosingOccasion: choosingOccasion,
+                            routes: StyleMeRoutes(
+                                addPiece: { path.append(.addPiece) }, openSuitcases: { path.append(.suitcases) }))
+                    case .addPiece:
+                        // From Style Me's empty closet. Saving goes back to Style Me, which reloads.
+                        GarmentEditorScreen(target: .newPiece, saved: { _ in goBack() }, close: goBack)
                     default: HomeStubScreen(destination: destination)
                     }
                 }
@@ -118,6 +125,10 @@ struct HomeScreen: View {
                 action: { Task { await model.load(from: services) } }
             )
         }
+    }
+
+    private func goBack() {
+        if !path.isEmpty { path.removeLast() }
     }
 
     private func open(_ control: RoomControl) {

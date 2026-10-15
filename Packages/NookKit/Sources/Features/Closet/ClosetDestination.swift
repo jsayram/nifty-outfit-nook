@@ -17,7 +17,7 @@ nonisolated enum ClosetDestination: Hashable, Sendable {
     case laundry
     /// Recently deleted (LR-16).
     case recentlyDeleted
-    /// Style Me with a starting piece, from Style with this (Phase 10a builds the request).
+    /// Style Me with a starting piece, from Style with this (Phase 10a).
     case styleMe(startingWith: Garment.ID, name: String)
     /// Make your own look starting from a piece, from Style with this (LR-08.3, Phase 11).
     case makeYourOwnLook(startingWith: Garment.ID, name: String)

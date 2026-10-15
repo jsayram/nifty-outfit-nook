@@ -3,9 +3,11 @@ import Models
 /// A screen Home opens by pushing it. Closet and Saved Looks are tabs, so the wardrobe and the
 /// shelf switch tabs instead (see `RoomControl.route(for:)`).
 nonisolated enum HomeDestination: Hashable, Sendable {
-    /// The Style Me request (RD-02). `choosingOccasion` comes from the calendar, so Phase 10a
-    /// can open the Occasion sheet straight away.
+    /// The Style Me request (RD-02). `choosingOccasion` comes from the calendar, which opens it
+    /// on the Occasion sheet.
     case styleMe(choosingOccasion: Bool)
+    /// Add a piece, from Style Me when the closet is empty (Phase 10a).
+    case addPiece
     case suitcases
     /// Laundry, when tracking is on (RD-11).
     case laundry
@@ -18,6 +20,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     var title: String {
         switch self {
         case .styleMe: String(localized: "Style Me", bundle: .module, comment: "Screen title")
+        case .addPiece: String(localized: "Add a piece", bundle: .module, comment: "Screen title")
         case .suitcases: String(localized: "Suitcases", bundle: .module, comment: "Screen title")
         case .laundry: String(localized: "Laundry", bundle: .module, comment: "Screen title")
         case .help: String(localized: "Help", bundle: .module, comment: "Screen title")
@@ -31,6 +34,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     var systemImage: String {
         switch self {
         case .styleMe: "sparkles"
+        case .addPiece: "camera"
         case .suitcases: "suitcase.rolling"
         case .laundry: "basket"
         case .help: "questionmark.circle"
@@ -44,6 +48,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     var identifier: String {
         switch self {
         case .styleMe: "styleMe"
+        case .addPiece: "addPiece"
         case .suitcases: "suitcases"
         case .laundry: "laundry"
         case .help: "help"
