@@ -129,7 +129,7 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 
 ## Left for later phases
 
-- **14a:** the try-on photo sheet in Profile.
+- **14a (done):** the try-on photo sheet in Profile (`docs/profile.md`).
 - **15b:** iPad Saved Looks with a picture beside the grid.
 - **22b:** stored image files for generated pictures, and removing them on Delete picture.
 - **30a:** the picture allowance and purchases.

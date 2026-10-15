@@ -175,5 +175,5 @@ Everything else held up: the plates use the strong tint with light text, the sig
 ## Left for later phases
 
 - **13 (done):** the remembered source and occasion on the suitcase and the calendar, and Suitcases and Laundry behind them (`docs/suitcases-and-laundry.md`).
-- **14a:** "Name on your sign" in Profile, and reloading Home when it changes (RD-03.1).
+- **14a (done):** "Name on your sign" in Profile; Home reloads when Profile closes, so the sign shows the new name (RD-03.1, `docs/profile.md`).
 - **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.
