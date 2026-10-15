@@ -77,13 +77,16 @@ public enum FixtureLaundryState: String, CaseIterable, Sendable {
 }
 
 /// An unsaved draft waiting at launch, as if the app had been closed in the middle of Add a piece
-/// or Edit (Phase 7b). Stage A keeps drafts in memory only, so UI tests use this to check what
-/// she sees after a relaunch.
+/// or Edit (Phase 7b), or Make your own look (Phase 11). Stage A keeps drafts in memory only,
+/// so UI tests use this to check what she sees after a relaunch.
 public enum FixtureDraftState: String, CaseIterable, Sendable {
     /// A new piece described in words, on the details step: "Sage cardigan".
     case add
     /// Changes to the navy dress pants: renamed "Navy work trousers". Demo set only.
     case edit
+    /// A half-built Make your own look (Phase 11, LR-08.4): the pink shirt and the navy dress
+    /// pants, named "Pink for Friday". Demo set only.
+    case look
 }
 
 /// Garment pictures in the fixture closet (Phase 8b).

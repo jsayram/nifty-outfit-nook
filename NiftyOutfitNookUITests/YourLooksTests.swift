@@ -53,9 +53,10 @@ final class YourLooksTests: XCTestCase {
         tap("results.tryOn", in: app)
         XCTAssertTrue(element("results.stub.tryOn", in: app).waitForExistence(timeout: Self.wait))
         app.buttons["Close"].tap()
+        // Swap a piece opens Swap (Phase 11); Back leaves the look as it was.
         tap("results.swap", in: app)
-        XCTAssertTrue(element("results.stub.swap", in: app).waitForExistence(timeout: Self.wait))
-        app.buttons["Close"].tap()
+        XCTAssertTrue(app.navigationBars["Swap a piece"].waitForExistence(timeout: Self.wait))
+        app.goBack(from: "Swap a piece", to: "Your looks", timeout: Self.wait)
 
         // Try a different outfit: a new look replaces all three versions (LR-05a.4), back on
         // Simple, and the saved one stays on the Saved tab.

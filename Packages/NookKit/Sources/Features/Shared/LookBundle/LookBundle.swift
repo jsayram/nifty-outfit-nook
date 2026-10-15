@@ -47,17 +47,24 @@ struct LookBundle: View {
     /// The look's name, or "Look", when not given.
     let title: String?
     let animatesEntrance: Bool
+    /// The piece being changed in Swap a piece (Phase 11): the others step back, as in
+    /// `swap.html`. `nil` shows every piece the same.
+    let focusedPieceID: String?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.locale) private var locale
     @State private var hasSettled = false
 
-    init(_ content: LookBundleContent, size: LookBundleSize, title: String? = nil, animatesEntrance: Bool = false) {
+    init(
+        _ content: LookBundleContent, size: LookBundleSize, title: String? = nil, animatesEntrance: Bool = false,
+        focusedPieceID: String? = nil
+    ) {
         self.content = content
         self.size = size
         self.title = title
         self.animatesEntrance = animatesEntrance
+        self.focusedPieceID = focusedPieceID
     }
 
     private var isSettled: Bool {
@@ -65,7 +72,7 @@ struct LookBundle: View {
     }
 
     var body: some View {
-        let placements = StickerBundleLayout.place(content.pieces.map(\.role), seed: content.id)
+        let placements = StickerBundleLayout.place(content.pieces.map(\.role), seed: content.layoutSeed)
         ZStack(alignment: .topLeading) {
             ForEach(placements, id: \.index) { placement in
                 piece(content.pieces[placement.index], placement: placement)
@@ -96,7 +103,7 @@ struct LookBundle: View {
         .rotationEffect(.degrees(moves ? placement.angle * 2.4 : placement.angle))
         .scaleEffect(moves ? 0.94 : 1)
         .offset(y: moves ? -10 : 0)
-        .opacity(settled ? 1 : 0)
+        .opacity(settled ? (focusedPieceID.map { $0 == piece.id } ?? true ? 1 : 0.42) : 0)
         .animation(entrance(order: placement.zIndex), value: settled)
         .position(x: frame.midX, y: frame.midY)
         .zIndex(placement.zIndex)

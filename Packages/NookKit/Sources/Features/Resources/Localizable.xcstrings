@@ -26,6 +26,9 @@
         }
       }
     },
+    "%@ can’t be worn today. Take it out or change it." : {
+      "comment" : "Make your own look: why Save is off, with the piece"
+    },
     "%@ can’t be your starting piece. %@." : {
       "comment" : "Style Me: the starting piece can't be used; its name, then why, such as In the wash"
     },
@@ -115,6 +118,9 @@
     },
     "%@ look" : {
       "comment" : "Name of a saved look with no main colours: the occasion"
+    },
+    "%@ now: %@" : {
+      "comment" : "Swap: under the look, the kind of piece and the piece in it now"
     },
     "%@ stays as it was." : {
       "comment" : "Edit: under the discard question, with the piece's saved name",
@@ -267,6 +273,9 @@
         }
       }
     },
+    "+ Make your own" : {
+      "comment" : "Saved Looks: opens Make your own look (RD-08, LR-08)"
+    },
     "A bag" : {
       "comment" : "What a look needs"
     },
@@ -282,8 +291,26 @@
     "A layer" : {
       "comment" : "What a look needs"
     },
+    "A look has at most 6 pieces. Remove one to save." : {
+      "comment" : "Make your own look: why Save is off"
+    },
+    "A look holds one piece of each kind." : {
+      "comment" : "Make your own look: why Save is off"
+    },
     "A look needs" : {
       "comment" : "Your looks: insufficient wardrobe"
+    },
+    "A look needs a top and a bottom, or a dress, so this one can only be swapped." : {
+      "comment" : "Swap: why Remove this piece is off"
+    },
+    "A look needs a top and a bottom, or a dress." : {
+      "comment" : "Make your own look: why Save is off"
+    },
+    "A look needs at least 2 pieces, so this one can only be swapped." : {
+      "comment" : "Swap: why Remove this piece is off"
+    },
+    "A look needs at least 2 pieces." : {
+      "comment" : "Make your own look: why Save is off"
     },
     "A look with no name" : {
       "comment" : "Saved look with no name",
@@ -435,6 +462,12 @@
         }
       }
     },
+    "Added %@" : {
+      "comment" : "Make your own look: status after adding"
+    },
+    "Adds it to the look." : {
+      "comment" : "Make your own look: hint on a piece"
+    },
     "All %@" : {
       "comment" : "Name of a saved look whose top and bottom are one colour"
     },
@@ -546,6 +579,9 @@
     },
     "Back to Style Me" : {
       "comment" : "Your looks button"
+    },
+    "Back to how it was" : {
+      "comment" : "Toast after undoing a swap or removal"
     },
     "Bag" : {
       "comment" : "One piece of this kind, used in search",
@@ -701,6 +737,9 @@
         }
       }
     },
+    "Build an outfit yourself, piece by piece." : {
+      "comment" : "Make your own look: the line at the top (LR-08)"
+    },
     "Burgundy" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -756,6 +795,9 @@
         }
       }
     },
+    "Change" : {
+      "comment" : "Make your own look: changes a piece"
+    },
     "Change anything, then save. Nothing changes until you do." : {
       "comment" : "Edit piece: line under the title",
       "localizations" : {
@@ -777,6 +819,9 @@
           }
         }
       }
+    },
+    "Change the %@, now %@" : {
+      "comment" : "Spoken label of Change: the kind of piece and the piece"
     },
     "Change the occasion" : {
       "comment" : "Style Me button"
@@ -979,6 +1024,9 @@
           }
         }
       }
+    },
+    "Continue your look?" : {
+      "comment" : "Make your own look: draft card title"
     },
     "Couldn’t turn it on. Try again." : {
       "comment" : "Laundry tracking sheet: saving the setting failed",
@@ -1288,6 +1336,9 @@
     },
     "Every piece in every version is one you own." : {
       "comment" : "Preferences sheet: Only mine"
+    },
+    "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
+      "comment" : "Swap: under the See all title, with the source's name"
     },
     "Explains laundry tracking." : {
       "comment" : "VoiceOver hint",
@@ -1644,6 +1695,9 @@
         }
       }
     },
+    "In Saved Looks. Saved looks work without pictures or credits." : {
+      "comment" : "Make your own look: under Save once saved"
+    },
     "In a suitcase" : {
       "comment" : "Suitcase filter choice",
       "localizations" : {
@@ -1690,6 +1744,9 @@
           }
         }
       }
+    },
+    "In the look" : {
+      "comment" : "Swap: mark on the piece the look has now"
     },
     "In the wash" : {
       "comment" : "Mark on a piece that's dirty",
@@ -1790,6 +1847,9 @@
     },
     "Just for this outfit. Your usual fit stays the same." : {
       "comment" : "Comfort sheet (LR-18)"
+    },
+    "Keep current" : {
+      "comment" : "Swap: leaves the look as it is"
     },
     "Keep editing" : {
       "comment" : "Button: closes the discard question",
@@ -2200,6 +2260,9 @@
         }
       }
     },
+    "May not match" : {
+      "comment" : "Swap: mark on a weaker match in See all (LR-07.3)"
+    },
     "Medium" : {
       "comment" : "How warm a piece is to wear",
       "localizations" : {
@@ -2236,6 +2299,9 @@
         }
       }
     },
+    "My look" : {
+      "comment" : "Name of a look she made with no main colours"
+    },
     "Name" : {
       "comment" : "Add a piece: field label",
       "localizations" : {
@@ -2268,6 +2334,9 @@
           }
         }
       }
+    },
+    "Name this look" : {
+      "comment" : "Make your own look: name field prompt"
     },
     "Navy" : {
       "comment" : "Colour name",
@@ -2322,6 +2391,9 @@
         }
       }
     },
+    "No other %@ in %@ can be worn today." : {
+      "comment" : "Swap: no options at all, with the kind of piece and the source's name"
+    },
     "No photo needed. You can add one later." : {
       "comment" : "Add a piece choice: under Describe in words",
       "localizations" : {
@@ -2355,6 +2427,9 @@
         }
       }
     },
+    "No pieces to add yet" : {
+      "comment" : "Make your own look: picker with nothing she can wear"
+    },
     "No pieces yet" : {
       "comment" : "Closet count when it's empty",
       "localizations" : {
@@ -2385,6 +2460,9 @@
     },
     "None" : {
       "comment" : "Style Me: no starting piece"
+    },
+    "None of your other %@ in %@ go with this look." : {
+      "comment" : "Swap: no good matches, with the kind of piece and the source's name"
     },
     "Not available" : {
       "comment" : "Weather row value when the weather can't be read",
@@ -2424,6 +2502,9 @@
           }
         }
       }
+    },
+    "Not in your closet?" : {
+      "comment" : "Swap: before Find one (LR-07.4)"
     },
     "Not marked as worn yet" : {
       "comment" : "Garment detail: she hasn't used Wear today with this piece",
@@ -2639,6 +2720,9 @@
         }
       }
     },
+    "One of each kind. A piece of a kind the look already has takes its place." : {
+      "comment" : "Make your own look: under the picker's title"
+    },
     "One piece, flat or on a hanger" : {
       "comment" : "Add a piece choice: under Take photo",
       "localizations" : {
@@ -2673,6 +2757,21 @@
     "Only pieces you own" : {
       "comment" : "Style Me Preferences line for Only mine"
     },
+    "Only the accessory changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the bag changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the bottom changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the dress changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the layer changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
     "Only the picture you pick is shared with the app" : {
       "comment" : "Add a piece choice: under Choose from Photos",
       "localizations" : {
@@ -2683,6 +2782,12 @@
           }
         }
       }
+    },
+    "Only the shoes change. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the top changes. Everything else stays." : {
+      "comment" : "Swap: under the buttons once she picked an option (FR-09)"
     },
     "Opening Recently deleted" : {
       "comment" : "Loading",
@@ -2928,6 +3033,15 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Piece to swap" : {
+      "comment" : "Swap: VoiceOver name of the piece chips"
+    },
+    "Pieces from Main closet that you can wear today. Nothing is sent, and no styling request is used." : {
+      "comment" : "Make your own look: where the pieces come from (FR-32)"
+    },
+    "Pieces in the wash or away don’t show here. Add a piece in Closet to build a look." : {
+      "comment" : "Make your own look: empty picker"
+    },
     "Pieces you delete stay here for 30 days, so you can bring them back." : {
       "comment" : "Recently deleted, empty",
       "localizations" : {
@@ -3017,6 +3131,9 @@
         }
       }
     },
+    "Puts back the look as it was before your last change." : {
+      "comment" : "VoiceOver hint on Undo under a changed look"
+    },
     "Recently deleted" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -3050,6 +3167,9 @@
         }
       }
     },
+    "Redo" : {
+      "comment" : "Make your own look: redoes a change"
+    },
     "Regular" : {
       "comment" : "How a piece is cut",
       "localizations" : {
@@ -3072,6 +3192,9 @@
         }
       }
     },
+    "Remove %@" : {
+      "comment" : "Spoken label of a piece's remove button"
+    },
     "Remove from closet" : {
       "comment" : "Button on garment detail (LR-16)",
       "localizations" : {
@@ -3082,6 +3205,9 @@
           }
         }
       }
+    },
+    "Remove this piece" : {
+      "comment" : "Swap: button (LR-08)"
     },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
@@ -3211,6 +3337,12 @@
     "Saved looks didn’t load" : {
       "comment" : "Saved tab error title"
     },
+    "Saved looks work without pictures or credits." : {
+      "comment" : "Make your own look: under Save once she typed a name"
+    },
+    "Saved looks work without pictures or credits. An empty name is filled in from the colours." : {
+      "comment" : "Make your own look: under Save while it can be saved"
+    },
     "Saved to Saved Looks" : {
       "comment" : "Toast after Save look"
     },
@@ -3227,6 +3359,9 @@
     },
     "Search %@" : {
       "comment" : "Starting piece sheet search; the source's name"
+    },
+    "Search these pieces" : {
+      "comment" : "Search prompt in a piece picker"
     },
     "Search your closet" : {
       "comment" : "Closet search field prompt",
@@ -3249,6 +3384,9 @@
           }
         }
       }
+    },
+    "See all %@" : {
+      "comment" : "Swap: button at the end (LR-07.3)"
     },
     "See saved looks" : {
       "comment" : "Your looks: opens the Saved tab"
@@ -3314,6 +3452,9 @@
     "Shopping comes later" : {
       "comment" : "Find one stand-in"
     },
+    "Show 3 more" : {
+      "comment" : "Swap: shows three more options (LR-07)"
+    },
     "Show filters" : {
       "comment" : "Button at large text sizes",
       "localizations" : {
@@ -3324,6 +3465,12 @@
           }
         }
       }
+    },
+    "Shows it in the look." : {
+      "comment" : "Swap: hint on an option"
+    },
+    "Shows three more of your pieces. Nothing is sent." : {
+      "comment" : "Swap hint"
     },
     "Simple" : {
       "comment" : "Look version (LR-05a)"
@@ -3441,6 +3588,9 @@
           }
         }
       }
+    },
+    "Start over" : {
+      "comment" : "Make your own look: throws the draft away"
     },
     "Starting piece" : {
       "comment" : "Style Me row",
@@ -3679,11 +3829,11 @@
     "Swap a piece" : {
       "comment" : "Results button (RD-06, LR-08)"
     },
-    "Swap a piece comes next" : {
-      "comment" : "Swap stand-in"
-    },
     "Swapped" : {
       "comment" : "Mark on a piece that replaces one in Simple"
+    },
+    "Swapped in %@" : {
+      "comment" : "Toast after a swap, with the new piece"
     },
     "Take it out of your closet?" : {
       "comment" : "Remove from closet: asks before I don't have it any more",
@@ -3726,6 +3876,9 @@
     },
     "Tap Retry when you’re back online. Nothing was charged, and your saved looks still work." : {
       "comment" : "Your looks offline state"
+    },
+    "Tap one to see it in the look." : {
+      "comment" : "Swap: under the buttons before she picks an option"
     },
     "That didn’t save. Nothing changed." : {
       "comment" : "Toast when a change to a piece couldn't be saved",
@@ -3774,6 +3927,9 @@
         }
       }
     },
+    "That’s %@ in %@." : {
+      "comment" : "Swap: the end of the options (LR-07.3): every top, then the source's name"
+    },
     "That’s every outfit %@ can make for this request, so this one came round again." : {
       "comment" : "Note on Your looks after Try a different outfit: the source's name"
     },
@@ -3787,6 +3943,9 @@
           }
         }
       }
+    },
+    "The look" : {
+      "comment" : "Swap: spoken name of the look"
     },
     "The piece you started adding isn’t in your closet yet." : {
       "comment" : "Draft card: a new piece with no name yet",
@@ -3861,6 +4020,9 @@
         }
       }
     },
+    "This look can’t be kept as a draft right now. Save it to keep it." : {
+      "comment" : "Make your own look: the draft couldn't be written"
+    },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
       "localizations" : {
@@ -3871,6 +4033,9 @@
           }
         }
       }
+    },
+    "This piece can only be swapped." : {
+      "comment" : "Swap: why Remove this piece is off, in general"
     },
     "This piece didn’t load" : {
       "comment" : "Garment detail error title",
@@ -3897,6 +4062,9 @@
     "This suitcase isn’t there any more" : {
       "comment" : "Style Me when the suitcase source was removed or archived"
     },
+    "Throws away the look you didn’t save. Saved Looks don’t change." : {
+      "comment" : "Hint on Start over"
+    },
     "Throws away what you started. Your closet doesn’t change." : {
       "comment" : "Hint on a draft's Discard",
       "localizations" : {
@@ -3916,6 +4084,9 @@
     },
     "Today’s comfort" : {
       "comment" : "Style Me sheet title"
+    },
+    "Took out %@" : {
+      "comment" : "Toast after Remove this piece"
     },
     "Top" : {
       "comment" : "One piece of this kind, used in search",
@@ -3990,6 +4161,9 @@
     "Try-on pictures come later" : {
       "comment" : "Try it on stand-in"
     },
+    "Trying %@" : {
+      "comment" : "Swap: under the look while she tries one"
+    },
     "Turn on" : {
       "comment" : "Button: turns laundry tracking on",
       "localizations" : {
@@ -4023,8 +4197,17 @@
         }
       }
     },
+    "Use %@" : {
+      "comment" : "Swap: commits the swap, as in Use this top"
+    },
+    "Use %lld characters or fewer." : {
+      "comment" : "Make your own look: the name is too long"
+    },
     "Use Main closet" : {
       "comment" : "Partial result banner action: style from the whole closet"
+    },
+    "Use one line of letters, numbers and spaces." : {
+      "comment" : "Make your own look: the name has line breaks or tabs"
     },
     "Use one line, without line breaks." : {
       "comment" : "Problem with the words for Other"
@@ -4232,6 +4415,9 @@
         }
       }
     },
+    "Worn together lately" : {
+      "comment" : "Swap: mark in See all on a piece that would repeat an outfit she wore recently (LR-10)"
+    },
     "Yellow" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -4265,6 +4451,9 @@
         }
       }
     },
+    "You changed this look. Undo goes back one change." : {
+      "comment" : "Your looks: under the pieces after a swap or removal (LR-08.2)"
+    },
     "You left before your looks came, so nothing was used. Your request is kept." : {
       "comment" : "Your looks after leaving mid-way"
     },
@@ -4279,6 +4468,12 @@
         }
       }
     },
+    "You started a look with %@ and didn’t save it." : {
+      "comment" : "Make your own look: draft card, with how many pieces, as in 3 pieces"
+    },
+    "You started “%@” with %@ and didn’t save it." : {
+      "comment" : "Make your own look: draft card, with the look's name and how many pieces"
+    },
     "You wore this %lld days ago" : {
       "comment" : "Recent-wear note on Your looks (LR-10): how many days ago"
     },
@@ -4287,6 +4482,9 @@
     },
     "You wore this yesterday" : {
       "comment" : "Recent-wear note on Your looks (LR-10)"
+    },
+    "Your %@ that go with this look" : {
+      "comment" : "Swap: the line above the options (LR-07), with the kind of piece"
     },
     "Your %lld pieces marked as in the wash are kept. Turn it back on and they come back." : {
       "comment" : "Laundry tracking sheet: how many pieces are still marked as in the wash",
@@ -4349,6 +4547,9 @@
           }
         }
       }
+    },
+    "Your look shows here as you add pieces." : {
+      "comment" : "Make your own look: before any piece is added"
     },
     "Your looks" : {
       "comment" : "Screen title"
@@ -4432,11 +4633,14 @@
     "You’ll be able to ask about this look in your own words." : {
       "comment" : "Ask stylist stand-in"
     },
-    "You’ll pick one piece and choose another of yours for it. The rest of the look stays." : {
-      "comment" : "Swap stand-in"
+    "accessories" : {
+      "comment" : "Swap: kind of piece, plural"
     },
     "across the look" : {
       "comment" : "Colour place, as in navy across the look"
+    },
+    "bags" : {
+      "comment" : "Swap: kind of piece, plural"
     },
     "bottoms" : {
       "comment" : "As in: No navy bottoms in Weekend"
@@ -4465,6 +4669,27 @@
     },
     "dresses" : {
       "comment" : "As in: No navy dresses in Weekend"
+    },
+    "every accessory" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every bag" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every bottom" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every dress" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every layer" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every pair of shoes" : {
+      "comment" : "Swap: That's every …"
+    },
+    "every top" : {
+      "comment" : "Swap: That's every …"
     },
     "in one piece" : {
       "comment" : "Colour place, as in navy in one piece"
@@ -4550,6 +4775,27 @@
           }
         }
       }
+    },
+    "these shoes" : {
+      "comment" : "Swap: Use …"
+    },
+    "this accessory" : {
+      "comment" : "Swap: Use …"
+    },
+    "this bag" : {
+      "comment" : "Swap: Use …"
+    },
+    "this bottom" : {
+      "comment" : "Swap: Use …"
+    },
+    "this dress" : {
+      "comment" : "Swap: Use …"
+    },
+    "this layer" : {
+      "comment" : "Swap: Use …"
+    },
+    "this top" : {
+      "comment" : "Swap: Use …"
     },
     "tops" : {
       "comment" : "As in: No navy tops in Weekend"

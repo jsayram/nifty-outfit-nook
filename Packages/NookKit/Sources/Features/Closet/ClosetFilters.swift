@@ -52,12 +52,16 @@ struct ClosetFilters: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
-            NookChipBar(String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row")) {
-                ForEach(model.pieceKinds, id: \.self) { kind in
-                    NookChip(kind.chipTitle, isSelected: model.filter.categories.contains(kind)) {
-                        model.toggle(kind)
+            if !model.pieceKinds.isEmpty {
+                NookChipBar(
+                    String(localized: "Kind of piece", bundle: .module, comment: "Name of the piece chips row")
+                ) {
+                    ForEach(model.pieceKinds, id: \.self) { kind in
+                        NookChip(kind.chipTitle, isSelected: model.filter.categories.contains(kind)) {
+                            model.toggle(kind)
+                        }
+                        .accessibilityIdentifier("closet.filter.kind.\(kind.rawValue)")
                     }
-                    .accessibilityIdentifier("closet.filter.kind.\(kind.rawValue)")
                 }
             }
             if !model.colorChoices.isEmpty {
@@ -76,7 +80,7 @@ struct ClosetFilters: View {
                 String(localized: "Suitcase and laundry", bundle: .module, comment: "Name of the third filter row")
             ) {
                 suitcaseMenu
-                if model.tracksLaundry {
+                if model.showsLaundryFilter {
                     NookChip(
                         String(
                             localized: "Dirty (\(model.dirtyCount))", bundle: .module,

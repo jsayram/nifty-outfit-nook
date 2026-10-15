@@ -6,8 +6,9 @@ import SwiftUI
 ///
 /// The title sits on the wall in the page's header, as in `closet.html`, so the navigation bar
 /// only carries Add a piece and Profile. Tapping a piece opens its detail (7a), and the row at
-/// the bottom opens Recently deleted, and Add a piece and Edit open the form (7b); Suitcases and
-/// Laundry open stand-ins until Phase 13. The closet reloads each time the tab appears and each
+/// the bottom opens Recently deleted, and Add a piece and Edit open the form (7b); Make your own
+/// look opens from a piece's Style with this (11); Suitcases and Laundry open stand-ins until
+/// Phase 13. The closet reloads each time the tab appears and each
 /// time a pushed screen closes, so changes made there show up.
 ///
 /// When she removes a piece on its detail, Closet goes back to the grid and shows a toast with
@@ -84,6 +85,8 @@ struct ClosetScreen: View {
                 saved: pieceSaved, close: goBack)
         case .editPiece(let id, _, let resumesDraft):
             GarmentEditorScreen(target: .garment(id), resumesDraft: resumesDraft, saved: pieceSaved, close: goBack)
+        case .makeYourOwnLook(let id, _):
+            LookBuilderScreen(startingPieceID: id)
         default:
             StubScreen(
                 title: destination.title, systemImage: destination.systemImage,

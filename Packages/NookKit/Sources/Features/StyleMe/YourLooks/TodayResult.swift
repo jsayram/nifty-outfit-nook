@@ -11,10 +11,12 @@ struct TodayResult: View {
     let actions: YourLooksActions
 
     @Environment(\.calendar) private var calendar
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         if let result = model.result, let look = model.currentLook {
-            let content = LookBundleContent(look: look, garments: model.garments)
+            let content = LookBundleContent(
+                look: look, garments: model.garments, layoutSeed: model.originalLook?.id.rawValue)
             VStack(spacing: NookSpacing.medium) {
                 if let problem = model.problem {
                     ProblemBanner(problem: problem, retry: actions.retry)
@@ -47,9 +49,13 @@ struct TodayResult: View {
                 LookPieceList(
                     content: content,
                     showsSameAsSimple: model.shownVersion != .simple,
-                    changes: YourLooksText.changes(in: look, simple: result.simple, garments: model.garments),
+                    changes: YourLooksText.changes(
+                        in: look, simple: result.simple, original: model.originalLook, garments: model.garments),
                     onFindOne: actions.findOne
                 )
+                if model.canUndoChange {
+                    changedLine
+                }
                 ResultActions(
                     isSaved: model.isSaved(look),
                     needsConnection: model.problem == .offline,
@@ -120,6 +126,34 @@ struct TodayResult: View {
             }
             .padding(.horizontal, NookSpacing.small)
         }
+    }
+
+    // MARK: Changed by her
+
+    /// After a swap or a removal: says so, with Undo that lasts longer than the toast.
+    private var changedLine: some View {
+        let layout =
+            dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: NookSpacing.xSmall))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NookSpacing.small))
+        return layout {
+            Text(YourLooksText.changedByHer)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            NookButton(
+                YourLooksText.undo, systemImage: "arrow.uturn.backward", kind: .text, size: .small,
+                action: actions.undoChange
+            )
+            .accessibilityHint(
+                Text(
+                    "Puts back the look as it was before your last change.", bundle: .module,
+                    comment: "VoiceOver hint on Undo under a changed look")
+            )
+            .accessibilityIdentifier("results.undoChange")
+        }
+        .padding(.horizontal, NookSpacing.small)
     }
 
     // MARK: Try a different outfit

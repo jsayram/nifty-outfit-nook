@@ -106,8 +106,6 @@ struct SavedLookSheet: View {
 enum ResultStub: Identifiable, Hashable {
     /// Try it on (RD-06): simulated pictures come in Phases 12b and 33.
     case tryOn(Look.ID)
-    /// Swap a piece (LR-07, LR-08): Phase 11.
-    case swap(Look.ID)
     /// Ask stylist (FR-14): later.
     case askStylist(Look.ID)
     /// Find one on a piece she doesn't own (LR-05b.4): Phase 34. Nothing is searched.
@@ -120,7 +118,6 @@ enum ResultStub: Identifiable, Hashable {
     var title: String {
         switch self {
         case .tryOn: String(localized: "Try it on", bundle: .module, comment: "Results button (RD-06)")
-        case .swap: String(localized: "Swap a piece", bundle: .module, comment: "Results button (RD-06, LR-08)")
         case .askStylist: String(localized: "Ask stylist", bundle: .module, comment: "Results button (RD-06)")
         case .findOne:
             String(localized: "Find one", bundle: .module, comment: "Button on a look's piece she doesn't own")
@@ -132,14 +129,13 @@ enum ResultStub: Identifiable, Hashable {
         switch self {
         case .tryOn: String(localized: "Simulated", bundle: .module, comment: "Badge: a stand-in, not the real thing")
         case .findOne(let name): name
-        case .swap, .askStylist, .saved: nil
+        case .askStylist, .saved: nil
         }
     }
 
     var systemImage: String {
         switch self {
         case .tryOn: "camera"
-        case .swap: "arrow.left.arrow.right"
         case .askStylist: "bubble.left.and.bubble.right"
         case .findOne: "magnifyingglass"
         case .saved: "heart"
@@ -150,8 +146,6 @@ enum ResultStub: Identifiable, Hashable {
         switch self {
         case .tryOn:
             String(localized: "Try-on pictures come later", bundle: .module, comment: "Try it on stand-in")
-        case .swap:
-            String(localized: "Swap a piece comes next", bundle: .module, comment: "Swap stand-in")
         case .askStylist:
             String(localized: "Ask stylist comes later", bundle: .module, comment: "Ask stylist stand-in")
         case .findOne:
@@ -168,10 +162,6 @@ enum ResultStub: Identifiable, Hashable {
                 localized:
                     "Try it on will make one simulated picture of this look, labelled Simulated. Pictures show the style, not the exact fit.",
                 bundle: .module, comment: "Try it on stand-in")
-        case .swap:
-            String(
-                localized: "You’ll pick one piece and choose another of yours for it. The rest of the look stays.",
-                bundle: .module, comment: "Swap stand-in")
         case .askStylist:
             String(
                 localized: "You’ll be able to ask about this look in your own words.", bundle: .module,
@@ -188,7 +178,6 @@ enum ResultStub: Identifiable, Hashable {
     var identifier: String {
         switch self {
         case .tryOn: "tryOn"
-        case .swap: "swap"
         case .askStylist: "askStylist"
         case .findOne: "findOne"
         case .saved: "saved"

@@ -21,6 +21,9 @@ public enum FixtureDrafts {
             return GarmentDraft(
                 target: .newPiece, step: .details, details: details, base: .blank, description: addDescription,
                 savedAt: savedAt)
+        case .look:
+            // A Make your own look draft lives in its own store (`lookDraft(in:now:)`).
+            return nil
         case .edit:
             guard let trousers = data.garments.first(where: { $0.id == "g-navy-trousers" }) else { return nil }
             let base = GarmentDetails(trousers)
@@ -29,5 +32,16 @@ public enum FixtureDrafts {
             return GarmentDraft(
                 target: .garment(trousers.id), step: .details, details: details, base: base, savedAt: savedAt)
         }
+    }
+
+    /// The name of the look draft `-fixtures demo:draft=look` leaves. UI tests look for it.
+    public static let lookDraftName = "Pink for Friday"
+
+    /// A half-built Make your own look, saved five minutes before `now`: the pink shirt and the
+    /// navy dress pants. `nil` when the set doesn't have them (only the demo does).
+    public static func lookDraft(in data: FixtureData, now: Date) -> LookDraft? {
+        let wanted: [Garment.ID] = ["g-pink-blouse", "g-navy-trousers"]
+        guard wanted.allSatisfy({ id in data.garments.contains { $0.id == id } }) else { return nil }
+        return LookDraft(name: lookDraftName, garmentIDs: wanted, savedAt: now.addingTimeInterval(-5 * 60))
     }
 }
