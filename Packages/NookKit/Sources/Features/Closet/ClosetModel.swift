@@ -2,6 +2,18 @@ import Foundation
 import Models
 import Observation
 
+/// Which pieces a closet-style list shows, when it isn't Closet itself (Phase 11): See all in
+/// Swap a piece, and the piece picker in Make your own look. They reuse Closet's search, filters
+/// and grid over a chosen set of pieces.
+struct PieceScope: Equatable {
+    /// The pieces to show, in this order. Pieces not listed are left out.
+    var garmentIDs: [Garment.ID]
+    /// A short mark under a piece's name, such as "May not match" (LR-07.3).
+    var notes: [Garment.ID: String] = [:]
+    /// Every piece is this kind (See all tops), so the piece chips aren't shown.
+    var fixedKind: GarmentCategory?
+}
+
 /// What Closet shows, and its search and filters (RD-13, LR-09, LR-11, RD-11).
 ///
 /// Loads her garments, suitcases and Preferences once, works out each piece's grid details
@@ -61,11 +73,25 @@ final class ClosetModel {
 
     static let standardKinds: [GarmentCategory] = [.top, .bottom, .dress, .layer, .shoes, .bag]
 
-    init(searchDelay: Duration = .milliseconds(250)) {
+    /// A chosen set of pieces instead of her whole closet (`PieceScope`). `nil` for Closet.
+    let scope: PieceScope?
+
+    init(searchDelay: Duration = .milliseconds(250), scope: PieceScope? = nil) {
         self.searchDelay = searchDelay
+        self.scope = scope
     }
 
+    /// The Dirty chip, only on Closet itself while tracking is on. A scoped list only holds
+    /// pieces she can wear now, so it has nothing in the wash to find.
+    var showsLaundryFilter: Bool { tracksLaundry && scope == nil }
+
     // MARK: Loading
+
+    /// Sets one piece chip on its own, as a picker opening on a kind does.
+    func showOnly(_ kind: GarmentCategory) {
+        filter.categories = [kind]
+        refresh()
+    }
 
     func load(from services: NookServices?, now: Date = .now) async {
         guard let services else {
@@ -110,7 +136,12 @@ final class ClosetModel {
     func show(_ all: [Garment], suitcases allSuitcases: [Suitcase], profile: Profile, now: Date) {
         loadedAt = now
         tracksLaundry = profile.preferences.tracksLaundry
-        garments = all.filter(\.isInCloset)
+        if let scope {
+            let byID = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            garments = scope.garmentIDs.compactMap { byID[$0] }.filter(\.isInCloset)
+        } else {
+            garments = all.filter(\.isInCloset)
+        }
         deletedCount = all.count(where: \.isDeleted)
         self.allSuitcases = allSuitcases
         suitcases = allSuitcases.filter { !$0.isArchived }
@@ -120,12 +151,22 @@ final class ClosetModel {
         for suitcase in suitcases {
             for id in suitcase.garmentIDs { names[id, default: []].append(suitcase.name) }
         }
-        items = garments.map { ClosetItem($0, suitcaseNames: names[$0.id] ?? [], tracksLaundry: tracksLaundry) }
-        itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+        items = garments.map {
+            ClosetItem(
+                $0, suitcaseNames: names[$0.id] ?? [], tracksLaundry: tracksLaundry, note: scope?.notes[$0.id])
+        }
+        itemsByID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         dirtyCount = items.count(where: \.isDirty)
 
         let kinds = Set(garments.map(\.category))
-        pieceKinds = Self.standardKinds + (kinds.contains(.accessory) ? [.accessory] : [])
+        if scope?.fixedKind != nil {
+            pieceKinds = []
+        } else if scope != nil {
+            // A picker offers the kinds it holds.
+            pieceKinds = GarmentCategory.allCases.filter(kinds.contains)
+        } else {
+            pieceKinds = Self.standardKinds + (kinds.contains(.accessory) ? [.accessory] : [])
+        }
         let colours = Set(garments.flatMap(\.colors))
         colorChoices = ColorName.allCases.filter { colours.contains($0) }
 

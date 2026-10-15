@@ -17,8 +17,10 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
     /// In the wash, shown only while laundry tracking is on (RD-11).
     let isDirty: Bool
     let lastWorn: Date?
+    /// A short mark under the name in a picker, such as "May not match" (Phase 11).
+    let note: String?
 
-    init(_ garment: Garment, suitcaseNames: [String], tracksLaundry: Bool) {
+    init(_ garment: Garment, suitcaseNames: [String], tracksLaundry: Bool, note: String? = nil) {
         id = garment.id
         name = garment.name
         category = garment.category
@@ -28,6 +30,7 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
         self.suitcaseNames = suitcaseNames
         isDirty = tracksLaundry && garment.laundry == .dirty
         lastWorn = garment.lastWorn
+        self.note = note
     }
 
     var isPacked: Bool { !suitcaseNames.isEmpty }
@@ -36,6 +39,7 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
     /// 3 days ago". Built when a cell shows, not for every piece up front.
     func spokenDetails(now: Date, calendar: Calendar, locale: Locale) -> String {
         var parts: [String] = []
+        if let note { parts.append(note) }
         if isDirty {
             parts.append(String(localized: "Dirty", bundle: .module, comment: "Spoken on a closet piece in the wash"))
         }

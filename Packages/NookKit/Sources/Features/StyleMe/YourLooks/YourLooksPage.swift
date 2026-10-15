@@ -7,6 +7,8 @@ struct YourLooksActions {
     var toggleSave: (Look) -> Void = { _ in }
     var tryOn: (Look) -> Void = { _ in }
     var swap: (Look) -> Void = { _ in }
+    /// Undo for the latest swap or removal (Phase 11).
+    var undoChange: () -> Void = {}
     var askStylist: (Look) -> Void = { _ in }
     var findOne: (LookBundlePiece) -> Void = { _ in }
     var tryDifferentOutfit: () -> Void = {}

@@ -8,14 +8,18 @@ import Models
 /// has loaded. Pieces are in body order (layer, top, dress, bottom, shoes, bag, accessory), so
 /// the spoken summary and the list under the bundle read top to bottom.
 struct LookBundleContent: Identifiable, Hashable {
-    /// The look's ID. It also seeds the layout, so a look lies the same way on every screen.
+    /// The look's ID.
     let id: String
+    /// Seeds the layout, so a look lies the same way on every screen. The look's ID, or for a
+    /// look changed in Swap, the ID of the look it came from, so a swap doesn't toss the others.
+    let layoutSeed: String
     /// The look's name, when she's named it.
     let name: String?
     let pieces: [LookBundlePiece]
 
-    init(id: String, name: String? = nil, pieces: [LookBundlePiece]) {
+    init(id: String, name: String? = nil, layoutSeed: String? = nil, pieces: [LookBundlePiece]) {
         self.id = id
+        self.layoutSeed = layoutSeed ?? id
         self.name = name
         self.pieces = pieces.enumerated()
             .sorted { ($0.element.category.listOrder, $0.offset) < ($1.element.category.listOrder, $1.offset) }
@@ -24,10 +28,11 @@ struct LookBundleContent: Identifiable, Hashable {
 
     /// The look's pieces. A garment that isn't in `garments` (purged from Recently deleted) is
     /// left out, since there's nothing left to draw or name.
-    init(look: Look, garments: [Garment.ID: Garment]) {
+    init(look: Look, garments: [Garment.ID: Garment], layoutSeed: String? = nil) {
         self.init(
             id: look.id.rawValue,
             name: look.name,
+            layoutSeed: layoutSeed,
             pieces: look.pieces.compactMap { piece in
                 switch piece.content {
                 case .garment(let id):

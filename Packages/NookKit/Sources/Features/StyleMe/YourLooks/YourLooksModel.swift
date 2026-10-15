@@ -12,6 +12,11 @@ import Observation
 ///
 /// Only `start`, `retry` and `tryDifferentOutfit` call the stylist. Leaving the screen cancels a
 /// request that's still running, and its answer is never shown.
+///
+/// Swap a piece changes a version by hand (Phase 11, LR-07, LR-08): the changed look takes the
+/// version's place on Today, marked "Swapped", and Undo steps back through the changes to the
+/// stylist's look exactly. Changes stay on this screen until she saves the look; a new result
+/// starts clean.
 @Observable
 final class YourLooksModel {
     enum Tab: String, Hashable, CaseIterable {
@@ -73,6 +78,14 @@ final class YourLooksModel {
     private(set) var looks: [Look] = []
     /// The suitcase's name when the source is a suitcase.
     private(set) var suitcaseName: String?
+    /// Her suitcases, for Swap's See all filter.
+    private(set) var suitcases: [Suitcase] = []
+    /// Her usual fit, for ranking swaps when the request has no comfort for today.
+    private(set) var usualFit: Comfort?
+    /// Versions she changed with Swap a piece, as they are now (Phase 11).
+    private(set) var edits: [LookVersion: Look] = [:]
+    /// Each changed version's earlier looks, for Undo (LR-08.2).
+    private var histories: [LookVersion: EditHistory<Look>] = [:]
     /// Pieces the stylist could use for this request, for the progress step.
     private(set) var usablePieces = 0
     /// How many times the stylist was asked, for tests and the checkpoint.
@@ -89,17 +102,20 @@ final class YourLooksModel {
     private let now: () -> Date
     private let calendar: Calendar
     private let makeID: () -> StyleRequest.ID
+    private let makeLookID: () -> Look.ID
 
     init(
         request: StyleRequest,
         now: @escaping () -> Date = { .now },
         calendar: Calendar = .current,
-        makeID: @escaping () -> StyleRequest.ID = { .random() }
+        makeID: @escaping () -> StyleRequest.ID = { .random() },
+        makeLookID: @escaping () -> Look.ID = { .random() }
     ) {
         self.request = request
         self.now = now
         self.calendar = calendar
         self.makeID = makeID
+        self.makeLookID = makeLookID
     }
 
     // MARK: Styling
@@ -173,6 +189,7 @@ final class YourLooksModel {
             let (garments, suitcases, looks) = try await (garmentList, suitcaseList, lookList)
             let usualFit = try await profile.usualFit
             guard thisRun == run else { return }
+            self.usualFit = usualFit
             show(garments: garments, suitcases: suitcases, looks: looks)
             context = try StylingContext.make(
                 request: request, garments: garments, suitcases: suitcases, looks: looks, usualFit: usualFit,
@@ -230,6 +247,8 @@ final class YourLooksModel {
         }
         version = .simple
         tab = .today
+        edits = [:]
+        histories = [:]
     }
 
     /// Ends a run that failed. With a result already on screen, it stays and the failure becomes
@@ -257,6 +276,7 @@ final class YourLooksModel {
     private func show(garments: [Garment], suitcases: [Suitcase], looks: [Look]) {
         self.garments = Dictionary(garments.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         self.looks = looks
+        self.suitcases = suitcases
         looksUnavailable = false
         suitcaseName = request.source.suitcaseID.flatMap { id in suitcases.first { $0.id == id }?.name }
     }
@@ -287,14 +307,83 @@ final class YourLooksModel {
         result?.versions.compactMap(\.version) ?? []
     }
 
-    /// The selected version's look, or Simple if the selected one isn't in this result.
+    /// The selected version's look as it is now (changed by Swap, or as the stylist made it),
+    /// or Simple if the selected one isn't in this result.
     var currentLook: Look? {
-        result?.look(for: version) ?? result?.simple
+        guard let result else { return nil }
+        let shown = result.look(for: version) != nil ? version : .simple
+        return edits[shown] ?? result.look(for: shown)
     }
 
     /// The version actually shown.
     var shownVersion: LookVersion {
         currentLook?.version ?? .simple
+    }
+
+    // MARK: Swap a piece
+
+    /// The stylist's look for the version on screen, before any swap.
+    var originalLook: Look? {
+        result?.look(for: shownVersion) ?? result?.simple
+    }
+
+    /// True when the version on screen has a change Undo can take back.
+    var canUndoChange: Bool {
+        histories[shownVersion]?.canUndo ?? false
+    }
+
+    /// What Swap a piece needs for the look on screen. Gathered from what this screen already
+    /// loaded, so Swap reads nothing and sends nothing (LR-07.1).
+    func swapSetup(sourceName: String) -> SwapSetup? {
+        guard let look = currentLook else { return nil }
+        let members = request.source.suitcaseID.flatMap { id in suitcases.first { $0.id == id }?.garmentIDs }
+        let recent = WearRules.recentCombinations(
+            in: looks, categories: garments.mapValues(\.category), window: request.preferences.repeatWindow,
+            now: now(), calendar: calendar)
+        return SwapSetup(
+            look: look,
+            simple: result?.simple,
+            garments: garments,
+            suitcases: suitcases,
+            situation: SwapSituation(
+                source: request.source,
+                members: members,
+                occasion: request.occasion,
+                weather: request.weatherToUse,
+                fit: (request.comfort ?? usualFit)?.matchingFit,
+                tracksLaundry: request.preferences.tracksLaundry,
+                recentCombinations: recent,
+                date: now(),
+                calendar: calendar
+            ),
+            sourceName: sourceName,
+            allowsFindOne: request.allowsNewPieceIdea,
+            layoutSeed: originalLook?.id.rawValue
+        )
+    }
+
+    /// A model for Swap a piece on the look on screen, with this screen's clock and IDs.
+    func swapModel(sourceName: String) -> SwapModel? {
+        swapSetup(sourceName: sourceName).map { SwapModel(setup: $0, makeLookID: makeLookID, now: now) }
+    }
+
+    /// Puts a look changed in Swap in its version's place, keeping the one before for Undo.
+    func apply(_ changed: Look) {
+        let version = changed.version ?? shownVersion
+        guard let before = edits[version] ?? result?.look(for: version) else { return }
+        histories[version, default: EditHistory()].record(before)
+        edits[version] = changed
+        self.version = version
+    }
+
+    /// Undo for the latest swap or removal on the version on screen. Gives back exactly the look
+    /// before it (LR-08.2). Returns false when there was nothing to undo.
+    @discardableResult
+    func undoChange() -> Bool {
+        let version = shownVersion
+        guard let current = currentLook, let earlier = histories[version]?.undo(from: current) else { return false }
+        edits[version] = earlier.id == result?.look(for: version)?.id ? nil : earlier
+        return true
     }
 
     func isSaved(_ look: Look) -> Bool {

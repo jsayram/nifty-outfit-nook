@@ -145,16 +145,40 @@ struct YourLooksText {
 
     // MARK: Piece marks
 
-    /// "Swapped" or "Added" for a piece that isn't in Simple (LR-05a.3), by piece ID.
-    static func changes(in look: Look, simple: Look?, garments: [Garment.ID: Garment]) -> [String: LookPieceChange] {
-        guard look.version != .simple, let simple else { return [:] }
-        let simpleKinds = Set(simple.garmentIDs.compactMap { garments[$0]?.category })
+    /// "Swapped" or "Added" for a piece that isn't in Simple (LR-05a.3), by piece ID. With
+    /// `original`, the stylist's look before she changed it in Swap, a piece she swapped in is
+    /// marked "Swapped" too, Simple included (Phase 11).
+    static func changes(
+        in look: Look, simple: Look?, original: Look? = nil, garments: [Garment.ID: Garment]
+    ) -> [String: LookPieceChange] {
         var changes: [String: LookPieceChange] = [:]
-        for piece in look.pieces where !piece.isSameAsSimple && !piece.isIdea {
-            guard let id = piece.garmentID, let category = garments[id]?.category else { continue }
-            changes[piece.id.rawValue] = simpleKinds.contains(category) ? .swapped : .added
+        if look.version != .simple, let simple {
+            let simpleKinds = Set(simple.garmentIDs.compactMap { garments[$0]?.category })
+            for piece in look.pieces where !piece.isSameAsSimple && !piece.isIdea {
+                guard let id = piece.garmentID, let category = garments[id]?.category else { continue }
+                changes[piece.id.rawValue] = simpleKinds.contains(category) ? .swapped : .added
+            }
+        }
+        if let original, original.id != look.id {
+            let originalIDs = Set(original.garmentIDs)
+            let originalKinds = Set(
+                original.pieces.compactMap { piece in
+                    piece.idea?.category ?? piece.garmentID.flatMap { garments[$0]?.category }
+                })
+            for piece in look.pieces {
+                guard let id = piece.garmentID, !originalIDs.contains(id), let category = garments[id]?.category
+                else { continue }
+                changes[piece.id.rawValue] = originalKinds.contains(category) ? .swapped : .added
+            }
         }
         return changes
+    }
+
+    /// Under the piece list once she changed the look with Swap a piece.
+    static var changedByHer: String {
+        String(
+            localized: "You changed this look. Undo goes back one change.", bundle: .module,
+            comment: "Your looks: under the pieces after a swap or removal (LR-08.2)")
     }
 
     // MARK: Saving
@@ -163,23 +187,9 @@ struct YourLooksText {
     /// "Blue dress", with the version when it isn't Simple. She can rename it in Saved Looks.
     func name(for look: Look, garments: [Garment.ID: Garment]) -> String {
         let pieces = look.garmentIDs.compactMap { garments[$0] }
-        let colour = { (kind: GarmentCategory) in pieces.first { $0.category == kind }?.colors.first }
         let base: String
-        if let dress = colour(.dress) {
-            let dressWord = dress.title
-            base = String(
-                localized: "\(dressWord) dress", bundle: .module, comment: "Name of a saved look: a dress's colour")
-        } else if let top = colour(.top), let bottom = colour(.bottom) {
-            let topWord = top.title
-            let bottomWord = bottom.title.lowercased(with: locale)
-            base =
-                top == bottom
-                ? String(
-                    localized: "All \(bottomWord)", bundle: .module,
-                    comment: "Name of a saved look whose top and bottom are one colour")
-                : String(
-                    localized: "\(topWord) & \(bottomWord)", bundle: .module,
-                    comment: "Name of a saved look: the top's colour and the bottom's")
+        if let colours = Self.colourName(of: pieces, locale: locale) {
+            base = colours
         } else {
             let occasion = request.occasion.title
             base = String(
@@ -196,6 +206,27 @@ struct YourLooksText {
         case .simple, nil:
             return base
         }
+    }
+
+    /// A look's name from its main colours: "Blue dress", "Pink & navy", "All navy". `nil` when
+    /// it has no dress and no coloured top and bottom.
+    static func colourName(of pieces: [Garment], locale: Locale) -> String? {
+        let colour = { (kind: GarmentCategory) in pieces.first { $0.category == kind }?.colors.first }
+        if let dress = colour(.dress) {
+            let dressWord = dress.title
+            return String(
+                localized: "\(dressWord) dress", bundle: .module, comment: "Name of a saved look: a dress's colour")
+        }
+        guard let top = colour(.top), let bottom = colour(.bottom) else { return nil }
+        let topWord = top.title
+        let bottomWord = bottom.title.lowercased(with: locale)
+        return top == bottom
+            ? String(
+                localized: "All \(bottomWord)", bundle: .module,
+                comment: "Name of a saved look whose top and bottom are one colour")
+            : String(
+                localized: "\(topWord) & \(bottomWord)", bundle: .module,
+                comment: "Name of a saved look: the top's colour and the bottom's")
     }
 
     static var saved: String {

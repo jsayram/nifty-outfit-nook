@@ -15,8 +15,9 @@ struct YourLooksRoutes {
 /// Your looks: what Style me opens (LR-05a, LR-05b, LR-06, RD-06).
 ///
 /// The request goes to the stylist when the screen first appears, and leaving the screen
-/// cancels it if it's still running. Saving happens here, with Undo. Try it on, Swap a piece, Ask
-/// stylist and Find one open stand-ins until their phases (12b and 33, 11, later, 34).
+/// cancels it if it's still running. Saving happens here, with Undo. Swap a piece opens Swap
+/// (Phase 11), and its changes come back here with Undo. Try it on, Ask stylist and Find one open
+/// stand-ins until their phases (12b and 33, later, 34).
 struct YourLooksScreen: View {
     var routes = YourLooksRoutes()
 
@@ -25,6 +26,7 @@ struct YourLooksScreen: View {
     @State private var model: YourLooksModel
     @State private var stub: ResultStub?
     @State private var toast: NookToastMessage?
+    @State private var swapping: SwapRoute?
 
     init(request: StyleRequest, routes: YourLooksRoutes = YourLooksRoutes()) {
         self.routes = routes
@@ -37,7 +39,8 @@ struct YourLooksScreen: View {
             actions: YourLooksActions(
                 toggleSave: toggleSave,
                 tryOn: { stub = .tryOn($0.id) },
-                swap: { stub = .swap($0.id) },
+                swap: { _ in openSwap() },
+                undoChange: undoChange,
                 askStylist: { stub = .askStylist($0.id) },
                 findOne: { stub = .findOne(pieceName: $0.name) },
                 tryDifferentOutfit: { model.tryDifferentOutfit() },
@@ -54,6 +57,9 @@ struct YourLooksScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .nookSheet(item: $stub, title: { sheetTitle($0) }, subtitle: { $0.subtitle }) { stub in
             sheetContent(stub)
+        }
+        .navigationDestination(item: $swapping) { route in
+            SwapScreen(model: route.model, finish: finishSwap)
         }
         // The page's scroll view runs under the floating tab bar, so the toast sits on a clear
         // layer that keeps to the safe area and stays above the tab bar.
@@ -128,6 +134,35 @@ struct YourLooksScreen: View {
         }
     }
 
+    // MARK: Swap a piece
+
+    private func openSwap() {
+        let text = YourLooksText(request: model.request, suitcaseName: model.suitcaseName, locale: locale)
+        guard let swap = model.swapModel(sourceName: text.sourceName) else { return }
+        swapping = SwapRoute(model: swap)
+    }
+
+    /// Use this top or Remove this piece: back to the look, changed, with Undo (LR-08.2).
+    private func finishSwap(_ outcome: SwapOutcome) {
+        let message: String
+        switch outcome {
+        case .swapped(let look, let name):
+            model.apply(look)
+            message = SwapText.swapped(name)
+        case .removed(let look, let name):
+            model.apply(look)
+            message = SwapText.removed(name)
+        }
+        swapping = nil
+        toast = NookToastMessage(
+            message, systemImage: "arrow.left.arrow.right", actionTitle: YourLooksText.undo, action: undoChange)
+    }
+
+    private func undoChange() {
+        guard model.undoChange() else { return }
+        toast = NookToastMessage(SwapText.undone, systemImage: "arrow.uturn.backward")
+    }
+
     private func undo(_ change: YourLooksModel.SaveChange, name: String) {
         Task {
             do {
@@ -161,4 +196,13 @@ struct YourLooksScreen: View {
             }
         if let message { AccessibilityNotification.Announcement(message).post() }
     }
+}
+
+/// Swap a piece on the navigation stack. Pushed by identity: each opening is a new Swap.
+struct SwapRoute: Hashable, Identifiable {
+    let id = UUID()
+    let model: SwapModel
+
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }

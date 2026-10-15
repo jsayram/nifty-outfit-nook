@@ -14,6 +14,10 @@ struct GarmentGrid: View {
     let items: [ClosetItem]
     /// When the closet loaded, for "Last worn 3 days ago".
     let now: Date
+    /// What tapping a piece does, for VoiceOver. `nil` says it opens the piece.
+    var hint: String?
+    /// The start of each cell's UI test identifier.
+    var identifierPrefix = "closet.garment"
     let open: (ClosetItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -23,7 +27,7 @@ struct GarmentGrid: View {
         case .rows:
             LazyVStack(alignment: .leading, spacing: NookSpacing.large) {
                 ForEach(items) { item in
-                    GarmentCell(item: item, now: now, style: .row) { open(item) }
+                    cell(item, style: .row)
                 }
             }
         case .grid(let minimum):
@@ -32,9 +36,15 @@ struct GarmentGrid: View {
                 spacing: 14
             ) {
                 ForEach(items) { item in
-                    GarmentCell(item: item, now: now, style: .tile) { open(item) }
+                    cell(item, style: .tile)
                 }
             }
+        }
+    }
+
+    private func cell(_ item: ClosetItem, style: GarmentCell.Style) -> some View {
+        GarmentCell(item: item, now: now, style: style, hint: hint, identifierPrefix: identifierPrefix) {
+            open(item)
         }
     }
 }
@@ -77,6 +87,8 @@ struct GarmentCell: View {
     let item: ClosetItem
     let now: Date
     let style: Style
+    var hint: String?
+    var identifierPrefix = "closet.garment"
     let action: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -107,8 +119,10 @@ struct GarmentCell: View {
         .buttonStyle(ClosetPressStyle())
         .accessibilityLabel(Text(item.name))
         .accessibilityValue(Text(item.spokenDetails(now: now, calendar: calendar, locale: locale)))
-        .accessibilityHint(Text("Opens the piece.", bundle: .module, comment: "Hint on a closet piece"))
-        .accessibilityIdentifier("closet.garment.\(item.id.rawValue)")
+        .accessibilityHint(
+            hint.map { Text($0) } ?? Text("Opens the piece.", bundle: .module, comment: "Hint on a closet piece")
+        )
+        .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue)")
     }
 
     private var size: CGSize { GarmentGridLayout(dynamicTypeSize).pictureSize }
@@ -144,10 +158,16 @@ struct GarmentCell: View {
     }
 
     private var name: some View {
-        Text(item.name)
-            .nookTextStyle(.chip)
-            .foregroundStyle(.nook.textPrimary)
-            .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: style == .tile ? .center : .leading, spacing: 3) {
+            Text(item.name)
+                .nookTextStyle(.chip)
+                .foregroundStyle(.nook.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let note = item.note {
+                NookBadge(note, tone: .neutral)
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }
 
