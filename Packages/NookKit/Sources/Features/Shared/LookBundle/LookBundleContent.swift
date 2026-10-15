@@ -47,6 +47,23 @@ struct LookBundleContent: Identifiable, Hashable {
 
     /// The pieces she doesn't own ("Not in your closet").
     var ideas: [LookBundlePiece] { pieces.filter(\.isIdea) }
+
+    /// Her pieces that have left her closet since the look was made (LR-16.4).
+    var removed: [LookBundlePiece] { pieces.filter(\.isRemoved) }
+}
+
+/// Why one of her garments in a look is no longer in her closet (LR-16).
+enum PieceRemoval: Hashable {
+    /// "I don't have it any more", or put away in the archive, which has no screen yet.
+    case noLongerOwned
+    /// In Recently deleted, for 30 days.
+    case deleted
+
+    /// `nil` while the garment is in her closet.
+    init?(_ garment: Garment) {
+        if garment.isInCloset { return nil }
+        self = garment.isDeleted ? .deleted : .noLongerOwned
+    }
 }
 
 /// One piece in a look bundle: a garment of hers, or an idea for one she doesn't own (LR-05b).
@@ -61,10 +78,13 @@ struct LookBundlePiece: Identifiable, Hashable {
     let isIdea: Bool
     /// The same piece as in the Simple version ("Same as Simple", LR-05a.3).
     let isSameAsSimple: Bool
+    /// Why a garment of hers is no longer in her closet, if it isn't (LR-16). The bundle shows
+    /// it faded, and saved looks offer Swap it.
+    let removal: PieceRemoval?
 
     init(
         id: String, name: String, category: GarmentCategory, colors: [ColorName], photo: PhotoReference = .noPhoto,
-        cutout: GarmentCutout? = nil, isIdea: Bool = false, isSameAsSimple: Bool = false
+        cutout: GarmentCutout? = nil, isIdea: Bool = false, isSameAsSimple: Bool = false, removal: PieceRemoval? = nil
     ) {
         self.id = id
         self.name = name
@@ -74,13 +94,17 @@ struct LookBundlePiece: Identifiable, Hashable {
         self.cutout = cutout
         self.isIdea = isIdea
         self.isSameAsSimple = isSameAsSimple
+        self.removal = removal
     }
 
     init(id: String, garment: Garment, isSameAsSimple: Bool = false) {
         self.init(
             id: id, name: garment.name, category: garment.category, colors: garment.colors, photo: garment.photo,
-            cutout: garment.cutout, isSameAsSimple: isSameAsSimple)
+            cutout: garment.cutout, isSameAsSimple: isSameAsSimple, removal: PieceRemoval(garment))
     }
+
+    /// True when the piece is a garment she no longer has in her closet.
+    var isRemoved: Bool { removal != nil }
 
     /// An idea has no photo: it's drawn from its kind and colours.
     init(id: String, idea: PieceIdea) {
