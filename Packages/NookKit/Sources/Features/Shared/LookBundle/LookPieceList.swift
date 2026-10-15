@@ -8,10 +8,13 @@ import SwiftUI
 /// One row per piece, in body order, on a soft tint with no lines between rows (`.pcs` in
 /// `results-versions.html`). A piece she doesn't own says "Not in your closet" and, when
 /// `onFindOne` is given, has a Find one button (LR-05b). With `showsSameAsSimple`, pieces shared
-/// with the Simple version say "Same as Simple" (LR-05a.3).
+/// with the Simple version say "Same as Simple", and `changes` marks the others "Swapped" or
+/// "Added" (LR-05a.3), in words rather than colour.
 struct LookPieceList: View {
     let content: LookBundleContent
     var showsSameAsSimple = false
+    /// How pieces differ from Simple, by piece ID (Phase 10b).
+    var changes: [String: LookPieceChange] = [:]
     var onFindOne: ((LookBundlePiece) -> Void)?
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -47,7 +50,7 @@ struct LookPieceList: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if !piece.isIdea, let mark = markTitle(for: piece) {
-                NookBadge(mark, tone: .neutral)
+                NookBadge(mark, tone: changes[piece.id] == nil ? .neutral : .accent)
                     .accessibilityHidden(true)
             }
             if piece.isIdea, let onFindOne {
@@ -72,6 +75,7 @@ struct LookPieceList: View {
 
     private func markTitle(for piece: LookBundlePiece) -> String? {
         if piece.isIdea { return LookBundleText.notInYourCloset }
+        if let change = changes[piece.id] { return change.title }
         if showsSameAsSimple && piece.isSameAsSimple {
             return String(
                 localized: "Same as Simple", bundle: .module, comment: "Mark on a piece also in the Simple version")

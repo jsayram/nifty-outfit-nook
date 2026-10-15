@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ & %@" : {
+      "comment" : "Name of a saved look: the top's colour and the bottom's"
+    },
     "%@ (not in your closet)" : {
       "comment" : "Spoken name of a look's piece she doesn't own",
       "localizations" : {
@@ -26,8 +29,20 @@
     "%@ can’t be your starting piece. %@." : {
       "comment" : "Style Me: the starting piece can't be used; its name, then why, such as In the wash"
     },
+    "%@ dress" : {
+      "comment" : "Name of a saved look: a dress's colour"
+    },
+    "%@ has %@ you can use today." : {
+      "comment" : "Your looks: insufficient wardrobe, the source's name and a count"
+    },
     "%@ has %lld pieces you can use today, so you may get fewer than three versions." : {
       "comment" : "Style Me warning: a small suitcase; its name and a count"
+    },
+    "%@ has no dressier piece to swap in." : {
+      "comment" : "Why a version is missing: the source's name"
+    },
+    "%@ has no other piece to make another version." : {
+      "comment" : "Why a version is missing: the source's name"
     },
     "%@ is back in your closet" : {
       "comment" : "Toast after Restore, with the piece's name",
@@ -98,6 +113,9 @@
         }
       }
     },
+    "%@ look" : {
+      "comment" : "Name of a saved look with no main colours: the occasion"
+    },
     "%@ stays as it was." : {
       "comment" : "Edit: under the discard question, with the piece's saved name",
       "localizations" : {
@@ -131,6 +149,9 @@
         }
       }
     },
+    "%@, dressed up" : {
+      "comment" : "Name of a saved Dressed up look"
+    },
     "%@, optional" : {
       "comment" : "VoiceOver name of an optional field, like Brand, optional",
       "localizations" : {
@@ -141,6 +162,9 @@
           }
         }
       }
+    },
+    "%@, something new" : {
+      "comment" : "Name of a saved Something new look"
     },
     "%@: %@" : {
       "comment" : "Spoken for a look bundle: the look's title, then its pieces, as in Look: Black tee, Jeans",
@@ -243,6 +267,24 @@
         }
       }
     },
+    "A bag" : {
+      "comment" : "What a look needs"
+    },
+    "A bottom, like trousers or a skirt" : {
+      "comment" : "What a look needs"
+    },
+    "A different outfit didn’t come through. Nothing was charged." : {
+      "comment" : "Banner over results when Try a different outfit fails"
+    },
+    "A dress" : {
+      "comment" : "What a look needs"
+    },
+    "A layer" : {
+      "comment" : "What a look needs"
+    },
+    "A look needs" : {
+      "comment" : "Your looks: insufficient wardrobe"
+    },
     "A look with no name" : {
       "comment" : "Saved look with no name",
       "localizations" : {
@@ -271,6 +313,9 @@
         }
       }
     },
+    "A piece or suitcase in it changed since you asked. Nothing was sent." : {
+      "comment" : "Your looks when the suitcase or starting piece changed"
+    },
     "A plain drawing stands in until you add one." : {
       "comment" : "Describe in words: under No photo yet",
       "localizations" : {
@@ -281,6 +326,9 @@
           }
         }
       }
+    },
+    "A top" : {
+      "comment" : "What a look needs"
     },
     "About this piece" : {
       "comment" : "Add a piece: details step title",
@@ -373,8 +421,11 @@
     "Add pieces" : {
       "comment" : "Style Me button: opens Suitcases to pack"
     },
+    "Add pieces to %@" : {
+      "comment" : "Your looks: insufficient wardrobe in a suitcase, its name"
+    },
     "Added" : {
-      "comment" : "Suggestion chip once accepted",
+      "comment" : "Mark: a suggestion chip once accepted, or a piece a look version adds to Simple",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -383,6 +434,9 @@
           }
         }
       }
+    },
+    "All %@" : {
+      "comment" : "Name of a saved look whose top and bottom are one colour"
     },
     "All clean" : {
       "comment" : "Hamper plate: nothing to wash",
@@ -406,8 +460,8 @@
         }
       }
     },
-    "Allowed in Something new" : {
-      "comment" : "Request summary: an unowned piece may appear"
+    "An accessory" : {
+      "comment" : "What a look needs"
     },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
@@ -425,6 +479,12 @@
     },
     "Applies to" : {
       "comment" : "Colour sheet group"
+    },
+    "Ask stylist" : {
+      "comment" : "Results button (RD-06)"
+    },
+    "Ask stylist comes later" : {
+      "comment" : "Ask stylist stand-in"
     },
     "Available" : {
       "comment" : "Garment status: nothing in the way",
@@ -483,6 +543,9 @@
           }
         }
       }
+    },
+    "Back to Style Me" : {
+      "comment" : "Your looks button"
     },
     "Bag" : {
       "comment" : "One piece of this kind, used in search",
@@ -718,6 +781,9 @@
     "Change the occasion" : {
       "comment" : "Style Me button"
     },
+    "Change your request" : {
+      "comment" : "Your looks: back to Style Me"
+    },
     "Changes saved" : {
       "comment" : "Toast after editing a piece",
       "localizations" : {
@@ -728,6 +794,12 @@
           }
         }
       }
+    },
+    "Check %@ ready to wear" : {
+      "comment" : "Styling step 1: how many pieces can be used"
+    },
+    "Check the pieces ready to wear" : {
+      "comment" : "Styling step 1, before the count is known"
     },
     "Checking the weather…" : {
       "comment" : "Weather sheet, while it loads",
@@ -774,6 +846,9 @@
         }
       }
     },
+    "Choose one outfit in three versions" : {
+      "comment" : "Styling step 3"
+    },
     "Choose the occasion." : {
       "comment" : "VoiceOver hint for Occasion"
     },
@@ -807,6 +882,9 @@
           }
         }
       }
+    },
+    "Choosing one outfit in three versions from %@ for %@." : {
+      "comment" : "Your looks while styling: the source and the occasion"
     },
     "Clean" : {
       "comment" : "Garment status: laundry tracking on",
@@ -934,9 +1012,6 @@
           }
         }
       }
-    },
-    "Debug builds only" : {
-      "comment" : "Debug section detail"
     },
     "Delete %@?" : {
       "comment" : "Remove from closet: asks before Delete it",
@@ -1128,6 +1203,9 @@
         }
       }
     },
+    "Dressed up" : {
+      "comment" : "Look version (LR-05a)"
+    },
     "Dresses" : {
       "comment" : "Piece chip",
       "localizations" : {
@@ -1149,6 +1227,9 @@
           }
         }
       }
+    },
+    "Easy and safe" : {
+      "comment" : "Under the version switch: Simple"
     },
     "Edit" : {
       "comment" : "Button: edits a piece",
@@ -1273,6 +1354,9 @@
           }
         }
       }
+    },
+    "Finding a piece like this comes in a later version. Nothing was searched." : {
+      "comment" : "Find one stand-in (LR-05b.4)"
     },
     "Fit" : {
       "comment" : "Garment fact label: how it's cut",
@@ -1571,6 +1655,9 @@
         }
       }
     },
+    "In progress" : {
+      "comment" : "VoiceOver: the styling step now"
+    },
     "In suitcase %@" : {
       "comment" : "Spoken for a suitcase on garment detail, as in In suitcase Weekend",
       "localizations" : {
@@ -1739,6 +1826,9 @@
           }
         }
       }
+    },
+    "Keeps this version in Saved Looks." : {
+      "comment" : "VoiceOver hint on Save look"
     },
     "Kept until %@" : {
       "comment" : "Recently deleted: the day a piece is deleted for good, such as Nov 13",
@@ -1916,6 +2006,9 @@
         }
       }
     },
+    "Leaving this screen stops it, and nothing is used." : {
+      "comment" : "Your looks while styling: leaving cancels the request"
+    },
     "Light" : {
       "comment" : "How warm a piece is to wear",
       "localizations" : {
@@ -2004,8 +2097,14 @@
         }
       }
     },
+    "Looks from %@ use only what’s packed, so Something new is made from your own pieces." : {
+      "comment" : "Note on Your looks from a suitcase (LR-05b): the suitcase's name"
+    },
     "Looks from a suitcase only use what’s packed in it. Pack a few pieces, or style from somewhere else." : {
       "comment" : "Style Me when the suitcase has nothing packed"
+    },
+    "Looks you saved for %@ from %@. Opening them sends nothing." : {
+      "comment" : "Saved tab lead: the occasion and the source"
     },
     "Made on this device from your words. Nothing is sent, and nothing is filled in until you accept it." : {
       "comment" : "Describe in words: under the suggestions",
@@ -2053,6 +2152,9 @@
           }
         }
       }
+    },
+    "Makes a simulated picture of this look." : {
+      "comment" : "VoiceOver hint on Try it on"
     },
     "Mark as clean" : {
       "comment" : "Button on garment detail",
@@ -2178,8 +2280,8 @@
         }
       }
     },
-    "New-piece idea" : {
-      "comment" : "Request summary row (LR-05b)"
+    "Next" : {
+      "comment" : "VoiceOver: a styling step still to come"
     },
     "Nifty Outfit Nook" : {
       "comment" : "The app's name, as the Home title",
@@ -2194,6 +2296,9 @@
     },
     "No %@ %@ in %@ can be used today." : {
       "comment" : "Style Me warning. Example: No navy shoes in Weekend can be used today."
+    },
+    "No %@ this time. %@" : {
+      "comment" : "Partial result banner: the missing versions, then why"
     },
     "No details found in those words. You can fill them in on the next step." : {
       "comment" : "Describe in words: nothing recognised",
@@ -2261,6 +2366,9 @@
         }
       }
     },
+    "No saved looks here yet" : {
+      "comment" : "Saved tab empty state title"
+    },
     "No saved looks use it." : {
       "comment" : "Remove from closet: Delete it affects no saved looks",
       "localizations" : {
@@ -2289,6 +2397,9 @@
         }
       }
     },
+    "Not enough pieces for a look" : {
+      "comment" : "Your looks: insufficient wardrobe"
+    },
     "Not enough to style yet" : {
       "comment" : "Style Me when too few pieces can be used"
     },
@@ -2302,9 +2413,6 @@
           }
         }
       }
-    },
-    "Not in this request" : {
-      "comment" : "Request summary: no unowned piece"
     },
     "Not in your closet" : {
       "comment" : "Tag on a look's piece she doesn't own",
@@ -2403,6 +2511,9 @@
     "Nothing in %@ can be used today. Pieces in the wash or away don’t count." : {
       "comment" : "Style Me: no usable pieces in the source; the source's name"
     },
+    "Nothing in %@ could bring in %@ here, so this look goes without it." : {
+      "comment" : "Note on Your looks: a required colour couldn't be met; the source and colour"
+    },
     "Nothing in %@ matches “%@”." : {
       "comment" : "Starting piece search with no match"
     },
@@ -2416,6 +2527,9 @@
           }
         }
       }
+    },
+    "Nothing was charged, and nothing was made up to fill the gap." : {
+      "comment" : "Your looks: insufficient wardrobe"
     },
     "Nothing was lost. Try again in a moment." : {
       "comment" : "Closet error message",
@@ -2438,6 +2552,9 @@
           }
         }
       }
+    },
+    "Nothing was sent. Try again in a moment." : {
+      "comment" : "Your looks when the stores fail"
     },
     "Occasion" : {
       "comment" : "Label on the calendar",
@@ -2507,6 +2624,9 @@
           }
         }
       }
+    },
+    "On this iPhone" : {
+      "comment" : "Styling step detail"
     },
     "On your wishlist" : {
       "comment" : "Garment status",
@@ -2883,6 +3003,9 @@
         }
       }
     },
+    "Progress" : {
+      "comment" : "VoiceOver name of the styling progress bar"
+    },
     "Purple" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -2959,9 +3082,6 @@
           }
         }
       }
-    },
-    "Request preview" : {
-      "comment" : "Debug section on the stand-in"
     },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
@@ -3046,6 +3166,9 @@
         }
       }
     },
+    "Save look" : {
+      "comment" : "Results button (RD-06)"
+    },
     "Save to closet" : {
       "comment" : "Button: saves a new piece",
       "localizations" : {
@@ -3056,6 +3179,9 @@
           }
         }
       }
+    },
+    "Saved" : {
+      "comment" : "Save look button once the look is saved"
     },
     "Saved Looks" : {
       "comment" : "Tab bar label",
@@ -3068,6 +3194,9 @@
         }
       }
     },
+    "Saved look" : {
+      "comment" : "Sheet title for a saved look"
+    },
     "Saved looks" : {
       "comment" : "Garment fact label",
       "localizations" : {
@@ -3078,6 +3207,12 @@
           }
         }
       }
+    },
+    "Saved looks didn’t load" : {
+      "comment" : "Saved tab error title"
+    },
+    "Saved to Saved Looks" : {
+      "comment" : "Toast after Save look"
     },
     "Say it the way you would to a friend." : {
       "comment" : "Describe in words: line under the title",
@@ -3115,6 +3250,9 @@
         }
       }
     },
+    "See saved looks" : {
+      "comment" : "Your looks: opens the Saved tab"
+    },
     "Send feedback" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -3125,6 +3263,9 @@
           }
         }
       }
+    },
+    "Send the request" : {
+      "comment" : "Styling step 2"
     },
     "Shade name" : {
       "comment" : "Add a piece: field label, her word for the shade",
@@ -3170,6 +3311,9 @@
         }
       }
     },
+    "Shopping comes later" : {
+      "comment" : "Find one stand-in"
+    },
     "Show filters" : {
       "comment" : "Button at large text sizes",
       "localizations" : {
@@ -3180,6 +3324,15 @@
           }
         }
       }
+    },
+    "Simple" : {
+      "comment" : "Look version (LR-05a)"
+    },
+    "Simulated" : {
+      "comment" : "Badge: a stand-in, not the real thing"
+    },
+    "Simulated stylist" : {
+      "comment" : "Styling step detail"
     },
     "Size" : {
       "comment" : "Garment fact label: size on the label",
@@ -3247,6 +3400,9 @@
         }
       }
     },
+    "Something new" : {
+      "comment" : "Look version (LR-05a)"
+    },
     "Something new may add one idea" : {
       "comment" : "Style Me Preferences line for Mine + one idea"
     },
@@ -3311,6 +3467,9 @@
         }
       }
     },
+    "Step %lld of 3" : {
+      "comment" : "VoiceOver value of the styling progress bar"
+    },
     "Style Me" : {
       "comment" : "Words on the laptop screen; opens Style Me",
       "localizations" : {
@@ -3372,6 +3531,9 @@
         }
       }
     },
+    "Style again" : {
+      "comment" : "Sends the request again"
+    },
     "Style from Main closet" : {
       "comment" : "Preferences sheet button"
     },
@@ -3402,6 +3564,18 @@
           }
         }
       }
+    },
+    "Styling didn’t finish" : {
+      "comment" : "Your looks failed state title"
+    },
+    "Styling needs a connection" : {
+      "comment" : "Your looks offline state title"
+    },
+    "Styling stopped" : {
+      "comment" : "Your looks after leaving mid-way"
+    },
+    "Styling…" : {
+      "comment" : "Your looks while the stylist works"
     },
     "Suggest details" : {
       "comment" : "Button: reads her words for details",
@@ -3502,6 +3676,15 @@
         }
       }
     },
+    "Swap a piece" : {
+      "comment" : "Results button (RD-06, LR-08)"
+    },
+    "Swap a piece comes next" : {
+      "comment" : "Swap stand-in"
+    },
+    "Swapped" : {
+      "comment" : "Mark on a piece that replaces one in Simple"
+    },
     "Take it out of your closet?" : {
       "comment" : "Remove from closet: asks before I don't have it any more",
       "localizations" : {
@@ -3524,6 +3707,12 @@
         }
       }
     },
+    "Taken out of Saved Looks" : {
+      "comment" : "Toast after unsaving a look"
+    },
+    "Takes it out of Saved Looks." : {
+      "comment" : "VoiceOver hint on Saved"
+    },
     "Tan" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -3534,6 +3723,9 @@
           }
         }
       }
+    },
+    "Tap Retry when you’re back online. Nothing was charged, and your saved looks still work." : {
+      "comment" : "Your looks offline state"
     },
     "That didn’t save. Nothing changed." : {
       "comment" : "Toast when a change to a piece couldn't be saved",
@@ -3557,6 +3749,9 @@
         }
       }
     },
+    "That look couldn’t be saved. Try again." : {
+      "comment" : "Toast when saving a look fails"
+    },
     "That photo couldn’t be read" : {
       "comment" : "Add a piece: the photo stand-in failed",
       "localizations" : {
@@ -3578,6 +3773,9 @@
           }
         }
       }
+    },
+    "That’s every outfit %@ can make for this request, so this one came round again." : {
+      "comment" : "Note on Your looks after Try a different outfit: the source's name"
     },
     "The first one you picked is the main colour." : {
       "comment" : "Add a piece: under the colours when several are picked",
@@ -3612,6 +3810,18 @@
         }
       }
     },
+    "The same outfit, a little classier" : {
+      "comment" : "Under the version switch: Dressed up"
+    },
+    "The same outfit, another way with your own pieces" : {
+      "comment" : "Under the version switch: Something new with Only mine or from a suitcase"
+    },
+    "The same outfit, plus one piece you don’t have" : {
+      "comment" : "Under the version switch: Something new with a piece she doesn't own"
+    },
+    "The stylist didn’t answer. Nothing was charged, and your request is kept as you left it." : {
+      "comment" : "Your looks failed state"
+    },
     "The weather can’t be read right now, so your looks won’t use it." : {
       "comment" : "Under the Weather row when the weather can't be read",
       "localizations" : {
@@ -3622,6 +3832,12 @@
           }
         }
       }
+    },
+    "The weather couldn’t be read, so these looks don’t use it." : {
+      "comment" : "Note on Your looks (LR-04.3)"
+    },
+    "These looks are kept on this iPhone." : {
+      "comment" : "Offline banner over results"
     },
     "These saved looks use it. They’ll show it faded, with Swap it:" : {
       "comment" : "Remove from closet: before the saved looks Delete it affects (LR-16.2)",
@@ -3692,6 +3908,9 @@
         }
       }
     },
+    "Today" : {
+      "comment" : "Your looks tab: the current result (LR-06)"
+    },
     "Today: %@ (you usually like %@)" : {
       "comment" : "Style Me Comfort line when today's comfort differs from her usual fit (LR-18)"
     },
@@ -3731,6 +3950,9 @@
         }
       }
     },
+    "Try a different outfit" : {
+      "comment" : "Your looks button (LR-05a)"
+    },
     "Try again" : {
       "comment" : "Button on the Home banner",
       "localizations" : {
@@ -3752,6 +3974,21 @@
           }
         }
       }
+    },
+    "Try it on" : {
+      "comment" : "Results button (RD-06)"
+    },
+    "Try it on and Ask stylist need a connection. Save and Swap work offline." : {
+      "comment" : "Under the results buttons while offline"
+    },
+    "Try it on will make one simulated picture of this look, labelled Simulated. Pictures show the style, not the exact fit." : {
+      "comment" : "Try it on stand-in"
+    },
+    "Try-on pictures are simulated." : {
+      "comment" : "Fine print under the results buttons (RD-06)"
+    },
+    "Try-on pictures come later" : {
+      "comment" : "Try it on stand-in"
     },
     "Turn on" : {
       "comment" : "Button: turns laundry tracking on",
@@ -3786,6 +4023,9 @@
         }
       }
     },
+    "Use Main closet" : {
+      "comment" : "Partial result banner action: style from the whole closet"
+    },
     "Use one line, without line breaks." : {
       "comment" : "Problem with the words for Other"
     },
@@ -3808,6 +4048,9 @@
     },
     "Usual fit (%@)" : {
       "comment" : "Comfort chip: her usual fit, named"
+    },
+    "Versions of this outfit" : {
+      "comment" : "VoiceOver name of the Simple, Dressed up, Something new switch"
     },
     "Wardrobe: Closet" : {
       "comment" : "VoiceOver label for the wardrobe",
@@ -3867,11 +4110,17 @@
         }
       }
     },
+    "When you see a look you like on Today, tap Save look. Looks you save for %@ from %@ show up here." : {
+      "comment" : "Saved tab empty state: the occasion and the source"
+    },
     "Where are you going?" : {
       "comment" : "Occasion sheet"
     },
     "Where your looks come from." : {
       "comment" : "Source sheet"
+    },
+    "Which looks" : {
+      "comment" : "VoiceOver name of the Today and Saved switch"
     },
     "While it’s off" : {
       "comment" : "Laundry tracking sheet",
@@ -4016,6 +4265,9 @@
         }
       }
     },
+    "You left before your looks came, so nothing was used. Your request is kept." : {
+      "comment" : "Your looks after leaving mid-way"
+    },
     "You mark pieces as in the wash. Style Me skips them unless you allow one." : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -4026,6 +4278,15 @@
           }
         }
       }
+    },
+    "You wore this %lld days ago" : {
+      "comment" : "Recent-wear note on Your looks (LR-10): how many days ago"
+    },
+    "You wore this today" : {
+      "comment" : "Recent-wear note on Your looks (LR-10)"
+    },
+    "You wore this yesterday" : {
+      "comment" : "Recent-wear note on Your looks (LR-10)"
     },
     "Your %lld pieces marked as in the wash are kept. Turn it back on and they come back." : {
       "comment" : "Laundry tracking sheet: how many pieces are still marked as in the wash",
@@ -4060,6 +4321,9 @@
           }
         }
       }
+    },
+    "Your closet couldn’t be read" : {
+      "comment" : "Your looks when the stores fail"
     },
     "Your closet couldn’t be read just now. Nothing was sent." : {
       "comment" : "Style Me error state"
@@ -4114,6 +4378,9 @@
         }
       }
     },
+    "Your looks are ready." : {
+      "comment" : "VoiceOver announcement"
+    },
     "Your looks don’t use the weather." : {
       "comment" : "Under the Weather row when she ignores the weather",
       "localizations" : {
@@ -4153,11 +4420,20 @@
     "Your request" : {
       "comment" : "Style Me section"
     },
-    "Your request is ready. Your looks come in the next build." : {
-      "comment" : "Stand-in results screen until Phase 10b"
+    "Your request is kept." : {
+      "comment" : "Offline banner on Your looks with no result"
+    },
+    "Your request needs another look" : {
+      "comment" : "Your looks when the suitcase or starting piece changed"
     },
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"
+    },
+    "You’ll be able to ask about this look in your own words." : {
+      "comment" : "Ask stylist stand-in"
+    },
+    "You’ll pick one piece and choose another of yours for it. The rest of the look stays." : {
+      "comment" : "Swap stand-in"
     },
     "across the look" : {
       "comment" : "Colour place, as in navy across the look"

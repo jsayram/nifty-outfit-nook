@@ -15,8 +15,7 @@ struct StyleMeRoutes {
 /// "Style me with it" goes with that piece as the starting piece.
 ///
 /// Opening it sends nothing (RD-02.1). Each row opens its own small sheet, and only the Style me
-/// button sends the request: for now it opens a stand-in that shows the request, until Phase 10b
-/// builds Your looks.
+/// button sends the request, by opening Your looks (Phase 10b).
 struct StyleMeScreen: View {
     /// Opens on the Occasion sheet, as the calendar on Home does.
     var choosingOccasion = false
@@ -26,7 +25,7 @@ struct StyleMeScreen: View {
     @Environment(\.locale) private var locale
     @State private var model: StyleMeModel
     @State private var sheet: StyleMeSheet?
-    @State private var sent: StyleRequestSummary?
+    @State private var sent: StyleRequest?
     @State private var askedForOccasion = false
 
     init(startingPieceID: Garment.ID? = nil, choosingOccasion: Bool = false, routes: StyleMeRoutes = StyleMeRoutes()) {
@@ -54,12 +53,12 @@ struct StyleMeScreen: View {
         ) { sheet in
             sheetContent(sheet)
         }
-        .navigationDestination(item: $sent) { summary in
-            StyleRequestSummaryScreen(summary: summary)
+        .navigationDestination(item: $sent) { request in
+            YourLooksScreen(request: request, routes: resultRoutes)
         }
         .task {
-            // Runs again when she comes back from a pushed screen (Add a piece, the stand-in
-            // results), which picks up any change and keeps her choices.
+            // Runs again when she comes back from a pushed screen (Add a piece, Your looks),
+            // which picks up any change and keeps her choices.
             await model.load(from: services)
             openOccasionIfAsked()
         }
@@ -103,13 +102,25 @@ struct StyleMeScreen: View {
         }
     }
 
-    /// Style me: the request goes to the stand-in results. Nothing else sends it (RD-02.1).
+    /// Style me: opens Your looks, which sends the request. Nothing else sends it (RD-02.1).
     private func styleMe() {
         guard let request = model.makeRequest() else { return }
-        let text = model.text(locale: locale)
-        sent = StyleRequestSummary(
-            request: request, sourceName: text.sourceName, startingPieceName: model.startingPiece?.name,
-            occasionValue: text.occasionValue, locale: locale)
+        sent = request
+    }
+
+    /// Your looks' ways back: to Style Me with her choices kept, or on to adding pieces.
+    private var resultRoutes: YourLooksRoutes {
+        YourLooksRoutes(
+            backToStyleMe: { sent = nil },
+            useMainCloset: {
+                model.choose(source: .mainCloset)
+                sent = nil
+            },
+            addPieces: { source in
+                sent = nil
+                if source.isSuitcase { routes.openSuitcases() } else { routes.addPiece() }
+            }
+        )
     }
 }
 

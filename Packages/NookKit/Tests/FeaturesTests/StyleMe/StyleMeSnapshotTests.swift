@@ -9,7 +9,7 @@ import UIKit
 @testable import DesignSystem
 @testable import Features
 
-/// The Style Me request (Phase 10a), its sheets and the stand-in results, compared with the PNGs
+/// The Style Me request (Phase 10a) and its sheets, compared with the PNGs
 /// in `__Snapshots__/StyleMeSnapshotTests`.
 ///
 /// Drawn 402 points wide (iPhone 17) at full height, without the navigation and tab bars:
@@ -19,8 +19,8 @@ import UIKit
 ///   outside it and a required colour it doesn't have, weather that can't be read, and the
 ///   error state;
 /// - each sheet: Source, Occasion with Other's words, Starting piece, Comfort, Colour, and
-///   Preferences from the main closet and from a suitcase; the Weather sheet is 5a's;
-/// - the stand-in results with the request preview.
+///   Preferences from the main closet and from a suitcase; the Weather sheet is 5a's.
+/// Your looks has its own suite, `YourLooksSnapshotTests`.
 @MainActor
 @Suite
 struct StyleMeSnapshotTests {
@@ -153,22 +153,6 @@ struct StyleMeSnapshotTests {
                 }
             },
             dynamicTypeSize: .accessibility5, scale: 1, named: "sheets-ax5")
-    }
-
-    // MARK: The stand-in results
-
-    @Test func requestSummary() async throws {
-        let model = await loadedStyleMe(startingPieceID: "g-navy-trousers")
-        model.update { draft in
-            draft.comfort = .comfortable
-            draft.color = ColorWish(.navy, scope: .shoes)
-        }
-        let request = try #require(model.makeRequest(id: "r-checkpoint", now: ClosetTestTime.now))
-        let text = model.text(locale: ClosetTestTime.locale)
-        let summary = StyleRequestSummary(
-            request: request, sourceName: text.sourceName, startingPieceName: model.startingPiece?.name,
-            occasionValue: text.occasionValue, locale: ClosetTestTime.locale)
-        assertSnapshot(StyleRequestSummaryScreen(summary: summary), named: "summary")
     }
 
     // MARK: Helpers
