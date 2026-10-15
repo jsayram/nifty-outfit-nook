@@ -44,7 +44,7 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 
 **Suitcase** (Personal). Name, icon (which drawing stands for it in the hall), the set of garment IDs it holds (it never copies a garment), `lastUsedAt`, archived, created. Favourites come from `lastUsedAt`. A piece she no longer has keeps its link, but screens only show and count pieces in her closet (`SourceChoice.pieces`, Phase 13).
 
-**Profile**. The sign name (Personal, may be empty), Preferences (Personal), usual fit, liked and avoided colours, and three Sensitive groups: body measurements (all optional, each with its unit), "pieces that fit you well" (LR-13), and the try-on photo. The doc comment on each field names its tier.
+**Profile**. The sign name (Personal, may be empty), Preferences (Personal), usual fit, liked and avoided colours, the units Fit shows (`units`, Phase 14a; `nil` means the region's usual ones), and three Sensitive groups: body measurements (all optional, each with its unit), "pieces that fit you well" (LR-13), and the try-on photo. The doc comment on each field names its tier. `BodyMeasurements` prints as "redacted" and has no mirror children, so a log line or `dump` can't leak it.
 
 **RememberedChoices** (Personal, Phase 13), `Profile.remembered`: the source and occasion she chose last, which Style Me starts from and Home's suitcase and calendar show (FR-67). See `docs/suitcases-and-laundry.md`.
 
@@ -85,7 +85,8 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `LookEditing` | One piece replaced or removed, as a new look that keeps its version, occasion, source and other pieces | FR-09, LR-08 |
 | `LookRules` | A hand-made or hand-changed look: 2 to 6 pieces, a dress or a top and a bottom, one of each kind in Make your own look, every piece wearable | RD-07.1, LR-08 |
 | `EditHistory` | Undo and Redo of whole values, up to 20 | PRD §7.3, LR-08.2 |
-| `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit) | RD-03.2, LR-13 |
+| `NameRules`, `MeasurementRules` | Trimmed names with length limits, no control characters, unique suitcase names; measurement sanity ranges (they catch typos and say nothing about fit); a fitting piece's brand and size | RD-03.2, LR-13 |
+| `MeasurementEntry` | Typed text to a stored length or weight: either decimal mark, empty means no value (never zero), feet and inches for height, the range shown in her units (Phase 14a, `docs/profile.md`) | PRD §10.1, §10.2 |
 
 ## The store protocol
 

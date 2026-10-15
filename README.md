@@ -108,6 +108,7 @@ docs/swap-and-editor.md      Swap a piece (ranking, See all, Remove and Undo) an
 docs/saved-looks.md          Saved Looks: the grid, search and filters, look detail, and the Home shelf frames.
 docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and how pictures link to their looks.
 docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
+docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 website/                     The app's static website.
 ```
 
