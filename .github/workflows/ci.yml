@@ -115,7 +115,13 @@ jobs:
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
           SELECTION: ${{ matrix.selection }}
         # SELECTION is a fixed list of xcodebuild flags from the matrix above, split on spaces on purpose.
-        run: scripts/test.sh $SELECTION
+        #
+        # A failed UI test runs once more, here only. This is for the hosted runner, not for our
+        # tests: twice in about 25 runs (October 2026) a test was lost to the simulator failing to start the app
+        # ("Timed out while launching application via Xcode", "Failed to get launch progress"),
+        # which no wait in a test can catch. A test that fails twice still fails the job, and the
+        # first failure stays in the test results. Package tests and local runs never retry.
+        run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

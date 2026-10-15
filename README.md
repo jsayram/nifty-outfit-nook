@@ -132,7 +132,7 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
   - `release-and-package-tests` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs every package test target;
   - `ui-tests (ui-catalog)`, `(ui-home)`, `(ui-home-variants)` and `(ui-rest)` run the UI tests in parts. `ui-rest` is every UI test class the others don't name, so a new class is never skipped.
 
-  Tests run through `scripts/test.sh` on the iOS 26.5 simulator. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
+  Tests run through `scripts/test.sh` on the iOS 26.5 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 
 - `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
 
