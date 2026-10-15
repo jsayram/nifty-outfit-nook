@@ -4,6 +4,9 @@
     "%@ & %@" : {
       "comment" : "Name of a saved look: the top's colour and the bottom's"
     },
+    "%@ (%@)" : {
+      "comment" : "Spoken name of a look's piece that left her closet: the name, then why, in brackets"
+    },
     "%@ (not in your closet)" : {
       "comment" : "Spoken name of a look's piece she doesn't own",
       "localizations" : {
@@ -93,6 +96,9 @@
           }
         }
       }
+    },
+    "%@ isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is." : {
+      "comment" : "Look detail: one piece left her closet (LR-16.4)"
     },
     "%@ isn’t in your closet yet." : {
       "comment" : "Draft card: a new piece, with the name she gave it",
@@ -194,6 +200,29 @@
         }
       }
     },
+    "%lld looks" : {
+      "comment" : "Saved Looks: how many looks she saved",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld look"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld looks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld of %@" : {
       "comment" : "Closet count while filtering: how many match, of how many pieces, as in 5 of 17 pieces",
       "localizations" : {
@@ -232,6 +261,75 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld pieces"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pieces aren’t in your closet any more. Swap them for your own, or keep the look as it is." : {
+      "comment" : "Look detail: several pieces left her closet (LR-16.4)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces aren’t in your closet any more. Swap them for your own, or keep the look as it is."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pieces no longer in your closet" : {
+      "comment" : "Saved Looks: how many of a look's pieces left her closet (LR-16)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece no longer in your closet"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces no longer in your closet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pieces were deleted for good, so they don’t show here." : {
+      "comment" : "Look detail: pieces purged from Recently deleted",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece was deleted for good, so it doesn’t show here."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces were deleted for good, so they don’t show here."
                 }
               }
             }
@@ -829,6 +927,9 @@
     "Change your request" : {
       "comment" : "Your looks: back to Style Me"
     },
+    "Changes one piece, from your own. Nothing is sent." : {
+      "comment" : "Hint on Swap a piece on a saved look"
+    },
     "Changes saved" : {
       "comment" : "Toast after editing a piece",
       "localizations" : {
@@ -1082,6 +1183,12 @@
           }
         }
       }
+    },
+    "Delete look" : {
+      "comment" : "Look detail button: takes it out of Saved Looks"
+    },
+    "Deleted %@" : {
+      "comment" : "Toast after Delete look, with the look's name"
     },
     "Deleted pieces stay here for 30 days. After that they’re deleted for good." : {
       "comment" : "Recently deleted: how long pieces stay",
@@ -1459,6 +1566,9 @@
     "For this request only" : {
       "comment" : "Style Me section detail"
     },
+    "From %@" : {
+      "comment" : "Look detail: the suitcase the look was made from"
+    },
     "From a suitcase, every piece is one you packed." : {
       "comment" : "Style Me Preferences line when the source is a suitcase (LR-05b)"
     },
@@ -1486,6 +1596,9 @@
           }
         }
       }
+    },
+    "Give the look a name." : {
+      "comment" : "Rename look: the name is empty"
     },
     "Go back" : {
       "comment" : "Button: back to the two choices",
@@ -1695,6 +1808,9 @@
         }
       }
     },
+    "In Recently deleted" : {
+      "comment" : "Mark on a saved look's piece she deleted, which is in Recently deleted (LR-16)"
+    },
     "In Saved Looks. Saved looks work without pictures or credits." : {
       "comment" : "Make your own look: under Save once saved"
     },
@@ -1805,6 +1921,9 @@
           }
         }
       }
+    },
+    "It may have been deleted on another screen." : {
+      "comment" : "Look detail: the look is gone"
     },
     "It starts on your usual choice each time." : {
       "comment" : "Preferences sheet note: the choice is for this request"
@@ -2157,11 +2276,17 @@
         }
       }
     },
+    "Looks" : {
+      "comment" : "Saved Looks tab: her saved looks (RD-08)"
+    },
     "Looks from %@ use only what’s packed, so Something new is made from your own pieces." : {
       "comment" : "Note on Your looks from a suitcase (LR-05b): the suitcase's name"
     },
     "Looks from a suitcase only use what’s packed in it. Pack a few pieces, or style from somewhere else." : {
       "comment" : "Style Me when the suitcase has nothing packed"
+    },
+    "Looks you keep show up here, ready to wear again." : {
+      "comment" : "Saved Looks with no looks (RD-08.4)"
     },
     "Looks you saved for %@ from %@. Opening them sends nothing." : {
       "comment" : "Saved tab lead: the occasion and the source"
@@ -2201,6 +2326,9 @@
           }
         }
       }
+    },
+    "Make your own" : {
+      "comment" : "Saved Looks toolbar button (RD-08, LR-08)"
     },
     "Make your own look" : {
       "comment" : "Screen title",
@@ -2249,6 +2377,9 @@
         }
       }
     },
+    "Marked as worn today" : {
+      "comment" : "Toast after Wear today"
+    },
     "Marked clean" : {
       "comment" : "Toast after Mark as clean",
       "localizations" : {
@@ -2259,6 +2390,9 @@
           }
         }
       }
+    },
+    "Marks this look and its pieces as worn today. Laundry doesn’t change." : {
+      "comment" : "Hint on Wear today"
     },
     "May not match" : {
       "comment" : "Swap: mark on a weaker match in See all (LR-07.3)"
@@ -2312,6 +2446,9 @@
           }
         }
       }
+    },
+    "Name saved" : {
+      "comment" : "Toast after renaming a look"
     },
     "Name sign, no name yet" : {
       "comment" : "VoiceOver label for the name sign when no name is set",
@@ -2444,6 +2581,9 @@
     "No saved looks here yet" : {
       "comment" : "Saved tab empty state title"
     },
+    "No saved looks match" : {
+      "comment" : "Saved Looks: nothing matches (LR-09.3)"
+    },
     "No saved looks use it." : {
       "comment" : "Remove from closet: Delete it affects no saved looks",
       "localizations" : {
@@ -2457,6 +2597,9 @@
     },
     "No starting piece" : {
       "comment" : "Style Me button and sheet choice"
+    },
+    "No try-on pictures yet" : {
+      "comment" : "Saved Looks Pictures tab, empty"
     },
     "None" : {
       "comment" : "Style Me: no starting piece"
@@ -2609,6 +2752,9 @@
         }
       }
     },
+    "Nothing saved yet" : {
+      "comment" : "Saved Looks with no looks (RD-08.4)"
+    },
     "Nothing was charged, and nothing was made up to fill the gap." : {
       "comment" : "Your looks: insufficient wardrobe"
     },
@@ -2706,6 +2852,9 @@
         }
       }
     },
+    "On Your looks, tap Save look." : {
+      "comment" : "Saved Looks empty state: step 2"
+    },
     "On this iPhone" : {
       "comment" : "Styling step detail"
     },
@@ -2733,6 +2882,9 @@
           }
         }
       }
+    },
+    "Only %lld of %@ pieces in %@ can be used today. A look needs at least %lld." : {
+      "comment" : "Style Me: too few usable pieces; counts and the source's name"
     },
     "Only %lld of %lld pieces in %@ can be used today. A look needs at least %lld." : {
       "comment" : "Style Me: too few usable pieces; counts and the source's name"
@@ -2789,6 +2941,9 @@
     "Only the top changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
     },
+    "Open Style Me from the laptop on Home and ask for a look." : {
+      "comment" : "Saved Looks empty state: step 1"
+    },
     "Opening Recently deleted" : {
       "comment" : "Loading",
       "localizations" : {
@@ -2821,6 +2976,9 @@
           }
         }
       }
+    },
+    "Opening your saved looks" : {
+      "comment" : "Saved Looks loading"
     },
     "Opens Help." : {
       "comment" : "VoiceOver hint",
@@ -2932,6 +3090,12 @@
         }
       }
     },
+    "Opens this look." : {
+      "comment" : "Hint on a saved look"
+    },
+    "Opens this piece." : {
+      "comment" : "Hint on a piece in a saved look's list"
+    },
     "Opens your closet." : {
       "comment" : "VoiceOver hint",
       "localizations" : {
@@ -2968,6 +3132,9 @@
     },
     "Options" : {
       "comment" : "Style Me section"
+    },
+    "Or put one together yourself with Make your own." : {
+      "comment" : "Saved Looks empty state: step 3"
     },
     "Orange" : {
       "comment" : "Colour name",
@@ -3033,8 +3200,17 @@
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
+    "Pictures" : {
+      "comment" : "Saved Looks tab: her try-on pictures (RD-08)"
+    },
+    "Pictures are made one look at a time, only when you ask, and they’re simulated. They’ll show here with the look each one came from." : {
+      "comment" : "Saved Looks Pictures tab, empty"
+    },
     "Piece to swap" : {
       "comment" : "Swap: VoiceOver name of the piece chips"
+    },
+    "Pieces" : {
+      "comment" : "Look detail: heading over the piece list"
     },
     "Pieces from Main closet that you can wear today. Nothing is sent, and no styling request is used." : {
       "comment" : "Make your own look: where the pieces come from (FR-32)"
@@ -3209,6 +3385,12 @@
     "Remove this piece" : {
       "comment" : "Swap: button (LR-08)"
     },
+    "Rename" : {
+      "comment" : "Look detail button: renames the look"
+    },
+    "Rename look" : {
+      "comment" : "Sheet title"
+    },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
     },
@@ -3309,6 +3491,9 @@
     "Saved" : {
       "comment" : "Save look button once the look is saved"
     },
+    "Saved %@" : {
+      "comment" : "Look detail: when she saved the look, a date such as 28 Aug"
+    },
     "Saved Looks" : {
       "comment" : "Tab bar label",
       "localizations" : {
@@ -3322,6 +3507,9 @@
     },
     "Saved look" : {
       "comment" : "Sheet title for a saved look"
+    },
+    "Saved look: %@" : {
+      "comment" : "VoiceOver label for a frame under the shelf, with the look's name"
     },
     "Saved looks" : {
       "comment" : "Garment fact label",
@@ -3345,6 +3533,12 @@
     },
     "Saved to Saved Looks" : {
       "comment" : "Toast after Save look"
+    },
+    "Saved today" : {
+      "comment" : "Look detail: when she saved the look"
+    },
+    "Saved yesterday" : {
+      "comment" : "Look detail: when she saved the look"
     },
     "Say it the way you would to a friend." : {
       "comment" : "Describe in words: line under the title",
@@ -3373,6 +3567,9 @@
           }
         }
       }
+    },
+    "Search your looks" : {
+      "comment" : "Saved Looks search field prompt (RD-08)"
     },
     "Seasons" : {
       "comment" : "Garment fact label",
@@ -3451,6 +3648,9 @@
     },
     "Shopping comes later" : {
       "comment" : "Find one stand-in"
+    },
+    "Show" : {
+      "comment" : "Spoken name of the Looks and Pictures switch"
     },
     "Show 3 more" : {
       "comment" : "Swap: shows three more options (LR-07)"
@@ -3826,8 +4026,14 @@
         }
       }
     },
+    "Swap %@ for one of your pieces" : {
+      "comment" : "Spoken label of Swap it, with the piece's name"
+    },
     "Swap a piece" : {
       "comment" : "Results button (RD-06, LR-08)"
+    },
+    "Swap it" : {
+      "comment" : "Button on a saved look's piece that left her closet (LR-16.4)"
     },
     "Swapped" : {
       "comment" : "Mark on a piece that replaces one in Simple"
@@ -3863,6 +4069,12 @@
     "Takes it out of Saved Looks." : {
       "comment" : "VoiceOver hint on Saved"
     },
+    "Takes it out of Saved Looks. You can undo it straight after." : {
+      "comment" : "Hint on Delete look"
+    },
+    "Takes today off this look and its pieces." : {
+      "comment" : "Hint on Worn today"
+    },
     "Tan" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -3890,6 +4102,9 @@
           }
         }
       }
+    },
+    "That didn’t save. Try again in a moment." : {
+      "comment" : "Toast when a change to a saved look couldn't be saved"
     },
     "That didn’t save. Your words are still here, so you can try again." : {
       "comment" : "Add a piece: the store couldn't save",
@@ -4023,6 +4238,12 @@
     "This look can’t be kept as a draft right now. Save it to keep it." : {
       "comment" : "Make your own look: the draft couldn't be written"
     },
+    "This look didn’t load" : {
+      "comment" : "Look detail error title"
+    },
+    "This look isn’t saved any more" : {
+      "comment" : "Look detail: the look is gone"
+    },
     "This part of the app is still being built." : {
       "comment" : "Shown on a tab whose screen isn't built yet",
       "localizations" : {
@@ -4087,6 +4308,9 @@
     },
     "Took out %@" : {
       "comment" : "Toast after Remove this piece"
+    },
+    "Took today off this look" : {
+      "comment" : "Toast after tapping Worn today"
     },
     "Top" : {
       "comment" : "One piece of this kind, used in search",
@@ -4257,6 +4481,9 @@
         }
       }
     },
+    "Wear today" : {
+      "comment" : "Look detail button (LR-10)"
+    },
     "Weather" : {
       "comment" : "Style Me row title",
       "localizations" : {
@@ -4414,6 +4641,9 @@
           }
         }
       }
+    },
+    "Worn today" : {
+      "comment" : "Look detail button after Wear today (LR-10)"
     },
     "Worn together lately" : {
       "comment" : "Swap: mark in See all on a piece that would repeat an outfit she wore recently (LR-10)"
@@ -4626,6 +4856,9 @@
     },
     "Your request needs another look" : {
       "comment" : "Your looks when the suitcase or starting piece changed"
+    },
+    "Your saved looks didn’t load" : {
+      "comment" : "Saved Looks error title"
     },
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"
