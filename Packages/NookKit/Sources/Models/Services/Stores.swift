@@ -24,7 +24,7 @@ public enum StoreError: Error, Hashable, Sendable {
 /// Her garments: everything in Closet, plus wishlist, no-longer-owned, archived and Recently
 /// deleted pieces. Screens filter with the rules (`Garment.isInCloset`, `Eligibility`,
 /// `GarmentFilter`).
-public protocol ClosetStore: Sendable {
+public protocol ClosetStore: ErasableStore {
     /// Every garment, newest first.
     func garments() async throws(StoreError) -> [Garment]
     func garment(_ id: Garment.ID) async throws(StoreError) -> Garment
@@ -52,7 +52,7 @@ public protocol ClosetStore: Sendable {
 }
 
 /// Saved looks, looks she made herself, and unsaved results kept as background history (LR-06).
-public protocol LookStore: Sendable {
+public protocol LookStore: ErasableStore {
     /// Every look, newest first. Saved Looks shows the ones with `isSaved`.
     func looks() async throws(StoreError) -> [Look]
     func look(_ id: Look.ID) async throws(StoreError) -> Look
@@ -70,7 +70,7 @@ public protocol LookStore: Sendable {
 ///
 /// Every picture stays until she deletes it, whatever happens to its look (PRD §7.5, §9.2.4).
 /// The rules for how pictures and looks link are in `TryOnLinks`.
-public protocol TryOnPictureStore: Sendable {
+public protocol TryOnPictureStore: ErasableStore {
     /// Every picture, newest first.
     func pictures() async throws(StoreError) -> [TryOnPicture]
     func picture(_ id: TryOnPicture.ID) async throws(StoreError) -> TryOnPicture
@@ -81,7 +81,7 @@ public protocol TryOnPictureStore: Sendable {
 }
 
 /// Her suitcases and what's in them (PRD §7.7, RD-09, LR-11, LR-17).
-public protocol SuitcaseStore: Sendable {
+public protocol SuitcaseStore: ErasableStore {
     /// Every suitcase, archived ones included. `SuitcaseShelf` arranges them.
     func suitcases() async throws(StoreError) -> [Suitcase]
     func suitcase(_ id: Suitcase.ID) async throws(StoreError) -> Suitcase
@@ -101,8 +101,9 @@ public protocol SuitcaseStore: Sendable {
     func restore(_ suitcase: Suitcase) async throws(StoreError)
 }
 
-/// Her one profile.
-public protocol ProfileStore: Sendable {
+/// Her one profile. Erasing it leaves a fresh profile: no name, the default Preferences, no
+/// measurements, fitting pieces or try-on photo.
+public protocol ProfileStore: ErasableStore {
     func profile() async throws(StoreError) -> Profile
     /// Saves the profile after checking the sign name and measurements.
     func save(_ profile: Profile) async throws(StoreError)

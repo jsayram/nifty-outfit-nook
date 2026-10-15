@@ -27,4 +27,10 @@ public actor InMemoryLookDraftStore: LookDraftStore {
         try await options.begin()
         current = nil
     }
+
+    /// Delete my data: the unsaved Make your own look.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        current = nil
+    }
 }

@@ -25,7 +25,12 @@ public struct NookServices: Sendable {
     public var pictures: any TryOnPictureStore
     /// Try it on (simulated in Stage A; the gated image service is Phase 33).
     public var tryOn: any TryOnService
+    /// Delete my data (Phase 14b). By default it erases the stores passed to `init` (replacing a
+    /// store afterwards doesn't change it); Phase 24c adds the account and what the server holds.
+    public var deletion: any DataDeletionService
 
+    /// - Parameter deletion: what Delete my data uses. `nil` erases every store above, which is
+    ///   what Stage A and the local part of Stage B want.
     public init(
         closet: any ClosetStore,
         looks: any LookStore,
@@ -40,7 +45,8 @@ public struct NookServices: Sendable {
         cutouts: any CutoutService,
         lookDrafts: any LookDraftStore,
         pictures: any TryOnPictureStore,
-        tryOn: any TryOnService
+        tryOn: any TryOnService,
+        deletion: (any DataDeletionService)? = nil
     ) {
         self.closet = closet
         self.looks = looks
@@ -56,5 +62,10 @@ public struct NookServices: Sendable {
         self.lookDrafts = lookDrafts
         self.pictures = pictures
         self.tryOn = tryOn
+        self.deletion =
+            deletion
+            ?? LocalDataDeletion(
+                closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
+                lookDrafts: lookDrafts, pictures: pictures)
     }
 }
