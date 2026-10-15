@@ -22,6 +22,9 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     /// The source the look was made from. Captured, not a promise the pieces are still there.
     public var source: WardrobeSource
     public var isSaved: Bool
+    /// When she saved it, for "Saved 3 Oct" and the newest-first order on Saved Looks and the
+    /// Home shelf (Phase 12a). `nil` while it isn't saved.
+    public var savedAt: Date?
     /// Days she chose Wear today for this look (LR-10), oldest first, at most one per day.
     public var wornOn: [Date]
     /// The simulated try-on picture made for this look, if any (RD-06).
@@ -37,6 +40,7 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         occasion: Occasion? = nil,
         source: WardrobeSource = .mainCloset,
         isSaved: Bool = false,
+        savedAt: Date? = nil,
         wornOn: [Date] = [],
         tryOnPictureID: TryOnPicture.ID? = nil,
         createdAt: Date
@@ -49,6 +53,7 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         self.occasion = occasion
         self.source = source
         self.isSaved = isSaved
+        self.savedAt = savedAt
         self.wornOn = wornOn
         self.tryOnPictureID = tryOnPictureID
         self.createdAt = createdAt
@@ -68,6 +73,10 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     public var isMadeByHer: Bool { version == nil }
 
     public var lastWorn: Date? { wornOn.max() }
+
+    /// When it went into Saved Looks: `savedAt`, or for a look saved before that was recorded,
+    /// when it was made.
+    public var savedDate: Date { savedAt ?? createdAt }
 }
 
 /// The three versions of one styling result (LR-05a), in the order the switch shows them.

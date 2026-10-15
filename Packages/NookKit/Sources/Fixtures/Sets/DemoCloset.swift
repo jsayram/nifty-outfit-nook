@@ -263,6 +263,7 @@ enum DemoCloset {
             occasion: occasion,
             source: source,
             isSaved: isSaved,
+            savedAt: isSaved ? createdAt : nil,
             wornOn: wornOn,
             createdAt: createdAt
         )

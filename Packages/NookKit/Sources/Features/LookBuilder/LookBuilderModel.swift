@@ -240,6 +240,7 @@ final class LookBuilderModel {
             name: typed.isEmpty ? fallbackName : typed,
             source: Self.source,
             isSaved: true,
+            savedAt: savedLook?.savedAt ?? now(),
             wornOn: savedLook?.wornOn ?? [],
             createdAt: savedLook?.createdAt ?? now()
         )
