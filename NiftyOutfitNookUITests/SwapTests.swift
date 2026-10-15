@@ -36,11 +36,12 @@ final class SwapTests: XCTestCase {
         // The shoes: try the heels, then use them.
         tap("swap.piece.shoes", in: app)
         XCTAssertFalse(app.buttons["swap.use"].isEnabled, "Nothing to use until she tries one")
-        tap("swap.option.g-black-heels", in: app)
-        XCTAssertTrue(app.buttons["swap.option.g-black-heels"].isSelected)
+        let heels = app.buttons["swap.option.g-black-heels"]
+        tapOnScreen(heels, in: app)
+        XCTAssertTrue(waitForSelected(heels), "The heels weren't tried")
         let use = app.buttons["swap.use"]
         XCTAssertEqual(use.label, "Use these shoes")
-        tap("swap.use", in: app)
+        tapOnScreen(use, in: app)
 
         // Back on Your looks, the look has the heels, marked Swapped, and keeps its version.
         XCTAssertTrue(app.navigationBars["Your looks"].waitForExistence(timeout: Self.wait))
@@ -121,6 +122,39 @@ final class SwapTests: XCTestCase {
             swipes += 1
         }
         button.tapWhenHittable(timeout: Self.wait)
+    }
+
+    /// Taps a control that's on screen. On CI the heels option was in view (the screen recording
+    /// shows it) but XCUITest reported it not hittable, twice in a row, with its scroll view's
+    /// frame as infinite, after See all's sheet had closed. When that happens and the control's
+    /// frame is inside the window, it's tapped at its centre instead. The test then checks the
+    /// tap's effect, so a tap that misses still fails. Use these shoes, under it, gets the same.
+    @MainActor
+    private func tapOnScreen(
+        _ control: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+    ) {
+        XCTAssertTrue(control.waitForExistence(timeout: Self.wait), "No \(control)", file: file, line: line)
+        if control.waitUntilHittable(timeout: 5) {
+            control.tap()
+            return
+        }
+        // Bring it above the floating tab bar first, so the tap can't land on the bar.
+        let bottom =
+            app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.windows.firstMatch.frame.maxY
+        for _ in 0..<4 where control.frame.maxY > bottom {
+            app.swipeUp(velocity: .slow)
+        }
+        let window = app.windows.firstMatch.frame
+        XCTAssertTrue(
+            window.contains(control.frame) && control.frame.maxY <= bottom, "\(control) is off the screen", file: file,
+            line: line)
+        control.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
+
+    @MainActor
+    private func waitForSelected(_ element: XCUIElement) -> Bool {
+        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: element)
+        return XCTWaiter().wait(for: [selected], timeout: Self.wait) == .completed
     }
 
     @MainActor

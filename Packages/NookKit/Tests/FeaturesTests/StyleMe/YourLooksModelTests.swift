@@ -556,10 +556,12 @@ struct YourLooksModelTests {
 
 /// Waits for a condition the model reaches on its own. The bound is generous because the whole
 /// suite runs in parallel and a busy runner can take seconds to get to the model's next step.
+/// On CI (15 October 2026, Phase 12b) three waits ran out at 20 seconds together while the
+/// snapshot tests held the main actor; the wait still ends as soon as the condition holds.
 @MainActor
 func waitUntil(_ condition: () -> Bool) async throws {
     let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: .seconds(20))
+    let deadline = clock.now.advanced(by: .seconds(60))
     while !condition() {
         // Throwing ends the test here, so it never goes on to wait for something that won't come.
         guard clock.now < deadline else { throw WaitTimedOut() }
