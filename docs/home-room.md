@@ -19,7 +19,6 @@ All of it is in `Packages/NookKit/Sources/Features/Home`.
 | `HomeModel.swift` | Loads the sign name, the piece count and the hamper state from the stores, and the weather from the weather service; turns laundry tracking on |
 | `HomeRoomContent.swift` | What the plates say, and the sign's fallback |
 | `HomeDestination.swift` | The screens Home pushes |
-| `HomeStubScreen.swift` | The stand-in for each of those until its phase builds it |
 | `LaundryTrackingSheet.swift` | The short sheet the hamper opens while laundry tracking is off |
 | `Room/RoomStage.swift` | Every rect from the mockup's 390 x 844 stage, and `RoomLayout`, which scales them |
 | `Room/RoomControl.swift` | The ten things that do something: where each goes, its VoiceOver label and hint, reading order |
@@ -176,4 +175,5 @@ Everything else held up: the plates use the strong tint with light text, the sig
 
 - **13 (done):** the remembered source and occasion on the suitcase and the calendar, and Suitcases and Laundry behind them (`docs/suitcases-and-laundry.md`).
 - **14a (done):** "Name on your sign" in Profile; Home reloads when Profile closes, so the sign shows the new name (RD-03.1, `docs/profile.md`).
+- **14b (done):** the drawers open Help, Send feedback and Privacy and terms (RD-10.1, `docs/settings.md`), and Delete my data starts the app fresh on Home with a toast.
 - **15a:** iPad's wide room (RD-01.6). Until then iPad shows the upright room, and the large-text layout at the accessibility sizes.

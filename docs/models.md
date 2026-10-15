@@ -48,6 +48,8 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 
 **RememberedChoices** (Personal, Phase 13), `Profile.remembered`: the source and occasion she chose last, which Style Me starts from and Home's suitcase and calendar show (FR-67). See `docs/suitcases-and-laundry.md`.
 
+**FeedbackNote** (Personal, Phase 14b): what it's about, her words (trimmed, at most 1,000 characters, `FeedbackRules`), and the app details (`FeedbackDiagnostics`: version, build, iOS version, model identifier) only when she adds them. Nothing about her closet, body or name is part of it. See `docs/settings.md`.
+
 **Preferences**: piece mode (Mine + one idea by default, or Only mine), repeat window (1 week by default, 2 weeks, I don't mind), Track laundry (off by default). These are Lily's defaults from the amendment (LR-03, LR-10, RD-11).
 
 **StyleRequest** (Sensitive when it carries today's comfort). Source, occasion (with her words for Other, at most 40 characters), weather choice (use today's, indoors, ignore) with the weather snapshot, today's comfort, a colour wish (`ColorWish`: a family, preferred or required, and where: any one piece, a kind of piece, or the overall palette), a copy of Preferences, and the starting piece. Style Me builds it from a `StyleRequestDraft` with `StyleRequestBuilder` (Phase 10a, `docs/style-me.md`). `allowsNewPieceIdea` is computed, not stored: true only with Mine + one idea and the main closet, so a suitcase request can never ask for an unowned piece.
@@ -131,7 +133,13 @@ protocol LookDraftStore: Sendable { draft, save, discard }      // the one unsav
 // Phase 12b, Try it on and the Pictures tab
 protocol TryOnPictureStore: Sendable { pictures, picture, save, delete }   // every picture, newest first
 protocol TryOnService: Sendable { func makePicture(of: Look, at: Date) async throws(TryOnError) -> TryOnPicture }
+
+// Phase 14b, Delete my data
+protocol ErasableStore: Sendable { func eraseAll() async throws(StoreError) }   // every store above refines it
+protocol DataDeletionService: Sendable { scopes, parts(in:), delete(_:) -> DeletionReport }
 ```
+
+Every store protocol refines `ErasableStore`, so Delete my data can empty each one through its protocol (a fresh profile for `ProfileStore`). `NookServices.deletion` is `LocalDataDeletion` over its own stores unless it's given another; it reports each `DataPart` as deleted, pending (a server part, from 24c) or failed. See `docs/settings.md`.
 
 Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture after a moment and sends nothing. The screen keeps the picture in the store before it says it's ready.
 
