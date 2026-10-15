@@ -75,9 +75,17 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # The UI tests in parts. Each part has a fixed cost of about 6 minutes on the hosted runner
-  # (setup, build, a cold simulator boot and the first launch), so a part should hold at least
-  # a few minutes of tests.
+  # The UI tests in four parts of about the same length, by test class. Each part has a fixed
+  # cost of about 6 minutes on the hosted runner (setup, build, a cold simulator boot and the
+  # first launch), so a part should hold several minutes of tests, and four parts plus the job
+  # above stay within the five macOS runners the free plan allows at once.
+  # Balanced in October 2026 from the classes' times on CI (in seconds, from the test log):
+  #   ui-home-and-results       HomeTests 320, YourLooksTests 165, CutoutBenchTests 20
+  #   ui-variants-and-style-me  HomeVariantTests 272, StyleMeTests 174, LaunchTests 75
+  #   ui-add-and-catalog        AddPieceTests 367, CatalogTests about 175
+  #   ui-rest                   the rest, about 580, and any new class
+  # When a part grows well past the others, move a class. Each class's time is in the job log
+  # ("Test Case ... passed (N seconds)").
   ui-tests:
     name: ui-tests (${{ matrix.part }})
     runs-on: macos-26
@@ -87,19 +95,32 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - part: ui-catalog
-            selection: -only-testing:NiftyOutfitNookUITests/CatalogTests
-          - part: ui-home
-            selection: -only-testing:NiftyOutfitNookUITests/HomeTests
-          - part: ui-home-variants
-            selection: -only-testing:NiftyOutfitNookUITests/HomeVariantTests
+          - part: ui-home-and-results
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/HomeTests
+              -only-testing:NiftyOutfitNookUITests/YourLooksTests
+              -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
+          - part: ui-variants-and-style-me
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -only-testing:NiftyOutfitNookUITests/StyleMeTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
+          - part: ui-add-and-catalog
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/AddPieceTests
+              -only-testing:NiftyOutfitNookUITests/CatalogTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             selection: >-
               -only-testing:NiftyOutfitNookUITests
-              -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
+              -skip-testing:NiftyOutfitNookUITests/YourLooksTests
+              -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -skip-testing:NiftyOutfitNookUITests/StyleMeTests
+              -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/AddPieceTests
+              -skip-testing:NiftyOutfitNookUITests/CatalogTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

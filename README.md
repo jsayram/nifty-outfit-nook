@@ -46,7 +46,7 @@ Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Config
 
 ## Component catalog
 
-Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. Its last page shows look bundles (Phase 9, `docs/look-bundles.md`), which Features adds through `NookCatalogView(extraPages:)`. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
+Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. Its last page shows look bundles (Phase 9, `docs/look-bundles.md`), which Features adds through `NookCatalogView(extraPages:)`. Add `-catalog-page <id>` to show one page alone (`search`, `sheet`, `toast`, `lookBundles` and so on), which the UI tests use instead of scrolling the whole catalog. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
 
 ## Cutout benchmark
 
@@ -132,7 +132,7 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
 - `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
   - `release-and-package-tests` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, then runs every package test target;
-  - `ui-tests (ui-catalog)`, `(ui-home)`, `(ui-home-variants)` and `(ui-rest)` run the UI tests in parts. `ui-rest` is every UI test class the others don't name, so a new class is never skipped.
+  - `ui-tests (ui-home-and-results)`, `(ui-variants-and-style-me)`, `(ui-add-and-catalog)` and `(ui-rest)` run the UI tests in four parts of about the same length, by test class. `ui-rest` is every UI test class the others don't name, so a new class is never skipped. The workflow lists each part's classes with their CI times; move a class when one part grows well past the others.
 
   Tests run through `scripts/test.sh` on the iOS 26.5 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 

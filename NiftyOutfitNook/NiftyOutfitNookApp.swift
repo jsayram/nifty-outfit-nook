@@ -18,12 +18,15 @@ struct NiftyOutfitNookApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-                // `-catalog` opens the component catalog instead of the app (debug builds only).
+                // `-catalog` opens the component catalog instead of the app (debug builds only), and
+                // `-catalog-page <id>` shows one of its pages alone.
                 if ProcessInfo.processInfo.arguments.contains("-catalog") {
-                    NookCatalogView(extraPages: [
-                        LookBundleCatalog.page(
-                            sampleGarments: SamplePhotoGarments.garments(now: .now), images: SamplePhotoProvider())
-                    ])
+                    NookCatalogView(
+                        extraPages: [
+                            LookBundleCatalog.page(
+                                sampleGarments: SamplePhotoGarments.garments(now: .now), images: SamplePhotoProvider())
+                        ],
+                        onlyPage: NookCatalogView.onlyPage(in: ProcessInfo.processInfo.arguments))
                 } else if ProcessInfo.processInfo.arguments.contains("-cutout-bench") {
                     // `-cutout-bench` opens the cutout benchmark (Phase 8a, debug builds only).
                     CutoutBenchScreen(
