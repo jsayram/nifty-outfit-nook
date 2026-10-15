@@ -16,6 +16,11 @@ Phase 6 added Closet's small drawings from the same folder: `closet-armoire.svg`
 
 - `source/closet-armoire-clothes.svg` is the clothes inside that armoire, exported from the mockups' `js/garments.js` (low detail, hangers on the hanging pieces) and laid out as `screens/closet.html` places them, in the armoire's own coordinates so the app draws it over the armoire at the same size. Each pair of shoes is placed twice with one shoe hidden each time, as the mockup does, and each copy has its own clip path IDs. It's a garment drawing, so it keeps its colours like the wardrobe rail.
 
+Phase 13 added Suitcases and Laundry:
+
+- **Copied as they are** from the mockups: the entry hall behind the favourites (`travel-hall-door.svg`, `travel-hall-hooks.svg`, `travel-hall-peg.svg`, `travel-hall-mirror.svg`, `travel-hall-console.svg`, `travel-hall-runner.svg`) and Laundry's corner (`travel-laundry-shelf.svg`, `travel-washer.svg`, `plant-floor.svg`). The corner's hamper is Home's, so its states match the room. The camel trench the mockup hangs on the hooks comes from `js/garments.js` and isn't exported.
+- **The five suitcase pictures.** `source/suitcase-rolling.svg` is the mockups' `travel-suitcase-pink.svg` with nothing changed but its name. `suitcase-weekender.svg`, `suitcase-duffel.svg`, `suitcase-backpack.svg` and `suitcase-tote.svg` were drawn for this project in Phase 13, in the spinner's style: the same 104 x 182 box, line weights, contact shadow and luggage-tag strap, and the same plain face at y 30 to 124, where the hall's tags and Home's plates sit. They're drawn in mockup pastels (tan, sage, butter, blue) and the script warms them like everything else, so they come out oak, sage, butter and stone beside the sand rolling case.
+
 `source/maya.svg` is Maya as the mockups draw her, from Jose's own illustration. It's heavy (about 1,300 small shapes of fur), but it's drawn once into the asset cache and only her z's move, so it stays as it is.
 
 ## How it gets into the app
