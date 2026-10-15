@@ -61,12 +61,3 @@ class IPadTestCase: XCTestCase {
         app.descendants(matching: .any)[identifier].firstMatch
     }
 }
-
-extension XCUIElement {
-    /// Waits until a tab or other selectable button says it's selected.
-    @MainActor
-    func waitUntilSelected(timeout: TimeInterval) -> Bool {
-        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: self)
-        return XCTWaiter().wait(for: [selected], timeout: timeout) == .completed
-    }
-}

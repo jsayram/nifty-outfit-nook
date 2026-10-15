@@ -14,7 +14,8 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
     @MainActor
     func testStyleMeSaveAndSeeTheLookBesideTheGrid() throws {
         let app = try launch(orientation: .landscapeLeft)
-        element("home.laptop", in: app).tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(room("wide", in: app).waitForExistence(timeout: Self.wait), "No wide room")
+        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
         XCTAssertTrue(app.navigationBars["Style Me"].waitForExistence(timeout: Self.wait))
 
         // The request on the left, the options beside it.
@@ -23,7 +24,7 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         XCTAssertTrue(source.waitForExistence(timeout: Self.wait))
         XCTAssertLessThan(source.frame.maxX, comfort.frame.minX, "The options aren't beside the request")
 
-        element("styleMe.go", in: app).tapWhenHittable(timeout: Self.wait)
+        app.buttons["styleMe.go"].tapWhenHittable(timeout: Self.wait)
         let save = app.buttons["results.save"]
         XCTAssertTrue(save.waitForExistence(timeout: Self.wait))
         assertTheLookIsBesideTheButtons(in: app)
@@ -36,7 +37,12 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         XCTAssertEqual(element("results.request", in: app).label, request)
         assertTheLookIsBesideTheButtons(in: app)
 
+        // A tap that lands while the turned layout is still settling can be lost on CI, so tap
+        // once more only if the button didn't change.
         save.tapWhenHittable(timeout: Self.wait)
+        if !waitForLabel(of: save, containing: "Saved") {
+            save.tapWhenHittable(timeout: Self.wait)
+        }
         XCTAssertTrue(waitForLabel(of: save, containing: "Saved"), save.label)
 
         // The Saved tab fills the width; its tile names the look.

@@ -53,6 +53,15 @@ extension XCUIElement {
     }
 }
 
+extension XCUIElement {
+    /// Waits until a tab or other selectable button says it's selected.
+    @MainActor
+    func waitUntilSelected(timeout: TimeInterval) -> Bool {
+        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: self)
+        return XCTWaiter().wait(for: [selected], timeout: timeout) == .completed
+    }
+}
+
 extension XCUIApplication {
     /// Taps Back on the screen titled `title` and waits until that screen has gone and
     /// `destination` is showing. The destination's bar is there while the pushed screen is still
