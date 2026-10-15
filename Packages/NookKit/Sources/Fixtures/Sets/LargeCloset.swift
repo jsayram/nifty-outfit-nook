@@ -138,6 +138,9 @@ enum LargeCloset {
         let isSaved = random.chance(0.8)
         let occasion = random.element(of: Occasion.allCases)
         let wears = random.chance(0.3) ? random.int(in: 1...2) : 0
+        // In this order, so the generator gives the same set as before `savedAt` existed.
+        let wornOn = Set((0..<wears).map { _ in random.int(in: 0...60) }).sorted(by: >).map { day(-$0) }
+        let created = day(-random.int(in: 0...300))
         return Look(
             id: id,
             resultID: version == nil ? nil : StyleResult.ID("r-large-\(index)"),
@@ -148,8 +151,9 @@ enum LargeCloset {
             name: isSaved ? "\(occasion.rawValue.capitalized) look \(index + 1)" : nil,
             occasion: occasion,
             isSaved: isSaved,
-            wornOn: Set((0..<wears).map { _ in random.int(in: 0...60) }).sorted(by: >).map { day(-$0) },
-            createdAt: day(-random.int(in: 0...300))
+            savedAt: isSaved ? created : nil,
+            wornOn: wornOn,
+            createdAt: created
         )
     }
 }

@@ -141,11 +141,6 @@ struct ClosetFilters: View {
     }
 
     private func swatch(_ color: ColorName) -> Color {
-        if color == .multicolor {
-            // One dot can't show many colours; the stripes' first colour stands in, and the
-            // name says the rest.
-            return GarmentColor.multicolorStripes[0].color(in: colorScheme)
-        }
-        return GarmentColor.fill(for: color).color(in: colorScheme)
+        GarmentColor.swatch(for: color).color(in: colorScheme)
     }
 }

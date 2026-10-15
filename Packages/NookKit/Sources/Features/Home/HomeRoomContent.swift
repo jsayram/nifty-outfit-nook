@@ -13,19 +13,24 @@ nonisolated struct HomeRoomContent: Hashable, Sendable {
     var occasion: Occasion?
     /// Today's weather for the window. `nil` while it loads or when it can't be read.
     var weather: WeatherSnapshot?
+    /// Her most recently saved looks, newest first, in the three frames under the shelf
+    /// (Phase 12a). Empty frames stay empty.
+    var framedLooks: [FramedLook]
 
     init(
         signName: String? = nil,
         source: SourcePlate = SourcePlate(),
         hamper: HamperState? = nil,
         occasion: Occasion? = nil,
-        weather: WeatherSnapshot? = nil
+        weather: WeatherSnapshot? = nil,
+        framedLooks: [FramedLook] = []
     ) {
         self.signName = signName
         self.source = source
         self.hamper = hamper
         self.occasion = occasion
         self.weather = weather
+        self.framedLooks = framedLooks
     }
 
     var window: RoomWindow { RoomWindow(weather: weather) }
@@ -110,5 +115,34 @@ nonisolated enum SignName {
 
     static func isFallback(_ stored: String) -> Bool {
         stored.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+/// A saved look in one of the frames under the shelf: its name, and the main pieces drawn small,
+/// one above the other, as in `home.html` (a top over a bottom, or a dress).
+nonisolated struct FramedLook: Identifiable, Hashable, Sendable {
+    /// One piece's picture in the frame.
+    struct Piece: Hashable, Sendable {
+        var category: GarmentCategory
+        var colors: [ColorName]
+        var photo: PhotoReference
+        var cutout: GarmentCutout?
+    }
+
+    let id: Look.ID
+    let name: String
+    /// A dress alone, or a top (or layer) over a bottom. At most two.
+    let pieces: [Piece]
+
+    /// How many frames the shelf has.
+    static let frameCount = 3
+
+    /// The pieces a frame shows: a dress, or a top over a bottom; failing those, the first two.
+    static func mainPieces(of all: [Piece]) -> [Piece] {
+        if let dress = all.first(where: { $0.category == .dress }) { return [dress] }
+        let upper = all.first { $0.category == .top } ?? all.first { $0.category == .layer }
+        let lower = all.first { $0.category == .bottom }
+        if let upper, let lower { return [upper, lower] }
+        return Array(all.prefix(2))
     }
 }

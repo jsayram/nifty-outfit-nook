@@ -34,7 +34,7 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 
 **GarmentCutout** (Personal, Phase 8b). A garment's `cutout`: the cutout picture's reference and its `CutoutQuality`. `nil` until a cutout is made. A new photo on Edit drops it. See `docs/stickers.md`.
 
-**Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, wear days, and a link to a try-on picture. A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
+**Look** (Personal). Pieces, an optional name (set when saved), occasion, the source it was made from, `isSaved`, when it was saved (`savedAt`, Phase 12a, for "Saved 3 Oct" and Saved Looks' order), wear days, and a link to a try-on picture. A styling result is one base outfit in three versions (LR-05a), so each version is its own Look with a `version` (Simple, Dressed up, Something new) and a shared `resultID`. A look she built in Make your own look has neither. Unsaved results stay in the store as background history (LR-06).
 
 A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a described piece she doesn't own, shown as "Not in your closet" with Find one. An idea never becomes owned by being in a look. Each piece records whether it's the same as in Simple ("Same as Simple", LR-05a.3).
 
@@ -70,6 +70,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 | `HamperState` | Off, all clean, or "2 to wash" | RD-11 |
 | `GarmentFilter` | Piece chips, colour swatches, the Suitcase filter, the Dirty chip and typed search, all combined. Every typed word must match the name, brand, colour note, a suitcase name, or an extra word the screen passes in (Closet passes its names for the piece's kind and colours) | LR-09, LR-11, RD-11 |
 | `StyleRequestBuilder` | Checks a Style Me draft before it's sent: an empty closet or suitcase, a missing suitcase, too few usable pieces (stops it), a small suitcase (warns), a starting piece that can't be used, Other's words, a required colour nothing usable has (warns). Builds the request | RD-02, FR-67, PRD §8.1, §8.3 |
+| `LookFilter` | Saved Looks' piece chips, colour swatches and typed search. A chip and a swatch match one piece together ("black bottoms"); every typed word must match the look's name, a piece's name, or the screen's words for the occasion, kinds and colours | RD-08, LR-09 |
 | `GarmentRules` | The Add a piece form: a name and a kind required, length limits on the shade, brand, size and notes, one-line fields. Every problem at once, by field. Stores run it on every garment save | Phase 7b |
 | `CutoutThresholds` | Whether a cutout's signals are clean enough for a sticker. `current` is 8a's proposal until the benchmark on her phone | RD-07, Phase 8a |
 | `GarmentArtChoice` | How a piece's picture shows: its drawing (no photo), its cutout (clean), or its photo in a tile (no cutout yet, or a concern) | RD-07, Phase 8b |

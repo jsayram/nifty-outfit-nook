@@ -1,4 +1,5 @@
 import DesignSystem
+import Fixtures
 import Models
 import SnapshotTesting
 import SwiftUI
@@ -43,6 +44,15 @@ struct HomeSnapshotTests {
             hamper: .toWash(2)
         )
         assertRoomSnapshot(content, on: .iPhoneSE, named: "long-name-suitcase")
+    }
+
+    /// Her three newest saved looks in the frames under the shelf (Phase 12a), light and dark.
+    @Test func framedLooks() {
+        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var content = Self.demo
+        content.framedLooks = HomeModel.framedLooks(from: data.looks, garments: data.garments)
+        assertRoomSnapshot(content, on: .iPhone17, named: "framed-looks")
+        assertRoomSnapshot(content, on: .iPhone17, colorScheme: .dark, named: "framed-looks-dark")
     }
 
     /// A snowy night with a full hamper and tracking on: the night window, the lamp's glow and
@@ -120,6 +130,7 @@ struct HomeSnapshotTests {
         let layout = phone.layout
         let view = RoomCanvas(layout: layout, content: content, open: { _ in })
             .environment(\.roomIsStillImage, true)
+            .environment(\.closetIsStillImage, true)
             .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, .large)
             .environment(\.locale, Locale(identifier: "en_US"))

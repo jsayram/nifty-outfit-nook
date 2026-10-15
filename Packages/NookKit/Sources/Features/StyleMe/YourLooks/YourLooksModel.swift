@@ -427,6 +427,7 @@ final class YourLooksModel {
         var updated = looks.first { $0.id == look.id } ?? look
         updated.isSaved = saved
         updated.name = saved ? (updated.name ?? name) : nil
+        updated.savedAt = saved ? (updated.savedAt ?? now()) : nil
         try await services.looks.save(updated)
         if let index = looks.firstIndex(where: { $0.id == updated.id }) {
             looks[index] = updated

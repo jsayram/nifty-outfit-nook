@@ -24,11 +24,34 @@ enum LookBundleText {
             comment: "Spoken for a look bundle: the look's title, then its pieces, as in Look: Black tee, Jeans")
     }
 
-    /// A piece's name, saying when she doesn't own it.
+    /// A piece's name, saying when she doesn't own it, or no longer has it.
     static func spokenName(of piece: LookBundlePiece) -> String {
-        guard piece.isIdea else { return piece.name }
-        return String(
-            localized: "\(piece.name) (not in your closet)", bundle: .module,
-            comment: "Spoken name of a look's piece she doesn't own")
+        if piece.isIdea {
+            return String(
+                localized: "\(piece.name) (not in your closet)", bundle: .module,
+                comment: "Spoken name of a look's piece she doesn't own")
+        }
+        if let removal = piece.removal {
+            let note = removalNote(removal)
+            return String(
+                localized: "\(piece.name) (\(note))", bundle: .module,
+                comment: "Spoken name of a look's piece that left her closet: the name, then why, in brackets")
+        }
+        return piece.name
+    }
+
+    /// Under a piece that left her closet (LR-16): "No longer in your closet" or "In Recently
+    /// deleted".
+    static func removalNote(_ removal: PieceRemoval) -> String {
+        switch removal {
+        case .noLongerOwned:
+            String(
+                localized: "No longer in your closet", bundle: .module,
+                comment: "Mark on a saved look's piece she said she doesn't have any more (LR-16)")
+        case .deleted:
+            String(
+                localized: "In Recently deleted", bundle: .module,
+                comment: "Mark on a saved look's piece she deleted, which is in Recently deleted (LR-16)")
+        }
     }
 }

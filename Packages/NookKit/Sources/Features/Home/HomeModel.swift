@@ -71,6 +71,13 @@ final class HomeModel {
             }
         }
 
+        do {
+            let looks = try await services.looks.looks()
+            content.framedLooks = Self.framedLooks(from: looks, garments: garments ?? [])
+        } catch {
+            failed = true
+        }
+
         content.signName = profile?.signName ?? (failed ? "" : nil)
         content.source = plate
         if let garments, let profile {
@@ -96,6 +103,32 @@ final class HomeModel {
         }
         await load(from: services)
         return true
+    }
+
+    /// Her three most recently saved looks for the shelf frames, newest first (Phase 12a).
+    static func framedLooks(from looks: [Look], garments: [Garment]) -> [FramedLook] {
+        let byID = Dictionary(garments.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return
+            looks
+            .filter(\.isSaved)
+            .sorted { lhs, rhs in lhs.savedDate != rhs.savedDate ? lhs.savedDate > rhs.savedDate : lhs.id < rhs.id }
+            .prefix(FramedLook.frameCount)
+            .map { look in
+                let pieces = look.pieces.compactMap { piece -> FramedLook.Piece? in
+                    switch piece.content {
+                    case .garment(let id):
+                        byID[id].map {
+                            FramedLook.Piece(
+                                category: $0.category, colors: $0.colors, photo: $0.photo, cutout: $0.cutout)
+                        }
+                    case .idea(let idea):
+                        FramedLook.Piece(category: idea.category, colors: idea.colors, photo: .noPhoto)
+                    }
+                }
+                return FramedLook(
+                    id: look.id, name: look.name ?? SavedLooksText.unnamed(occasion: look.occasion?.title),
+                    pieces: FramedLook.mainPieces(of: pieces))
+            }
     }
 
     nonisolated private static func currentWeather(from services: NookServices) async -> WeatherSnapshot? {

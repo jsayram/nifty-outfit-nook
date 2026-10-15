@@ -60,6 +60,12 @@ nonisolated struct GarmentColor: Hashable, Sendable {
     /// A piece with no colour recorded is drawn in a quiet stone, so it never looks like a real colour.
     static let unknown = GarmentColor(hex: 0xCFC4B8)
 
+    /// The dot on a colour filter chip (LR-09). One dot can't show many colours, so Multicolour
+    /// uses its stripes' first colour, and the chip's name says the rest.
+    static func swatch(for name: ColorName) -> GarmentColor {
+        name == .multicolor ? multicolorStripes[0] : fill(for: name)
+    }
+
     /// Relative luminance (WCAG), used to pick a line colour that shows on the fill.
     var luminance: Double {
         func linear(_ c: Double) -> Double { c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4) }

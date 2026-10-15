@@ -32,6 +32,7 @@ struct LookBundleSize: Hashable {
 ///   is a rounded tile in the same space (RD-07.2), and a piece with no photo is its drawing.
 /// - An idea piece she doesn't own (LR-05b) is drawn from its kind and colours and carries a
 ///   soft "Not in your closet" tag; thumbnails show just the tag icon.
+/// - A piece of hers that has since left her closet is faded (LR-16.4).
 /// - The layout (`StickerBundleLayout`) is seeded by the look's ID, so a look lies the same way
 ///   on every screen and launch.
 /// - VoiceOver reads the bundle as one element that names the pieces in body order, with each
@@ -103,11 +104,20 @@ struct LookBundle: View {
         .rotationEffect(.degrees(moves ? placement.angle * 2.4 : placement.angle))
         .scaleEffect(moves ? 0.94 : 1)
         .offset(y: moves ? -10 : 0)
-        .opacity(settled ? (focusedPieceID.map { $0 == piece.id } ?? true ? 1 : 0.42) : 0)
+        .opacity(settled ? restingOpacity(of: piece) : 0)
         .animation(entrance(order: placement.zIndex), value: settled)
         .position(x: frame.midX, y: frame.midY)
         .zIndex(placement.zIndex)
     }
+
+    /// Pieces step back while another is being swapped, and a piece that has left her closet
+    /// stays faded (LR-16.4). The words say so too: the list under the bundle and VoiceOver.
+    private func restingOpacity(of piece: LookBundlePiece) -> Double {
+        if let focusedPieceID, focusedPieceID != piece.id { return Self.steppedBack }
+        return piece.isRemoved ? Self.steppedBack : 1
+    }
+
+    static let steppedBack = 0.42
 
     /// Back to front, a little apart, so the bundle is laid down piece by piece.
     private func entrance(order: Double) -> Animation {
