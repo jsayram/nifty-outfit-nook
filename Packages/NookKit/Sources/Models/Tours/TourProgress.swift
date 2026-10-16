@@ -23,6 +23,33 @@ public struct TourID: RawRepresentable, Hashable, Comparable, Codable, Sendable,
     /// Home's tour: the laptop, the wardrobe, the suitcase and the name sign.
     public static let home = TourID("home")
 
+    // Phase 16b: one tour for every other screen that has one in the mockups.
+    public static let closet = TourID("closet")
+    public static let garment = TourID("garment")
+    public static let addPiece = TourID("addPiece")
+    public static let styleMe = TourID("styleMe")
+    public static let yourLooks = TourID("yourLooks")
+    public static let swap = TourID("swap")
+    public static let lookBuilder = TourID("lookBuilder")
+    public static let savedLooks = TourID("savedLooks")
+    public static let look = TourID("look")
+    public static let picture = TourID("picture")
+    public static let suitcases = TourID("suitcases")
+    public static let suitcase = TourID("suitcase")
+    public static let laundry = TourID("laundry")
+    public static let laundryOff = TourID("laundryOff")
+    public static let profile = TourID("profile")
+    public static let fit = TourID("fit")
+    public static let help = TourID("help")
+    public static let feedback = TourID("feedback")
+    public static let privacy = TourID("privacy")
+
+    /// Every tour, in the order App tours lists them.
+    public static let all: [TourID] = [
+        .home, .closet, .styleMe, .yourLooks, .savedLooks, .suitcases, .fit, .swap, .lookBuilder, .look, .picture,
+        .garment, .addPiece, .laundry, .laundryOff, .suitcase, .profile, .help, .feedback, .privacy,
+    ]
+
     public static func < (lhs: TourID, rhs: TourID) -> Bool { lhs.rawValue < rhs.rawValue }
 
     public var description: String { rawValue }
@@ -61,7 +88,7 @@ public struct TourProgress: Hashable, Codable, Sendable {
     /// The latest record for each tour.
     public var records: [TourID: TourRecord]
     /// "Show tips on new screens" (PRD §7.8), on by default. Off stops tours from starting on
-    /// their own; replay from Profile (Phase 16b) still works.
+    /// their own; replay from App tours on Profile still works.
     public var showsTipsOnNewScreens: Bool
 
     public init(records: [TourID: TourRecord] = [:], showsTipsOnNewScreens: Bool = true) {
@@ -76,12 +103,17 @@ public struct TourProgress: Hashable, Codable, Sendable {
     public mutating func add(_ record: TourRecord) {
         records[record.tour] = record
     }
+
+    /// Reset all tips: every tour counts as unseen again. The switch stays as she set it.
+    public mutating func forgetSeen() {
+        records = [:]
+    }
 }
 
 /// When a tour may start on its own.
 public enum TourRules {
     /// True when a tour at `version` should start by itself: tips are on and she hasn't seen
-    /// this version or a later one. Replay and the debug `-tour` flag don't ask.
+    /// this version or a later one. Replay from App tours and the debug `-tour` flag don't ask.
     public static func startsAutomatically(_ tour: TourID, version: Int, progress: TourProgress) -> Bool {
         guard progress.showsTipsOnNewScreens else { return false }
         guard let seen = progress.records[tour] else { return true }
@@ -94,6 +126,8 @@ public protocol TourProgressStore: ErasableStore {
     func progress() async throws(StoreError) -> TourProgress
     /// Keeps how a tour ended, replacing any earlier record for the same tour.
     func record(_ record: TourRecord) async throws(StoreError)
-    /// The "Show tips on new screens" switch (its row is Phase 16b).
+    /// The "Show tips on new screens" switch, in App tours on Profile (Phase 16b).
     func setShowsTipsOnNewScreens(_ isOn: Bool) async throws(StoreError)
+    /// Reset all tips in App tours: forgets every tour seen, keeping the switch.
+    func forgetSeenTours() async throws(StoreError)
 }

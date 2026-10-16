@@ -13,8 +13,9 @@ import SwiftUI
 ///
 /// A tour starts on its own at most once a session and only while "Show tips on new screens" is
 /// on and she hasn't seen its version (`TourRules`). Skip, the last button, Escape and tapping
-/// the highlighted control all end it and record it as seen. Replay from Profile (Phase 16b)
-/// calls `start(_:)`, which doesn't ask.
+/// the highlighted control all end it and record it as seen. Replay from App tours on Profile
+/// (Phase 16b) calls `replay(_:)`, which starts the tour from step 1 the next time its screen is
+/// ready, whatever is recorded. Only one tour shows at a time.
 @MainActor
 @Observable
 final class TourCenter {
@@ -35,7 +36,7 @@ final class TourCenter {
         /// What activating it from the tour does, read after the label.
         var hint: String?
         /// What it does when tapped. The tour ends first, then this runs once.
-        var action: (@MainActor () -> Void)?
+        var action: (() -> Void)?
         /// The view that registered it, so a view leaving doesn't remove another one's anchor.
         var owner: UUID
     }
@@ -54,11 +55,13 @@ final class TourCenter {
     @ObservationIgnored private let store: (any TourProgressStore)?
     @ObservationIgnored private let launch: TourLaunchOptions
     @ObservationIgnored private let now: @Sendable () -> Date
-    @ObservationIgnored private var isPrepared = false
+    /// Applying the `-tour` flag, once, before anything reads the store.
+    @ObservationIgnored private var preparation: Task<Void, Never>?
     /// Tours that already started this session, so a failed write never brings one back.
     @ObservationIgnored private var startedThisSession: Set<TourID> = []
-    /// Tours the `-tour` debug flag starts once, whatever is recorded.
-    @ObservationIgnored private var forced: Set<TourID>
+    /// Tours to start once, whatever is recorded: replayed from App tours, or asked for by the
+    /// `-tour` debug flag. Observed, so a screen that's already showing starts its replay.
+    private(set) var waiting: Set<TourID>
     /// The last write to the store, so tests can wait for it.
     @ObservationIgnored private(set) var lastWrite: Task<Void, Never>?
 
@@ -69,7 +72,7 @@ final class TourCenter {
         self.store = store
         self.launch = launch
         self.now = now
-        forced = launch.startsTours
+        waiting = launch.startsTours
     }
 
     /// The control the current step points at.
@@ -80,31 +83,45 @@ final class TourCenter {
     // MARK: Starting
 
     /// Starts `definition` if it should start by itself: no tour is showing, it hasn't started
-    /// this session, and tips are on with this version unseen (or the `-tour` flag asks for it).
-    /// `isReady` is asked again after reading the store, so a screen that has since opened a
-    /// sheet or pushed a screen doesn't get a tour over it.
+    /// this session, and tips are on with this version unseen. A tour waiting to replay (or asked
+    /// for by the `-tour` flag) starts whatever is recorded. `isReady` is asked again after
+    /// reading the store, so a screen that has since opened a sheet or pushed a screen doesn't get
+    /// a tour over it.
     ///
     /// - Returns: whether the tour started.
     @discardableResult
     func startIfNeeded(_ definition: TourDefinition, when isReady: () -> Bool = { true }) async -> Bool {
-        guard canStart(definition.id) else { return false }
+        let id = definition.id
+        guard active == nil, waiting.contains(id) || !startedThisSession.contains(id) else { return false }
         await prepare()
-        if forced.remove(definition.id) != nil {
-            guard canStart(definition.id), isReady() else { return false }
+        if waiting.contains(id) {
+            guard active == nil, isReady() else { return false }
+            waiting.remove(id)
             start(definition)
             return true
         }
         // A store that can't be read means no tour: they're optional, and never worth an error.
         guard let store, let progress = try? await store.progress() else { return false }
-        guard TourRules.startsAutomatically(definition.id, version: definition.version, progress: progress) else {
+        guard TourRules.startsAutomatically(id, version: definition.version, progress: progress) else {
             return false
         }
-        guard canStart(definition.id), isReady() else { return false }
+        guard canStart(id), isReady() else { return false }
         start(definition)
         return true
     }
 
-    /// Starts `definition` from step 1 whatever is recorded: replay from Profile (Phase 16b).
+    /// Replay from App tours: the tour starts from step 1 as soon as its screen is ready, whatever
+    /// is recorded and even with tips off. The screen that opens App tours takes her there.
+    func replay(_ id: TourID) {
+        guard active?.definition.id != id else { return }
+        waiting = [id]
+        startedThisSession.remove(id)
+    }
+
+    /// Whether a tour is waiting to replay.
+    func isWaiting(_ id: TourID) -> Bool { waiting.contains(id) }
+
+    /// Starts `definition` from step 1 whatever is recorded.
     func start(_ definition: TourDefinition) {
         guard let run = TourRun(tour: definition.id, version: definition.version, stepCount: definition.steps.count)
         else { return }
@@ -126,6 +143,51 @@ final class TourCenter {
     func forgetSession() {
         active = nil
         startedThisSession = []
+        waiting = []
+    }
+
+    // MARK: App tours
+
+    /// "Show tips on new screens", or `nil` when it can't be read.
+    func showsTips() async -> Bool? {
+        await prepare()
+        return try? await store?.progress().showsTipsOnNewScreens
+    }
+
+    /// Turns "Show tips on new screens" on or off. Returns false when it didn't save.
+    func setShowsTips(_ isOn: Bool) async -> Bool {
+        await prepare()
+        guard let store else { return false }
+        do {
+            try await store.setShowsTipsOnNewScreens(isOn)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Reset all tips: every tour counts as unseen again, including the ones that already showed
+    /// this session, so each shows the next time its screen opens (while tips are on). Tours in
+    /// `keeping` don't start again this session: the screen she's on, so its tour doesn't jump
+    /// up when App tours closes. Returns false when it didn't save.
+    func resetAllTips(keeping: Set<TourID> = []) async -> Bool {
+        await prepare()
+        guard let store else { return false }
+        do {
+            try await store.forgetSeenTours()
+            startedThisSession = startedThisSession.intersection(keeping)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Keeps a tour from starting by itself this session: the screen that opens App tours, so
+    /// turning tips on there doesn't start its own tour as the sheet closes. A replay still
+    /// starts it.
+    func holdBack(_ id: TourID) {
+        guard active?.definition.id != id else { return }
+        startedThisSession.insert(id)
     }
 
     // MARK: The buttons
@@ -177,7 +239,7 @@ final class TourCenter {
     /// Registers or refreshes what an anchored control is called and does.
     func register(
         _ id: TourAnchorID, owner: UUID, frame: CGRect? = nil, label: String, hint: String?,
-        action: (@MainActor () -> Void)?
+        action: (() -> Void)?
     ) {
         let known = anchors[id]?.owner == owner ? anchors[id]?.frame : nil
         anchors[id] = Anchor(frame: frame ?? known, label: label, hint: hint, action: action, owner: owner)
@@ -199,13 +261,19 @@ final class TourCenter {
 
     // MARK: Launch options
 
-    /// Applies `-tour reset` and `-tour off` once, before the first tour is considered.
+    /// Applies `-tour reset` and `-tour off` once, before the first tour is considered. Callers
+    /// that arrive while it's running wait for it, so none reads the store before it's done.
     private func prepare() async {
-        guard !isPrepared else { return }
-        isPrepared = true
-        guard let store else { return }
-        if launch.resetsProgress { try? await store.eraseAll() }
-        if launch.turnsTipsOff { try? await store.setShowsTipsOnNewScreens(false) }
+        if preparation == nil {
+            let store = store
+            let launch = launch
+            preparation = Task {
+                guard let store else { return }
+                if launch.resetsProgress { try? await store.eraseAll() }
+                if launch.turnsTipsOff { try? await store.setShowsTipsOnNewScreens(false) }
+            }
+        }
+        await preparation?.value
     }
 
     private func canStart(_ id: TourID) -> Bool {

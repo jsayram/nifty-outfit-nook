@@ -4,7 +4,8 @@ import Models
 /// `standard`: the parser is compiled only in Debug, and `scripts/check-release.sh` checks the
 /// flag isn't in a Release binary.
 ///
-/// - `-tour home` starts Home's tour when Home first shows, whatever is recorded.
+/// - `-tour home` starts Home's tour when Home first shows, whatever is recorded. Any tour's ID
+///   works the same way (`-tour closet`, `-tour yourLooks`; see `TourID.all`).
 /// - `-tour reset` forgets every tour seen and turns tips back on, before anything starts. In
 ///   Stage A progress is in memory, so a launch is already fresh; from Phase 21a it's on disk.
 /// - `-tour off` turns "Show tips on new screens" off, so no tour starts by itself. The UI tests
@@ -42,8 +43,11 @@ public struct TourLaunchOptions: Hashable, Sendable {
                 switch value {
                 case "reset": resetsProgress = true
                 case "off": turnsTipsOff = true
-                case TourID.home.rawValue: startsTours.insert(.home)
-                default: continue
+                default:
+                    // Any tour's ID starts that tour once its screen shows (Phase 16b).
+                    if let tour = TourID.all.first(where: { $0.rawValue == value }) {
+                        startsTours.insert(tour)
+                    }
                 }
             }
         }
