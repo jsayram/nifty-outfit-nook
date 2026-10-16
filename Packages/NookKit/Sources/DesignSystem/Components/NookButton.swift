@@ -63,12 +63,15 @@ public struct NookButton: View {
     private let size: NookButtonSize
     private let isLoading: Bool
     private let fillsWidth: Bool
+    private let fillsHeight: Bool
     private let action: () -> Void
 
     /// - Parameters:
     ///   - title: The label, already localized.
     ///   - systemImage: An SF Symbol shown before the title.
     ///   - fillsWidth: Stretch to the width offered, as the stacked actions in the mockups do.
+    ///   - fillsHeight: Stretch to the height offered, so buttons laid out together can all be
+    ///     as tall as the tallest (results' four buttons, RD-06.3).
     public init(
         _ title: String,
         systemImage: String? = nil,
@@ -76,6 +79,7 @@ public struct NookButton: View {
         size: NookButtonSize = .regular,
         isLoading: Bool = false,
         fillsWidth: Bool = false,
+        fillsHeight: Bool = false,
         action: @escaping () -> Void
     ) {
         self.title = title
@@ -84,6 +88,7 @@ public struct NookButton: View {
         self.size = size
         self.isLoading = isLoading
         self.fillsWidth = fillsWidth
+        self.fillsHeight = fillsHeight
         self.action = action
     }
 
@@ -92,7 +97,9 @@ public struct NookButton: View {
             // Not `.disabled`: a loading button keeps its colour, it just ignores taps.
             if !isLoading { action() }
         } label: {
-            NookButtonLabel(title: title, systemImage: systemImage, isLoading: isLoading, fillsWidth: fillsWidth)
+            NookButtonLabel(
+                title: title, systemImage: systemImage, isLoading: isLoading, fillsWidth: fillsWidth,
+                fillsHeight: fillsHeight)
         }
         .buttonStyle(.nook(kind, size: size))
         .allowsHitTesting(!isLoading)
@@ -108,6 +115,7 @@ struct NookButtonLabel: View {
     let systemImage: String?
     var isLoading = false
     var fillsWidth = false
+    var fillsHeight = false
 
     var body: some View {
         // Icon beside the title while the title fits on one line; at large text sizes the icon
@@ -124,7 +132,7 @@ struct NookButtonLabel: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .frame(maxWidth: fillsWidth ? .infinity : nil)
+        .frame(maxWidth: fillsWidth ? .infinity : nil, maxHeight: fillsHeight ? .infinity : nil)
     }
 
     @ViewBuilder private var icon: some View {

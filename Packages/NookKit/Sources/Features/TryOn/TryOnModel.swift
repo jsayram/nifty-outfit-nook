@@ -43,7 +43,7 @@ final class TryOnModel {
     /// Saves the look first, when it isn't saved yet (Your looks). `nil` for a saved look.
     let saveLook: (() async throws(StoreError) -> Look)?
 
-    private var services: NookServices?
+    private var services: NookServices = .unavailable
     private var making: Task<Void, Never>?
     private let now: () -> Date
 
@@ -66,9 +66,9 @@ final class TryOnModel {
 
     /// Looks for a picture of exactly this look. If the store can't be read, it goes on as if
     /// there were none: making another is never wrong, only less thrifty.
-    func start(with services: NookServices?) async {
+    func start(with services: NookServices) async {
         self.services = services
-        guard step == .ready, let services else { return }
+        guard step == .ready else { return }
         let pictures = (try? await services.pictures.pictures()) ?? []
         if let existing = TryOnLinks.reusable(for: look, in: pictures) {
             step = .alreadyMade(existing)
@@ -95,10 +95,6 @@ final class TryOnModel {
     }
 
     private func perform() async {
-        guard let services else {
-            step = .failed(.notSaved)
-            return
-        }
         var picture: TryOnPicture
         do {
             picture = try await services.tryOn.makePicture(of: look, at: now())

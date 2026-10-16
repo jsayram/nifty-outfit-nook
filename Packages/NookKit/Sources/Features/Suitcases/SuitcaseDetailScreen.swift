@@ -230,7 +230,6 @@ struct SuitcaseDetailScreen: View {
                 guard let change = try await model.setArchived(archived, in: services) else { return }
                 toast = NookToastMessage(change.message, systemImage: "checkmark", actionTitle: SuitcasesText.undo) {
                     Task {
-                        guard let services else { return }
                         try? await change.undo(in: services)
                         await model.load(from: services)
                     }

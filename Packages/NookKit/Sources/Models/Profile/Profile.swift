@@ -277,3 +277,32 @@ extension BodyMeasurements: CustomStringConvertible, CustomDebugStringConvertibl
 
     public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
 }
+
+// The parts of her fit details print no values either, so `"\(length)"`, `"\(piece)"` or a
+// `dump` of one never shows a measurement, a brand or size she wears, or her usual fit.
+
+extension Length: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String { "Length(redacted)" }
+    public var debugDescription: String { description }
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
+}
+
+extension Weight: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String { "Weight(redacted)" }
+    public var debugDescription: String { description }
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
+}
+
+extension FitPiece: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    /// The ID only, so a log line can still say which piece without saying what it is.
+    public var description: String { "FitPiece(\(id), redacted)" }
+    public var debugDescription: String { description }
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
+}
+
+/// Code that needs the word uses `rawValue` or `title`, never the description.
+extension Comfort: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String { "Comfort(redacted)" }
+    public var debugDescription: String { description }
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
+}

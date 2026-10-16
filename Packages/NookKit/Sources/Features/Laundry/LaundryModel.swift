@@ -30,21 +30,22 @@ final class LaundryModel {
     /// Her suitcases that aren't archived, for "packed in Jose's house".
     private(set) var suitcases: [Suitcase] = []
     private var garments: [Garment] = []
+    @ObservationIgnored private var loads = LoadGeneration()
 
     // MARK: Loading
 
-    func load(from services: NookServices?) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    func load(from services: NookServices) async {
+        let load = loads.begin()
         if phase != .loaded { phase = .loading }
         do {
             async let garmentList = services.closet.garments()
             async let suitcaseList = services.suitcases.suitcases()
             async let profile = services.profile.profile()
-            show(garments: try await garmentList, suitcases: try await suitcaseList, profile: try await profile)
+            let loaded = try await (garmentList, suitcaseList, profile)
+            guard loads.isCurrent(load) else { return }
+            show(garments: loaded.0, suitcases: loaded.1, profile: loaded.2)
         } catch {
+            guard loads.isCurrent(load) else { return }
             if phase != .loaded { phase = .failed }
         }
     }
@@ -119,8 +120,7 @@ final class LaundryModel {
 
     /// Mark clean: the pieces still in her closet and still in the wash become clean (FR-65).
     /// Returns the ones that changed, for the toast and Undo; others are skipped.
-    func markClean(_ ids: [Garment.ID], in services: NookServices?) async throws(StoreError) -> [Garment.ID] {
-        guard let services else { throw .unavailable }
+    func markClean(_ ids: [Garment.ID], in services: NookServices) async throws(StoreError) -> [Garment.ID] {
         let cleanable = LaundryBasket.cleanable(ids, in: garments)
         guard !cleanable.isEmpty else { return [] }
         try await services.closet.setLaundry(.clean, for: cleanable)
@@ -131,8 +131,7 @@ final class LaundryModel {
 
     /// Undo: back in the wash, but only pieces still clean, so a change made since isn't
     /// overwritten (PRD §7.3).
-    func undoClean(_ ids: [Garment.ID], in services: NookServices?) async throws(StoreError) {
-        guard let services else { return }
+    func undoClean(_ ids: [Garment.ID], in services: NookServices) async throws(StoreError) {
         let fresh = try await services.closet.garments()
         let undoable = LaundryBasket.undoable(ids, in: fresh)
         if !undoable.isEmpty {
@@ -142,8 +141,7 @@ final class LaundryModel {
     }
 
     /// Turn on (RD-11.4): saves the setting. The marks she had come back.
-    func turnOnTracking(in services: NookServices?) async -> Bool {
-        guard let services else { return false }
+    func turnOnTracking(in services: NookServices) async -> Bool {
         do {
             try await services.profile.update { $0.preferences.tracksLaundry = true }
         } catch {

@@ -27,7 +27,7 @@ Top to bottom, as in `results-versions.html`:
 - **The bundle**, large, with the version as its spoken title. A new result lays its pieces down; switching versions doesn't, so shared pieces stay still.
 - **The piece list.** "Same as Simple" on shared pieces, and "Swapped" or "Added" on the others (LR-05a.3). Swapped means Simple has a piece of that kind; Added means it doesn't. The idea piece says "Not in your closet" with Find one (LR-05b.1).
 - **Save look, Try it on, Swap a piece, Ask stylist**, two by two, one column at the accessibility sizes (RD-06.3). "Try-on pictures are simulated." under them.
-- **Try a different outfit**, "Uses 1 styling request."
+- **Try a different outfit**, "Uses 1 styling" (the amendment's words; Style me's own caption says "Uses 1 styling request.").
 
 ## What each button does
 

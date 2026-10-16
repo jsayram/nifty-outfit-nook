@@ -75,7 +75,7 @@ struct SuitcasesScreen: View {
 enum SourceChoiceToast {
     @MainActor
     static func make(
-        choosing source: WardrobeSource, model: SuitcasesModel, services: NookServices?,
+        choosing source: WardrobeSource, model: SuitcasesModel, services: NookServices,
         open: @escaping (ClosetDestination) -> Void
     ) async -> NookToastMessage? {
         do {

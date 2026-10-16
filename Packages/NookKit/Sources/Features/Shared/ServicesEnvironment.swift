@@ -3,8 +3,10 @@ import SwiftUI
 
 extension EnvironmentValues {
     /// The app's services. The app target sets it once at the root; screens read it and never
-    /// build services themselves. `nil` only in previews and tests that don't need data.
-    @Entry public var services: NookServices?
+    /// build services themselves. Without it (a preview, or a test that doesn't need data) a
+    /// screen gets `NookServices.unavailable`, so it shows its error state rather than
+    /// pretending to load or save.
+    @Entry public var services: NookServices = .unavailable
 }
 
 /// Opens Saved Looks from another tab with screens pushed on it, as a frame on the Home shelf

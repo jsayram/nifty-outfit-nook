@@ -34,7 +34,8 @@ final class LookDetailModel {
     /// The look's try-on pictures, newest first (RD-08.2).
     private(set) var pictures: [TryOnPicture] = []
 
-    private var services: NookServices?
+    private var services: NookServices = .unavailable
+    @ObservationIgnored private var loads = LoadGeneration()
     private let now: () -> Date
     private let calendar: Calendar
     private let makeLookID: () -> Look.ID
@@ -55,26 +56,27 @@ final class LookDetailModel {
 
     /// Reads the look and what it needs. Runs again each time the screen appears, so a piece
     /// changed on garment detail shows when she comes back.
-    func load(from services: NookServices?) async {
+    func load(from services: NookServices) async {
         self.services = services
-        guard let services else {
-            phase = .missing
-            return
-        }
+        let load = loads.begin()
         if look == nil { phase = .loading }
         do {
             async let lookList = services.looks.looks()
             async let garmentList = services.closet.garments()
             async let suitcaseList = services.suitcases.suitcases()
             async let profile = services.profile.profile()
-            let (looks, garments, suitcases) = try await (lookList, garmentList, suitcaseList)
-            show(looks: looks, garments: garments, suitcases: suitcases, profile: try await profile)
+            let (looks, garments, suitcases, profileValue) = try await (lookList, garmentList, suitcaseList, profile)
+            guard loads.isCurrent(load) else { return }
+            show(looks: looks, garments: garments, suitcases: suitcases, profile: profileValue)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
             return
         }
         // The look works without its pictures, so a picture store that can't be read only hides them.
-        showPictures((try? await services.pictures.pictures()) ?? [])
+        let pictures = (try? await services.pictures.pictures()) ?? []
+        guard loads.isCurrent(load) else { return }
+        showPictures(pictures)
     }
 
     /// Sets the look's pictures from every picture.
@@ -184,7 +186,7 @@ final class LookDetailModel {
 
     /// Renames the look. The name is trimmed; a name with a problem is refused.
     func rename(to text: String) async throws(StoreError) {
-        guard let services, let look else { throw .unavailable }
+        guard let look else { throw .unavailable }
         let name: String
         do {
             name = try NameRules.lookName(text)
@@ -204,7 +206,7 @@ final class LookDetailModel {
     /// untouched (LR-10, option A). `LookWear` keeps the look and its pieces in step if a store
     /// fails.
     func wearToday() async throws(StoreError) -> Wear {
-        guard let services, let look else { throw .unavailable }
+        guard let look else { throw .unavailable }
         let wear = Wear(lookID: look.id, garmentIDs: wornPieces(of: look), date: now())
         try await wear.record(looks: services.looks, closet: services.closet)
         await reload()
@@ -213,7 +215,6 @@ final class LookDetailModel {
 
     /// Undo for Wear today, or taking today's wear off again.
     func undo(_ wear: Wear) async throws(StoreError) {
-        guard let services else { throw .unavailable }
         try await wear.remove(looks: services.looks, closet: services.closet)
         await reload()
     }
@@ -272,7 +273,7 @@ final class LookDetailModel {
     /// Puts the pieces of a look changed in Swap into this saved look, keeping its ID, name,
     /// saved date and wear days. Returns the look before, for Undo.
     func applySwap(_ changed: Look) async throws(StoreError) -> Look {
-        guard let services, let before = look else { throw .unavailable }
+        guard let before = look else { throw .unavailable }
         var updated = before
         updated.pieces = changed.pieces
         try await services.looks.save(updated)
@@ -282,7 +283,6 @@ final class LookDetailModel {
 
     /// Undo for a swap or a removed piece: exactly the look before (LR-08.2).
     func restore(_ earlier: Look) async throws(StoreError) {
-        guard let services else { throw .unavailable }
         try await services.looks.save(earlier)
         replace(earlier)
     }
@@ -291,7 +291,7 @@ final class LookDetailModel {
 
     /// Delete look: takes it out of Saved Looks. Returns what Undo needs.
     func delete() async throws(StoreError) -> SavedLookRemoval {
-        guard let services, let look else { throw .unavailable }
+        guard let look else { throw .unavailable }
         let removal = SavedLookRemoval(look: look, pictureCount: pictures.count)
         try await removal.apply(in: services.looks)
         self.look = nil
@@ -309,7 +309,6 @@ final class LookDetailModel {
     }
 
     private func reload() async {
-        guard let services else { return }
         if let looks = try? await services.looks.looks(), let garments = try? await services.closet.garments() {
             show(looks: looks, garments: garments, suitcases: suitcases, profile: profile)
         }

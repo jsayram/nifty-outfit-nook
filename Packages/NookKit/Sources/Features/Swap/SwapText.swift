@@ -88,7 +88,7 @@ struct SwapText {
     var everyOne: String {
         let every = words.every
         return String(
-            localized: "That’s \(every) in \(sourceName).", bundle: .module,
+            localized: "That’s \(every) in \(sourceName)", bundle: .module,
             comment: "Swap: the end of the options (LR-07.3): every top, then the source's name")
     }
 

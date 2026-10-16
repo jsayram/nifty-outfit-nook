@@ -275,7 +275,6 @@ struct SavedLooksScreen: View {
     /// Delete suitcase, from a suitcase opened on a piece's detail: back to the piece, with Undo.
     private func suitcaseDeleted(_ change: SuitcaseChange) {
         goBack()
-        guard let services else { return }
         toast = NookToastMessage(
             change.message, systemImage: "checkmark",
             actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
@@ -365,7 +364,7 @@ struct SavedLooksScreen: View {
         if case .closet(.garment(let id, _)) = path.last, id == removal.garmentID {
             path.removeLast()
         }
-        guard let closet = services?.closet else { return }
+        let closet = services.closet
         toast = NookToastMessage(
             removal.message, systemImage: "checkmark",
             actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")

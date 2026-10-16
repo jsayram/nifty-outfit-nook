@@ -145,4 +145,29 @@ struct MeasurementEntryTests {
         #expect(!dumped.contains("130"))
         #expect(Mirror(reflecting: measurements).children.isEmpty)
     }
+
+    /// The parts print nothing either: a length, a weight, a fitting piece and her usual fit.
+    @Test func fitDetailsNeverPrintTheirValues() {
+        let piece = FitPiece(id: "f1", brand: "Old Navy", category: .bottom, sizeLabel: "0 Petite", result: .tooLong)
+        let values: [(Any, [String])] = [
+            (Length(59, .inches), ["59", "inches"]),
+            (Weight(130, .pounds), ["130", "pounds"]),
+            (piece, ["Old Navy", "Petite", "tooLong", "bottom"]),
+            (Comfort.relaxed, ["relaxed"]),
+        ]
+        for (value, secrets) in values {
+            var dumped = ""
+            dump(value, to: &dumped)
+            let printed = ["\(value)", String(describing: value), String(reflecting: value), dumped]
+            for text in printed {
+                for secret in secrets {
+                    #expect(!text.contains(secret), "\(text) shows \(secret)")
+                }
+                #expect(text.contains("redacted"))
+            }
+            #expect(Mirror(reflecting: value).children.isEmpty)
+        }
+        // The word itself is still there for code that needs it.
+        #expect(Comfort.relaxed.rawValue == "relaxed")
+    }
 }

@@ -140,10 +140,13 @@ struct HomeModelTests {
         #expect(model.content.hamper == nil)
     }
 
-    @Test func noServicesMeansNothingToLoad() async {
+    /// Without real services (a preview), the room says it couldn't load rather than pretending
+    /// it did.
+    @Test func noServicesIsAFailure() async {
         let model = HomeModel()
-        await model.load(from: nil)
-        #expect(model.phase == .loaded)
-        #expect(model.content.signName == nil)
+        await model.load(from: .unavailable)
+        #expect(model.phase == .failed)
+        #expect(model.content.signName == "")
+        #expect(model.content.weather == nil)
     }
 }

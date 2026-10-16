@@ -142,7 +142,8 @@ struct GarmentDetailScreen: View {
 
     /// Mark as dirty or Mark as clean, with Undo (RD-11).
     private func toggleLaundry() {
-        guard let closet = services?.closet, let laundry = model.garment?.laundry else { return }
+        let closet = services.closet
+        guard let laundry = model.garment?.laundry else { return }
         let next: LaundryState = laundry == .dirty ? .clean : .dirty
         Task {
             do {
@@ -176,7 +177,7 @@ struct GarmentDetailScreen: View {
 
     /// "Yes, I don't have it" or "Delete it": saves, closes the sheet, then Closet takes over.
     private func remove(deleting: Bool) {
-        guard let closet = services?.closet else { return }
+        let closet = services.closet
         Task {
             do {
                 let removal =

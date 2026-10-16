@@ -153,7 +153,9 @@ Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture 
 
 `CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
 
-`NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). The root puts the services in the SwiftUI environment (`\.services`). Screens never build services.
+`NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). The root puts the services in the SwiftUI environment (`\.services`). Screens never build services. Without them (a preview, or a test that doesn't need data) a screen gets `NookServices.unavailable`, whose every call fails, so it shows its error state rather than pretending to load or save.
+
+Screens load from `.task` and again after a pushed screen closes, Undo or Try again, so loads can overlap. Each model numbers its loads (`LoadGeneration` in Features/Shared) and only the newest shows what it read, so an older load that finishes last can't put back data from before a change.
 
 A store returns everything it holds and leaves filtering to the rules: Closet shows `isInCloset`, Saved Looks shows `isSaved`, Suitcases arranges with `SuitcaseShelf`. Wear today on a look writes to two stores, the look and then its pieces, so neither store needs to know about the other. `LookWear` (Models) does both: if the pieces can't be written it puts the look back as it was and throws, so the look and its pieces never disagree.
 

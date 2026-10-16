@@ -68,6 +68,43 @@ struct GarmentImageLoaderTests {
         #expect(await provider.calls == 1)
     }
 
+    /// A provider that fails is asked again next time: only a picture that isn't there is
+    /// remembered as missing.
+    @Test func aFailedLoadIsAskedForAgain() async throws {
+        let provider = FlakyProvider()
+        let loader = GarmentImageLoader(provider: provider)
+        #expect(await loader.image(for: .stored("p-1"), maxPixelSize: 50) == nil)
+        #expect(!loader.isMissing(.stored("p-1"), maxPixelSize: 50))
+        #expect(try #require(await loader.image(for: .stored("p-1"), maxPixelSize: 50)).cgImage != nil)
+        #expect(await provider.calls == 2)
+    }
+
+    /// The pictures remembered as missing are bounded: when the list is full it starts over.
+    @Test func theMissingListIsBounded() async {
+        let provider = PhotoProvider(width: 10, height: 10)
+        let loader = GarmentImageLoader(provider: provider, missingLimit: 2)
+        for name in ["a", "b", "c"] {
+            _ = await loader.image(for: .sample(name), maxPixelSize: 100)
+        }
+        #expect(!loader.isMissing(.sample("a"), maxPixelSize: 100))
+        #expect(loader.isMissing(.sample("c"), maxPixelSize: 100))
+    }
+
+    /// Fails the first call, then answers with a small PNG.
+    actor FlakyProvider: ImageProvider {
+        private(set) var calls = 0
+        let png = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 4)).pngData { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 4, height: 4))
+        }
+
+        func imageData(for reference: PhotoReference, maxPixelSize: Int) async throws(ImageError) -> Data? {
+            calls += 1
+            if calls == 1 { throw .unavailable }
+            return png
+        }
+    }
+
     @Test func aPieceWithNoPhotoNeverAsks() async {
         let provider = PhotoProvider(width: 10, height: 10)
         let loader = GarmentImageLoader(provider: provider)

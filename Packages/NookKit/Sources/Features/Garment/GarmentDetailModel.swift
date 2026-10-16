@@ -34,6 +34,7 @@ final class GarmentDetailModel {
     private(set) var loadedAt: Date = .now
     /// True while a change is being saved, so a second tap does nothing.
     private(set) var isSaving = false
+    @ObservationIgnored private var loads = LoadGeneration()
 
     init(garmentID: Garment.ID) {
         self.garmentID = garmentID
@@ -41,24 +42,23 @@ final class GarmentDetailModel {
 
     // MARK: Loading
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .gone
-            return
-        }
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if garment == nil { phase = .loading }
         do {
             async let piece = services.closet.garment(garmentID)
             async let suitcaseList = services.suitcases.suitcases()
             async let lookList = services.looks.looks()
             async let profile = services.profile.profile()
-            show(
-                try await piece, suitcases: try await suitcaseList, looks: try await lookList,
-                profile: try await profile, now: now)
+            let loaded = try await (piece, suitcaseList, lookList, profile)
+            guard loads.isCurrent(load) else { return }
+            show(loaded.0, suitcases: loaded.1, looks: loaded.2, profile: loaded.3, now: now)
         } catch StoreError.notFound {
+            guard loads.isCurrent(load) else { return }
             garment = nil
             phase = .gone
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
         }
     }
@@ -111,8 +111,8 @@ final class GarmentDetailModel {
     /// "Add to a suitcase" (Phase 13, PRD §7.7): packs it in a suitcase, or takes it out. It's the
     /// same piece either way; nothing is copied. Returns true when it's now packed.
     @discardableResult
-    func toggleSuitcase(_ id: Suitcase.ID, in services: NookServices?) async throws(StoreError) -> Bool {
-        guard let services, let garment else { throw .unavailable }
+    func toggleSuitcase(_ id: Suitcase.ID, in services: NookServices) async throws(StoreError) -> Bool {
+        guard let garment else { throw .unavailable }
         let packing = !(activeSuitcases.first { $0.id == id }?.contains(garment.id) ?? false)
         if packing {
             try await services.suitcases.add([garment.id], to: id)

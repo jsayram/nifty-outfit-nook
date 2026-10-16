@@ -76,10 +76,13 @@ struct GarmentDetailLoadingTests {
         #expect(model.phase == .failed)
     }
 
-    @Test func noServicesMeansNothingToShow() async {
+    @Test func noServicesIsAFailure() async {
         let model = GarmentDetailModel(garmentID: "g-navy-trousers")
-        await model.load(from: nil)
-        #expect(model.phase == .gone)
+        await model.load(from: .unavailable)
+        #expect(model.phase == .failed)
+        await #expect(throws: StoreError.unavailable) {
+            try await model.toggleSuitcase("s-weekend", in: .unavailable)
+        }
     }
 
     /// A piece she no longer has can be shown, but nothing can be done with it.

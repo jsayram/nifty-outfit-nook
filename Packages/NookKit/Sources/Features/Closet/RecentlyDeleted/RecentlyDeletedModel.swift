@@ -22,17 +22,18 @@ final class RecentlyDeletedModel {
     private(set) var loadedAt: Date = .now
     /// The piece being restored, so its button shows the dots and a second tap does nothing.
     private(set) var restoring: Garment.ID?
+    @ObservationIgnored private var loads = LoadGeneration()
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if pieces.isEmpty { phase = .loading }
         do {
             _ = try await services.closet.purgeExpired(asOf: now)
-            show(try await services.closet.garments(), now: now)
+            let garments = try await services.closet.garments()
+            guard loads.isCurrent(load) else { return }
+            show(garments, now: now)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
         }
     }

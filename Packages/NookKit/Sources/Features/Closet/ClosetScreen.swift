@@ -175,7 +175,6 @@ struct ClosetScreen: View {
         if case .suitcase(let id, _, _) = path.last, id == change.suitcase.id {
             path.removeLast()
         }
-        guard let services else { return }
         toast = NookToastMessage(
             change.message, systemImage: "checkmark",
             actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
@@ -189,7 +188,7 @@ struct ClosetScreen: View {
     }
 
     private func discardDraft() {
-        guard let drafts = services?.drafts else { return }
+        let drafts = services.drafts
         Task { await model.discardDraft(in: drafts) }
     }
 
@@ -225,7 +224,7 @@ struct ClosetScreen: View {
             current = nil
         }
         reload()
-        guard let closet = services?.closet else { return }
+        let closet = services.closet
         toast = NookToastMessage(
             removal.message, systemImage: "checkmark",
             actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
@@ -257,5 +256,5 @@ private struct CurrentPiece: Equatable {
 }
 
 #Preview {
-    RootTabView(services: nil, tours: TourCenter(store: nil))
+    RootTabView(services: .unavailable, tours: TourCenter(store: nil))
 }

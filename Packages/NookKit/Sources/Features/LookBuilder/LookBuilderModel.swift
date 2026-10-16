@@ -49,7 +49,8 @@ final class LookBuilderModel {
 
     let startingPieceID: Garment.ID?
     private var history = EditHistory<[Garment.ID]>()
-    private var services: NookServices?
+    private var services: NookServices = .unavailable
+    @ObservationIgnored private var loads = LoadGeneration()
     private var draftWriting: Task<Void, Never>?
     /// True while the model sets the name itself (resuming, or naming on save), which isn't a
     /// change of hers.
@@ -71,22 +72,21 @@ final class LookBuilderModel {
 
     /// Reads her closet and any draft. A draft with work in it is offered; otherwise the look
     /// starts with the starting piece, if it can be worn.
-    func load(from services: NookServices?) async {
+    func load(from services: NookServices) async {
         self.services = services
-        guard let services else {
-            phase = .loaded
-            return
-        }
+        let load = loads.begin()
         if garments.isEmpty { phase = .loading }
         do {
             async let garmentList = services.closet.garments()
             async let suitcaseList = services.suitcases.suitcases()
             async let profile = services.profile.profile()
-            let all = try await garmentList
-            suitcases = try await suitcaseList
-            tracksLaundry = try await profile.preferences.tracksLaundry
+            let (all, suitcaseValues, profileValue) = try await (garmentList, suitcaseList, profile)
+            guard loads.isCurrent(load) else { return }
+            suitcases = suitcaseValues
+            tracksLaundry = profileValue.preferences.tracksLaundry
             garments = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
             return
         }
@@ -96,6 +96,7 @@ final class LookBuilderModel {
         // Coming back to the screen keeps what's on it.
         guard !wasLoaded, pieceIDs.isEmpty, savedLook == nil, offeredDraft == nil else { return }
         let draft = (try? await services.lookDrafts.draft()) ?? nil
+        guard loads.isCurrent(load) else { return }
         if let draft, draft.hasChanges {
             offeredDraft = draft
         }
@@ -122,11 +123,11 @@ final class LookBuilderModel {
         if pieceIDs != (startingPieceID.map { [$0] } ?? []) || !name.isEmpty {
             writeDraft()
         } else {
-            let drafts = services?.lookDrafts
+            let drafts = services.lookDrafts
             let previous = draftWriting
             draftWriting = Task {
                 await previous?.value
-                try? await drafts?.discard()
+                try? await drafts.discard()
             }
         }
     }
@@ -231,7 +232,6 @@ final class LookBuilderModel {
     /// - Parameter fallbackName: the name to use when she didn't type one.
     @discardableResult
     func save(fallbackName: String) async throws(StoreError) -> Look {
-        guard let services else { throw .unavailable }
         let typed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let id = savedLook?.id ?? makeLookID()
         let look = Look(
@@ -278,7 +278,8 @@ final class LookBuilderModel {
     }
 
     private func writeDraft() {
-        guard let drafts = services?.lookDrafts, phase == .loaded else { return }
+        let drafts = services.lookDrafts
+        guard phase == .loaded else { return }
         let draft = LookDraft(
             name: name, source: Self.source, garmentIDs: pieceIDs, startingPieceID: startingPieceID,
             savedAt: now())

@@ -31,12 +31,13 @@ final class DeleteDataModel {
     private(set) var counts: Counts?
     /// What the deletion covers, from the service, in reading order (closet first).
     private(set) var parts: [DataPart] = DataPart.allCases
+    @ObservationIgnored private var loads = LoadGeneration()
     let scope = DeletionScope.thisDevice
 
-    func load(from services: NookServices?) async {
-        guard let services else { return }
+    func load(from services: NookServices) async {
         let covered = services.deletion.parts(in: scope)
         parts = DataPart.allCases.filter(covered.contains)
+        let load = loads.begin()
         do {
             var counts = Counts()
             counts.pieces = try await services.closet.garments().count
@@ -45,8 +46,10 @@ final class DeleteDataModel {
             counts.suitcases = try await services.suitcases.suitcases().count
             counts.drafts = try await services.drafts.drafts().count
             if try await services.lookDrafts.draft() != nil { counts.drafts += 1 }
+            guard loads.isCurrent(load) else { return }
             self.counts = counts
         } catch {
+            guard loads.isCurrent(load) else { return }
             counts = nil
         }
     }
@@ -58,8 +61,8 @@ final class DeleteDataModel {
     }
 
     /// Deletes everything in scope. Returns true when every part was deleted.
-    func delete(in services: NookServices?) async -> Bool {
-        guard let services, phase != .deleting else { return false }
+    func delete(in services: NookServices) async -> Bool {
+        guard phase != .deleting else { return false }
         phase = .deleting
         let report = await services.deletion.delete(scope)
         if report.isComplete {

@@ -23,12 +23,12 @@ final class HomeModel {
     /// Pieces in her closet marked as in the wash, counted even while tracking is off, since
     /// the marks are kept (RD-11). The laundry sheet mentions them.
     private(set) var keptDirtyCount = 0
+    @ObservationIgnored private var loads = LoadGeneration()
 
-    func load(from services: NookServices?) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    /// Reads what the room shows. A load that an overlapping newer one has overtaken shows
+    /// nothing (`LoadGeneration`).
+    func load(from services: NookServices) async {
+        let load = loads.begin()
         phase = .loading
         var failed = false
         // The weather comes from elsewhere (WeatherKit from Phase 29) and can be slow, so it
@@ -58,17 +58,22 @@ final class HomeModel {
             suitcases = nil
             failed = true
         }
-        content.source = Self.sourcePlate(
-            remembered: profile?.remembered.source ?? .mainCloset, garments: garments, suitcases: suitcases)
-        content.occasion = profile?.remembered.occasion
 
+        let looks: [Look]?
         do {
-            let looks = try await services.looks.looks()
-            content.framedLooks = Self.framedLooks(from: looks, garments: garments ?? [])
+            looks = try await services.looks.looks()
         } catch {
+            looks = nil
             failed = true
         }
 
+        guard loads.isCurrent(load) else { return }
+        content.source = Self.sourcePlate(
+            remembered: profile?.remembered.source ?? .mainCloset, garments: garments, suitcases: suitcases)
+        content.occasion = profile?.remembered.occasion
+        if let looks {
+            content.framedLooks = Self.framedLooks(from: looks, garments: garments ?? [])
+        }
         content.signName = profile?.signName ?? (failed ? "" : nil)
         if let garments, let profile {
             content.hamper = HamperState(garments: garments, tracksLaundry: profile.preferences.tracksLaundry)
@@ -77,17 +82,16 @@ final class HomeModel {
         }
         keptDirtyCount = garments?.count { $0.isInCloset && $0.laundry == .dirty } ?? 0
         phase = failed ? .failed : .loaded
-        content.weather = await weather
+        let reading = await weather
+        guard loads.isCurrent(load) else { return }
+        content.weather = reading
     }
 
     /// "Turn on" in the laundry sheet: saves the setting, then reloads, so the hamper changes
     /// at once (RD-11.4). Returns false if the profile couldn't be saved.
-    func turnOnLaundryTracking(using services: NookServices?) async -> Bool {
-        guard let services else { return false }
+    func turnOnLaundryTracking(using services: NookServices) async -> Bool {
         do {
-            var profile = try await services.profile.profile()
-            profile.preferences.tracksLaundry = true
-            try await services.profile.save(profile)
+            try await services.profile.update { $0.preferences.tracksLaundry = true }
         } catch {
             return false
         }
