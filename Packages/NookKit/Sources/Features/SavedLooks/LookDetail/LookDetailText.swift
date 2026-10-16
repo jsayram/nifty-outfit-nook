@@ -70,11 +70,6 @@ enum LookDetailText {
             comment: "Hint on Delete look")
     }
 
-    static var simulated: String {
-        String(
-            localized: "Try-on pictures are simulated.", bundle: .module, comment: "Fine print under results buttons")
-    }
-
     static var piecesHeading: String {
         String(localized: "Pieces", bundle: .module, comment: "Look detail: heading over the piece list")
     }

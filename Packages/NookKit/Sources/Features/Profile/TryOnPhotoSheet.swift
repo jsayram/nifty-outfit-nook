@@ -265,7 +265,7 @@ struct ExamplePhoto: View {
                 Image(systemName: "photo")
                     .font(.system(size: 44, weight: .regular))
                     .foregroundStyle(.nook.textSecondary)
-                NookBadge(TryOnText.simulated, systemImage: "camera")
+                NookBadge(SharedText.simulated, systemImage: "camera")
                     .padding(NookSpacing.small)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }

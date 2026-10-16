@@ -71,7 +71,7 @@ final class PictureDetailModel {
     func facts(locale: Locale) -> String {
         guard let item else { return "" }
         let made = TryOnText.made(item.picture.createdAt, now: now(), calendar: calendar, locale: locale)
-        return [TryOnText.simulated, made].joined(separator: " · ")
+        return [SharedText.simulated, made].joined(separator: " · ")
     }
 
     /// The look to open with See the look, while it's in Saved Looks.

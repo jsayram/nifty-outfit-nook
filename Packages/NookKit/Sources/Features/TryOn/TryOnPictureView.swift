@@ -37,7 +37,7 @@ struct TryOnPictureView: View {
                 LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
                     .accessibilityHidden(true)
                 if width >= Self.badgeMinimumWidth {
-                    NookBadge(TryOnText.simulated, systemImage: "camera")
+                    NookBadge(SharedText.simulated, systemImage: "camera")
                         .padding(width >= 240 ? NookSpacing.medium : NookSpacing.small)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }

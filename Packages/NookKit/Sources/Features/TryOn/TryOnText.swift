@@ -3,10 +3,6 @@ import Models
 
 /// The words for Try it on, the Pictures tab and picture detail (Phase 12b).
 enum TryOnText {
-    static var simulated: String {
-        String(localized: "Simulated", bundle: .module, comment: "Badge: a stand-in, not the real thing")
-    }
-
     static var tryOn: String {
         String(localized: "Try it on", bundle: .module, comment: "Results button (RD-06)")
     }

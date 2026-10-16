@@ -19,7 +19,7 @@ extension View {
         nookSheet(
             item: route,
             title: { _ in TryOnText.tryOn },
-            subtitle: { _ in TryOnText.simulated },
+            subtitle: { _ in SharedText.simulated },
             // Full height: the picture and its two buttons don't fit a half-height sheet.
             detents: [.large],
             content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture) }

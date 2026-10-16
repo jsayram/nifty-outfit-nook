@@ -173,7 +173,7 @@ struct SavedPictureCell: View {
     /// "28 Aug", "28 Aug · Earlier version", "28 Aug · Look deleted". In a row the picture is
     /// too small for its Simulated badge, so the line starts with Simulated (RD-04.2).
     private var dateLine: String {
-        var parts = style == .row ? [TryOnText.simulated, date] : [date]
+        var parts = style == .row ? [SharedText.simulated, date] : [date]
         switch item.status {
         case .current: break
         case .changed: parts.append(TryOnText.earlierVersionShort)
