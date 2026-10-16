@@ -72,6 +72,15 @@ final class HomeVariantTests: XCTestCase {
         let tabBar = app.tabBars.firstMatch
         let wardrobe = app.buttons["home.wardrobe"]
         reveal(wardrobe, in: app)
+        // The banner is the page's first row, so the swipes that reveal it can leave it half under
+        // the navigation bar. The wardrobe still counts as hittable there, but a tap lands on the
+        // bar and nothing opens: the CI recordings of this test's failures (October 2026) show the
+        // banner behind the bar. Scroll until the whole wardrobe edge is below the bar.
+        let homeBar = app.navigationBars["Home"]
+        for _ in 0..<6 where wardrobe.frame.minY < homeBar.frame.maxY {
+            app.swipeDown(velocity: .slow)
+        }
+        XCTAssertGreaterThanOrEqual(wardrobe.frame.minY, homeBar.frame.maxY, "The wardrobe is under the bar")
         // The tap follows the swipes that revealed the wardrobe. On a slow runner the page can
         // still be moving and the tap only stops it, so wait for the tab, and tap once more if
         // it didn't switch.
