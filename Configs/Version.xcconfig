@@ -1,0 +1,13 @@
+// The app's version and build number (Phase 18, docs/testflight.md).
+//
+// MARKETING_VERSION is the version people see. It stays 0.1.0 for the Stage A TestFlight builds.
+// CURRENT_PROJECT_VERSION is the build number. App Store Connect needs a higher one for every
+// upload of the same version. Run scripts/bump-build.sh before each archive: it writes the
+// current UTC date and time (for example 20261016.1420) to Build.local.xcconfig, which git
+// ignores and which overrides the 1 below. So a build number never needs a commit, a later
+// archive always has a higher number, and Help shows it to Lily ("0.1.0 (20261016.1420)").
+
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+#include? "Build.local.xcconfig"
