@@ -29,6 +29,7 @@ struct DataDeletionFixtureTests {
         #expect(try await services.lookDrafts.draft() != nil)
         try await services.tours.record(TourRecord(tour: .home, version: 1, outcome: .skipped, date: TestTime.now))
         try await services.tours.setShowsTipsOnNewScreens(false)
+        try await services.onboarding.complete(startingCloset: .empty)
 
         let report = await services.deletion.delete(.thisDevice)
 
@@ -51,6 +52,8 @@ struct DataDeletionFixtureTests {
         #expect(profile.remembered == RememberedChoices())
         // Tours go with the profile: nothing seen and tips back on (PRD §7.8, Phase 16a).
         #expect(try await services.tours.progress() == .fresh)
+        // And so does onboarding, so the app opens on the welcome again (Phase 17).
+        #expect(try await services.onboarding.state() == .fresh)
     }
 
     @Test func afterDeletingTheStoresMatchTheEmptySet() async throws {

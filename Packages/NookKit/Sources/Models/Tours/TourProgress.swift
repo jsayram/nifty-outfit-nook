@@ -4,8 +4,13 @@ import Foundation
 //
 // What's stored is a local preference: which tours she has seen, at which content version, how
 // each one ended, and whether tours start on their own. No wardrobe content, no body values and
-// no analytics identifier. Stage A keeps it in memory (`InMemoryTourProgressStore`); Phase 21a
-// puts it on disk with the other preferences, and Delete my data erases it with her profile.
+// no analytics identifier. Delete my data erases it with her profile.
+//
+// Since Phase 17 it comes in two parts. The seen versions and the "Show tips on new screens"
+// switch are app state in the lowest tier of `closet/DATA_MAP.md`, so they're kept across launches
+// (`DefaultsTourProgressStore` in Services); that's what stops a tour coming back after a relaunch.
+// How each tour ended and when are kept only for the session, in `records`. Phase 21a moves both
+// into the real preferences store.
 
 /// A tour's stable, logical name. Every layout of a screen shares one ID, so turning the phone,
 /// changing the text size or moving to an iPad never counts as a new first visit.
@@ -83,30 +88,42 @@ public struct TourRecord: Hashable, Codable, Sendable {
     }
 }
 
-/// Everything stored about tours: the seen records and the "Show tips on new screens" switch.
+/// Everything stored about tours: the seen versions, the records, and the "Show tips on new
+/// screens" switch.
 public struct TourProgress: Hashable, Codable, Sendable {
-    /// The latest record for each tour.
+    /// The latest record for each tour: its version, how it ended and when. Kept for the session
+    /// only since Phase 17 (see the top of this file).
     public var records: [TourID: TourRecord]
+    /// The latest content version seen of each tour, whatever way it ended. This is what decides
+    /// whether a tour starts again, and what's kept across launches.
+    public var seenVersions: [TourID: Int]
     /// "Show tips on new screens" (PRD §7.8), on by default. Off stops tours from starting on
     /// their own; replay from App tours on Profile still works.
     public var showsTipsOnNewScreens: Bool
 
-    public init(records: [TourID: TourRecord] = [:], showsTipsOnNewScreens: Bool = true) {
+    /// - Parameter seenVersions: versions seen before this session. Each record's version counts
+    ///   as seen too.
+    public init(
+        records: [TourID: TourRecord] = [:], seenVersions: [TourID: Int] = [:], showsTipsOnNewScreens: Bool = true
+    ) {
         self.records = records
+        self.seenVersions = seenVersions.merging(records.mapValues(\.version), uniquingKeysWith: max)
         self.showsTipsOnNewScreens = showsTipsOnNewScreens
     }
 
     /// A fresh install: nothing seen, tips on.
     public static let fresh = TourProgress()
 
-    /// Keeps `record` as its tour's latest.
+    /// Keeps `record` as its tour's latest, and its version as seen.
     public mutating func add(_ record: TourRecord) {
         records[record.tour] = record
+        seenVersions[record.tour] = max(seenVersions[record.tour] ?? record.version, record.version)
     }
 
     /// Reset all tips: every tour counts as unseen again. The switch stays as she set it.
     public mutating func forgetSeen() {
         records = [:]
+        seenVersions = [:]
     }
 }
 
@@ -116,8 +133,8 @@ public enum TourRules {
     /// this version or a later one. Replay from App tours and the debug `-tour` flag don't ask.
     public static func startsAutomatically(_ tour: TourID, version: Int, progress: TourProgress) -> Bool {
         guard progress.showsTipsOnNewScreens else { return false }
-        guard let seen = progress.records[tour] else { return true }
-        return seen.version < version
+        guard let seen = progress.seenVersions[tour] else { return true }
+        return seen < version
     }
 }
 

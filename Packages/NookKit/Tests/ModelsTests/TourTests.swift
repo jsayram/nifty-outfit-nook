@@ -96,8 +96,30 @@ struct TourTests {
         }
         progress.forgetSeen()
         #expect(progress.records.isEmpty)
+        #expect(progress.seenVersions.isEmpty)
         #expect(!progress.showsTipsOnNewScreens)
         // Seen nothing, but tips off: still nothing starts by itself.
         #expect(!TourRules.startsAutomatically(.closet, version: 1, progress: progress))
+    }
+
+    /// Phase 17: the seen versions are what's kept across launches, so a tour seen before this
+    /// session doesn't start again, though this session has no record of how it ended.
+    @Test func versionsSeenBeforeThisSessionCount() {
+        let earlier = TourProgress(seenVersions: [.home: 1, .closet: 2])
+        #expect(earlier.records.isEmpty)
+        #expect(!TourRules.startsAutomatically(.home, version: 1, progress: earlier))
+        #expect(TourRules.startsAutomatically(.home, version: 2, progress: earlier))
+        #expect(!TourRules.startsAutomatically(.closet, version: 2, progress: earlier))
+        #expect(TourRules.startsAutomatically(.styleMe, version: 1, progress: earlier))
+    }
+
+    @Test func recordsCountAsSeenAndKeepTheHighestVersion() {
+        let record = TourRecord(tour: .home, version: 3, outcome: .skipped, date: .distantPast)
+        let progress = TourProgress(records: [.home: record], seenVersions: [.home: 1, .fit: 1])
+        #expect(progress.seenVersions == [.home: 3, .fit: 1])
+        var later = progress
+        later.add(TourRecord(tour: .home, version: 2, outcome: .finished, date: .distantFuture))
+        #expect(later.seenVersions[.home] == 3)
+        #expect(later.records[.home]?.version == 2)
     }
 }
