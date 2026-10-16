@@ -61,6 +61,10 @@ light and dark. It names the colour set that's wrong.
 | `divider` | `#967D64` at 0.3 | `#E6D2BE` at 0.2 | `--soft-divider` colour |
 | `shadow` | `#3C2A1C` at 0.26 | `#000000` at 0.55 | `--soft-drop` colour |
 | `shadowLarge` | `#3C2A1C` at 0.32 | `#000000` at 0.6 | `--soft-drop-lg` colour |
+| `tourScrim` | `#2A211B` at 0.58 | `#0E0B09` at 0.66 | `.tour-spotlight` dim, `--ink` in place of plum (LR-02) |
+| `tourGlow` | `#FFECC8` at 0.55 | `#DCC3A8` at 0.4 | `.tour-spotlight` warm glow |
+| `tourRim` | `#FFFFFF` at 0.55 | `#F4EEE6` at 0.35 | `.tour-spotlight` rim, drawn blurred |
+| `tourCard` | `#FFFDF9` | `#2E2620` | `.tour-card`, the plate colour in place of pink-white. Opaque: without the mockup's blur, a see-through card let the room's words show through its own |
 
 ### Status
 
@@ -206,7 +210,7 @@ shadows that fall only below. Each one is checked at the default text size, at A
 keeps tap targets at 44 points or more, and turns its animation into a plain change or a fade when Reduce Motion is
 on. Text that a component shows comes in already localized, as a `String`; the few words the components own
 ("Try again", "Close", "Clear search", "Loading", "You’re offline.", "Retry") are in
-`Resources/Localizable.xcstrings`.
+`Resources/Localizable.xcstrings`, with the quick tour's own ("Quick tour · 1 of 4", "Skip", "Next", "Back").
 
 | Component | Mockup source | Notes |
 |---|---|---|
@@ -226,6 +230,7 @@ on. Text that a component shows comes in already localized, as a `String`; the f
 | `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. At the accessibility sizes the action goes under the message (Phase 11), so long words don't break. |
 | `NookBadge` | `.sim`, `.pill`, `.dirty` | Small capsule label in four tones. Always words, never colour alone. |
 | `NookSticker`, `StickerRenderer`, `StickerCache` | `.stk` in `results.html` and `garment.html` | Phase 8b. See [Stickers](#stickers). |
+| `NookTourCard`, `NookTourOverlay`, `NookTourPlacement` | `.tour-card`, `.tour-spotlight` in `home-tour.html` | Phase 16a. The quick tour: a warm dim with a soft cut-out and glow around one control (blurred, no hard outline), and the card with sparkles, "Quick tour · 1 of 4", title, words, dots, Back (from step 2), Skip and Next. The card is the plate colour, 300 points wide (340 at the larger standard sizes, up to 480 at the accessibility sizes), and goes below or above the control, beside it on a wide screen, or on its own when it can't sit clear of it. Its words scroll at the largest sizes while the buttons stay. With Reduce Motion steps cross-fade. The words are one VoiceOver element, focused on each step; the overlay is modal, Escape and the VoiceOver escape gesture skip. How Features runs tours is in `docs/tours.md`. |
 | `StickerBundleLayout`, `BundleRole`, `BundlePlacement` | `spots()` in `results.html` | Phase 9. The flat-lay arrangement of a look bundle: where 2 to 6 stickers lie by what they are, their tilt from a seed, and fitting the whole inside the 300 x 356 box. Pure arithmetic, tested for every mix of pieces. The view, `LookBundle`, is in Features since it draws garments; see `docs/look-bundles.md`. |
 | `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
 
@@ -270,7 +275,7 @@ wrapped in `#if DEBUG`, so a Release build doesn't contain it. CI checks that wi
 ### Snapshot tests
 
 `ComponentSnapshotTests` draws every catalog page in light, dark and AX5 on a 390 pt canvas, and five pages on an
-820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 47 images,
+820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 50 images,
 about 4 MB at 2x.
 
 - **How they're drawn.** With SwiftUI's `ImageRenderer`, not the library's UIKit host. The UIKit host's

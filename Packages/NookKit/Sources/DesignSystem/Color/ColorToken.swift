@@ -44,6 +44,14 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case shadow
     /// The colour of the larger soft shadow under buttons and big rows.
     case shadowLarge
+    /// The dim over the screen while a quick tour shows (PRD §7.8, warm instead of plum per LR-02).
+    case tourScrim
+    /// The warm glow around a quick tour's spotlight.
+    case tourGlow
+    /// The soft light rim just inside the glow. Blurred, never a hard outline.
+    case tourRim
+    /// A quick tour's card: the plate colour, opaque, so the room never shows through its words.
+    case tourCard
 
     // MARK: Status
 

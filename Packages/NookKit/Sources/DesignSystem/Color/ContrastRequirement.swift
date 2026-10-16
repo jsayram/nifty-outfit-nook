@@ -63,6 +63,8 @@ extension ContrastRequirement {
         (.background, nil), (.backgroundLow, nil), (.surface, nil), (.accentSoft, nil),
         (.tint, .background), (.tint, .backgroundLow), (.tint, .floor),
         (.tintStrong, .background), (.tintStrong, .backgroundLow), (.tintStrong, .floor),
+        // A quick tour's card (Phase 16a).
+        (.tourCard, nil),
     ]
 
     private static let textPairs: [ContrastRequirement] =
