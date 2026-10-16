@@ -107,7 +107,7 @@ final class ProfileTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: uiTestWait))
         return app
     }
 

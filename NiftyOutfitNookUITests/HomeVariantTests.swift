@@ -21,7 +21,7 @@ final class HomeVariantTests: XCTestCase {
                 "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
             ]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: uiTestWait))
 
         // The large-text layout, not the room: the suitcase is the Source row, read as it reads.
         let source = app.buttons["home.suitcase"]
@@ -109,7 +109,7 @@ final class HomeVariantTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: uiTestWait))
 
         XCUIDevice.shared.orientation = .landscapeLeft
         let source = app.buttons["home.suitcase"]

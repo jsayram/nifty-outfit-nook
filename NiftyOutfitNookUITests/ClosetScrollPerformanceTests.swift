@@ -15,9 +15,9 @@ final class ClosetScrollPerformanceTests: XCTestCase {
         app.launchArguments = UITestLaunch.standard + ["-fixtures", "large"]
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
-        closet.tapUntilSelected(timeout: 15)
+        closet.tapUntilSelected(timeout: uiTestWait)
         let grid = app.scrollViews.firstMatch
-        XCTAssertTrue(grid.waitUntilExists(timeout: 15))
+        XCTAssertTrue(grid.waitUntilExists(timeout: uiTestWait))
 
         let options = XCTMeasureOptions()
         options.invocationOptions = [.manuallyStop]

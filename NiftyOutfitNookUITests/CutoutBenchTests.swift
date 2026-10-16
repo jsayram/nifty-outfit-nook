@@ -13,14 +13,15 @@ final class CutoutBenchTests: XCTestCase {
         app.launchArguments = ["-cutout-bench"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["Cutout benchmark"].waitUntilExists(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Cutout benchmark"].waitUntilExists(timeout: uiTestWait))
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The benchmark replaces the app's tabs")
         XCTAssertTrue(app.buttons["Choose photos"].exists)
 
-        app.buttons["cutoutBench.samples"].tap()
+        app.buttons["cutoutBench.samples"].tapWhenHittable(timeout: uiTestWait)
 
-        // Nine drawn samples. Drawing them at full photo size takes a few seconds.
-        XCTAssertTrue(app.staticTexts["9 of 9"].waitUntilExists(timeout: 90))
+        // Nine drawn samples. Drawing them at full photo size takes a few seconds here, and once
+        // took more than 90 on a busy CI runner.
+        XCTAssertTrue(app.staticTexts["9 of 9"].waitUntilExists(timeout: 180))
         XCTAssertTrue(app.staticTexts["Results at 1536 px"].exists)
 
         let export = app.buttons["Export results"].firstMatch
