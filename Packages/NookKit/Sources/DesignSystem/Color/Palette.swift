@@ -68,6 +68,10 @@ nonisolated public enum Palette {
         case .floor: TokenValue(light: RGBA(hex: 0xE5D7C5), dark: RGBA(hex: 0x362C24))
         case .floorLow: TokenValue(light: RGBA(hex: 0xDACAB4), dark: RGBA(hex: 0x30271F))
         case .floorLine: TokenValue(light: RGBA(hex: 0xC6B097), dark: RGBA(hex: 0x1A1410))
+        // `onboarding.html`'s sky, #D2E5F7 to #EDF5FD, given the windows' treatment (a little sky
+        // kept, `scripts/room-art.py`). Dark is a warm evening sky, not a dimmed day.
+        case .skyTop: TokenValue(light: RGBA(hex: 0xDCE3EB), dark: RGBA(hex: 0x17130F))
+        case .skyBottom: TokenValue(light: RGBA(hex: 0xF1F4F7), dark: RGBA(hex: 0x2A231C))
         case .artSage: TokenValue(light: RGBA(hex: 0xC9CDB4), dark: RGBA(hex: 0x858770))
         case .artSageDeep: TokenValue(light: RGBA(hex: 0xB6BB9E), dark: RGBA(hex: 0x787B62))
         case .artSageLine: TokenValue(light: RGBA(hex: 0x959A7C), dark: RGBA(hex: 0x62664D))

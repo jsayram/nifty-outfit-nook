@@ -15,8 +15,6 @@ struct HomeScreen: View {
     let openTab: (AppTab) -> Void
     /// Opens a saved look on Saved Looks, from its frame under the shelf (Phase 12a).
     var openLook: (Look.ID) -> Void = { _ in }
-    /// Said once in a toast when Home opens, after Delete my data (Phase 14b).
-    var notice: String?
     /// Home's navigation, kept by the root view so App tours can open Style Me or go back to
     /// the room for a replay (Phase 16b).
     @Binding var path: [HomeDestination]
@@ -26,7 +24,6 @@ struct HomeScreen: View {
     @State private var model = HomeModel()
     @State private var sheet: HomeSheet?
     @State private var toast: NookToastMessage?
-    @State private var noticeShown = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -104,15 +101,11 @@ struct HomeScreen: View {
         // marked clean in Laundry (Phase 13).
         .task {
             await model.load(from: services)
-            if let notice, !noticeShown {
-                noticeShown = true
-                toast = NookToastMessage(notice, systemImage: "checkmark")
-            }
         }
         // Home's quick tour, the first time Home shows, once its controls are ready, and only over
         // Home itself: not over a pushed screen, a sheet or a toast (PRD §7.8). A toast is said
-        // before a tour starts, or VoiceOver would never read it, so after Delete my data the
-        // tour waits until the toast has gone.
+        // before a tour starts, or VoiceOver would never read it. After onboarding (Phase 17) this
+        // is the first thing she sees.
         .screenTour(tour, isReady: isReadyForTour)
         .onChange(of: path) { old, new in
             // Back from a pushed screen: Style Me may have changed the source or the occasion.
@@ -145,7 +138,7 @@ struct HomeScreen: View {
     }
 
     private var isReadyForTour: Bool {
-        model.phase != .loading && (notice == nil || noticeShown) && path.isEmpty && sheet == nil && toast == nil
+        model.phase != .loading && path.isEmpty && sheet == nil && toast == nil
     }
 
     private func turnOnLaundryTracking() async -> Bool {
@@ -224,5 +217,5 @@ struct HomeRoomView: View {
 }
 
 #Preview {
-    RootTabView(services: nil)
+    RootTabView(services: nil, tours: TourCenter(store: nil))
 }

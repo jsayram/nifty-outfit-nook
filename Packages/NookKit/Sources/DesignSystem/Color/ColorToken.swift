@@ -76,6 +76,11 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case floorLow
     /// The line where the wall meets the floor.
     case floorLine
+    /// The sky over the porch on the welcome screen (Phase 17), top of its gradient. In dark it's
+    /// a warm evening, so the light words on it stay readable.
+    case skyTop
+    /// The bottom of the welcome sky.
+    case skyBottom
     /// Sage in the drawn room (plants, the cardigan, soft furnishings).
     case artSage
     /// Deeper sage for shading.
@@ -109,8 +114,8 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
         switch self {
         case .success, .successSurface, .warning, .warningSurface, .error, .errorSurface:
             .status
-        case .floor, .floorLow, .floorLine, .artSage, .artSageDeep, .artSageLine, .artSand, .artStone, .artButter,
-            .artButterLine, .signPanel, .signText, .stickerEdge:
+        case .floor, .floorLow, .floorLine, .skyTop, .skyBottom, .artSage, .artSageDeep, .artSageLine, .artSand,
+            .artStone, .artButter, .artButterLine, .signPanel, .signText, .stickerEdge:
             .room
         default:
             .interface

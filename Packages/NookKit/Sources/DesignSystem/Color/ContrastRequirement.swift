@@ -92,6 +92,12 @@ extension ContrastRequirement {
             ContrastRequirement(.accent, on: .tintStrong, over: .warningSurface, kind: .text),
             // Delete my data's button: words on the error colour (Phase 14b).
             ContrastRequirement(.onAccent, on: .error, kind: .text),
+            // The welcome's title and lines on the sky, and its text button on the porch (Phase 17).
+            ContrastRequirement(.textPrimary, on: .skyTop, kind: .text),
+            ContrastRequirement(.textPrimary, on: .skyBottom, kind: .text),
+            ContrastRequirement(.textSecondary, on: .skyTop, kind: .text),
+            ContrastRequirement(.textSecondary, on: .skyBottom, kind: .text),
+            ContrastRequirement(.accent, on: .floor, kind: .text),
         ]
 
     private static let statusPairs: [ContrastRequirement] = [

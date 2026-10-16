@@ -2,51 +2,32 @@ import DesignSystem
 import Models
 import SwiftUI
 
-/// The app's root: a tab bar with Home, Closet and Saved Looks.
+/// The tab bar with Home, Closet and Saved Looks, and the quick tour over it.
 ///
-/// After Delete my data (Phase 14b) the whole tree below is built again, so every screen, every
-/// cache and every unsent note starts empty, and Home is the selected tab with a short note that
-/// the data is gone. Nothing from before can show on a screen that was already open.
-public struct RootTabView: View {
+/// `AppRootView` builds a new one each time the app opens on a set of services (Phase 17): after
+/// onboarding, and on a relaunch. Delete my data goes back to onboarding, so every screen, every
+/// cache and every unsent note from before is gone; nothing can show on a screen that was already
+/// open.
+struct RootTabView: View {
     private let services: NookServices?
-    /// Bumped after Delete my data, which gives the tabs a new identity.
-    @State private var generation = 0
-    /// What Home says when it opens again after a fresh start.
-    @State private var freshStartNotice: String?
-    /// The quick tours (Phase 16a). Kept across a fresh start, so the `-tour` flag applies once
-    /// per launch; Delete my data erases what it has recorded.
-    @State private var tours: TourCenter
+    /// The quick tours (Phase 16a). The root keeps it across onboarding and Delete my data, so the
+    /// `-tour` flag applies once per launch.
+    private let tours: TourCenter
 
-    /// - Parameters:
-    ///   - services: what every screen below reads its data from.
-    ///   - tourLaunch: what the `-tour` debug flag asks of the tours. Release builds pass
-    ///     `standard`.
-    public init(services: NookServices?, tourLaunch: TourLaunchOptions = .standard) {
+    init(services: NookServices?, tours: TourCenter) {
         self.services = services
-        _tours = State(initialValue: TourCenter(store: services?.tours, launch: tourLaunch))
+        self.tours = tours
     }
 
-    public var body: some View {
-        RootTabs(services: services, notice: freshStartNotice)
-            .id(generation)
+    var body: some View {
+        RootTabs(services: services)
             // While a tour shows, VoiceOver reads only the tour, over every tab and the tab bar.
             .accessibilityHidden(tours.isShowing)
             .overlay { TourOverlay(tours: tours) }
-            .environment(\.dataDeleted, DataDeletedAction { startFresh() })
-            .environment(\.tourCenter, tours)
-    }
-
-    private func startFresh() {
-        freshStartNotice = String(
-            localized: "Your data is deleted. The app is starting fresh.", bundle: .module,
-            comment: "Toast on Home after Delete my data")
-        // As on a fresh install, Home's tour can start again.
-        tours.forgetSession()
-        generation += 1
     }
 }
 
-/// The tab bar and the state every tab shares. Rebuilt from scratch after Delete my data.
+/// The tab bar and the state every tab shares. Built new each time the app opens on services.
 private struct RootTabs: View {
     @State private var selection: AppTab = .home
     /// Home's navigation, kept here so App tours can open a screen on it (Phase 16b).
@@ -57,8 +38,6 @@ private struct RootTabs: View {
     /// Laundry in it (Phase 13).
     @State private var closetPath: [ClosetDestination] = []
     private let services: NookServices?
-    /// Shown once on Home when it opens, after Delete my data.
-    private let notice: String?
     /// Garment pictures, shared by every screen so they're cached once.
     @State private var garmentImages: GarmentImageLoader?
     /// Garment stickers, made once and shared by every screen (Phase 8b).
@@ -71,9 +50,8 @@ private struct RootTabs: View {
     /// the real class back (`windowSizeClass(_:)`).
     @Environment(\.horizontalSizeClass) private var windowSizeClass
 
-    init(services: NookServices?, notice: String?) {
+    init(services: NookServices?) {
         self.services = services
-        self.notice = notice
         _garmentImages = State(initialValue: services.map { GarmentImageLoader(provider: $0.images) })
     }
 
@@ -82,7 +60,7 @@ private struct RootTabs: View {
             Tab(AppTab.home.title, systemImage: AppTab.home.systemImage, value: AppTab.home) {
                 // The wardrobe and the shelf in the room switch tabs; a frame on the shelf opens
                 // its look on Saved Looks.
-                HomeScreen(openTab: { selection = $0 }, openLook: openSavedLook, notice: notice, path: $homePath)
+                HomeScreen(openTab: { selection = $0 }, openLook: openSavedLook, path: $homePath)
                     .windowSizeClass(windowSizeClass)
             }
             Tab(AppTab.closet.title, systemImage: AppTab.closet.systemImage, value: AppTab.closet) {
@@ -195,5 +173,5 @@ extension View {
 }
 
 #Preview {
-    RootTabView(services: nil)
+    RootTabView(services: nil, tours: TourCenter(store: nil))
 }

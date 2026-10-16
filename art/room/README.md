@@ -23,6 +23,10 @@ Phase 13 added Suitcases and Laundry:
 
 Phase 14b added the desk's drawers as a small chest, copied as they are: `acct-drawers-help.svg`, `acct-drawers-feedback.svg` and `acct-drawers-privacy.svg`, one with each drawer pulled open, for the headers of Help, Send feedback and Privacy and terms.
 
+Phase 17 added the porch on the welcome screen (`onboarding.html`): `welcome-clouds.svg`, `welcome-door.svg`, `welcome-lantern.svg`, `welcome-mat.svg`, `welcome-pots.svg` and `welcome-roof.svg`, with `acct-porch-bench.svg` and `chat-sneakers.svg`, all copied as they are. One more is drawn here:
+
+- `source/welcome-siding.svg` is the house's siding boards and skirt board, drawn from the mockup's `.siding` and `.skirt` CSS bands (boards every 22 units, 390 x 432) so they go through the same recolouring as the rest. The app stretches it to the window's width, which leaves horizontal boards unchanged. The sky isn't a drawing: it's the `skyTop` and `skyBottom` colour tokens, so dark can be an evening sky rather than a dimmed day. The camel coat on the peg rail is the app's own garment drawing, as `garments.js` isn't exported.
+
 `source/maya.svg` is Maya as the mockups draw her, from Jose's own illustration. It's heavy (about 1,300 small shapes of fur), but it's drawn once into the asset cache and only her z's move, so it stays as it is.
 
 ## How it gets into the app

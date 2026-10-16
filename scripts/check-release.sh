@@ -3,7 +3,7 @@
 # (DesignSystem/Catalog, compiled only in Debug, and the look bundle page in Features/Debug/Catalog),
 # the cutout benchmark (Features/Debug, Phase 8a)
 # and swift-snapshot-testing (test targets only), and that the debug-only launch arguments
-# (-catalog, -cutout-bench and Phase 16a's -tour) aren't in it.
+# (-catalog, -cutout-bench, Phase 16a's -tour and Phase 17's -onboarding) aren't in it.
 # Run after scripts/build.sh Release.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -21,7 +21,7 @@ for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleS
         failed=1
     fi
 done
-for argument in -catalog -cutout-bench -tour; do
+for argument in -catalog -cutout-bench -tour -onboarding; do
     if strings "$binary" | grep -q -- "$argument"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1

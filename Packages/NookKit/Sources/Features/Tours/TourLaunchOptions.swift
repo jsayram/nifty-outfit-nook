@@ -12,7 +12,7 @@ import Models
 ///   use it, except the ones about tours.
 ///
 /// Values can be combined with commas: `-tour reset,home`.
-public struct TourLaunchOptions: Hashable, Sendable {
+nonisolated public struct TourLaunchOptions: Hashable, Sendable {
     public var startsTours: Set<TourID>
     public var resetsProgress: Bool
     public var turnsTipsOff: Bool
