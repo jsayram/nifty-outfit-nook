@@ -36,13 +36,15 @@ public enum DataPart: String, CaseIterable, Hashable, Sendable {
     case pictures
     case suitcases
     /// The name on her sign, Preferences, fit, measurements, fitting pieces, the try-on photo,
-    /// the remembered source and occasion, and the tours she has seen with the "Show tips on new
-    /// screens" switch (Phase 16a). Erased back to a fresh profile, with tips on.
+    /// the remembered source and occasion, the tours she has seen with the "Show tips on new
+    /// screens" switch (Phase 16a), and that she has finished onboarding, with the closet she
+    /// started from (Phase 17). Erased back to a fresh profile, with tips on, and the app opens on
+    /// onboarding again.
     case profile
     /// Unsaved Add a piece, Edit and Make your own look work.
     case drafts
     // Tour progress is a preference, so it goes with the profile (PRD §7.8: Delete My Data
-    // resets it). Phase 24c: `account` and `serverData`.
+    // resets it), and so does the onboarding state. Phase 24c: `account` and `serverData`.
 }
 
 /// How one part's deletion went.
@@ -100,11 +102,12 @@ public struct LocalDataDeletion: DataDeletionService {
     }
 
     /// The order used by `NookServices`: unsaved work, pictures, looks, suitcases, the closet,
-    /// then the profile and the tours she has seen.
+    /// then the profile, the tours she has seen and, last, the onboarding state, so the app only
+    /// counts as new once everything else has gone.
     public init(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, pictures: any TryOnPictureStore,
-        tours: any TourProgressStore
+        tours: any TourProgressStore, onboarding: any OnboardingStateStore
     ) {
         self.init(stores: [
             (.drafts, drafts),
@@ -115,6 +118,7 @@ public struct LocalDataDeletion: DataDeletionService {
             (.closet, closet),
             (.profile, profile),
             (.profile, tours),
+            (.profile, onboarding),
         ])
     }
 

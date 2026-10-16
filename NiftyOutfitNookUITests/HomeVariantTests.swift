@@ -16,7 +16,7 @@ final class HomeVariantTests: XCTestCase {
     func testEveryHomeActionIsReachableAtTheLargestTextSize() {
         let app = XCUIApplication()
         app.launchArguments =
-            UITestLaunch.toursOff + [
+            UITestLaunch.standard + [
                 "-fixtures", "demo",
                 "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
             ]
@@ -99,7 +99,7 @@ final class HomeVariantTests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         addTeardownBlock { @MainActor in XCUIDevice.shared.orientation = .portrait }
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: 10))
 

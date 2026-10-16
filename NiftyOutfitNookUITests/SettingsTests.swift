@@ -148,7 +148,7 @@ final class SettingsTests: XCTestCase {
     }
 
     /// Delete my data: explained, asked once more, then everything goes and the app starts fresh
-    /// on Home. Cancel deletes nothing.
+    /// on the welcome (Phase 17), then Home. Cancel deletes nothing.
     @MainActor
     func testDeleteMyDataResetsTheApp() {
         let app = launch()
@@ -170,16 +170,29 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(alert.waitForExistence(timeout: Self.wait))
         alert.buttons["Delete everything"].tap()
 
-        // A fresh app on Home: a sign with no name, an empty source, and a note that it's done.
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "Didn't return to Home")
+        // A fresh app: the welcome, with a note that it's done (Phase 17). Onboarding again, this
+        // time with no name and the empty closet.
+        XCTAssertTrue(
+            app.buttons["welcome.getStarted"].waitForExistence(timeout: Self.wait), "Didn't go back to the welcome")
+        XCTAssertTrue(
+            labelled("Your data is deleted", in: app).waitForExistence(timeout: Self.wait), "No note that it's done")
+        app.buttons["welcome.getStarted"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(app.navigationBars["Your closet stays here"].waitForExistence(timeout: Self.wait))
+        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(app.navigationBars["How you like clothes to fit"].waitForExistence(timeout: Self.wait))
+        app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
+        element("onboarding.closet.empty", in: app).tapWhenHittable(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+
+        // Home: a sign with no name and an empty source.
+        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "Didn't reach Home")
         XCTAssertTrue(app.buttons["Name sign, no name yet"].waitForExistence(timeout: Self.wait))
         XCTAssertTrue(app.buttons["Suitcase: Source, Main closet, Empty, Whole closet"].exists)
         XCTAssertTrue(app.tabBars.firstMatch.buttons["Home"].isSelected)
-        XCTAssertTrue(
-            labelled("Your data is deleted", in: app).waitForExistence(timeout: Self.wait), "No note that it's done")
 
         // Delete my data forgets the tours seen and turns tips back on, so Home's tour starts as
-        // on a fresh install, once the note has gone (Phase 16a).
+        // on a fresh install (Phase 16a), once onboarding hands over (Phase 17).
         let skip = app.buttons["tour.skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: Self.wait), "Home's tour didn't start after a fresh start")
         skip.tapUntilGone(timeout: Self.wait)
@@ -195,7 +208,7 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func launch() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
         return app

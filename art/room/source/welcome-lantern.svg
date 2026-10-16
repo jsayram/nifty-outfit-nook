@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 64" width="34" height="64" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Porch lantern on a wall bracket, wood and brass like the rails and the lamp stem.
+       Backplate x 2..9, y 14..56. Lantern centred on x 22: finial y 4, roof y 9.5..19, glass y 22..43, base y 43..48.
+       Warm glass with a small lit bulb. Ids are prefixed wl-. No text. -->
+  <defs>
+    <linearGradient id="wl-warm" x1="0" y1="22" x2="0" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FAD98E"/>
+      <stop offset="1" stop-color="#FFF1C9"/>
+    </linearGradient>
+    <clipPath id="wl-glass"><path d="M14 22H30L28.4 43H15.6Z"/></clipPath>
+  </defs>
+
+  <!-- backplate -->
+  <rect x="2" y="14" width="7" height="42" rx="3.5" fill="#E7BC6E" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M7 17V53" stroke="#D9A650" stroke-width="1.6"/>
+  <path d="M4.3 18.6V51" stroke="#F6DC9C" stroke-width="1"/>
+  <!-- arm and brace -->
+  <path d="M8.6 46.8H17" stroke="#B98632" stroke-width="4"/>
+  <path d="M8.6 46.8H17" stroke="#E7BC6E" stroke-width="2"/>
+  <path d="M8.6 53.4C12.4 53.2 15.4 51.4 17.2 48.6" stroke="#B98632" stroke-width="3.2"/>
+  <path d="M8.6 53.4C12.4 53.2 15.4 51.4 17.2 48.6" stroke="#E7BC6E" stroke-width="1.4"/>
+
+  <!-- glass with the bulb -->
+  <g clip-path="url(#wl-glass)">
+    <rect x="13" y="22" width="18" height="21" fill="url(#wl-warm)"/>
+    <ellipse cx="22" cy="34" rx="6.4" ry="7.6" fill="#FFF7DE"/>
+    <ellipse cx="22" cy="34.6" rx="2.6" ry="3.4" fill="#FFFDF4" stroke="#F3D285" stroke-width=".8"/>
+    <path d="M15 40L23 30H25.6L17.6 40Z" fill="#FFFFFF" opacity=".35"/>
+  </g>
+  <path d="M14 22H30L28.4 43H15.6Z" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M22 22.6V42.4" stroke="#B98632" stroke-width="1.2"/>
+
+  <!-- top band, roof and finial -->
+  <rect x="12" y="19" width="20" height="3.6" rx="1.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M11.4 19.2L21 10.4Q22 9.6 23 10.4L32.6 19.2Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M22.6 11.6L30.2 18.6H22.6Z" fill="#D9A650"/>
+  <path d="M15.6 17.6L20.8 12.6" stroke="#F6DC9C" stroke-width="1"/>
+  <circle cx="22" cy="6.8" r="2.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  <circle cx="21.3" cy="6.1" r=".8" fill="#F6DC9C"/>
+  <path d="M22 9.2V10" stroke="#B98632" stroke-width="1.2"/>
+
+  <!-- base and drop -->
+  <path d="M14.6 43H29.4L28.4 47.4Q28.2 48.4 27.2 48.4H16.8Q15.8 48.4 15.6 47.4Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M24.6 43.6H28.8L28 47.6H24.6Z" fill="#D9A650"/>
+  <circle cx="22" cy="51.2" r="1.9" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+</svg>

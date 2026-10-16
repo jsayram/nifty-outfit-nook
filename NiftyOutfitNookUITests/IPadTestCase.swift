@@ -18,7 +18,7 @@ class IPadTestCase: XCTestCase {
         }
         XCUIDevice.shared.orientation = orientation
         let app = XCUIApplication()
-        app.launchArguments = ["-tour", tour, "-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", tour, "-fixtures", "demo"]
         app.launch()
         // A window size left by an earlier run survives a relaunch, so start full screen.
         // SpringBoard's frame is the screen in portrait.

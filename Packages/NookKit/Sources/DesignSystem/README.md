@@ -91,6 +91,8 @@ is redrawn in a later phase; these are the values it uses.
 | `floor` | `#E5D7C5` | `#362C24` | `--floor` |
 | `floorLow` | `#DACAB4` | `#30271F` | `--floor-2` |
 | `floorLine` | `#C6B097` | `#1A1410` | `--floor-line` |
+| `skyTop` | `#DCE3EB` | `#17130F` | `.sky` in `onboarding.html` (`#D2E5F7`), Phase 17 |
+| `skyBottom` | `#F1F4F7` | `#2A231C` | `.sky` in `onboarding.html` (`#EDF5FD`), Phase 17 |
 | `artSage` | `#C9CDB4` | `#858770` | `--sage` |
 | `artSageDeep` | `#B6BB9E` | `#787B62` | `--sage-2` |
 | `artSageLine` | `#959A7C` | `#62664D` | `--sage-line` |
@@ -233,6 +235,8 @@ on. Text that a component shows comes in already localized, as a `String`; the f
 | `NookTourCard`, `NookTourOverlay`, `NookTourPlacement` | `.tour-card`, `.tour-spotlight` in `home-tour.html` | Phase 16a. The quick tour: a warm dim with a soft cut-out and glow around one control (blurred, no hard outline), and the card with sparkles, "Quick tour · 1 of 4", title, words, dots, Back (from step 2), Skip and Next. The card is the plate colour, 300 points wide (340 at the larger standard sizes, up to 480 at the accessibility sizes), and goes below or above the control, beside it on a wide screen, or on its own when it can't sit clear of it. Its words scroll at the largest sizes while the buttons stay. With Reduce Motion steps cross-fade. The words are one VoiceOver element, focused on each step; the overlay is modal, Escape and the VoiceOver escape gesture skip. How Features runs tours is in `docs/tours.md`. |
 | `StickerBundleLayout`, `BundleRole`, `BundlePlacement` | `spots()` in `results.html` | Phase 9. The flat-lay arrangement of a look bundle: where 2 to 6 stickers lie by what they are, their tilt from a seed, and fitting the whole inside the 300 x 356 box. Pure arithmetic, tested for every mix of pieces. The view, `LookBundle`, is in Features since it draws garments; see `docs/look-bundles.md`. |
 | `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
+
+The welcome's sky (Phase 17, `docs/onboarding.md`) keeps a little of the mockup's blue in light, as the room's windows do (`scripts/room-art.py`, `sky`). In dark it isn't the light sky dimmed, which left the light title at 2.6:1, but a warm evening, so the title and its line are at least 13:1 and 8:1 there. Primary and secondary text on both ends, and the accent as text on the floor (the welcome's text button), are in `ContrastRequirement`.
 
 New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
 toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter. Phase 14b added

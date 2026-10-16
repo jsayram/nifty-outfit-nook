@@ -12,7 +12,7 @@ final class ClosetScrollPerformanceTests: XCTestCase {
             ProcessInfo.processInfo.environment["NOOK_PERFORMANCE"] == "1",
             "Set TEST_RUNNER_NOOK_PERFORMANCE=1 to measure scrolling.")
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "large"]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", "large"]
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
         XCTAssertTrue(closet.waitForExistence(timeout: 15))

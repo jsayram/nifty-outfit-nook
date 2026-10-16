@@ -72,6 +72,18 @@ nonisolated enum RoomArt: String, CaseIterable, Sendable {
     case drawersHelp = "acct-drawers-help"
     case drawersFeedback = "acct-drawers-feedback"
     case drawersPrivacy = "acct-drawers-privacy"
+    // The porch on the welcome screen (Phase 17, `onboarding.html`).
+    /// The roof's edge, 390 x 54, tiled across the window.
+    case welcomeRoof = "welcome-roof"
+    /// The house's siding boards and skirt, 390 x 432, stretched across the window.
+    case welcomeSiding = "welcome-siding"
+    case welcomeClouds = "welcome-clouds"
+    case welcomeDoor = "welcome-door"
+    case welcomeLantern = "welcome-lantern"
+    case welcomeMat = "welcome-mat"
+    case welcomePots = "welcome-pots"
+    case porchBench = "acct-porch-bench"
+    case porchSneakers = "chat-sneakers"
 }
 
 extension SuitcaseIcon {

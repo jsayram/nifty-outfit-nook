@@ -59,7 +59,7 @@ Since Phase 16b, a row under Help ("Replay the tips for any screen") opens App t
 
 The chest with its top drawer open, then "Everyday" (Get outfit ideas, Swap save and try on a look, Add a piece, Suitcases, Laundry) and "Good to know" (What needs a connection, Try-on pictures and real fit, Your data). Each topic opens and closes on a tap, with its answer and a quieter line; the first is open to start. VoiceOver hears each as a button with "Open" or "Closed" and a hint. Then "Still stuck?", which opens Send feedback, and the version line ("Nifty Outfit Nook · 0.1 (1) · test build with sample data").
 
-The words are in the String Catalog, so they work offline. They describe this build as it is: the sample photos, Something new's one idea, and that nothing is sent. The mockup's "Free and paid" topic waits for the subscription phase, and "What changed" (§22.2) for the first public release. There's no search: eight short topics don't need it, and neither the mockup nor §22.3 asks for one.
+The words are in the String Catalog, so they work offline. They describe this build as it is: the sample photos, Something new's one idea, that nothing is sent, and since Phase 17 (under Your data) that it forgets her changes when it closes. The mockup's "Free and paid" topic waits for the subscription phase, and "What changed" (§22.2) for the first public release. There's no search: eight short topics don't need it, and neither the mockup nor §22.3 asks for one.
 
 ## Send feedback (`feedback.html`, PRD §22)
 
@@ -91,7 +91,7 @@ Send with nothing written shows "Write a few words to send the note." under the 
 ## Privacy and terms (`privacy.html`)
 
 1. A butter note: a test build with no account, nothing sent by the app, and no tracking or analytics.
-2. **Stays on this iPhone**: pieces with their pictures and details; suitcases and laundry marks; saved looks and try-on pictures; her name, measurements, weight and fit; Preferences and what Style Me remembers. Then: Fit and measurements and try-on pictures are hidden in the app switcher, and this build keeps everything only while the app is open, so closing it brings back the sample closet.
+2. **Stays on this iPhone**: pieces with their pictures and details; suitcases and laundry marks; saved looks and try-on pictures; her name, measurements, weight and fit; Preferences and what Style Me remembers. Then: Fit and measurements and try-on pictures are hidden in the app switcher, and this build forgets her changes when it closes: the closet she started with comes back as it was, and it only remembers that she set it up, which closet she chose and which tips she has seen (Phase 17).
 3. **Later, sent only if you allow it**: Style Me and swaps, Try-on pictures, Weather, each with what it would send and what it never sends, from DATA_MAP. "None of these is in this test build. Each will ask first, and allowing one never allows another."
 4. **Your data**: Delete my data.
 5. **Policies**: Privacy policy and Terms of use, "On the website", opened in the system's in-app Safari view at `https://niftyoutfitnook.pages.dev/privacy` and `/terms`, with "The full privacy policy and terms are still being written." Those pages don't exist yet, and the site currently answers both addresses with its coming-soon page. Phase 19b writes them.
@@ -100,13 +100,13 @@ Send with nothing written shows "Write a few words to send the note." under the 
 
 ## Delete my data
 
-Two steps. The screen says exactly what goes, with counts read from the stores: Your closet (21 pieces, with pictures, details and Recently deleted), Looks (6 looks), Try-on pictures (3 pictures), Suitcases (6 suitcases), Your profile (name on the sign, Preferences, fit, measurements, try-on photo and, since 16b, the app tours she has seen) and Unsaved work (drafts). "Afterwards" says the app starts fresh, as if just installed, and that nothing about her is kept anywhere else. Then a solid button in the error colour with a trash icon, and "You'll be asked once more. Deleting can't be undone."
+Two steps. The screen says exactly what goes, with counts read from the stores: Your closet (21 pieces, with pictures, details and Recently deleted), Looks (6 looks), Try-on pictures (3 pictures), Suitcases (6 suitcases), Your profile (name on the sign, Preferences, fit, measurements, try-on photo, since 16b the app tours she has seen, and since 17 the closet she started with) and Unsaved work (drafts). "Afterwards" says the app starts fresh, as if just installed, opening on the welcome so she can choose a starting closet again (Phase 17), and that nothing about her is kept anywhere else. Then a solid button in the error colour with a trash icon, and "You'll be asked once more. Deleting can't be undone."
 
-The button asks once more: "Delete everything?" with Delete everything and Cancel. Delete everything erases every store through `DataDeletionService`, then the root view builds every tab again (`DataDeletedAction`): Home is selected, the sign says Hello, the closet is empty, every cache and the unsent feedback note are gone, and a toast says "Your data is deleted. The app is starting fresh." Nothing from before can show on a screen that was already open, because no screen from before is left.
+The button asks once more: "Delete everything?" with Delete everything and Cancel. Delete everything erases every store through `DataDeletionService`, then the root goes back to onboarding (`DataDeletedAction`, Phase 17, `docs/onboarding.md`): the welcome, with a toast that says "Your data is deleted. The app is starting fresh." Every tab, every cache and the unsent feedback note are gone, and finishing onboarding builds them new on the closet she chooses. Nothing from before can show on a screen that was already open, because no screen from before is left.
 
 If a part fails (`-fixtures demo:stores-fail`), the screen stays and a note names what's left ("Most of your data is deleted, but not: Looks and Try-on pictures. Try again to finish.", or "Nothing was deleted. Try again in a moment."), and the button becomes Try again. Deleting is safe to repeat.
 
-**In Stage A a relaunch brings the sample closet back,** because the fixtures are built at launch. From Phase 21a the stores are on disk and deletion lasts.
+**In Stage A a relaunch brings back the closet she chose in onboarding,** because the fixtures are built at launch; only the onboarding and tour flags are kept (Phase 17). Deleting erases those too, so the next launch opens on the welcome. From Phase 21a the stores are on disk and deletion lasts.
 
 ### The service, built for Phase 24c
 
@@ -126,7 +126,7 @@ protocol DataDeletionService: Sendable {
 - Sign in with Apple token revocation, and the note that deleting doesn't cancel a subscription (30a);
 - the same screen, which already lists parts from the service and reports pending ones.
 
-Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again once the toast has gone (`docs/tours.md`). Since 16b the words under Your profile name them. Phase 20b adds her private iCloud copy.
+Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again when she's back on Home (`docs/tours.md`). Since 16b the words under Your profile name them. Phase 20b adds her private iCloud copy.
 
 ## States
 
@@ -163,7 +163,7 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 4. **Privacy and terms has no permission switches** and no Export, since nothing is sent and export isn't built.
 5. **Delete my data is two steps** (the explaining screen, then one question), not type-to-confirm, which is a lot of typing for something already explained and asked.
 6. **Delete my data is on Profile as well as Privacy and terms.** The mockup has it only under Privacy and terms; 14a put the row on Profile, and Apple wants deletion easy to find.
-7. **Deleting resets to a fresh Home**, the same as `-fixtures empty`. Onboarding comes in 17.
+7. **Deleting resets to a fresh Home**, the same as `-fixtures empty`. Since Phase 17 it goes back to onboarding instead.
 8. **The policy links open the website's addresses now**, which show the coming-soon page until 19b writes the pages.
 
 ## Left for later phases

@@ -289,5 +289,5 @@ private struct CurrentPiece: Equatable {
 }
 
 #Preview {
-    RootTabView(services: nil)
+    RootTabView(services: nil, tours: TourCenter(store: nil))
 }

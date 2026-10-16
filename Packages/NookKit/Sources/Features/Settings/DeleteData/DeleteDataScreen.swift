@@ -165,8 +165,9 @@ nonisolated enum DeleteDataText {
         case .profile:
             String(
                 localized:
-                    "Name on your sign, Preferences, fit, measurements, try-on photo and the app tours you’ve seen",
-                bundle: .module, comment: "Delete my data: under Your profile (tours since Phase 16b)")
+                    "Name on your sign, Preferences, fit, measurements, try-on photo, the app tours you’ve seen and the closet you started with",
+                bundle: .module,
+                comment: "Delete my data: under Your profile (tours since Phase 16b, the starting closet since 17)")
         case .drafts:
             String(
                 localized: "Pieces and looks you started but didn’t save", bundle: .module,
@@ -218,7 +219,7 @@ nonisolated enum DeleteDataText {
     static var after: String {
         String(
             localized:
-                "The app starts fresh, as if it were just installed: an empty closet, and a sign that says Hello.",
+                "The app starts fresh, as if it were just installed. It opens on the welcome, and you choose a starting closet again.",
             bundle: .module, comment: "Delete my data: what happens after")
     }
 

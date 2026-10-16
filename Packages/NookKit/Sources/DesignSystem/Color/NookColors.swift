@@ -51,6 +51,8 @@ nonisolated public struct NookColors: Sendable {
     public var floor: Color { Color(token: .floor) }
     public var floorLow: Color { Color(token: .floorLow) }
     public var floorLine: Color { Color(token: .floorLine) }
+    public var skyTop: Color { Color(token: .skyTop) }
+    public var skyBottom: Color { Color(token: .skyBottom) }
     public var artSage: Color { Color(token: .artSage) }
     public var artSageDeep: Color { Color(token: .artSageDeep) }
     public var artSageLine: Color { Color(token: .artSageLine) }
@@ -65,6 +67,11 @@ nonisolated public struct NookColors: Sendable {
     /// The wall, from `background` at the top to `backgroundLow` at the bottom (`.screen` in the mockups).
     public var wallGradient: LinearGradient {
         LinearGradient(colors: [background, backgroundLow], startPoint: .top, endPoint: .bottom)
+    }
+
+    /// The welcome screen's sky, from `skyTop` to `skyBottom` (Phase 17).
+    public var skyGradient: LinearGradient {
+        LinearGradient(colors: [skyTop, skyBottom], startPoint: .top, endPoint: .bottom)
     }
 
     /// The floor, from `floor` to `floorLow`.

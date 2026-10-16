@@ -809,6 +809,12 @@
     "Add your clothes" : {
       "comment" : "Closet tour, step 1 title"
     },
+    "Add your own pieces, with sample pictures for now. In this test build they’re gone when the app closes." : {
+      "comment" : "Onboarding: what the empty closet is"
+    },
+    "Add your pieces, then tap the laptop in your room. You’ll get one outfit in three versions." : {
+      "comment" : "Onboarding privacy: what the app does, the line under it"
+    },
     "Add, find and filter your clothes" : {
       "comment" : "App tours: what Closet's tour covers"
     },
@@ -1325,6 +1331,9 @@
     },
     "Choose a piece to build your looks around." : {
       "comment" : "VoiceOver hint"
+    },
+    "Choose a starting closet" : {
+      "comment" : "Onboarding: the last step's title"
     },
     "Choose a suitcase or your whole closet for outfit ideas." : {
       "comment" : "Home tour, step 3, at large text sizes and on a phone held sideways"
@@ -1900,6 +1909,9 @@
         }
       }
     },
+    "Empty closet" : {
+      "comment" : "Onboarding: starting closet choice"
+    },
     "Ends the tour." : {
       "comment" : "VoiceOver hint on a control in a quick tour's spotlight, before what the control does"
     },
@@ -2019,7 +2031,7 @@
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
     },
-    "Everything you add stays on this iPhone. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
+    "Everything you add stays on this iPhone. This test build forgets your changes when it closes. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
       "comment" : "Help: Your data"
     },
     "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
@@ -2033,6 +2045,9 @@
     },
     "Example photo · Simulated" : {
       "comment" : "Under the example try-on photo"
+    },
+    "Example pieces, looks and suitcases, so you can try Style Me straight away. It comes back each time the app opens." : {
+      "comment" : "Onboarding: what the sample closet is"
     },
     "Example try-on photo, simulated. It isn’t a photo of you." : {
       "comment" : "VoiceOver: the example try-on photo"
@@ -2124,6 +2139,9 @@
     "Finding a piece like this comes in a later version. Nothing was searched." : {
       "comment" : "Find one stand-in (LR-05b.4)"
     },
+    "First name" : {
+      "comment" : "Onboarding: the name field's label"
+    },
     "Fit" : {
       "comment" : "Garment fact label: how it's cut",
       "localizations" : {
@@ -2138,7 +2156,7 @@
     "Fit and measurements" : {
       "comment" : "Profile row and screen title"
     },
-    "Fit and measurements and your try-on pictures are hidden when you switch apps. This test build keeps everything only while the app is open, so closing it brings back the sample closet." : {
+    "Fit and measurements and your try-on pictures are hidden when you switch apps. This test build forgets your changes when it closes, and the closet you started with comes back as it was. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen." : {
       "comment" : "Privacy and terms: under what stays on the iPhone"
     },
     "Fits well" : {
@@ -2216,6 +2234,9 @@
     "Get outfit ideas" : {
       "comment" : "Help topic"
     },
+    "Get started" : {
+      "comment" : "Onboarding: the welcome's main button"
+    },
     "Getting Style Me ready" : {
       "comment" : "Style Me while it loads"
     },
@@ -2266,6 +2287,9 @@
           }
         }
       }
+    },
+    "Go to my room" : {
+      "comment" : "Onboarding: the last step's button"
     },
     "Good to know" : {
       "comment" : "Help section header"
@@ -2427,8 +2451,17 @@
         }
       }
     },
+    "How you like clothes to fit" : {
+      "comment" : "Onboarding: the fit step's title"
+    },
     "How you like clothes to sit. Saved until you change it." : {
       "comment" : "Under the usual fit choices (LR-18)"
+    },
+    "How you like clothes to sit. You can change it in Profile, under Fit and measurements, and add measurements there if you want to." : {
+      "comment" : "Onboarding: under the fit choices"
+    },
+    "I already use Nifty Outfit Nook" : {
+      "comment" : "Onboarding: the welcome's text button, straight to Home"
     },
     "I don’t have it any more" : {
       "comment" : "Remove from closet choice",
@@ -2618,6 +2651,12 @@
     },
     "Inside your suitcase" : {
       "comment" : "App tours: a screen"
+    },
+    "It all stays on this iPhone" : {
+      "comment" : "Onboarding privacy: row title"
+    },
+    "It goes on the little sign in your room." : {
+      "comment" : "Onboarding: under the name step's title"
     },
     "It goes to Recently deleted for 30 days. You can bring it back until then." : {
       "comment" : "Remove from closet: what Delete it does",
@@ -2890,6 +2929,9 @@
     "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline." : {
       "comment" : "Help: What needs a connection, the quieter line"
     },
+    "Later, it asks first" : {
+      "comment" : "Onboarding privacy: row title"
+    },
     "Later, sent only if you allow it" : {
       "comment" : "Privacy and terms: section header"
     },
@@ -3024,6 +3066,9 @@
           }
         }
       }
+    },
+    "Leave it empty and the sign says Hello. You can change it later in Profile." : {
+      "comment" : "Onboarding: under the name field"
     },
     "Leave it empty and the sign says “Hello”." : {
       "comment" : "Name on your sign: what an empty name does (RD-03.2)"
@@ -3409,8 +3454,8 @@
     "Name on your sign" : {
       "comment" : "Profile row (RD-03)"
     },
-    "Name on your sign, Preferences, fit, measurements, try-on photo and the app tours you’ve seen" : {
-      "comment" : "Delete my data: under Your profile (tours since Phase 16b)"
+    "Name on your sign, Preferences, fit, measurements, try-on photo, the app tours you’ve seen and the closet you started with" : {
+      "comment" : "Delete my data: under Your profile (tours since Phase 16b, the starting closet since 17)"
     },
     "Name on your sign, no name yet" : {
       "comment" : "VoiceOver: Profile's sign when no name is set"
@@ -3779,6 +3824,9 @@
           }
         }
       }
+    },
+    "Nothing is sent" : {
+      "comment" : "Onboarding privacy: row title"
     },
     "Nothing packed yet" : {
       "comment" : "Packing sheet: nothing packed"
@@ -4233,6 +4281,9 @@
     "Optional, for this request only." : {
       "comment" : "Colour sheet"
     },
+    "Optional. It helps Style Me choose pieces that feel right." : {
+      "comment" : "Onboarding: under the fit step's title"
+    },
     "Optional. Kept with this request only." : {
       "comment" : "Under Other's words"
     },
@@ -4275,6 +4326,9 @@
     },
     "Outfits can come back any time." : {
       "comment" : "Repeat setting: I don't mind"
+    },
+    "Outfits from your own clothes" : {
+      "comment" : "Onboarding privacy: what the app does"
     },
     "Overall palette" : {
       "comment" : "Colour sheet: applies to"
@@ -4691,6 +4745,9 @@
         }
       }
     },
+    "Sample closet" : {
+      "comment" : "Onboarding: starting closet choice"
+    },
     "Sample photo" : {
       "comment" : "Add a piece form: a sample picture stands in for a real photo until photos are built",
       "localizations" : {
@@ -5077,6 +5134,9 @@
         }
       }
     },
+    "Skip for now" : {
+      "comment" : "Onboarding: skips an optional step"
+    },
     "Skipped" : {
       "comment" : "Suggestion chip once skipped",
       "localizations" : {
@@ -5087,6 +5147,9 @@
           }
         }
       }
+    },
+    "Skips the setup and opens your room with the sample closet." : {
+      "comment" : "VoiceOver hint on I already use Nifty Outfit Nook"
     },
     "Smaller" : {
       "comment" : "Accessibility: text size value"
@@ -5186,6 +5249,9 @@
     },
     "Stays on this iPhone" : {
       "comment" : "Privacy and terms: section header"
+    },
+    "Step %lld of %lld" : {
+      "comment" : "Onboarding: which step this is, under the title"
     },
     "Step %lld of 3" : {
       "comment" : "VoiceOver value of the styling progress bar"
@@ -5327,6 +5393,9 @@
     },
     "Style me works once the note above is sorted." : {
       "comment" : "Under the Style me button while something stops it"
+    },
+    "Style outfits from the clothes you already own.\nYour closet stays on this iPhone." : {
+      "comment" : "Onboarding: under the welcome title, two lines"
     },
     "Style with this" : {
       "comment" : "Button on garment detail",
@@ -5649,6 +5718,9 @@
         }
       }
     },
+    "That didn’t work. Try again." : {
+      "comment" : "Onboarding: finishing failed, under the button"
+    },
     "That is you" : {
       "comment" : "Home tour, step 4 title on the iPad, at large text sizes and sideways"
     },
@@ -5695,7 +5767,7 @@
     "The app follows your iPhone’s settings." : {
       "comment" : "Accessibility, under the title"
     },
-    "The app starts fresh, as if it were just installed: an empty closet, and a sign that says Hello." : {
+    "The app starts fresh, as if it were just installed. It opens on the welcome, and you choose a starting closet again." : {
       "comment" : "Delete my data: what happens after"
     },
     "The first one you picked is the main colour." : {
@@ -5896,6 +5968,15 @@
     "This suitcase isn’t there any more" : {
       "comment" : "Style Me when the suitcase source was removed or archived"
     },
+    "This test build can start with sample clothes, or with nothing." : {
+      "comment" : "Onboarding: under the starting closet title"
+    },
+    "This test build forgets your changes when it closes. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen." : {
+      "comment" : "Onboarding privacy: Stage A keeps nothing she adds"
+    },
+    "This test build sends nothing. It doesn’t ask for your camera, photos, location or notifications." : {
+      "comment" : "Onboarding privacy: nothing leaves the phone in Stage A"
+    },
     "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded." : {
       "comment" : "Try-on photo sheet: Stage A note"
     },
@@ -5924,6 +6005,9 @@
     },
     "Tidy up" : {
       "comment" : "Try-on picture tour, step 2 title"
+    },
+    "To choose again later, use Delete my data in Profile." : {
+      "comment" : "Onboarding: under the starting closet choices"
     },
     "Today" : {
       "comment" : "Your looks tab: the current result (LR-06)"
@@ -6231,6 +6315,9 @@
     "Weight" : {
       "comment" : "Measurement"
     },
+    "Welcome home" : {
+      "comment" : "Onboarding: the welcome title"
+    },
     "What Style Me starts with" : {
       "comment" : "Under the Preferences row in Profile"
     },
@@ -6248,6 +6335,9 @@
     },
     "What stays here, what would be sent, and when." : {
       "comment" : "Privacy and terms, under the title"
+    },
+    "What the app does, and where your things are kept." : {
+      "comment" : "Onboarding: under the privacy step's title"
     },
     "What would you like to say?" : {
       "comment" : "Send feedback: the field's name"
@@ -6288,6 +6378,9 @@
           }
         }
       }
+    },
+    "When styling uses the internet, the app will say exactly what it sends and ask you before it sends anything." : {
+      "comment" : "Onboarding privacy: consent later"
     },
     "When you see a look you like on Today, tap Save look. Looks you save for %@ from %@ show up here." : {
       "comment" : "Saved tab empty state: the occasion and the source"
@@ -6595,6 +6688,9 @@
         }
       }
     },
+    "Your closet stays here" : {
+      "comment" : "Onboarding: the privacy step's title"
+    },
     "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
       "comment" : "Delete my data: the question"
     },
@@ -6602,7 +6698,7 @@
       "comment" : "Help topic"
     },
     "Your data is deleted. The app is starting fresh." : {
-      "comment" : "Toast on Home after Delete my data"
+      "comment" : "Toast on the welcome after Delete my data"
     },
     "Your favourite outfits" : {
       "comment" : "Saved Looks tour, step 1 title"
@@ -6678,6 +6774,9 @@
     "Your looks, your pictures and search" : {
       "comment" : "App tours: what Saved Looks' tour covers"
     },
+    "Your name" : {
+      "comment" : "Onboarding: the name step's title"
+    },
     "Your name on the sign" : {
       "comment" : "Profile tour, step 1 title"
     },
@@ -6715,6 +6814,9 @@
     },
     "Your pieces to swap in" : {
       "comment" : "VoiceOver name of Swap's options, in its tour"
+    },
+    "Your pieces, looks, name and fit are kept here. There’s no account to make." : {
+      "comment" : "Onboarding privacy: where things are kept"
     },
     "Your pieces, their pictures and details" : {
       "comment" : "Privacy and terms: what stays on the iPhone"

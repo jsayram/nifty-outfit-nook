@@ -26,7 +26,7 @@ scripts/build.sh            # Debug build for the simulator
 scripts/build.sh Release    # Release build
 scripts/test.sh             # package tests, snapshot tests and UI tests on an iPhone simulator
 scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebuild test selection
-scripts/check-release.sh    # after a Release build: no catalog or snapshot-testing code in the app
+scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code or debug flags in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding)
 scripts/format.sh --fix     # rewrite files, then lint
@@ -48,9 +48,13 @@ Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Config
 
 Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. Its last page shows look bundles (Phase 9, `docs/look-bundles.md`), which Features adds through `NookCatalogView(extraPages:)`. Add `-catalog-page <id>` to show one page alone (`search`, `sheet`, `toast`, `lookBundles` and so on), which the UI tests use instead of scrolling the whole catalog. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
 
+## Onboarding
+
+A fresh install opens on the welcome, then four short steps (a name for the sign, where her things stay, her usual fit, and a sample or empty starting closet), then Home with its quick tour (Phase 17, `docs/onboarding.md`). Delete my data goes back to the welcome. Debug builds take `-onboarding reset` to show onboarding again and `-onboarding skip` to open Home on the `-fixtures` set for one launch, which every UI test but the onboarding ones passes.
+
 ## Quick tours
 
-Each screen's quick tour starts the first time the screen shows (Phases 16a and 16b, `docs/tours.md`), and App tours on Profile replays any of them. In Stage A that's every launch, since nothing is kept on disk. Debug builds take `-tour home` (or any tour's ID, such as `closet`) to start that tour whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Values combine with commas: `-tour reset,home`.
+Each screen's quick tour starts the first time the screen shows (Phases 16a and 16b, `docs/tours.md`), and App tours on Profile replays any of them. Since Phase 17 the tours seen and the "Show tips on new screens" switch are kept across launches (with the onboarding state, see below). Debug builds take `-tour home` (or any tour's ID, such as `closet`) to start that tour whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Both write to the kept state, so `-tour off` stays until a later `-tour reset` or Delete my data. Values combine with commas: `-tour reset,home`.
 
 ## Cutout benchmark
 
@@ -58,7 +62,7 @@ Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) 
 
 ## Sample data
 
-Stage A runs on sample data only. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
+Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are a few app-state flags in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch (`docs/onboarding.md`). Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
 - a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail`, `photo-fails` or `picture-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
@@ -82,7 +86,8 @@ Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
   Sources/Models/            Domain types, rules as pure functions, and service protocols (Phase 3).
   Sources/Fixtures/          In-memory stores, the mock stylist, sample data sets and the -fixtures argument.
-  Sources/Services/          Real services on Apple frameworks only. Phase 8a: subject lifting with Vision.
+  Sources/Services/          Real services on Apple frameworks only. Phase 8a: subject lifting with Vision. Phase 17: the app
+                             state kept in UserDefaults.
   Sources/Features/          Screens and view models, one folder per feature.
     Resources/               Localizable.xcstrings, the String Catalog for user-facing text.
   Tests/                     One Swift Testing target per module.
@@ -115,11 +120,12 @@ docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitc
 docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
 docs/tours.md                Quick tours: the tour system, every screen's tour, App tours, the -tour flag, VoiceOver and the tests.
+docs/onboarding.md           Onboarding: the welcome and its steps, what's kept across launches, a relaunch, and the -onboarding flag.
 docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet's and Saved Looks' columns, two panes, readable widths, sheets and window sizes.
 website/                     The app's static website.
 ```
 
-Features depend on DesignSystem and Models. Fixtures and Services depend on Models. The app target links Features, Fixtures, DesignSystem (for the debug catalog) and Services (for the debug cutout benchmark) and only wires them together.
+Features depend on DesignSystem and Models. Fixtures and Services depend on Models. The app target links Features, Fixtures, DesignSystem (for the debug catalog) and Services (the app state kept in `UserDefaults`, and the debug cutout benchmark) and only wires them together.
 
 The local package is added to the project as a folder reference rather than a package reference. That keeps it editable in Xcode, lets the test plan run its test targets, and stops Xcode building it with warnings suppressed.
 
@@ -127,7 +133,7 @@ The local package is added to the project as a folder reference rather than a pa
 
 - No App Transport Security exceptions. The generated Info.plist has no `NSAppTransportSecurity` keys.
 - Data Protection is `NSFileProtectionComplete` through the `com.apple.developer.default-data-protection` entitlement.
-- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains, no collected data and no required-reason APIs. It's updated whenever that changes.
+- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains and no collected data. Its one required-reason API is `UserDefaults` (reason `CA92.1`, data only this app reads), since Phase 17 keeps the onboarding and tour flags there. It's updated whenever that changes.
 - No secrets anywhere. `Secrets.xcconfig` and `*.local.xcconfig` are ignored by git and only ever hold non-secret identifiers such as a team ID.
 
 ## Branches

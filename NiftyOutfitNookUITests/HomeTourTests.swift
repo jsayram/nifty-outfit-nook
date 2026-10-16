@@ -148,7 +148,7 @@ final class HomeTourTests: XCTestCase {
     @MainActor
     func testTheDebugFlag() {
         let quiet = XCUIApplication()
-        quiet.launchArguments = ["-tour", "off", "-fixtures", "demo"]
+        quiet.launchArguments = UITestLaunch.skipOnboarding + ["-tour", "off", "-fixtures", "demo"]
         quiet.launch()
         XCTAssertTrue(quiet.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait))
         XCTAssertFalse(quiet.descendants(matching: .any)["tour.card"].waitForExistence(timeout: 3))
@@ -165,7 +165,7 @@ final class HomeTourTests: XCTestCase {
     @MainActor
     private func launch(tour: String = "off,home", extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-tour", tour, "-fixtures", "demo"] + extra
+        app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", tour, "-fixtures", "demo"] + extra
         app.launch()
         XCTAssertTrue(
             app.descendants(matching: .any)["tour.card"].waitForExistence(timeout: Self.wait), "The tour didn't start")

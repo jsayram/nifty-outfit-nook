@@ -51,8 +51,9 @@ extension EnvironmentValues {
     @Entry var openForTour = OpenForTourAction { _ in }
 }
 
-/// Starts the app fresh after Delete my data (Phase 14b): the root view builds every tab again
-/// and opens Home. The root view sets it; elsewhere it does nothing.
+/// Starts the app fresh after Delete my data (Phase 14b): since Phase 17 the root view opens
+/// onboarding again, as on a fresh install, and builds every tab new after it. The root view sets
+/// it; elsewhere it does nothing.
 struct DataDeletedAction: Sendable {
     let action: @MainActor @Sendable () -> Void
 

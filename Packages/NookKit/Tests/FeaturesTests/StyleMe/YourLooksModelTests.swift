@@ -558,10 +558,16 @@ struct YourLooksModelTests {
 /// suite runs in parallel and a busy runner can take seconds to get to the model's next step.
 /// On CI (15 October 2026, Phase 12b) three waits ran out at 20 seconds together while the
 /// snapshot tests held the main actor; the wait still ends as soon as the condition holds.
+///
+/// Phase 17: six waits ran out at 60 seconds on CI, twice in a row and once on develop before.
+/// The model's next step needs a few turns on the main actor, and with every main-actor test of
+/// the target queued there (snapshots render synchronously, about 0.3 s each on the hosted
+/// runner) those turns came only as the target drained, about 200 seconds in. The bound is only
+/// a guard against a real hang, so it's now longer than the whole target takes there.
 @MainActor
 func waitUntil(_ condition: () -> Bool) async throws {
     let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: .seconds(60))
+    let deadline = clock.now.advanced(by: .seconds(600))
     while !condition() {
         // Throwing ends the test here, so it never goes on to wait for something that won't come.
         guard clock.now < deadline else { throw WaitTimedOut() }
