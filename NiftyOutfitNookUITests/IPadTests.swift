@@ -137,11 +137,16 @@ final class IPadTests: IPadTestCase {
 
         let target = app.buttons["tour.target"]
         func assertOnTheWardrobe(_ when: String) {
-            let window = app.windows.firstMatch.frame
-            let spot = target.frame
-            XCTAssertTrue(window.contains(CGPoint(x: spot.midX, y: spot.midY)), "Spotlight off the window \(when)")
+            // The spotlight moves to the wardrobe's new place after the room changes, so wait
+            // for it to stop before measuring.
+            XCTAssertTrue(target.waitUntilStill(timeout: Self.wait), "The spotlight kept moving \(when)")
             // The wardrobe stands at the left of every room.
-            XCTAssertLessThan(spot.midX, window.midX, "Spotlight isn't on the wardrobe \(when)")
+            let onTheWardrobe = waitUntilTrue(timeout: Self.wait) {
+                let window = app.windows.firstMatch.frame
+                let spot = target.frame
+                return window.contains(CGPoint(x: spot.midX, y: spot.midY)) && spot.midX < window.midX
+            }
+            XCTAssertTrue(onTheWardrobe, "Spotlight isn't on the wardrobe \(when): \(target.frame)")
             XCTAssertTrue(wait(for: words, toContain: "step 2 of 4"), "Lost the step \(when)")
         }
         assertOnTheWardrobe("sideways")

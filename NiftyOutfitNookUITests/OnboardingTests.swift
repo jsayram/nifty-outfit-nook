@@ -28,6 +28,7 @@ final class OnboardingTests: XCTestCase {
 
         // Step 1: her name, which the sign on the wall shows as she types.
         XCTAssertTrue(app.navigationBars["Your name"].waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(app.buttons["welcome.getStarted"].waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(label("Step 1 of 4", in: app).exists)
         let field = app.textFields["field.onboarding.name"]
         field.tapUntilFocused(timeout: Self.wait)
@@ -35,20 +36,20 @@ final class OnboardingTests: XCTestCase {
         app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
 
         // Step 2: where her things stay. Nothing to choose.
-        XCTAssertTrue(app.navigationBars["Your closet stays here"].waitUntilExists(timeout: Self.wait))
+        waitForStep("Your closet stays here", after: "Your name", in: app)
         XCTAssertTrue(element("onboarding.forgets", in: app).exists, "No word that the test build forgets")
         XCTAssertFalse(app.buttons["onboarding.skip"].exists, "The privacy step can be skipped")
         app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
 
         // Step 3: her usual fit.
-        XCTAssertTrue(app.navigationBars["How you like clothes to fit"].waitUntilExists(timeout: Self.wait))
+        waitForStep("How you like clothes to fit", after: "Your closet stays here", in: app)
         let comfortable = app.buttons["onboarding.fit.comfortable"]
         comfortable.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(comfortable.isSelected)
+        XCTAssertTrue(comfortable.waitUntilSelected(timeout: Self.wait))
         app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
 
         // Step 4: the sample closet is chosen to start; Go to my room.
-        XCTAssertTrue(app.navigationBars["Choose a starting closet"].waitUntilExists(timeout: Self.wait))
+        waitForStep("Choose a starting closet", after: "How you like clothes to fit", in: app)
         XCTAssertTrue(element("onboarding.closet.sample", in: app).isSelected)
         let finish = app.buttons["onboarding.continue"]
         XCTAssertEqual(finish.label, "Go to my room")
@@ -110,6 +111,21 @@ final class OnboardingTests: XCTestCase {
     // MARK: Helpers
 
     /// Skips the quick tour that's showing, once it has shown.
+    /// Waits for the onboarding step titled `title`, and for the step before it to have slid
+    /// away. While a step slides in, both steps' Continue buttons exist, and on CI a query then
+    /// matched two of them ("Multiple matching elements found").
+    @MainActor
+    private func waitForStep(
+        _ title: String, after previous: String, in app: XCUIApplication, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(
+            app.navigationBars[title].waitUntilExists(timeout: Self.wait), "No \(title)", file: file, line: line)
+        XCTAssertTrue(
+            app.navigationBars[previous].waitUntilGone(timeout: Self.wait), "\(previous) didn't go", file: file,
+            line: line)
+    }
+
     @MainActor
     private func skipTour(in app: XCUIApplication) {
         let skip = app.buttons["tour.skip"]

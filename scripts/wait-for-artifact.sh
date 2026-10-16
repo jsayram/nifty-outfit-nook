@@ -5,28 +5,39 @@
 # The UI test jobs start with the build job instead of after it, so each can boot its simulator
 # while the build runs, then test what the build uploaded (see .github/workflows/ci.yml). This
 # asks the GitHub API about this run only (GITHUB_RUN_ID), so it can't pick up another run's
-# artifact. It gives up when the build job has ended without it, or after 20 minutes.
-# Needs GH_TOKEN with actions: read.
+# artifact. Needs GH_TOKEN with actions: read.
+#
+# It writes `ready=true` to GITHUB_OUTPUT once the artifact is there. If the build job is still
+# queued after 3 minutes (the free plan's five macOS runners are busy, perhaps with these test
+# jobs themselves), it writes `ready=false` instead, so the test job builds for itself rather
+# than wait for a runner it may be holding. It fails when the build job ended without
+# uploading, or after 20 minutes.
 set -euo pipefail
 
 name="${1:?usage: scripts/wait-for-artifact.sh <artifact> <job>}"
 job="${2:?usage: scripts/wait-for-artifact.sh <artifact> <job>}"
 run="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
-SECONDS=0
 uploaded() {
     [[ "$(gh api "$run/artifacts?name=$name" --jq '.total_count')" != "0" ]]
 }
 
+SECONDS=0
 while ((SECONDS < 1200)); do
     if uploaded; then
         echo "$name is ready after ${SECONDS}s"
+        echo "ready=true" >> "$GITHUB_OUTPUT"
         exit 0
     fi
-    state="$(gh api "$run/attempts/$GITHUB_RUN_ATTEMPT/jobs" --jq ".jobs[] | select(.name == \"$job\") | .conclusion")"
-    if [[ -n "$state" ]] && ! uploaded; then
-        echo "$job ended ($state) without uploading $name" >&2
+    status="$(gh api "$run/attempts/$GITHUB_RUN_ATTEMPT/jobs" --jq ".jobs[] | select(.name == \"$job\") | .status")"
+    if [[ "$status" == "completed" ]] && ! uploaded; then
+        echo "$job ended without uploading $name" >&2
         exit 1
+    fi
+    if [[ "$status" != "in_progress" ]] && ((SECONDS >= 180)); then
+        echo "$job hasn't started after ${SECONDS}s ($status), so this job builds for itself"
+        echo "ready=false" >> "$GITHUB_OUTPUT"
+        exit 0
     fi
     sleep 10
 done
