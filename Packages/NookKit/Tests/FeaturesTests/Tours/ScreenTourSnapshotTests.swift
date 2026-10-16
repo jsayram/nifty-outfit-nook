@@ -102,7 +102,8 @@ struct ScreenTourSnapshotTests {
     }
 
     @Test func lookWearToday() async throws {
-        let model = LookDetailModel(lookID: try #require(data.looks.first?.id))
+        let model = LookDetailModel(
+            lookID: try #require(data.looks.first?.id), now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
         await model.load(from: services)
         assertTourSnapshot(LookDetailPage(model: model), LookTour.definition, step: 0, named: "look-1")
     }
