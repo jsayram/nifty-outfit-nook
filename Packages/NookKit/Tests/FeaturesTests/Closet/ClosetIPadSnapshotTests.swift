@@ -53,7 +53,12 @@ struct ClosetIPadSnapshotTests {
 
     @Test func detailBesideThePageUpright() throws {
         try assertWindow(.iPad11Portrait, expected: .pageAndDetail, named: "11-portrait")
-        try assertWindow(.iPad13Portrait, expected: .pageAndDetail, named: "13-portrait")
+        // The 13-inch upright has the same layout; its picture added nothing the 11-inch one
+        // doesn't show.
+        #expect(
+            WindowLayout.browse(
+                width: IPadWindow.iPad13Portrait.size.width, horizontalSizeClass: .regular,
+                dynamicTypeSize: .large) == .pageAndDetail)
     }
 
     /// Nothing picked yet: the quiet note beside the grid.

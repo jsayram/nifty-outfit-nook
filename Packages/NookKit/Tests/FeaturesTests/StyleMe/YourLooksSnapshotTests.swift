@@ -58,7 +58,7 @@ struct YourLooksSnapshotTests {
 
     @Test func simpleAX5() async {
         assertSnapshot(
-            YourLooksPage(model: await styledLooks()), dynamicTypeSize: .accessibility5, scale: 1, named: "simple-ax5")
+            YourLooksPage(model: await styledLooks()), dynamicTypeSize: .accessibility5, named: "simple-ax5")
     }
 
     // MARK: States
@@ -71,7 +71,7 @@ struct YourLooksSnapshotTests {
 
     @Test func stylingAX5() async throws {
         let model = try await stylingModel()
-        assertSnapshot(YourLooksPage(model: model), dynamicTypeSize: .accessibility5, scale: 1, named: "styling-ax5")
+        assertSnapshot(YourLooksPage(model: model), dynamicTypeSize: .accessibility5, named: "styling-ax5")
         model.cancel()
     }
 
@@ -157,7 +157,7 @@ struct YourLooksSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

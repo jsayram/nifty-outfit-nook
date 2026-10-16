@@ -249,9 +249,7 @@ struct ResultActions: View {
                     ? String(
                         localized: "Try it on and Ask stylist need a connection. Save and Swap work offline.",
                         bundle: .module, comment: "Under the results buttons while offline")
-                    : String(
-                        localized: "Try-on pictures are simulated.", bundle: .module,
-                        comment: "Fine print under the results buttons (RD-06)")
+                    : SharedText.tryOnPicturesSimulated
             )
             .nookTextStyle(.finePrint)
             .foregroundStyle(.nook.textSecondary)

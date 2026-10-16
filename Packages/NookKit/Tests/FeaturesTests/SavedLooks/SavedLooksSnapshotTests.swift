@@ -39,7 +39,7 @@ struct SavedLooksSnapshotTests {
 
     @Test func gridAX5() async {
         assertSnapshot(
-            SavedLooksPage(model: await loadedSavedLooks()), dynamicTypeSize: .accessibility5, scale: 1,
+            SavedLooksPage(model: await loadedSavedLooks()), dynamicTypeSize: .accessibility5,
             named: "grid-ax5")
     }
 
@@ -80,7 +80,7 @@ struct SavedLooksSnapshotTests {
     @Test func picturesAX5() async {
         let model = await loadedSavedLooks()
         model.tab = .pictures
-        assertSnapshot(SavedLooksPage(model: model), dynamicTypeSize: .accessibility5, scale: 1, named: "pictures-ax5")
+        assertSnapshot(SavedLooksPage(model: model), dynamicTypeSize: .accessibility5, named: "pictures-ax5")
     }
 
     /// No pictures yet: what a picture is, that it needs a look, and how to make one.
@@ -101,7 +101,7 @@ struct SavedLooksSnapshotTests {
 
     @Test func pictureDetailAX5() async {
         assertSnapshot(
-            PictureDetailPage(model: await picture("p-interview")), dynamicTypeSize: .accessibility5, scale: 1,
+            PictureDetailPage(model: await picture("p-interview")), dynamicTypeSize: .accessibility5,
             named: "picture-ax5")
     }
 
@@ -158,7 +158,7 @@ struct SavedLooksSnapshotTests {
 
     @Test func detailAX5() async {
         assertSnapshot(
-            LookDetailPage(model: await detail("o-interview")), dynamicTypeSize: .accessibility5, scale: 1,
+            LookDetailPage(model: await detail("o-interview")), dynamicTypeSize: .accessibility5,
             named: "detail-ax5")
     }
 
@@ -179,7 +179,7 @@ struct SavedLooksSnapshotTests {
 
     /// The sheet's header and content, as the sheet shows them, on the wall.
     private func tryOnSheet(_ model: TryOnModel) -> some View {
-        NookSheetContainer(title: TryOnText.tryOn, subtitle: TryOnText.simulated) {
+        NookSheetContainer(title: TryOnText.tryOn, subtitle: SharedText.simulated) {
             TryOnSheetContent(model: model, seePicture: { _ in })
         }
         .background(Color.nook.wallGradient)
@@ -196,7 +196,7 @@ struct SavedLooksSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         scenePhase: ScenePhase = .active,
         named name: String,
         fileID: StaticString = #fileID,

@@ -40,7 +40,7 @@ struct StyleMeSnapshotTests {
     @Test func defaultRequestAX5() async {
         assertSnapshot(
             StyleMePage(model: await loadedStyleMe(startingPieceID: "g-navy-trousers")),
-            dynamicTypeSize: .accessibility5, scale: 1, named: "ax5")
+            dynamicTypeSize: .accessibility5, named: "ax5")
     }
 
     @Test func everyChoiceSet() async {
@@ -153,7 +153,7 @@ struct StyleMeSnapshotTests {
                     PreferencesChoices(model: model, sourceName: "Main closet", close: {})
                 }
             },
-            dynamicTypeSize: .accessibility5, scale: 1, named: "sheets-ax5")
+            dynamicTypeSize: .accessibility5, named: "sheets-ax5")
     }
 
     // MARK: Helpers
@@ -173,7 +173,7 @@ struct StyleMeSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

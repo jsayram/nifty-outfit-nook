@@ -57,7 +57,7 @@ final class SavedLooksModel {
     private var garmentsByID: [Garment.ID: Garment] = [:]
     private var pictures: [TryOnPicture] = []
 
-    /// What's typed in the search field. Applied after `searchDelay` without typing.
+    /// What's typed in the search field. Applied once typing pauses (`SearchDebouncer`).
     var searchText = "" {
         didSet {
             guard searchText != oldValue else { return }
@@ -65,16 +65,15 @@ final class SavedLooksModel {
         }
     }
 
-    let searchDelay: Duration
     /// How many times a typed search was applied, for tests of the delay.
     private(set) var searchesApplied = 0
-    private var searchTask: Task<Void, Never>?
+    @ObservationIgnored private let search: SearchDebouncer
     @ObservationIgnored private var loads = LoadGeneration()
 
     static let standardKinds: [GarmentCategory] = [.top, .bottom, .dress, .layer, .shoes, .bag]
 
     init(searchDelay: Duration = .milliseconds(250)) {
-        self.searchDelay = searchDelay
+        search = SearchDebouncer(delay: searchDelay)
     }
 
     // MARK: Loading
@@ -193,7 +192,7 @@ final class SavedLooksModel {
 
     /// Clear: every chip and the search (LR-09.3).
     func clearFilters() {
-        searchTask?.cancel()
+        search.cancel()
         filter = LookFilter()
         searchText = ""
         refresh()
@@ -201,27 +200,17 @@ final class SavedLooksModel {
 
     /// Runs the typed search now, as when she presses Search.
     func applySearchNow() {
-        searchTask?.cancel()
+        search.cancel()
         applySearch()
     }
 
     /// Waits for a pending typed search to run. For tests.
     func settleSearch() async {
-        await searchTask?.value
+        await search.settle()
     }
 
     private func scheduleSearch() {
-        searchTask?.cancel()
-        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
-            applySearch()
-            return
-        }
-        let delay = searchDelay
-        searchTask = Task { [weak self] in
-            try? await Task.sleep(for: delay)
-            guard !Task.isCancelled else { return }
-            self?.applySearch()
-        }
+        search.schedule(searchText) { [weak self] in self?.applySearch() }
     }
 
     private func applySearch() {

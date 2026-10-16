@@ -202,13 +202,13 @@ struct ScreenTourSnapshotTests {
             .environment(\.nookStaticRendering, true)
             .environment(\.locale, TestTime.locale)
         let renderer = ImageRenderer(content: view)
-        renderer.scale = 2
+        renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: Self.phone.width, height: nil)
         guard let image = renderer.uiImage else {
             Issue.record("ImageRenderer produced no image")
             return
         }
-        assertSnapshot(of: image, as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 2), named: "app-tours")
+        assertSnapshot(of: image, as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 1), named: "app-tours")
     }
 
     // MARK: iPad
@@ -218,7 +218,7 @@ struct ScreenTourSnapshotTests {
         assertTourSnapshot(
             YourLooksPage(model: await styledLooks()), YourLooksTour.definition(hasVersions: true), step: 2,
             size: SnapshotWindow.landscape.size, safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0),
-            barsHeight: 86, sizeClass: .regular, scale: 1, named: "your-looks-3-ipad")
+            barsHeight: 86, sizeClass: .regular, named: "your-looks-3-ipad")
     }
 
     @Test func fitOnIPadUpright() async {
@@ -227,7 +227,7 @@ struct ScreenTourSnapshotTests {
         assertTourSnapshot(
             FitPage(model: model), FitTour.definition, step: 3, size: SnapshotWindow.portrait.size,
             safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0), barsHeight: 86, sizeClass: .regular,
-            scale: 1, named: "fit-4-ipad")
+            named: "fit-4-ipad")
     }
 
     // MARK: Helper
@@ -244,7 +244,7 @@ struct ScreenTourSnapshotTests {
         sizeClass: UserInterfaceSizeClass = .compact,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

@@ -6,10 +6,12 @@ import Models
 ///
 /// - `-tour home` starts Home's tour when Home first shows, whatever is recorded. Any tour's ID
 ///   works the same way (`-tour closet`, `-tour yourLooks`; see `TourID.all`).
-/// - `-tour reset` forgets every tour seen and turns tips back on, before anything starts. In
-///   Stage A progress is in memory, so a launch is already fresh; from Phase 21a it's on disk.
-/// - `-tour off` turns "Show tips on new screens" off, so no tour starts by itself. The UI tests
-///   use it, except the ones about tours.
+/// - `-tour reset` forgets every tour seen and turns tips back on, before anything starts. Since
+///   Phase 17 the tours seen and the switch are kept across launches in the app's `UserDefaults`
+///   suite (`DefaultsTourProgressStore`), so this is how to see the tours again.
+/// - `-tour off` turns "Show tips on new screens" off, so no tour starts by itself. It's kept too,
+///   until a later `-tour reset` or Delete my data. The UI tests use it, except the ones about
+///   tours.
 ///
 /// Values can be combined with commas: `-tour reset,home`.
 nonisolated public struct TourLaunchOptions: Hashable, Sendable {

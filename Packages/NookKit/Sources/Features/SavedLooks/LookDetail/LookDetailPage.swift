@@ -201,7 +201,7 @@ struct LookDetailPage: View {
                     }
                 }
             }
-            Text(LookDetailText.simulated)
+            Text(SharedText.tryOnPicturesSimulated)
                 .nookTextStyle(.finePrint)
                 .foregroundStyle(.nook.textSecondary)
                 .multilineTextAlignment(.center)

@@ -146,7 +146,7 @@ struct HomeSnapshotTests {
             .environment(\.dynamicTypeSize, .large)
             .environment(\.locale, Locale(identifier: "en_US"))
         let renderer = ImageRenderer(content: view)
-        renderer.scale = 2
+        renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: layout.size.width, height: layout.contentHeight)
         guard let image = renderer.uiImage else {
             Issue.record("ImageRenderer produced no image for \(name)")
@@ -154,7 +154,7 @@ struct HomeSnapshotTests {
         }
         assertSnapshot(
             of: image,
-            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 2),
+            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 1),
             named: name,
             fileID: fileID,
             file: filePath,
@@ -184,14 +184,14 @@ struct HomeSnapshotTests {
         .environment(\.dynamicTypeSize, .large)
         .environment(\.locale, Locale(identifier: "en_US"))
         let renderer = ImageRenderer(content: view)
-        renderer.scale = 2
+        renderer.scale = 1
         guard let image = renderer.uiImage else {
             Issue.record("ImageRenderer produced no image for \(name)")
             return
         }
         assertSnapshot(
             of: image,
-            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 2),
+            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 1),
             named: name,
             fileID: fileID,
             file: filePath,

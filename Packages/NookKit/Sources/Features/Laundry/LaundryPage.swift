@@ -222,7 +222,11 @@ struct LaundryPage: View {
                 ),
                 isLoading: isSaving, fillsWidth: true, action: actions.cleanAll
             )
-            .accessibilityValue(Text("\(model.scopeName) · \(SuitcasesText.pieces(count))"))
+            .accessibilityValue(
+                Text(
+                    "\(model.scopeName) · \(SuitcasesText.pieces(count))", bundle: .module,
+                    comment: "VoiceOver value of Mark all clean: where, then how many pieces")
+            )
             .accessibilityIdentifier("laundry.cleanAll")
             .tourAnchor(
                 LaundryTour.Anchor.cleanAll,
@@ -307,9 +311,12 @@ private struct LaundryRow: View {
                 Text(garment.name)
                     .nookTextStyle(.label)
                     .foregroundStyle(.nook.textPrimary)
-                Text("\(garment.category.singularTitle) · \(place)")
-                    .nookTextStyle(.note)
-                    .foregroundStyle(.nook.textSecondary)
+                Text(
+                    "\(garment.category.singularTitle) · \(place)", bundle: .module,
+                    comment: "Laundry row: the kind of piece, then where it is"
+                )
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
             }
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)

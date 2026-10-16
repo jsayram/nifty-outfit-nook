@@ -297,6 +297,18 @@ about 4 MB at 2x.
   run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.
 - **iPad screens** (Phases 15a and 15b, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
   2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.
+- **Snapshot policy** (after the Stage A audit). The PNGs live in git, so every one costs every clone, and every
+  re-record adds to the history. Keep them small:
+  - **Scale.** Screens (everything in FeaturesTests, phone and iPad) are drawn at 1x. DesignSystem's component pages
+    stay at 2x, since they're small and their edges and shadows are what's being checked. Never 3x.
+  - **What gets one.** Each key screen gets light, dark and AX5. A further picture is for a state that draws
+    something different (an empty, error or offline state, a sheet, a sticker, a tour step, a layout on another
+    window size), not for another combination of the same state. A layout that only needs checking at another
+    size gets a `WindowLayout` expectation instead of a second picture.
+  - **Size.** Keep each PNG under about 1 MB; only a very tall AX5 page may go over. The Features PNGs are about
+    50 MB in all. If a new suite adds more than a few megabytes, cut variants or draw less of the page.
+  - The audit's change took the snapshots from 108 MB (319 PNGs, phones at 2x) to 56 MB (317 PNGs). It
+    didn't rewrite history, so older commits still hold the 2x images.
 - **One at a time on the main actor** (Phase 18). Each Features snapshot suite carries `@Suite(.heavyMainActorWork)`,
   and so do the large-closet speed checks. Swift Testing starts every test at once, and drawing a snapshot holds the
   main actor, so without it a model test waited behind every snapshot for each of its turns and finished only as the

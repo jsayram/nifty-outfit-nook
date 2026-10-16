@@ -33,9 +33,7 @@ struct StylingProgress: View {
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("results.styling")
                 HStack(spacing: NookSpacing.small) {
-                    NookBadge(
-                        String(
-                            localized: "Simulated", bundle: .module, comment: "Badge: a stand-in, not the real thing"))
+                    NookBadge(SharedText.simulated)
                     Spacer(minLength: 0)
                     // The dots only fade under Reduce Motion.
                     NookLoadingIndicator(size: .large)

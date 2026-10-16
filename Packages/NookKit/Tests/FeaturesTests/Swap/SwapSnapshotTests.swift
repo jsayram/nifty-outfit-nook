@@ -43,7 +43,7 @@ struct SwapSnapshotTests {
 
     @Test func topAX5() async throws {
         let (_, model) = try await swap()
-        assertSnapshot(SwapPage(model: model), dynamicTypeSize: .accessibility5, scale: 1, named: "top-ax5")
+        assertSnapshot(SwapPage(model: model), dynamicTypeSize: .accessibility5, named: "top-ax5")
     }
 
     @Test func shoesTrying() async throws {
@@ -95,7 +95,7 @@ struct SwapSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

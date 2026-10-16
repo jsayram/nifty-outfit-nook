@@ -46,7 +46,7 @@ struct OnboardingSnapshotTests {
         // The words take what they need and the porch gets smaller; the page is taller than the
         // screen, so it scrolls there.
         assertSnapshot(
-            welcomeView, height: Self.phone.height, dynamicTypeSize: .accessibility5, scale: 1, named: "welcome-ax5")
+            welcomeView, height: Self.phone.height, dynamicTypeSize: .accessibility5, named: "welcome-ax5")
     }
 
     @Test func welcomeOnIPad() {
@@ -79,10 +79,10 @@ struct OnboardingSnapshotTests {
 
     @Test func stepsAX5() {
         assertSnapshot(
-            OnboardingNameStep(model: model(name: "Lily")), dynamicTypeSize: .accessibility5, scale: 1,
+            OnboardingNameStep(model: model(name: "Lily")), dynamicTypeSize: .accessibility5,
             named: "name-ax5")
         assertSnapshot(
-            OnboardingPrivacyStep(model: model()), dynamicTypeSize: .accessibility5, scale: 1, named: "privacy-ax5")
+            OnboardingPrivacyStep(model: model()), dynamicTypeSize: .accessibility5, named: "privacy-ax5")
     }
 
     @Test func privacyStepOnIPad() {
@@ -100,7 +100,7 @@ struct OnboardingSnapshotTests {
         height: CGFloat? = nil,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

@@ -18,7 +18,7 @@ struct PieceScope: Equatable {
 ///
 /// Loads her garments, suitcases and Preferences once, works out each piece's grid details
 /// (`ClosetItem`), then filters with the Models rule (`GarmentFilter`). Chips apply at once;
-/// typed search waits until she pauses (`searchDelay`), so a long closet isn't filtered on every
+/// typed search waits until she pauses (`SearchDebouncer`), so a long closet isn't filtered on every
 /// letter. Clearing the field or pressing Search applies straight away.
 @Observable
 final class ClosetModel {
@@ -53,7 +53,7 @@ final class ClosetModel {
     /// An unsaved Add a piece or Edit draft, offered as "Continue where you left off?" (Phase 7b).
     private(set) var draft: GarmentDraft?
 
-    /// What's typed in the search field. Applied after `searchDelay` without typing.
+    /// What's typed in the search field. Applied once typing pauses (`SearchDebouncer`).
     var searchText = "" {
         didSet {
             guard searchText != oldValue else { return }
@@ -61,11 +61,9 @@ final class ClosetModel {
         }
     }
 
-    /// How long typing has to pause before the search runs.
-    let searchDelay: Duration
     /// How many times a typed search was applied, for tests of the delay.
     private(set) var searchesApplied = 0
-    private var searchTask: Task<Void, Never>?
+    @ObservationIgnored private let search: SearchDebouncer
     @ObservationIgnored private var loads = LoadGeneration()
 
     private var garments: [Garment] = []
@@ -78,7 +76,7 @@ final class ClosetModel {
     let scope: PieceScope?
 
     init(searchDelay: Duration = .milliseconds(250), scope: PieceScope? = nil) {
-        self.searchDelay = searchDelay
+        search = SearchDebouncer(delay: searchDelay)
         self.scope = scope
     }
 
@@ -211,7 +209,7 @@ final class ClosetModel {
 
     /// Clear: every chip and the search (LR-09.3).
     func clearFilters() {
-        searchTask?.cancel()
+        search.cancel()
         filter = GarmentFilter()
         searchText = ""
         refresh()
@@ -219,28 +217,17 @@ final class ClosetModel {
 
     /// Runs the typed search now, as when she presses Search.
     func applySearchNow() {
-        searchTask?.cancel()
+        search.cancel()
         applySearch()
     }
 
     /// Waits for a pending typed search to run. For tests.
     func settleSearch() async {
-        await searchTask?.value
+        await search.settle()
     }
 
     private func scheduleSearch() {
-        searchTask?.cancel()
-        // An emptied field shows everything at once; there's nothing to wait for.
-        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
-            applySearch()
-            return
-        }
-        let delay = searchDelay
-        searchTask = Task { [weak self] in
-            try? await Task.sleep(for: delay)
-            guard !Task.isCancelled else { return }
-            self?.applySearch()
-        }
+        search.schedule(searchText) { [weak self] in self?.applySearch() }
     }
 
     private func applySearch() {
