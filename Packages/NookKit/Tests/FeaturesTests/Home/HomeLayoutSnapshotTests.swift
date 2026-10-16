@@ -15,7 +15,7 @@ import UIKit
 /// iPhone 17's 874 x 402 with the safe area measured there on iOS 26.5 (62 points at each side,
 /// 64 for the tab bar), in light and at night in dark. The system bars aren't in the pictures.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct HomeLayoutSnapshotTests {
     static let demo = HomeSnapshotTests.demo
 

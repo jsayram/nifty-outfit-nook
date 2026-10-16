@@ -20,7 +20,7 @@ import UIKit
 ///   `ImageRenderer` will draw, and it gives back an empty image;
 /// - "Continue where you left off?".
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct GarmentEditorSnapshotTests {
     static let width: CGFloat = 402
 

@@ -22,7 +22,7 @@ import UIKit
 ///   deleted; a picture hidden while the app isn't active;
 /// - the Try it on sheet from Your looks, and with a picture she already has.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct SavedLooksSnapshotTests {
     static let width: CGFloat = 402
 

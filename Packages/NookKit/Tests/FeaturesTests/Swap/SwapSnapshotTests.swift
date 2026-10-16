@@ -19,7 +19,7 @@ import UIKit
 /// - See all tops in its sheet;
 /// - Your looks after a swap, marked Swapped, with Undo.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct SwapSnapshotTests {
     static let width: CGFloat = 402
 

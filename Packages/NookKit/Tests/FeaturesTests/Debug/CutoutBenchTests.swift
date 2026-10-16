@@ -134,7 +134,7 @@
             }
         }
 
-        @Test func eachPhotoIsMeasuredTwiceAndOnlyTheFirstIsCold() async throws {
+        @Test(.heavyMainActorWork) func eachPhotoIsMeasuredTwiceAndOnlyTheFirstIsCold() async throws {
             let model = CutoutBenchModel(device: "test") { _ in StandInCutoutService() }
             await model.measure(photos(3))
             #expect(model.rows.count == 3)
@@ -152,7 +152,7 @@
             #expect(model.report.coldStart == nil)
         }
 
-        @Test func theWorkingSizeReachesTheService() async {
+        @Test(.heavyMainActorWork) func theWorkingSizeReachesTheService() async {
             let sizes = SizeLog()
             let model = CutoutBenchModel(device: "test") { size in
                 sizes.add(size)

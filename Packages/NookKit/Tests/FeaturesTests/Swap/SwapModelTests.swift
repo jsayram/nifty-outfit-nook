@@ -159,7 +159,7 @@ struct SwapModelTests {
     }
 
     /// LR-07.5: with the large closet, ranking a piece's options and Show 3 more stay quick.
-    @Test func theLargeClosetStaysQuick() async throws {
+    @Test(.heavyMainActorWork) func theLargeClosetStaysQuick() async throws {
         let model = await swappableLooks(services: yourLooksServices(.large))
         let swap = try swap(model)
         #expect(model.garments.count > 2_000)

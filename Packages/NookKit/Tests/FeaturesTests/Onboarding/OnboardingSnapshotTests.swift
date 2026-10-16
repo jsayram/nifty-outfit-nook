@@ -18,7 +18,7 @@ import UIKit
 ///   steps at AX5.
 /// - On the 11-inch iPad: the welcome upright and sideways, and the privacy step sideways.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct OnboardingSnapshotTests {
     static let phone = CGSize(width: 402, height: 874)
     private let us = Locale(identifier: "en_US")

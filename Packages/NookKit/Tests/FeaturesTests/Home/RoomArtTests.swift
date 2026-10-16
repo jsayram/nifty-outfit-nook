@@ -52,7 +52,7 @@ struct RoomArtTests {
     /// Dark is the light drawing in lamplight: the same shapes, each colour dimmed by the rule in
     /// DesignSystem/README.md. Garments are only dimmed to 92%, since they stand for real clothes.
     /// The faded hamper has its own dark rule (checked below).
-    @Test(arguments: RoomArt.allCases.filter { $0 != .hamperFaded })
+    @Test(.heavyMainActorWork, arguments: RoomArt.allCases.filter { $0 != .hamperFaded })
     func darkIsTheLightDrawingDimmed(art: RoomArt) throws {
         let folder = Self.catalog.appending(path: "\(art.rawValue).imageset")
         let light = try String(contentsOf: folder.appending(path: "\(art.rawValue).svg"), encoding: .utf8)

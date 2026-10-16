@@ -48,7 +48,7 @@ struct GarmentImageLoaderTests {
         #expect(cgImage.width == 180 && cgImage.height == 135)
     }
 
-    @Test func aLoadedPhotoIsCached() async {
+    @Test(.heavyMainActorWork) func aLoadedPhotoIsCached() async {
         let provider = PhotoProvider(width: 400, height: 400)
         let loader = GarmentImageLoader(provider: provider)
         _ = await loader.image(for: .stored("p-1"), maxPixelSize: 100)

@@ -554,23 +554,23 @@ struct YourLooksModelTests {
     }
 }
 
-/// Waits for a condition the model reaches on its own. The bound is generous because the whole
-/// suite runs in parallel and a busy runner can take seconds to get to the model's next step.
-/// On CI (15 October 2026, Phase 12b) three waits ran out at 20 seconds together while the
-/// snapshot tests held the main actor; the wait still ends as soon as the condition holds.
+/// Waits for a condition the model reaches on its own, a few turns on the main actor away.
 ///
-/// Phase 17: six waits ran out at 60 seconds on CI, twice in a row and once on develop before.
-/// The model's next step needs a few turns on the main actor, and with every main-actor test of
-/// the target queued there (snapshots render synchronously, about 0.3 s each on the hosted
-/// runner) those turns came only as the target drained, about 200 seconds in. The bound is only
-/// a guard against a real hang, so it's now longer than the whole target takes there.
+/// The bound counts the wait's own turns on the main actor, not seconds. In Phases 12b and 17 a
+/// bound in seconds ran out at 20 and then 60 seconds on CI and was raised to 600. The model
+/// wasn't slow: the whole target shares the main actor, which takes its jobs in order, so on a
+/// busy runner each turn can take seconds, for the model and for this loop alike. Counting turns
+/// measures what matters, how many chances the model had, however busy the runner is. The model
+/// needs a few; 1,000 turns is about five seconds once the main actor is free, so a real hang
+/// still fails, at the latest a few seconds after the rest of the target has finished.
+/// (`HeavyMainActorWork` keeps the snapshot tests from crowding the queue in the first place.)
 @MainActor
 func waitUntil(_ condition: () -> Bool) async throws {
-    let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: .seconds(600))
+    var turns = 0
     while !condition() {
         // Throwing ends the test here, so it never goes on to wait for something that won't come.
-        guard clock.now < deadline else { throw WaitTimedOut() }
+        guard turns < 1_000 else { throw WaitTimedOut() }
+        turns += 1
         try await Task.sleep(for: .milliseconds(5))
     }
 }

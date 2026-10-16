@@ -19,7 +19,7 @@ import UIKit
 /// - Accessibility at the default size, and at AX5 in dark with VoiceOver and Reduce Motion on.
 /// - Delete my data with counts, after a deletion that didn't finish (dark), and at AX5.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct SettingsSnapshotTests {
     static let width: CGFloat = 402
     private let us = Locale(identifier: "en_US")

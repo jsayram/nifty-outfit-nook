@@ -18,7 +18,7 @@ import UIKit
 /// (`TourAnchorBounds`), read in the same layout pass. So these check that each step points at
 /// the control it names and where its card lands. The UI tests check the anchors on screen.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct ScreenTourSnapshotTests {
     static let phone = PhoneScreen.iPhone17.size
     /// The iPhone 17's safe area, which the card keeps inside.

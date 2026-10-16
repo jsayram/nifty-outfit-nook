@@ -17,7 +17,7 @@ import UIKit
 ///   photo tiles, in light and dark.
 /// - Garment detail with a sample photo's sticker, and with a tile.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct GarmentStickerSnapshotTests {
     static let width: CGFloat = 402
     static let scale: CGFloat = 2

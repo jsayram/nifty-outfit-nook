@@ -195,7 +195,7 @@ struct SavedPicturesTests {
     // MARK: Speed
 
     /// The large set's 165 pictures load and filter as fast as its looks.
-    @Test func largeSetStaysQuick() async throws {
+    @Test(.heavyMainActorWork) func largeSetStaysQuick() async throws {
         let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
         let model = SavedLooksModel(searchDelay: .zero)
         model.show(data.looks, garments: data.garments, now: ClosetTestTime.now)

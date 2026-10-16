@@ -22,7 +22,7 @@ import UIKit
 ///   Preferences from the main closet and from a suitcase; the Weather sheet is 5a's.
 /// Your looks has its own suite, `YourLooksSnapshotTests`.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct StyleMeSnapshotTests {
     static let width: CGFloat = 402
 
