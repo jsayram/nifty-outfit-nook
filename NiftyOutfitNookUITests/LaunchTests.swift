@@ -12,7 +12,7 @@ final class LaunchTests: XCTestCase {
         app.launch()
 
         let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 10))
+        XCTAssertTrue(tabBar.waitUntilExists(timeout: 10))
         for label in ["Home", "Closet", "Saved Looks"] {
             XCTAssertTrue(tabBar.buttons[label].exists, "Missing tab: \(label)")
         }
@@ -30,7 +30,7 @@ final class LaunchTests: XCTestCase {
         for (fixtures, text) in expected {
             let app = launchOnCloset(fixtures)
             let count = pieceCount(in: app)
-            XCTAssertTrue(count.waitForExistence(timeout: 10), "No piece count for \(fixtures)")
+            XCTAssertTrue(count.waitUntilExists(timeout: 10), "No piece count for \(fixtures)")
             XCTAssertTrue(count.label.hasSuffix(text), "\(fixtures): \(count.label)")
             app.terminate()
         }
@@ -41,14 +41,14 @@ final class LaunchTests: XCTestCase {
     func testLargeAndFailingFixturesLaunch() {
         let large = launchOnCloset("large")
         let detail = pieceCount(in: large)
-        XCTAssertTrue(detail.waitForExistence(timeout: 10))
+        XCTAssertTrue(detail.waitUntilExists(timeout: 10))
         // The number is formatted for the locale, for example "2,117".
         let count = Int(detail.label.filter(\.isNumber)) ?? 0
         XCTAssertGreaterThanOrEqual(count, 2_000, detail.label)
         large.terminate()
 
         let failing = launchOnCloset("demo:stores-fail")
-        XCTAssertTrue(failing.staticTexts["Your closet didn’t load"].waitForExistence(timeout: 10))
+        XCTAssertTrue(failing.staticTexts["Your closet didn’t load"].waitUntilExists(timeout: 10))
         XCTAssertTrue(failing.buttons["Try again"].exists)
         XCTAssertFalse(pieceCount(in: failing).label.contains("pieces"))
     }
@@ -59,8 +59,7 @@ final class LaunchTests: XCTestCase {
         app.launchArguments = UITestLaunch.standard + ["-fixtures", fixtures]
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
-        XCTAssertTrue(closet.waitForExistence(timeout: 10))
-        closet.tap()
+        closet.tapUntilSelected(timeout: 10)
         return app
     }
 

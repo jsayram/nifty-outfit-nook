@@ -4,7 +4,7 @@ import XCTest
 /// (LR-16) and Recently deleted. The words and rules are covered by the package tests; these
 /// check the real screens, sheets and navigation.
 final class GarmentDetailTests: XCTestCase {
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -25,42 +25,43 @@ final class GarmentDetailTests: XCTestCase {
         // Remove from closet asks first, and Delete it lists the saved looks it affects.
         tap("garment.remove", in: app)
         tap("remove.delete", in: app)
-        XCTAssertTrue(element("remove.affectedLooks", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("remove.affectedLooks", in: app).waitUntilExists(timeout: Self.wait))
         tap("remove.delete.confirm", in: app)
 
         // Back on Closet without it, and Recently deleted now has two pieces.
-        XCTAssertTrue(labelled("Navy dress pants is in Recently deleted", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(labelled("Navy dress pants is in Recently deleted", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForNonExistence(trousers))
         let recentlyDeleted = app.buttons["closet.recentlyDeleted"]
-        XCTAssertTrue(recentlyDeleted.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(recentlyDeleted.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(recentlyDeleted.label.contains("2"), recentlyDeleted.label)
         recentlyDeleted.tap()
 
         // Restore it from Recently deleted.
         let restore = app.buttons["recentlyDeleted.restore.g-navy-trousers"]
-        XCTAssertTrue(restore.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(restore.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["recentlyDeleted.restore.g-gray-leggings"].exists)
         restore.tap()
-        XCTAssertTrue(labelled("Navy dress pants is back in your closet", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(labelled("Navy dress pants is back in your closet", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForNonExistence(restore))
 
         app.navigationBars.firstMatch.buttons.firstMatch.tap()
-        XCTAssertTrue(trousers.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
     }
 
     /// Mark as dirty while tracking is on (RD-11), Style with this and its choice, and
     /// "I don't have it any more" with Undo (LR-16.1).
     @MainActor
     func testLaundryStyleWithThisAndUndo() {
-        let app = launchOnCloset("demo:laundry=some")
+        // Undo's toast lasts 6 seconds, which a slow CI runner used up twice before it tapped Undo.
+        let app = launchOnCloset("demo:laundry=some", toastsStay: true)
         let trousers = openNavyTrousers(in: app)
 
         // Mark as dirty, then the status says so.
         let status = element("garment.fact.status", in: app)
-        XCTAssertTrue(status.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(status.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(status.value as? String, "Clean")
         tap("garment.laundry", in: app)
-        XCTAssertTrue(labelled("Marked as dirty", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(labelled("Marked as dirty", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(status.value as? String, "Dirty")
 
         // Style with this offers the two choices; Style me with it opens Style Me with the piece.
@@ -68,7 +69,7 @@ final class GarmentDetailTests: XCTestCase {
         tap("garment.styleWithThis", in: app)
         tap("styleWithThis.styleMe", in: app)
         let start = app.buttons["styleMe.startingPiece"]
-        XCTAssertTrue(start.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(start.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(start.label.contains("Navy dress pants"), start.label)
         XCTAssertTrue(start.label.contains("In the wash"), start.label)
         XCTAssertFalse(app.buttons["styleMe.go"].isEnabled)
@@ -79,22 +80,21 @@ final class GarmentDetailTests: XCTestCase {
         tap("remove.noLongerOwned", in: app)
         tap("remove.noLongerOwned.confirm", in: app)
         let undo = app.buttons["Undo"]
-        XCTAssertTrue(undo.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(undo.waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(trousers.exists)
-        undo.tap()
-        XCTAssertTrue(trousers.waitForExistence(timeout: Self.wait))
+        undo.tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
     }
 
     // MARK: Helpers
 
     @MainActor
-    private func launchOnCloset(_ fixtures: String) -> XCUIApplication {
+    private func launchOnCloset(_ fixtures: String, toastsStay: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.standard + ["-fixtures", fixtures]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", fixtures] + (toastsStay ? ["-toasts-stay"] : [])
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
-        XCTAssertTrue(closet.waitForExistence(timeout: Self.wait))
-        closet.tap()
+        closet.tapUntilSelected(timeout: Self.wait)
         return app
     }
 
@@ -102,13 +102,13 @@ final class GarmentDetailTests: XCTestCase {
     @MainActor
     private func openNavyTrousers(in app: XCUIApplication) -> XCUIElement {
         let search = app.searchFields["Search your closet"]
-        XCTAssertTrue(search.waitForExistence(timeout: Self.wait))
-        search.tap()
+        XCTAssertTrue(search.waitUntilExists(timeout: Self.wait))
+        search.tapUntilFocused(timeout: Self.wait)
         search.typeText("navy pants\n")
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
-        XCTAssertTrue(trousers.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
         trousers.tap()
-        XCTAssertTrue(element("garment.name", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("garment.name", in: app).waitUntilExists(timeout: Self.wait))
         return trousers
     }
 
@@ -127,17 +127,13 @@ final class GarmentDetailTests: XCTestCase {
     @MainActor
     private func tap(_ identifier: String, in app: XCUIApplication) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitForExistence(timeout: Self.wait), "No button \(identifier)")
-        var swipes = 0
-        while !button.isHittable && swipes < 6 {
-            app.swipeUp()
-            swipes += 1
-        }
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        app.scrollUntilHittable(button, up: 12)
         button.tap()
     }
 
     @MainActor
     private func waitForNonExistence(_ element: XCUIElement) -> Bool {
-        element.waitForNonExistence(timeout: Self.wait)
+        element.waitUntilGone(timeout: Self.wait)
     }
 }
