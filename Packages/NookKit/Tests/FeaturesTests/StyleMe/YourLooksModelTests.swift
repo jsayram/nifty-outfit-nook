@@ -571,6 +571,7 @@ func waitUntil(_ condition: () -> Bool) async throws {
         guard clock.now < deadline else { throw WaitTimedOut() }
         try await Task.sleep(for: .milliseconds(5))
     }
+    print("WAITUNTIL-ELAPSED \(clock.now - (deadline - .seconds(30)))")
 }
 
 struct WaitTimedOut: Error {}
