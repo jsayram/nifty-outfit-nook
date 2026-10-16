@@ -69,7 +69,7 @@ struct ProfileSnapshotTests {
 
     @Test func fitAX5() {
         assertSnapshot(
-            FitPage(model: model(measured: true)), dynamicTypeSize: .accessibility5, scale: 1, named: "fit-ax5")
+            FitPage(model: model(measured: true)), dynamicTypeSize: .accessibility5, named: "fit-ax5")
     }
 
     @Test func fitWithNothingYet() {
@@ -170,7 +170,7 @@ struct ProfileSnapshotTests {
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
         scenePhase: ScenePhase = .active,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,
@@ -191,8 +191,8 @@ struct ProfileSnapshotTests {
             .environment(\.locale, us)
             .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
-        // A very tall page (Fit at AX5) comes back empty at 2x (playbook, Phase 7b), so it's drawn
-        // at 1x.
+        // Drawn at 1x, like every screen snapshot (DesignSystem README, "Snapshot policy"). A very
+        // tall page (Fit at AX5) comes back empty at 2x anyway (playbook, Phase 7b).
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
         guard let image = renderer.uiImage else {

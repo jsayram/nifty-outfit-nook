@@ -17,8 +17,7 @@ import UIKit
 /// - "How would you like to add it?";
 /// - Describe in words with suggestions, one accepted and one skipped;
 /// - the empty form, the form with the problems Save found, and the cardigan filled in;
-/// - the filled form at AX5 and in dark. AX5 is drawn at 1x: at 2x the page is taller than
-///   `ImageRenderer` will draw, and it gives back an empty image;
+/// - the filled form at AX5 and in dark;
 /// - "Continue where you left off?".
 @MainActor
 @Suite(.heavyMainActorWork)
@@ -65,7 +64,7 @@ struct GarmentEditorSnapshotTests {
 
     @Test func filledFormAX5() async {
         assertSnapshot(
-            GarmentEditorPage(model: await filledModel()), dynamicTypeSize: .accessibility5, scale: 1,
+            GarmentEditorPage(model: await filledModel()), dynamicTypeSize: .accessibility5,
             named: "filled-ax5")
     }
 
@@ -82,7 +81,7 @@ struct GarmentEditorSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

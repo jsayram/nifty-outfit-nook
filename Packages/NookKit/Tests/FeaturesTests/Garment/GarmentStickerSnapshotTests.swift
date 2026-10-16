@@ -21,7 +21,7 @@ import UIKit
 @Suite(.heavyMainActorWork)
 struct GarmentStickerSnapshotTests {
     static let width: CGFloat = 402
-    static let scale: CGFloat = 2
+    static let scale: CGFloat = 1
 
     /// Every kind of piece: demo pieces, plus a made-up hat and a multicolour scarf-top, which
     /// the demo closet doesn't have.

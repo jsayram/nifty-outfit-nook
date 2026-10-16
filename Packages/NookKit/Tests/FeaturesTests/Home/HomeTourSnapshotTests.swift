@@ -60,7 +60,7 @@ struct HomeTourSnapshotTests {
         assertTourSnapshot(
             RoomCanvas(layout: layout, content: Self.content, open: { _ in }),
             step: step(1, of: .iPadRoom), target: spot(1, in: layout), size: layout.size,
-            safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0), scale: 1, named: "ipad-landscape")
+            safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0), named: "ipad-landscape")
     }
 
     // MARK: Helpers
@@ -88,7 +88,7 @@ struct HomeTourSnapshotTests {
         safeArea: EdgeInsets,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

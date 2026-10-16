@@ -47,7 +47,7 @@ struct LookBuilderSnapshotTests {
 
     @Test func piecesAX5() async {
         assertSnapshot(
-            LookBuilderPage(model: await built()), dynamicTypeSize: .accessibility5, scale: 1, named: "pieces-ax5")
+            LookBuilderPage(model: await built()), dynamicTypeSize: .accessibility5, named: "pieces-ax5")
     }
 
     @Test func needsABottom() async {
@@ -92,7 +92,7 @@ struct LookBuilderSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,

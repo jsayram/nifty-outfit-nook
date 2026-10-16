@@ -39,7 +39,7 @@ struct SettingsSnapshotTests {
     }
 
     @Test func helpAX5() {
-        assertSnapshot(help, dynamicTypeSize: .accessibility5, scale: 1, named: "help-ax5")
+        assertSnapshot(help, dynamicTypeSize: .accessibility5, named: "help-ax5")
     }
 
     // MARK: Send feedback
@@ -72,7 +72,7 @@ struct SettingsSnapshotTests {
 
     @Test func feedbackAX5() {
         assertSnapshot(
-            feedback(message: "Love the room.", kind: .other), dynamicTypeSize: .accessibility5, scale: 1,
+            feedback(message: "Love the room.", kind: .other), dynamicTypeSize: .accessibility5,
             named: "feedback-ax5")
     }
 
@@ -84,7 +84,7 @@ struct SettingsSnapshotTests {
     }
 
     @Test func privacyAX5() {
-        assertSnapshot(PrivacyPage(), dynamicTypeSize: .accessibility5, scale: 1, named: "privacy-ax5")
+        assertSnapshot(PrivacyPage(), dynamicTypeSize: .accessibility5, named: "privacy-ax5")
     }
 
     // MARK: Accessibility
@@ -93,7 +93,7 @@ struct SettingsSnapshotTests {
         assertSnapshot(AccessibilityPage(), named: "accessibility")
         assertSnapshot(
             AccessibilityPage(voiceOverOverride: true, reduceMotionOverride: true),
-            colorScheme: .dark, dynamicTypeSize: .accessibility5, scale: 1, named: "accessibility-ax5-dark")
+            colorScheme: .dark, dynamicTypeSize: .accessibility5, named: "accessibility-ax5-dark")
     }
 
     // MARK: Delete my data
@@ -114,7 +114,7 @@ struct SettingsSnapshotTests {
     }
 
     @Test func deleteDataAX5() {
-        assertSnapshot(deleteData(), dynamicTypeSize: .accessibility5, scale: 1, named: "delete-data-ax5")
+        assertSnapshot(deleteData(), dynamicTypeSize: .accessibility5, named: "delete-data-ax5")
     }
 
     // MARK: Drawing
@@ -123,7 +123,7 @@ struct SettingsSnapshotTests {
         _ view: some View,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
-        scale: CGFloat = 2,
+        scale: CGFloat = 1,
         named name: String,
         fileID: StaticString = #fileID,
         filePath: StaticString = #filePath,
@@ -143,7 +143,8 @@ struct SettingsSnapshotTests {
             .environment(\.locale, us)
             .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
-        // Very tall pages at AX5 come back empty at 2x (playbook, Phase 7b), so they're drawn at 1x.
+        // Drawn at 1x, like every screen snapshot (DesignSystem README, "Snapshot policy"). Very
+        // tall pages at AX5 come back empty at 2x anyway (playbook, Phase 7b).
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
         guard let image = renderer.uiImage else {

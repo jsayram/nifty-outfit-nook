@@ -86,7 +86,7 @@ struct ClosetSnapshotTests {
             .environment(\.locale, TestTime.locale)
             .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
-        renderer.scale = 2
+        renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
         guard let image = renderer.uiImage else {
             Issue.record("ImageRenderer produced no image for \(name)")
@@ -94,7 +94,7 @@ struct ClosetSnapshotTests {
         }
         assertSnapshot(
             of: image,
-            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 2),
+            as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 1),
             named: name,
             fileID: fileID,
             file: filePath,

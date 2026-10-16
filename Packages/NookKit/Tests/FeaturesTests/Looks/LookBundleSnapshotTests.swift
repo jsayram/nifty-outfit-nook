@@ -24,7 +24,7 @@ import UIKit
 struct LookBundleSnapshotTests {
     static let phone: CGFloat = 402
     static let iPad: CGFloat = 820
-    static let scale: CGFloat = 2
+    static let scale: CGFloat = 1
 
     @Test func piecesPhone() {
         assertSnapshot(countsBoard(columns: 1), width: Self.phone, named: "pieces-phone")

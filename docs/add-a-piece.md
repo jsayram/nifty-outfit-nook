@@ -100,7 +100,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 - `GarmentDetailsTests`, `GarmentRulesTests`, `GarmentSuggestionTests`, `GarmentDraftTests` (Models): the checks and limits, trimming, defaults, writing details onto a garment without touching its states, each suggestion, and when a draft counts as work.
 - `WordMatchDescriptionReaderTests`, `InMemoryDraftStoreTests`, `AddPieceFixtureTests` (Fixtures): description cases, the draft store, the photo stand-in, the `draft=` and `photo-fails` options, the store's new check, and every fixture garment passing it.
 - `GarmentEditorModelTests` (Features): steps, Back, Save's checks and live problems, add by words end to end, accept and skip, a failed save, photos, edit keeping states, dirty detection, the draft's save delay, "closing the app" and resuming, Discard, Cancel, and Closet's draft card.
-- `GarmentEditorSnapshotTests`: the choices, Describe in words with suggestions, the empty form, the form with problems, the filled form in light, AX5 and dark, and "Continue where you left off?". AX5 is drawn at 1x, because at 2x the page is taller than `ImageRenderer` will draw.
+- `GarmentEditorSnapshotTests`: the choices, Describe in words with suggestions, the empty form, the form with problems, the filled form in light, AX5 and dark, and "Continue where you left off?". Like every screen snapshot it is drawn at 1x (the snapshot policy in `Packages/NookKit/Sources/DesignSystem/README.md`).
 - `AddPieceTests` (UI): add by words with Save's checks and see it in Closet; edit with Cancel, Keep editing and Discard changes, then save and see the detail change; abandon mid-add, close the app, relaunch and resume from Add a piece, then save.
 
 ## Decisions for Jose

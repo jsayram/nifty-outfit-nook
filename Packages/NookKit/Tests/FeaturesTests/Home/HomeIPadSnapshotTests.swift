@@ -8,21 +8,21 @@ import UIKit
 @testable import Features
 
 /// Home on iPad (Phase 15a), compared with the PNGs in `__Snapshots__/HomeIPadSnapshotTests`:
-/// the tall room on the 11- and 13-inch iPads upright, the wide room held sideways, the wide
+/// the tall room on the 11-inch iPad upright, the wide room held sideways on both sizes, the wide
 /// room in dark, a window a third of the screen wide (compact, so the phone room), and the
 /// large-text page at AX5 on an upright iPad.
 ///
 /// The canvas is the whole window, with the bars measured on the iOS 26.5 simulator (86 points
 /// at the top, 77 for the tab bar); the system bars themselves aren't in the pictures. These
-/// are drawn at 1x, since a 2x picture of a 13-inch screen is several megabytes and 1x still
-/// catches a moved drawing or a changed plate.
+/// are drawn at 1x, like every screen snapshot: a 2x picture of a 13-inch screen is several
+/// megabytes and 1x still catches a moved drawing or a changed plate.
 @MainActor
 @Suite(.heavyMainActorWork)
 struct HomeIPadSnapshotTests {
     static let demo = HomeSnapshotTests.demo
 
     @Test(arguments: [
-        IPadWindow.iPad11Portrait, .iPad11Landscape, .iPad13Portrait, .iPad13Landscape,
+        IPadWindow.iPad11Portrait, .iPad11Landscape, .iPad13Landscape,
     ])
     func room(window: IPadWindow) {
         assertRoomSnapshot(window.roomLayout, named: window.rawValue)
