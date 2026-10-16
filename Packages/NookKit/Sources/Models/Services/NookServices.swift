@@ -29,9 +29,21 @@ public struct NookServices: Sendable {
     public var tours: any TourProgressStore
     /// Whether she has finished onboarding, and the closet she started with (Phase 17).
     public var onboarding: any OnboardingStateStore
-    /// Delete my data (Phase 14b). By default it erases the stores passed to `init` (replacing a
-    /// store afterwards doesn't change it); Phase 24c adds the account and what the server holds.
-    public var deletion: any DataDeletionService
+    /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
+    /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
+    /// what the server holds.
+    public var deletion: any DataDeletionService {
+        get {
+            customDeletion
+                ?? LocalDataDeletion(
+                    closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
+                    lookDrafts: lookDrafts, pictures: pictures, tours: tours, onboarding: onboarding)
+        }
+        set { customDeletion = newValue }
+    }
+
+    /// A deletion service passed in or set, instead of erasing the stores above.
+    private var customDeletion: (any DataDeletionService)?
 
     /// - Parameter deletion: what Delete my data uses. `nil` erases every store above, which is
     ///   what Stage A and the local part of Stage B want.
@@ -70,10 +82,6 @@ public struct NookServices: Sendable {
         self.tryOn = tryOn
         self.tours = tours
         self.onboarding = onboarding
-        self.deletion =
-            deletion
-            ?? LocalDataDeletion(
-                closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
-                lookDrafts: lookDrafts, pictures: pictures, tours: tours, onboarding: onboarding)
+        self.customDeletion = deletion
     }
 }
