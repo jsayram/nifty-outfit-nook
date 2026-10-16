@@ -166,6 +166,19 @@ final class SavedLooksTests: XCTestCase {
             app.buttons["savedLooks.picture.p-lace"].waitForExistence(timeout: Self.wait), "Undo didn't bring it back")
     }
 
+    /// Saved Looks' Profile button opens the real Profile, as Closet's does. It used to open a
+    /// stand-in, because Saved Looks drew Closet's screens with its own switch, which had no
+    /// Profile case.
+    @MainActor
+    func testProfileOpensFromSavedLooks() {
+        let app = launch()
+        app.tabBars.firstMatch.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
+        app.buttons["savedLooks.profile"].tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("profile.deleteData", in: app).waitForExistence(timeout: Self.wait), "Profile is missing")
+        app.goBack(from: "Profile", to: "Saved Looks", timeout: Self.wait)
+    }
+
     // MARK: Helpers
 
     @MainActor

@@ -1,7 +1,8 @@
 import Models
 
-/// A screen Closet pushes. Garment detail and Recently deleted (Phase 7a), Add a piece and Edit
-/// (Phase 7b), Suitcases and Laundry (Phase 13) and Profile (Phase 14a) are built.
+/// A screen Closet pushes: garment detail and Recently deleted (Phase 7a), Add a piece and Edit
+/// (Phase 7b), Suitcases and Laundry (Phase 13) and Profile (Phase 14a). Saved Looks pushes the
+/// same screens from a look's piece. `ClosetDestinationScreen` draws them for both tabs.
 nonisolated enum ClosetDestination: Hashable, Sendable {
     /// Garment detail (Phase 7a). Carries the name so the title shows before the piece loads.
     case garment(Garment.ID, name: String)
@@ -50,38 +51,6 @@ nonisolated enum ClosetDestination: Hashable, Sendable {
         case .styleMe, .styleMeFrom: String(localized: "Style Me", bundle: .module, comment: "Screen title")
         case .makeYourOwnLook: String(localized: "Make your own look", bundle: .module, comment: "Screen title")
         case .profile: String(localized: "Profile", bundle: .module, comment: "Screen title")
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .garment: "hanger"
-        case .addPiece(.photo): "camera"
-        case .addPiece(.words), .addPiece(.resume): "pencil"
-        case .editPiece: "pencil"
-        case .suitcases, .allSuitcases, .suitcase: "suitcase.rolling"
-        case .laundry: "basket"
-        case .recentlyDeleted: "trash"
-        case .styleMe, .styleMeFrom: "sparkles"
-        case .makeYourOwnLook: "square.stack"
-        case .profile: "person.crop.circle"
-        }
-    }
-
-    /// A stable name for UI tests.
-    var identifier: String {
-        switch self {
-        case .garment: "garment"
-        case .addPiece: "addPiece"
-        case .editPiece: "editPiece"
-        case .suitcases: "suitcases"
-        case .allSuitcases: "allSuitcases"
-        case .suitcase: "suitcase"
-        case .laundry: "laundry"
-        case .recentlyDeleted: "recentlyDeleted"
-        case .styleMe, .styleMeFrom: "styleMe"
-        case .makeYourOwnLook: "makeYourOwnLook"
-        case .profile: "profile"
         }
     }
 }
