@@ -2,7 +2,9 @@
 
 Phase 16a, 15 October 2026. One tour system for every screen, and Home's tour. Spec: PRD §7.8, FR-73, TourProgress / TourPreferences in §12 and AC-103; amendment LR-02 (the tour in the warm palette instead of plum). Visual references: `home-tour.html`, `home-ax-tour.html`, `home-landscape-tour.html`, `ipad-home-tour.html` and `ipad-home-portrait-tour.html` in `closet/prototypes/RoomDirectionMockups/screens`, with `css/home-tour.css` and the copy in `js/screen-tours.js`.
 
-Phase 16b, the same day, added the other screens' tours, App tours on Profile (replay, the "Show tips on new screens" switch and Reset all tips) and the `.screenTour` modifier every screen uses; see [Every screen's tour](#every-screens-tour-phase-16b). Progress still lives in memory until Phase 21a.
+Phase 16b, the same day, added the other screens' tours, App tours on Profile (replay, the "Show tips on new screens" switch and Reset all tips) and the `.screenTour` modifier every screen uses; see [Every screen's tour](#every-screens-tour-phase-16b).
+
+Phase 17 keeps the tours seen and the switch across launches, and Home's tour now starts as onboarding hands over; see [Kept across launches](#kept-across-launches-phase-17).
 
 ## What's where
 
@@ -10,7 +12,8 @@ Phase 16b, the same day, added the other screens' tours, App tours on Profile (r
 |---|---|
 | `Models/Tours/TourProgress.swift` | `TourID`, `TourOutcome`, `TourRecord`, `TourProgress`, `TourRules` and the `TourProgressStore` protocol |
 | `Models/Tours/TourRun.swift` | One tour while it shows: the step, Next, Back, and the record when it ends |
-| `Fixtures/Stores/InMemoryTourProgressStore.swift` | Stage A's store, in memory |
+| `Fixtures/Stores/InMemoryTourProgressStore.swift` | The store in memory, for tests and previews |
+| `Services/AppState/AppStateDefaults.swift` | `DefaultsTourProgressStore`, the app's store since Phase 17: seen versions and the switch in `UserDefaults`, records in memory |
 | `DesignSystem/Components/Tour/` | `NookTourOverlay` (the dim, the spotlight, the tail and the card), `NookTourCard`, and `NookTourPlacement`, which decides where the card goes |
 | `Features/Tours/TourCenter.swift` | Runs the tours: starting, the buttons, anchors, recording |
 | `Features/Tours/TourAnchor.swift` | `.tourAnchor(_:label:hint:action:)`, `.tourFocusTarget(_:)` and `TourScrollReader` |
@@ -36,9 +39,9 @@ The root view keeps one `TourCenter` for the app and draws the tour over the tab
 
 By itself, once a session, when tips are on and she hasn't seen this version (`TourRules.startsAutomatically`), and never while another tour shows. Finished, skipped and "tapped the highlighted control" all count as seen. A version goes up only when the controls or the steps really change, never for copy fixes. A store that can't be read means no tour (tours are optional), and a write that fails only means the tour may show again next launch.
 
-Home's starts the first time Home shows, after its model has loaded, and never over a pushed screen, a sheet or a toast. Each other screen's rules are in the table below. After Delete my data the toast is said first, then the tour starts, as on a fresh install: Delete my data erases the tour progress with the profile and turns tips back on.
+Home's starts the first time Home shows, after its model has loaded, and never over a pushed screen, a sheet or a toast. Each other screen's rules are in the table below. After Delete my data the app goes back to onboarding (Phase 17), and the tour starts when she reaches Home again, as on a fresh install: Delete my data erases the tour progress with the profile and turns tips back on.
 
-In Stage A progress is in memory, so every launch is a first visit, like a fresh install. Phase 21a puts it on disk with the other preferences.
+Since Phase 17 the versions seen and the switch are kept across launches, so a tour seen once doesn't come back after a relaunch (AC-103). Phase 21a moves them into the real preferences store.
 
 ## The tour on screen
 
@@ -79,6 +82,8 @@ Debug builds take `-tour` with one or more values, separated by commas:
 - `-tour reset`: forget the tours seen and turn tips back on, before anything starts.
 - `-tour off`: turn tips off, so no tour starts by itself. Every UI test passes this except the tour's own.
 
+Since Phase 17 both write to the state kept across launches, so `-tour off` lasts until a `-tour reset` or Delete my data. Every launch in the UI tests says what it needs.
+
 For example `-fixtures demo -tour reset,home`. `scripts/check-release.sh` checks the flag isn't in a Release build.
 
 ## Tests
@@ -88,7 +93,7 @@ For example `-fixtures demo -tour reset,home`. `scripts/check-release.sh` checks
 - `TourPlacementTests` (DesignSystem): below, above, beside, alone, and in the middle with no control; the card's width; what VoiceOver reads.
 - `TourCenterTests` (Features): starting once, the buttons, what each way out records, tips off, a store that fails, the screen not ready, the debug flag, a new layout keeping the step, anchors and their owners, and a control out of sight getting no spotlight.
 - `HomeTourSnapshotTests`: each of the four steps on iPhone 17, a step in dark, AX5, and the wide room on the 11-inch iPad sideways. `ComponentSnapshotTests` adds the catalog's "Quick tour card" page (`-catalog-page tour`).
-- `HomeTourTests` (UI): completing the tour with Back on the way, skipping it, tapping the highlighted control, the tour being modal (the card's words first, nothing under the dim can be tapped), the tour at AX5, and the debug flag. `SettingsTests` checks the tour starts again after Delete my data, once the toast has gone.
+- `HomeTourTests` (UI): completing the tour with Back on the way, skipping it, tapping the highlighted control, the tour being modal (the card's words first, nothing under the dim can be tapped), the tour at AX5, and the debug flag. `SettingsTests` checks the tour starts again after Delete my data and onboarding.
 - `IPadTests` (UI): the spotlight follows the wardrobe through rotation and a narrow window, keeping the step.
 
 ### Needs a check with VoiceOver on
@@ -194,9 +199,20 @@ App tours' short descriptions are new: the mockup lists only the tip count, and 
 ### Decisions for Jose (16b)
 
 1. **Tours for the 19 screens the app has** that have a mockup tour; none for screens without one.
-2. **In Stage A every launch is a fresh install for tours too**, since progress is in memory until 21a. On Lily's TestFlight build (18) she'll see each screen's tour again after every relaunch unless she turns tips off in App tours.
+2. **In Stage A every launch was a fresh install for tours too.** Phase 17 fixed it: the tours seen and the switch are kept across launches (see below).
 3. **Replay opens the first item** (piece, look, picture, suitcase) for the screens about one thing, and Your looks and Swap a piece start when she next gets there.
 4. **Laundry's two tours are separate** (on and off), as in the mockups, and App tours lists the one that matches tracking.
 5. **On a wide iPad two new screens can show their tours one after the other** (Closet, then the piece beside it), never together.
 6. **Profile's own tour doesn't start as App tours closes**, even after tips on or Reset all tips. It waits for the next session or a replay.
 7. **App tours' descriptions are new copy** (see above).
+
+## Kept across launches (Phase 17)
+
+16b noted that Lily's TestFlight build would show every tour again after each relaunch. Phase 17 splits `TourProgress`:
+
+- **`seenVersions`**, the latest content version seen of each tour, and **`showsTipsOnNewScreens`** are app state in the lowest tier of `closet/DATA_MAP.md`: they name only the app's own screens. `DefaultsTourProgressStore` keeps them in the app's `UserDefaults` suite (`docs/onboarding.md`). `TourRules.startsAutomatically` reads `seenVersions`, so a version seen in an earlier session counts.
+- **`records`**, how each tour ended and when, are Personal in the data map and stay in memory for the session.
+
+Reset all tips clears both and keeps the switch; Delete my data and `-tour reset` clear everything. A value that can't be read counts as not seen, so a tour can show again but never gets stuck hidden.
+
+Home's tour starts when Home first shows after onboarding, as on any first visit: the root keeps the `TourCenter` above both onboarding and the tabs. `OnboardingTests` (UI) goes through onboarding to Home's tour and Style Me's, then relaunches and checks neither comes back.

@@ -50,6 +50,10 @@ A **LookPiece** is either a garment she owns (by ID) or a **PieceIdea**: a descr
 
 **FeedbackNote** (Personal, Phase 14b): what it's about, her words (trimmed, at most 1,000 characters, `FeedbackRules`), and the app details (`FeedbackDiagnostics`: version, build, iOS version, model identifier) only when she adds them. Nothing about her closet, body or name is part of it. See `docs/settings.md`.
 
+**OnboardingState** (Phase 17, `docs/onboarding.md`): whether onboarding is finished and the starting closet she chose (`StartingCloset`: sample or empty). App state in the lowest tier, kept across launches. Her answers (`OnboardingAnswers`: the sign name and usual fit) go to the profile.
+
+**TourProgress** (Phase 16a): the tours seen. Since Phase 17 `seenVersions` and the tips switch are kept across launches, and `records` (how and when each ended) only for the session (`docs/tours.md`).
+
 **Preferences**: piece mode (Mine + one idea by default, or Only mine), repeat window (1 week by default, 2 weeks, I don't mind), Track laundry (off by default). These are Lily's defaults from the amendment (LR-03, LR-10, RD-11).
 
 **StyleRequest** (Sensitive when it carries today's comfort). Source, occasion (with her words for Other, at most 40 characters), weather choice (use today's, indoors, ignore) with the weather snapshot, today's comfort, a colour wish (`ColorWish`: a family, preferred or required, and where: any one piece, a kind of piece, or the overall palette), a copy of Preferences, and the starting piece. Style Me builds it from a `StyleRequestDraft` with `StyleRequestBuilder` (Phase 10a, `docs/style-me.md`). `allowsNewPieceIdea` is computed, not stored: true only with Mine + one idea and the main closet, so a suitcase request can never ask for an unowned piece.
@@ -134,18 +138,22 @@ protocol LookDraftStore: Sendable { draft, save, discard }      // the one unsav
 protocol TryOnPictureStore: Sendable { pictures, picture, save, delete }   // every picture, newest first
 protocol TryOnService: Sendable { func makePicture(of: Look, at: Date) async throws(TryOnError) -> TryOnPicture }
 
+// Phase 16a and 17, kept across launches by Services' `UserDefaults` stores in the app
+protocol TourProgressStore: ErasableStore { progress, record, setShowsTipsOnNewScreens, forgetSeenTours }
+protocol OnboardingStateStore: ErasableStore { state, complete(startingCloset:) }
+
 // Phase 14b, Delete my data
 protocol ErasableStore: Sendable { func eraseAll() async throws(StoreError) }   // every store above refines it
 protocol DataDeletionService: Sendable { scopes, parts(in:), delete(_:) -> DeletionReport }
 ```
 
-Every store protocol refines `ErasableStore`, so Delete my data can empty each one through its protocol (a fresh profile for `ProfileStore`). `NookServices.deletion` is `LocalDataDeletion` over its own stores unless it's given another; it reports each `DataPart` as deleted, pending (a server part, from 24c) or failed. See `docs/settings.md`.
+Every store protocol refines `ErasableStore`, so Delete my data can empty each one through its protocol (a fresh profile for `ProfileStore`, and since Phase 17 the onboarding state last). `NookServices.deletion` is `LocalDataDeletion` over its own stores unless it's given another; it reports each `DataPart` as deleted, pending (a server part, from 24c) or failed. See `docs/settings.md`.
 
 Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture after a moment and sends nothing. The screen keeps the picture in the store before it says it's ready.
 
 `CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
 
-`NookServices` bundles one of each. The app target builds it and passes it to `RootTabView`, which puts it in the SwiftUI environment (`\.services`). Screens never build services.
+`NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). The root puts the services in the SwiftUI environment (`\.services`). Screens never build services.
 
 A store returns everything it holds and leaves filtering to the rules: Closet shows `isInCloset`, Saved Looks shows `isSaved`, Suitcases arranges with `SuitcaseShelf`. Wear today on a look is two calls (the look and its pieces); the screen does both, so neither store needs to know about the other.
 
@@ -187,7 +195,7 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 
 ## Left out on purpose
 
-- **Persistence, revisions and sync.** The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork.
+- **Persistence, revisions and sync.** Stage A keeps only the onboarding and tour flags across launches (Phase 17). The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork.
 - **Favourites and collections** (PRD §8.2) have no Stage A screen (RD-08), so no type yet.
 - **Find One, shopping and the fit check** (Phase 34). Wishlist pieces exist as an ownership state only.
 - **More than one colour.** Since 10a the request has one colour wish, preferred or required, with its place (PRD §8.3). Several colours at once, or explicit monochrome, can come later if Lily asks.
