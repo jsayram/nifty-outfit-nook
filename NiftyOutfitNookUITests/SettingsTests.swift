@@ -178,6 +178,12 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(
             labelled("Your data is deleted", in: app).waitForExistence(timeout: Self.wait), "No note that it's done")
 
+        // Delete my data forgets the tours seen and turns tips back on, so Home's tour starts as
+        // on a fresh install, once the note has gone (Phase 16a).
+        let skip = app.buttons["tour.skip"]
+        XCTAssertTrue(skip.waitForExistence(timeout: Self.wait), "Home's tour didn't start after a fresh start")
+        skip.tapUntilGone(timeout: Self.wait)
+
         // Closet is empty, and Saved Looks has nothing.
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(
@@ -189,7 +195,7 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func launch() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
         return app

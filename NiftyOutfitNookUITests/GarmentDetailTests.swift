@@ -90,7 +90,7 @@ final class GarmentDetailTests: XCTestCase {
     @MainActor
     private func launchOnCloset(_ fixtures: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", fixtures]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", fixtures]
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
         XCTAssertTrue(closet.waitForExistence(timeout: Self.wait))
