@@ -13,6 +13,20 @@ struct NiftyOutfitNookApp: App {
     /// across launches, and the sample data for the closet she chose.
     private let launch = Self.makeLaunch(arguments: ProcessInfo.processInfo.arguments)
 
+    #if DEBUG
+        init() {
+            // `-animations off` (debug builds only) turns UIKit's animations off: pushes, sheets
+            // and alerts appear at once. Most UI tests pass it, so they don't wait for each
+            // transition to finish, or tap while one is still moving.
+            let arguments = ProcessInfo.processInfo.arguments
+            if let flag = arguments.firstIndex(of: "-animations"), arguments.indices.contains(flag + 1),
+                arguments[flag + 1] == "off"
+            {
+                UIView.setAnimationsEnabled(false)
+            }
+        }
+    #endif
+
     var body: some Scene {
         WindowGroup {
             #if DEBUG

@@ -234,6 +234,12 @@ enum UITestLaunch {
     /// between tests on one simulator, so each test sets what it relies on with these flags
     /// rather than counting on a fresh install.
     static let skipOnboarding = ["-onboarding", "skip"]
-    /// Tours off and onboarding skipped: what most tests launch with.
-    static let standard = toursOff + skipOnboarding
+    /// Turns UIKit's animations off for this launch (debug builds only), so pushes, sheets and
+    /// alerts appear at once. XCUITest waits for the app to be idle after every action, and on CI
+    /// those waits were the biggest share of a test's time; locally it took Home, Saved Looks and
+    /// Settings from 283 to 235 seconds (October 2026). Tests about tours, onboarding and the iPad
+    /// layouts leave it out, so animated transitions are still exercised.
+    static let animationsOff = ["-animations", "off"]
+    /// Tours off, onboarding skipped and animations off: what most tests launch with.
+    static let standard = toursOff + skipOnboarding + animationsOff
 }
