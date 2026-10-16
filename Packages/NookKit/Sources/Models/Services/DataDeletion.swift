@@ -35,13 +35,14 @@ public enum DataPart: String, CaseIterable, Hashable, Sendable {
     /// Try-on pictures.
     case pictures
     case suitcases
-    /// The name on her sign, Preferences, fit, measurements, fitting pieces, the try-on photo and
-    /// the remembered source and occasion. Erased back to a fresh profile.
+    /// The name on her sign, Preferences, fit, measurements, fitting pieces, the try-on photo,
+    /// the remembered source and occasion, and the tours she has seen with the "Show tips on new
+    /// screens" switch (Phase 16a). Erased back to a fresh profile, with tips on.
     case profile
     /// Unsaved Add a piece, Edit and Make your own look work.
     case drafts
-    // Phase 16a/16b: tour progress and "Show tips on new screens" (PRD §7.8: Delete My Data
-    // resets them). Phase 24c: `account` and `serverData`.
+    // Tour progress is a preference, so it goes with the profile (PRD §7.8: Delete My Data
+    // resets it). Phase 24c: `account` and `serverData`.
 }
 
 /// How one part's deletion went.
@@ -99,10 +100,11 @@ public struct LocalDataDeletion: DataDeletionService {
     }
 
     /// The order used by `NookServices`: unsaved work, pictures, looks, suitcases, the closet,
-    /// then the profile.
+    /// then the profile and the tours she has seen.
     public init(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
-        drafts: any DraftStore, lookDrafts: any LookDraftStore, pictures: any TryOnPictureStore
+        drafts: any DraftStore, lookDrafts: any LookDraftStore, pictures: any TryOnPictureStore,
+        tours: any TourProgressStore
     ) {
         self.init(stores: [
             (.drafts, drafts),
@@ -112,6 +114,7 @@ public struct LocalDataDeletion: DataDeletionService {
             (.suitcases, suitcases),
             (.closet, closet),
             (.profile, profile),
+            (.profile, tours),
         ])
     }
 
@@ -135,7 +138,7 @@ public struct LocalDataDeletion: DataDeletionService {
             } catch {
                 outcome = .failed
             }
-            // A part held by two stores (drafts) is deleted only if both were erased.
+            // A part held by two stores (drafts, the profile) is deleted only if both were erased.
             if let index = results.firstIndex(where: { $0.0 == part }) {
                 if outcome == .failed { results[index].1 = .failed }
             } else {
