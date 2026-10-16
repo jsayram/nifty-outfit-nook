@@ -205,7 +205,8 @@ struct TodayResult: View {
 
     private var tryDifferent: some View {
         let caption = String(
-            localized: "Uses 1 styling request.", bundle: .module, comment: "Caption under the Style me button")
+            localized: "Uses 1 styling", bundle: .module,
+            comment: "Caption under Try a different outfit: it costs one styling request (amendment, LR-05a)")
         return VStack(spacing: NookSpacing.xxSmall) {
             NookButton(
                 String(localized: "Try a different outfit", bundle: .module, comment: "Your looks button (LR-05a)"),
@@ -224,7 +225,8 @@ struct TodayResult: View {
 }
 
 /// Save look, Try it on, Swap a piece and Ask stylist (RD-06): four equal buttons in two rows,
-/// one column at the accessibility sizes (RD-06.3), with the fine print under them.
+/// one column at the accessibility sizes (RD-06.3), with the fine print under them. Every button
+/// is the size of the largest, so a title that wraps makes all four taller together.
 struct ResultActions: View {
     let isSaved: Bool
     /// Offline with a result on screen: Try it on and Ask stylist need a connection.
@@ -236,24 +238,11 @@ struct ResultActions: View {
 
     var body: some View {
         VStack(spacing: NookSpacing.small) {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: NookSpacing.small) {
-                    save
-                    tryOn
-                    swap
-                    ask
-                }
-            } else {
-                Grid(horizontalSpacing: NookSpacing.small, verticalSpacing: NookSpacing.small) {
-                    GridRow {
-                        save
-                        tryOn
-                    }
-                    GridRow {
-                        swap
-                        ask
-                    }
-                }
+            EqualCellGrid(columns: dynamicTypeSize.isAccessibilitySize ? 1 : 2, spacing: NookSpacing.small) {
+                save
+                tryOn
+                swap
+                ask
             }
             Text(
                 needsConnection
@@ -279,7 +268,7 @@ struct ResultActions: View {
                 : String(localized: "Save look", bundle: .module, comment: "Results button (RD-06)"),
             systemImage: isSaved ? "heart.fill" : "heart",
             kind: isSaved ? .soft : .primary,
-            fillsWidth: true
+            fillsWidth: true, fillsHeight: true
         ) { actions.toggleSave(look) }
         .accessibilityHint(
             isSaved
@@ -298,7 +287,7 @@ struct ResultActions: View {
     private var tryOn: some View {
         NookButton(
             String(localized: "Try it on", bundle: .module, comment: "Results button (RD-06)"),
-            systemImage: "camera", kind: .soft, fillsWidth: true
+            systemImage: "camera", kind: .soft, fillsWidth: true, fillsHeight: true
         ) { actions.tryOn(look) }
         .disabled(needsConnection)
         .accessibilityHint(
@@ -317,7 +306,7 @@ struct ResultActions: View {
     private var swap: some View {
         NookButton(
             String(localized: "Swap a piece", bundle: .module, comment: "Results button (RD-06, LR-08)"),
-            systemImage: "arrow.left.arrow.right", kind: .soft, fillsWidth: true
+            systemImage: "arrow.left.arrow.right", kind: .soft, fillsWidth: true, fillsHeight: true
         ) { actions.swap(look) }
         .accessibilityIdentifier("results.swap")
         .tourAnchor(
@@ -329,7 +318,7 @@ struct ResultActions: View {
     private var ask: some View {
         NookButton(
             String(localized: "Ask stylist", bundle: .module, comment: "Results button (RD-06)"),
-            systemImage: "bubble.left.and.bubble.right", kind: .soft, fillsWidth: true
+            systemImage: "bubble.left.and.bubble.right", kind: .soft, fillsWidth: true, fillsHeight: true
         ) { actions.askStylist(look) }
         .disabled(needsConnection)
         .accessibilityIdentifier("results.askStylist")
@@ -362,5 +351,48 @@ struct ProblemBanner: View {
                 action: retry
             )
         }
+    }
+}
+
+/// Lays its views out in rows of `columns`, every cell as wide as the others and as tall as the
+/// tallest view, so the results buttons are the same size at every text size (RD-06.3).
+struct EqualCellGrid: Layout {
+    var columns: Int
+    var spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let cell = cellSize(proposal: proposal, subviews: subviews)
+        let rows = rowCount(subviews.count)
+        let width = cell.width * CGFloat(columnCount) + spacing * CGFloat(columnCount - 1)
+        return CGSize(width: width, height: cell.height * CGFloat(rows) + spacing * CGFloat(max(rows - 1, 0)))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let cell = cellSize(proposal: ProposedViewSize(width: bounds.width, height: nil), subviews: subviews)
+        for (index, subview) in subviews.enumerated() {
+            let column = index % columnCount
+            let row = index / columnCount
+            let origin = CGPoint(
+                x: bounds.minX + CGFloat(column) * (cell.width + spacing),
+                y: bounds.minY + CGFloat(row) * (cell.height + spacing))
+            subview.place(at: origin, proposal: ProposedViewSize(cell))
+        }
+    }
+
+    private var columnCount: Int { max(columns, 1) }
+
+    private func rowCount(_ count: Int) -> Int {
+        (count + columnCount - 1) / columnCount
+    }
+
+    /// One cell: an equal share of the width offered (or of the widest view's ideal width), and
+    /// the height of the tallest view at that width.
+    private func cellSize(proposal: ProposedViewSize, subviews: Subviews) -> CGSize {
+        let gaps = spacing * CGFloat(columnCount - 1)
+        let width =
+            proposal.width.map { max(($0 - gaps) / CGFloat(columnCount), 0) }
+            ?? subviews.map { $0.sizeThatFits(.unspecified).width }.max() ?? 0
+        let height = subviews.map { $0.sizeThatFits(ProposedViewSize(width: width, height: nil)).height }.max() ?? 0
+        return CGSize(width: width, height: height)
     }
 }

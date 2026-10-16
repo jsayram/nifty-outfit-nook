@@ -26,7 +26,7 @@ Your looks' Swap a piece pushes it, on the version on screen. Since 12a, look de
 - **Which piece**: a chip per piece ("Layer", "Top", "Bottom", "Shoes", and the idea's kind on Something new). It opens on the first main piece. VoiceOver reads each chip with the piece's name.
 - **The look**, its bundle with the piece being changed at full strength and the others stepped back, and a line under it: "Top now: Cream knit sweater", or "Trying Brick knit top".
 - **"Your tops that go with this look"** (LR-07), then three of her pieces. Tapping one tries it in the look; tapping it again goes back.
-- **Show 3 more** while there are more good matches. Then "That's every top in Main closet." and **See all tops** (LR-07.3), and "Not in your closet? Find one" with Mine + one idea (LR-07.4).
+- **Show 3 more** while there are more good matches. Then "That's every top in Main closet" and **See all tops** (LR-07.3), and "Not in your closet? Find one" with Mine + one idea (LR-07.4).
 - **Keep current** and **Use this top** ("Use these shoes" for shoes). Use is off until she tries something. Under them: "Only the top changes. Everything else stays."
 - **Remove this piece**, quiet, at the end. When taking the piece out would leave no look, it's off and says why: "A look needs a top and a bottom, or a dress, so this one can only be swapped."
 

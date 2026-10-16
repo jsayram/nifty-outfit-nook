@@ -58,12 +58,12 @@ struct SwapModelTests {
         #expect(swap.pieces.compactMap { swap.category(of: $0) } == [.layer, .top, .bottom, .shoes])
         let text = SwapText(category: swap.category, sourceName: "Main closet")
         #expect(text.explanation == "Your tops that go with this look")
-        #expect(text.everyOne == "That’s every top in Main closet.")
+        #expect(text.everyOne == "That’s every top in Main closet")
         #expect(text.seeAll == "See all tops")
         #expect(text.use == "Use this top")
         #expect(
             SwapText(category: .shoes, sourceName: "Jose's house").everyOne
-                == "That’s every pair of shoes in Jose's house.")
+                == "That’s every pair of shoes in Jose's house")
         #expect(SwapText(category: .shoes, sourceName: "").use == "Use these shoes")
     }
 

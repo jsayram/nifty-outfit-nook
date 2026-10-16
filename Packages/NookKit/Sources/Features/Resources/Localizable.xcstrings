@@ -5752,7 +5752,7 @@
         }
       }
     },
-    "That’s %@ in %@." : {
+    "That’s %@ in %@" : {
       "comment" : "Swap: the end of the options (LR-07.3): every top, then the source's name"
     },
     "That’s every outfit %@ can make for this request, so this one came round again." : {
@@ -6248,6 +6248,9 @@
     },
     "Used yesterday" : {
       "comment" : "Suitcases: when it was last used"
+    },
+    "Uses 1 styling" : {
+      "comment" : "Caption under Try a different outfit: it costs one styling request (amendment, LR-05a)"
     },
     "Uses 1 styling request." : {
       "comment" : "Under the Style me button"
