@@ -52,6 +52,13 @@ let package = Package(
             resources: [.process("Resources")],
             swiftSettings: uiSettings
         ),
+        // Test-only helpers every test target shares: the fixed test time, the speed checks and the
+        // store contracts that every store, in-memory or real, has to pass. Only test targets
+        // depend on it, so none of it reaches the app.
+        .target(
+            name: "NookTestSupport", dependencies: ["Models"], path: "Tests/NookTestSupport",
+            swiftSettings: strictSettings
+        ),
         .testTarget(
             name: "DesignSystemTests",
             dependencies: [
@@ -61,10 +68,14 @@ let package = Package(
             exclude: ["__Snapshots__"],
             swiftSettings: strictSettings
         ),
-        .testTarget(name: "ModelsTests", dependencies: ["Models"], swiftSettings: strictSettings),
-        .testTarget(name: "FixturesTests", dependencies: ["Fixtures", "Models"], swiftSettings: strictSettings),
+        .testTarget(name: "ModelsTests", dependencies: ["Models", "NookTestSupport"], swiftSettings: strictSettings),
         .testTarget(
-            name: "ServicesTests", dependencies: ["Services", "Models", "Fixtures"], swiftSettings: strictSettings),
+            name: "FixturesTests", dependencies: ["Fixtures", "Models", "NookTestSupport"],
+            swiftSettings: strictSettings
+        ),
+        .testTarget(
+            name: "ServicesTests", dependencies: ["Services", "Models", "Fixtures", "NookTestSupport"],
+            swiftSettings: strictSettings),
         .testTarget(
             name: "FeaturesTests",
             dependencies: [
@@ -72,6 +83,7 @@ let package = Package(
                 "Models",
                 "Fixtures",
                 "DesignSystem",
+                "NookTestSupport",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
             exclude: [

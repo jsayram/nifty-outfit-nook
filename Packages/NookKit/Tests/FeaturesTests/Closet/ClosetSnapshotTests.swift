@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -21,7 +22,7 @@ struct ClosetSnapshotTests {
     static let width: CGFloat = 402
 
     private func model(_ set: FixtureSet, laundry: FixtureLaundryState? = nil) -> ClosetModel {
-        var data = set.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var data = set.data(now: TestTime.now, calendar: TestTime.calendar)
         if laundry != nil {
             // The same as `-fixtures demo:laundry=some`: tracking on, two pieces in the wash.
             data.profile.preferences.tracksLaundry = true
@@ -29,7 +30,7 @@ struct ClosetSnapshotTests {
         // Newest first, as the store hands them over.
         let garments = data.garments.sorted { $0.addedAt > $1.addedAt }
         let model = ClosetModel()
-        model.show(garments, suitcases: data.suitcases, profile: data.profile, now: ClosetTestTime.now)
+        model.show(garments, suitcases: data.suitcases, profile: data.profile, now: TestTime.now)
         return model
     }
 
@@ -59,8 +60,8 @@ struct ClosetSnapshotTests {
     @Test func failedToLoad() async {
         let model = ClosetModel()
         let services = FixtureServices.make(
-            set: .demo, behavior: .storesFail, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
-        await model.load(from: services, now: ClosetTestTime.now)
+            set: .demo, behavior: .storesFail, now: TestTime.now, calendar: TestTime.calendar)
+        await model.load(from: services, now: TestTime.now)
         assertPageSnapshot(model, named: "failed")
     }
 
@@ -82,8 +83,8 @@ struct ClosetSnapshotTests {
             .environment(\.nookStaticRendering, true)
             .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

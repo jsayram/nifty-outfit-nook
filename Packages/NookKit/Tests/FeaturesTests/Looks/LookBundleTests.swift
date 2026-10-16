@@ -3,6 +3,7 @@ import DesignSystem
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -12,7 +13,7 @@ import Testing
 @MainActor
 @Suite
 struct LookBundleTests {
-    let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+    let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
     var garments: [Garment.ID: Garment] { Dictionary(uniqueKeysWithValues: data.garments.map { ($0.id, $0) }) }
     let english = Locale(identifier: "en_US")
 
@@ -49,7 +50,7 @@ struct LookBundleTests {
     }
 
     @Test func garmentPiecesKeepTheirPhotoAndCutout() {
-        let photoPieces = SamplePhotoGarments.garments(now: ClosetTestTime.now)
+        let photoPieces = SamplePhotoGarments.garments(now: TestTime.now)
         let content = LookBundleSamples.withPhotos(LookBundleSamples.photoPieces(from: photoPieces))
         let tee = content.pieces.first { $0.id == "g-photo-white-on-white" }
         #expect(tee?.cutout != nil)

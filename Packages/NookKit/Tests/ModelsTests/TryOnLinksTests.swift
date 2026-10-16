@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 /// How try-on pictures and their looks link (Phase 12b, RD-08.2).

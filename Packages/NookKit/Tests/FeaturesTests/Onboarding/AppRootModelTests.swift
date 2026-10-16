@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -25,7 +26,7 @@ struct AppRootModelTests {
                 services: { closet in
                     FixtureServices.make(
                         configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
-                        now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+                        now: TestTime.now, calendar: TestTime.calendar)
                 },
                 onboardingOptions: options)
         }
@@ -88,9 +89,9 @@ struct AppRootModelTests {
         let services = try services(first)
         try await services.closet.save(
             GarmentDetails(name: "Sage cardigan", category: .layer).makeGarment(
-                id: Garment.ID("g-new"), addedAt: ClosetTestTime.now))
+                id: Garment.ID("g-new"), addedAt: TestTime.now))
         try await services.tours.record(
-            TourRecord(tour: .home, version: HomeTour.version, outcome: .finished, date: ClosetTestTime.now))
+            TourRecord(tour: .home, version: HomeTour.version, outcome: .finished, date: TestTime.now))
 
         // The same install, launched again: Home straight away, on the empty closet she chose.
         // In Stage A what she added and her name are gone; the tours she saw stay seen.

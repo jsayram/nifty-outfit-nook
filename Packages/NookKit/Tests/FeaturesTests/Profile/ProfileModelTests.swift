@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -10,11 +11,11 @@ import Testing
 /// photo. Measurements here are made up.
 @MainActor
 struct ProfileModelTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
     private let us = Locale(identifier: "en_US")
 
     private func services(_ set: FixtureSet = .demo, behavior: FixtureBehavior = .normal) -> NookServices {
-        FixtureServices.make(set: set, behavior: behavior, now: now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: set, behavior: behavior, now: now, calendar: TestTime.calendar)
     }
 
     private func loaded(_ services: NookServices, locale: Locale? = nil) async -> ProfileModel {
@@ -103,7 +104,7 @@ struct ProfileModelTests {
         // Each change reads the store first, so Track laundry turned on in Laundry stays on.
         let services = services()
         let model = await loaded(services)
-        try await services.profile.change { $0.preferences.tracksLaundry = true }
+        try await services.profile.update { $0.preferences.tracksLaundry = true }
         #expect(await model.setRepeatWindow(.noLimit, in: services))
         #expect(try await services.profile.profile().preferences.tracksLaundry)
     }

@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -25,7 +26,7 @@ struct GarmentStickerSnapshotTests {
     /// Every kind of piece: demo pieces, plus a made-up hat and a multicolour scarf-top, which
     /// the demo closet doesn't have.
     private var drawings: [Garment] {
-        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         let ids: [Garment.ID] = [
             "g-pink-blouse", "g-navy-trousers", "g-blue-dress", "g-brown-jacket", "g-tan-loafers", "g-burgundy-bag",
             "g-black-tee", "g-wide-jeans", "g-white-sneakers",
@@ -33,11 +34,11 @@ struct GarmentStickerSnapshotTests {
         let demo = ids.compactMap { id in data.garments.first { $0.id == id } }
         return demo + [
             Garment(
-                id: "g-test-hat", name: "Straw hat", category: .accessory, colors: [.beige], addedAt: ClosetTestTime.now
+                id: "g-test-hat", name: "Straw hat", category: .accessory, colors: [.beige], addedAt: TestTime.now
             ),
             Garment(
                 id: "g-test-stripes", name: "Rainbow top", category: .top, colors: [.multicolor],
-                addedAt: ClosetTestTime.now),
+                addedAt: TestTime.now),
         ]
     }
 
@@ -50,20 +51,20 @@ struct GarmentStickerSnapshotTests {
     }
 
     @Test func samplePhotos() async {
-        let garments = SamplePhotoGarments.garments(now: ClosetTestTime.now)
+        let garments = SamplePhotoGarments.garments(now: TestTime.now)
         let loader = await loadedPictures(for: garments, sizes: [Self.large, Self.small])
         assertSnapshot(board(garments), loader: loader, named: "sample-photos")
     }
 
     @Test func samplePhotosDark() async {
-        let garments = SamplePhotoGarments.garments(now: ClosetTestTime.now)
+        let garments = SamplePhotoGarments.garments(now: TestTime.now)
         let loader = await loadedPictures(for: garments, sizes: [Self.large, Self.small])
         assertSnapshot(board(garments), loader: loader, colorScheme: .dark, named: "sample-photos-dark")
     }
 
     /// Garment detail with a photo: the striped sweater as a sticker, the white tee as a tile.
     @Test func detailWithAPhoto() async throws {
-        let garments = SamplePhotoGarments.garments(now: ClosetTestTime.now)
+        let garments = SamplePhotoGarments.garments(now: TestTime.now)
         let sweater = try #require(garments.first { $0.id == "g-photo-striped-sweater" })
         let whiteTee = try #require(garments.first { $0.id == "g-photo-white-on-white" })
         let stage = CGSize(width: 190, height: 236)
@@ -142,7 +143,7 @@ struct GarmentStickerSnapshotTests {
             .environment(\.nookStaticRendering, true)
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, Self.scale)
-            .environment(\.locale, ClosetTestTime.locale)
+            .environment(\.locale, TestTime.locale)
         let renderer = ImageRenderer(content: content)
         renderer.scale = Self.scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 struct SuitcaseShelfTests {

@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -26,12 +27,12 @@ struct GarmentDetailSnapshotTests {
     static let width: CGFloat = 402
 
     private func model(_ id: Garment.ID, tracksLaundry: Bool = false) throws -> GarmentDetailModel {
-        var data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         data.profile.preferences.tracksLaundry = tracksLaundry
         let garment = try #require(data.garments.first { $0.id == id })
         let looks = data.looks.sorted { $0.createdAt > $1.createdAt }
         let model = GarmentDetailModel(garmentID: id)
-        model.show(garment, suitcases: data.suitcases, looks: looks, profile: data.profile, now: ClosetTestTime.now)
+        model.show(garment, suitcases: data.suitcases, looks: looks, profile: data.profile, now: TestTime.now)
         return model
     }
 
@@ -60,9 +61,9 @@ struct GarmentDetailSnapshotTests {
 
     @Test func goneAndFailed() async {
         let gone = GarmentDetailModel(garmentID: "g-nothing")
-        await gone.load(from: garmentTestServices(), now: ClosetTestTime.now)
+        await gone.load(from: garmentTestServices(), now: TestTime.now)
         let failed = GarmentDetailModel(garmentID: "g-navy-trousers")
-        await failed.load(from: garmentTestServices(behavior: .storesFail), now: ClosetTestTime.now)
+        await failed.load(from: garmentTestServices(behavior: .storesFail), now: TestTime.now)
         assertSnapshot(
             VStack(spacing: 0) {
                 GarmentDetailPage(model: gone)
@@ -112,12 +113,12 @@ struct GarmentDetailSnapshotTests {
     }
 
     @Test func recentlyDeleted() {
-        var data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         if let index = data.garments.firstIndex(where: { $0.id == "g-navy-trousers" }) {
-            data.garments[index].deletedAt = ClosetTestTime.now
+            data.garments[index].deletedAt = TestTime.now
         }
         let model = RecentlyDeletedModel()
-        model.show(data.garments, now: ClosetTestTime.now)
+        model.show(data.garments, now: TestTime.now)
         assertSnapshot(RecentlyDeletedPage(model: model), named: "recently-deleted")
     }
 
@@ -141,8 +142,8 @@ struct GarmentDetailSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, 2)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

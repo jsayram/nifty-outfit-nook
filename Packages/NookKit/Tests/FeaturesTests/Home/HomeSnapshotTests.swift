@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -58,7 +59,7 @@ struct HomeSnapshotTests {
 
     /// Her three newest saved looks in the frames under the shelf (Phase 12a), light and dark.
     @Test func framedLooks() {
-        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         var content = Self.demo
         content.framedLooks = HomeModel.framedLooks(from: data.looks, garments: data.garments)
         assertRoomSnapshot(content, on: .iPhone17, named: "framed-looks")

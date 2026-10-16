@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -162,7 +163,7 @@ struct StyleMeSnapshotTests {
     {
         NookSheetContainer(
             title: sheet.title,
-            subtitle: sheet.subtitle(sourceName: model.text(locale: ClosetTestTime.locale).sourceName),
+            subtitle: sheet.subtitle(sourceName: model.text(locale: TestTime.locale).sourceName),
             content: content
         )
         .background(Color.nook.wallGradient)
@@ -189,8 +190,8 @@ struct StyleMeSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

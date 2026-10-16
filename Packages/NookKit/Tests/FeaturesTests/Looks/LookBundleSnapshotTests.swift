@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -86,7 +87,7 @@ struct LookBundleSnapshotTests {
 
     private var photoLook: LookBundleContent {
         LookBundleSamples.withPhotos(
-            LookBundleSamples.photoPieces(from: SamplePhotoGarments.garments(now: ClosetTestTime.now)))
+            LookBundleSamples.photoPieces(from: SamplePhotoGarments.garments(now: TestTime.now)))
     }
 
     private func photoBoard(_ look: LookBundleContent) -> some View {
@@ -143,7 +144,7 @@ struct LookBundleSnapshotTests {
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.horizontalSizeClass, sizeClass)
             .environment(\.displayScale, Self.scale)
-            .environment(\.locale, ClosetTestTime.locale)
+            .environment(\.locale, TestTime.locale)
         let renderer = ImageRenderer(content: content)
         renderer.scale = Self.scale
         renderer.proposedSize = ProposedViewSize(width: width, height: nil)

@@ -2,6 +2,7 @@ import CoreGraphics
 import Foundation
 import ImageIO
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Fixtures

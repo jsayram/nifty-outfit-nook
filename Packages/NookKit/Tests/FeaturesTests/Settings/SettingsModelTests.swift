@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -10,8 +11,8 @@ import Testing
 struct TrackLaundryTests {
     private func services(laundry: FixtureLaundryState? = nil, behavior: FixtureBehavior = .normal) -> NookServices {
         FixtureServices.make(
-            set: .demo, behavior: behavior, laundry: laundry, now: ClosetTestTime.now,
-            calendar: ClosetTestTime.calendar)
+            set: .demo, behavior: behavior, laundry: laundry, now: TestTime.now,
+            calendar: TestTime.calendar)
     }
 
     private func loaded(_ services: NookServices) async -> ProfileModel {
@@ -47,7 +48,7 @@ struct TrackLaundryTests {
         await home.load(from: services)
         #expect(home.content.hamper == .toWash(2))
         let closet = ClosetModel()
-        await closet.load(from: services, now: ClosetTestTime.now)
+        await closet.load(from: services, now: TestTime.now)
         #expect(closet.tracksLaundry)
     }
 
@@ -71,7 +72,7 @@ struct TrackLaundryTests {
         await home.load(from: services)
         #expect(home.content.hamper == .off)
         let closet = ClosetModel()
-        await closet.load(from: services, now: ClosetTestTime.now)
+        await closet.load(from: services, now: TestTime.now)
         #expect(!closet.tracksLaundry)
         #expect(!closet.showsLaundryFilter)
 
@@ -82,7 +83,7 @@ struct TrackLaundryTests {
             let garment = try #require(garments.first { $0.id == id })
             #expect(
                 Eligibility.isEligible(
-                    garment, members: nil, tracksLaundry: profile.preferences.tracksLaundry, on: ClosetTestTime.now))
+                    garment, members: nil, tracksLaundry: profile.preferences.tracksLaundry, on: TestTime.now))
         }
     }
 
@@ -103,7 +104,7 @@ struct FeedbackModelTests {
     @Test func theNoteHoldsHerWordsAndNothingElseByDefault() async throws {
         // Even with her whole profile and closet loaded elsewhere in the app, the note is built
         // from the form alone: her words and what it's about.
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         let profile = try await services.profile.profile()
         let garments = try await services.closet.garments()
 
@@ -198,7 +199,7 @@ struct FeedbackModelTests {
 struct DeleteDataModelTests {
     private func services(_ set: FixtureSet = .demo, behavior: FixtureBehavior = .normal) -> NookServices {
         FixtureServices.make(
-            set: set, behavior: behavior, draft: .look, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+            set: set, behavior: behavior, draft: .look, now: TestTime.now, calendar: TestTime.calendar)
     }
 
     @Test func countsWhatWillGo() async throws {
@@ -232,7 +233,7 @@ struct DeleteDataModelTests {
         #expect(home.content.hamper == .off)
         #expect(home.content.framedLooks.isEmpty)
         let closet = ClosetModel()
-        await closet.load(from: services, now: ClosetTestTime.now)
+        await closet.load(from: services, now: TestTime.now)
         #expect(closet.phase == .loaded)
         let profile = ProfileModel()
         await profile.load(from: services, locale: Locale(identifier: "en_US"))

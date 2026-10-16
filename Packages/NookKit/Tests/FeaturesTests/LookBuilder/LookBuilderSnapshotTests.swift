@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -70,7 +71,7 @@ struct LookBuilderSnapshotTests {
         let model = await loadedBuilder(startingWith: "g-navy-trousers")
         let picker = ClosetModel(scope: model.pickerScope())
         picker.show(
-            Array(model.garments.values), suitcases: model.suitcases, profile: Profile(), now: ClosetTestTime.now)
+            Array(model.garments.values), suitcases: model.suitcases, profile: Profile(), now: TestTime.now)
         assertSnapshot(
             NookSheetContainer(title: LookBuilderText.pickerTitle) {
                 PiecePicker(
@@ -108,8 +109,8 @@ struct LookBuilderSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

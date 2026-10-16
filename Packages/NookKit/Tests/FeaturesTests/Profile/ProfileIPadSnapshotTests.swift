@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -20,7 +21,7 @@ import UIKit
 @Suite(.heavyMainActorWork)
 struct ProfileIPadSnapshotTests {
     private func model() -> ProfileModel {
-        let profile = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar).profile
+        let profile = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar).profile
         let model = ProfileModel()
         model.show(profile, locale: Locale(identifier: "en_US"))
         return model

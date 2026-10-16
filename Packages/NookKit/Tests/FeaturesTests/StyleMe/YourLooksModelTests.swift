@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -54,7 +55,7 @@ func yourLooksServices(
     _ set: FixtureSet = .demo, behavior: FixtureBehavior = .normal, stylist: ScriptedStylist? = nil
 ) -> NookServices {
     var services = FixtureServices.make(
-        set: set, behavior: behavior, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, now: TestTime.now, calendar: TestTime.calendar)
     if let stylist { services.stylist = stylist }
     return services
 }
@@ -70,8 +71,8 @@ func lookRequest(
 ) -> StyleRequest {
     StyleRequest(
         id: id, source: source, occasion: occasion, weatherChoice: weatherChoice,
-        weather: WeatherSnapshot(condition: .rain, temperatureCelsius: 14.5, observedAt: ClosetTestTime.now),
-        preferences: Preferences(pieceMode: pieceMode), createdAt: ClosetTestTime.now)
+        weather: WeatherSnapshot(condition: .rain, temperatureCelsius: 14.5, observedAt: TestTime.now),
+        preferences: Preferences(pieceMode: pieceMode), createdAt: TestTime.now)
 }
 
 /// A Your looks model with numbered request IDs (req-2, req-3, …) for Try a different outfit.
@@ -79,7 +80,7 @@ func lookRequest(
 func yourLooksModel(_ request: StyleRequest = lookRequest()) -> YourLooksModel {
     var next = 1
     return YourLooksModel(
-        request: request, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar,
+        request: request, now: { TestTime.now }, calendar: TestTime.calendar,
         makeID: {
             next += 1
             return StyleRequest.ID("req-\(next)")
@@ -99,7 +100,7 @@ func styledLooks(
 
 @MainActor
 struct YourLooksModelTests {
-    private let us = ClosetTestTime.locale
+    private let us = TestTime.locale
 
     // MARK: Complete
 
@@ -163,7 +164,7 @@ struct YourLooksModelTests {
         #expect(model.suitcaseName == "Weekend")
         let text = YourLooksText(request: model.request, suitcaseName: model.suitcaseName, locale: us)
         #expect(
-            text.line(for: .noNewPieceInSuitcase, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+            text.line(for: .noNewPieceInSuitcase, now: TestTime.now, calendar: TestTime.calendar)
                 == "Looks from Weekend use only what’s packed, so Something new is made from your own pieces.")
     }
 
@@ -184,7 +185,7 @@ struct YourLooksModelTests {
     @Test func aSuitcaseIsMarkedAsUsed() async throws {
         let services = yourLooksServices()
         _ = await styledLooks(lookRequest(source: .suitcase("s-weekend")), services: services)
-        #expect(try await services.suitcases.suitcase("s-weekend").lastUsedAt == ClosetTestTime.now)
+        #expect(try await services.suitcases.suitcase("s-weekend").lastUsedAt == TestTime.now)
     }
 
     // MARK: Partial and insufficient
@@ -274,9 +275,9 @@ struct YourLooksModelTests {
                         LookPiece(id: "p1", content: .garment("g-navy-trousers"), isSameAsSimple: true),
                         LookPiece(id: "p2", content: .idea(PieceIdea(name: "Blazer", category: .layer))),
                     ],
-                    createdAt: ClosetTestTime.now)
+                    createdAt: TestTime.now)
             ],
-            createdAt: ClosetTestTime.now)
+            createdAt: TestTime.now)
         let services = yourLooksServices(stylist: ScriptedStylist([.outcome(.complete(bad))]))
         let model = await styledLooks(request, services: services)
         #expect(model.status == .failed(.notCompleted))
@@ -506,14 +507,14 @@ struct YourLooksModelTests {
         let text = YourLooksText(request: lookRequest(), suitcaseName: nil, locale: us)
         let line = { (days: Int) in
             text.line(
-                for: .wornRecently(lastWorn: ClosetTestTime.day(-days)), now: ClosetTestTime.now,
-                calendar: ClosetTestTime.calendar)
+                for: .wornRecently(lastWorn: TestTime.day(-days)), now: TestTime.now,
+                calendar: TestTime.calendar)
         }
         #expect(line(0) == "You wore this today")
         #expect(line(1) == "You wore this yesterday")
         #expect(line(5) == "You wore this 5 days ago")
         #expect(
-            text.line(for: .requiredColorNotMet(.purple), now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+            text.line(for: .requiredColorNotMet(.purple), now: TestTime.now, calendar: TestTime.calendar)
                 == "Nothing in Main closet could bring in purple here, so this look goes without it.")
     }
 
@@ -529,14 +530,14 @@ struct YourLooksModelTests {
         }
         let dress = Look(
             id: "d", version: .simple, pieces: [LookPiece(id: "p", content: .garment("g-blue-dress"))],
-            createdAt: ClosetTestTime.now)
+            createdAt: TestTime.now)
         #expect(text.name(for: dress, garments: model.garments) == "Blue dress")
         let pair = Look(
             id: "p", version: .dressedUp,
             pieces: [
                 LookPiece(id: "a", content: .garment("g-pink-blouse")),
                 LookPiece(id: "b", content: .garment("g-navy-trousers")),
-            ], createdAt: ClosetTestTime.now)
+            ], createdAt: TestTime.now)
         #expect(text.name(for: pair, garments: model.garments) == "Pink & navy, dressed up")
     }
 

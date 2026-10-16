@@ -120,7 +120,7 @@ struct HomeModelTests {
         let services = FixtureServices.make(set: .demo, now: now)
         let suitcase = try #require(
             try await services.suitcases.suitcases().first { !$0.isArchived && !$0.garmentIDs.isEmpty })
-        try await services.profile.change { $0.remembered.source = .suitcase(suitcase.id) }
+        try await services.profile.update { $0.remembered.source = .suitcase(suitcase.id) }
         let model = HomeModel()
         await model.load(from: services)
         #expect(model.content.source.kind == .suitcase(name: suitcase.name, icon: suitcase.icon))

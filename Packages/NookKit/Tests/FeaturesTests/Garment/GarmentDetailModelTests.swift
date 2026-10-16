@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -13,14 +14,14 @@ func garmentTestServices(
     laundry: FixtureLaundryState? = nil
 ) -> NookServices {
     FixtureServices.make(
-        set: set, behavior: behavior, laundry: laundry, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, laundry: laundry, now: TestTime.now, calendar: TestTime.calendar)
 }
 
 /// A detail model loaded from fixture services, the way the screen loads it.
 @MainActor
 func loadedDetailModel(_ id: Garment.ID, services: NookServices) async -> GarmentDetailModel {
     let model = GarmentDetailModel(garmentID: id)
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }
 
@@ -116,7 +117,7 @@ struct GarmentDetailChangeTests {
         let stored = try await services.closet.garment("g-navy-trousers")
         #expect(stored.ownership == .noLongerOwned)
         #expect(!stored.isInCloset)
-        #expect(!Eligibility.isEligible(stored, members: nil, tracksLaundry: false, on: ClosetTestTime.now))
+        #expect(!Eligibility.isEligible(stored, members: nil, tracksLaundry: false, on: TestTime.now))
         // It stays in its suitcases and looks, so Undo needs nothing else.
         #expect(try await services.suitcases.suitcase(DemoClosetIDs.weekend).contains("g-navy-trousers"))
         let closet = await loadedClosetModel(services: services)
@@ -142,14 +143,14 @@ struct GarmentDetailChangeTests {
     @Test func deleteItThenRestoreFromRecentlyDeleted() async throws {
         let services = garmentTestServices()
         let model = await loadedDetailModel("g-navy-trousers", services: services)
-        let removal = try #require(try await model.delete(in: services.closet, at: ClosetTestTime.now))
+        let removal = try #require(try await model.delete(in: services.closet, at: TestTime.now))
         #expect(removal.kind == .deleted)
         #expect(removal.message == "Navy dress pants is in Recently deleted")
-        #expect(try await services.closet.garment("g-navy-trousers").deletedAt == ClosetTestTime.now)
+        #expect(try await services.closet.garment("g-navy-trousers").deletedAt == TestTime.now)
         #expect(await loadedClosetModel(services: services).deletedCount == 2)
 
         let deleted = RecentlyDeletedModel()
-        await deleted.load(from: services, now: ClosetTestTime.now)
+        await deleted.load(from: services, now: TestTime.now)
         #expect(deleted.pieces.map(\.id) == ["g-navy-trousers", "g-gray-leggings"])
 
         let restored = try await deleted.restore("g-navy-trousers", in: services.closet)
@@ -164,7 +165,7 @@ struct GarmentDetailChangeTests {
     @Test func undoAfterDeleteRestores() async throws {
         let services = garmentTestServices()
         let model = await loadedDetailModel("g-black-heels", services: services)
-        let removal = try #require(try await model.delete(in: services.closet, at: ClosetTestTime.now))
+        let removal = try #require(try await model.delete(in: services.closet, at: TestTime.now))
         try await removal.undo(in: services.closet)
         #expect(try await services.closet.garment("g-black-heels").isInCloset)
     }
@@ -174,7 +175,7 @@ struct GarmentDetailChangeTests {
         let services = garmentTestServices()
         let model = await loadedDetailModel("g-gray-blazer", services: services)
         #expect(try await model.markNoLongerOwned(in: services.closet) == nil)
-        #expect(try await model.delete(in: services.closet, at: ClosetTestTime.now) == nil)
+        #expect(try await model.delete(in: services.closet, at: TestTime.now) == nil)
         #expect(try await services.closet.garment("g-gray-blazer").deletedAt == nil)
     }
 
@@ -195,7 +196,7 @@ struct GarmentDetailChangeTests {
 struct RecentlyDeletedModelTests {
     @Test func theDemoHasOneDeletedPiece() async {
         let model = RecentlyDeletedModel()
-        await model.load(from: garmentTestServices(), now: ClosetTestTime.now)
+        await model.load(from: garmentTestServices(), now: TestTime.now)
         #expect(model.phase == .loaded)
         #expect(model.pieces.map(\.name) == ["Old gray leggings"])
         #expect(!model.isEmpty)
@@ -205,9 +206,9 @@ struct RecentlyDeletedModelTests {
     @Test func piecesPastTheirThirtyDaysArePurgedOnLoad() async throws {
         let services = garmentTestServices()
         let model = RecentlyDeletedModel()
-        await model.load(from: services, now: ClosetTestTime.day(26))
+        await model.load(from: services, now: TestTime.day(26))
         #expect(model.pieces.count == 1)
-        await model.load(from: services, now: ClosetTestTime.day(27))
+        await model.load(from: services, now: TestTime.day(27))
         #expect(model.isEmpty)
         await #expect(throws: StoreError.notFound) {
             try await services.closet.garment("g-gray-leggings")
@@ -216,13 +217,13 @@ struct RecentlyDeletedModelTests {
 
     @Test func anEmptyClosetHasNothingDeleted() async {
         let model = RecentlyDeletedModel()
-        await model.load(from: garmentTestServices(.empty), now: ClosetTestTime.now)
+        await model.load(from: garmentTestServices(.empty), now: TestTime.now)
         #expect(model.isEmpty)
     }
 
     @Test func aFailingStoreShowsTheErrorState() async {
         let model = RecentlyDeletedModel()
-        await model.load(from: garmentTestServices(behavior: .storesFail), now: ClosetTestTime.now)
+        await model.load(from: garmentTestServices(behavior: .storesFail), now: TestTime.now)
         #expect(model.phase == .failed)
     }
 }
@@ -237,6 +238,6 @@ enum DemoClosetIDs {
 @MainActor
 func loadedClosetModel(services: NookServices) async -> ClosetModel {
     let model = ClosetModel()
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }

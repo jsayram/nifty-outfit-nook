@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -34,7 +35,7 @@ struct ProfileSnapshotTests {
     private func model(
         _ set: FixtureSet = .demo, measured: Bool = false, units: MeasurementUnits? = nil, photo: Bool = false
     ) -> ProfileModel {
-        var profile = set.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar).profile
+        var profile = set.data(now: TestTime.now, calendar: TestTime.calendar).profile
         if measured { profile.measurements = Self.measurements }
         profile.units = units
         if photo { profile.tryOnPhoto = ProfileModel.exampleTryOnPhoto }
@@ -188,7 +189,7 @@ struct ProfileSnapshotTests {
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, us)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         // A very tall page (Fit at AX5) comes back empty at 2x (playbook, Phase 7b), so it's drawn
         // at 1x.

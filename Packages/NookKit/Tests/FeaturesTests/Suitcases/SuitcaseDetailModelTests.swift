@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -8,10 +9,10 @@ import Testing
 /// One suitcase (Phase 13): packing, removing with Undo, the source, archive and delete with Undo.
 @MainActor
 struct SuitcaseDetailModelTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func services(source: FixtureSourceState? = nil, laundry: FixtureLaundryState? = nil) -> NookServices {
-        FixtureServices.make(set: .demo, laundry: laundry, source: source, now: now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, laundry: laundry, source: source, now: now, calendar: TestTime.calendar)
     }
 
     private func loaded(_ id: Suitcase.ID, _ services: NookServices) async -> SuitcaseDetailModel {

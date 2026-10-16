@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -24,8 +25,8 @@ func styleMeServices(
     laundry: FixtureLaundryState? = nil
 ) -> NookServices {
     FixtureServices.make(
-        set: set, behavior: behavior, weather: weather, laundry: laundry, now: ClosetTestTime.now,
-        calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, weather: weather, laundry: laundry, now: TestTime.now,
+        calendar: TestTime.calendar)
 }
 
 /// A Style Me model loaded the way the screen loads it.
@@ -34,13 +35,13 @@ func loadedStyleMe(
     _ services: NookServices = styleMeServices(), startingPieceID: Garment.ID? = nil
 ) async -> StyleMeModel {
     let model = StyleMeModel(startingPieceID: startingPieceID)
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }
 
 @MainActor
 struct StyleMeModelTests {
-    private let us = ClosetTestTime.locale
+    private let us = TestTime.locale
 
     /// RD-02: the defaults are ready to style, with today's weather (LR-04.1) and Lily's
     /// Preferences default (LR-03.3).
@@ -74,7 +75,7 @@ struct StyleMeModelTests {
         let model = await loadedStyleMe(services)
         model.update { $0.comfort = .fitted }
         model.choose(source: .suitcase("s-weekend"))
-        let request = try #require(model.makeRequest(id: "r-1", now: ClosetTestTime.now))
+        let request = try #require(model.makeRequest(id: "r-1", now: TestTime.now))
         #expect(request.source == .suitcase("s-weekend"))
         #expect(await stylist.calls == 0)
     }
@@ -91,7 +92,7 @@ struct StyleMeModelTests {
             draft.pieceMode = .onlyMine
             draft.startingPieceID = "g-navy-trousers"
         }
-        let request = try #require(model.makeRequest(id: "r-1", now: ClosetTestTime.now))
+        let request = try #require(model.makeRequest(id: "r-1", now: TestTime.now))
         #expect(request.occasion == .other)
         #expect(request.occasionNote == "Museum visit")
         #expect(request.weatherChoice == .indoors)
@@ -112,7 +113,7 @@ struct StyleMeModelTests {
     @Test func theRequestHoldsNoNames() async throws {
         let model = await loadedStyleMe(startingPieceID: "g-navy-trousers")
         model.choose(source: .suitcase("s-jose"))
-        let request = try #require(model.makeRequest(id: "r-1", now: ClosetTestTime.now))
+        let request = try #require(model.makeRequest(id: "r-1", now: TestTime.now))
         let json = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
         #expect(json.contains("s-jose"))
         #expect(!json.contains("Jose"))
@@ -128,7 +129,7 @@ struct StyleMeModelTests {
         let text = model.text(locale: us)
         #expect(text.startingPieceValue == "Navy dress pants")
         #expect(text.startingPieceDetail == "Your looks are built around it")
-        #expect(model.makeRequest(now: ClosetTestTime.now)?.startingPieceID == "g-navy-trousers")
+        #expect(model.makeRequest(now: TestTime.now)?.startingPieceID == "g-navy-trousers")
     }
 
     /// RD-11.2: with tracking on, a piece in the wash can't start a look, and the screen says why.
@@ -136,7 +137,7 @@ struct StyleMeModelTests {
         let model = await loadedStyleMe(styleMeServices(laundry: .some), startingPieceID: "g-lace-top")
         #expect(model.check.issues == [.startingPieceUnusable([.dirty])])
         #expect(!model.canStyle)
-        #expect(model.makeRequest(now: ClosetTestTime.now) == nil)
+        #expect(model.makeRequest(now: TestTime.now) == nil)
         let text = model.text(locale: us)
         #expect(text.startingPieceProblem == "In the wash")
         let notice = text.notice(for: model.check.issues[0])
@@ -166,7 +167,7 @@ struct StyleMeModelTests {
         #expect(text.sourceName == "Weekend")
         #expect(text.sourceDetail == "8 pieces · Suitcase only")
         #expect(text.preferencesLine == "From a suitcase, every piece is one you packed.")
-        #expect(model.makeRequest(now: ClosetTestTime.now)?.allowsNewPieceIdea == false)
+        #expect(model.makeRequest(now: TestTime.now)?.allowsNewPieceIdea == false)
     }
 
     /// A small suitcase warns early and still styles.
@@ -217,7 +218,7 @@ struct StyleMeModelTests {
         #expect(model.phase == .loaded)
         #expect(model.check.issues == [.closetEmpty])
         #expect(!model.canStyle)
-        #expect(model.makeRequest(now: ClosetTestTime.now) == nil)
+        #expect(model.makeRequest(now: TestTime.now) == nil)
         let notice = model.text(locale: us).notice(for: .closetEmpty)
         #expect(notice.title == "Your closet is empty")
         #expect(notice.actions == [.addPiece])
@@ -228,7 +229,7 @@ struct StyleMeModelTests {
         let model = await loadedStyleMe(styleMeServices(weather: .unavailable))
         #expect(model.weather == .unavailable)
         #expect(model.canStyle)
-        let request = try #require(model.makeRequest(now: ClosetTestTime.now))
+        let request = try #require(model.makeRequest(now: TestTime.now))
         #expect(request.weatherChoice == .useToday)
         #expect(request.weather == nil)
     }
@@ -237,7 +238,7 @@ struct StyleMeModelTests {
         let model = await loadedStyleMe(styleMeServices(behavior: .storesFail))
         #expect(model.phase == .failed)
         #expect(!model.canStyle)
-        #expect(model.makeRequest(now: ClosetTestTime.now) == nil)
+        #expect(model.makeRequest(now: TestTime.now) == nil)
     }
 
     @Test func noServicesIsAFailureNotACrash() async {
@@ -273,7 +274,7 @@ struct StyleMeModelTests {
             draft.occasion = .brunch
         }
         let before = model.draft
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         #expect(model.draft == before)
     }
 

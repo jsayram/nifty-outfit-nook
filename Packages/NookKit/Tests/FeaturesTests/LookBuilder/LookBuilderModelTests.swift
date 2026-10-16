@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -12,8 +13,8 @@ func builderServices(
     draft: FixtureDraftState? = nil, stylist: ScriptedStylist? = nil
 ) -> NookServices {
     var services = FixtureServices.make(
-        set: set, behavior: behavior, laundry: laundry, draft: draft, now: ClosetTestTime.now,
-        calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, laundry: laundry, draft: draft, now: TestTime.now,
+        calendar: TestTime.calendar)
     if let stylist { services.stylist = stylist }
     return services
 }
@@ -25,7 +26,7 @@ func loadedBuilder(
 ) async -> LookBuilderModel {
     var next = 0
     let model = LookBuilderModel(
-        startingPieceID: start, now: { ClosetTestTime.now },
+        startingPieceID: start, now: { TestTime.now },
         makeLookID: {
             next += 1
             return Look.ID("made-\(next)")
@@ -162,7 +163,7 @@ struct LookBuilderModelTests {
     @Test func anEmptyNameIsFilledIn() async throws {
         let model = await loadedBuilder(startingWith: "g-navy-trousers")
         model.add("g-pink-blouse")
-        let fallback = YourLooksText.colourName(of: model.pieces, locale: ClosetTestTime.locale)
+        let fallback = YourLooksText.colourName(of: model.pieces, locale: TestTime.locale)
         #expect(fallback == "Pink & navy")
         let look = try await model.save(fallbackName: fallback ?? LookBuilderText.fallbackName)
         #expect(look.name == "Pink & navy")
@@ -231,7 +232,7 @@ struct LookBuilderModelTests {
     @Test func anUnchangedDraftIsNotOffered() async throws {
         let services = builderServices()
         try await services.lookDrafts.save(
-            LookDraft(garmentIDs: ["g-navy-trousers"], startingPieceID: "g-navy-trousers", savedAt: ClosetTestTime.now))
+            LookDraft(garmentIDs: ["g-navy-trousers"], startingPieceID: "g-navy-trousers", savedAt: TestTime.now))
         let model = await loadedBuilder(services: services)
         #expect(model.offeredDraft == nil)
     }

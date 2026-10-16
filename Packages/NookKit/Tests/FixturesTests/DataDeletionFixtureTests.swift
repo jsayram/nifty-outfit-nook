@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 /// Delete my data over the real Stage A stores (Phase 14b): after it, every store reads as a
@@ -11,6 +12,21 @@ struct DataDeletionFixtureTests {
     ) -> NookServices {
         FixtureServices.make(
             set: set, behavior: behavior, draft: draft, now: TestTime.now, calendar: TestTime.calendar)
+    }
+
+    /// Delete my data erases the stores the services hold now. A store replaced after the
+    /// services were made is the one erased, not the one it replaced.
+    @Test func deletionErasesAStoreSwappedInLater() async throws {
+        var services = services()
+        let original = services.closet
+        services.closet = InMemoryClosetStore(
+            garments: [Garment(id: "g-new", name: "New piece", category: .top, addedAt: TestTime.now)],
+            calendar: TestTime.calendar)
+
+        #expect(await services.deletion.delete(.thisDevice).isComplete)
+
+        #expect(try await services.closet.garments().isEmpty)
+        #expect(try await !original.garments().isEmpty)
     }
 
     @Test func deletionWipesEveryStore() async throws {

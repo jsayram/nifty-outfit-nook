@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -69,7 +70,7 @@ struct SwapSnapshotTests {
         let picker = ClosetModel(scope: model.seeAllScope)
         picker.show(
             Array(model.setup.garments.values), suitcases: model.setup.suitcases, profile: Profile(),
-            now: ClosetTestTime.now)
+            now: TestTime.now)
         let text = SwapText(category: model.category, sourceName: model.setup.sourceName)
         assertSnapshot(
             NookSheetContainer(title: text.seeAllTitle) {
@@ -111,8 +112,8 @@ struct SwapSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

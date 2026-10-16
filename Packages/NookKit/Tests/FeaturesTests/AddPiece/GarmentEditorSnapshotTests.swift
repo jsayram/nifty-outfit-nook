@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -74,7 +75,7 @@ struct GarmentEditorSnapshotTests {
 
     @Test func continueWhereYouLeftOff() async {
         let model = await loadedEditor(services: editorServices(draft: .add))
-        assertSnapshot(GarmentEditorPage(model: model, now: ClosetTestTime.now), named: "resume")
+        assertSnapshot(GarmentEditorPage(model: model, now: TestTime.now), named: "resume")
     }
 
     private func assertSnapshot(
@@ -97,8 +98,8 @@ struct GarmentEditorSnapshotTests {
             .environment(\.nookStaticRendering, true)
             .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

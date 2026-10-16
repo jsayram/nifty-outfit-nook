@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -10,10 +11,10 @@ import Testing
 /// earlier version) and one of Lace date night.
 @MainActor
 struct SavedPicturesTests {
-    private let us = ClosetTestTime.locale
+    private let us = TestTime.locale
 
     private func services(_ behavior: FixtureBehavior = .normal) -> NookServices {
-        FixtureServices.make(set: .demo, behavior: behavior, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, behavior: behavior, now: TestTime.now, calendar: TestTime.calendar)
     }
 
     private func ids(_ model: SavedLooksModel) -> [String] {
@@ -21,13 +22,13 @@ struct SavedPicturesTests {
     }
 
     private func picture(_ id: TryOnPicture.ID, services: NookServices) async -> PictureDetailModel {
-        let model = PictureDetailModel(pictureID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+        let model = PictureDetailModel(pictureID: id, now: { TestTime.now }, calendar: TestTime.calendar)
         await model.load(from: services)
         return model
     }
 
     private func look(_ id: Look.ID, services: NookServices) async -> LookDetailModel {
-        let model = LookDetailModel(lookID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+        let model = LookDetailModel(lookID: id, now: { TestTime.now }, calendar: TestTime.calendar)
         await model.load(from: services)
         return model
     }
@@ -127,8 +128,8 @@ struct SavedPicturesTests {
 
         let grid = await loadedSavedLooks()
         grid.lastPictureRemoval = removal
-        await grid.load(from: services, now: ClosetTestTime.now)
-        await grid.undoLastPictureRemoval(using: services, now: ClosetTestTime.now)
+        await grid.load(from: services, now: TestTime.now)
+        await grid.undoLastPictureRemoval(using: services, now: TestTime.now)
         #expect(grid.lastPictureRemoval == nil)
         #expect(ids(grid) == ["p-interview", "p-interview-earlier", "p-lace"])
         await lace.load(from: services)
@@ -196,9 +197,9 @@ struct SavedPicturesTests {
 
     /// The large set's 165 pictures load and filter as fast as its looks.
     @Test(.heavyMainActorWork) func largeSetStaysQuick() async throws {
-        let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar)
         let model = SavedLooksModel(searchDelay: .zero)
-        model.show(data.looks, garments: data.garments, now: ClosetTestTime.now)
+        model.show(data.looks, garments: data.garments, now: TestTime.now)
         let loading = SpeedCheck.fastest {
             model.showPictures(data.pictures)
         }
@@ -220,6 +221,6 @@ func loadedSavedLooksFrom(_ services: NookServices, searchDelay: Duration = .mil
     -> SavedLooksModel
 {
     let model = SavedLooksModel(searchDelay: searchDelay)
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }
