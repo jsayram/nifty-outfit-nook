@@ -125,4 +125,50 @@ final class IPadTests: IPadTestCase {
         XCTAssertEqual(name.label, "Navy dress pants")
         XCTAssertFalse(app.navigationBars["Navy dress pants"].exists)
     }
+
+    /// Home's quick tour on iPad (Phase 16a): turning the iPad or resizing the window keeps the
+    /// step, and the spotlight follows the wardrobe to wherever the room puts it.
+    @MainActor
+    func testHomeTourFollowsTheWardrobeThroughRotationAndResizing() throws {
+        let app = try launch(orientation: .landscapeLeft, tour: "reset")
+        let words = element("tour.text", in: app)
+        XCTAssertTrue(words.waitForExistence(timeout: Self.wait), "The tour didn't start")
+        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
+        XCTAssertTrue(wait(for: words, toContain: "step 2 of 4. Your closet."), words.label)
+
+        let target = app.buttons["tour.target"]
+        func assertOnTheWardrobe(_ when: String) {
+            let window = app.windows.firstMatch.frame
+            let spot = target.frame
+            XCTAssertTrue(window.contains(CGPoint(x: spot.midX, y: spot.midY)), "Spotlight off the window \(when)")
+            // The wardrobe stands at the left of every room.
+            XCTAssertLessThan(spot.midX, window.midX, "Spotlight isn't on the wardrobe \(when)")
+            XCTAssertTrue(wait(for: words, toContain: "step 2 of 4"), "Lost the step \(when)")
+        }
+        assertOnTheWardrobe("sideways")
+        let sideways = target.frame
+
+        XCUIDevice.shared.orientation = .portrait
+        XCTAssertTrue(room("tall", in: app).waitForExistence(timeout: Self.wait))
+        assertOnTheWardrobe("upright")
+        XCTAssertNotEqual(target.frame, sideways, "The spotlight didn't move with the room")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let full = app.windows.firstMatch.frame.width
+        resize(app, toWidth: (full / 3).rounded())
+        if app.windows.firstMatch.frame.width < full * 0.5 {
+            XCTAssertTrue(room("upright", in: app).waitForExistence(timeout: Self.wait))
+            assertOnTheWardrobe("in a narrow window")
+            resize(app, toWidth: full)
+        }
+        app.buttons["tour.skip"].tapUntilGone(timeout: Self.wait)
+        XCTAssertTrue(app.buttons["home.wardrobe"].waitUntilHittable(timeout: Self.wait))
+    }
+
+    @MainActor
+    private func wait(for element: XCUIElement, toContain text: String) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label CONTAINS %@", text), object: element)
+        return XCTWaiter().wait(for: [expectation], timeout: Self.wait) == .completed
+    }
 }

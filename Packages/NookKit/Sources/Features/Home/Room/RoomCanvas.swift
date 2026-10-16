@@ -30,6 +30,7 @@ struct RoomCanvas: View {
             floor
             bed
             title
+            tourSpots
         }
         .frame(width: layout.size.width, height: layout.contentHeight, alignment: .topLeading)
         .clipped()
@@ -256,6 +257,28 @@ struct RoomCanvas: View {
         }
     }
 
+    /// Where Home's quick tour shines its spotlight: the drawn laptop, wardrobe, suitcase and
+    /// sign, which are bigger than their tap areas (Phase 16a). Invisible, and taps and VoiceOver
+    /// go to the controls themselves.
+    private var tourSpots: some View {
+        let spots: [(RoomControl, CGRect)] = [
+            (.laptop, plan.laptop), (.wardrobe, plan.wardrobe), (.suitcase, plan.suitcase), (.nameSign, plan.sign),
+        ]
+        return ZStack(alignment: .topLeading) {
+            ForEach(spots, id: \.0) { control, stage in
+                let spot = layout.rect(stage)
+                // Anchored before it's positioned: `.position` fills the canvas, and the spot
+                // must measure only itself.
+                Color.clear
+                    .frame(width: spot.width, height: spot.height)
+                    .homeTourAnchor(control, content: content, open: open, focus: false)
+                    .position(x: spot.midX, y: spot.midY)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
     private var bed: some View {
         RoomArtImage(.bed)
             .roomFrame(layout.bed)
@@ -299,6 +322,7 @@ struct RoomCanvas: View {
             .accessibilityHint(control.accessibilityHint(for: content))
             .accessibilityIdentifier(control.identifier)
             .accessibilitySortPriority(control.sortPriority)
+            .homeTourFocus(control)
         }
     }
 }

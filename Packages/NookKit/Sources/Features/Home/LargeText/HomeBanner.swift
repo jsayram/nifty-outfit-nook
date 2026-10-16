@@ -66,6 +66,7 @@ struct HomeBanner: View {
         .accessibilityLabel(RoomControl.wardrobe.accessibilityLabel(for: content))
         .accessibilityHint(RoomControl.wardrobe.accessibilityHint(for: content))
         .accessibilityIdentifier(RoomControl.wardrobe.identifier)
+        .homeTourAnchor(.wardrobe, content: content, open: open)
     }
 
     /// The rail sits where it does on the room's wardrobe, scaled to this wardrobe's size.
@@ -110,6 +111,7 @@ struct HomeBanner: View {
         .accessibilityLabel(RoomControl.nameSign.accessibilityLabel(for: content))
         .accessibilityHint(RoomControl.nameSign.accessibilityHint(for: content))
         .accessibilityIdentifier(RoomControl.nameSign.identifier)
+        .homeTourAnchor(.nameSign, content: content, open: open)
     }
 }
 

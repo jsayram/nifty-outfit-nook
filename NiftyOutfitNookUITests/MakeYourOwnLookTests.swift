@@ -14,7 +14,7 @@ final class MakeYourOwnLookTests: XCTestCase {
     @MainActor
     func testMakeYourOwnLookFromGarmentDetailAndSave() {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
         app.launch()
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         let search = app.searchFields["Search your closet"]
@@ -51,7 +51,7 @@ final class MakeYourOwnLookTests: XCTestCase {
     @MainActor
     func testAHalfBuiltLookIsOfferedAfterARelaunch() {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo:draft=look"]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo:draft=look"]
         app.launch()
         app.tabBars.firstMatch.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         tap("savedLooks.makeYourOwn", in: app)

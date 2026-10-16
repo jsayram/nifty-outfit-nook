@@ -125,7 +125,7 @@ protocol DataDeletionService: Sendable {
 - Sign in with Apple token revocation, and the note that deleting doesn't cancel a subscription (30a);
 - the same screen, which already lists parts from the service and reports pending ones.
 
-Phase 16a/16b adds tour progress as a part (PRD §7.8: Delete My Data resets it), and 20b her private iCloud copy.
+Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again once the toast has gone (`docs/tours.md`). The words under Your profile name them in 16b, when the switch appears in Profile. Phase 20b adds her private iCloud copy.
 
 ## States
 
@@ -167,7 +167,8 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 
 ## Left for later phases
 
-- **16a/16b:** App tours on Profile, and tour progress as a part of Delete my data.
+- **16a (done):** tour progress erased by Delete my data, with the profile (`docs/tours.md`).
+- **16b:** App tours on Profile.
 - **19b:** the privacy policy and terms pages on the website, and the real wording of Privacy and terms.
 - **20b, 21b:** Export a copy, and the iCloud copy in Delete my data.
 - **21a:** stores on disk, so deletion lasts across launches and the feedback note can be kept.

@@ -51,6 +51,10 @@ nonisolated public enum Palette {
         case .divider: TokenValue(light: RGBA(hex: 0x967D64, alpha: 0.3), dark: RGBA(hex: 0xE6D2BE, alpha: 0.2))
         case .shadow: TokenValue(light: RGBA(hex: 0x3C2A1C, alpha: 0.26), dark: RGBA(hex: 0x000000, alpha: 0.55))
         case .shadowLarge: TokenValue(light: RGBA(hex: 0x3C2A1C, alpha: 0.32), dark: RGBA(hex: 0x000000, alpha: 0.6))
+        case .tourScrim: TokenValue(light: RGBA(hex: 0x2A211B, alpha: 0.58), dark: RGBA(hex: 0x0E0B09, alpha: 0.66))
+        case .tourGlow: TokenValue(light: RGBA(hex: 0xFFECC8, alpha: 0.55), dark: RGBA(hex: 0xDCC3A8, alpha: 0.4))
+        case .tourRim: TokenValue(light: RGBA(hex: 0xFFFFFF, alpha: 0.55), dark: RGBA(hex: 0xF4EEE6, alpha: 0.35))
+        case .tourCard: TokenValue(light: RGBA(hex: 0xFFFDF9), dark: RGBA(hex: 0x2E2620))
 
         // Status
         case .success: TokenValue(light: RGBA(hex: 0x46613F), dark: RGBA(hex: 0xB9CDA6))

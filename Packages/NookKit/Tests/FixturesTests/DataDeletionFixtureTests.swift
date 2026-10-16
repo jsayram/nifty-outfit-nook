@@ -27,6 +27,8 @@ struct DataDeletionFixtureTests {
         #expect(try await services.profile.profile() != Profile())
         #expect(try await !services.drafts.drafts().isEmpty)
         #expect(try await services.lookDrafts.draft() != nil)
+        try await services.tours.record(TourRecord(tour: .home, version: 1, outcome: .skipped, date: TestTime.now))
+        try await services.tours.setShowsTipsOnNewScreens(false)
 
         let report = await services.deletion.delete(.thisDevice)
 
@@ -47,6 +49,8 @@ struct DataDeletionFixtureTests {
         #expect(profile.measurements.isEmpty)
         #expect(profile.tryOnPhoto == nil)
         #expect(profile.remembered == RememberedChoices())
+        // Tours go with the profile: nothing seen and tips back on (PRD §7.8, Phase 16a).
+        #expect(try await services.tours.progress() == .fresh)
     }
 
     @Test func afterDeletingTheStoresMatchTheEmptySet() async throws {

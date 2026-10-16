@@ -20,6 +20,7 @@
         case errorState
         case sheet
         case stickers
+        case tour
 
         var id: Self { self }
 
@@ -39,6 +40,7 @@
             case .errorState: "Error state"
             case .sheet: "Bottom sheet"
             case .stickers: "Stickers and photo tiles"
+            case .tour: "Quick tour card"
             }
         }
 
@@ -58,6 +60,7 @@
             case .errorState: ErrorStateDemo()
             case .sheet: SheetDemo()
             case .stickers: StickerDemo()
+            case .tour: TourDemo()
             }
         }
     }
@@ -300,6 +303,29 @@
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .nookToast($toast)
+        }
+    }
+
+    /// The quick tour's card (Phase 16a) on the tour's dim: a first step, and a last step with
+    /// Back and its own finishing button.
+    private struct TourDemo: View {
+        var body: some View {
+            VStack(alignment: .leading, spacing: NookSpacing.medium) {
+                CatalogCaption("First step")
+                NookTourCard(
+                    step: NookTourStep(
+                        title: "Style Me", message: "Tap the laptop for an outfit idea made from your clothes.",
+                        index: 0, count: 4, finishTitle: "Start styling"),
+                    onNext: {}, onBack: {}, onSkip: {})
+                CatalogCaption("Last step")
+                NookTourCard(
+                    step: NookTourStep(
+                        title: "That is you", message: "Your name sign opens Profile.", index: 3, count: 4,
+                        finishTitle: "Start styling"),
+                    onNext: {}, onBack: {}, onSkip: {})
+            }
+            .padding(NookSpacing.large)
+            .background(Color.nook.tourScrim, in: NookRadius.shape(NookRadius.sheet))
         }
     }
 

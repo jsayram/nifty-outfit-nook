@@ -97,7 +97,9 @@ public enum FixtureServices {
             lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores),
             pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: stores),
             // A moment, so the making state shows; a real picture takes much longer (Phase 33).
-            tryOn: SimulatedTryOn(mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800))
+            tryOn: SimulatedTryOn(mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800)),
+            // Every set starts as a fresh install: no tour seen, tips on (Phase 16a).
+            tours: InMemoryTourProgressStore(options: stores)
         )
     }
 }

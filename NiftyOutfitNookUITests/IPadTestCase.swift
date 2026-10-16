@@ -10,14 +10,15 @@ class IPadTestCase: XCTestCase {
         continueAfterFailure = false
     }
 
+    /// - Parameter tour: the `-tour` flag. Tours are off unless a test is about them (Phase 16a).
     @MainActor
-    func launch(orientation: UIDeviceOrientation) throws -> XCUIApplication {
+    func launch(orientation: UIDeviceOrientation, tour: String = "off") throws -> XCUIApplication {
         guard UIDevice.current.userInterfaceIdiom == .pad else {
             throw XCTSkip("iPad layouts are checked on an iPad simulator.")
         }
         XCUIDevice.shared.orientation = orientation
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo"]
+        app.launchArguments = ["-tour", tour, "-fixtures", "demo"]
         app.launch()
         // A window size left by an earlier run survives a relaunch, so start full screen.
         // SpringBoard's frame is the screen in portrait.

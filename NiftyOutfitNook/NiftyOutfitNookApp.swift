@@ -39,7 +39,10 @@ struct NiftyOutfitNookApp: App {
                         }
                     )
                 } else {
-                    RootTabView(services: services)
+                    // `-tour home`, `-tour reset` and `-tour off` (Phase 16a, debug builds only).
+                    RootTabView(
+                        services: services,
+                        tourLaunch: TourLaunchOptions(launchArguments: ProcessInfo.processInfo.arguments))
                 }
             #else
                 RootTabView(services: services)

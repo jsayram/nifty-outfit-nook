@@ -79,3 +79,10 @@ extension XCUIApplication {
             line: line)
     }
 }
+
+/// Launch arguments every UI test shares.
+enum UITestLaunch {
+    /// Turns "Show tips on new screens" off, so Home's quick tour (Phase 16a) doesn't cover what
+    /// a test taps. The tour's own tests (`HomeTourTests`) leave it out.
+    static let toursOff = ["-tour", "off"]
+}

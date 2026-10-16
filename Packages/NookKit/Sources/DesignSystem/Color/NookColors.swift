@@ -34,6 +34,10 @@ nonisolated public struct NookColors: Sendable {
     public var divider: Color { Color(token: .divider) }
     public var shadow: Color { Color(token: .shadow) }
     public var shadowLarge: Color { Color(token: .shadowLarge) }
+    public var tourScrim: Color { Color(token: .tourScrim) }
+    public var tourGlow: Color { Color(token: .tourGlow) }
+    public var tourRim: Color { Color(token: .tourRim) }
+    public var tourCard: Color { Color(token: .tourCard) }
 
     // Status
     public var success: Color { Color(token: .success) }

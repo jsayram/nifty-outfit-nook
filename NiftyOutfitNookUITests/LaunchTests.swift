@@ -8,7 +8,7 @@ final class LaunchTests: XCTestCase {
     @MainActor
     func testLaunchShowsTheTabBar() {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
         app.launch()
 
         let tabBar = app.tabBars.firstMatch
@@ -56,7 +56,7 @@ final class LaunchTests: XCTestCase {
     @MainActor
     private func launchOnCloset(_ fixtures: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-fixtures", fixtures]
+        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", fixtures]
         app.launch()
         let closet = app.tabBars.firstMatch.buttons["Closet"]
         XCTAssertTrue(closet.waitForExistence(timeout: 10))

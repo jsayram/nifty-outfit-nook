@@ -25,8 +25,11 @@ struct HomeLargeTextView<Notice: View>: View {
         if isStillImage {
             page.background(Color.nook.wallGradient)
         } else {
-            ScrollView(.vertical) { page }
-                .background(Color.nook.wallGradient.ignoresSafeArea())
+            // The tour scrolls each control it points at into view (Phase 16a).
+            TourScrollReader {
+                ScrollView(.vertical) { page }
+            }
+            .background(Color.nook.wallGradient.ignoresSafeArea())
         }
     }
 
@@ -78,6 +81,7 @@ struct HomeLargeTextView<Notice: View>: View {
             NookButton(control(.laptop), systemImage: "sparkles", fillsWidth: true) { open(.laptop) }
                 .accessibilityHint(RoomControl.laptop.accessibilityHint(for: content))
                 .accessibilityIdentifier(RoomControl.laptop.identifier)
+                .homeTourAnchor(.laptop, content: content, label: control(.laptop), open: open)
 
             LargeRow(control: .hamper, content: content, systemImage: "basket", open: open) {
                 LaundryRowText(hamper: content.hamper)
@@ -176,6 +180,7 @@ struct LargeRow<Label: View>: View {
         .accessibilityHint(control.accessibilityHint(for: content))
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(control.identifier)
+        .homeTourAnchor(control, content: content, label: control.rowLabel(for: content), open: open)
     }
 
     private var icon: some View {
