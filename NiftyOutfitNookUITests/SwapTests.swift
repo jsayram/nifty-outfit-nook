@@ -88,7 +88,7 @@ final class SwapTests: XCTestCase {
     @MainActor
     private func launch(_ fixtures: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", fixtures]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", fixtures]
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
         return app

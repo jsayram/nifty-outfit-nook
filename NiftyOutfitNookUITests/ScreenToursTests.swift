@@ -19,7 +19,7 @@ final class ScreenToursTests: XCTestCase {
     @MainActor
     func testFreshInstallShowsEachTourOnce() {
         let app = XCUIApplication()
-        app.launchArguments = ["-tour", "reset", "-fixtures", "demo:laundry=some"]
+        app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", "reset", "-fixtures", "demo:laundry=some"]
         app.launch()
         expectTour("Style Me", step: 1, of: 4, in: app)
         skip(in: app)
@@ -84,7 +84,7 @@ final class ScreenToursTests: XCTestCase {
     @MainActor
     func testReplayFromProfileAndTipsOff() {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.toursOff + ["-fixtures", "demo"]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
 
         // Tips off: no tour on Closet or Profile.

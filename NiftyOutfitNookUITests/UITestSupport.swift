@@ -85,4 +85,13 @@ enum UITestLaunch {
     /// Turns "Show tips on new screens" off, so Home's quick tour (Phase 16a) doesn't cover what
     /// a test taps. The tour's own tests (`HomeTourTests`) leave it out.
     static let toursOff = ["-tour", "off"]
+    /// Opens Home straight away for this launch, on the `-fixtures` set as it is, writing nothing
+    /// (Phase 17). Every UI test passes it except `OnboardingTests`, which is about onboarding.
+    ///
+    /// Since Phase 17 the onboarding state and the tours seen are kept across launches, also
+    /// between tests on one simulator, so each test sets what it relies on with these flags
+    /// rather than counting on a fresh install.
+    static let skipOnboarding = ["-onboarding", "skip"]
+    /// Tours off and onboarding skipped: what most tests launch with.
+    static let standard = toursOff + skipOnboarding
 }
