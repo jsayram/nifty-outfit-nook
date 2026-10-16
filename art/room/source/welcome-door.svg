@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188 390" width="188" height="390" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Front door, seen from the porch. Cream casing with a crown head (cap, cove, bead) built like the wardrobe cornice,
+       oblique depth 6 right / 3 up. Blue leaf x 28..155, y 39..380 with an arched glass upper panel: a fanlight with
+       three radial bars over a single pane, warm light from a table lamp on a console in the hall behind it.
+       Letter slot on the lock rail, brass knob at y 226 on the latch stile, two recessed lower panels.
+       Threshold x 20..163, top y 378: the porch floor line sits at y 380. Plinth blocks end at y 382.
+       Ids are prefixed wd- so the door can be inlined next to the wardrobe without clashes. No text. -->
+  <defs>
+    <linearGradient id="wd-warm" x1="0" y1="57" x2="0" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FAD98E"/>
+      <stop offset="1" stop-color="#FFF0C6"/>
+    </linearGradient>
+    <clipPath id="wd-glass"><path d="M45 180V104A46.5 46.5 0 0 1 138 104V180Z"/></clipPath>
+  </defs>
+
+  <!-- contact shadow along the threshold -->
+  <ellipse cx="92" cy="386.4" rx="78" ry="2.6" fill="#8A5A48" opacity=".13"/>
+
+  <!-- ===== casing ===== -->
+  <!-- side return of the casing (it stands a little proud of the siding) -->
+  <path d="M168 26 L171 24.5 V380.5 L168 382 Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <!-- reveal: the frame's inner faces, seen past the leaf on the top and left -->
+  <rect x="25" y="36" width="130" height="344" fill="#F3E6D0"/>
+  <path d="M25 36H155V39.6H28.6V380H25Z" fill="#E8D6B8"/>
+  <!-- casing face -->
+  <path d="M12 25H168V382H12Z M25 36V380H155V36Z" fill="#FFF7EA" fill-rule="evenodd" stroke="#D9C6A5" stroke-width="1.5"/>
+  <!-- a soft moulding line inside the casing, light on the left, shade on the right -->
+  <path d="M15.6 360V28.6H164.4" stroke="#FFFEFB" stroke-width="1.1"/>
+  <path d="M21.6 360V39.6M158.4 39.6V360" stroke="#EADDC6" stroke-width="1"/>
+  <path d="M164.6 30V360" stroke="#F3E6D0" stroke-width="1.6"/>
+  <!-- plinth blocks -->
+  <rect x="10.5" y="358" width="16.5" height="24" rx="1.2" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+  <path d="M13 361H24.5" stroke="#FFFEFB" stroke-width="1"/>
+  <path d="M11.5 377.6H26" stroke="#F3E6D0" stroke-width="1.6"/>
+  <rect x="153" y="358" width="16.5" height="24" rx="1.2" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+  <path d="M155.5 361H167" stroke="#FFFEFB" stroke-width="1"/>
+  <path d="M154 377.6H168.5" stroke="#F3E6D0" stroke-width="1.6"/>
+  <path d="M169.5 358.6 L172 357.4 V380.8 L169.5 382 Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.1"/>
+
+  <!-- ===== crown head ===== -->
+  <!-- bead -->
+  <path d="M175 21.3 L181 18.3 V22.3 L175 25.3 Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <rect x="9" y="21" width="166" height="4.2" rx="2.1" fill="#FFFCF4" stroke="#D9C6A5" stroke-width="1.3"/>
+  <!-- cove -->
+  <path d="M174 12 L180 9 V18 L174 21 Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M6 12C6 16.5 8.5 20.4 12.5 21H174V12Z" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+  <path d="M7.4 16.4C8.2 19.3 10 20.8 12.5 20.9H173.4V16.4Z" fill="#F3E6D0"/>
+  <!-- cap board -->
+  <path d="M178 6 L184 3 V9 L178 12 Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.3"/>
+  <path d="M2 6H178L184 3H8Z" fill="#FFFCF4" stroke="#D9C6A5" stroke-width="1.3"/>
+  <rect x="2" y="6" width="176" height="6" rx="1.3" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.5"/>
+  <path d="M5 7.8H175" stroke="#FFFEFB" stroke-width="1"/>
+  <!-- thin shadow the crown throws on the head casing -->
+  <rect x="12.75" y="25.9" width="154.5" height="1.6" fill="#F3E6D0"/>
+
+  <!-- ===== door leaf ===== -->
+  <rect x="28" y="39" width="127" height="341" rx="1" fill="#A9CBEF"/>
+  <path d="M30.6 42V377" stroke="#CFE2F8" stroke-width="1.3"/>
+  <path d="M152.4 42V377" stroke="#8FB8E6" stroke-width="1.3"/>
+  <path d="M31 41.6H152" stroke="#CFE2F8" stroke-width="1"/>
+
+  <!-- glass panel: moulding ring (lit bottom-right, shaded top-left), then the glass -->
+  <path d="M42 183V104A49.5 49.5 0 0 1 141 104V183Z" fill="#DCEBFB" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M42.7 182.3V104A48.8 48.8 0 0 1 140.3 104H138A46.5 46.5 0 0 0 45 104V180Z" fill="#8FB8E6"/>
+  <g clip-path="url(#wd-glass)">
+    <rect x="45" y="57" width="93" height="123" fill="url(#wd-warm)"/>
+    <!-- the hall behind: a table lamp on a console against the far wall, its light pool on the wall.
+         It stands off the centre line, below the spring bar, so nothing reads as hanging from the glazing. -->
+    <circle cx="113" cy="146" r="28" fill="#FFF3CF"/>
+    <circle cx="113" cy="146" r="17.5" fill="#FFF8E2"/>
+    <!-- console: top board and apron, running out past the right edge of the pane -->
+    <path d="M86 172.6H140V180H86Z" fill="#D9A650"/>
+    <rect x="84" y="169.4" width="58" height="4" rx="1.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+    <path d="M87 170.9H139" stroke="#F6DC9C" stroke-width=".9"/>
+    <!-- lamp base: a round pink pot on a short foot, with a brass stem -->
+    <path d="M113 150.6V158" stroke="#B98632" stroke-width="1.4"/>
+    <path d="M107.4 169.4C105.6 167.6 105 165.6 105.6 163.4C106.4 160.4 109.2 158.4 113 158.4C116.8 158.4 119.6 160.4 120.4 163.4C121 165.6 120.4 167.6 118.6 169.4Z" fill="#F4B4C2" stroke="#D97F97" stroke-width="1.1"/>
+    <path d="M116.6 160C118.6 161.2 119.6 163.2 119.4 165.6C119.2 167 118.6 168.2 117.8 169H118.6C120.4 167.6 121 165.6 120.4 163.4C119.8 161.6 118.4 160.4 116.6 160Z" fill="#EC9DB0"/>
+    <path d="M108.2 163.2C108.6 161.8 109.6 160.8 110.8 160.2" stroke="#FBD3DC" stroke-width="1"/>
+    <!-- shade: lit from inside, so it is the palest thing in the hall -->
+    <path d="M106.4 136.2H119.6L123.6 150.2Q113 152.8 102.4 150.2Z" fill="#FFF6DA" stroke="#DDBB4E" stroke-width="1.1"/>
+    <path d="M117.2 136.8H119.2L123 149.8Q121.4 150.3 119.6 150.6Z" fill="#FBE9A6"/>
+    <path d="M107.6 138.6L105.2 147.6" stroke="#FFFFFF" stroke-width="1" opacity=".9"/>
+    <!-- a pale wash over the hall, so the console and lamp sit behind the glass rather than on it -->
+    <rect x="45" y="57" width="93" height="123" fill="#FFF9EC" opacity=".22"/>
+    <!-- glints -->
+    <path d="M45 176L71 150H78L52 176Z" fill="#FFFFFF" opacity=".34"/>
+    <path d="M57 180L85 152H88.4L60.4 180Z" fill="#FFFFFF" opacity=".26"/>
+  </g>
+  <!-- fanlight bars: spring line, three spokes and a half hub -->
+  <g>
+    <path d="M45 104H138M91.5 104L58.6 71.1M91.5 104V57.5M91.5 104L124.4 71.1" stroke="#6C9AD0" stroke-width="4.4"/>
+    <path d="M45.6 104H137.4M91.5 104L58.9 71.4M91.5 104V58M91.5 104L124.1 71.4" stroke="#A9CBEF" stroke-width="2.4"/>
+    <path d="M84.6 104A6.9 6.9 0 0 1 98.4 104Z" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.2"/>
+    <path d="M86.6 102.2A5 5 0 0 1 90 99.2" stroke="#CFE2F8" stroke-width="1"/>
+  </g>
+  <path d="M45 180V104A46.5 46.5 0 0 1 138 104V180Z" stroke="#6C9AD0" stroke-width="1.3"/>
+
+  <!-- letter slot -->
+  <rect x="72" y="196" width="39" height="10" rx="2.6" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M75 198H108" stroke="#F6DC9C" stroke-width="1"/>
+  <rect x="76.5" y="199.8" width="30" height="3.2" rx="1.6" fill="#B98632"/>
+
+  <!-- knob on its backplate, with the lock above -->
+  <rect x="144.6" y="207.6" width="8" height="32" rx="4" fill="#6C9AD0" opacity=".45"/>
+  <rect x="143.6" y="206" width="8" height="32" rx="4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M145.6 209.6V234" stroke="#F6DC9C" stroke-width="1"/>
+  <circle cx="147.6" cy="212.8" r="1.5" fill="#B98632"/>
+  <circle cx="148.6" cy="227.4" r="5" fill="#6C9AD0" opacity=".5"/>
+  <circle cx="147.6" cy="226" r="4.8" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <circle cx="146.2" cy="224.6" r="1.4" fill="#F6DC9C"/>
+
+  <!-- recessed lower panels: outline, dark top-left bevel, light bottom-right bevel -->
+  <g>
+    <rect x="46" y="228" width="42" height="134" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M47 231Q47 229 49 229H86L83 232.2H50.2V358L47 361Z" fill="#8FB8E6"/>
+    <path d="M50.6 358.4H84.2Q85.3 358.4 85.3 357.3V232.6" stroke="#DCEBFB" stroke-width="1.2"/>
+    <rect x="95" y="228" width="42" height="134" rx="3" fill="#B6D3F2" stroke="#6C9AD0" stroke-width="1.3"/>
+    <path d="M96 231Q96 229 98 229H135L132 232.2H99.2V358L96 361Z" fill="#8FB8E6"/>
+    <path d="M99.6 358.4H133.2Q134.3 358.4 134.3 357.3V232.6" stroke="#DCEBFB" stroke-width="1.2"/>
+  </g>
+  <!-- rail lines between stiles and rails -->
+  <path d="M42 190H141" stroke="#8FB8E6" stroke-width="1" opacity=".55"/>
+  <rect x="28" y="39" width="127" height="341" rx="1" stroke="#6C9AD0" stroke-width="1.5"/>
+
+  <!-- threshold -->
+  <rect x="20" y="377.6" width="143" height="7" rx="1.6" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+  <path d="M23 379.6H160" stroke="#FFFEFB" stroke-width="1"/>
+  <path d="M21.4 383H161.6" stroke="#F3E6D0" stroke-width="1.4"/>
+</svg>

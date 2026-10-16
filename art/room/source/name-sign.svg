@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 64" width="110" height="64">
+<!--
+  name-sign.svg: a small wooden name sign hanging on two strings from a nail, with a cream painted panel,
+  a sprig of leaves at the top-left corner and a small heart at the bottom-right corner.
+  viewBox 0 0 110 64, shown 110 x 64 at phone scale (1 unit = 1 CSS px).
+
+  TEXT AREA (flat cream, nothing drawn on it): rect x 17..93, y 27..53 (76 x 26), centre (55, 40).
+  Pages lay the profile's first name over it as live HTML text, centred in that box.
+
+  Nail head at (55, 4). Strings from the nail to screw eyes at (24, 21) and (86, 21).
+  Board: x 5..105, y 19..61 (rounded 7). Painted panel: x 13..97, y 25..55 (rounded 5).
+-->
+
+<!-- strings, behind the board -->
+<path d="M 24 21 L 55 4.4 L 86 21" fill="none" stroke="#B98632" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 26 20.4 L 55 5.4 L 84 20.4" fill="none" stroke="#EED7A6" stroke-width="0.55" stroke-linecap="round" stroke-linejoin="round"/>
+
+<!-- nail -->
+<circle cx="55" cy="4" r="2.6" fill="#C9B3A8" stroke="#9C8478" stroke-width="1.1"/>
+<circle cx="54.2" cy="3.3" r="0.8" fill="#F1E6E0"/>
+
+<!-- board: underside thickness, face, top highlight, grain -->
+<rect x="5" y="20.5" width="100" height="41" rx="7" fill="#D9A650"/>
+<rect x="5" y="19" width="100" height="38.6" rx="7" fill="#E7BC6E"/>
+<path d="M 10.5 21.6 L 99.5 21.6" stroke="#F3D594" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M 8.4 34 C 8.2 40, 8.4 46, 9 51" fill="none" stroke="#D9A650" stroke-width="0.9" stroke-linecap="round"/>
+<path d="M 101.4 30 C 101.8 36, 101.6 42, 101 47" fill="none" stroke="#D9A650" stroke-width="0.9" stroke-linecap="round"/>
+<rect x="5" y="19" width="100" height="42" rx="7" fill="none" stroke="#B98632" stroke-width="1.5"/>
+
+<!-- screw eyes where the strings meet the board -->
+<circle cx="24" cy="21" r="1.7" fill="#F2D06A" stroke="#B98632" stroke-width="0.9"/>
+<circle cx="86" cy="21" r="1.7" fill="#F2D06A" stroke="#B98632" stroke-width="0.9"/>
+
+<!-- painted cream panel, with a thin inner shade along its top and left so it reads as set into the board -->
+<rect x="13" y="25" width="84" height="30" rx="5" fill="#F3E6D0"/>
+<rect x="14" y="26.2" width="83" height="28.8" rx="4.4" fill="#FFF7EA"/>
+<rect x="13" y="25" width="84" height="30" rx="5" fill="none" stroke="#D9C6A5" stroke-width="1.1"/>
+
+<!-- sprig of leaves over the top-left corner -->
+<g stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 3.6 31 C 8.6 27, 13 24, 19.4 22.6" fill="none" stroke="#5C9670" stroke-width="1.1"/>
+  <path d="M 9.5 26.4 C 7.6 22.8, 8.6 19.4, 11.6 18 C 12.6 21.4, 12 24.4, 9.5 26.4 Z" fill="#77AE84" stroke="#5C9670" stroke-width="0.95"/>
+  <path d="M 10.2 24.6 L 11.2 20.2" stroke="#9CCBA6" stroke-width="0.7"/>
+  <path d="M 14.6 23.6 C 15 20, 17.6 17.8, 20.6 18 C 20 21.2, 17.8 23.4, 14.6 23.6 Z" fill="#77AE84" stroke="#5C9670" stroke-width="0.95"/>
+  <path d="M 15.8 22.4 L 19 19.4" stroke="#9CCBA6" stroke-width="0.7"/>
+  <path d="M 7.4 28.2 C 4.4 28.6, 2.2 31, 2.4 34 C 5.4 33.4, 7.4 31.2, 7.4 28.2 Z" fill="#9FC49C" stroke="#5C9670" stroke-width="0.95"/>
+  <path d="M 12.6 25 C 11.6 28.4, 12.8 31.2, 15.6 32 C 16 28.8, 14.8 26.4, 12.6 25 Z" fill="#77AE84" stroke="#5C9670" stroke-width="0.95"/>
+  <circle cx="7.4" cy="24.2" r="2.1" fill="#F4B4C2" stroke="#D97F97" stroke-width="0.9"/>
+  <circle cx="6.9" cy="23.7" r="0.65" fill="#FFF7EA"/>
+</g>
+
+<!-- small heart at the bottom-right corner of the board -->
+<path d="M 99.5 58.6 C 96.4 56.6, 94.6 54.8, 94.6 52.7 C 94.6 51.1, 95.8 50, 97.2 50 C 98.2 50, 99 50.6, 99.5 51.4 C 100 50.6, 100.8 50, 101.8 50 C 103.2 50, 104.4 51.1, 104.4 52.7 C 104.4 54.8, 102.6 56.6, 99.5 58.6 Z" fill="#F4B4C2" stroke="#D97F97" stroke-width="1" stroke-linejoin="round"/>
+<path d="M 96.4 52.2 C 96.6 51.4, 97.2 51.1, 97.8 51.2" fill="none" stroke="#FCE1E7" stroke-width="0.8" stroke-linecap="round"/>
+</svg>

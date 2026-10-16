@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 158" width="112" height="158" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Front-loading washer for the laundry corner: cream body, a control panel with a detergent drawer, a small display,
+       two buttons and a dial, and a round blue door with the empty drum showing through the glass. Ids are prefixed tw-.
+       Body cream #FFF7EA / #F3E6D0 / #D9C6A5. Door and dial blue #A9CBEF / #8FB8E6 / #6C9AD0, highlight #C4DCF5.
+       Glass uses the sunny-window sky tones (#DDEEFB to #B9D8F3). Body x 3..109, y 3..150. Panel y 8..36.
+       Door centre (56, 92), ring radius 32, glass radius 23. Feet end at y 153.4; place it so y 153 lands just below the floor line.
+       No label zone: the count plate lives on the shelf above. -->
+  <defs>
+    <clipPath id="tw-body"><rect x="3" y="3" width="106" height="147" rx="8"/></clipPath>
+    <clipPath id="tw-glass"><circle cx="56" cy="92" r="23"/></clipPath>
+    <linearGradient id="tw-sky" x1="0" y1="69" x2="0" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DDEEFB"/>
+      <stop offset="1" stop-color="#B9D8F3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- contact shadow -->
+  <ellipse cx="56" cy="154.4" rx="52" ry="2.8" fill="#7A4636" opacity=".12"/>
+
+  <!-- feet -->
+  <path d="M10 148H21L20.2 152.4Q15.5 154.2 10.8 152.4Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M91 148H102L101.2 152.4Q96.5 154.2 91.8 152.4Z" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+
+  <!-- body -->
+  <rect x="3" y="3" width="106" height="147" rx="8" fill="#FFF7EA"/>
+  <g clip-path="url(#tw-body)">
+    <!-- shade down the right side and along the kick plate -->
+    <rect x="100" y="0" width="12" height="152" fill="#F3E6D0"/>
+    <path d="M100 4V150" stroke="#D9C6A5" stroke-width="1" opacity=".7"/>
+    <rect x="0" y="133" width="112" height="20" fill="#F3E6D0" opacity=".7"/>
+    <!-- lit top face -->
+    <rect x="0" y="0" width="112" height="7.6" fill="#FFFCF6"/>
+    <path d="M3 7.6H109" stroke="#D9C6A5" stroke-width="1.1"/>
+  </g>
+  <path d="M7 14V128" stroke="#FFFFFF" stroke-width="1.8"/>
+
+  <!-- control panel -->
+  <path d="M3 36H109" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M5 37.6H99" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- detergent drawer -->
+  <rect x="10" y="13" width="32" height="17" rx="2.6" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M12.6 15H39.4" stroke="#FFFFFF" stroke-width="1"/>
+  <rect x="14.5" y="23.6" width="23" height="3.6" rx="1.6" fill="#F3E6D0" stroke="#D9C6A5" stroke-width=".9"/>
+  <!-- display -->
+  <rect x="48" y="13.4" width="23" height="10.6" rx="2.2" fill="#B9D8F3" stroke="#6C9AD0" stroke-width="1.1"/>
+  <path d="M50.6 15.8L55 15.8" stroke="#EAF4FC" stroke-width="1.2"/>
+  <rect x="58.6" y="17.2" width="9" height="3.4" rx="1.4" fill="#DDEEFB"/>
+  <!-- two small buttons -->
+  <circle cx="53.4" cy="29.6" r="2.4" fill="#F4B4C2" stroke="#D97F97" stroke-width="1"/>
+  <circle cx="65.4" cy="29.6" r="2.4" fill="#FBE9A6" stroke="#DDBB4E" stroke-width="1"/>
+  <!-- dial with tick dots -->
+  <path d="M88 8.4h.01M98.6 14h.01M100.4 24h.01M77.4 14h.01M75.6 24h.01" stroke="#D9C6A5" stroke-width="1.8"/>
+  <ellipse cx="88.8" cy="22.8" rx="10" ry="9.8" fill="#8FB8E6" opacity=".35"/>
+  <circle cx="88" cy="22" r="9.6" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <circle cx="88" cy="22" r="6.2" fill="#C4DCF5" stroke="#6C9AD0" stroke-width="1"/>
+  <path d="M88 22L91.6 16.6" stroke="#557FB6" stroke-width="1.8"/>
+  <path d="M81.6 19.4A6.8 6.8 0 0 1 85 15.6" stroke="#E2EEFA" stroke-width="1.2"/>
+
+  <!-- door: a recessed bezel in the body, the blue ring, the glass and the drum behind it -->
+  <circle cx="56" cy="92" r="36.4" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M27.4 77.4A33 33 0 0 1 78 67.2" stroke="#FFFCF6" stroke-width="1.2"/>
+  <!-- hinge -->
+  <rect x="19.4" y="80" width="6" height="7" rx="1.6" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.1"/>
+  <rect x="19.4" y="97" width="6" height="7" rx="1.6" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.1"/>
+  <ellipse cx="57.2" cy="93.6" rx="32.4" ry="32" fill="#6C9AD0" opacity=".22"/>
+  <circle cx="56" cy="92" r="32" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.5"/>
+  <path d="M30 78A29 29 0 0 1 70 66.6" stroke="#C4DCF5" stroke-width="2.2"/>
+  <path d="M84.2 99A29 29 0 0 1 46 119.4" stroke="#8FB8E6" stroke-width="2.6"/>
+  <circle cx="56" cy="92" r="26.4" stroke="#6C9AD0" stroke-width=".8" opacity=".6"/>
+  <circle cx="56" cy="92" r="23" fill="url(#tw-sky)"/>
+  <g clip-path="url(#tw-glass)">
+    <!-- the drum: a ring of small holes and the back of the drum a touch deeper -->
+    <circle cx="56" cy="95" r="17" fill="#A9C8E8" opacity=".55"/>
+    <path d="M56 79.6h.01M66.2 83.4h.01M70.8 93h.01M66.8 103.8h.01M56 108.4h.01M45.2 103.8h.01M41.2 93h.01M45.8 83.4h.01" stroke="#86A3C6" stroke-width="1.8" opacity=".7"/>
+    <!-- glass highlights -->
+    <path d="M36 98L58 70L64 72L40 102Z" fill="#FFFFFF" opacity=".42"/>
+    <path d="M47 112L71 82L73.6 84.4L50 114Z" fill="#FFFFFF" opacity=".32"/>
+  </g>
+  <circle cx="56" cy="92" r="23" stroke="#6C9AD0" stroke-width="1.2"/>
+  <!-- door handle on the ring's right edge -->
+  <rect x="84.4" y="82" width="6.4" height="20" rx="3.2" fill="#8FB8E6" stroke="#6C9AD0" stroke-width="1.2"/>
+  <path d="M86.4 85.4V98" stroke="#C4DCF5" stroke-width="1"/>
+
+  <!-- kick plate seam and the small filter hatch -->
+  <path d="M4 133H108" stroke="#D9C6A5" stroke-width="1.1"/>
+  <rect x="10" y="137" width="16" height="8" rx="2" stroke="#D9C6A5" stroke-width="1.1"/>
+  <path d="M15 141H21" stroke="#D9C6A5" stroke-width="1.2"/>
+
+  <!-- body outline last -->
+  <rect x="3" y="3" width="106" height="147" rx="8" stroke="#D9C6A5" stroke-width="1.5"/>
+</svg>

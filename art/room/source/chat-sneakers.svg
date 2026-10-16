@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 13" width="46" height="13" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- The white sneakers (g-white-sneakers) standing as a pair on a pink room floor, toes left, for the look card
+       in Ask stylist. Same shoe outline as garments.js, drawn at 0.24 like chat-flats.svg, so one shoe is about
+       22 px long. Soles rest on y 11.4. Stroke widths are set so they land near 0.9 to 1 px.
+       Tones from garments.js: upper #FAFAFA, shade #E9E4DE, outline #B3A79B, detail #C7BCB1, lining #DCD4CB / #EFEAE4,
+       outsole #E2CBA6, heel tab #F4B4C2 / #D97F97. Contact shadow: the floor tone darkened, 13 percent.
+       Ids are prefixed cs-. -->
+  <defs>
+    <path id="cs-upper" d="M3.2 34.2C2.4 28.5 7.5 24.6 14.5 22.8C21.5 21 27.5 18.5 33 14.5L45 5.5C47 4 50.5 3.6 52.5 5.6L55.5 9.2C61 13.8 71 14.2 78.5 10.5C82.5 8.5 85.5 6.2 88.6 6C91.6 5.8 93.4 8.5 94 12C95 18 95 27 94.6 34Z"/>
+    <path id="cs-open" d="M55.5 9.2C63 5.6 76 3.8 88.6 6C91.6 6.4 93 8 93.4 10.4C92.2 8.4 90.4 7.4 88.6 8C84 9.6 79 13.2 72 14.8C65 16.2 59 14 55.5 9.2Z"/>
+    <clipPath id="cs-clip-u"><use href="#cs-upper"/></clipPath>
+    <g id="cs-shoe">
+      <!-- midsole and outsole -->
+      <path d="M3 33.6C1.8 38 3.4 42.6 8 42.8L90 42.8C94.6 42.8 95.8 38 94.8 33.2L3 33.6Z" fill="#FFFFFF" stroke="#B3A79B" stroke-width="3.6"/>
+      <path d="M4.4 39.6H93.6Q94.6 39.6 94.4 40.8Q94 42.8 92.4 42.8H8C5 42.8 4 41.4 4.4 39.6Z" fill="#E2CBA6" stroke="#B3A79B" stroke-width="2.6"/>
+      <!-- opening with its lining -->
+      <use href="#cs-open" fill="#EFEAE4" stroke="#B3A79B" stroke-width="3.2"/>
+      <!-- upper: fill, lower shade band, toe cap seam, one highlight, heel tab -->
+      <use href="#cs-upper" fill="#FAFAFA"/>
+      <g clip-path="url(#cs-clip-u)">
+        <path d="M0 29H100V40H0Z" fill="#E9E4DE"/>
+        <path d="M14.8 22.9C19 25.5 21 30 20.6 34" stroke="#C7BCB1" stroke-width="2.6"/>
+        <path d="M62 34C63 26 70 19 80 16" stroke="#C7BCB1" stroke-width="2.6"/>
+        <path d="M84.2 8.4C86.6 6.8 89.2 6 91.2 6.8C93.2 8.2 94.2 11.2 94.5 15.2L87 15.6C87 12.4 86 10.2 84.2 8.4Z" fill="#F4B4C2" stroke="#D97F97" stroke-width="2.4"/>
+      </g>
+      <use href="#cs-upper" stroke="#B3A79B" stroke-width="4"/>
+      <!-- laces: short bars across the throat -->
+      <path d="M28.4 20.4L32.4 24.6M33.4 16.6L37.4 20.8M38.4 12.8L42.4 17" stroke="#B3A79B" stroke-width="3"/>
+    </g>
+  </defs>
+
+  <!-- contact shadow on the floor (floor shade darkened) -->
+  <ellipse cx="22.4" cy="11.6" rx="21" ry="1.35" fill="#9C5E4C" opacity=".13"/>
+
+  <!-- far shoe, set back and to the right; its toe tucks behind the near heel -->
+  <use href="#cs-shoe" transform="translate(18.6 .05) scale(.24)"/>
+  <!-- near shoe -->
+  <use href="#cs-shoe" transform="translate(1.4 1.13) scale(.24)"/>
+</svg>

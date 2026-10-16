@@ -20,10 +20,17 @@ public struct Profile: Hashable, Sendable, Codable {
     public var avoidedColors: [ColorName]
     /// Optional body measurements. **Sensitive.**
     public var measurements: BodyMeasurements
+    /// The units Fit and measurements shows: inches and pounds, or centimetres and kilograms.
+    /// `nil` until she picks, which means the region's usual units
+    /// (`MeasurementUnits.preferred(for:)`). **Personal.**
+    public var units: MeasurementUnits?
     /// "Add a piece that fits you well" (LR-13). **Sensitive.**
     public var fitPieces: [FitPiece]
     /// "Your try-on photo" (RD-06). **Sensitive**: a photo of her.
     public var tryOnPhoto: PhotoReference?
+    /// What Style Me starts from next time: the source and occasion she chose last (FR-67,
+    /// Phase 13). **Personal**: a suitcase can say where she'll be.
+    public var remembered: RememberedChoices
 
     public init(
         signName: String = "",
@@ -32,8 +39,10 @@ public struct Profile: Hashable, Sendable, Codable {
         likedColors: [ColorName] = [],
         avoidedColors: [ColorName] = [],
         measurements: BodyMeasurements = BodyMeasurements(),
+        units: MeasurementUnits? = nil,
         fitPieces: [FitPiece] = [],
-        tryOnPhoto: PhotoReference? = nil
+        tryOnPhoto: PhotoReference? = nil,
+        remembered: RememberedChoices = RememberedChoices()
     ) {
         self.signName = signName
         self.preferences = preferences
@@ -41,8 +50,29 @@ public struct Profile: Hashable, Sendable, Codable {
         self.likedColors = likedColors
         self.avoidedColors = avoidedColors
         self.measurements = measurements
+        self.units = units
         self.fitPieces = fitPieces
         self.tryOnPhoto = tryOnPhoto
+        self.remembered = remembered
+    }
+}
+
+/// The choices Style Me remembers between requests (FR-67, PRD §7.7).
+///
+/// The source is the one she chose last, in Suitcases, on a suitcase, or on Style Me; Home's
+/// suitcase shows it. The occasion is the one she picked last on Style Me, and Home's calendar
+/// shows it. Comfort, colour and weather are never remembered: they're for one request only
+/// (RD-02.4). Her words for Other aren't kept either, so choosing Other leaves the remembered
+/// occasion as it was.
+///
+/// Data tier: **Personal**.
+public struct RememberedChoices: Hashable, Sendable, Codable {
+    public var source: WardrobeSource
+    public var occasion: Occasion
+
+    public init(source: WardrobeSource = .mainCloset, occasion: Occasion = .office) {
+        self.source = source
+        self.occasion = occasion
     }
 }
 
@@ -232,4 +262,18 @@ public enum FitResult: String, CaseIterable, Hashable, Sendable, Codable {
     case tooShort
     case tooTight
     case tooLoose
+}
+
+/// Measurements never show their values in a string, so a stray `print`, a log line or a crash
+/// report that interpolates them can't leak her body details (SECURITY_STANDARD §1 and §4: no
+/// Sensitive data in logs). `dump` and debuggers see no children either.
+extension BodyMeasurements: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String {
+        let filled = MeasurementField.allCases.count { checkedValue(of: $0) != nil }
+        return "BodyMeasurements(redacted, \(filled) filled in)"
+    }
+
+    public var debugDescription: String { description }
+
+    public var customMirror: Mirror { Mirror(self, children: [Mirror.Child]()) }
 }

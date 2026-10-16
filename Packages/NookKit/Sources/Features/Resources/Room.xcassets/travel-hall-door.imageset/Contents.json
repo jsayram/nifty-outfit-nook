@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "filename": "travel-hall-door.svg",
+      "idiom": "universal"
+    },
+    {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "filename": "travel-hall-door-dark.svg",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "preserves-vector-representation": true
+  }
+}

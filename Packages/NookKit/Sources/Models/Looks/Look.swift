@@ -7,6 +7,9 @@ import Foundation
 /// A styling result is one base outfit in three versions (LR-05a). Each version is its own
 /// `Look`, linked to the others by `resultID`. A look she built herself has no result and no
 /// version. Unsaved results are kept too (background history, LR-06), with `isSaved` false.
+///
+/// Its try-on pictures point at the look (`TryOnPicture.lookID`), not the other way round, so a
+/// look can have several, and deleting a picture never changes the look (Phase 12b).
 public struct Look: Identifiable, Hashable, Sendable, Codable {
     public typealias ID = EntityID<Look>
 
@@ -22,10 +25,11 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     /// The source the look was made from. Captured, not a promise the pieces are still there.
     public var source: WardrobeSource
     public var isSaved: Bool
+    /// When she saved it, for "Saved 3 Oct" and the newest-first order on Saved Looks and the
+    /// Home shelf (Phase 12a). `nil` while it isn't saved.
+    public var savedAt: Date?
     /// Days she chose Wear today for this look (LR-10), oldest first, at most one per day.
     public var wornOn: [Date]
-    /// The simulated try-on picture made for this look, if any (RD-06).
-    public var tryOnPictureID: TryOnPicture.ID?
     public var createdAt: Date
 
     public init(
@@ -37,8 +41,8 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         occasion: Occasion? = nil,
         source: WardrobeSource = .mainCloset,
         isSaved: Bool = false,
+        savedAt: Date? = nil,
         wornOn: [Date] = [],
-        tryOnPictureID: TryOnPicture.ID? = nil,
         createdAt: Date
     ) {
         self.id = id
@@ -49,8 +53,8 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         self.occasion = occasion
         self.source = source
         self.isSaved = isSaved
+        self.savedAt = savedAt
         self.wornOn = wornOn
-        self.tryOnPictureID = tryOnPictureID
         self.createdAt = createdAt
     }
 
@@ -68,6 +72,10 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     public var isMadeByHer: Bool { version == nil }
 
     public var lastWorn: Date? { wornOn.max() }
+
+    /// When it went into Saved Looks: `savedAt`, or for a look saved before that was recorded,
+    /// when it was made.
+    public var savedDate: Date { savedAt ?? createdAt }
 }
 
 /// The three versions of one styling result (LR-05a), in the order the switch shows them.
@@ -124,25 +132,5 @@ public struct PieceIdea: Hashable, Sendable, Codable {
         self.name = name
         self.category = category
         self.colors = colors
-    }
-}
-
-/// A simulated picture of her wearing a look (RD-06). Always labelled Simulated.
-///
-/// Data tier: **Sensitive** (a picture of a person). Stage A only has the placeholder; real
-/// pictures wait for Phase 33's gates.
-public struct TryOnPicture: Identifiable, Hashable, Sendable, Codable {
-    public typealias ID = EntityID<TryOnPicture>
-
-    public let id: ID
-    public var lookID: Look.ID
-    public var image: PhotoReference
-    public var createdAt: Date
-
-    public init(id: ID, lookID: Look.ID, image: PhotoReference, createdAt: Date) {
-        self.id = id
-        self.lookID = lookID
-        self.image = image
-        self.createdAt = createdAt
     }
 }

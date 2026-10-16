@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 44" width="48" height="44" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <clipPath id="cs-body">
+      <rect x="4" y="14" width="40" height="26" rx="4.5" />
+    </clipPath>
+  </defs>
+  <ellipse cx="24" cy="41.4" rx="21" ry="1.9" fill="#70655B" opacity=".13" />
+  <rect x="8.6" y="38.6" width="4.4" height="2.8" rx="1" fill="#C3AC8A" stroke="#A48D6D" stroke-width="1" />
+  <rect x="35" y="38.6" width="4.4" height="2.8" rx="1" fill="#C3AC8A" stroke="#A48D6D" stroke-width="1" />
+  <path d="M18.4 14.6 V11.6 Q18.4 8 22 8 H26 Q29.6 8 29.6 11.6 V14.6" stroke="#8A7A6B" stroke-width="4.2" />
+  <path d="M18.4 14.6 V11.6 Q18.4 8 22 8 H26 Q29.6 8 29.6 11.6 V14.6" stroke="#AFA093" stroke-width="2" />
+  <path d="M20.6 9.6 Q21.4 9 22.6 9" stroke="#E3DBD5" stroke-width=".9" />
+  <rect x="16.6" y="12.6" width="3.6" height="2.6" rx=".8" fill="#D5C0A0" stroke="#A48D6D" stroke-width=".9" />
+  <rect x="27.8" y="12.6" width="3.6" height="2.6" rx=".8" fill="#D5C0A0" stroke="#A48D6D" stroke-width=".9" />
+  <rect x="4" y="14" width="40" height="26" rx="4.5" fill="#D0C5BB" />
+  <g clip-path="url(#cs-body)">
+    <rect x="0" y="34.2" width="48" height="8" fill="#BFB1A5" />
+    <rect x="38.4" y="14" width="8" height="28" fill="#BFB1A5" opacity=".55" />
+  </g>
+  <path d="M8.2 17 H14" stroke="#E3DBD5" stroke-width="1.2" />
+  <path d="M5.2 21 H42.8" stroke="#A39485" stroke-width="1.1" />
+  <path d="M5.4 22.4 H42.6" stroke="#E3DBD5" stroke-width=".8" opacity=".8" />
+  <rect x="4" y="14" width="40" height="26" rx="4.5" stroke="#A39485" stroke-width="1.4" />
+  <rect x="11" y="13.5" width="5" height="27" rx="1" fill="#FFF7EA" stroke="#D0C7B9" stroke-width="1.1" />
+  <rect x="32" y="13.5" width="5" height="27" rx="1" fill="#FFF7EA" stroke="#D0C7B9" stroke-width="1.1" />
+  <path d="M12.2 34.6 H14.8 M33.2 34.6 H35.8" stroke="#EDE7DD" stroke-width="1.6" />
+  <rect x="10.4" y="23.6" width="6.2" height="4.6" rx="1" fill="#D5C0A0" stroke="#A48D6D" stroke-width="1" />
+  <rect x="31.4" y="23.6" width="6.2" height="4.6" rx="1" fill="#D5C0A0" stroke="#A48D6D" stroke-width="1" />
+  <path d="M13.5 24.6 V27.2 M34.5 24.6 V27.2" stroke="#A48D6D" stroke-width=".9" />
+  <rect x="22" y="19.4" width="4" height="3.4" rx=".9" fill="#D5C0A0" stroke="#A48D6D" stroke-width=".9" />
+</svg>

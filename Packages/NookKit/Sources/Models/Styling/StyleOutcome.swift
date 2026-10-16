@@ -78,6 +78,12 @@ public enum ResultNote: Hashable, Sendable, Codable {
     case noNewPieceInSuitcase
     /// The weather couldn't be read, so the look ignores it (LR-04.3).
     case weatherUnavailable
+    /// Try a different outfit found no new base: every outfit this source can make has been
+    /// shown for this request, so this one comes round again.
+    case noOtherOutfit
+    /// She asked for a colour as required, and no usable piece could bring it into the look, so
+    /// the look goes without it rather than inventing a piece (PRD §8.3).
+    case requiredColorNotMet(ColorName)
 }
 
 /// A version the stylist couldn't make, and why. Shown with a partial result.

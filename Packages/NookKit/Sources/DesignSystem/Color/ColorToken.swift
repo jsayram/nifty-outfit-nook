@@ -44,6 +44,14 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case shadow
     /// The colour of the larger soft shadow under buttons and big rows.
     case shadowLarge
+    /// The dim over the screen while a quick tour shows (PRD §7.8, warm instead of plum per LR-02).
+    case tourScrim
+    /// The warm glow around a quick tour's spotlight.
+    case tourGlow
+    /// The soft light rim just inside the glow. Blurred, never a hard outline.
+    case tourRim
+    /// A quick tour's card: the plate colour, opaque, so the room never shows through its words.
+    case tourCard
 
     // MARK: Status
 
@@ -68,6 +76,11 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case floorLow
     /// The line where the wall meets the floor.
     case floorLine
+    /// The sky over the porch on the welcome screen (Phase 17), top of its gradient. In dark it's
+    /// a warm evening, so the light words on it stay readable.
+    case skyTop
+    /// The bottom of the welcome sky.
+    case skyBottom
     /// Sage in the drawn room (plants, the cardigan, soft furnishings).
     case artSage
     /// Deeper sage for shading.
@@ -86,6 +99,9 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
     case signPanel
     /// Her name, written on the sign's panel.
     case signText
+    /// The paper edge of a garment sticker (RD-07). Part of the art, like the sticker's paper,
+    /// not an outline on the interface. Stays near white in dark, a little dimmed with the garments.
+    case stickerEdge
 
     /// Where the token is used, for grouping in docs and the catalog.
     public enum Group: String, CaseIterable, Sendable {
@@ -98,8 +114,8 @@ nonisolated public enum ColorToken: String, CaseIterable, Sendable {
         switch self {
         case .success, .successSurface, .warning, .warningSurface, .error, .errorSurface:
             .status
-        case .floor, .floorLow, .floorLine, .artSage, .artSageDeep, .artSageLine, .artSand, .artStone, .artButter,
-            .artButterLine, .signPanel, .signText:
+        case .floor, .floorLow, .floorLine, .skyTop, .skyBottom, .artSage, .artSageDeep, .artSageLine, .artSand,
+            .artStone, .artButter, .artButterLine, .signPanel, .signText, .stickerEdge:
             .room
         default:
             .interface

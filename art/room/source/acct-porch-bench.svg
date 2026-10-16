@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 46" width="100" height="46" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Small slatted wood bench for the porch on the welcome screen, seen from a little above so the seat shows its top.
+       Contract: seat top face y 8..14, seat front y 14..20, apron y 20..25. Front legs stand on y 43 (place y 43 a px or
+       two below the floor line); back legs stop at y 39. The space under the apron (x 16..84, y 25..43) is clear for shoes.
+       Wood: fill #E7BC6E, shade #D9A650, outline #B98632, highlight #F3D391. -->
+  <ellipse cx="50" cy="43.6" rx="47" ry="2.6" fill="#B07A66" fill-opacity=".14" stroke="none"/>
+  <!-- back legs -->
+  <path d="M15 22 h4 l-.4 17 h-3.2 z" fill="#D9A650" stroke="#B98632" stroke-width="1.25"/>
+  <path d="M81 22 h4 l-.4 17 h-3.2 z" fill="#D9A650" stroke="#B98632" stroke-width="1.25"/>
+  <!-- seat top face, three slats -->
+  <path d="M8 8 H92 Q94 8 94.8 9.6 L97 14 H3 L5.2 9.6 Q6 8 8 8 Z" fill="#F3D391" stroke="#B98632" stroke-width="1.25"/>
+  <path d="M5.4 10.2 H94.6" stroke="#D9A650" stroke-width="1"/>
+  <path d="M4.4 12.2 H95.6" stroke="#D9A650" stroke-width="1"/>
+  <!-- seat front -->
+  <rect x="3" y="14" width="94" height="6" rx="1.6" fill="#E7BC6E" stroke="#B98632" stroke-width="1.25"/>
+  <path d="M6 15.8 H94" stroke="#F3D391" stroke-width="1"/>
+  <!-- apron -->
+  <path d="M9 20 H91 V23.4 Q91 25 89.4 25 H10.6 Q9 25 9 23.4 Z" fill="#D9A650" stroke="#B98632" stroke-width="1.25"/>
+  <!-- front legs, slightly tapered -->
+  <path d="M8.4 20 h5.6 l-.7 23 h-4.2 z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.25"/>
+  <path d="M86 20 h5.6 l-.7 23 h-4.2 z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.25"/>
+  <path d="M12.2 22 l-.4 19" stroke="#D9A650" stroke-width="1"/>
+  <path d="M89.8 22 l-.4 19" stroke="#D9A650" stroke-width="1"/>
+</svg>
