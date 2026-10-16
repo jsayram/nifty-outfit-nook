@@ -50,7 +50,7 @@ Debug builds launched with `-catalog` open a catalog of every DesignSystem compo
 
 ## Quick tours
 
-Home's quick tour starts the first time Home shows (Phase 16a, `docs/tours.md`). In Stage A that's every launch, since nothing is kept on disk. Debug builds take `-tour home` to start it whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Values combine with commas: `-tour reset,home`.
+Each screen's quick tour starts the first time the screen shows (Phases 16a and 16b, `docs/tours.md`), and App tours on Profile replays any of them. In Stage A that's every launch, since nothing is kept on disk. Debug builds take `-tour home` (or any tour's ID, such as `closet`) to start that tour whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Values combine with commas: `-tour reset,home`.
 
 ## Cutout benchmark
 
@@ -114,7 +114,7 @@ docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and ho
 docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
 docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
-docs/tours.md                Quick tours: the tour system, Home's tour, the -tour flag, VoiceOver and the tests.
+docs/tours.md                Quick tours: the tour system, every screen's tour, App tours, the -tour flag, VoiceOver and the tests.
 docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet's and Saved Looks' columns, two panes, readable widths, sheets and window sizes.
 website/                     The app's static website.
 ```

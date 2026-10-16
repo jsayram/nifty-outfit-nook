@@ -30,6 +30,7 @@ Spec: amendment RD-10 (the desk drawers and their screens) and RD-11 (the Track 
 | Send feedback | Profile, the middle drawer, and "Still stuck?" at the end of Help |
 | Privacy and terms | Profile, the bottom drawer |
 | Delete my data | Profile, and Your data on Privacy and terms |
+| App tours (16b) | Profile, a sheet |
 
 Each is pushed on whichever stack opened it, so Back goes where she came from. The titles sit on the wall, as on Profile, and the navigation bar keeps the name for Back and VoiceOver.
 
@@ -52,7 +53,7 @@ Neither the PRD nor the mockups list in-app accessibility options. PRD §16 asks
 
 ## App tours
 
-Hidden until Phase 16b. PRD §7.8 wants each guide listed with its step count and a "Show tips on new screens" switch, and there are no tours yet. A "coming soon" row would be the only Profile row that opens nothing real, and Apple rejects placeholder features, so the row comes back with the replay list in 16b.
+Since Phase 16b, a row under Help ("Replay the tips for any screen") opens App tours: every screen's quick tour with its tip count, the "Show tips on new screens" switch and Reset all tips. See `docs/tours.md`, App tours.
 
 ## Help (`help.html`)
 
@@ -99,7 +100,7 @@ Send with nothing written shows "Write a few words to send the note." under the 
 
 ## Delete my data
 
-Two steps. The screen says exactly what goes, with counts read from the stores: Your closet (21 pieces, with pictures, details and Recently deleted), Looks (6 looks), Try-on pictures (3 pictures), Suitcases (6 suitcases), Your profile (name on the sign, Preferences, fit, measurements and try-on photo) and Unsaved work (drafts). "Afterwards" says the app starts fresh, as if just installed, and that nothing about her is kept anywhere else. Then a solid button in the error colour with a trash icon, and "You'll be asked once more. Deleting can't be undone."
+Two steps. The screen says exactly what goes, with counts read from the stores: Your closet (21 pieces, with pictures, details and Recently deleted), Looks (6 looks), Try-on pictures (3 pictures), Suitcases (6 suitcases), Your profile (name on the sign, Preferences, fit, measurements, try-on photo and, since 16b, the app tours she has seen) and Unsaved work (drafts). "Afterwards" says the app starts fresh, as if just installed, and that nothing about her is kept anywhere else. Then a solid button in the error colour with a trash icon, and "You'll be asked once more. Deleting can't be undone."
 
 The button asks once more: "Delete everything?" with Delete everything and Cancel. Delete everything erases every store through `DataDeletionService`, then the root view builds every tab again (`DataDeletedAction`): Home is selected, the sign says Hello, the closet is empty, every cache and the unsent feedback note are gone, and a toast says "Your data is deleted. The app is starting fresh." Nothing from before can show on a screen that was already open, because no screen from before is left.
 
@@ -125,7 +126,7 @@ protocol DataDeletionService: Sendable {
 - Sign in with Apple token revocation, and the note that deleting doesn't cancel a subscription (30a);
 - the same screen, which already lists parts from the service and reports pending ones.
 
-Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again once the toast has gone (`docs/tours.md`). The words under Your profile name them in 16b, when the switch appears in Profile. Phase 20b adds her private iCloud copy.
+Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again once the toast has gone (`docs/tours.md`). Since 16b the words under Your profile name them. Phase 20b adds her private iCloud copy.
 
 ## States
 
@@ -156,7 +157,7 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 
 ## Decisions for Jose
 
-1. **App tours is hidden until 16b**, not shown as "coming soon".
+1. **App tours was hidden until 16b**, not shown as "coming soon". It's on Profile now.
 2. **Accessibility has no in-app options**, only the system's settings with what the app does and Open Settings, since nothing in the spec lists any.
 3. **Send feedback goes through the share sheet**, with no reply email field, until a support queue exists. The app details are three lines, off by default.
 4. **Privacy and terms has no permission switches** and no Export, since nothing is sent and export isn't built.
@@ -168,7 +169,7 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 ## Left for later phases
 
 - **16a (done):** tour progress erased by Delete my data, with the profile (`docs/tours.md`).
-- **16b:** App tours on Profile.
+- **16b (done):** App tours on Profile, and Delete my data naming the tours.
 - **19b:** the privacy policy and terms pages on the website, and the real wording of Privacy and terms.
 - **20b, 21b:** Export a copy, and the iCloud copy in Delete my data.
 - **21a:** stores on disk, so deletion lasts across launches and the feedback note can be kept.

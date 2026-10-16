@@ -107,6 +107,6 @@ It opens from a garment's Style with this, Make my own look (starting with that 
 ## Left for later phases
 
 - **12a (done):** Swap it on a saved look's faded piece (LR-16) and Swap a piece from look detail, which change the saved look in place; the saved looks list and renaming.
-- **16a, 16b:** the Make your own look tour, starting "Build an outfit yourself, piece by piece."
+- **16b (done):** the Make your own look and Swap a piece tours; Make your own look's starts "Build an outfit yourself, piece by piece." (`docs/tours.md`).
 - **21a:** durable storage behind `LookDraftStore`.
 - **34:** Find one.
