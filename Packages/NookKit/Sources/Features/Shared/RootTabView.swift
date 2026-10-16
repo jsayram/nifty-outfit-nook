@@ -13,22 +13,35 @@ public struct RootTabView: View {
     @State private var generation = 0
     /// What Home says when it opens again after a fresh start.
     @State private var freshStartNotice: String?
+    /// The quick tours (Phase 16a). Kept across a fresh start, so the `-tour` flag applies once
+    /// per launch; Delete my data erases what it has recorded.
+    @State private var tours: TourCenter
 
-    /// - Parameter services: what every screen below reads its data from.
-    public init(services: NookServices?) {
+    /// - Parameters:
+    ///   - services: what every screen below reads its data from.
+    ///   - tourLaunch: what the `-tour` debug flag asks of the tours. Release builds pass
+    ///     `standard`.
+    public init(services: NookServices?, tourLaunch: TourLaunchOptions = .standard) {
         self.services = services
+        _tours = State(initialValue: TourCenter(store: services?.tours, launch: tourLaunch))
     }
 
     public var body: some View {
         RootTabs(services: services, notice: freshStartNotice)
             .id(generation)
+            // While a tour shows, VoiceOver reads only the tour, over every tab and the tab bar.
+            .accessibilityHidden(tours.isShowing)
+            .overlay { TourOverlay(tours: tours) }
             .environment(\.dataDeleted, DataDeletedAction { startFresh() })
+            .environment(\.tourCenter, tours)
     }
 
     private func startFresh() {
         freshStartNotice = String(
             localized: "Your data is deleted. The app is starting fresh.", bundle: .module,
             comment: "Toast on Home after Delete my data")
+        // As on a fresh install, Home's tour can start again.
+        tours.forgetSession()
         generation += 1
     }
 }

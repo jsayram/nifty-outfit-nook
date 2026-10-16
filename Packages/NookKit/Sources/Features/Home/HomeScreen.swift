@@ -28,9 +28,16 @@ struct HomeScreen: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.tourCenter) private var tours
 
     private var layout: HomeLayout {
         HomeLayout(dynamicTypeSize: dynamicTypeSize, verticalSizeClass: verticalSizeClass)
+    }
+
+    /// Home's quick tour in the words for the layout that's showing (Phase 16a).
+    private var tour: TourDefinition {
+        HomeTour.definition(for: HomeTour.Variant(layout: layout, horizontalSizeClass: horizontalSizeClass))
     }
 
     var body: some View {
@@ -100,7 +107,15 @@ struct HomeScreen: View {
                 noticeShown = true
                 toast = NookToastMessage(notice, systemImage: "checkmark")
             }
+            await startTour()
         }
+        // A toast is said before a tour starts, or VoiceOver would never read it: the tour
+        // waits until the toast has gone (after Delete my data, for one).
+        .onChange(of: toast) { old, new in
+            if old != nil, new == nil { Task { await startTour() } }
+        }
+        // Turning the phone or changing the text size keeps the step, in the new layout's words.
+        .onChange(of: tour) { tours?.update(tour) }
         .onChange(of: path) { old, new in
             // Back from a pushed screen: Style Me may have changed the source or the occasion.
             if new.count < old.count { Task { await model.load(from: services) } }
@@ -129,6 +144,13 @@ struct HomeScreen: View {
                 content: model.content, open: open, openProfile: { path.append(.profile) },
                 notice: { errorBanner })
         }
+    }
+
+    /// Starts Home's quick tour the first time Home shows, once its controls are ready, and only
+    /// over Home itself: not over a pushed screen, a sheet or a toast (PRD §7.8).
+    private func startTour() async {
+        guard toast == nil else { return }
+        await tours?.startIfNeeded(tour) { path.isEmpty && sheet == nil && toast == nil }
     }
 
     private func turnOnLaundryTracking() async -> Bool {
@@ -190,12 +212,16 @@ struct HomeRoomView: View {
                 insets: EdgeInsets(top: insets.top, leading: 0, bottom: insets.bottom, trailing: 0),
                 horizontalSizeClass: horizontalSizeClass
             )
-            ScrollView(.vertical) {
-                RoomCanvas(layout: layout, content: content, open: open, openLook: openLook)
+            // On a phone too short for the room, the tour scrolls each control it points at
+            // into view (Phase 16a).
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    RoomCanvas(layout: layout, content: content, open: open, openLook: openLook)
+                }
+                .scrollDisabled(!layout.scrolls)
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .scrollDisabled(!layout.scrolls)
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
             .ignoresSafeArea()
         }
         .background(Color.nook.background)

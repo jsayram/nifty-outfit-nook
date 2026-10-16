@@ -1234,6 +1234,9 @@
     "Choose a piece to build your looks around." : {
       "comment" : "VoiceOver hint"
     },
+    "Choose a suitcase or your whole closet for outfit ideas." : {
+      "comment" : "Home tour, step 3, at large text sizes and on a phone held sideways"
+    },
     "Choose another" : {
       "comment" : "Style Me button: another starting piece"
     },
@@ -1304,6 +1307,9 @@
           }
         }
       }
+    },
+    "Choose which packed clothes to use, or switch to your whole closet." : {
+      "comment" : "Home tour, step 3, on the iPad's room"
     },
     "Choosing one outfit in three versions from %@ for %@." : {
       "comment" : "Your looks while styling: the source and the occasion"
@@ -1771,6 +1777,9 @@
           }
         }
       }
+    },
+    "Ends the tour." : {
+      "comment" : "VoiceOver hint on a control in a quick tour's spotlight, before what the control does"
     },
     "Enter a height between 3 and 8 feet, or leave both boxes empty." : {
       "comment" : "Height in feet and inches isn't a number or is out of range"
@@ -3781,6 +3790,12 @@
     "Open the look and tap Try it on. Pictures in this test build are simulated." : {
       "comment" : "Pictures tab empty state: step 2"
     },
+    "Open the wardrobe to add clothes and see everything you own." : {
+      "comment" : "Home tour, step 2, on the phone's room"
+    },
+    "Open the wardrobe to see or add your clothes." : {
+      "comment" : "Home tour, step 2, on the iPad, at large text sizes and sideways"
+    },
     "Opening Recently deleted" : {
       "comment" : "Loading",
       "localizations" : {
@@ -4048,6 +4063,9 @@
     },
     "Packed" : {
       "comment" : "Suitcase: heading over its pieces"
+    },
+    "Packing from" : {
+      "comment" : "Home tour, step 3 title on the phone's room: the suitcase Style Me picks from"
     },
     "Packs it, or takes it out." : {
       "comment" : "Hint on a piece in the packing sheet"
@@ -4854,6 +4872,9 @@
     "Start over" : {
       "comment" : "Make your own look: throws the draft away"
     },
+    "Start styling" : {
+      "comment" : "Last button of Home's quick tour; closes it"
+    },
     "Starting piece" : {
       "comment" : "Style Me row",
       "localizations" : {
@@ -4921,6 +4942,9 @@
     },
     "Style Me now uses %@." : {
       "comment" : "Toast after choosing a source, with its name"
+    },
+    "Style Me only picks from what’s in this suitcase. Tap it to switch suitcases or use your whole closet." : {
+      "comment" : "Home tour, step 3, on the phone's room"
     },
     "Style Me picks only from the suitcase you choose. Main closet uses everything." : {
       "comment" : "Suitcases: what choosing a source does"
@@ -5220,8 +5244,17 @@
     "Tap a piece for details." : {
       "comment" : "Suitcase: under Packed"
     },
+    "Tap here for an outfit idea made from your clothes." : {
+      "comment" : "Home tour, step 1, at large text sizes and on a phone held sideways"
+    },
     "Tap one to see it in the look." : {
       "comment" : "Swap: under the buttons before she picks an option"
+    },
+    "Tap the laptop and I’ll pull together a look from your closet for today’s weather and plans." : {
+      "comment" : "Home tour, step 1, on the phone's room"
+    },
+    "Tap the laptop for an outfit idea made from your clothes." : {
+      "comment" : "Home tour, step 1, on the iPad's room"
     },
     "Tap the laptop on your desk. Check the occasion, then tap Style me. You’ll see one outfit in three versions: Simple, Dressed up and Something new." : {
       "comment" : "Help: Get outfit ideas"
@@ -5263,6 +5296,9 @@
         }
       }
     },
+    "That is you" : {
+      "comment" : "Home tour, step 4 title on the iPad, at large text sizes and sideways"
+    },
     "That look couldn’t be saved. Try again." : {
       "comment" : "Toast when saving a look fails"
     },
@@ -5296,6 +5332,9 @@
     },
     "That’s every outfit %@ can make for this request, so this one came round again." : {
       "comment" : "Note on Your looks after Try a different outfit: the source's name"
+    },
+    "That’s you" : {
+      "comment" : "Home tour, step 4 title on the phone's room"
     },
     "The app doesn’t send anything itself. Send opens the share sheet, and you choose where the note goes, like Messages or Mail." : {
       "comment" : "Send feedback: under the button, in this test build"
@@ -6199,6 +6238,9 @@
         }
       }
     },
+    "Your name sign opens Profile, where you can replay these tours." : {
+      "comment" : "Home tour, step 4, on the iPad, at large text sizes and sideways"
+    },
     "Your name, measurements, weight and fit" : {
       "comment" : "Privacy and terms: what stays on the iPhone"
     },
@@ -6234,6 +6276,9 @@
     "Your profile didn’t load" : {
       "comment" : "Profile error title"
     },
+    "Your profile lives here. You can replay this tour from it any time." : {
+      "comment" : "Home tour, step 4, on the phone's room"
+    },
     "Your request" : {
       "comment" : "Style Me section"
     },
@@ -6254,6 +6299,9 @@
     },
     "Your sign now says %@." : {
       "comment" : "Toast after changing the name on the sign, with what it shows"
+    },
+    "Your suitcase" : {
+      "comment" : "Home tour, step 3 title on the iPad, at large text sizes and sideways"
     },
     "Your suitcases didn’t load" : {
       "comment" : "Suitcases error title"

@@ -89,11 +89,13 @@ struct HomeSidewaysView<Notice: View>: View {
             if isStillImage {
                 column.padding(.top, top)
             } else {
-                ScrollView(.vertical) { column }
-                    .contentMargins(.top, top, for: .scrollContent)
-                    .contentMargins(.bottom, bottom, for: .scrollContent)
-                    .scrollBounceBehavior(.basedOnSize)
-                    .scrollIndicators(.hidden)
+                TourScrollReader {
+                    ScrollView(.vertical) { column }
+                        .contentMargins(.top, top, for: .scrollContent)
+                        .contentMargins(.bottom, bottom, for: .scrollContent)
+                        .scrollBounceBehavior(.basedOnSize)
+                        .scrollIndicators(.hidden)
+                }
             }
         }
     }
@@ -120,6 +122,7 @@ struct HomeSidewaysView<Notice: View>: View {
             ) { open(.laptop) }
             .accessibilityHint(RoomControl.laptop.accessibilityHint(for: content))
             .accessibilityIdentifier(RoomControl.laptop.identifier)
+            .homeTourAnchor(.laptop, content: content, label: RoomControl.laptop.rowLabel(for: content), open: open)
             more
         }
         .padding(.leading, 18)
@@ -144,6 +147,8 @@ struct HomeSidewaysView<Notice: View>: View {
             }
             .accessibilityLabel(Text("Profile", bundle: .module, comment: "Button: opens Profile"))
             .accessibilityIdentifier("home.profile")
+            // The sign is a drawing hidden from VoiceOver here, so VoiceOver returns to this.
+            .homeTourFocus(.nameSign)
             .padding(.trailing, -NookSpacing.small)
         }
     }
@@ -260,6 +265,7 @@ struct SidewaysTile<Label: View>: View {
         .accessibilityHint(control.accessibilityHint(for: content))
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(control.identifier)
+        .homeTourAnchor(control, content: content, label: control.rowLabel(for: content), open: open)
     }
 }
 
@@ -361,11 +367,33 @@ struct SidewaysScene: View {
         ZStack(alignment: .topLeading) {
             drawing().allowsHitTesting(false)
             if let stage = SidewaysStage.rect(for: control) {
+                let spot = layout.rect(stage)
                 Color.clear
                     .contentShape(Rectangle())
-                    .roomFrame(layout.rect(stage))
+                    .frame(width: spot.width, height: spot.height)
+                    // The tiles carry the laptop and the suitcase for the tour; the wardrobe
+                    // and the sign are only here (Phase 16a). Anchored before `.position`,
+                    // which fills the scene.
+                    .modifier(SceneTourSpot(control: control, content: content, open: open))
+                    .position(x: spot.midX, y: spot.midY)
                     .onTapGesture { open(control) }
             }
+        }
+    }
+}
+
+/// The tour's spot on the wardrobe and the sign in the sideways scene. They're hidden from
+/// VoiceOver, so VoiceOver returns to the tiles and the Profile button instead.
+private struct SceneTourSpot: ViewModifier {
+    let control: RoomControl
+    let content: HomeRoomContent
+    let open: (RoomControl) -> Void
+
+    func body(content view: Content) -> some View {
+        if control == .wardrobe || control == .nameSign {
+            view.homeTourAnchor(control, content: self.content, open: open, focus: false)
+        } else {
+            view
         }
     }
 }
