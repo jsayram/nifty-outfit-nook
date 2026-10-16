@@ -6,8 +6,8 @@ import Observation
 /// usual fit, measurements, the pieces that fit her well and the try-on photo.
 ///
 /// One model serves Profile and the Fit screen it pushes, so a change on one shows on the other.
-/// Every change is one read-change-save through `ProfileStore.change`, so a setting changed on
-/// another screen in the meantime (Track laundry, the remembered source) is never overwritten.
+/// Every change is one `ProfileStore.update`, so a setting changed on another screen in the
+/// meantime (Track laundry, the remembered source) is never overwritten.
 /// The store checks names and measurements again before it keeps anything.
 ///
 /// Measurements, fitting pieces and the photo are **Sensitive** (DATA_MAP.md). Nothing here logs
@@ -204,7 +204,7 @@ final class ProfileModel {
             return profile
         }
         do {
-            let saved = try await services.profile.change(edit)
+            let saved = try await services.profile.update(edit)
             profile = saved
             return saved
         } catch {

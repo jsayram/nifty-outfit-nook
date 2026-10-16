@@ -119,7 +119,7 @@ final class StyleMeModel {
         let source = draft.source
         let sourceIsThere = SourceChoice.isAvailable(source, among: builder.suitcases)
         let occasion = draft.occasion
-        _ = try? await services.profile.change { profile in
+        _ = try? await services.profile.update { profile in
             if sourceIsThere { profile.remembered.source = source }
             if occasion != .other { profile.remembered.occasion = occasion }
         }

@@ -2,10 +2,11 @@ import Foundation
 
 // The store protocols. Features talk to these and never to a concrete store.
 //
-// Stage A has in-memory stores (Fixtures). Stage B puts real persistence behind the same
-// protocols (Phase 20a). Each store is `Sendable` and every call is `async`, so an actor, a
-// database or a sync engine can sit behind it. Stores keep data, not rules: the rules are the
-// pure functions in Models/Rules, which screens and stores both call.
+// Stage A has in-memory stores (Fixtures). Stage B puts real storage behind the same protocols
+// (Phase 21a). Each store is `Sendable` and every call is `async`, so an actor, a database or a
+// sync engine can sit behind it. Stores keep data, not rules: the rules are the pure functions in
+// Models/Rules, which screens and stores both call, and every store checks a record on save with
+// `StoreValidation`. The store contracts in NookTestSupport say what each store must do.
 
 /// Why a store call failed.
 public enum StoreError: Error, Hashable, Sendable {
@@ -105,18 +106,11 @@ public protocol SuitcaseStore: ErasableStore {
 /// measurements, fitting pieces or try-on photo.
 public protocol ProfileStore: ErasableStore {
     func profile() async throws(StoreError) -> Profile
-    /// Saves the profile after checking the sign name and measurements.
+    /// Saves the profile after checking the sign name and measurements (`ProfileValidation`).
     func save(_ profile: Profile) async throws(StoreError)
-}
-
-extension ProfileStore {
-    /// Reads the profile, changes it and saves it, for one setting at a time (Track laundry, the
-    /// remembered source). Returns what was saved.
+    /// Changes the profile in place and returns what was saved, for one setting at a time (Track
+    /// laundry, the remembered source). Checks it as `save` does. The read, the change and the
+    /// write are one step, so two changes made at once both land.
     @discardableResult
-    public func change(_ edit: @Sendable (inout Profile) -> Void) async throws(StoreError) -> Profile {
-        var profile = try await profile()
-        edit(&profile)
-        try await save(profile)
-        return profile
-    }
+    func update(_ change: @Sendable (inout Profile) -> Void) async throws(StoreError) -> Profile
 }

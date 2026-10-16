@@ -140,7 +140,7 @@ final class SuitcasesModel {
         let previous = chosen
         isSaving = true
         defer { isSaving = false }
-        try await services.profile.change { $0.remembered.source = source }
+        try await services.profile.update { $0.remembered.source = source }
         if let id = source.suitcaseID {
             try await services.suitcases.markUsed(id, at: now)
         }

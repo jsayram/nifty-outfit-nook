@@ -15,21 +15,20 @@ public actor InMemoryProfileStore: ProfileStore {
         return stored
     }
 
-    /// Checks the sign name, the measurements and each fit piece before saving.
+    /// Checks the sign name, the measurements and each fit piece before saving
+    /// (`StoreValidation.profile`).
     public func save(_ profile: Profile) async throws(StoreError) {
         try await options.begin()
-        var profile = profile
-        do {
-            profile.signName = try NameRules.signName(profile.signName)
-            profile.fitPieces = try profile.fitPieces.map { piece throws(NameProblem) in
-                try MeasurementRules.checkedFitPiece(piece)
-            }
-        } catch {
-            throw .invalidName(error)
-        }
-        let problems = MeasurementRules.problems(in: profile.measurements)
-        guard problems.isEmpty else { throw .invalidMeasurements(problems) }
-        stored = profile
+        stored = try StoreValidation.profile(profile)
+    }
+
+    @discardableResult
+    public func update(_ change: @Sendable (inout Profile) -> Void) async throws(StoreError) -> Profile {
+        try await options.begin()
+        var profile = stored
+        change(&profile)
+        stored = try StoreValidation.profile(profile)
+        return stored
     }
 
     /// Delete my data: a fresh profile, as on a new install.

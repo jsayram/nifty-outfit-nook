@@ -145,7 +145,7 @@ final class LaundryModel {
     func turnOnTracking(in services: NookServices?) async -> Bool {
         guard let services else { return false }
         do {
-            try await services.profile.change { $0.preferences.tracksLaundry = true }
+            try await services.profile.update { $0.preferences.tracksLaundry = true }
         } catch {
             return false
         }
