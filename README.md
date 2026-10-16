@@ -32,6 +32,8 @@ scripts/format.sh           # swift-format lint (fails on any finding)
 scripts/format.sh --fix     # rewrite files, then lint
 scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
 scripts/promote.sh "<title>" <body-file>  # at a milestone: open the develop-to-main promotion PR
+scripts/bump-build.sh       # before an archive: set the build number (UTC date and time, ignored by git)
+scripts/check-archive.sh    # unsigned Release archive for a device, and checks on what would be uploaded
 ```
 
 The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commit whose staged changes look like they contain a secret.
@@ -60,6 +62,10 @@ Each screen's quick tour starts the first time the screen shows (Phases 16a and 
 
 Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) instead of the app: pick photos with the system picker (no photo-library permission needed) or use drawn samples, and it times each cutout, samples memory, shows the quality signals and exports the numbers as text. Since Phase 8b it also shows each photo as a sticker and as a tile, marking the one the signals pick. The simulator can't run Vision's subject lifting, so it needs a device. `docs/cutout-feasibility.md` has the steps and the go/no-go limits. Like the catalog, it's compiled only in Debug.
 
+## TestFlight
+
+Lily's builds go out through TestFlight as internal-only builds with sample data (Phase 18). `docs/testflight.md` has Jose's steps: the App ID and app record, adding Lily as a tester, archiving and uploading, the What to Test text, and how her notes come back. The version is 0.1.0 (`Configs/Version.xcconfig`), and `scripts/bump-build.sh` sets the build number before each archive. The app icon is a placeholder (`art/app-icon/README.md`).
+
 ## Sample data
 
 Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are a few app-state flags in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch (`docs/onboarding.md`). Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
@@ -80,7 +86,7 @@ The models, the store protocols and the fixture sets are described in `docs/mode
 ```
 NiftyOutfitNook.xcodeproj    Thin app project. Folders are synchronized, so adding a file never edits it.
 NiftyOutfitNook.xctestplan   Runs the NookKit tests and the UI tests.
-NiftyOutfitNook/             App target: entry point, assets, entitlements, privacy manifest.
+NiftyOutfitNook/             App target: entry point, app icon (AppIcon.icon), assets, entitlements, privacy manifest.
 NiftyOutfitNookUITests/      XCUITest UI tests.
 Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
@@ -96,10 +102,14 @@ Configs/                     Build settings as xcconfig files.
   Debug.xcconfig             Debug configuration, Dev environment.
   Release.xcconfig           Release configuration, Production environment.
   App.xcconfig               App target: bundle ID, Info.plist keys, entitlements.
+  AppInfo.plist              The launch screen colour, merged into the generated Info.plist.
+  Version.xcconfig           Version and build number (Phase 18).
+  ExportOptions-TestFlight.plist  Upload options for a TestFlight Internal Only build.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
-scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-release.sh, check-package-pins.sh,
-                             install-hooks.sh, merge-pr.sh, promote.sh.
+scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-release.sh, check-archive.sh,
+                             check-package-pins.sh, bump-build.sh, install-hooks.sh, merge-pr.sh, promote.sh.
+art/                         Sources for the room drawings (room/) and the app icon (app-icon/).
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
 docs/decisions/              Technical decision notes.
@@ -121,6 +131,7 @@ docs/profile.md              Profile, Fit and measurements, the try-on photo she
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
 docs/tours.md                Quick tours: the tour system, every screen's tour, App tours, the -tour flag, VoiceOver and the tests.
 docs/onboarding.md           Onboarding: the welcome and its steps, what's kept across launches, a relaunch, and the -onboarding flag.
+docs/testflight.md           Lily's TestFlight build: setup, each build, What to Test, her notes, and the release checks.
 docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet's and Saved Looks' columns, two panes, readable widths, sheets and window sizes.
 website/                     The app's static website.
 ```
