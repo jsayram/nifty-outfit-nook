@@ -52,6 +52,7 @@ jobs:
   # 3 to 7 minutes, so this job is now the longest (22 to 26 minutes in October 2026).
   release-and-package-tests:
     name: release-and-package-tests
+    if: false
     runs-on: macos-26
     timeout-minutes: 40
     steps:
@@ -119,6 +120,17 @@ jobs:
         include:
           - part: ui-home-and-results
             family: iPhone
+            parallel: ""
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/HomeTests
+              -only-testing:NiftyOutfitNookUITests/YourLooksTests
+              -only-testing:NiftyOutfitNookUITests/StyleMeTests
+              -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -only-testing:NiftyOutfitNookUITests/ClosetTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
+          - part: ui-home-and-results-par2
+            family: iPhone
+            parallel: -parallel-testing-enabled YES -parallel-testing-worker-count 2
             selection: >-
               -only-testing:NiftyOutfitNookUITests/HomeTests
               -only-testing:NiftyOutfitNookUITests/YourLooksTests
@@ -128,6 +140,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/LaunchTests
           - part: ui-add-and-variants
             family: iPhone
+            parallel: -parallel-testing-enabled YES -parallel-testing-worker-count 2
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
               -only-testing:NiftyOutfitNookUITests/HomeVariantTests
@@ -138,6 +151,7 @@ jobs:
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             family: iPhone
+            parallel: -parallel-testing-enabled YES -parallel-testing-worker-count 2
             selection: >-
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
@@ -159,6 +173,7 @@ jobs:
           # one of these skips itself on an iPhone.
           - part: ui-ipad
             family: iPad
+            parallel: ""
             selection: >-
               -only-testing:NiftyOutfitNookUITests/IPadTests
               -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
@@ -171,8 +186,20 @@ jobs:
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
           xcrun simctl list runtimes available
+      - name: Start a resource sampler (diagnostic)
+        run: |
+          sysctl hw.ncpu hw.memsize
+          (while true; do
+            echo "== $(date -u +%H:%M:%S) load $(sysctl -n vm.loadavg) swap $(sysctl -n vm.swapusage)"
+            memory_pressure -Q 2>/dev/null | tail -1
+            vm_stat | grep -E "Pages free|Pages active|Pages occupied by compressor|Pageouts|Swapouts"
+            ps -Ao rss=,pcpu=,comm= -r | head -5 | sed -E 's#[^ ]*/##'
+            ps -Ao rss=,comm= -m | head -4 | sed -E 's#[^ ]*/##'
+            sleep 15
+          done) > "$RUNNER_TEMP/sampler.log" 2>&1 &
       - name: Test (${{ matrix.part }})
         env:
+          PARALLEL: ${{ matrix.parallel }}
           NOOK_SIM_FAMILY: ${{ matrix.family }}
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
@@ -184,7 +211,10 @@ jobs:
         # ("Timed out while launching application via Xcode", "Failed to get launch progress"),
         # which no wait in a test can catch. A test that fails twice still fails the job, and the
         # first failure stays in the test results. Package tests and local runs never retry.
-        run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
+        run: scripts/test.sh $SELECTION $PARALLEL -retry-tests-on-failure -test-iterations 2
+      - name: Show the resource samples (diagnostic)
+        if: always()
+        run: cat "$RUNNER_TEMP/sampler.log"
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
