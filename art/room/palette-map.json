@@ -1,0 +1,1082 @@
+{
+  "#131115": {
+    "light": "#131115",
+    "dark": "#0D0B0D"
+  },
+  "#18253D": {
+    "light": "#2A241E",
+    "dark": "#1C1813",
+    "sky": "#20262F"
+  },
+  "#1D2749": {
+    "light": "#302820",
+    "dark": "#201A14",
+    "sky": "#242936"
+  },
+  "#20304C": {
+    "light": "#362F28",
+    "dark": "#241F19",
+    "sky": "#2A303C"
+  },
+  "#221F24": {
+    "light": "#221F24",
+    "dark": "#161416"
+  },
+  "#22314F": {
+    "light": "#383029",
+    "dark": "#252019",
+    "sky": "#2C323E"
+  },
+  "#27305F": {
+    "light": "#3E3227",
+    "dark": "#292118",
+    "sky": "#2F3446"
+  },
+  "#283A5E": {
+    "light": "#423930",
+    "dark": "#2C261E",
+    "sky": "#343B49"
+  },
+  "#2B3C5E": {
+    "light": "#443B32",
+    "dark": "#2D271F",
+    "sky": "#363D4A"
+  },
+  "#2C3E63": {
+    "light": "#473D34",
+    "dark": "#2F2820",
+    "sky": "#383F4E"
+  },
+  "#2E2A30": {
+    "light": "#2D2B2A",
+    "dark": "#1E1C1A"
+  },
+  "#2E4F80": {
+    "light": "#5A4C40",
+    "dark": "#3B3228"
+  },
+  "#313C70": {
+    "light": "#4B3E32",
+    "dark": "#32291F",
+    "sky": "#3A4054"
+  },
+  "#33466D": {
+    "light": "#4F453B",
+    "dark": "#342E25",
+    "sky": "#3F4757"
+  },
+  "#3E4A86": {
+    "light": "#5B4C3E",
+    "dark": "#3C3226",
+    "sky": "#484E66"
+  },
+  "#3E6656": {
+    "light": "#536151",
+    "dark": "#374032"
+  },
+  "#44795A": {
+    "light": "#627157",
+    "dark": "#414B36"
+  },
+  "#4A7564": {
+    "light": "#60705F",
+    "dark": "#3F4A3B"
+  },
+  "#4B5794": {
+    "light": "#69594B",
+    "dark": "#453B2F",
+    "sky": "#555B73"
+  },
+  "#4C78B2": {
+    "light": "#847364",
+    "dark": "#574C3E"
+  },
+  "#4E4853": {
+    "light": "#4D4A47",
+    "dark": "#33312C"
+  },
+  "#4F7A69": {
+    "light": "#657463",
+    "dark": "#434D3D"
+  },
+  "#557FB6": {
+    "light": "#8A7A6B",
+    "dark": "#5B5142"
+  },
+  "#565862": {
+    "light": "#5B5856",
+    "dark": "#3C3A35"
+  },
+  "#56796B": {
+    "light": "#677466",
+    "dark": "#444D3F"
+  },
+  "#5A535F": {
+    "light": "#595553",
+    "dark": "#3B3833"
+  },
+  "#5A8572": {
+    "light": "#707F6D",
+    "dark": "#4A5444"
+  },
+  "#5C9670": {
+    "light": "#7D8D6E",
+    "dark": "#535D44"
+  },
+  "#5E8978": {
+    "light": "#748372",
+    "dark": "#4D5647"
+  },
+  "#5E8A61": {
+    "light": "#798264",
+    "dark": "#50563E"
+  },
+  "#5E8A68": {
+    "light": "#788268",
+    "dark": "#4F5640"
+  },
+  "#64907C": {
+    "light": "#7B8A77",
+    "dark": "#515B4A"
+  },
+  "#6590C6": {
+    "light": "#9A8A7C",
+    "dark": "#665B4D"
+  },
+  "#68897A": {
+    "light": "#798476",
+    "dark": "#505749"
+  },
+  "#6A1F58": {
+    "light": "#4B3628",
+    "dark": "#322419",
+    "token": "accent"
+  },
+  "#6B5563": {
+    "light": "#615C56",
+    "dark": "#403D35"
+  },
+  "#6C6E78": {
+    "light": "#716E6C",
+    "dark": "#4B4943"
+  },
+  "#6C8F80": {
+    "light": "#7D8A7C",
+    "dark": "#535B4D"
+  },
+  "#6C9AD0": {
+    "light": "#A39485",
+    "dark": "#6C6252"
+  },
+  "#6F9474": {
+    "light": "#858D75",
+    "dark": "#585D49"
+  },
+  "#6F9870": {
+    "light": "#889073",
+    "dark": "#5A5F47"
+  },
+  "#6F9A86": {
+    "light": "#859481",
+    "dark": "#586250"
+  },
+  "#6F9BD0": {
+    "light": "#A49586",
+    "dark": "#6C6253"
+  },
+  "#6FA275": {
+    "light": "#8E9977",
+    "dark": "#5E654A"
+  },
+  "#7590B6": {
+    "light": "#978C82",
+    "dark": "#645C51",
+    "sky": "#848F9E"
+  },
+  "#76A07D": {
+    "light": "#8E987E",
+    "dark": "#5E644E"
+  },
+  "#772E1F": {
+    "light": "#554536",
+    "dark": "#382E21"
+  },
+  "#77AE84": {
+    "light": "#97A584",
+    "dark": "#646D52"
+  },
+  "#7A4636": {
+    "light": "#5F5449",
+    "dark": "#3F372D",
+    "faded": "#686460",
+    "fadedDark": "#3C3A36"
+  },
+  "#7B7D86": {
+    "light": "#7F7D7B",
+    "dark": "#54534C"
+  },
+  "#7BA67D": {
+    "light": "#959A7C",
+    "dark": "#62664D",
+    "token": "artSageLine"
+  },
+  "#7EA6DA": {
+    "light": "#AFA093",
+    "dark": "#746A5B"
+  },
+  "#7F9C8C": {
+    "light": "#8E9789",
+    "dark": "#5E6455"
+  },
+  "#7FA8D8": {
+    "light": "#B0A295",
+    "dark": "#746B5C"
+  },
+  "#82A293": {
+    "light": "#929D8F",
+    "dark": "#606859"
+  },
+  "#8466B8": {
+    "light": "#897562",
+    "dark": "#5A4D3D"
+  },
+  "#86A3C6": {
+    "light": "#A99E95",
+    "dark": "#70685C",
+    "sky": "#96A2B0"
+  },
+  "#86A585": {
+    "light": "#999E88",
+    "dark": "#656854"
+  },
+  "#86AE84": {
+    "light": "#9EA688",
+    "dark": "#686E54"
+  },
+  "#86B087": {
+    "light": "#9FA88A",
+    "dark": "#696F56"
+  },
+  "#86B184": {
+    "light": "#A0A888",
+    "dark": "#6A6F54"
+  },
+  "#89A5C8": {
+    "light": "#ABA097",
+    "dark": "#716A5E",
+    "sky": "#99A4B2"
+  },
+  "#8A5A48": {
+    "light": "#70655B",
+    "dark": "#4A4338"
+  },
+  "#8A5E3C": {
+    "light": "#776655",
+    "dark": "#4F4335"
+  },
+  "#8A8DA6": {
+    "light": "#948E88",
+    "dark": "#625E54"
+  },
+  "#8BAD8B": {
+    "light": "#9FA68D",
+    "dark": "#696E57"
+  },
+  "#8DBE8D": {
+    "light": "#ABB491",
+    "dark": "#71775A"
+  },
+  "#8E3C2A": {
+    "light": "#675545",
+    "dark": "#44382B"
+  },
+  "#8E9098": {
+    "light": "#92908E",
+    "dark": "#605F58"
+  },
+  "#8FB8E6": {
+    "light": "#BFB1A5",
+    "dark": "#7E7566"
+  },
+  "#90AC9C": {
+    "light": "#9EA89A",
+    "dark": "#686F5F"
+  },
+  "#92C39C": {
+    "light": "#AEBA9C",
+    "dark": "#737B61"
+  },
+  "#93BAE6": {
+    "light": "#C1B4A7",
+    "dark": "#7F7768"
+  },
+  "#93C29D": {
+    "light": "#AEBA9D",
+    "dark": "#737B61"
+  },
+  "#97B595": {
+    "light": "#A9AF98",
+    "dark": "#70745E"
+  },
+  "#9A6E24": {
+    "light": "#887458",
+    "dark": "#5A4D37",
+    "faded": "#888177",
+    "fadedDark": "#4C4841"
+  },
+  "#9C5E4C": {
+    "light": "#7C6E61",
+    "dark": "#52493C"
+  },
+  "#9C8478": {
+    "light": "#8E8983",
+    "dark": "#5E5A51"
+  },
+  "#9CCBA6": {
+    "light": "#B6C3A6",
+    "dark": "#788167"
+  },
+  "#9DB7D6": {
+    "light": "#BCB2AA",
+    "dark": "#7C7569",
+    "sky": "#ABB5C2"
+  },
+  "#9DB8A8": {
+    "light": "#ABB4A6",
+    "dark": "#717767"
+  },
+  "#9DC497": {
+    "light": "#B5BB9C",
+    "dark": "#777B61"
+  },
+  "#9E4531": {
+    "light": "#73604E",
+    "dark": "#4C3F30"
+  },
+  "#9FC49C": {
+    "light": "#B6BB9E",
+    "dark": "#787B62",
+    "token": "artSageDeep"
+  },
+  "#A3BFA0": {
+    "light": "#B4B9A3",
+    "dark": "#777A65"
+  },
+  "#A4A6AE": {
+    "light": "#A4A6AE",
+    "dark": "#6C6E6C"
+  },
+  "#A4AABD": {
+    "light": "#AEAAA5",
+    "dark": "#737066"
+  },
+  "#A6B2C5": {
+    "light": "#B5B0AB",
+    "dark": "#77746A",
+    "sky": "#ADB1B9"
+  },
+  "#A8653F": {
+    "light": "#857566",
+    "dark": "#584D3F"
+  },
+  "#A98CD6": {
+    "light": "#AC9988",
+    "dark": "#726554"
+  },
+  "#A9C8E8": {
+    "light": "#CCC2B9",
+    "dark": "#878073",
+    "sky": "#BAC6D3"
+  },
+  "#A9CBEF": {
+    "light": "#D0C5BB",
+    "dark": "#898274"
+  },
+  "#ABD0A5": {
+    "light": "#C2C8AA",
+    "dark": "#808469"
+  },
+  "#B07A66": {
+    "light": "#93877B",
+    "dark": "#61594C"
+  },
+  "#B2D0F1": {
+    "light": "#D5CBC1",
+    "dark": "#8D8678"
+  },
+  "#B3A79B": {
+    "light": "#ADA8A3",
+    "dark": "#726F65"
+  },
+  "#B48F68": {
+    "light": "#A49482",
+    "dark": "#6C6251"
+  },
+  "#B4BDCF": {
+    "light": "#C1BCB7",
+    "dark": "#7F7C71",
+    "sky": "#B9BDC4"
+  },
+  "#B4BFD0": {
+    "light": "#C2BDB9",
+    "dark": "#807D73",
+    "sky": "#BABEC5"
+  },
+  "#B5533C": {
+    "light": "#86705C",
+    "dark": "#584A39"
+  },
+  "#B6D3F2": {
+    "light": "#D7CEC5",
+    "dark": "#8E887A"
+  },
+  "#B79BE0": {
+    "light": "#B9A797",
+    "dark": "#7A6E5E"
+  },
+  "#B7D5B1": {
+    "light": "#C9CDB4",
+    "dark": "#858770",
+    "token": "artSage"
+  },
+  "#B8627B": {
+    "light": "#907D6C",
+    "dark": "#5F5343"
+  },
+  "#B98632": {
+    "light": "#A48D6D",
+    "dark": "#6C5D44",
+    "faded": "#9F978C",
+    "fadedDark": "#58544B"
+  },
+  "#B99A3A": {
+    "light": "#AD9B78",
+    "dark": "#72664A"
+  },
+  "#B9A2DE": {
+    "light": "#BBAC9E",
+    "dark": "#7B7262"
+  },
+  "#B9D8F3": {
+    "light": "#DBD2CA",
+    "dark": "#918B7D",
+    "sky": "#C9D5E0"
+  },
+  "#BFA5E2": {
+    "light": "#BFB0A1",
+    "dark": "#7E7464"
+  },
+  "#C3ABE6": {
+    "light": "#C4B5A7",
+    "dark": "#817768"
+  },
+  "#C3CBDB": {
+    "light": "#CECAC6",
+    "dark": "#88857B",
+    "sky": "#C8CBD1"
+  },
+  "#C3CCD9": {
+    "light": "#CECAC7",
+    "dark": "#88857B",
+    "sky": "#C8CBD1"
+  },
+  "#C4CDDA": {
+    "light": "#CFCBC8",
+    "dark": "#89867C",
+    "sky": "#C9CCD2"
+  },
+  "#C4D5E3": {
+    "light": "#D6D1CD",
+    "dark": "#8D8A7F",
+    "sky": "#CDD3D9"
+  },
+  "#C4DCF5": {
+    "light": "#DFD7D0",
+    "dark": "#938E81"
+  },
+  "#C6AA80": {
+    "light": "#BAAD9A",
+    "dark": "#7B725F"
+  },
+  "#C6DFF3": {
+    "light": "#E1DAD3",
+    "dark": "#959083",
+    "sky": "#D3DDE5"
+  },
+  "#C7BCB1": {
+    "light": "#C2BDB8",
+    "dark": "#807D72"
+  },
+  "#C7D0DD": {
+    "light": "#D2CECB",
+    "dark": "#8B887E",
+    "sky": "#CCCFD5"
+  },
+  "#C7DEF6": {
+    "light": "#E1DAD3",
+    "dark": "#959083"
+  },
+  "#C8A27C": {
+    "light": "#B7A796",
+    "dark": "#796E5D"
+  },
+  "#C98A9A": {
+    "light": "#A99C90",
+    "dark": "#706759"
+  },
+  "#C9963F": {
+    "light": "#B49C7B",
+    "dark": "#77674C"
+  },
+  "#C99A55": {
+    "light": "#B5A083",
+    "dark": "#776A51"
+  },
+  "#C9A676": {
+    "light": "#BAAA95",
+    "dark": "#7B705C"
+  },
+  "#C9A684": {
+    "light": "#B9AB9B",
+    "dark": "#7A7160"
+  },
+  "#C9B3A8": {
+    "light": "#BCB7B2",
+    "dark": "#7C796E"
+  },
+  "#C9D3E0": {
+    "light": "#D5D1CE",
+    "dark": "#8D8A80",
+    "sky": "#CED2D8"
+  },
+  "#C9E0F6": {
+    "light": "#E3DBD5",
+    "dark": "#969184"
+  },
+  "#CBD0DE": {
+    "light": "#D3CFCC",
+    "dark": "#8B897E"
+  },
+  "#CBD3DF": {
+    "light": "#D5D2CF",
+    "dark": "#8D8B80",
+    "sky": "#CFD3D7"
+  },
+  "#CC6E56": {
+    "light": "#9D8875",
+    "dark": "#685A49"
+  },
+  "#CCBBEE": {
+    "light": "#CFC3B7",
+    "dark": "#898171"
+  },
+  "#CDD5E1": {
+    "light": "#D7D4D1",
+    "dark": "#8E8C82",
+    "sky": "#D1D5D9"
+  },
+  "#CF9D45": {
+    "light": "#BAA381",
+    "dark": "#7B6C50",
+    "faded": "#B2AA9E",
+    "fadedDark": "#625D54"
+  },
+  "#CFD6E3": {
+    "light": "#D8D5D2",
+    "dark": "#8F8D82",
+    "sky": "#D3D6DB"
+  },
+  "#CFE2F8": {
+    "light": "#E5DED8",
+    "dark": "#979386"
+  },
+  "#CFE5C9": {
+    "light": "#DDE0CD",
+    "dark": "#92947F"
+  },
+  "#D3DBE6": {
+    "light": "#DDDAD7",
+    "dark": "#929085",
+    "sky": "#D7DADF"
+  },
+  "#D3E2EE": {
+    "light": "#E3DFDB",
+    "dark": "#969388",
+    "sky": "#DBE1E5"
+  },
+  "#D3E2F2": {
+    "light": "#E4DFDB",
+    "dark": "#969388"
+  },
+  "#D3E7CF": {
+    "light": "#DFE2D2",
+    "dark": "#939582"
+  },
+  "#D3E8CE": {
+    "light": "#E0E3D1",
+    "dark": "#949682"
+  },
+  "#D4E8CF": {
+    "light": "#E0E3D2",
+    "dark": "#949682"
+  },
+  "#D6C09C": {
+    "light": "#CCC2B2",
+    "dark": "#87806E"
+  },
+  "#D6DDE7": {
+    "light": "#DFDCD9",
+    "dark": "#939187",
+    "sky": "#DADDE1"
+  },
+  "#D8C6F0": {
+    "light": "#DCD3CA",
+    "dark": "#918B7D",
+    "token": "artStone"
+  },
+  "#D97F97": {
+    "light": "#AE9A89",
+    "dark": "#736655"
+  },
+  "#D9A650": {
+    "light": "#C3AC8A",
+    "dark": "#817256",
+    "faded": "#BAB2A6",
+    "fadedDark": "#666257"
+  },
+  "#D9C6A5": {
+    "light": "#D0C7B9",
+    "dark": "#898373"
+  },
+  "#DCD0F2": {
+    "light": "#DED5CD",
+    "dark": "#938D7F"
+  },
+  "#DCE7F0": {
+    "light": "#E8E5E2",
+    "dark": "#99978C",
+    "sky": "#E2E6EA"
+  },
+  "#DCE8F4": {
+    "light": "#E9E6E2",
+    "dark": "#9A988C",
+    "sky": "#E2E7EC"
+  },
+  "#DCEBFB": {
+    "light": "#EDE8E4",
+    "dark": "#9C998D"
+  },
+  "#DDB05E": {
+    "light": "#CAB594",
+    "dark": "#85775C"
+  },
+  "#DDBB4E": {
+    "light": "#CDB98F",
+    "dark": "#877A59",
+    "token": "artButterLine"
+  },
+  "#DDBE92": {
+    "light": "#CFC1AE",
+    "dark": "#897F6C"
+  },
+  "#DDEEFB": {
+    "light": "#EFEAE6",
+    "dark": "#9E9A8F",
+    "sky": "#E6ECF2"
+  },
+  "#E08BA2": {
+    "light": "#B7A493",
+    "dark": "#796C5B"
+  },
+  "#E0A6BE": {
+    "light": "#C4B7AB",
+    "dark": "#81796A"
+  },
+  "#E1E6EE": {
+    "light": "#E7E5E3",
+    "dark": "#98978D",
+    "sky": "#E4E6E9"
+  },
+  "#E294A8": {
+    "light": "#BBAB9B",
+    "dark": "#7B7160"
+  },
+  "#E2AFBD": {
+    "light": "#C8BDB3",
+    "dark": "#847D6F"
+  },
+  "#E2C8AC": {
+    "light": "#D6CBBE",
+    "dark": "#8D8676"
+  },
+  "#E2CBA6": {
+    "light": "#D8CDBD",
+    "dark": "#8F8775"
+  },
+  "#E2EEFA": {
+    "light": "#EFECE8",
+    "dark": "#9E9C90"
+  },
+  "#E4E8F0": {
+    "light": "#E4E8F0",
+    "dark": "#969995"
+  },
+  "#E4E9F0": {
+    "light": "#E4E9F0",
+    "dark": "#969A95"
+  },
+  "#E6C85C": {
+    "light": "#DBC89E",
+    "dark": "#918462"
+  },
+  "#E6D6BC": {
+    "light": "#DFD7CC",
+    "dark": "#938E7E"
+  },
+  "#E7BC6E": {
+    "light": "#D5C0A0",
+    "dark": "#8D7F63",
+    "faded": "#CBC4B8",
+    "fadedDark": "#6F6B60"
+  },
+  "#E8D6B8": {
+    "light": "#E0D7CA",
+    "dark": "#948E7D"
+  },
+  "#E9BDC8": {
+    "light": "#D2C9C0",
+    "dark": "#8B8577"
+  },
+  "#E9CB6A": {
+    "light": "#DDCBA5",
+    "dark": "#928666"
+  },
+  "#E9E4DE": {
+    "light": "#E9E4DE",
+    "dark": "#9A968A"
+  },
+  "#EADDC6": {
+    "light": "#E4DED4",
+    "dark": "#969383"
+  },
+  "#EADFF8": {
+    "light": "#EAE3DD",
+    "dark": "#9A9689"
+  },
+  "#EAF1F6": {
+    "light": "#EAF1F6",
+    "dark": "#9A9F99"
+  },
+  "#EAF1FA": {
+    "light": "#F2F0ED",
+    "dark": "#A09E93",
+    "sky": "#EEF0F4"
+  },
+  "#EAF2FB": {
+    "light": "#F3F0EE",
+    "dark": "#A09E94"
+  },
+  "#EAF4FC": {
+    "light": "#F5F2EF",
+    "dark": "#A2A094"
+  },
+  "#EBC777": {
+    "light": "#DCC9A9",
+    "dark": "#918569"
+  },
+  "#EC9DB0": {
+    "light": "#C5B4A4",
+    "dark": "#827766"
+  },
+  "#EDA9B9": {
+    "light": "#CABCAF",
+    "dark": "#857C6D"
+  },
+  "#EDE3FA": {
+    "light": "#EDE7E1",
+    "dark": "#9C988C"
+  },
+  "#EDF0F5": {
+    "light": "#EDF0F5",
+    "dark": "#9C9E98"
+  },
+  "#EECBD3": {
+    "light": "#DBD4CD",
+    "dark": "#918C7F"
+  },
+  "#EED7A6": {
+    "light": "#E4D8C3",
+    "dark": "#968F79"
+  },
+  "#EEE4FA": {
+    "light": "#EDE8E3",
+    "dark": "#9C998D"
+  },
+  "#EEF0F5": {
+    "light": "#EEF0F5",
+    "dark": "#9D9E98"
+  },
+  "#EFE8FA": {
+    "light": "#EFEBE7",
+    "dark": "#9E9B8F"
+  },
+  "#EFEAE4": {
+    "light": "#EFEAE4",
+    "dark": "#9E9A8D"
+  },
+  "#F0CB84": {
+    "light": "#E0CEB0",
+    "dark": "#94886D",
+    "faded": "#D6D0C5",
+    "fadedDark": "#747166"
+  },
+  "#F0E7D6": {
+    "light": "#ECE7E0",
+    "dark": "#9C988B"
+  },
+  "#F1DCC6": {
+    "light": "#E7DED4",
+    "dark": "#989383"
+  },
+  "#F1DEBF": {
+    "light": "#E8DFD2",
+    "dark": "#999382"
+  },
+  "#F1E6E0": {
+    "light": "#EBE8E5",
+    "dark": "#9B998E"
+  },
+  "#F1F4F8": {
+    "light": "#F1F4F8",
+    "dark": "#9FA19A"
+  },
+  "#F2D06A": {
+    "light": "#E5D1A9",
+    "dark": "#978A69"
+  },
+  "#F2F8EF": {
+    "light": "#F6F6F0",
+    "dark": "#A2A295"
+  },
+  "#F3BCC8": {
+    "light": "#D6CBC0",
+    "dark": "#8D8677"
+  },
+  "#F3D285": {
+    "light": "#E5D4B4",
+    "dark": "#978C70"
+  },
+  "#F3D391": {
+    "light": "#E5D5B9",
+    "dark": "#978D73",
+    "faded": "#DBD6CC",
+    "fadedDark": "#77746A"
+  },
+  "#F3D594": {
+    "light": "#E6D7BB",
+    "dark": "#988E74"
+  },
+  "#F3D97C": {
+    "light": "#E9D8B3",
+    "dark": "#9A8F6F"
+  },
+  "#F3D97E": {
+    "light": "#E9D8B4",
+    "dark": "#9A8F70"
+  },
+  "#F3E6D0": {
+    "light": "#EDE7DD",
+    "dark": "#9C9889"
+  },
+  "#F4B4C2": {
+    "light": "#E3D3C6",
+    "dark": "#968B7B",
+    "token": "artSand"
+  },
+  "#F4F6F9": {
+    "light": "#F4F6F9",
+    "dark": "#A1A29A"
+  },
+  "#F4F8FD": {
+    "light": "#F4F8FD",
+    "dark": "#A1A49D"
+  },
+  "#F6DB9E": {
+    "light": "#EADCC3",
+    "dark": "#9A9179"
+  },
+  "#F6DC9C": {
+    "light": "#EBDDC2",
+    "dark": "#9B9278"
+  },
+  "#F6DDA4": {
+    "light": "#EBDEC6",
+    "dark": "#9B937B"
+  },
+  "#F6E6D2": {
+    "light": "#EFE7DE",
+    "dark": "#9E988A"
+  },
+  "#F7F2FD": {
+    "light": "#F7F4F1",
+    "dark": "#A3A195"
+  },
+  "#F7F9FC": {
+    "light": "#F7F9FC",
+    "dark": "#A3A49C"
+  },
+  "#F8D2DB": {
+    "light": "#E4DCD5",
+    "dark": "#969184"
+  },
+  "#F8DAE0": {
+    "light": "#E8E2DC",
+    "dark": "#999588"
+  },
+  "#F8E3B0": {
+    "light": "#EFE3CE",
+    "dark": "#9E9680"
+  },
+  "#F8E4A4": {
+    "light": "#F0E3C9",
+    "dark": "#9E967D"
+  },
+  "#F9CDD5": {
+    "light": "#E2D8D0",
+    "dark": "#958F81"
+  },
+  "#F9ECDD": {
+    "light": "#F3EDE6",
+    "dark": "#A09C8F"
+  },
+  "#FAD98E": {
+    "light": "#ECDBBC",
+    "dark": "#9C9175"
+  },
+  "#FAE7B8": {
+    "light": "#F2E7D3",
+    "dark": "#A09883"
+  },
+  "#FAFAFA": {
+    "light": "#FAFAFA",
+    "dark": "#A5A59B"
+  },
+  "#FBD0D9": {
+    "light": "#E4DBD3",
+    "dark": "#969183"
+  },
+  "#FBD3DC": {
+    "light": "#E6DDD6",
+    "dark": "#989285"
+  },
+  "#FBE4E8": {
+    "light": "#EEEAE5",
+    "dark": "#9D9A8E"
+  },
+  "#FBE7B1": {
+    "light": "#F3E7D0",
+    "dark": "#A09881"
+  },
+  "#FBE9A6": {
+    "light": "#EFE3C8",
+    "dark": "#9E967C",
+    "token": "artButter"
+  },
+  "#FCD9E0": {
+    "light": "#E9E2DB",
+    "dark": "#9A9588"
+  },
+  "#FCE1E7": {
+    "light": "#EDE8E3",
+    "dark": "#9C998D"
+  },
+  "#FCE6F2": {
+    "light": "#F1ECE7",
+    "dark": "#9F9C8F"
+  },
+  "#FDF1C6": {
+    "light": "#F8F0DE",
+    "dark": "#A49E8A"
+  },
+  "#FFF0C6": {
+    "light": "#F9F0DE",
+    "dark": "#A49E8A"
+  },
+  "#FFF1C9": {
+    "light": "#F9F1E0",
+    "dark": "#A49F8B"
+  },
+  "#FFF3CF": {
+    "light": "#FAF3E3",
+    "dark": "#A5A08D"
+  },
+  "#FFF3E0": {
+    "light": "#F9F4EB",
+    "dark": "#A4A192"
+  },
+  "#FFF4CC": {
+    "light": "#FBF3E2",
+    "dark": "#A6A08C"
+  },
+  "#FFF5CF": {
+    "light": "#FBF4E4",
+    "dark": "#A6A18D"
+  },
+  "#FFF6D2": {
+    "light": "#FCF5E6",
+    "dark": "#A6A28F"
+  },
+  "#FFF6D8": {
+    "light": "#FBF5E9",
+    "dark": "#A6A290"
+  },
+  "#FFF6DA": {
+    "light": "#FBF6EA",
+    "dark": "#A6A291"
+  },
+  "#FFF7DE": {
+    "light": "#FCF7EC",
+    "dark": "#A6A392"
+  },
+  "#FFF7EA": {
+    "light": "#FFF7EA",
+    "dark": "#A8A391",
+    "token": "signPanel"
+  },
+  "#FFF8E2": {
+    "light": "#FCF8EE",
+    "dark": "#A6A494"
+  },
+  "#FFF9EC": {
+    "light": "#FCF9F3",
+    "dark": "#A6A497"
+  },
+  "#FFFBEA": {
+    "light": "#FDFAF3",
+    "dark": "#A7A597"
+  },
+  "#FFFCF4": {
+    "light": "#FFFCF4",
+    "dark": "#A8A697"
+  },
+  "#FFFCF6": {
+    "light": "#FFFCF6",
+    "dark": "#A8A699"
+  },
+  "#FFFDF4": {
+    "light": "#FEFDF9",
+    "dark": "#A8A79A"
+  },
+  "#FFFDF8": {
+    "light": "#FFFDF8",
+    "dark": "#A8A79A"
+  },
+  "#FFFEFB": {
+    "light": "#FFFEFB",
+    "dark": "#A8A89C"
+  },
+  "#FFFFFF": {
+    "light": "#FFFFFF",
+    "dark": "#A8A89E"
+  }
+}

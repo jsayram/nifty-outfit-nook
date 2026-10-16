@@ -193,6 +193,51 @@ struct MockStylistTests {
         #expect(outcome.result?.notes.contains(.wornRecently(lastWorn: TestTime.day(-3))) == true)
     }
 
+    // MARK: Try a different outfit (Phase 10b)
+
+    /// LR-05a.4: with the first base marked as shown, the next result starts from another one.
+    @Test func aShownBaseGivesADifferentOutfit() async throws {
+        let first = try StylingContext.from(demo, request: makeRequest())
+        let firstOutcome = try await MockStylist().style(first)
+        let firstMain = mainPieces(of: firstOutcome, in: demo)
+        var again = try StylingContext.from(demo, request: makeRequest("req-2"))
+        again.shownCombinations = [firstMain]
+        let secondOutcome = try await MockStylist().style(again)
+        let secondMain = mainPieces(of: secondOutcome, in: demo)
+        #expect(!secondMain.isEmpty)
+        #expect(secondMain != firstMain)
+        #expect(secondOutcome.result?.notes.contains(.noOtherOutfit) == false)
+        if let result = secondOutcome.result {
+            #expect(ResultCheck.problems(in: result, for: again).isEmpty)
+        }
+    }
+
+    /// A required colour nothing usable has is said, not invented (PRD §8.3).
+    @Test func anUnmetRequiredColourIsNoted() async throws {
+        var request = makeRequest()
+        request.color = ColorWish(.purple, strength: .required)
+        let (outcome, _) = try await style(demo, request)
+        #expect(outcome.result?.notes.contains(.requiredColorNotMet(.purple)) == true)
+        request.color = ColorWish(.purple)
+        let (preferred, _) = try await style(demo, request)
+        #expect(preferred.result?.notes.contains(.requiredColorNotMet(.purple)) == false)
+    }
+
+    /// When every base has been shown, the best one comes round again and the result says so.
+    @Test func noOtherBaseComesRoundAgainWithANote() async throws {
+        var context = try StylingContext.from(repeatCloset, request: makeRequest())
+        context.shownCombinations = [["top-a", "bottom"], ["top-b", "bottom"]]
+        let outcome = try await MockStylist().style(context)
+        #expect(mainPieces(outcome) == ["top-a", "bottom"])
+        #expect(outcome.result?.notes.contains(.noOtherOutfit) == true)
+    }
+
+    private func mainPieces(of outcome: StyleOutcome, in data: some FixtureDataLike) -> Set<Garment.ID> {
+        let categories = Dictionary(data.garments.map { ($0.id, $0.category) }, uniquingKeysWith: { first, _ in first })
+        guard let simple = outcome.result?.simple else { return [] }
+        return WearRules.mainPieces(of: simple, categories: categories)
+    }
+
     // MARK: Failure modes
 
     @Test func aFailingStylistThrows() async throws {
@@ -212,6 +257,20 @@ struct MockStylistTests {
         #expect(result.versions.map(\.version) == [.simple, .dressedUp])
         #expect(missing.map(\.version) == [.somethingNew])
         #expect(ResultCheck.problems(in: result, for: context).isEmpty)
+    }
+
+    @Test func theInsufficientModeSaysWhatIsMissing() async throws {
+        let (outcome, _) = try await style(demo, makeRequest(), stylist: MockStylist(mode: .insufficient))
+        #expect(outcome == .insufficient(InsufficientWardrobe(source: .mainCloset, missing: [.bottom, .shoes])))
+    }
+
+    /// `offline-once`: the first request fails as offline, the retry works.
+    @Test func failingOnceWorksTheSecondTime() async throws {
+        let context = try StylingContext.from(demo, request: makeRequest())
+        let stylist = MockStylist(mode: .failingOnce(.offline))
+        await #expect(throws: StylistError.offline) { try await stylist.style(context) }
+        let outcome = try await stylist.style(context)
+        #expect(outcome.result?.versions.count == 3)
     }
 
     @Test func aSlowStylistCanBeCancelled() async throws {

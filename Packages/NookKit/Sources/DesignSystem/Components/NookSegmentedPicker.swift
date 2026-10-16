@@ -13,11 +13,20 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
         public let value: Value
         public let title: String
         public let systemImage: String?
+        /// What VoiceOver says after the option's name, already localized, such as what the
+        /// option shows ("Easy and safe").
+        public let hint: String?
+        /// An accessibility identifier for UI tests.
+        public let identifier: String?
 
-        public init(_ value: Value, title: String, systemImage: String? = nil) {
+        public init(
+            _ value: Value, title: String, systemImage: String? = nil, hint: String? = nil, identifier: String? = nil
+        ) {
             self.value = value
             self.title = title
             self.systemImage = systemImage
+            self.hint = hint
+            self.identifier = identifier
         }
 
         public var id: Value { value }
@@ -43,6 +52,7 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
             track(HStack(spacing: NookSpacing.xSmall) { segments(sideBySide: true) })
             track(VStack(spacing: NookSpacing.xSmall) { segments(sideBySide: false) })
         }
+        .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: selection)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(title))
     }
@@ -61,11 +71,7 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
         ForEach(options) { option in
             let isSelected = option.value == selection
             Button {
-                if reduceMotion {
-                    selection = option.value
-                } else {
-                    withAnimation(.snappy(duration: 0.25)) { selection = option.value }
-                }
+                selection = option.value
             } label: {
                 HStack(spacing: 6) {
                     if let systemImage = option.systemImage {
@@ -95,6 +101,8 @@ public struct NookSegmentedPicker<Value: Hashable>: View {
             }
             .buttonStyle(.plain)
             .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityHint(Text(option.hint ?? ""))
+            .accessibilityIdentifier(option.identifier ?? "")
         }
     }
 }

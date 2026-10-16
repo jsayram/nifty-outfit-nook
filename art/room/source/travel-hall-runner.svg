@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 108" width="372" height="108" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hall runner lying on the floor in front of the door, a little narrower at the far edge, fringe on both short ends.
+       Rug pink #F3BCC8 / rim #EDA9B9 / outline #E294A8 / highlight #F8D2DB, with a cream band #FFF7EA / #F3E6D0.
+       Far edge y 4 (x 42..330), near edge y 100 (x 10..362), pile to y 103. Things standing on it rest anywhere in y 30..80;
+       the centre row of diamonds runs along y 52 and a second quiet band runs along y 80, so the pattern shows between
+       and in front of whatever stands on it. No label zone. -->
+  <!-- pile thickness along the near edge -->
+  <path d="M46 7H326Q331 7 332 10L362.5 98.5Q363.6 103 358 103H14Q8.4 103 9.5 98.5L40 10Q41 7 46 7Z" fill="#E294A8"/>
+  <!-- rim -->
+  <path d="M47 4H325Q330 4 331 7L361.5 95.5Q362.6 100 357 100H15Q9.4 100 10.5 95.5L41 7Q42 4 47 4Z" fill="#EDA9B9" stroke="#E294A8" stroke-width="1.4"/>
+  <!-- cream band -->
+  <path d="M51.3 9H320.7Q325.7 9 326.6 12L353.9 90.5Q354.9 95 349.3 95H22.7Q17.1 95 18.1 90.5L45.4 12Q46.3 9 51.3 9Z" fill="#FFF7EA" stroke="#E294A8" stroke-width="1" stroke-opacity=".6"/>
+  <!-- field -->
+  <path d="M55.7 14H316.3Q321.3 14 322.3 17L346.2 85.5Q347.3 90 341.7 90H30.3Q24.7 90 25.8 85.5L49.7 17Q50.7 14 55.7 14Z" fill="#F3BCC8" stroke="#E294A8" stroke-width="1" stroke-opacity=".6"/>
+  <path d="M56 16.4H316" stroke="#F8D2DB" stroke-width="1.2"/>
+  <!-- centre row: cream diamonds joined by a stitched line -->
+  <path d="M56 52l6 -5.4 6 5.4 -6 5.4Z M90 52l6 -5.4 6 5.4 -6 5.4Z M124 52l6 -5.4 6 5.4 -6 5.4Z M158 52l6 -5.4 6 5.4 -6 5.4Z M192 52l6 -5.4 6 5.4 -6 5.4Z M226 52l6 -5.4 6 5.4 -6 5.4Z M260 52l6 -5.4 6 5.4 -6 5.4Z M294 52l6 -5.4 6 5.4 -6 5.4Z" fill="#F8D2DB" stroke="#E294A8" stroke-width="1" stroke-opacity=".55"/>
+  <path d="M48 52H53M71 52H87M105 52H121M139 52H155M173 52H189M207 52H223M241 52H257M275 52H291M309 52H324" stroke="#F8D2DB" stroke-width="1.3" stroke-dasharray="3.4 3"/>
+  <!-- front band: two thin lines with small dots between, the part that shows in front of the cases -->
+  <path d="M38 76H334M35.3 84H336.7" stroke="#F8D2DB" stroke-width="1.3"/>
+  <path d="M44 80h.01M56 80h.01M68 80h.01M80 80h.01M92 80h.01M104 80h.01M116 80h.01M128 80h.01M140 80h.01M152 80h.01M164 80h.01M176 80h.01M188 80h.01M200 80h.01M212 80h.01M224 80h.01M236 80h.01M248 80h.01M260 80h.01M272 80h.01M284 80h.01M296 80h.01M308 80h.01M320 80h.01" stroke="#FFF7EA" stroke-width="2.6"/>
+  <path d="M49.5 5.6H322.5" stroke="#F8D2DB" stroke-width="1"/>
+  <!-- fringe -->
+  <path d="M40.4 10l-6.4 -1M38.3 16.2l-6.4 -1M36.3 22.4l-6.4 -1M34.2 28.6l-6.4 -1M32.1 34.8l-6.4 -1M30.1 41l-6.4 -1M28 47.2l-6.4 -1M25.9 53.4l-6.4 -1M23.9 59.6l-6.4 -1M21.8 65.8l-6.4 -1M19.7 72l-6.4 -1M17.7 78.2l-6.4 -1M15.6 84.4l-6.4 -1M13.5 90.6l-6.4 -1M11.5 96.8l-6.4 -1" stroke="#D9C6A5" stroke-width="2.2"/>
+  <path d="M40.4 10l-6.4 -1M38.3 16.2l-6.4 -1M36.3 22.4l-6.4 -1M34.2 28.6l-6.4 -1M32.1 34.8l-6.4 -1M30.1 41l-6.4 -1M28 47.2l-6.4 -1M25.9 53.4l-6.4 -1M23.9 59.6l-6.4 -1M21.8 65.8l-6.4 -1M19.7 72l-6.4 -1M17.7 78.2l-6.4 -1M15.6 84.4l-6.4 -1M13.5 90.6l-6.4 -1M11.5 96.8l-6.4 -1" stroke="#FFF7EA" stroke-width="1"/>
+  <path d="M331.6 10l6.4 -1M333.7 16.2l6.4 -1M335.7 22.4l6.4 -1M337.8 28.6l6.4 -1M339.9 34.8l6.4 -1M341.9 41l6.4 -1M344 47.2l6.4 -1M346.1 53.4l6.4 -1M348.1 59.6l6.4 -1M350.2 65.8l6.4 -1M352.3 72l6.4 -1M354.3 78.2l6.4 -1M356.4 84.4l6.4 -1M358.5 90.6l6.4 -1M360.5 96.8l6.4 -1" stroke="#D9C6A5" stroke-width="2.2"/>
+  <path d="M331.6 10l6.4 -1M333.7 16.2l6.4 -1M335.7 22.4l6.4 -1M337.8 28.6l6.4 -1M339.9 34.8l6.4 -1M341.9 41l6.4 -1M344 47.2l6.4 -1M346.1 53.4l6.4 -1M348.1 59.6l6.4 -1M350.2 65.8l6.4 -1M352.3 72l6.4 -1M354.3 78.2l6.4 -1M356.4 84.4l6.4 -1M358.5 90.6l6.4 -1M360.5 96.8l6.4 -1" stroke="#FFF7EA" stroke-width="1"/>
+</svg>

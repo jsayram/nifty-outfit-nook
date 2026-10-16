@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Upload an archive to App Store Connect as a TestFlight Internal Only build (Phase 18,
+	     docs/testflight.md). Used only by the command-line path:
+	       xcodebuild -exportArchive -archivePath <archive> -exportOptionsPlist Configs/ExportOptions-TestFlight.plist -exportPath build/Export
+	     No team ID here: automatic signing takes the team from the archive, which got it from
+	     the ignored Configs/Signing.local.xcconfig. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>upload</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<!-- Stage A builds carry sample data only, so they can't go to external testers or the
+	     App Store. -->
+	<key>testFlightInternalTestingOnly</key>
+	<true/>
+	<!-- Keep the build number scripts/bump-build.sh set, so the number in Help matches App
+	     Store Connect. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<true/>
+</dict>
+</plist>

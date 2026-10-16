@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 182" width="104" height="182" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <clipPath id="stt-body">
+      <path d="M4.4 29H99.6Q102.2 29 102 31.6L95.4 174.6Q95.2 178 91.8 178H12.2Q8.8 178 8.6 174.6L2 31.6Q1.8 29 4.4 29Z" />
+    </clipPath>
+  </defs>
+  <ellipse cx="52" cy="178.8" rx="45" ry="2.6" fill="#3F372D" opacity=".13" />
+  <path d="M38 19C38 .6 90 .6 90 19" stroke="#5B5142" stroke-width="6" />
+  <path d="M38 19C38 .6 90 .6 90 19" stroke="#746A5B" stroke-width="3.8" />
+  <path d="M8 16H96L98 30H6Z" fill="#746A5B" />
+  <rect x="56" y="18.6" width="22" height="14" rx="1.4" fill="#7E7566" stroke="#5B5142" stroke-width=".9" opacity=".9" />
+  <path d="M58 21.2H76" stroke="#5B5142" stroke-width=".8" stroke-dasharray="1.2 1.6" opacity=".55" />
+  <path d="M6 30L7 24.6H97L98 30Z" fill="#5B5142" opacity=".22" />
+  <path d="M8 16L2 30H12Z" fill="#7E7566" />
+  <path d="M96 16L102 30H92Z" fill="#7E7566" />
+  <path d="M8 16L12 30M96 16L92 30" stroke="#6C6252" stroke-width="1" opacity=".8" />
+  <path d="M2 30L8 16H96L102 30" stroke="#6C6252" stroke-width="1.5" />
+  <path d="M10.6 17.6H40" stroke="#969184" stroke-width="1.1" opacity=".8" />
+  <path d="M4.4 29H99.6Q102.2 29 102 31.6L95.4 174.6Q95.2 178 91.8 178H12.2Q8.8 178 8.6 174.6L2 31.6Q1.8 29 4.4 29Z" fill="#898274" />
+  <g clip-path="url(#stt-body)">
+    <path d="M94.2 27L87.8 180H104V27Z" fill="#7E7566" />
+    <path d="M94.2 41L88.4 178" stroke="#6C6252" stroke-width="1.2" />
+    <path d="M98 44L93 164" stroke="#6C6252" stroke-width="1.1" stroke-dasharray="1.4 2.2" opacity=".7" />
+    <path d="M0 167Q52 164 104 167V180H0Z" fill="#7E7566" opacity=".75" />
+    <path d="M0 42.2H104" stroke="#7E7566" stroke-width="2.6" />
+    <path d="M0 41H104" stroke="#6C6252" stroke-width="1.2" />
+    <path d="M4 37.8H100" stroke="#6C6252" stroke-width=".8" stroke-dasharray="1.4 2" opacity=".5" />
+    <path d="M11.8 148L7.6 47" stroke="#969184" stroke-width="2.2" />
+    <path d="M6.6 32.6H42" stroke="#969184" stroke-width="1.6" />
+  </g>
+  <path d="M4.4 29H99.6Q102.2 29 102 31.6L95.4 174.6Q95.2 178 91.8 178H12.2Q8.8 178 8.6 174.6L2 31.6Q1.8 29 4.4 29Z" stroke="#6C6252" stroke-width="1.5" />
+  <path d="M24 39V31C24 -6 80 -6 80 31V39" stroke="#5B5142" stroke-width="6" />
+  <path d="M24 39V31C24 -6 80 -6 80 31V39" stroke="#746A5B" stroke-width="3.8" />
+  <path d="M24.6 22C25.6 10 30.4 4.6 37 2.8" stroke="#969184" stroke-width="1" opacity=".8" />
+  <rect x="20.6" y="32" width="6.8" height="9.4" rx="2" fill="#746A5B" stroke="#5B5142" stroke-width="1.2" />
+  <rect x="76.6" y="32" width="6.8" height="9.4" rx="2" fill="#746A5B" stroke="#5B5142" stroke-width="1.2" />
+  <circle cx="24" cy="36.8" r="1.1" fill="#969184" />
+  <circle cx="80" cy="36.8" r="1.1" fill="#969184" />
+  <path d="M40 11.4C39.4 17.6 48 21 48 27V35" stroke="#6C5D44" stroke-width="3.8" />
+  <path d="M40 11.4C39.4 17.6 48 21 48 27V35" stroke="#8D7F63" stroke-width="2" />
+  <rect x="37.4" y=".9" width="5.2" height="11.4" rx="1.6" fill="#8D7F63" stroke="#6C5D44" stroke-width="1.2" />
+  <path d="M39 3V10" stroke="#9A9179" stroke-width="1" />
+</svg>

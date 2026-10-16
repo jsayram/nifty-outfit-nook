@@ -75,6 +75,8 @@ public struct NookToast: View {
     private let toast: NookToastMessage
     private let onAction: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     /// - Parameter onAction: Runs after the toast's own action, so the presenter can close it.
     public init(_ toast: NookToastMessage, onAction: @escaping () -> Void = {}) {
         self.toast = toast
@@ -82,7 +84,13 @@ public struct NookToast: View {
     }
 
     public var body: some View {
-        HStack(spacing: 10) {
+        // At the accessibility sizes the action goes under the message, so neither is squeezed
+        // until words break mid-word.
+        let layout =
+            dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 0))
+            : AnyLayout(HStackLayout(spacing: 10))
+        layout {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 if let systemImage = toast.systemImage {
                     Image(systemName: systemImage)
@@ -106,6 +114,8 @@ public struct NookToast: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                // Under the message, the word lines up with it rather than with its padding.
+                .padding(.leading, dynamicTypeSize.isAccessibilitySize ? -NookSpacing.small : 0)
             }
         }
         .nookTextStyle(.note)

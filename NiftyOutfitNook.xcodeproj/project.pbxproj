@@ -10,6 +10,7 @@
 		4E4F4F4B0000000000000017 /* Features in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000015 /* Features */; };
 		4E4F4F4B0000000000000018 /* Fixtures in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000016 /* Fixtures */; };
 		4E4F4F4B000000000000002D /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B000000000000002C /* DesignSystem */; };
+		4E4F4F4B000000000000002F /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B000000000000002E /* Services */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 				4E4F4F4B0000000000000017 /* Features in Frameworks */,
 				4E4F4F4B0000000000000018 /* Fixtures in Frameworks */,
 				4E4F4F4B000000000000002D /* DesignSystem in Frameworks */,
+				4E4F4F4B000000000000002F /* Services in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +140,7 @@
 				4E4F4F4B0000000000000015 /* Features */,
 				4E4F4F4B0000000000000016 /* Fixtures */,
 				4E4F4F4B000000000000002C /* DesignSystem */,
+				4E4F4F4B000000000000002E /* Services */,
 			);
 			productName = NiftyOutfitNook;
 			productReference = 4E4F4F4B0000000000000008 /* NiftyOutfitNook.app */;
@@ -334,6 +337,10 @@
 		4E4F4F4B000000000000002C /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DesignSystem;
+		};
+		4E4F4F4B000000000000002E /* Services */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Services;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

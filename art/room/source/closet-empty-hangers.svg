@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" width="200" height="64" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- closet-empty-hangers: a short gold rail on two wood brackets with three empty wood hangers hooked over it, for the
+       empty closet and the add-a-piece screen. Rail centre line y 22.4; hangers at x 48, 100, 152 (hooks drawn in front of
+       the rail so they read as hooked over it). Wood #E7BC6E / #D9A650 / #B98632, highlight #F6DB9E; gold rod #EBC777 /
+       #FBE7B1 / #B98632. No text. -->
+  <path d="M14 4 H24 V12 Q24 20 18 24 H14 Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.4"/>
+  <path d="M176 4 H186 V24 H182 Q176 20 176 12 Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.4"/>
+  <path d="M16.6 7.6 V20" stroke="#F6DB9E" stroke-width="1.1"/>
+  <rect x="12" y="19.6" width="176" height="5.6" rx="2.8" fill="#EBC777" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M16 21.4 H184" stroke="#FBE7B1" stroke-width="1"/>
+  <circle cx="12" cy="22.4" r="3.6" fill="#EBC777" stroke="#B98632" stroke-width="1.2"/>
+  <circle cx="188" cy="22.4" r="3.6" fill="#EBC777" stroke="#B98632" stroke-width="1.2"/>
+  <g>
+    <path d="M26 52 L45.4 34.4 Q48 32.2 50.6 34.4 L70 52 Q72 55.4 68 55.4 H28 Q24 55.4 26 52 Z" stroke="#B98632" stroke-width="5.4"/><path d="M26 52 L45.4 34.4 Q48 32.2 50.6 34.4 L70 52 Q72 55.4 68 55.4 H28 Q24 55.4 26 52 Z" stroke="#E7BC6E" stroke-width="3"/>
+    <path d="M32 48 L44 37" stroke="#F6DB9E" stroke-width="1"/>
+    <path d="M48 32 V23.6 C48 15.399999999999999 55.6 15.399999999999999 55.6 21.4" stroke="#B98632" stroke-width="2.6"/><path d="M48 32 V23.6 C48 15.399999999999999 55.6 15.399999999999999 55.6 21.4" stroke="#EBC777" stroke-width="1.1"/>
+    <circle cx="48" cy="33" r="2.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  </g>
+  <g>
+    <path d="M78 52 L97.4 34.4 Q100 32.2 102.6 34.4 L122 52 Q124 55.4 120 55.4 H80 Q76 55.4 78 52 Z" stroke="#B98632" stroke-width="5.4"/><path d="M78 52 L97.4 34.4 Q100 32.2 102.6 34.4 L122 52 Q124 55.4 120 55.4 H80 Q76 55.4 78 52 Z" stroke="#E7BC6E" stroke-width="3"/>
+    <path d="M84 48 L96 37" stroke="#F6DB9E" stroke-width="1"/>
+    <path d="M100 32 V23.6 C100 15.399999999999999 107.6 15.399999999999999 107.6 21.4" stroke="#B98632" stroke-width="2.6"/><path d="M100 32 V23.6 C100 15.399999999999999 107.6 15.399999999999999 107.6 21.4" stroke="#EBC777" stroke-width="1.1"/>
+    <circle cx="100" cy="33" r="2.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  </g>
+  <g>
+    <path d="M130 52 L149.4 34.4 Q152 32.2 154.6 34.4 L174 52 Q176 55.4 172 55.4 H132 Q128 55.4 130 52 Z" stroke="#B98632" stroke-width="5.4"/><path d="M130 52 L149.4 34.4 Q152 32.2 154.6 34.4 L174 52 Q176 55.4 172 55.4 H132 Q128 55.4 130 52 Z" stroke="#E7BC6E" stroke-width="3"/>
+    <path d="M136 48 L148 37" stroke="#F6DB9E" stroke-width="1"/>
+    <path d="M152 32 V23.6 C152 15.399999999999999 159.6 15.399999999999999 159.6 21.4" stroke="#B98632" stroke-width="2.6"/><path d="M152 32 V23.6 C152 15.399999999999999 159.6 15.399999999999999 159.6 21.4" stroke="#EBC777" stroke-width="1.1"/>
+    <circle cx="152" cy="33" r="2.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  </g>
+</svg>

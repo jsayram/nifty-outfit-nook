@@ -11,14 +11,18 @@ public struct StyleRequest: Identifiable, Hashable, Sendable, Codable {
     public let id: ID
     public var source: WardrobeSource
     public var occasion: Occasion
+    /// Her words for an Other occasion ("museum visit"), trimmed, at most
+    /// `NameRules.occasionNoteMaximum` characters. `nil` for every other occasion. Kept with this
+    /// request only. **Personal** free text: the stylist treats it as data, never instructions.
+    public var occasionNote: String?
     /// Use today's weather, I'll be indoors, or Ignore the weather (LR-04).
     public var weatherChoice: WeatherChoice
     /// The weather when the request was made. `nil` when it couldn't be read (LR-04.3).
     public var weather: WeatherSnapshot?
     /// Today's comfort, "Just for this outfit" (LR-18). `nil` means her usual fit.
     public var comfort: Comfort?
-    /// A colour she'd like in the look. Preferred, not required.
-    public var color: ColorName?
+    /// A colour she'd like in the look: preferred or required, and where (PRD §8.3, FR-48).
+    public var color: ColorWish?
     /// Her preferences when the request was made.
     public var preferences: Preferences
     /// "Style with this": a piece every version must include.
@@ -29,10 +33,11 @@ public struct StyleRequest: Identifiable, Hashable, Sendable, Codable {
         id: ID,
         source: WardrobeSource = .mainCloset,
         occasion: Occasion,
+        occasionNote: String? = nil,
         weatherChoice: WeatherChoice = .useToday,
         weather: WeatherSnapshot? = nil,
         comfort: Comfort? = nil,
-        color: ColorName? = nil,
+        color: ColorWish? = nil,
         preferences: Preferences = Preferences(),
         startingPieceID: Garment.ID? = nil,
         createdAt: Date
@@ -40,6 +45,7 @@ public struct StyleRequest: Identifiable, Hashable, Sendable, Codable {
         self.id = id
         self.source = source
         self.occasion = occasion
+        self.occasionNote = occasionNote
         self.weatherChoice = weatherChoice
         self.weather = weather
         self.comfort = comfort
@@ -47,6 +53,24 @@ public struct StyleRequest: Identifiable, Hashable, Sendable, Codable {
         self.preferences = preferences
         self.startingPieceID = startingPieceID
         self.createdAt = createdAt
+    }
+
+    /// The same choices as a new request, for Try a different outfit (LR-05a.4): one more styling
+    /// request with its own ID.
+    public func again(id: ID, createdAt: Date) -> StyleRequest {
+        StyleRequest(
+            id: id,
+            source: source,
+            occasion: occasion,
+            occasionNote: occasionNote,
+            weatherChoice: weatherChoice,
+            weather: weather,
+            comfort: comfort,
+            color: color,
+            preferences: preferences,
+            startingPieceID: startingPieceID,
+            createdAt: createdAt
+        )
     }
 
     /// Whether Something new may add one piece she doesn't own.

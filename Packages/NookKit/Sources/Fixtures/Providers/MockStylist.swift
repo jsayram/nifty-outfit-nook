@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import Synchronization
 
 /// A stand-in stylist for Stage A. Deterministic: the same context always gives the same result.
 ///
@@ -15,10 +16,16 @@ public struct MockStylist: Stylist {
         case failing(StylistError)
         /// Returns Simple and Dressed up only, as a partial result.
         case partial
+        /// Says the source can't make a look, whatever is in it (a bottom and shoes missing).
+        case insufficient
+        /// Throws this error the first time, then styles normally, like a phone that comes back
+        /// online before she taps Retry.
+        case failingOnce(StylistError)
     }
 
     public var mode: Mode
     public var latency: Duration
+    private let calls = CallCounter()
 
     public init(mode: Mode = .normal, latency: Duration = .zero) {
         self.mode = mode
@@ -34,13 +41,19 @@ public struct MockStylist: Stylist {
             }
         }
         if Task.isCancelled { throw .cancelled }
+        let call = calls.next()
         switch mode {
         case .failing(let error):
             throw error
+        case .failingOnce(let error):
+            if call == 1 { throw error }
+            return MockStyling(context: context).outcome()
         case .normal:
             return MockStyling(context: context).outcome()
         case .partial:
             return Self.partial(from: MockStyling(context: context).outcome())
+        case .insufficient:
+            return .insufficient(InsufficientWardrobe(source: context.request.source, missing: [.bottom, .shoes]))
         }
     }
 
@@ -49,6 +62,18 @@ public struct MockStylist: Stylist {
         guard case .complete(var result) = outcome else { return outcome }
         result.versions.removeAll { $0.version == .somethingNew }
         return .partial(result, missing: [MissingVersion(version: .somethingNew, reason: .noOtherOwnedPiece)])
+    }
+}
+
+/// Counts styling calls, for `failingOnce`. Shared by copies of the stylist.
+private final class CallCounter: Sendable {
+    private let count = Mutex(0)
+
+    func next() -> Int {
+        count.withLock { count in
+            count += 1
+            return count
+        }
     }
 }
 
@@ -88,7 +113,7 @@ struct MockStyling {
         if let season, garment.seasons.contains(season) { score += 1 }
         if let band, band.suitableWarmth.contains(garment.warmth) { score += 1 }
         if let comfortFit, garment.fit == comfortFit { score += 1 }
-        if let color = request.color, garment.colors.contains(color) { score += 2 }
+        if let color = request.color, color.fits(garment) { score += 2 }
         return score
     }
 
@@ -124,8 +149,12 @@ struct MockStyling {
         }
 
         var notes: [ResultNote] = []
-        let fresh = mains.first { context.recentCombinations[Set($0.map(\.id))] == nil }
-        let main = fresh ?? mains[0]
+        // Try a different outfit: start from a base not shown yet for this request, if any.
+        let unshown = mains.filter { !context.shownCombinations.contains(Set($0.map(\.id))) }
+        if unshown.isEmpty && !context.shownCombinations.isEmpty { notes.append(.noOtherOutfit) }
+        let candidates = unshown.isEmpty ? mains : unshown
+        let fresh = candidates.first { context.recentCombinations[Set($0.map(\.id))] == nil }
+        let main = fresh ?? candidates[0]
         if fresh == nil, let worn = context.recentCombinations[Set(main.map(\.id))] {
             notes.append(.wornRecently(lastWorn: worn))
         }
@@ -185,6 +214,9 @@ struct MockStyling {
         }
 
         if request.weatherChoice == .useToday && request.weather == nil { notes.append(.weatherUnavailable) }
+        if let color = request.color, color.strength == .required, !basePieces.contains(where: color.fits) {
+            notes.append(.requiredColorNotMet(color.family))
+        }
         let result = StyleResult(
             id: resultID,
             requestID: request.id,

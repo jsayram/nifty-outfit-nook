@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 322" width="156" height="322" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Front door for the entry hall: a blue door with a round rainy window, two raised panels, a brass mail slot and knob,
+       in a cream casing with a wood threshold. Ids are prefixed td-.
+       Door blue: fill #A9CBEF, shade #8FB8E6, outline #6C9AD0, highlight #C4DCF5. Casing cream: #FFF7EA / #F3E6D0 / #D9C6A5.
+       Brass: #E7BC6E / #D9A650 / #B98632. The glass uses the rainy-window tones from window-rain.svg (it rains today).
+       Casing x 5..151, y 6..314. Slab x 16..140, y 19..312. Window centre (78, 78), glass radius 20.
+       Threshold x 13..143, top y 311, front edge to y 317.4; place the door so y 317 lands just below the floor line. No label zone. -->
+  <defs>
+    <clipPath id="td-glass"><circle cx="78" cy="78" r="20"/></clipPath>
+    <linearGradient id="td-sky" x1="0" y1="58" x2="0" y2="98" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#86A3C6"/>
+      <stop offset="1" stop-color="#9DB7D6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- contact shadow on the floor -->
+  <ellipse cx="78" cy="318.4" rx="70" ry="2.6" fill="#7A4636" opacity=".12"/>
+
+  <!-- casing -->
+  <rect x="5" y="6" width="146" height="308" rx="1.6" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.5"/>
+  <path d="M7.4 9V312M7.4 9H148.6" stroke="#FFFEFB" stroke-width="1"/>
+  <!-- the jamb reveal inside the casing -->
+  <rect x="12.5" y="15.5" width="131" height="298.5" rx="1" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.1"/>
+  <!-- head cap above the casing -->
+  <rect x="1" y="1" width="154" height="8" rx="1.8" fill="#FFF7EA"/>
+  <path d="M1 6.4H155V7.2A1.8 1.8 0 0 1 153.2 9H2.8A1.8 1.8 0 0 1 1 7.2Z" fill="#F3E6D0"/>
+  <path d="M3.4 3.4H152.6" stroke="#FFFEFB" stroke-width="1"/>
+  <rect x="1" y="1" width="154" height="8" rx="1.8" stroke="#D9C6A5" stroke-width="1.4"/>
+
+  <!-- door slab -->
+  <rect x="16" y="19" width="124" height="293" rx="1.4" fill="#A9CBEF"/>
+  <!-- shade under the head and down the hinge-free edge -->
+  <rect x="16.6" y="19.6" width="122.8" height="3.4" fill="#8FB8E6"/>
+  <rect x="135.4" y="19.6" width="4" height="292" fill="#8FB8E6"/>
+  <path d="M19.6 26V306" stroke="#C4DCF5" stroke-width="1.4"/>
+  <rect x="16" y="19" width="124" height="293" rx="1.4" stroke="#6C9AD0" stroke-width="1.5"/>
+
+  <!-- hinges on the left edge -->
+  <rect x="14.6" y="48" width="4.2" height="14" rx="1.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  <rect x="14.6" y="262" width="4.2" height="14" rx="1.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+
+  <!-- round window: cream frame ring, rainy glass, a cross of glazing bars -->
+  <circle cx="78" cy="78" r="27" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+  <circle cx="78" cy="78" r="23.4" stroke="#F3E6D0" stroke-width="2"/>
+  <path d="M59.4 66A22 22 0 0 1 92 59.6" stroke="#FFFEFB" stroke-width="1.2"/>
+  <g clip-path="url(#td-glass)">
+    <rect x="56" y="56" width="44" height="44" fill="url(#td-sky)"/>
+    <path d="M56 100V86C59 81.6 64.6 81 67 84.6C69.4 79.4 76.6 79 79.2 83.6C81.6 79.6 88 79.2 90.4 82.8C93 80.6 97.4 81.4 100 84.4V100Z" fill="#6F9A86" stroke="#5A8572" stroke-width="1.1"/>
+    <path d="M56 100V93C60 89.2 66 89 69 92.2C72.4 88.4 80 88.4 83 92C86.4 88.8 94 89 100 92.4V100Z" fill="#5E8978" stroke="#4A7564" stroke-width="1.1"/>
+    <path d="M65 61.6l-2.6 8.6M74.6 60l-2.4 8M85.4 61l-2.6 8.6M92.6 67.4l-2 7M63.4 75l-2.2 7.4M81 71.6l-2.4 8M70.4 70.4l-1.8 6" stroke="#EAF1FA" stroke-width="1" opacity=".85"/>
+    <path d="M64 58L72 58L60 82L56 82Z" fill="#FFFFFF" opacity=".12"/>
+  </g>
+  <!-- glazing bars -->
+  <path d="M78 58V98M58 78H98" stroke="#D9C6A5" stroke-width="4"/>
+  <path d="M78 58V98M58 78H98" stroke="#FFF7EA" stroke-width="2.2"/>
+  <circle cx="78" cy="78" r="20" stroke="#D9C6A5" stroke-width="1.3"/>
+
+  <!-- upper raised panel -->
+  <rect x="34" y="122" width="88" height="84" rx="3" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M37.4 202V128Q37.4 125.4 40 125.4H118.6" stroke="#C4DCF5" stroke-width="1.4"/>
+  <path d="M118.6 126.4V200.4Q118.6 202.6 116.4 202.6H38.6" stroke="#8FB8E6" stroke-width="1.6"/>
+  <rect x="42" y="130" width="72" height="68" rx="2" stroke="#6C9AD0" stroke-width="1" opacity=".5"/>
+
+  <!-- lower raised panel -->
+  <rect x="34" y="222" width="88" height="78" rx="3" fill="#A9CBEF" stroke="#6C9AD0" stroke-width="1.3"/>
+  <path d="M37.4 296V228Q37.4 225.4 40 225.4H118.6" stroke="#C4DCF5" stroke-width="1.4"/>
+  <path d="M118.6 226.4V294.4Q118.6 296.6 116.4 296.6H38.6" stroke="#8FB8E6" stroke-width="1.6"/>
+  <rect x="42" y="230" width="72" height="62" rx="2" stroke="#6C9AD0" stroke-width="1" opacity=".5"/>
+
+  <!-- brass mail slot in the middle rail -->
+  <rect x="61" y="209.4" width="34" height="8.4" rx="2.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <rect x="65" y="212.2" width="26" height="2.8" rx="1.2" fill="#B98632" opacity=".55"/>
+  <path d="M63.6 211H92.4" stroke="#F6DB9E" stroke-width="1"/>
+
+  <!-- knob and backplate on the right stile -->
+  <rect x="127.2" y="180" width="8" height="30" rx="3.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M129.2 184V206" stroke="#F6DB9E" stroke-width="1"/>
+  <ellipse cx="132.2" cy="191.2" rx="5.4" ry="5.2" fill="#B98632" opacity=".3"/>
+  <circle cx="131.2" cy="190" r="5.2" fill="#E7BC6E" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M128.8 188.4A2.8 2.8 0 0 1 131.4 186.6" stroke="#FBE7B1" stroke-width="1.3"/>
+  <path d="M131.2 200.6V203.6" stroke="#9A6E24" stroke-width="1.8"/>
+
+  <!-- wood threshold in front of the door, as wide as the slab -->
+  <rect x="13" y="310.6" width="130" height="6.8" rx="1.8" fill="#E7BC6E"/>
+  <path d="M14.8 310.6H141.2A1.8 1.8 0 0 1 143 312.4V313H13V312.4A1.8 1.8 0 0 1 14.8 310.6Z" fill="#F3D391"/>
+  <path d="M13 315.8H143A1.8 1.8 0 0 1 141.2 317.4H14.8A1.8 1.8 0 0 1 13 315.8Z" fill="#D9A650"/>
+  <path d="M30 314.6h12M66 314.4h16M112 314.7h10" stroke="#D9A650" stroke-width=".9"/>
+  <rect x="13" y="310.6" width="130" height="6.8" rx="1.8" stroke="#B98632" stroke-width="1.3"/>
+</svg>

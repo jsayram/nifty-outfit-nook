@@ -93,6 +93,8 @@ public actor InMemoryClosetStore: ClosetStore {
         } catch {
             throw .invalidName(error)
         }
+        let problems = GarmentRules.problems(in: garment)
+        if !problems.isEmpty { throw .invalidDetails(problems) }
         return garment
     }
 
@@ -105,5 +107,11 @@ public actor InMemoryClosetStore: ClosetStore {
                 garmentsByID[id] = garment
             }
         }
+    }
+
+    /// Delete my data: every piece, Recently deleted included.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        garmentsByID = [:]
     }
 }
