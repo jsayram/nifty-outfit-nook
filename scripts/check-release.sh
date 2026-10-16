@@ -4,11 +4,12 @@
 # the cutout benchmark (Features/Debug, Phase 8a)
 # and swift-snapshot-testing (test targets only), and that the debug-only launch arguments
 # (-catalog, -cutout-bench, Phase 16a's -tour and Phase 17's -onboarding) aren't in it.
-# Run after scripts/build.sh Release.
+# Run after scripts/build.sh Release. scripts/check-archive.sh runs it on an archive's app
+# binary instead: scripts/check-release.sh <path to the app's executable>.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-binary="build/DerivedData/Build/Products/Release-iphonesimulator/NiftyOutfitNook.app/NiftyOutfitNook"
+binary="${1:-build/DerivedData/Build/Products/Release-iphonesimulator/NiftyOutfitNook.app/NiftyOutfitNook}"
 if [[ ! -f "$binary" ]]; then
     echo "No Release build at $binary. Run scripts/build.sh Release first." >&2
     exit 1
