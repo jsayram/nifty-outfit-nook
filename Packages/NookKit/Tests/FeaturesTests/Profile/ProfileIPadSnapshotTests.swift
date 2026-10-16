@@ -17,7 +17,7 @@ import UIKit
 /// middle: Profile sideways, upright and in a narrow window; Fit and measurements, Help and
 /// Privacy and terms sideways.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct ProfileIPadSnapshotTests {
     private func model() -> ProfileModel {
         let profile = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar).profile

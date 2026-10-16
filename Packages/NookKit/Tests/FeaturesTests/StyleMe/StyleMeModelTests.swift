@@ -288,7 +288,7 @@ struct StyleMeModelTests {
     }
 
     /// The large closet: checking a change stays quick with 2,400 pieces.
-    @Test func theLargeClosetChecksQuickly() async {
+    @Test(.heavyMainActorWork) func theLargeClosetChecksQuickly() async {
         let model = await loadedStyleMe(styleMeServices(.large))
         #expect(model.phase == .loaded)
         let elapsed = SpeedCheck.fastest {

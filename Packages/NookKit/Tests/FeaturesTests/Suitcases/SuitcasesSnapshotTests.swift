@@ -20,7 +20,7 @@ import UIKit
 /// - Laundry: two in the wash with a suitcase source, all clean in dark, tracking off, and the
 ///   confirmation.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct SuitcasesSnapshotTests {
     static let width: CGFloat = 402
     private let now = ClosetTestTime.now

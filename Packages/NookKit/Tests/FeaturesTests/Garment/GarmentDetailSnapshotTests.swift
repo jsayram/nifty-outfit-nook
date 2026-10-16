@@ -21,7 +21,7 @@ import UIKit
 /// - The gone and error states, the Remove from closet and Style with this sheets, and Recently
 ///   deleted.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct GarmentDetailSnapshotTests {
     static let width: CGFloat = 402
 

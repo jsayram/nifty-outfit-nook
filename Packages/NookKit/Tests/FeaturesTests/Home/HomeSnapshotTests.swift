@@ -18,7 +18,7 @@ import UIKit
 /// taller than its screen because it scrolls. How to record new references is in
 /// `DesignSystem/README.md` under "Snapshot tests".
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct HomeSnapshotTests {
     /// The mockup's room: 58° and rain, laundry tracking off.
     static let demo = HomeRoomContent(

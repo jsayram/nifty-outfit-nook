@@ -18,7 +18,7 @@ import UIKit
 /// from their tops, as if not scrolled, without the system bars. Drawn at 1x, like
 /// `HomeIPadSnapshotTests`.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct ClosetIPadSnapshotTests {
     private static let trousers: Garment.ID = "g-navy-trousers"
 

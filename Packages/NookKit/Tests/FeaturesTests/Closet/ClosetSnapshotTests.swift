@@ -16,7 +16,7 @@ import UIKit
 /// same in dark, at AX5 (filters folded away, one piece per row), with no matches, empty, and
 /// failed to load.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct ClosetSnapshotTests {
     static let width: CGFloat = 402
 

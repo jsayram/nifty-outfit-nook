@@ -21,7 +21,7 @@ import UIKit
 ///   a problem, a fitting piece with problems, and the try-on photo sheet empty, added and asking
 ///   before removing.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct ProfileSnapshotTests {
     static let width: CGFloat = 402
     private let us = Locale(identifier: "en_US")

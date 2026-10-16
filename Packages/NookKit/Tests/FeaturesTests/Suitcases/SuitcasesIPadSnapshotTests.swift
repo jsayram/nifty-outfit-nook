@@ -17,7 +17,7 @@ import UIKit
 /// middle: Suitcases sideways, upright and in a narrow window; Jose's house sideways; Laundry
 /// with two pieces in the wash sideways and upright.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct SuitcasesIPadSnapshotTests {
     private let now = ClosetTestTime.now
 

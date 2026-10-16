@@ -19,7 +19,7 @@ import UIKit
 /// - Her photos mixed with drawn pieces: a clean cutout as a sticker and a photo tile, light
 ///   and dark.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct LookBundleSnapshotTests {
     static let phone: CGFloat = 402
     static let iPad: CGFloat = 820

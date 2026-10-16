@@ -297,3 +297,8 @@ about 4 MB at 2x.
   run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.
 - **iPad screens** (Phases 15a and 15b, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
   2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.
+- **One at a time on the main actor** (Phase 18). Each Features snapshot suite carries `@Suite(.heavyMainActorWork)`,
+  and so do the large-closet speed checks. Swift Testing starts every test at once, and drawing a snapshot holds the
+  main actor, so without it a model test waited behind every snapshot for each of its turns and finished only as the
+  target drained. The trait (`Tests/FeaturesTests/Support/HeavyMainActorWork.swift`) lets one of those tests have
+  the main actor at a time and leaves the rest of the target parallel. Add it to any new snapshot suite.

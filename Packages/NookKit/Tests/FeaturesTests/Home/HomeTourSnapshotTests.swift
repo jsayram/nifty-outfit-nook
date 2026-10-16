@@ -17,7 +17,7 @@ import UIKit
 /// so these check the drawing and the card's placement. That the anchors follow the real
 /// controls on screen, through rotation and window resizes, is checked by the UI tests.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct HomeTourSnapshotTests {
     static let content = HomeSnapshotTests.demo
     /// The iPhone 17's safe area, which the tour keeps its card inside.

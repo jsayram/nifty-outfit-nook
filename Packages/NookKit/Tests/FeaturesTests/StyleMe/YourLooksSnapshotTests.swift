@@ -20,7 +20,7 @@ import UIKit
 /// - the Saved tab with looks and empty;
 /// - Simple and the styling state at AX5; Something new, offline and Saved in dark.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct YourLooksSnapshotTests {
     static let width: CGFloat = 402
 

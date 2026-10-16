@@ -20,7 +20,7 @@ import UIKit
 /// - the Add a piece picker;
 /// - the error state.
 @MainActor
-@Suite
+@Suite(.heavyMainActorWork)
 struct LookBuilderSnapshotTests {
     static let width: CGFloat = 402
 

@@ -186,7 +186,7 @@ struct SavedLooksModelTests {
     // MARK: Large set
 
     /// The large set's 480-odd saved looks load, search and filter without a stall.
-    @Test func largeSetStaysQuick() async {
+    @Test(.heavyMainActorWork) func largeSetStaysQuick() async {
         let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
         let model = SavedLooksModel(searchDelay: .zero)
         let loading = SpeedCheck.fastest {

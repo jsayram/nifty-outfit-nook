@@ -12,6 +12,7 @@ import Testing
 /// three runs and allows three times as long on CI (`SpeedCheck`). A failure means something got
 /// many times slower.
 @MainActor
+@Suite(.heavyMainActorWork)
 struct LargeClosetBrowsingTests {
     private static let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
 
