@@ -25,6 +25,17 @@ struct TourStoreTests {
         #expect(try await store.progress() == .fresh)
     }
 
+    /// Reset all tips in App tours (Phase 16b): every tour unseen, the switch as she left it.
+    @Test func forgettingSeenToursKeepsTheSwitch() async throws {
+        let store = InMemoryTourProgressStore()
+        try await store.record(TourRecord(tour: .closet, version: 1, outcome: .skipped, date: TestTime.now))
+        try await store.setShowsTipsOnNewScreens(false)
+        try await store.forgetSeenTours()
+        let progress = try await store.progress()
+        #expect(progress.records.isEmpty)
+        #expect(!progress.showsTipsOnNewScreens)
+    }
+
     @Test func failsWithTheOtherStores() async {
         let services = FixtureServices.make(
             set: .demo, behavior: .storesFail, now: TestTime.now, calendar: TestTime.calendar)

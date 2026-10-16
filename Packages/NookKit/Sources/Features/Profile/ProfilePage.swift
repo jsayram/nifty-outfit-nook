@@ -16,8 +16,8 @@ struct ProfileActions {
 ///
 /// 1. Name on your sign, Fit and measurements, Your try-on photo.
 /// 2. Style Me: Preferences, Avoid repeating outfits for, and the Track laundry switch (14b).
-/// 3. Help and privacy: Accessibility, Help, Send feedback, Privacy and terms, Delete my data
-///    (14b). App tours joins them in Phase 16b.
+/// 3. Help and privacy: Accessibility, Help, App tours (16b), Send feedback, Privacy and
+///    terms, Delete my data (14b).
 ///
 /// Separate from `ProfileScreen` so snapshot tests can draw it from a model.
 struct ProfilePage: View {
@@ -32,8 +32,10 @@ struct ProfilePage: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(FloorBackground())
         }
@@ -77,13 +79,16 @@ struct ProfilePage: View {
             row(
                 ProfileText.nameRow, subtitle: ProfileText.nameRowDetail,
                 value: SignName.shown(model.profile.signName), systemImage: "signature", identifier: "profile.name",
-                action: actions.editName)
+                action: actions.editName
+            )
+            .tourAnchor(ProfileTour.Anchor.name, label: ProfileText.nameRow, action: actions.editName)
             row(
                 ProfileText.fitRow, subtitle: ProfileText.fitRowDetail, systemImage: "ruler",
                 identifier: "profile.fit"
             ) {
                 actions.open(.fit)
             }
+            .tourAnchor(ProfileTour.Anchor.fit, label: ProfileText.fitRow) { actions.open(.fit) }
             row(
                 ProfileText.photoRow, subtitle: ProfileText.photoRowDetail,
                 value: model.hasTryOnPhoto ? ProfileText.photoAdded : ProfileText.photoNotAdded,
@@ -126,6 +131,18 @@ struct ProfilePage: View {
                     identifier: "profile.\(destination.identifier)"
                 ) {
                     actions.open(destination)
+                }
+                // App tours sits under Help, as in `settings.html` (Phase 16b).
+                if destination == .help {
+                    row(
+                        AppToursText.row, subtitle: AppToursText.rowDetail, systemImage: "sparkles",
+                        identifier: "profile.appTours"
+                    ) {
+                        actions.openSheet(.appTours)
+                    }
+                    .tourAnchor(ProfileTour.Anchor.appTours, label: AppToursText.row) {
+                        actions.openSheet(.appTours)
+                    }
                 }
             }
         }

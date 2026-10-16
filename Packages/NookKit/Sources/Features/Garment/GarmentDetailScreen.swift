@@ -109,6 +109,12 @@ struct GarmentDetailScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+        // The piece's quick tour (Phase 16b), once it has loaded with its buttons: a piece she no
+        // longer owns has none.
+        .screenTour(
+            GarmentTour.definition,
+            isReady: model.phase == .loaded && model.isInCloset && !showsStyleChoice && !showsRemove
+                && !showsSuitcases && toast == nil)
     }
 
     /// Edit on the page, only beside the grid.
@@ -231,6 +237,7 @@ private struct DetailBar: ViewModifier {
                                 .padding(.horizontal, NookSpacing.xSmall)
                             }
                             .accessibilityIdentifier("garment.edit")
+                            .tourAnchor(GarmentTour.Anchor.edit, label: GarmentTourText.edit, action: edit)
                         }
                     }
                 }
@@ -238,4 +245,9 @@ private struct DetailBar: ViewModifier {
             content
         }
     }
+}
+
+/// What VoiceOver calls garment detail's controls in its tour.
+enum GarmentTourText {
+    static var edit: String { String(localized: "Edit", bundle: .module, comment: "Button: edits a piece") }
 }

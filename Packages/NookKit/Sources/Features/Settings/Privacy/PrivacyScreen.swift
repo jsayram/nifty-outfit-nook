@@ -35,6 +35,8 @@ struct PrivacyScreen: View {
             SafariView(url: link.url)
                 .ignoresSafeArea()
         }
+        // Privacy and terms' quick tour (Phase 16b).
+        .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && page == nil)
     }
 }
 
@@ -64,6 +66,7 @@ struct PrivacyPage: View {
                     SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
                 }
             }
+            .tourAnchor(PrivacyTour.Anchor.later, label: PrivacyText.laterHeader)
 
             SettingsGroup(header: PrivacyText.yourDataHeader) {
                 Button(action: deleteData) {
@@ -73,6 +76,7 @@ struct PrivacyPage: View {
                 }
                 .buttonStyle(.nookRow)
                 .accessibilityIdentifier("privacy.deleteData")
+                .tourAnchor(PrivacyTour.Anchor.deleteData, label: SettingsText.deleteTitle, action: deleteData)
             }
 
             SettingsGroup(header: PrivacyText.policiesHeader) {

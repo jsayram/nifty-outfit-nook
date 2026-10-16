@@ -478,6 +478,29 @@
         }
       }
     },
+    "%lld quick tips" : {
+      "comment" : "App tours: how many tips a screen's tour has (plural)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld quick tip"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld quick tips"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld suitcases" : {
       "comment" : "Closet tile: how many suitcases she has",
       "localizations" : {
@@ -530,6 +553,9 @@
     "A bottom, like trousers or a skirt" : {
       "comment" : "What a look needs"
     },
+    "A closer look" : {
+      "comment" : "Closet tour on iPad, step 3 title: the piece beside the grid"
+    },
     "A different outfit didn’t come through. Nothing was charged." : {
       "comment" : "Banner over results when Try a different outfit fails"
     },
@@ -538,6 +564,9 @@
     },
     "A layer" : {
       "comment" : "What a look needs"
+    },
+    "A little reminder" : {
+      "comment" : "Profile tour, step 3 title"
     },
     "A look has at most 6 pieces. Remove one to save." : {
       "comment" : "Make your own look: why Save is off"
@@ -577,6 +606,9 @@
     "A missing suitcase" : {
       "comment" : "Style Me source when it's gone"
     },
+    "A name makes your outfit easier to find later." : {
+      "comment" : "Make your own look tour, step 2"
+    },
     "A photo you copied from somewhere else" : {
       "comment" : "Add a piece choice: under Paste",
       "localizations" : {
@@ -588,8 +620,14 @@
         }
       }
     },
+    "A photo, or words" : {
+      "comment" : "App tours: what Add a piece's tour covers"
+    },
     "A picture shows one of your looks. Pictures are made one look at a time, only when you ask." : {
       "comment" : "Saved Looks Pictures tab, empty"
+    },
+    "A piece of clothing" : {
+      "comment" : "App tours: a screen"
     },
     "A piece or suitcase in it changed since you asked. Nothing was sent." : {
       "comment" : "Your looks when the suitcase or starting piece changed"
@@ -610,6 +648,9 @@
     },
     "A rough location for the forecast. Never your exact address." : {
       "comment" : "Privacy and terms: what weather would send"
+    },
+    "A saved look" : {
+      "comment" : "App tours: a screen"
     },
     "A suitcase is a smaller set of your pieces, for a trip or a second home. Style Me can then pick from just what’s packed." : {
       "comment" : "Suitcases: empty message"
@@ -735,6 +776,9 @@
     "Add or remove" : {
       "comment" : "Button: opens the packing sheet"
     },
+    "Add or remove clothes here. Removing one keeps it in your closet." : {
+      "comment" : "Suitcase tour, step 2"
+    },
     "Add pieces" : {
       "comment" : "Style Me button: opens Suitcases to pack"
     },
@@ -747,14 +791,26 @@
     "Add pieces to your closet first, then pack them here." : {
       "comment" : "Packing sheet: nothing in the closet"
     },
+    "Add sizes or measurements if you want. You can leave them blank." : {
+      "comment" : "Profile tour, step 2"
+    },
     "Add the brand." : {
       "comment" : "Fitting piece sheet: brand is empty"
     },
     "Add the size as printed." : {
       "comment" : "Fitting piece sheet: size is empty"
     },
+    "Add this piece to a suitcase. It still stays in your closet." : {
+      "comment" : "Garment tour, step 3"
+    },
     "Add to a suitcase" : {
       "comment" : "Button on garment detail (Phase 13)"
+    },
+    "Add your clothes" : {
+      "comment" : "Closet tour, step 1 title"
+    },
+    "Add, find and filter your clothes" : {
+      "comment" : "App tours: what Closet's tour covers"
     },
     "Added" : {
       "comment" : "Mark: a suggestion chip once accepted, or a piece a look version adds to Simple",
@@ -796,6 +852,9 @@
         }
       }
     },
+    "All finished?" : {
+      "comment" : "Laundry tour, Mark all clean title"
+    },
     "All suitcases" : {
       "comment" : "Screen title: every suitcase (RD-09)"
     },
@@ -819,6 +878,9 @@
     "An idea" : {
       "comment" : "Send feedback: kind chip"
     },
+    "Answers, and where to ask" : {
+      "comment" : "App tours: what Help's tour covers"
+    },
     "Any" : {
       "comment" : "Suitcase filter choice: no filter",
       "localizations" : {
@@ -832,6 +894,12 @@
     },
     "Any one piece" : {
       "comment" : "Colour sheet: applies to"
+    },
+    "App tours" : {
+      "comment" : "Profile row: replays the quick tours"
+    },
+    "App tours lets you replay any of these little guides whenever you like." : {
+      "comment" : "Profile tour, step 3"
     },
     "App version: %@ (%@)" : {
       "comment" : "Send feedback: app details line, version and build"
@@ -926,6 +994,9 @@
     },
     "Back to how it was" : {
       "comment" : "Toast after undoing a swap or removal"
+    },
+    "Back to the outfit" : {
+      "comment" : "Try-on picture tour, step 1 title"
     },
     "Backpack" : {
       "comment" : "A suitcase picture"
@@ -1079,6 +1150,9 @@
         }
       }
     },
+    "Build a look around it" : {
+      "comment" : "Garment tour, step 2 title"
+    },
     "Build an outfit yourself, piece by piece, starting with it." : {
       "comment" : "Style with this choice: what Make my own look does",
       "localizations" : {
@@ -1092,6 +1166,12 @@
     },
     "Build an outfit yourself, piece by piece." : {
       "comment" : "Make your own look: the line at the top (LR-08)"
+    },
+    "Build an outfit yourself, piece by piece. Tap Add a piece to pick from your closet." : {
+      "comment" : "Make your own look tour, step 1 (LR-08)"
+    },
+    "Building an outfit piece by piece" : {
+      "comment" : "App tours: what Make your own look's tour covers"
     },
     "Burgundy" : {
       "comment" : "Colour name",
@@ -1174,6 +1254,9 @@
     "Change example photo" : {
       "comment" : "Try-on photo sheet button"
     },
+    "Change just one piece" : {
+      "comment" : "Your looks tour, Swap a piece title"
+    },
     "Change photo" : {
       "comment" : "Button on the Add a piece form",
       "localizations" : {
@@ -1187,6 +1270,9 @@
     },
     "Change the %@, now %@" : {
       "comment" : "Spoken label of Change: the kind of piece and the piece"
+    },
+    "Change the details" : {
+      "comment" : "Garment tour, step 1 title"
     },
     "Change the occasion" : {
       "comment" : "Style Me button"
@@ -1211,6 +1297,9 @@
     "Changes the name." : {
       "comment" : "VoiceOver hint on Profile's sign"
     },
+    "Changing or removing one piece" : {
+      "comment" : "App tours: what Swap a piece's tour covers"
+    },
     "Check %@ ready to wear" : {
       "comment" : "Styling step 1: how many pieces can be used"
     },
@@ -1230,6 +1319,9 @@
     },
     "Choose a colour for this look." : {
       "comment" : "VoiceOver hint for Colour"
+    },
+    "Choose a photo, or take one, to add your piece. For now each one adds a sample picture." : {
+      "comment" : "Add a piece tour, step 1"
     },
     "Choose a piece to build your looks around." : {
       "comment" : "VoiceOver hint"
@@ -1271,6 +1363,12 @@
     "Choose one outfit in three versions" : {
       "comment" : "Styling step 3"
     },
+    "Choose the fit that feels best to you. It’s saved until you change it." : {
+      "comment" : "Fit tour, step 1 (LR-18)"
+    },
+    "Choose the measurements you are comfortable with." : {
+      "comment" : "Fit tour, step 2"
+    },
     "Choose the occasion." : {
       "comment" : "VoiceOver hint for Occasion"
     },
@@ -1279,6 +1377,9 @@
     },
     "Choose today’s comfort." : {
       "comment" : "VoiceOver hint for Comfort"
+    },
+    "Choose what goes in" : {
+      "comment" : "Suitcase tour, step 2 title"
     },
     "Choose what kind of piece it is." : {
       "comment" : "Add a piece: no kind of piece chosen",
@@ -1310,6 +1411,12 @@
     },
     "Choose which packed clothes to use, or switch to your whole closet." : {
       "comment" : "Home tour, step 3, on the iPad's room"
+    },
+    "Choose your pieces" : {
+      "comment" : "Make your own look tour, step 1 title"
+    },
+    "Choose your whole closet or the suitcase you are using." : {
+      "comment" : "Laundry tour, step 1"
     },
     "Choosing one outfit in three versions from %@ for %@." : {
       "comment" : "Your looks while styling: the source and the occasion"
@@ -1498,6 +1605,9 @@
     },
     "Delete my data" : {
       "comment" : "Profile row and screen title"
+    },
+    "Delete my data erases everything the app keeps about you. It asks you first." : {
+      "comment" : "Privacy tour, step 2"
     },
     "Delete picture" : {
       "comment" : "Button on picture detail"
@@ -1697,6 +1807,12 @@
     "Done" : {
       "comment" : "Closes the Occasion sheet"
     },
+    "Done. Each screen shows its tips again the next time you open it, while tips are on." : {
+      "comment" : "App tours: after Reset all tips"
+    },
+    "Don’t need it?" : {
+      "comment" : "Swap tour, step 4 title"
+    },
     "Dress" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -1736,6 +1852,9 @@
     "Duffel bag" : {
       "comment" : "A suitcase picture"
     },
+    "Each tour shows once. Skip ends it." : {
+      "comment" : "App tours: under the switch"
+    },
     "Earlier version" : {
       "comment" : "A picture of an earlier version of its look"
     },
@@ -1766,6 +1885,9 @@
           }
         }
       }
+    },
+    "Editing, styling and packing it" : {
+      "comment" : "App tours: what a piece's tour covers"
     },
     "Empty" : {
       "comment" : "Source plate: the source has no pieces",
@@ -1882,6 +2004,9 @@
     "Every piece, with its pictures and details, and Recently deleted" : {
       "comment" : "Delete my data: under Your closet"
     },
+    "Every screen shows its tips again the next time you open it." : {
+      "comment" : "VoiceOver hint on Reset all tips"
+    },
     "Every screen’s words grow with it. At the largest sizes, Home turns into big rows." : {
       "comment" : "Accessibility: what the app does with Text size"
     },
@@ -1962,6 +2087,15 @@
         }
       }
     },
+    "Filters" : {
+      "comment" : "VoiceOver name of Closet's filter chips, in Closet's tour"
+    },
+    "Find a piece" : {
+      "comment" : "Closet tour, step 2 title"
+    },
+    "Find a simple answer" : {
+      "comment" : "Help tour, step 1 title"
+    },
     "Find one" : {
       "comment" : "Button on a look's piece she doesn't own",
       "localizations" : {
@@ -1983,6 +2117,9 @@
           }
         }
       }
+    },
+    "Find something quickly" : {
+      "comment" : "Saved Looks tour, step 3 title"
     },
     "Finding a piece like this comes in a later version. Nothing was searched." : {
       "comment" : "Find one stand-in (LR-05b.4)"
@@ -2061,6 +2198,9 @@
     "For try-on pictures later" : {
       "comment" : "Under the Your try-on photo row"
     },
+    "Fresh from the wash?" : {
+      "comment" : "Laundry tour, Mark clean title"
+    },
     "From %@" : {
       "comment" : "Look detail: the suitcase the look was made from"
     },
@@ -2090,6 +2230,9 @@
         }
       }
     },
+    "Give it a name" : {
+      "comment" : "Saved look tour, step 3 title"
+    },
     "Give it a name and a picture, then pick what goes in." : {
       "comment" : "Under the Add a suitcase sheet's title"
     },
@@ -2110,6 +2253,9 @@
     "Give the suitcase a name." : {
       "comment" : "Suitcase name: empty"
     },
+    "Give your suitcase a name that is easy to remember." : {
+      "comment" : "Suitcase tour, step 1"
+    },
     "Go back" : {
       "comment" : "Button: back to the two choices",
       "localizations" : {
@@ -2123,6 +2269,9 @@
     },
     "Good to know" : {
       "comment" : "Help section header"
+    },
+    "Got it" : {
+      "comment" : "Last button of a quick tour; closes it"
     },
     "Gray" : {
       "comment" : "Colour name",
@@ -2199,6 +2348,9 @@
     "Help and privacy" : {
       "comment" : "Profile section header"
     },
+    "Help with your fit" : {
+      "comment" : "Profile tour, step 2 title"
+    },
     "Hidden while the app is in the background" : {
       "comment" : "Cover over sensitive screens in the app switcher"
     },
@@ -2232,6 +2384,9 @@
     },
     "How closely your looks stick to your own clothes." : {
       "comment" : "Preferences sheet (LR-03)"
+    },
+    "How do you like your clothes?" : {
+      "comment" : "Fit tour, step 1 title"
     },
     "How dressy" : {
       "comment" : "Add a piece: field label",
@@ -2461,6 +2616,9 @@
     "Inseam" : {
       "comment" : "Measurement"
     },
+    "Inside your suitcase" : {
+      "comment" : "App tours: a screen"
+    },
     "It goes to Recently deleted for 30 days. You can bring it back until then." : {
       "comment" : "Remove from closet: what Delete it does",
       "localizations" : {
@@ -2518,6 +2676,9 @@
     "Its look isn’t in Saved Looks any more. The picture stays until you delete it." : {
       "comment" : "Picture detail: its look was deleted"
     },
+    "Its look, and deleting it" : {
+      "comment" : "App tours: what a try-on picture's tour covers"
+    },
     "Its pieces are still in your closet." : {
       "comment" : "Suitcase gone: the pieces stay"
     },
@@ -2551,6 +2712,9 @@
     },
     "Just for this outfit. Your usual fit stays the same." : {
       "comment" : "Comfort sheet (LR-18)"
+    },
+    "Keep a favourite" : {
+      "comment" : "Your looks tour, Save look title"
     },
     "Keep current" : {
       "comment" : "Swap: leaves the look as it is"
@@ -2589,6 +2753,9 @@
         }
       }
     },
+    "Keep this outfit" : {
+      "comment" : "Make your own look tour, step 3 title"
+    },
     "Keep this to %lld characters." : {
       "comment" : "Add a piece: a field is too long, with the limit",
       "localizations" : {
@@ -2599,6 +2766,12 @@
           }
         }
       }
+    },
+    "Keep track of the wash" : {
+      "comment" : "Laundry is off tour, step 1 title"
+    },
+    "Keep your change" : {
+      "comment" : "Swap tour, step 3 title"
     },
     "Keeps this version in Saved Looks." : {
       "comment" : "VoiceOver hint on Save look"
@@ -2731,6 +2904,9 @@
         }
       }
     },
+    "Laundry is off" : {
+      "comment" : "App tours: a screen"
+    },
     "Laundry tracking is a switch in Profile. When it’s on, the hamper shows what’s in the wash and Style Me skips those pieces until you mark them clean." : {
       "comment" : "Help: Laundry"
     },
@@ -2855,6 +3031,9 @@
     "Leave it empty if you don’t know." : {
       "comment" : "Measurement sheet, after the help"
     },
+    "Leave it off if you would rather keep things simple. You can turn it on later in Profile." : {
+      "comment" : "Laundry is off tour, step 2"
+    },
     "Leaving this screen stops it, and nothing is used." : {
       "comment" : "Your looks while styling: leaving cancels the request"
     },
@@ -2868,6 +3047,9 @@
           }
         }
       }
+    },
+    "Like the outfit but fancy another top? Swap a piece keeps the rest of the look." : {
+      "comment" : "Your looks tour, Swap a piece"
     },
     "Like “0 Petite”" : {
       "comment" : "Add a piece: size prompt",
@@ -2958,6 +3140,9 @@
     "Looks from a suitcase only use what’s packed in it. Pack a few pieces, or style from somewhere else." : {
       "comment" : "Style Me when the suitcase has nothing packed"
     },
+    "Looks keeps the outfits you saved. Tap an outfit to open it." : {
+      "comment" : "Saved Looks tour, step 1"
+    },
     "Looks you keep show up here, ready to wear again." : {
       "comment" : "Saved Looks with no looks (RD-08.4)"
     },
@@ -2998,11 +3183,17 @@
     "Make a picture" : {
       "comment" : "Try it on sheet button"
     },
+    "Make a suitcase for a trip, a place or a few favourite pieces." : {
+      "comment" : "Suitcases tour, step 1"
+    },
     "Make another" : {
       "comment" : "Try it on sheet button"
     },
     "Make it preferred" : {
       "comment" : "Style Me button: colour wish"
+    },
+    "Make it yours" : {
+      "comment" : "Saved look tour, step 2 title"
     },
     "Make my own look" : {
       "comment" : "Style with this choice (LR-08)",
@@ -3014,6 +3205,9 @@
           }
         }
       }
+    },
+    "Make the name yours" : {
+      "comment" : "Suitcase tour, step 1 title"
     },
     "Make your own" : {
       "comment" : "Saved Looks toolbar button (RD-08, LR-08)"
@@ -3040,6 +3234,9 @@
     },
     "Making a picture also saves this look, so the picture has a look to go with." : {
       "comment" : "Try it on sheet, from Your looks for a look that isn't saved"
+    },
+    "Making a suitcase and choosing one" : {
+      "comment" : "App tours: what Suitcases' tour covers"
     },
     "Mark %@ clean" : {
       "comment" : "Laundry: marks one piece clean"
@@ -3072,6 +3269,9 @@
     },
     "Mark all clean" : {
       "comment" : "Button: marks every piece in the wash clean"
+    },
+    "Mark all clean lets you finish the whole list together. You will be asked to confirm." : {
+      "comment" : "Laundry tour, Mark all clean"
     },
     "Mark as clean" : {
       "comment" : "Button on garment detail",
@@ -3123,6 +3323,9 @@
         }
       }
     },
+    "Marking pieces clean" : {
+      "comment" : "App tours: what Laundry's tour covers"
+    },
     "Marks this look and its pieces as worn today. Laundry doesn’t change." : {
       "comment" : "Hint on Wear today"
     },
@@ -3169,6 +3372,9 @@
     "More" : {
       "comment" : "Button: opens a suitcase's menu"
     },
+    "More screen tours" : {
+      "comment" : "App tours: shows the rest of the list"
+    },
     "Most of your data is deleted, but not: %@. Try again to finish." : {
       "comment" : "Delete my data: some parts failed, with their names"
     },
@@ -3203,8 +3409,8 @@
     "Name on your sign" : {
       "comment" : "Profile row (RD-03)"
     },
-    "Name on your sign, Preferences, fit, measurements and try-on photo" : {
-      "comment" : "Delete my data: under Your profile"
+    "Name on your sign, Preferences, fit, measurements, try-on photo and the app tours you’ve seen" : {
+      "comment" : "Delete my data: under Your profile (tours since Phase 16b)"
     },
     "Name on your sign, no name yet" : {
       "comment" : "VoiceOver: Profile's sign when no name is set"
@@ -3239,6 +3445,12 @@
     },
     "Name this look" : {
       "comment" : "Make your own look: name field prompt"
+    },
+    "Naming, packing and styling from it" : {
+      "comment" : "App tours: what a suitcase's tour covers"
+    },
+    "Narrow it down" : {
+      "comment" : "Closet tour, step 3 title"
     },
     "Navy" : {
       "comment" : "Colour name",
@@ -3305,6 +3517,9 @@
         }
       }
     },
+    "No more tips. You can replay any tour here." : {
+      "comment" : "App tours: after turning tips off"
+    },
     "No other %@ in %@ can be worn today." : {
       "comment" : "Swap: no options at all, with the kind of piece and the source's name"
     },
@@ -3329,6 +3544,9 @@
           }
         }
       }
+    },
+    "No photo yet? Describe your piece instead. You can add a photo later." : {
+      "comment" : "Add a piece tour, step 2"
     },
     "No pictures match" : {
       "comment" : "Pictures tab: nothing matches"
@@ -3529,6 +3747,9 @@
           }
         }
       }
+    },
+    "Nothing here is sent yet. Later, each of these asks you first." : {
+      "comment" : "Privacy tour, step 1"
     },
     "Nothing in %@ can be used today." : {
       "comment" : "Starting piece sheet with no usable pieces; the source's name"
@@ -3924,6 +4145,9 @@
         }
       }
     },
+    "Opens Style Me. Shows when your looks are ready." : {
+      "comment" : "App tours: Your looks' tour needs a Style Me request first"
+    },
     "Opens Suitcases, where you pick the source." : {
       "comment" : "VoiceOver hint",
       "localizations" : {
@@ -3951,6 +4175,9 @@
           }
         }
       }
+    },
+    "Opens the screen and starts its tips from the beginning." : {
+      "comment" : "VoiceOver hint on a screen in App tours"
     },
     "Opens the suitcase." : {
       "comment" : "Hint on a suitcase name",
@@ -4055,11 +4282,17 @@
     "Pack %@" : {
       "comment" : "Packing sheet title, with the suitcase's name"
     },
+    "Pack a little collection" : {
+      "comment" : "Suitcases tour, step 1 title"
+    },
     "Pack at least one piece first. Style Me keeps using %@ until then." : {
       "comment" : "Suitcase: empty, with the source now"
     },
     "Pack it" : {
       "comment" : "Toast action: opens the empty suitcase to pack it"
+    },
+    "Pack it away" : {
+      "comment" : "Garment tour, step 3 title"
     },
     "Packed" : {
       "comment" : "Suitcase: heading over its pieces"
@@ -4115,11 +4348,26 @@
     "Pick a piece" : {
       "comment" : "Beside Closet's grid on iPad"
     },
+    "Pick a replacement" : {
+      "comment" : "Swap tour, step 2 title"
+    },
+    "Pick a screen and I’ll show you around it again." : {
+      "comment" : "Under the App tours sheet's title"
+    },
     "Pick something you own that fits just right. We’ll use its brand and size to suggest sizes for you." : {
       "comment" : "Under the pieces that fit section header (LR-13)"
     },
     "Pick the kind of piece." : {
       "comment" : "Fitting piece sheet: no kind chosen"
+    },
+    "Pick the part of the outfit you want to change." : {
+      "comment" : "Swap tour, step 1"
+    },
+    "Pick your suitcase" : {
+      "comment" : "Suitcases tour, step 2 title"
+    },
+    "Pick your whole closet or one suitcase. I’ll use the clothes you choose." : {
+      "comment" : "Style Me tour, step 1"
     },
     "Picture" : {
       "comment" : "Label over the suitcase pictures"
@@ -4127,8 +4375,14 @@
     "Picture deleted" : {
       "comment" : "Toast after Delete picture"
     },
+    "Picture the outfit" : {
+      "comment" : "Your looks tour, Try it on title"
+    },
     "Pictures" : {
       "comment" : "Saved Looks tab: her try-on pictures (RD-08)"
+    },
+    "Pictures keeps your saved try-on pictures." : {
+      "comment" : "Saved Looks tour, step 2"
     },
     "Pictures need a connection" : {
       "comment" : "Try it on sheet: offline"
@@ -4264,6 +4518,9 @@
     "Puts back the look as it was before your last change." : {
       "comment" : "VoiceOver hint on Undo under a changed look"
     },
+    "Ready for outfit ideas?" : {
+      "comment" : "Style Me tour, step 3 title"
+    },
     "Recently deleted" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -4351,6 +4608,9 @@
     "Remove this piece" : {
       "comment" : "Swap: button (LR-08)"
     },
+    "Remove this piece takes it out of the outfit. You can undo it." : {
+      "comment" : "Swap tour, step 4: Remove this piece (LR-08)"
+    },
     "Remove your try-on photo? Try-on pictures you saved will stay." : {
       "comment" : "Try-on photo sheet: asks before removing"
     },
@@ -4372,11 +4632,17 @@
     "Rename look" : {
       "comment" : "Sheet title"
     },
+    "Replay the tips for any screen" : {
+      "comment" : "Profile row: under App tours"
+    },
     "Required" : {
       "comment" : "Colour sheet: how strongly"
     },
     "Required: every look has %@ %@, using your own pieces. If nothing fits, you’ll see why." : {
       "comment" : "Colour sheet note. Example: navy in the shoes"
+    },
+    "Reset all tips" : {
+      "comment" : "App tours: button"
     },
     "Restore" : {
       "comment" : "Button: brings a deleted piece back",
@@ -4634,8 +4900,14 @@
     "Send privately" : {
       "comment" : "Send feedback: the button"
     },
+    "Send privately opens the share sheet. You choose where your note goes, like Messages or Mail." : {
+      "comment" : "Send feedback tour, step 2"
+    },
     "Send the request" : {
       "comment" : "Styling step 2"
+    },
+    "Sending your note" : {
+      "comment" : "Send feedback tour, step 2 title"
     },
     "Shade name" : {
       "comment" : "Add a piece: field label, her word for the shade",
@@ -4704,6 +4976,9 @@
         }
       }
     },
+    "Show tips on new screens" : {
+      "comment" : "App tours: switch"
+    },
     "Shown in your room" : {
       "comment" : "Under the Name on your sign row"
     },
@@ -4725,11 +5000,17 @@
     "Shows three more of your pieces. Nothing is sent." : {
       "comment" : "Swap hint"
     },
+    "Shows when you next tap Swap a piece." : {
+      "comment" : "App tours: Swap a piece's tour starts when she opens it"
+    },
     "Simple" : {
       "comment" : "Look version (LR-05a)"
     },
     "Simple and Dressed up use only your pieces. Something new can add one idea if Preferences allows it. If there aren’t enough pieces, Style Me says what’s missing." : {
       "comment" : "Help: Get outfit ideas, the quieter line"
+    },
+    "Simple, Dressed up and Something new are the same outfit, styled three ways. Tap one to see it." : {
+      "comment" : "Your looks tour, step 1: the version switch (LR-05a)"
     },
     "Simulated" : {
       "comment" : "Badge: a stand-in, not the real thing"
@@ -4869,6 +5150,9 @@
         }
       }
     },
+    "Start here when you want an outfit with this piece." : {
+      "comment" : "Garment tour, step 2"
+    },
     "Start over" : {
       "comment" : "Make your own look: throws the draft away"
     },
@@ -4906,8 +5190,14 @@
     "Step %lld of 3" : {
       "comment" : "VoiceOver value of the styling progress bar"
     },
+    "Still need a hand?" : {
+      "comment" : "Help tour, step 2 title"
+    },
     "Still stuck?" : {
       "comment" : "Help: the last card"
+    },
+    "Still stuck? opens Send feedback, where you can write a private note about the app." : {
+      "comment" : "Help tour, step 2"
     },
     "Style Me" : {
       "comment" : "Words on the laptop screen; opens Style Me",
@@ -5014,6 +5304,9 @@
     },
     "Style from Main closet" : {
       "comment" : "Preferences sheet button"
+    },
+    "Style from this suitcase" : {
+      "comment" : "Suitcase tour, step 3 title"
     },
     "Style me" : {
       "comment" : "The button that sends the Style Me request"
@@ -5215,6 +5508,9 @@
         }
       }
     },
+    "Take photo, Choose from Photos or Paste" : {
+      "comment" : "VoiceOver name of Add a piece's three photo choices, in its tour"
+    },
     "Taken out of Saved Looks" : {
       "comment" : "Toast after unsaving a look"
     },
@@ -5238,14 +5534,68 @@
         }
       }
     },
+    "Tap Add a piece to add a photo or describe something you own." : {
+      "comment" : "Closet tour, step 1"
+    },
+    "Tap Delete picture to remove one you don’t want. You can undo it." : {
+      "comment" : "Try-on picture tour, step 2"
+    },
+    "Tap Edit to change the name, photo or details of this piece." : {
+      "comment" : "Garment tour, step 1"
+    },
+    "Tap Mark clean when a piece is ready to wear again." : {
+      "comment" : "Laundry tour, Mark clean"
+    },
+    "Tap Rename to change what this outfit is called." : {
+      "comment" : "Saved look tour, step 3"
+    },
     "Tap Retry when you’re back online. Nothing was charged, and your saved looks still work." : {
       "comment" : "Your looks offline state"
+    },
+    "Tap Save look to find this outfit in Saved Looks later." : {
+      "comment" : "Your looks tour, Save look"
+    },
+    "Tap Save look when it feels right. You can change a piece later with Swap a piece." : {
+      "comment" : "Make your own look tour, step 3 (LR-08)"
+    },
+    "Tap See the look to open the outfit behind the picture." : {
+      "comment" : "Try-on picture tour, step 1"
+    },
+    "Tap Style me when you are ready. Your outfit ideas come next." : {
+      "comment" : "Style Me tour, step 3"
+    },
+    "Tap Swap a piece to change one piece. The rest of the outfit stays." : {
+      "comment" : "Saved look tour, step 2 (LR-08)"
+    },
+    "Tap Use this to put the new piece into your outfit." : {
+      "comment" : "Swap tour, step 3"
+    },
+    "Tap Wear today to mark this outfit as worn today." : {
+      "comment" : "Saved look tour, step 1"
+    },
+    "Tap Weight to add it, or leave it blank if you prefer." : {
+      "comment" : "Fit tour, step 3"
     },
     "Tap a piece for details." : {
       "comment" : "Suitcase: under Packed"
     },
+    "Tap a piece you like from these choices." : {
+      "comment" : "Swap tour, step 2"
+    },
+    "Tap a question to open the answer. Tap it again to close it." : {
+      "comment" : "Help tour, step 1"
+    },
+    "Tap a suitcase to choose it for Style Me, or its arrow to see what’s packed." : {
+      "comment" : "Suitcases tour, step 2"
+    },
     "Tap here for an outfit idea made from your clothes." : {
       "comment" : "Home tour, step 1, at large text sizes and on a phone held sideways"
+    },
+    "Tap here to change the name shown in your room." : {
+      "comment" : "Profile tour, step 1"
+    },
+    "Tap here to choose what you are dressing for, like work or a dinner out." : {
+      "comment" : "Style Me tour, step 2"
     },
     "Tap one to see it in the look." : {
       "comment" : "Swap: under the buttons before she picks an option"
@@ -5258,6 +5608,9 @@
     },
     "Tap the laptop on your desk. Check the occasion, then tap Style me. You’ll see one outfit in three versions: Simple, Dressed up and Something new." : {
       "comment" : "Help: Get outfit ideas"
+    },
+    "Tell me what happened" : {
+      "comment" : "Send feedback tour, step 1 title"
     },
     "Terms of use" : {
       "comment" : "Privacy and terms: a row"
@@ -5362,6 +5715,9 @@
     "The inside leg length you like, from a pair of trousers that fits." : {
       "comment" : "Measurement help"
     },
+    "The laptop, the wardrobe, the suitcase and your sign" : {
+      "comment" : "App tours: what Home's tour covers"
+    },
     "The look" : {
       "comment" : "Swap: spoken name of the look"
     },
@@ -5377,8 +5733,14 @@
     "The picture didn’t finish" : {
       "comment" : "Try it on sheet: failed"
     },
+    "The piece beside your closet" : {
+      "comment" : "VoiceOver name of the column beside Closet's grid on iPad, in Closet's tour"
+    },
     "The piece stays in your closet. A suitcase only lists it, no copy is made." : {
       "comment" : "Under the Add to a suitcase sheet's title"
+    },
+    "The piece you choose appears on the right. Tap Edit to change its details." : {
+      "comment" : "Closet tour on iPad, step 3"
     },
     "The piece you started adding isn’t in your closet yet." : {
       "comment" : "Draft card: a new piece with no name yet",
@@ -5419,6 +5781,9 @@
     },
     "The suitcase you were styling from isn’t there any more, so Style Me uses Main closet." : {
       "comment" : "Suitcases: the remembered suitcase was deleted or archived"
+    },
+    "The three versions, saving, trying on and swapping" : {
+      "comment" : "App tours: what Your looks' tour covers"
     },
     "The version, iOS and device model. Never anything about you." : {
       "comment" : "Send feedback: under the Include app details switch while it's on"
@@ -5534,6 +5899,9 @@
     "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded." : {
       "comment" : "Try-on photo sheet: Stage A note"
     },
+    "Three versions" : {
+      "comment" : "Your looks tour, step 1 title"
+    },
     "Throws away the look you didn’t save. Saved Looks don’t change." : {
       "comment" : "Hint on Start over"
     },
@@ -5553,6 +5921,9 @@
     },
     "Tick what goes in. A piece can be in more than one suitcase. It’s the same piece, so nothing is copied." : {
       "comment" : "Packing sheet: how it works"
+    },
+    "Tidy up" : {
+      "comment" : "Try-on picture tour, step 2 title"
     },
     "Today" : {
       "comment" : "Your looks tab: the current result (LR-06)"
@@ -5657,6 +6028,9 @@
     "Try it on makes a simulated picture of the look, only when you ask. In this test build it’s drawn on your iPhone." : {
       "comment" : "Help: Swap, save and try on, the quieter line"
     },
+    "Try it on makes a simulated picture of this outfit. It shows the style, not the exact fit." : {
+      "comment" : "Your looks tour, Try it on"
+    },
     "Try it on makes one picture of this look, only now that you ask." : {
       "comment" : "Try it on sheet"
     },
@@ -5689,8 +6063,14 @@
         }
       }
     },
+    "Turn this on if you want Style Me to skip clothes that are in the wash." : {
+      "comment" : "Laundry is off tour, step 1"
+    },
     "Turning it off keeps your marks, and every piece counts as available." : {
       "comment" : "Help: Laundry, the quieter line"
+    },
+    "Turning tracking on, or not" : {
+      "comment" : "App tours: what the Laundry is off tour covers"
     },
     "Type a few words about the piece first." : {
       "comment" : "Describe in words: Suggest details with nothing typed",
@@ -5702,6 +6082,12 @@
           }
         }
       }
+    },
+    "Type a word, like blue or jeans, to find your clothes." : {
+      "comment" : "Closet tour, step 2"
+    },
+    "Type a word, like navy, to find a saved outfit or picture." : {
+      "comment" : "Saved Looks tour, step 3"
     },
     "Undo" : {
       "comment" : "Toast action",
@@ -5740,6 +6126,15 @@
     },
     "Use one line, without line breaks." : {
       "comment" : "Problem with the words for Other"
+    },
+    "Use the packed clothes for outfit ideas. You can switch back to your whole closet too." : {
+      "comment" : "Suitcase tour, step 3"
+    },
+    "Use the units you know" : {
+      "comment" : "Fit tour, step 2 title"
+    },
+    "Use these little buttons to show just the clothes you want to see." : {
+      "comment" : "Closet tour, step 3"
     },
     "Use today’s weather" : {
       "comment" : "Weather sheet option",
@@ -5810,8 +6205,14 @@
         }
       }
     },
+    "Wear this one" : {
+      "comment" : "Saved look tour, step 1 title"
+    },
     "Wear today" : {
       "comment" : "Look detail button (LR-10)"
+    },
+    "Wearing, swapping and renaming it" : {
+      "comment" : "App tours: what a saved look's tour covers"
     },
     "Weather" : {
       "comment" : "Style Me row title",
@@ -5832,6 +6233,9 @@
     },
     "What Style Me starts with" : {
       "comment" : "Under the Preferences row in Profile"
+    },
+    "What are your plans?" : {
+      "comment" : "Style Me tour, step 2 title"
     },
     "What happened?" : {
       "comment" : "Send feedback: the field's name"
@@ -5865,6 +6269,9 @@
     "What’s sent" : {
       "comment" : "Send feedback: above the preview"
     },
+    "What’s shared, and deleting your data" : {
+      "comment" : "App tours: what Privacy and terms' tour covers"
+    },
     "What’s the occasion?" : {
       "comment" : "Label for Other's words"
     },
@@ -5894,8 +6301,17 @@
     "Which clothes" : {
       "comment" : "Laundry: name of the scope chips"
     },
+    "Which clothes, your plans and Style me" : {
+      "comment" : "App tours: what Style Me's tour covers"
+    },
+    "Which clothes?" : {
+      "comment" : "Laundry tour, step 1 title"
+    },
     "Which looks" : {
       "comment" : "VoiceOver name of the Today and Saved switch"
+    },
+    "Which piece?" : {
+      "comment" : "Swap tour, step 1 title"
     },
     "While it’s off" : {
       "comment" : "Laundry tracking sheet",
@@ -6007,6 +6423,9 @@
         }
       }
     },
+    "Words work too" : {
+      "comment" : "Add a piece tour, step 2 title"
+    },
     "Worn today" : {
       "comment" : "Look detail button after Wear today (LR-10)"
     },
@@ -6018,6 +6437,12 @@
     },
     "Write another" : {
       "comment" : "Button: starts a new note"
+    },
+    "Write what went wrong or what you would like changed." : {
+      "comment" : "Send feedback tour, step 1"
+    },
+    "Writing and sending a note" : {
+      "comment" : "App tours: what Send feedback's tour covers"
     },
     "Yellow" : {
       "comment" : "Colour name",
@@ -6061,11 +6486,17 @@
         }
       }
     },
+    "You can leave it off" : {
+      "comment" : "Laundry is off tour, step 2 title"
+    },
     "You can leave this empty and add it later." : {
       "comment" : "Try-on photo sheet with no photo"
     },
     "You changed this look. Undo goes back one change." : {
       "comment" : "Your looks: under the pieces after a swap or removal (LR-08.2)"
+    },
+    "You choose what to share" : {
+      "comment" : "Privacy tour, step 1 title"
     },
     "You left before your looks came, so nothing was used. Your request is kept." : {
       "comment" : "Your looks after leaving mid-way"
@@ -6173,11 +6604,17 @@
     "Your data is deleted. The app is starting fresh." : {
       "comment" : "Toast on Home after Delete my data"
     },
+    "Your favourite outfits" : {
+      "comment" : "Saved Looks tour, step 1 title"
+    },
     "Your first name" : {
       "comment" : "Name on your sign: the empty field's prompt"
     },
     "Your iPhone’s settings now" : {
       "comment" : "Accessibility: section header"
+    },
+    "Your information" : {
+      "comment" : "Privacy tour, step 2 title"
     },
     "Your laundry didn’t load" : {
       "comment" : "Laundry error title"
@@ -6238,6 +6675,12 @@
         }
       }
     },
+    "Your looks, your pictures and search" : {
+      "comment" : "App tours: what Saved Looks' tour covers"
+    },
+    "Your name on the sign" : {
+      "comment" : "Profile tour, step 1 title"
+    },
     "Your name sign opens Profile, where you can replay these tours." : {
       "comment" : "Home tour, step 4, on the iPad, at large text sizes and sideways"
     },
@@ -6249,6 +6692,9 @@
     },
     "Your note went where you sent it. This is what it said." : {
       "comment" : "Send feedback: after sending"
+    },
+    "Your outfit pictures" : {
+      "comment" : "Saved Looks tour, step 2 title"
     },
     "Your own clothes first. Something new adds one piece you don’t have, marked “Not in your closet”." : {
       "comment" : "Preferences sheet: Mine + one idea"
@@ -6266,6 +6712,9 @@
     },
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
+    },
+    "Your pieces to swap in" : {
+      "comment" : "VoiceOver name of Swap's options, in its tour"
     },
     "Your pieces, their pictures and details" : {
       "comment" : "Privacy and terms: what stays on the iPhone"
@@ -6300,6 +6749,9 @@
     "Your sign now says %@." : {
       "comment" : "Toast after changing the name on the sign, with what it shows"
     },
+    "Your sign, your fit and these tours" : {
+      "comment" : "App tours: what Profile's tour covers"
+    },
     "Your suitcase" : {
       "comment" : "Home tour, step 3 title on the iPad, at large text sizes and sideways"
     },
@@ -6315,6 +6767,12 @@
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"
     },
+    "Your usual fit, measurements and pieces that fit" : {
+      "comment" : "App tours: what Fit and measurements' tour covers"
+    },
+    "Your weight is optional" : {
+      "comment" : "Fit tour, step 3 title"
+    },
     "Yours to remove" : {
       "comment" : "Try-on photo sheet point"
     },
@@ -6323,6 +6781,9 @@
     },
     "You’ll be asked once more. Deleting can’t be undone." : {
       "comment" : "Delete my data: under the button"
+    },
+    "You’ll see tips the first time you open a screen." : {
+      "comment" : "App tours: after turning tips on"
     },
     "accessories" : {
       "comment" : "Swap: kind of piece, plural"

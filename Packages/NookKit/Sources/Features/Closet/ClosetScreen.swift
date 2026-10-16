@@ -60,6 +60,9 @@ struct ClosetScreen: View {
                             .padding(.horizontal, NookSpacing.xSmall)
                         }
                         .accessibilityIdentifier("closet.addPiece")
+                        .tourAnchor(ClosetTour.Anchor.addPiece, label: ClosetDestination.addPiece(.photo).title) {
+                            path.append(.addPiece(.photo))
+                        }
                     }
                     ToolbarSpacer(.fixed, placement: .topBarTrailing)
                     ToolbarItem(placement: .topBarTrailing) {
@@ -90,7 +93,19 @@ struct ClosetScreen: View {
     // MARK: - Layouts
 
     private var root: some View {
-        BrowseColumns(layout: layout, width: width, identifier: "closet", page: page) { detail }
+        BrowseColumns(layout: layout, width: width, identifier: "closet", page: page) {
+            detail
+                .tourAnchor(
+                    ClosetTour.Anchor.beside,
+                    label: String(
+                        localized: "The piece beside your closet", bundle: .module,
+                        comment: "VoiceOver name of the column beside Closet's grid on iPad, in Closet's tour"))
+        }
+        // Closet's quick tour (Phase 16b), once her pieces are on screen: an empty closet, or one
+        // still loading, doesn't have the search and filters it points at.
+        .screenTour(
+            ClosetTour.definition(detailBeside: layout.showsDetailBeside),
+            isReady: model.phase == .loaded && !model.isEmpty && toast == nil)
     }
 
     private func page(_ part: BrowsePart) -> some View {

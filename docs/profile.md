@@ -117,7 +117,7 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 ## Left for later phases
 
 - **14b (done):** Track laundry, Accessibility, Help, Send feedback, Privacy and terms, Delete my data (`docs/settings.md`). The default wardrobe view stays with Style Me's remembered source (Phase 13).
-- **16b:** App tours.
+- **16b (done):** App tours, under Help (`docs/tours.md`).
 - **21a:** keeping the profile across launches, with Data Protection `complete`.
 - **22a, 33:** a real try-on photo through the system picker, its metadata stripped, then the image service behind its gate.
 - **34:** fit checks that use the pieces that fit her well (LR-12).

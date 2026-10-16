@@ -66,6 +66,12 @@ struct SavedLooksScreen: View {
     var body: some View {
         NavigationStack(path: $path) {
             BrowseColumns(layout: layout, width: width, identifier: "savedLooks", page: page) { detail }
+                // Saved Looks' quick tour (Phase 16b), on the Looks tab once she has saved looks.
+                .screenTour(
+                    SavedLooksTour.definition,
+                    isReady: model.phase == .loaded && model.tab == .looks && !model.isEmpty && !model.hasNoMatches
+                        && toast == nil
+                )
                 .navigationTitle(SavedLooksText.title)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

@@ -6,13 +6,17 @@ extension View {
     ///
     /// - Parameters:
     ///   - label: what VoiceOver calls the control, read on the tour card and on the spotlight.
-    ///   - hint: what activating it from the tour does.
+    ///   - hint: what activating it from the tour does. Without one, VoiceOver hears "Ends the
+    ///     tour."
+    ///   - isEnabled: false leaves the view unmarked without changing it, for the items of a list
+    ///     where only the first one is the spot (her first look, the first piece in the wash).
     ///   - action: what a tap inside the spotlight does, after the tour ends. Usually the same as
-    ///     the control's own action.
+    ///     the control's own action. Without one, the tap only ends the tour.
     func tourAnchor(
-        _ id: TourAnchorID, label: String, hint: String? = nil, action: (@MainActor () -> Void)? = nil
+        _ id: TourAnchorID, label: String, hint: String? = nil, isEnabled: Bool = true,
+        action: (() -> Void)? = nil
     ) -> some View {
-        modifier(TourAnchorModifier(id: id, label: label, hint: hint, action: action))
+        modifier(TourAnchorModifier(id: id, label: label, hint: hint, isEnabled: isEnabled, action: action))
     }
 
     /// Lets this control take VoiceOver focus when a tour that pointed at `id` closes, so she
@@ -26,31 +30,60 @@ private struct TourAnchorModifier: ViewModifier {
     let id: TourAnchorID
     let label: String
     let hint: String?
-    let action: (@MainActor () -> Void)?
+    let isEnabled: Bool
+    let action: (() -> Void)?
 
     @Environment(\.tourCenter) private var tours
     @State private var owner = UUID()
     /// The last frame seen, so registering never loses one measured just before it.
     @State private var frame: CGRect?
 
+    /// The scroll ID: the anchor's, or one of the view's own while it isn't the spot.
+    private var scrollID: TourAnchorID {
+        isEnabled ? id : TourAnchorID("\(id.rawValue)#\(owner.uuidString)")
+    }
+
     func body(content: Content) -> some View {
         if let tours {
             content
+                .anchorPreference(key: TourAnchorBounds.self, value: .bounds) { isEnabled ? [id: $0] : [:] }
                 // So a scroll view around it can bring it into view (`TourScrollReader`).
-                .id(id)
+                .id(scrollID)
                 .onGeometryChange(for: CGRect.self) {
                     $0.frame(in: .global)
                 } action: { frame in
                     self.frame = frame
-                    tours.move(id, owner: owner, to: frame)
+                    if isEnabled { tours.move(id, owner: owner, to: frame) }
                 }
-                .onChange(of: label, initial: true) {
-                    tours.register(id, owner: owner, frame: frame, label: label, hint: hint, action: action)
-                }
+                // Again on every appearance: a screen covered by a pushed one, or on another
+                // tab, lost its anchors when it disappeared, and a replay may point at it again.
+                .onAppear { register(in: tours) }
+                .onChange(of: label) { register(in: tours) }
+                .onChange(of: isEnabled) { register(in: tours) }
                 .onDisappear { tours.remove(id, owner: owner) }
         } else {
             content
+                .anchorPreference(key: TourAnchorBounds.self, value: .bounds) { isEnabled ? [id: $0] : [:] }
         }
+    }
+
+    private func register(in tours: TourCenter) {
+        guard isEnabled else {
+            tours.remove(id, owner: owner)
+            return
+        }
+        tours.register(id, owner: owner, frame: frame, label: label, hint: hint ?? TourText.endsTour, action: action)
+    }
+}
+
+/// Where each anchored control is, for a still image of a tour: the snapshot tests read it with
+/// `overlayPreferenceValue` and draw the spotlight there, in the same layout pass as the page.
+/// The app itself uses the frames the anchors report to `TourCenter`.
+struct TourAnchorBounds: PreferenceKey {
+    static let defaultValue: [TourAnchorID: Anchor<CGRect>] = [:]
+
+    static func reduce(value: inout [TourAnchorID: Anchor<CGRect>], nextValue: () -> [TourAnchorID: Anchor<CGRect>]) {
+        value.merge(nextValue()) { $1 }
     }
 }
 

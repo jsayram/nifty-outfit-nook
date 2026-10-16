@@ -42,6 +42,7 @@ struct SuitcasesScreen: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 AddSuitcaseToolbarButton { showsAdd = true }
+                    .tourAnchor(SuitcasesTour.Anchor.add, label: SuitcasesText.addSuitcase) { showsAdd = true }
             }
         }
         .addSuitcaseSheet(isPresented: $showsAdd, model: model, made: $made) { suitcase in
@@ -53,6 +54,10 @@ struct SuitcasesScreen: View {
         }
         .task { await model.load(from: services) }
         .onChange(of: changes) { reload() }
+        // Suitcases' quick tour (Phase 16b), once she has a favourite to choose.
+        .screenTour(
+            SuitcasesTour.definition,
+            isReady: model.phase == .loaded && !model.favorites.isEmpty && !showsAdd && made == nil && toast == nil)
     }
 
     private func reload() {

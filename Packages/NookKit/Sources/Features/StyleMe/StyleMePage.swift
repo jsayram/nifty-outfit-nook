@@ -42,8 +42,10 @@ struct StyleMePage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
-                    .centersShortContentInWideWindows()
+                TourScrollReader {
+                    ScrollView { content }
+                        .centersShortContentInWideWindows()
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -177,6 +179,7 @@ struct StyleMePage: View {
             Text("Choose where your looks come from.", bundle: .module, comment: "VoiceOver hint for Source")
         )
         .accessibilityIdentifier("styleMe.source")
+        .tourAnchor(StyleMeTour.Anchor.source, label: text.sourceLabel) { actions.open(.source) }
     }
 
     private func occasionCard(_ text: StyleMeText) -> some View {
@@ -195,6 +198,11 @@ struct StyleMePage: View {
         )
         .accessibilityHint(Text("Choose the occasion.", bundle: .module, comment: "VoiceOver hint for Occasion"))
         .accessibilityIdentifier("styleMe.occasion")
+        .tourAnchor(
+            StyleMeTour.Anchor.occasion,
+            label: String(
+                localized: "Occasion: \(text.occasionValue)", bundle: .module, comment: "VoiceOver label for Occasion")
+        ) { actions.open(.occasion) }
     }
 
     private func startingPieceCard(_ text: StyleMeText) -> some View {
@@ -280,6 +288,14 @@ struct StyleMePage: View {
             .disabled(!model.canStyle)
             .accessibilityHint(Text(text.buttonCaption))
             .accessibilityIdentifier("styleMe.go")
+            .tourAnchor(
+                StyleMeTour.Anchor.go,
+                label: String(
+                    localized: "Style me", bundle: .module, comment: "The button that sends the Style Me request")
+            ) {
+                // Only when the button itself could be tapped.
+                if model.canStyle { actions.styleMe() }
+            }
             Text(text.buttonCaption)
                 .nookTextStyle(.note)
                 .foregroundStyle(.nook.textSecondary)

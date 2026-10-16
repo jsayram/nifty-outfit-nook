@@ -38,6 +38,19 @@ extension EnvironmentValues {
     @Entry var openInCloset = OpenInClosetAction { _ in }
 }
 
+/// Opens a tour's screen for a replay from App tours (Phase 16b). The root view supplies it.
+struct OpenForTourAction: Sendable {
+    let open: @MainActor @Sendable (TourID) -> Void
+
+    @MainActor func callAsFunction(_ tour: TourID) {
+        open(tour)
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var openForTour = OpenForTourAction { _ in }
+}
+
 /// Starts the app fresh after Delete my data (Phase 14b): the root view builds every tab again
 /// and opens Home. The root view sets it; elsewhere it does nothing.
 struct DataDeletedAction: Sendable {

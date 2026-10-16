@@ -35,3 +35,18 @@ struct TourDefinition: Hashable, Sendable {
     /// out send it to the control of the step that was showing.
     var finishFocus: TourAnchorID?
 }
+
+extension TourStep {
+    init(_ anchor: TourAnchorID, title: String, message: String) {
+        self.init(anchor: anchor, title: title, message: message)
+    }
+}
+
+extension TourDefinition {
+    /// A screen's tour that ends with Got it, as every tour but Home's does (Phase 16b). Every
+    /// tour starts at version 1; a version goes up only when the screen's controls or the steps
+    /// really change, never for a copy fix (PRD §7.8).
+    static func gotIt(_ id: TourID, version: Int = 1, steps: [TourStep]) -> TourDefinition {
+        TourDefinition(id: id, version: version, steps: steps, finishTitle: TourText.gotIt, finishFocus: nil)
+    }
+}

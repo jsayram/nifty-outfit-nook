@@ -84,4 +84,20 @@ struct TourTests {
         #expect(progress.records.count == 1)
         #expect(progress.records[.home]?.version == 2)
     }
+
+    /// Phase 16b: every tour has its own stable ID, and Reset all tips forgets them all.
+    @Test func everyTourHasItsOwnIDAndResetForgetsThemAll() {
+        #expect(Set(TourID.all).count == TourID.all.count)
+        #expect(TourID.all.count == 20)
+        #expect(TourID.all.first == .home)
+        var progress = TourProgress(showsTipsOnNewScreens: false)
+        for tour in TourID.all {
+            progress.add(TourRecord(tour: tour, version: 1, outcome: .finished, date: .distantPast))
+        }
+        progress.forgetSeen()
+        #expect(progress.records.isEmpty)
+        #expect(!progress.showsTipsOnNewScreens)
+        // Seen nothing, but tips off: still nothing starts by itself.
+        #expect(!TourRules.startsAutomatically(.closet, version: 1, progress: progress))
+    }
 }

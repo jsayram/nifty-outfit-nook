@@ -87,6 +87,11 @@ struct LookDetailScreen: View {
                 .nookToast($toast)
         }
         .task(id: changes) { await model.load(from: services) }
+        // A saved look's quick tour (Phase 16b), once it has loaded, with nothing open over it.
+        .screenTour(
+            LookTour.definition,
+            isReady: model.phase == .loaded && swapping == nil && stub == nil && renaming == nil && tryingOn == nil
+                && toast == nil)
     }
 
     private func reload() {

@@ -33,7 +33,9 @@ struct PictureDetailPage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
+                TourScrollReader {
+                    ScrollView { content }
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -72,6 +74,7 @@ struct PictureDetailPage: View {
         NookButton(TryOnText.delete, systemImage: "trash", kind: .text, action: actions.delete)
             .accessibilityHint(Text(TryOnText.deleteHint))
             .accessibilityIdentifier("picture.delete")
+            .tourAnchor(PictureTour.Anchor.delete, label: TryOnText.delete) { actions.delete() }
         about
     }
 
@@ -111,6 +114,9 @@ struct PictureDetailPage: View {
                 .accessibilityValue(Text(item.look?.occasion?.title ?? ""))
                 .accessibilityAddTraits(.isButton)
                 .accessibilityIdentifier("picture.seeLook")
+                .tourAnchor(PictureTour.Anchor.seeLook, label: TryOnText.seeTheLook(item.lookName)) {
+                    actions.seeLook(look)
+                }
             } else {
                 lookRow(item, opens: false)
                     .accessibilityElement(children: .combine)

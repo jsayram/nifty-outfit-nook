@@ -64,6 +64,9 @@ struct FitScreen: View {
             Color.clear
                 .nookToast($toast)
         }
+        // Fit and measurements' quick tour (Phase 16b), once Profile's model has loaded.
+        .screenTour(
+            FitTour.definition, isReady: model.phase == .loaded && form == nil && !addsPiece && toast == nil)
     }
 
     private func save(_ value: MeasurementForm.Value, for field: MeasurementField) async -> Bool {

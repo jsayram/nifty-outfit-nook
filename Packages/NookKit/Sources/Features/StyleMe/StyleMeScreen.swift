@@ -69,6 +69,12 @@ struct StyleMeScreen: View {
             await model.load(from: services)
             openOccasionIfAsked()
         }
+        // Style Me's quick tour (Phase 16b), on her first visit, once the request is on screen.
+        // From the calendar it waits until the Occasion sheet has closed.
+        .screenTour(
+            StyleMeTour.definition,
+            isReady: model.phase == .loaded && !model.check.issues.contains(.closetEmpty) && sheet == nil
+                && sent == nil)
     }
 
     @ViewBuilder

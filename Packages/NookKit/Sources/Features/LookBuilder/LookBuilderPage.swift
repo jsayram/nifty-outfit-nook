@@ -35,8 +35,10 @@ struct LookBuilderPage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
-                    .scrollDismissesKeyboard(.immediately)
+                TourScrollReader {
+                    ScrollView { content }
+                        .scrollDismissesKeyboard(.immediately)
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -90,6 +92,7 @@ struct LookBuilderPage: View {
                 action: { actions.pick(nil) }
             )
             .accessibilityIdentifier("builder.add")
+            .tourAnchor(LookBuilderTour.Anchor.add, label: LookBuilderText.addPiece) { actions.pick(nil) }
             saveSection
         }
     }
@@ -107,7 +110,9 @@ struct LookBuilderPage: View {
         EditorTextField(
             label: LookBuilderText.nameLabel, isOptional: true, prompt: LookBuilderText.namePrompt,
             text: $model.name, problem: model.nameProblem.map(LookBuilderText.nameLine(for:)),
-            identifier: "builder.name", focus: $focus, focusValue: .name)
+            identifier: "builder.name", focus: $focus, focusValue: .name
+        )
+        .tourAnchor(LookBuilderTour.Anchor.name, label: LookBuilderText.nameLabel)
         Text(LookBuilderText.source)
             .nookTextStyle(.note)
             .foregroundStyle(.nook.textSecondary)
@@ -293,6 +298,9 @@ struct LookBuilderPage: View {
                 problem.map { Text(LookBuilderText.line(for: $0, garments: model.garments)) } ?? Text("")
             )
             .accessibilityIdentifier("builder.save")
+            .tourAnchor(LookBuilderTour.Anchor.save, label: LookBuilderText.save) {
+                if model.canSave { actions.save() }
+            }
             Text(
                 isSaved
                     ? LookBuilderText.savedLine

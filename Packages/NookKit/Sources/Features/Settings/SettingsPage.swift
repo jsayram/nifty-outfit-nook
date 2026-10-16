@@ -85,8 +85,10 @@ struct SettingsPage<Content: View>: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(FloorBackground())
         }

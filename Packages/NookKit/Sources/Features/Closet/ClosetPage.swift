@@ -38,8 +38,10 @@ struct ClosetPage: View {
         if isStillImage {
             page
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .scrollDismissesKeyboard(.immediately)
             .background {
@@ -181,8 +183,18 @@ struct ClosetPage: View {
                 text: $model.searchText,
                 onSubmit: model.applySearchNow
             )
+            .tourAnchor(
+                ClosetTour.Anchor.search,
+                label: String(localized: "Search your closet", bundle: .module, comment: "Closet search field prompt")
+            )
             .padding(.horizontal, NookSpacing.screenMargin)
             ClosetFilters(model: model, chipLayout: chipLayout)
+                .tourAnchor(
+                    ClosetTour.Anchor.filters,
+                    label: String(
+                        localized: "Filters", bundle: .module,
+                        comment: "VoiceOver name of Closet's filter chips, in Closet's tour")
+                )
                 .padding(.top, NookSpacing.small)
             ClosetTiles(
                 suitcaseCount: model.suitcases.count, tracksLaundry: model.tracksLaundry,

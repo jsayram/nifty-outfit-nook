@@ -113,6 +113,12 @@ struct SuitcaseDetailScreen: View {
                 openPacking()
             }
         }
+        // A suitcase's quick tour (Phase 16b), unless it's archived or a sheet is open. A new
+        // suitcase opens on its packing sheet, so the tour waits until that closes.
+        .screenTour(
+            SuitcaseTour.definition(hasPieces: model.pieceCount > 0),
+            isReady: model.phase == .loaded && !model.isArchived && packingList == nil && !showsEditor
+                && toast == nil && (!startsPacking || askedToPack))
     }
 
     private var menu: some View {

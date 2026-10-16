@@ -37,7 +37,9 @@ struct SwapPage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
+                TourScrollReader {
+                    ScrollView { content }
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -78,6 +80,10 @@ struct SwapPage: View {
                 .accessibilityIdentifier("swap.piece.\(model.category(of: piece)?.rawValue ?? "")")
             }
         }
+        .tourAnchor(
+            SwapTour.Anchor.pieces,
+            label: String(
+                localized: "Piece to swap", bundle: .module, comment: "Swap: VoiceOver name of the piece chips"))
     }
 
     // MARK: The look
@@ -121,6 +127,11 @@ struct SwapPage: View {
                     .accessibilityIdentifier("swap.noOptions")
             } else {
                 optionGrid
+                    .tourAnchor(
+                        SwapTour.Anchor.options,
+                        label: String(
+                            localized: "Your pieces to swap in", bundle: .module,
+                            comment: "VoiceOver name of Swap's options, in its tour"))
             }
             listEnd
         }
@@ -206,6 +217,9 @@ struct SwapPage: View {
                 NookButton(text.use, fillsWidth: true, action: actions.use)
                     .disabled(model.preview == nil)
                     .accessibilityIdentifier("swap.use")
+                    .tourAnchor(SwapTour.Anchor.use, label: text.use) {
+                        if model.preview != nil { actions.use() }
+                    }
             }
             quietLine(text.hint(isPreviewing: model.preview != nil))
                 .multilineTextAlignment(.center)
@@ -222,6 +236,9 @@ struct SwapPage: View {
                 .disabled(model.removalProblem != nil)
                 .accessibilityHint(model.removalProblem.map { Text(SwapText.whyNoRemove($0)) } ?? Text(""))
                 .accessibilityIdentifier("swap.remove")
+                .tourAnchor(SwapTour.Anchor.remove, label: SwapText.remove) {
+                    if model.removalProblem == nil { actions.remove() }
+                }
             if let problem = model.removalProblem {
                 quietLine(SwapText.whyNoRemove(problem))
                     .multilineTextAlignment(.center)

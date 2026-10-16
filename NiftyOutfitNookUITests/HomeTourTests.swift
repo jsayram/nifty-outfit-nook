@@ -159,9 +159,11 @@ final class HomeTourTests: XCTestCase {
 
     // MARK: Helpers
 
-    /// Launches with the tour as a fresh install has it, and waits for its card.
+    /// Launches with Home's tour starting as on a fresh install, and waits for its card. Tips are
+    /// off, so the other screens' tours (Phase 16b, `ScreenToursTests`) stay out of the way when
+    /// these tests leave Home.
     @MainActor
-    private func launch(tour: String = "reset", extra: [String] = []) -> XCUIApplication {
+    private func launch(tour: String = "off,home", extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-tour", tour, "-fixtures", "demo"] + extra
         app.launch()

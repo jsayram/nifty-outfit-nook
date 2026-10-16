@@ -117,6 +117,16 @@ struct LaundryScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+        // Laundry's quick tours (Phase 16b): one with pieces in the wash while tracking is on,
+        // and one while it's off.
+        .screenTour(
+            LaundryTour.definition(hasScope: model.sourceSuitcase != nil),
+            isReady: model.phase == .loaded && model.tracksLaundry && !model.shown.isEmpty && request == nil
+                && !isSaving && toast == nil
+        )
+        .screenTour(
+            LaundryTour.offDefinition,
+            isReady: model.phase == .loaded && !model.tracksLaundry && !isSaving && toast == nil)
     }
 
     /// One ticked piece is cleaned straight away; two or more ask first.

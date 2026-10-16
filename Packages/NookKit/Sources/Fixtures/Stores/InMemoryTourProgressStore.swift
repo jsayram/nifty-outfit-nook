@@ -26,6 +26,11 @@ public actor InMemoryTourProgressStore: TourProgressStore {
         stored.showsTipsOnNewScreens = isOn
     }
 
+    public func forgetSeenTours() async throws(StoreError) {
+        try await options.begin()
+        stored.forgetSeen()
+    }
+
     /// Delete my data: nothing seen and tips back on (PRD §7.8).
     public func eraseAll() async throws(StoreError) {
         try await options.begin()
