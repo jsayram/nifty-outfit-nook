@@ -29,6 +29,7 @@ All of it is in `Packages/NookKit/Sources/Features/Home`.
 | `Room/RoomWindow.swift` | Which window the weather gives, and the lamp's glow at night |
 | `Room/HamperLook.swift` | Which hamper drawing the laundry gives |
 | `Room/MayaView.swift` | Maya's z's and how they drift |
+| `HomeTour.swift` | Home's quick tour (Phase 16a, `docs/tours.md`) |
 
 Style Me's Weather row and its sheet live in `Features/StyleMe` (see below).
 
@@ -178,3 +179,4 @@ Everything else held up: the plates use the strong tint with light text, the sig
 - **14a (done):** "Name on your sign" in Profile; Home reloads when Profile closes, so the sign shows the new name (RD-03.1, `docs/profile.md`).
 - **14b (done):** the drawers open Help, Send feedback and Privacy and terms (RD-10.1, `docs/settings.md`), and Delete my data starts the app fresh on Home with a toast.
 - **15a (done):** the iPad's wide room sideways and tall room upright, with the tab bar at the bottom (RD-01.6). See `docs/ipad.md`.
+- **16a (done):** Home's quick tour, the first time Home shows: the laptop, the wardrobe, the suitcase and the name sign, in every layout. See `docs/tours.md`.

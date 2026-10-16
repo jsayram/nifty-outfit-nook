@@ -168,5 +168,6 @@ The phone UI tests (`HomeTests`, `ClosetTests` and the rest) are written for the
 
 ## Left for later phases
 
-- **16a, 16b:** the tours on iPad layouts.
+- **16a (done):** Home's tour on the tall and wide rooms, following the furniture through rotation and window resizes (`docs/tours.md`).
+- **16b:** the other screens' tours on iPad layouts.
 - **Later:** keyboard shortcuts, checked on a real iPad with a keyboard.

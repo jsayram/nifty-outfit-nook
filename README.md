@@ -48,6 +48,10 @@ Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Config
 
 Debug builds launched with `-catalog` open a catalog of every DesignSystem component instead of the app, with switches for light, dark and text size. Its last page shows look bundles (Phase 9, `docs/look-bundles.md`), which Features adds through `NookCatalogView(extraPages:)`. Add `-catalog-page <id>` to show one page alone (`search`, `sheet`, `toast`, `lookBundles` and so on), which the UI tests use instead of scrolling the whole catalog. It's compiled only in Debug; `scripts/check-release.sh` checks that a Release build doesn't contain it.
 
+## Quick tours
+
+Home's quick tour starts the first time Home shows (Phase 16a, `docs/tours.md`). In Stage A that's every launch, since nothing is kept on disk. Debug builds take `-tour home` to start it whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Values combine with commas: `-tour reset,home`.
+
 ## Cutout benchmark
 
 Debug builds launched with `-cutout-bench` open the cutout benchmark (Phase 8a) instead of the app: pick photos with the system picker (no photo-library permission needed) or use drawn samples, and it times each cutout, samples memory, shows the quality signals and exports the numbers as text. Since Phase 8b it also shows each photo as a sticker and as a tile, marking the one the signals pick. The simulator can't run Vision's subject lifting, so it needs a device. `docs/cutout-feasibility.md` has the steps and the go/no-go limits. Like the catalog, it's compiled only in Debug.
@@ -110,6 +114,7 @@ docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and ho
 docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
 docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
+docs/tours.md                Quick tours: the tour system, Home's tour, the -tour flag, VoiceOver and the tests.
 docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet's and Saved Looks' columns, two panes, readable widths, sheets and window sizes.
 website/                     The app's static website.
 ```
