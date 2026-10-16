@@ -15,19 +15,23 @@ public enum StoreError: Error, Hashable, Sendable {
     case unavailable
     case cancelled
     case invalidName(NameProblem)
+    /// A garment's other text fields were refused (`GarmentRules`): too long, or a line break in
+    /// a one-line field.
+    case invalidDetails(GarmentProblems)
     case invalidMeasurements([MeasurementProblem])
 }
 
 /// Her garments: everything in Closet, plus wishlist, no-longer-owned, archived and Recently
 /// deleted pieces. Screens filter with the rules (`Garment.isInCloset`, `Eligibility`,
 /// `GarmentFilter`).
-public protocol ClosetStore: Sendable {
+public protocol ClosetStore: ErasableStore {
     /// Every garment, newest first.
     func garments() async throws(StoreError) -> [Garment]
     func garment(_ id: Garment.ID) async throws(StoreError) -> Garment
-    /// Adds a garment, or replaces the one with the same ID. Checks the name (`NameRules`).
+    /// Adds a garment, or replaces the one with the same ID. Checks the name (`NameRules`) and
+    /// the other text fields (`GarmentRules`).
     func save(_ garment: Garment) async throws(StoreError)
-    /// Changes one garment in place and returns the new value. Checks the name.
+    /// Changes one garment in place and returns the new value. Checks it as `save` does.
     @discardableResult
     func update(
         _ id: Garment.ID,
@@ -48,7 +52,7 @@ public protocol ClosetStore: Sendable {
 }
 
 /// Saved looks, looks she made herself, and unsaved results kept as background history (LR-06).
-public protocol LookStore: Sendable {
+public protocol LookStore: ErasableStore {
     /// Every look, newest first. Saved Looks shows the ones with `isSaved`.
     func looks() async throws(StoreError) -> [Look]
     func look(_ id: Look.ID) async throws(StoreError) -> Look
@@ -62,8 +66,22 @@ public protocol LookStore: Sendable {
     func removeWear(of id: Look.ID, on date: Date) async throws(StoreError)
 }
 
+/// Her try-on pictures (RD-08, Phase 12b). Sensitive: a real one is a picture of her.
+///
+/// Every picture stays until she deletes it, whatever happens to its look (PRD §7.5, §9.2.4).
+/// The rules for how pictures and looks link are in `TryOnLinks`.
+public protocol TryOnPictureStore: ErasableStore {
+    /// Every picture, newest first.
+    func pictures() async throws(StoreError) -> [TryOnPicture]
+    func picture(_ id: TryOnPicture.ID) async throws(StoreError) -> TryOnPicture
+    /// Keeps a new picture, or puts back the one with the same ID (Undo after Delete picture).
+    func save(_ picture: TryOnPicture) async throws(StoreError)
+    /// Delete picture. Stage B also removes its image file (Phase 22b).
+    func delete(_ id: TryOnPicture.ID) async throws(StoreError)
+}
+
 /// Her suitcases and what's in them (PRD §7.7, RD-09, LR-11, LR-17).
-public protocol SuitcaseStore: Sendable {
+public protocol SuitcaseStore: ErasableStore {
     /// Every suitcase, archived ones included. `SuitcaseShelf` arranges them.
     func suitcases() async throws(StoreError) -> [Suitcase]
     func suitcase(_ id: Suitcase.ID) async throws(StoreError) -> Suitcase
@@ -78,11 +96,27 @@ public protocol SuitcaseStore: Sendable {
     func markUsed(_ id: Suitcase.ID, at date: Date) async throws(StoreError)
     /// Deletes the suitcase only. Its garments and looks stay (PRD §12).
     func delete(_ id: Suitcase.ID) async throws(StoreError)
+    /// Undo after a delete: puts back exactly this suitcase, with its ID, name and pieces
+    /// (Phase 13). Fails with `invalidName` if another suitcase took the name meanwhile.
+    func restore(_ suitcase: Suitcase) async throws(StoreError)
 }
 
-/// Her one profile.
-public protocol ProfileStore: Sendable {
+/// Her one profile. Erasing it leaves a fresh profile: no name, the default Preferences, no
+/// measurements, fitting pieces or try-on photo.
+public protocol ProfileStore: ErasableStore {
     func profile() async throws(StoreError) -> Profile
     /// Saves the profile after checking the sign name and measurements.
     func save(_ profile: Profile) async throws(StoreError)
+}
+
+extension ProfileStore {
+    /// Reads the profile, changes it and saves it, for one setting at a time (Track laundry, the
+    /// remembered source). Returns what was saved.
+    @discardableResult
+    public func change(_ edit: @Sendable (inout Profile) -> Void) async throws(StoreError) -> Profile {
+        var profile = try await profile()
+        edit(&profile)
+        try await save(profile)
+        return profile
+    }
 }

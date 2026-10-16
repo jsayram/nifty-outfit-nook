@@ -2,8 +2,7 @@
 
 PRODUCT_NAME = $(TARGET_NAME)
 PRODUCT_BUNDLE_IDENTIFIER = com.jsayram.niftyoutfitnook
-MARKETING_VERSION = 0.1.0
-CURRENT_PROJECT_VERSION = 1
+#include "Version.xcconfig"
 
 // UI code defaults to the main actor. Background work is explicit.
 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor
@@ -15,11 +14,12 @@ ENABLE_PREVIEWS = YES
 
 // Generated Info.plist. No NSAppTransportSecurity keys: ATS stays fully on.
 GENERATE_INFOPLIST_FILE = YES
+// The launch screen's colour, the one key the build settings can't set (see the file).
+INFOPLIST_FILE = Configs/AppInfo.plist
 INFOPLIST_KEY_CFBundleDisplayName = Outfit Nook
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.lifestyle
 INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
 INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES
 INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES
-INFOPLIST_KEY_UILaunchScreen_Generation = YES
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight

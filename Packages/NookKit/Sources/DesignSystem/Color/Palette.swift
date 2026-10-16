@@ -51,6 +51,10 @@ nonisolated public enum Palette {
         case .divider: TokenValue(light: RGBA(hex: 0x967D64, alpha: 0.3), dark: RGBA(hex: 0xE6D2BE, alpha: 0.2))
         case .shadow: TokenValue(light: RGBA(hex: 0x3C2A1C, alpha: 0.26), dark: RGBA(hex: 0x000000, alpha: 0.55))
         case .shadowLarge: TokenValue(light: RGBA(hex: 0x3C2A1C, alpha: 0.32), dark: RGBA(hex: 0x000000, alpha: 0.6))
+        case .tourScrim: TokenValue(light: RGBA(hex: 0x2A211B, alpha: 0.58), dark: RGBA(hex: 0x0E0B09, alpha: 0.66))
+        case .tourGlow: TokenValue(light: RGBA(hex: 0xFFECC8, alpha: 0.55), dark: RGBA(hex: 0xDCC3A8, alpha: 0.4))
+        case .tourRim: TokenValue(light: RGBA(hex: 0xFFFFFF, alpha: 0.55), dark: RGBA(hex: 0xF4EEE6, alpha: 0.35))
+        case .tourCard: TokenValue(light: RGBA(hex: 0xFFFDF9), dark: RGBA(hex: 0x2E2620))
 
         // Status
         case .success: TokenValue(light: RGBA(hex: 0x46613F), dark: RGBA(hex: 0xB9CDA6))
@@ -64,6 +68,10 @@ nonisolated public enum Palette {
         case .floor: TokenValue(light: RGBA(hex: 0xE5D7C5), dark: RGBA(hex: 0x362C24))
         case .floorLow: TokenValue(light: RGBA(hex: 0xDACAB4), dark: RGBA(hex: 0x30271F))
         case .floorLine: TokenValue(light: RGBA(hex: 0xC6B097), dark: RGBA(hex: 0x1A1410))
+        // `onboarding.html`'s sky, #D2E5F7 to #EDF5FD, given the windows' treatment (a little sky
+        // kept, `scripts/room-art.py`). Dark is a warm evening sky, not a dimmed day.
+        case .skyTop: TokenValue(light: RGBA(hex: 0xDCE3EB), dark: RGBA(hex: 0x17130F))
+        case .skyBottom: TokenValue(light: RGBA(hex: 0xF1F4F7), dark: RGBA(hex: 0x2A231C))
         case .artSage: TokenValue(light: RGBA(hex: 0xC9CDB4), dark: RGBA(hex: 0x858770))
         case .artSageDeep: TokenValue(light: RGBA(hex: 0xB6BB9E), dark: RGBA(hex: 0x787B62))
         case .artSageLine: TokenValue(light: RGBA(hex: 0x959A7C), dark: RGBA(hex: 0x62664D))
@@ -73,6 +81,7 @@ nonisolated public enum Palette {
         case .artButterLine: TokenValue(light: RGBA(hex: 0xCDB98F), dark: RGBA(hex: 0x877A59))
         case .signPanel: TokenValue(light: RGBA(hex: 0xFFF7EA), dark: RGBA(hex: 0xA8A391))
         case .signText: TokenValue(light: RGBA(hex: 0x4B3628), dark: RGBA(hex: 0x3A2A1E))
+        case .stickerEdge: TokenValue(light: RGBA(hex: 0xFFFFFF), dark: RGBA(hex: 0xEEE7DE))
         }
     }
 }

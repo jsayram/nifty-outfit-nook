@@ -67,3 +67,49 @@ struct GarmentFilterTests {
         #expect(ids(GarmentFilter(packing: .suitcase("s-old"))).isEmpty)
     }
 }
+
+struct GarmentFilterWordsTests {
+    private let garments: [Garment] = {
+        var trousers = Make.garment("g-trousers", .bottom, colors: [.navy])
+        trousers.name = "Navy dress pants"
+        var cardigan = Make.garment("g-cardigan", .layer, colors: [.navy])
+        cardigan.name = "Navy cardigan"
+        cardigan.laundry = .dirty
+        var flats = Make.garment("g-flats", .shoes, colors: [.beige])
+        flats.name = "Nude pointed flats"
+        return [trousers, cardigan, flats]
+    }()
+
+    private func ids(_ filter: GarmentFilter, extra: @escaping (Garment) -> [String] = { _ in [] }) -> [Garment.ID] {
+        filter.apply(to: garments, suitcases: [], extraWords: extra).map(\.id)
+    }
+
+    @Test func everyTypedWordMustMatchSomewhere() {
+        #expect(ids(GarmentFilter(query: "navy pants")) == ["g-trousers"])
+        #expect(ids(GarmentFilter(query: "  pants   navy ")) == ["g-trousers"])
+        #expect(ids(GarmentFilter(query: "navy flats")).isEmpty)
+        #expect(GarmentFilter(query: " navy  pants ").words == ["navy", "pants"])
+    }
+
+    @Test func extraWordsFromTheScreenAreSearchedToo() {
+        let kind: (Garment) -> [String] = { $0.category == .shoes ? ["Shoes", "Beige"] : [] }
+        #expect(ids(GarmentFilter(query: "shoes"), extra: kind) == ["g-flats"])
+        #expect(ids(GarmentFilter(query: "beige flats"), extra: kind) == ["g-flats"])
+        #expect(ids(GarmentFilter(query: "shoes")).isEmpty)
+    }
+
+    @Test func theDirtyChipKeepsOnlyPiecesInTheWash() {
+        let dirty = GarmentFilter(laundry: .dirty)
+        #expect(dirty.isActive)
+        #expect(dirty.hasChoices)
+        #expect(ids(dirty) == ["g-cardigan"])
+        #expect(ids(GarmentFilter(categories: [.layer, .bottom], laundry: .clean)) == ["g-trousers"])
+        #expect(ids(GarmentFilter(laundry: .dirty, query: "navy")) == ["g-cardigan"])
+    }
+
+    @Test func typedTextAloneIsActiveButHasNoChoices() {
+        let filter = GarmentFilter(query: "navy")
+        #expect(filter.isActive)
+        #expect(!filter.hasChoices)
+    }
+}

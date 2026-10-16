@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 182" width="104" height="182" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <clipPath id="sdf-body">
+      <path d="M2 162V38C2 31 6 28.4 12.4 26L38 16.6H66L91.6 26C98 28.4 102 31 102 38V162A50 16 0 0 1 2 162Z" />
+    </clipPath>
+  </defs>
+  <ellipse cx="52" cy="178.8" rx="48" ry="2.6" fill="#5F5449" opacity=".13" />
+  <path d="M38.6 18C31 16.4 23.4 12.6 25 8.6C26.4 5.4 30.6 5.2 33.2 6.4C34.8 2.8 40.4 2 43.4 4.2C46 1.4 52 1.2 54.6 3.8C57.6 1.6 63.4 2.2 65 5.2C68.4 3.6 74.4 4.6 75.6 8C79.4 9 80 13.4 76 15C72.4 16.6 69 17.4 65.4 18Z" fill="#C9CDB4" />
+  <path d="M31 14.4C40 17.8 64 17.8 74 14.4L66 18.4H38Z" fill="#B6BB9E" />
+  <path d="M38.6 18C31 16.4 23.4 12.6 25 8.6C26.4 5.4 30.6 5.2 33.2 6.4C34.8 2.8 40.4 2 43.4 4.2C46 1.4 52 1.2 54.6 3.8C57.6 1.6 63.4 2.2 65 5.2C68.4 3.6 74.4 4.6 75.6 8C79.4 9 80 13.4 76 15C72.4 16.6 69 17.4 65.4 18Z" stroke="#959A7C" stroke-width="1.5" />
+  <path d="M26.6 8.4C27.4 7 29.4 6.6 31.4 7.2M36.4 4.4C38.4 3.2 41 3.4 42.4 4.4M47 3C49.2 2.2 51.8 2.4 53.4 3.4" stroke="#E0E3D1" stroke-width="1.2" opacity=".9" />
+  <path d="M40.6 17.2C37 13 35 10 33.6 7.4M45.6 17.6C44.6 12.6 44 8.6 43.6 5M52 17.8C52.6 12.6 53.6 8.6 54.4 4.8M58.6 17.6C60.4 12.6 62.4 9 64.6 6.2M63.4 17C67 14 71 11 75 8.6" stroke="#959A7C" stroke-width=".9" opacity=".6" />
+  <g fill="#E0E3D1" stroke="#798264" stroke-width="1.1">
+    <circle cx="29" cy="9.8" r="1.7" />
+    <circle cx="38.6" cy="7" r="1.7" />
+    <circle cx="49.2" cy="6.2" r="1.7" />
+    <circle cx="59.8" cy="6.6" r="1.7" />
+    <circle cx="70.2" cy="8.4" r="1.7" />
+    <circle cx="76.4" cy="12" r="1.5" />
+  </g>
+  <path d="M2 162V38C2 31 6 28.4 12.4 26L38 16.6H66L91.6 26C98 28.4 102 31 102 38V162A50 16 0 0 1 2 162Z" fill="#C9CDB4" />
+  <g clip-path="url(#sdf-body)">
+    <path d="M93 14V182H104V14Z" fill="#B6BB9E" />
+    <path d="M93 30V160" stroke="#959A7C" stroke-width="1" opacity=".35" />
+    <path d="M7 146V39C7 34.4 9.6 32 14 30.4L22 27.4" stroke="#E0E3D1" stroke-width="2.2" />
+    <path d="M40 18.6C34 22 26 25.6 18 27.6M45 18.8C42 22.6 37 26.6 32 29.4M60 18.8C63 22.6 67 26.4 72 29.2M65 18.6C71 22 79 25.4 87 27.4" stroke="#959A7C" stroke-width="1" opacity=".75" />
+    <path d="M80 22V152" stroke="#959A7C" stroke-width="1.1" opacity=".6" />
+    <path d="M82.4 26V150" stroke="#959A7C" stroke-width=".8" stroke-dasharray="1.4 2" opacity=".5" />
+    <path d="M0 150A52 16 0 0 0 104 150V182H0Z" fill="#B6BB9E" />
+    <path d="M2 150A50 16 0 0 0 102 150" stroke="#959A7C" stroke-width="1.2" />
+    <path d="M2 154.6A50 16 0 0 0 102 154.6" stroke="#959A7C" stroke-width=".8" stroke-dasharray="1.4 2" opacity=".55" />
+    <path d="M6.6 157V163" stroke="#E0E3D1" stroke-width="1.2" opacity=".8" />
+  </g>
+  <path d="M2 162V38C2 31 6 28.4 12.4 26L38 16.6H66L91.6 26C98 28.4 102 31 102 38V162A50 16 0 0 1 2 162Z" stroke="#959A7C" stroke-width="1.5" />
+  <path d="M93.4 141.6H99.6Q100.6 141.6 100.6 142.6V151L96.5 154L92.4 151V142.6Q92.4 141.6 93.4 141.6Z" fill="#9FA88A" stroke="#798264" stroke-width="1.2" />
+  <circle cx="96.5" cy="140" r="3.4" stroke="#798264" stroke-width="1.6" />
+  <path d="M64 18.4C80 19.6 96.6 25.6 96.6 42V136.8" stroke="#798264" stroke-width="6.4" />
+  <path d="M64 18.4C80 19.6 96.6 25.6 96.6 42V136.8" stroke="#9FA88A" stroke-width="4" />
+  <path d="M95.2 44V132" stroke="#E0E3D1" stroke-width="1" opacity=".75" />
+  <path d="M93.6 136.8H99.6" stroke="#798264" stroke-width="1.2" />
+  <path d="M37 17.4C46 19.4 58 19.4 67 17.4" stroke="#798264" stroke-width="5" />
+  <path d="M37 17.4C46 19.4 58 19.4 67 17.4" stroke="#9FA88A" stroke-width="3.2" />
+  <path d="M37 17.4C46 19.4 58 19.4 67 17.4" stroke="#798264" stroke-width="3.2" stroke-dasharray=".8 2.2" opacity=".45" />
+  <path d="M35 18.6C30.6 22 28.6 26.4 29 31.6M36.4 19.6C35 24 35.4 28 37.4 31.8" stroke="#798264" stroke-width="3.6" />
+  <path d="M35 18.6C30.6 22 28.6 26.4 29 31.6M36.4 19.6C35 24 35.4 28 37.4 31.8" stroke="#9FA88A" stroke-width="1.9" />
+  <circle cx="35.6" cy="17.8" r="3.2" fill="#9FA88A" stroke="#798264" stroke-width="1.2" />
+  <path d="M34.4 16.6L36.6 18.8" stroke="#798264" stroke-width=".9" opacity=".6" />
+  <path d="M44 22.2C44 25.4 48 25.2 48 28.6V35" stroke="#A48D6D" stroke-width="3.8" />
+  <path d="M44 22.2C44 25.4 48 25.2 48 28.6V35" stroke="#D5C0A0" stroke-width="2" />
+  <rect x="41.4" y="12.4" width="5.2" height="11.4" rx="1.6" fill="#D5C0A0" stroke="#A48D6D" stroke-width="1.2" />
+  <path d="M43 14.4V21.6" stroke="#EADCC3" stroke-width="1" />
+</svg>

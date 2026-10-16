@@ -2,15 +2,19 @@ import XCTest
 
 /// The debug component catalog (`-catalog`). These check what VoiceOver and touch rely on:
 /// labels, the selected trait, and that the sheet, search and toast work in the real app.
+///
+/// Tests that need a page further down open the catalog on that page alone (`-catalog-page`),
+/// since swiping through the whole catalog took minutes on CI.
 final class CatalogTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
     }
 
+    /// Opens the catalog, or only its page `page` (a catalog page ID such as `search`).
     @MainActor
-    private func launchCatalog() -> XCUIApplication {
+    private func launchCatalog(page: String? = nil) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-catalog"]
+        app.launchArguments = ["-catalog"] + (page.map { ["-catalog-page", $0] } ?? [])
         app.launch()
         return app
     }
@@ -52,7 +56,7 @@ final class CatalogTests: XCTestCase {
 
     @MainActor
     func testClearSearchEmptiesTheField() {
-        let app = launchCatalog()
+        let app = launchCatalog(page: "search")
         let clear = app.buttons["Clear search"]
         scrollTo(clear, in: app)
         clear.tap()
@@ -69,7 +73,7 @@ final class CatalogTests: XCTestCase {
 
     @MainActor
     func testSheetOpensAndCloses() {
-        let app = launchCatalog()
+        let app = launchCatalog(page: "sheet")
         let open = app.buttons["Open the sheet"]
         scrollTo(open, in: app)
         open.tap()
@@ -87,7 +91,7 @@ final class CatalogTests: XCTestCase {
 
     @MainActor
     func testToastAppearsWithItsAction() {
-        let app = launchCatalog()
+        let app = launchCatalog(page: "toast")
         let show = app.buttons["Show a toast"]
         scrollTo(show, in: app)
         show.tap()
@@ -95,14 +99,40 @@ final class CatalogTests: XCTestCase {
         XCTAssertTrue(app.buttons["Undo"].firstMatch.exists)
     }
 
-    /// Swipes up until `element` is on screen and can be tapped.
+    /// The look bundle page (Phase 9), at the end of the catalog: a bundle is one VoiceOver
+    /// element naming its pieces, a thumbnail is one button, and Find one names its piece.
+    @MainActor
+    func testLookBundlesReadAsOneElement() {
+        let app = launchCatalog(page: "lookBundles")
+        let thumbnail = app.buttons["Simple: Cream blouse, Navy trousers, Tan loafers"]
+        scrollTo(thumbnail, in: app)
+
+        // One element that names every piece. (The catalog page's identifier replaces the
+        // bundle's own inside the catalog, so match the words.)
+        let somethingNew = app.otherElements.matching(
+            NSPredicate(
+                format: "label == %@",
+                "Office, something new: Camel blazer (not in your closet), Cream blouse, Navy trousers, Tan loafers"))
+        XCTAssertEqual(somethingNew.count, 1)
+
+        thumbnail.tap()
+        XCTAssertTrue(app.staticTexts["Tapped: Simple"].waitForExistence(timeout: 5))
+
+        let findOne = app.buttons["Find one like Camel blazer"]
+        scrollTo(findOne, in: app, swipes: 10, up: false)
+        findOne.tap()
+        XCTAssertTrue(app.staticTexts["Tapped: Find one: Camel blazer"].waitForExistence(timeout: 5))
+    }
+
+    /// Swipes until `element` is on screen and can be tapped.
     @MainActor
     private func scrollTo(
-        _ element: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+        _ element: XCUIElement, in app: XCUIApplication, swipes: Int = 15, up: Bool = true,
+        file: StaticString = #filePath, line: UInt = #line
     ) {
         XCTAssertTrue(app.navigationBars["Component catalog"].waitForExistence(timeout: 10), file: file, line: line)
-        for _ in 0..<15 where !(element.exists && element.isHittable) {
-            app.swipeUp(velocity: .slow)
+        for _ in 0..<swipes where !(element.exists && element.isHittable) {
+            if up { app.swipeUp(velocity: .slow) } else { app.swipeDown(velocity: .slow) }
         }
         XCTAssertTrue(element.isHittable, "Couldn't scroll to \(element)", file: file, line: line)
     }

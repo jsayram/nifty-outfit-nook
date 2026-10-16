@@ -12,19 +12,23 @@ public struct FixtureData: Sendable {
     public var suitcases: [Suitcase]
     public var profile: Profile
     public var weather: WeatherSnapshot
+    /// Try-on pictures (Phase 12b). Simulated: drawn from their looks' pieces, with no person.
+    public var pictures: [TryOnPicture]
 
     public init(
         garments: [Garment],
         looks: [Look],
         suitcases: [Suitcase],
         profile: Profile,
-        weather: WeatherSnapshot
+        weather: WeatherSnapshot,
+        pictures: [TryOnPicture] = []
     ) {
         self.garments = garments
         self.looks = looks
         self.suitcases = suitcases
         self.profile = profile
         self.weather = weather
+        self.pictures = pictures
     }
 }
 
@@ -39,10 +43,69 @@ extension FixtureSet {
     }
 }
 
-/// "58° and rain", the weather the mockups show.
+/// "58° and rain", the weather the mockups show, and the other states the Home window draws.
+/// The temperatures are the mockups' (`screens/home.html`), in Celsius.
 enum FixtureWeather {
     static func rainyDay(at date: Date) -> WeatherSnapshot {
         WeatherSnapshot(condition: .rain, temperatureCelsius: 14.5, isNight: false, observedAt: date)
+    }
+
+    /// The snapshot for a forced state, or `nil` for `unavailable`, which has none.
+    static func snapshot(_ state: FixtureWeatherState, at date: Date) -> WeatherSnapshot? {
+        switch state {
+        case .sun: WeatherSnapshot(condition: .sun, temperatureCelsius: 22.2, observedAt: date)
+        case .cloudy: WeatherSnapshot(condition: .cloudy, temperatureCelsius: 17.2, observedAt: date)
+        case .rain: rainyDay(at: date)
+        case .snow: WeatherSnapshot(condition: .snow, temperatureCelsius: -1.1, observedAt: date)
+        case .night: WeatherSnapshot(condition: .sun, temperatureCelsius: 16.1, isNight: true, observedAt: date)
+        case .unavailable: nil
+        }
+    }
+}
+
+extension FixtureData {
+    /// How many pieces `some` and `full` leave dirty.
+    static func dirtyCount(for state: FixtureLaundryState) -> Int {
+        switch state {
+        case .off, .clean: 0
+        case .some: 2
+        case .full: 8
+        }
+    }
+
+    /// The same records with laundry forced to `state`. With tracking on, exactly
+    /// `dirtyCount(for:)` pieces in her closet are dirty, the set's own dirty pieces first, or
+    /// fewer if the closet is smaller. With it off, the set's dirty marks are kept (RD-11).
+    func applying(laundry state: FixtureLaundryState) -> FixtureData {
+        var data = self
+        data.profile.preferences.tracksLaundry = state != .off
+        guard state != .off else { return data }
+        let candidates = garments.indices.filter { garments[$0].isInCloset }
+        let dirtyFirst =
+            candidates.filter { garments[$0].laundry == .dirty }
+            + candidates.filter { garments[$0].laundry != .dirty }
+        let dirty = Set(dirtyFirst.prefix(Self.dirtyCount(for: state)))
+        for index in data.garments.indices {
+            data.garments[index].laundry = dirty.contains(index) ? .dirty : .clean
+        }
+        return data
+    }
+}
+
+extension FixtureData {
+    /// The same records with the remembered source set to `state`. A set with no suitcases
+    /// keeps the main closet.
+    func applying(source state: FixtureSourceState) -> FixtureData {
+        var data = self
+        switch state {
+        case .main:
+            data.profile.remembered.source = .mainCloset
+        case .suitcase:
+            if let suitcase = SuitcaseShelf(suitcases).favorites.first {
+                data.profile.remembered.source = .suitcase(suitcase.id)
+            }
+        }
+        return data
     }
 }
 

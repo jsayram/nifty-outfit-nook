@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 80" width="90" height="80" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Butter wall calendar pad. Rings along the top, darker header strip y 8..18.5.
+       Flat face for labels: x 8..82, y 20..65. The page curl sits below and right of it (x 77.5..87, y 66..75.5). -->
+
+  <defs>
+    <g id="cal-ring">
+      <ellipse cx="0" cy="13.6" rx="2.5" ry="1.5" fill="#DDBB4E"/>
+      <rect x="-1.75" y="1.4" width="3.5" height="12.6" rx="1.75" fill="#E7BC6E"/>
+      <path d="M.7 2.8V12.2" stroke="#D9A650" stroke-width="1"/>
+      <path d="M-.5 3.4V9.2" stroke="#F8E3B0" stroke-width=".8"/>
+      <rect x="-1.75" y="1.4" width="3.5" height="12.6" rx="1.75" stroke="#B98632" stroke-width="1.25"/>
+    </g>
+  </defs>
+
+  <!-- pages underneath the top sheet -->
+  <rect x="5" y="12" width="80" height="66.5" rx="6" fill="#F3D97C" stroke="#DDBB4E" stroke-width="1.25"/>
+  <path d="M10 76.4H70" stroke="#E6C85C" stroke-width=".8"/>
+
+  <!-- top sheet with its bottom right corner lifting -->
+  <path d="M9 8H81A6 6 0 0 1 87 14V66L77.5 75.5H9A6 6 0 0 1 3 69.5V14A6 6 0 0 1 9 8Z" fill="#FBE9A6"/>
+  <path d="M3 18.5V14A6 6 0 0 1 9 8H81A6 6 0 0 1 87 14V18.5Z" fill="#F3D97C"/>
+  <path d="M3.6 18.5H86.4" stroke="#E6C85C" stroke-width=".9"/>
+  <path d="M5.2 22V69A4.2 4.2 0 0 0 7.8 73" stroke="#FFF5CF" stroke-width="1.1"/>
+  <path d="M9 8H81A6 6 0 0 1 87 14V66L77.5 75.5H9A6 6 0 0 1 3 69.5V14A6 6 0 0 1 9 8Z" stroke="#DDBB4E" stroke-width="1.4"/>
+
+  <!-- the curl: pale underside of the sheet, with the shadow it throws on the page below -->
+  <path d="M86.5 66.9C85.3 69.6 82.9 72.7 79.2 75.2" stroke="#E6C85C" stroke-width="2" opacity=".55"/>
+  <path d="M87 66L77.5 75.5C77.6 72.3 77.9 69.7 79.4 68.1C80.9 66.5 83.9 66.1 87 66Z" fill="#FFF6D2"/>
+  <path d="M80.2 70.1C81.5 68.8 83.3 68.3 85.1 68" stroke="#F3D97C" stroke-width=".9"/>
+  <path d="M87 66L77.5 75.5C77.6 72.3 77.9 69.7 79.4 68.1C80.9 66.5 83.9 66.1 87 66Z" stroke="#DDBB4E" stroke-width="1.25"/>
+
+  <!-- binding rings -->
+  <use href="#cal-ring" transform="translate(15 0)"/>
+  <use href="#cal-ring" transform="translate(30 0)"/>
+  <use href="#cal-ring" transform="translate(45 0)"/>
+  <use href="#cal-ring" transform="translate(60 0)"/>
+  <use href="#cal-ring" transform="translate(75 0)"/>
+</svg>

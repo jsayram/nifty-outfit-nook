@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 174" width="112" height="174" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Small wood console for the entry hall, with a leafy plant in a pink pot and a cream key dish on top,
+       one drawer in the apron and a slim lower shelf. Ids are prefixed tc-.
+       Wood #E7BC6E / #D9A650 / #B98632, highlight #F3D391. Pot pink #F4B4C2 / #EC9DB0 / #D97F97. Leaves as in shelf-top.svg.
+       Top slab x 2..110, y 54..62 (things stand on y 54). Drawer x 34..78, y 63..74. Lower shelf y 134..140.
+       Front feet end at y 170; place the console so y 170 lands just below the floor line. No label zone. -->
+  <defs>
+    <g id="tc-leaf-s">
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24C-6.9 -16.3 -8.9 -5.3 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24Z" fill="#5C9670"/>
+      <path d="M0 -2.4V-20.2" stroke="#44795A" stroke-width=".8"/>
+      <path d="M-3.1 -5.8C-4 -10 -3.4 -14.8 -1.7 -18.4" stroke="#92C39C" stroke-width="1"/>
+      <path d="M0 0C8.9 -5.3 6.9 -16.3 0 -24C-6.9 -16.3 -8.9 -5.3 0 0Z" stroke="#44795A" stroke-width="1.1"/>
+    </g>
+    <g id="tc-leaf-t">
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21C-6.3 -14.3 -8.1 -4.6 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21Z" fill="#5C9670"/>
+      <path d="M0 -2.2V-17.6" stroke="#44795A" stroke-width=".8"/>
+      <path d="M-2.8 -5.1C-3.6 -8.8 -3.1 -13 -1.5 -16.1" stroke="#92C39C" stroke-width="1"/>
+      <path d="M0 0C8.1 -4.6 6.3 -14.3 0 -21C-6.3 -14.3 -8.1 -4.6 0 0Z" stroke="#44795A" stroke-width="1.1"/>
+    </g>
+    <g id="tc-leaf-xs">
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17C-5.3 -11.6 -6.8 -3.7 0 0Z" fill="#77AE84"/>
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17Z" fill="#5C9670"/>
+      <path d="M0 -2V-14" stroke="#44795A" stroke-width=".8"/>
+      <path d="M-2.3 -4.2C-3 -7.2 -2.6 -10.6 -1.3 -13.2" stroke="#92C39C" stroke-width="1"/>
+      <path d="M0 0C6.8 -3.7 5.3 -11.6 0 -17C-5.3 -11.6 -6.8 -3.7 0 0Z" stroke="#44795A" stroke-width="1.1"/>
+    </g>
+  </defs>
+
+  <!-- contact shadows -->
+  <ellipse cx="56" cy="170.6" rx="52" ry="2.8" fill="#7A4636" opacity=".12"/>
+
+  <!-- back legs, seen between the front ones -->
+  <path d="M18 62H23.4V163.4Q20.7 165 18 163.4Z" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+  <path d="M88.6 62H94V163.4Q91.3 165 88.6 163.4Z" fill="#D9A650" stroke="#B98632" stroke-width="1.2"/>
+
+  <!-- lower shelf -->
+  <rect x="9" y="134" width="94" height="6.4" rx="1.4" fill="#E7BC6E"/>
+  <path d="M10.4 134H101.6A1.4 1.4 0 0 1 103 135.4V136.2H9V135.4A1.4 1.4 0 0 1 10.4 134Z" fill="#F3D391"/>
+  <path d="M9 139H103A1.4 1.4 0 0 1 101.6 140.4H10.4A1.4 1.4 0 0 1 9 139Z" fill="#D9A650"/>
+  <rect x="9" y="134" width="94" height="6.4" rx="1.4" stroke="#B98632" stroke-width="1.2"/>
+
+  <!-- front legs, tapering to the floor -->
+  <path d="M7 62H15.4L13.8 168.4Q11.2 170.4 8.6 168.4Z" fill="#E7BC6E"/>
+  <path d="M12.4 62H15.4L13.8 168.4Q12.8 169.2 11.6 169.4Z" fill="#D9A650"/>
+  <path d="M9.4 70L10.4 160" stroke="#F3D391" stroke-width="1"/>
+  <path d="M7 62H15.4L13.8 168.4Q11.2 170.4 8.6 168.4Z" stroke="#B98632" stroke-width="1.3"/>
+  <path d="M96.6 62H105L103.4 168.4Q100.8 170.4 98.2 168.4Z" fill="#E7BC6E"/>
+  <path d="M102 62H105L103.4 168.4Q102.4 169.2 101.2 169.4Z" fill="#D9A650"/>
+  <path d="M99 70L100 160" stroke="#F3D391" stroke-width="1"/>
+  <path d="M96.6 62H105L103.4 168.4Q100.8 170.4 98.2 168.4Z" stroke="#B98632" stroke-width="1.3"/>
+
+  <!-- apron with one drawer -->
+  <rect x="7" y="60" width="98" height="17" fill="#E7BC6E" stroke="#B98632" stroke-width="1.3"/>
+  <rect x="7.6" y="60.6" width="96.8" height="2.2" fill="#D9A650"/>
+  <rect x="34" y="64" width="44" height="10" rx="1.6" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  <path d="M36.4 65.6H75.6" stroke="#F3D391" stroke-width="1"/>
+  <circle cx="56" cy="69.2" r="2.3" fill="#F3D391" stroke="#B98632" stroke-width="1.1"/>
+  <path d="M16 71h10M86 70.4h10" stroke="#D9A650" stroke-width=".9"/>
+
+  <!-- top slab -->
+  <rect x="2" y="54" width="108" height="8.4" rx="1.8" fill="#E7BC6E"/>
+  <path d="M3.8 54H108.2A1.8 1.8 0 0 1 110 55.8V56.8H2V55.8A1.8 1.8 0 0 1 3.8 54Z" fill="#F3D391"/>
+  <path d="M2 60.6H110A1.8 1.8 0 0 1 108.2 62.4H3.8A1.8 1.8 0 0 1 2 60.6Z" fill="#D9A650"/>
+  <path d="M2.5 56.8H109.5" stroke="#CF9D45" stroke-width=".8"/>
+  <path d="M10 59h12M44 58.6h9M66 59.2h14" stroke="#D9A650" stroke-width=".9"/>
+  <!-- shadows of the dish and the pot on the top face -->
+  <ellipse cx="24" cy="55.4" rx="11" ry="1.2" fill="#DDB05E"/>
+  <ellipse cx="76" cy="55.4" rx="10.4" ry="1.2" fill="#DDB05E"/>
+  <rect x="2" y="54" width="108" height="8.4" rx="1.8" stroke="#B98632" stroke-width="1.3"/>
+
+  <!-- key dish: a shallow cream bowl with a brass key resting on the rim -->
+  <g transform="translate(-6 0)">
+  <path d="M20 48.6H40Q39 54.6 30 54.8Q21 54.6 20 48.6Z" fill="#FFF7EA"/>
+  <path d="M33 48.6H40Q39 54.6 30 54.8Q31.8 52 33 48.6Z" fill="#F3E6D0"/>
+  <path d="M20 48.6H40Q39 54.6 30 54.8Q21 54.6 20 48.6Z" stroke="#D9C6A5" stroke-width="1.2"/>
+  <ellipse cx="30" cy="48.6" rx="10" ry="2" fill="#F3E6D0" stroke="#D9C6A5" stroke-width="1.2"/>
+  <path d="M27 47.8L35.6 45.6" stroke="#B98632" stroke-width="2.6"/>
+  <path d="M27 47.8L35.6 45.6" stroke="#E7BC6E" stroke-width="1.2"/>
+  <circle cx="25.2" cy="48.2" r="2.4" fill="#E7BC6E" stroke="#B98632" stroke-width="1.1"/>
+  <path d="M33.6 46.1L34.2 47.6M35.2 45.7L35.8 47.2" stroke="#B98632" stroke-width="1"/>
+  </g>
+
+  <!-- plant: drawn around a pot centred at x 90 with its foot at y 48.9, placed at (76, 54.2) at 115 percent -->
+  <g transform="translate(76 54.2) scale(1.15) translate(-90 -48.9)">
+    <path d="M90.2 36.5C90.6 33.4 91 30.2 91.5 27.2M89.6 36.5C88 34 86 31 84 28.6M89.2 36.6C87 35.5 84.6 34.2 82.2 33.2M90.8 36.5C93 33.8 95.6 31.5 98 29.6M91.2 36.6C93.6 35.8 96 35.2 98.4 34.6M89.8 36.6C89.2 35.2 88.6 33.6 88.1 32.2" stroke="#44795A" stroke-width="1.2"/>
+    <use href="#tc-leaf-s" transform="translate(91.5 27) rotate(6)"/>
+    <use href="#tc-leaf-s" transform="translate(84 28.5) rotate(-38) scale(-1 1)"/>
+    <use href="#tc-leaf-s" transform="translate(98 29.5) rotate(48)"/>
+    <path d="M81.2 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H85.2C83.9 48.9 82.9 48.1 82.7 46.8Z" fill="#F4B4C2"/>
+    <path d="M92.6 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H91.6Z" fill="#EC9DB0"/>
+    <path d="M84.8 41.2L85.5 46.4" stroke="#FCD9E0" stroke-width="1.1"/>
+    <path d="M81.2 38.6H98.8L97.3 46.8C97.1 48.1 96.1 48.9 94.8 48.9H85.2C83.9 48.9 82.9 48.1 82.7 46.8Z" stroke="#D97F97" stroke-width="1.1"/>
+    <rect x="79.8" y="35.4" width="20.4" height="4.2" rx="1.4" fill="#F4B4C2"/>
+    <path d="M93.8 35.4H98.8A1.4 1.4 0 0 1 100.2 36.8V38.2A1.4 1.4 0 0 1 98.8 39.6H93.8Z" fill="#EC9DB0"/>
+    <path d="M82 36.9H89.6" stroke="#FCD9E0" stroke-width=".9"/>
+    <rect x="79.8" y="35.4" width="20.4" height="4.2" rx="1.4" stroke="#D97F97" stroke-width="1.1"/>
+    <use href="#tc-leaf-t" transform="translate(82 33) rotate(-74) scale(-1 1)"/>
+    <use href="#tc-leaf-t" transform="translate(98.5 34.5) rotate(98)"/>
+    <use href="#tc-leaf-xs" transform="translate(88 32) rotate(-25) scale(-1 1)"/>
+  </g>
+</svg>

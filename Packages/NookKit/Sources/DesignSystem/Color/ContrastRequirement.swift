@@ -63,6 +63,8 @@ extension ContrastRequirement {
         (.background, nil), (.backgroundLow, nil), (.surface, nil), (.accentSoft, nil),
         (.tint, .background), (.tint, .backgroundLow), (.tint, .floor),
         (.tintStrong, .background), (.tintStrong, .backgroundLow), (.tintStrong, .floor),
+        // A quick tour's card (Phase 16a).
+        (.tourCard, nil),
     ]
 
     private static let textPairs: [ContrastRequirement] =
@@ -75,6 +77,8 @@ extension ContrastRequirement {
             ContrastRequirement(.textPrimary, on: .floorLow, kind: .text),
             ContrastRequirement(.textPrimary, on: .successSurface, kind: .text),
             ContrastRequirement(.textPrimary, on: .warningSurface, kind: .text),
+            // The caption on a butter row (Home's Occasion row at large text sizes, Phase 5b).
+            ContrastRequirement(.textSecondary, on: .warningSurface, kind: .text),
             ContrastRequirement(.textPrimary, on: .errorSurface, kind: .text),
             // Selected chips, primary buttons and the active tab.
             ContrastRequirement(.onAccent, on: .accent, kind: .text),
@@ -86,6 +90,14 @@ extension ContrastRequirement {
             ContrastRequirement(.accentPressed, on: .track, kind: .text),
             ContrastRequirement(.background, on: .textPrimary, kind: .text),
             ContrastRequirement(.accent, on: .tintStrong, over: .warningSurface, kind: .text),
+            // Delete my data's button: words on the error colour (Phase 14b).
+            ContrastRequirement(.onAccent, on: .error, kind: .text),
+            // The welcome's title and lines on the sky, and its text button on the porch (Phase 17).
+            ContrastRequirement(.textPrimary, on: .skyTop, kind: .text),
+            ContrastRequirement(.textPrimary, on: .skyBottom, kind: .text),
+            ContrastRequirement(.textSecondary, on: .skyTop, kind: .text),
+            ContrastRequirement(.textSecondary, on: .skyBottom, kind: .text),
+            ContrastRequirement(.accent, on: .floor, kind: .text),
         ]
 
     private static let statusPairs: [ContrastRequirement] = [
@@ -102,6 +114,10 @@ extension ContrastRequirement {
             ContrastRequirement(.accent, on: .floor, kind: .largeTextOrGraphic),
             // The filled part of a meter against its track.
             ContrastRequirement(.accent, on: .track, kind: .largeTextOrGraphic),
+            // Icons on a butter row (Phase 5b).
+            ContrastRequirement(.accent, on: .warningSurface, kind: .largeTextOrGraphic),
+            // Delete my data's button stands out from the floor by its fill (Phase 14b).
+            ContrastRequirement(.error, on: .floor, kind: .largeTextOrGraphic),
         ]
         + [ColorToken.background, .backgroundLow, .surface].map {
             ContrastRequirement(.chevron, on: $0, kind: .largeTextOrGraphic)

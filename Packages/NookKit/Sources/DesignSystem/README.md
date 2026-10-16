@@ -61,6 +61,10 @@ light and dark. It names the colour set that's wrong.
 | `divider` | `#967D64` at 0.3 | `#E6D2BE` at 0.2 | `--soft-divider` colour |
 | `shadow` | `#3C2A1C` at 0.26 | `#000000` at 0.55 | `--soft-drop` colour |
 | `shadowLarge` | `#3C2A1C` at 0.32 | `#000000` at 0.6 | `--soft-drop-lg` colour |
+| `tourScrim` | `#2A211B` at 0.58 | `#0E0B09` at 0.66 | `.tour-spotlight` dim, `--ink` in place of plum (LR-02) |
+| `tourGlow` | `#FFECC8` at 0.55 | `#DCC3A8` at 0.4 | `.tour-spotlight` warm glow |
+| `tourRim` | `#FFFFFF` at 0.55 | `#F4EEE6` at 0.35 | `.tour-spotlight` rim, drawn blurred |
+| `tourCard` | `#FFFDF9` | `#2E2620` | `.tour-card`, the plate colour in place of pink-white. Opaque: without the mockup's blur, a see-through card let the room's words show through its own |
 
 ### Status
 
@@ -87,6 +91,8 @@ is redrawn in a later phase; these are the values it uses.
 | `floor` | `#E5D7C5` | `#362C24` | `--floor` |
 | `floorLow` | `#DACAB4` | `#30271F` | `--floor-2` |
 | `floorLine` | `#C6B097` | `#1A1410` | `--floor-line` |
+| `skyTop` | `#DCE3EB` | `#17130F` | `.sky` in `onboarding.html` (`#D2E5F7`), Phase 17 |
+| `skyBottom` | `#F1F4F7` | `#2A231C` | `.sky` in `onboarding.html` (`#EDF5FD`), Phase 17 |
 | `artSage` | `#C9CDB4` | `#858770` | `--sage` |
 | `artSageDeep` | `#B6BB9E` | `#787B62` | `--sage-2` |
 | `artSageLine` | `#959A7C` | `#62664D` | `--sage-line` |
@@ -96,6 +102,7 @@ is redrawn in a later phase; these are the values it uses.
 | `artButterLine` | `#CDB98F` | `#877A59` | `--butter-line` |
 | `signPanel` | `#FFF7EA` | `#A8A391` | `name-sign.svg` panel |
 | `signText` | `#4B3628` | `#3A2A1E` | `.sign .name` (`--plum`) |
+| `stickerEdge` | `#FFFFFF` | `#EEE7DE` | `.stk` drop shadows `#fff` (Phase 8b) |
 
 ### How dark appearance was derived
 
@@ -205,38 +212,74 @@ shadows that fall only below. Each one is checked at the default text size, at A
 keeps tap targets at 44 points or more, and turns its animation into a plain change or a fade when Reduce Motion is
 on. Text that a component shows comes in already localized, as a `String`; the few words the components own
 ("Try again", "Close", "Clear search", "Loading", "You’re offline.", "Retry") are in
-`Resources/Localizable.xcstrings`.
+`Resources/Localizable.xcstrings`, with the quick tour's own ("Quick tour · 1 of 4", "Skip", "Next", "Back").
 
 | Component | Mockup source | Notes |
 |---|---|---|
 | `NookButton`, `.buttonStyle(.nook(_:size:))` | `.btn`, `.btn.ghost`, `.btn.small`, `.shuffle`, `.lnk` | Kinds: `primary` (solid accent, radius 18), `soft` (tint), `pill` (strong tint capsule), `text`. Sizes `regular` (50 pt) and `small` (44 pt). Pressed darkens and shrinks 3% (no shrink with Reduce Motion). Disabled fades to 45% and drops its shadow. `isLoading` swaps the icon for the dots, ignores taps, keeps its colour, and adds "Loading" as the VoiceOver value. At large sizes the icon moves above the title. |
 | `NookAdaptiveStack` | `.grid4` at the largest size | Side by side normally, stacked at the accessibility sizes. For pairs of buttons. |
-| `NookChip`, `NookChipBar` | `.chip`, `.chip.on`, filters (Lily's L9, L11) | Tint pill, selected is a solid accent pill. 36 pt pill inside a 44 pt target. `.isSelected` trait. The bar scrolls sideways, and wraps (`NookFlowLayout`) at the accessibility sizes so no chip is hidden off screen. The bar is a VoiceOver container named by its title. |
-| `NookSegmentedPicker` | `.seg` (Looks / Pictures), `.vers` (Simple · Dressed up · Something new) | Tint track, accent pill on the chosen option, which slides (moves without sliding under Reduce Motion). Options stack when their labels don't fit side by side. Each option is a button with `.isSelected`. |
-| `NookRow`, `.buttonStyle(.nookRow)` | `.item` (Profile), `.erow` | Round tinted icon, title, subtitle, value, chevron. No separators. Pressed shows a tint. At the accessibility sizes the icon goes above the title and the value under it. One VoiceOver element. |
+| `NookChip`, `NookChipBar` | `.chip`, `.chip.on`, filters (Lily's L9, L11) | Tint pill, selected is a solid accent pill. 36 pt pill inside a 44 pt target. `.isSelected` trait. The bar scrolls sideways, and wraps (`NookFlowLayout`) at the accessibility sizes so no chip is hidden off screen. The bar is a VoiceOver container named by its title. A chip can carry a colour `swatch` before its name (Phase 6, colour filters); the name is always there too. |
+| `NookMenuChip` | Suitcase filter (L11) | A chip that opens a menu, with a chevron after the title. Shows the choice as a selected pill once something is chosen. Draws only its label in still images. |
+| `NookSegmentedPicker` | `.seg` (Looks / Pictures), `.vers` (Simple · Dressed up · Something new) | Tint track, accent pill on the chosen option, which slides (moves without sliding under Reduce Motion). Options stack when their labels don't fit side by side. Each option is a button with `.isSelected`, and can carry a VoiceOver hint (Your looks reads each version's description) and a UI test identifier (Phase 10b). Only the pill animates; what the choice changes on the page changes at once (Phase 15b, `docs/ipad.md`). |
+| `NookRow`, `.buttonStyle(.nookRow)` | `.item` (Profile), `.erow` | Round tinted icon, title, subtitle, value, chevron. No separators. Pressed shows a tint. At the accessibility sizes the icon goes above the title with the chevron beside it (Phase 14a, so the words get the whole width), and the value under the title. One VoiceOver element. |
 | `NookSection`, `NookSectionHeader`, `NookDivider` | `.sec-h`, `.grp`, `.note`, `.soft-div` | Headers are VoiceOver headings. The divider fades at both ends and goes between groups, never between rows. Secondary text in headers and notes must not sit on the bare floor (see Contrast). |
 | `.nookCard(_:)` | `.tile`, `.sec`, `.r` | Tint (or strong tint, or butter) with radius 22 and the small shadow. Use sparingly. |
-| `NookSearchField` | `.search` | Strong tint, radius 18, magnifier, 44 pt "Clear search" button. Wraps a long query or prompt at large sizes; Return still searches. |
-| `.nookSheet(isPresented:…)`, `.nookSheet(item:…)`, `NookSheetContainer` | `.sheet-w`, `.wxsheet` | System sheet with grabber, radius 28 and the wall behind it. Serif title, optional line, Close button. Content scrolls. At the accessibility sizes it opens full height. |
+| `NookSearchField` | `.search` | Strong tint, radius 18, magnifier, 44 pt "Clear search" button. Wraps a long query or prompt at large sizes; Return still searches. The prompt is a wrapping text behind the field, since the system's own prompt stays on one line and truncated at AX5 (Phase 6). VoiceOver and XCUITest see a search field named by the prompt. |
+| `.nookSheet(isPresented:…)`, `.nookSheet(item:…)`, `NookSheetContainer` | `.sheet-w`, `.wxsheet` | System sheet with grabber, radius 28 and the wall behind it. Serif title, optional line, Close button. Content scrolls. At the accessibility sizes it opens full height and Close sits above the title, so a one-word title never breaks mid-word (Phase 10a). Over a regular-width window (iPad) it's a form sheet as tall as its content, or full form height for sheets that only open full height (Phase 15b). |
 | `NookEmptyState`, `NookLoadingState`, `NookErrorState` | `.empty` (Closet), `.state` (Your looks) | Centred, at most 360 pt wide, title is a heading. Error has a retry button ("Try again") and room for more actions. Loading reads as one VoiceOver element. |
 | `NookLoadingIndicator` | new | Three soft dots. Fades only under Reduce Motion. |
 | `NookBanner`, `NookOfflineBanner` | `.banner` (Your looks) | Butter or neutral, with an optional action that moves under the text at large sizes. |
-| `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. |
+| `NookToast`, `.nookToast(_:)` | `.toast` (Closet, Laundry, Profile, Swap) | Dark pill (light in dark mode) with an optional action like Undo. VoiceOver announces it. It stays 4 s, 6 s with an action, two and a half times longer while VoiceOver runs. Slides in, or fades with Reduce Motion. At the accessibility sizes the action goes under the message (Phase 11), so long words don't break. |
 | `NookBadge` | `.sim`, `.pill`, `.dirty` | Small capsule label in four tones. Always words, never colour alone. |
+| `NookSticker`, `StickerRenderer`, `StickerCache` | `.stk` in `results.html` and `garment.html` | Phase 8b. See [Stickers](#stickers). |
+| `NookTourCard`, `NookTourOverlay`, `NookTourPlacement` | `.tour-card`, `.tour-spotlight` in `home-tour.html` | Phase 16a. The quick tour: a warm dim with a soft cut-out and glow around one control (blurred, no hard outline), and the card with sparkles, "Quick tour · 1 of 4", title, words, dots, Back (from step 2), Skip and Next. The card is the plate colour, 300 points wide (340 at the larger standard sizes, up to 480 at the accessibility sizes), and goes below or above the control, beside it on a wide screen, or on its own when it can't sit clear of it. Its words scroll at the largest sizes while the buttons stay. With Reduce Motion steps cross-fade. The words are one VoiceOver element, focused on each step; the overlay is modal, Escape and the VoiceOver escape gesture skip. How Features runs tours is in `docs/tours.md`. |
+| `StickerBundleLayout`, `BundleRole`, `BundlePlacement` | `spots()` in `results.html` | Phase 9. The flat-lay arrangement of a look bundle: where 2 to 6 stickers lie by what they are, their tilt from a seed, and fitting the whole inside the 300 x 356 box. Pure arithmetic, tested for every mix of pieces. The view, `LookBundle`, is in Features since it draws garments; see `docs/look-bundles.md`. |
+| `NookPhotoTile` | RD-07.2 | Phase 8b. A photo in a rounded tile with the soft shadow below, no outline, the same size a sticker would take. Corners are an eighth of the short side, 8 to 24 points. |
+
+The welcome's sky (Phase 17, `docs/onboarding.md`) keeps a little of the mockup's blue in light, as the room's windows do (`scripts/room-art.py`, `sky`). In dark it isn't the light sky dimmed, which left the light title at 2.6:1, but a warm evening, so the title and its line are at least 13:1 and 8:1 there. Primary and secondary text on both ends, and the accent as text on the floor (the welcome's text button), are in `ContrastRequirement`.
 
 New colour pairings these components use are in `ContrastRequirement.all`: pressed soft buttons on `track`, the
-toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter.
+toast's wall-coloured text on `textPrimary`, and the banner's action on the strong tint over butter. Phase 14b added
+Delete my data's button: `onAccent` words on the `error` fill (6.8:1 light, 8.6:1 dark), and that fill against the floor.
+
+### Stickers
+
+Phase 8b. A garment picture with transparency becomes a sticker: the piece, a thick white edge that follows its
+outline, and a soft shadow that falls below it. The mockups draw the edge with eight stacked CSS drop shadows; here
+it's drawn once into a picture and cached.
+
+- **Size.** A sticker takes exactly the size it's given. The garment is cropped to what isn't transparent and fitted
+  inside, centred, or resting on the bottom (`.resting`, used on garment detail so shoes sit on the contact shadow).
+  The shadow falls outside that size, like a CSS shadow, so it never moves a layout.
+- **Edge.** 1.8% of the long side, 1.25 to 6 points: about 4.25 points on garment detail, 1.6 on a closet-sized piece.
+  The shadow's offset and blur grow the same way, and it always falls further than it spreads, so nothing shows
+  above the sticker. The edge is the `stickerEdge` token: white, and a warm off-white in dark so it doesn't glare
+  next to garments dimmed for dark mode. The shadow is the `shadow` token, a little lighter, as in the mockups.
+- **How the edge is drawn** (`StickerRenderer`). The garment's alpha is doubled (so a half-covered pixel of a thin
+  strap counts as solid) and grown with a greyscale dilation, `vImageDilate_Planar8` with a round brush whose rim
+  fades over one pixel. The garment's own anti-aliased edge carries through, so the paper's edge is smooth along
+  slanted sides. Thin straps get the full edge and small holes fill in, as on a die-cut sticker. Core Graphics and
+  Accelerate on the CPU, so it's the same on every machine and in the snapshot tests.
+- **Cost and caching** (`StickerCache`). A detail-sized sticker at 3x took about 25 ms in a Debug build on the
+  simulator (an earlier pure-Swift distance transform took 1.7 s in Debug). It's still made away from the main
+  actor, once, and kept by its key: what it shows plus its size,
+  scale, appearance and placement. Two views asking at once share one render. The least recently used go first
+  past 48 MB, and everything goes on a memory warning. Nothing is written to disk. The root screen puts one cache in
+  the environment (`\.stickerCache`).
+- **Still images.** With `nookStaticRendering` on, a sticker is made on the spot, since `ImageRenderer` can't wait.
+
+The catalog's "Stickers and photo tiles" page shows three sizes, the tile fallback in the same sizes, and thin parts.
 
 ### The catalog
 
-A debug-only catalog shows every component and state on one page, with switches for light, dark and text sizes up
+A debug-only catalog shows every component and state on one page (plus pages other modules pass to `NookCatalogView(extraPages:)`, such as Features' look bundles), with switches for light, dark and text sizes up
 to AX5. Launch a Debug build with `-catalog` (in Xcode: scheme, Run, Arguments). The code is in `Catalog/` and is
 wrapped in `#if DEBUG`, so a Release build doesn't contain it. CI checks that with `scripts/check-release.sh`.
 
 ### Snapshot tests
 
 `ComponentSnapshotTests` draws every catalog page in light, dark and AX5 on a 390 pt canvas, and five pages on an
-820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 44 images,
+820 pt (iPad) canvas, and compares them with the PNGs in `Tests/DesignSystemTests/__Snapshots__`. That's 50 images,
 about 4 MB at 2x.
 
 - **How they're drawn.** With SwiftUI's `ImageRenderer`, not the library's UIKit host. The UIKit host's
@@ -252,3 +295,10 @@ about 4 MB at 2x.
 - **Recording.** A missing reference is recorded and the test fails once. To re-record everything after a deliberate
   change, run `TEST_RUNNER_SNAPSHOT_TESTING_RECORD=all scripts/test.sh`, look at every changed PNG in the diff, then
   run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.
+- **iPad screens** (Phases 15a and 15b, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
+  2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.
+- **One at a time on the main actor** (Phase 18). Each Features snapshot suite carries `@Suite(.heavyMainActorWork)`,
+  and so do the large-closet speed checks. Swift Testing starts every test at once, and drawing a snapshot holds the
+  main actor, so without it a model test waited behind every snapshot for each of its turns and finished only as the
+  target drained. The trait (`Tests/FeaturesTests/Support/HeavyMainActorWork.swift`) lets one of those tests have
+  the main actor at a time and leaves the rest of the target parallel. Add it to any new snapshot suite.

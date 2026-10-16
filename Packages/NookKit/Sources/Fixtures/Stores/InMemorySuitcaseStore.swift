@@ -74,6 +74,13 @@ public actor InMemorySuitcaseStore: SuitcaseStore {
         guard suitcasesByID.removeValue(forKey: id) != nil else { throw .notFound }
     }
 
+    public func restore(_ suitcase: Suitcase) async throws(StoreError) {
+        try await options.begin()
+        var restored = suitcase
+        restored.name = try checkedName(suitcase.name, renaming: suitcase.id)
+        suitcasesByID[suitcase.id] = restored
+    }
+
     private func existing(_ id: Suitcase.ID) throws(StoreError) -> Suitcase {
         guard let suitcase = suitcasesByID[id] else { throw .notFound }
         return suitcase
@@ -85,5 +92,11 @@ public actor InMemorySuitcaseStore: SuitcaseStore {
         } catch {
             throw .invalidName(error)
         }
+    }
+
+    /// Delete my data: every suitcase, archived ones included.
+    public func eraseAll() async throws(StoreError) {
+        try await options.begin()
+        suitcasesByID = [:]
     }
 }

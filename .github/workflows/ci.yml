@@ -35,10 +35,133 @@ jobs:
       - name: Lint
         run: scripts/format.sh
 
-  build-and-test:
-    name: build-and-test
+  # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
+  # only when every one of them passed. Splitting them took the check from about 18 minutes to
+  # the length of the slowest job. Nothing is cached between runs, so a pull request can't
+  # leave build output behind for a later run on develop or main to pick up.
+  #
+  # The free plan runs at most five macOS jobs at once, and swift-format takes one for its first
+  # half minute, so a sixth build job would wait for a whole job to finish. Instead the five jobs
+  # below are balanced to about the same length (Phase 15b, October 2026; before that the check
+  # took 27 to 30 minutes, as the iPad tests rode in one UI part and the Release job had time to
+  # spare). Each job's fixed cost on the hosted runner is about 6 minutes: setup, the build, a
+  # cold simulator boot and the first launch.
+  #
+  # The Release check and the package tests share a runner, then the same runner runs
+  # SettingsTests. That costs no second build or boot, but the first UI launch there still took
+  # 3 to 7 minutes, so this job is now the longest (22 to 26 minutes in October 2026).
+  release-and-package-tests:
+    name: release-and-package-tests
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select Xcode
+        run: |
+          sudo xcode-select --switch "$XCODE_APP"
+          xcodebuild -version
+      - name: Check the two Package.resolved files agree
+        run: scripts/check-package-pins.sh
+      - name: Build (Release)
+        run: scripts/build.sh Release
+      - name: Check the Release build has no debug or test code
+        run: scripts/check-release.sh
+      - name: Test (every package test target, anything that isn't a UI test)
+        env:
+          # Failed snapshots write the new image and a diff here (passed through to the simulator).
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
+        run: scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      # UI tests on the simulator the package tests booted. ui-rest skips this class.
+      # A failed UI test runs once more, as in the ui-tests job below.
+      - name: Test (UI, SettingsTests)
+        env:
+          NOOK_RESULT_BUNDLE: build/TestResults-UI.xcresult
+        run: >-
+          scripts/test.sh -only-testing:NiftyOutfitNookUITests/SettingsTests
+          -retry-tests-on-failure -test-iterations 2
+      - name: Keep test results on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: TestResults-package
+          path: |
+            build/TestResults.xcresult
+            build/TestResults-UI.xcresult
+            build/SnapshotArtifacts
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # The rest of the UI tests in four parts of about the same length, by test class: three on an
+  # iPhone simulator and one, the iPad layouts, on an iPad simulator.
+  # Balanced in October 2026 (Phase 15b) from the classes' times on CI, in seconds, from the
+  # test log ("Test Case ... passed (N seconds)"). The same class took up to 1.5 times as long
+  # from one run to the next:
+  #   ui-home-and-results     HomeTests 206, ClosetTests 191, StyleMeTests 182, YourLooksTests 170,
+  #                           LaunchTests 85, CutoutBenchTests 20 (job about 20 minutes)
+  #   ui-add-and-variants     AddPieceTests 300, HomeVariantTests 207, SwapTests 125, CatalogTests 124,
+  #                           MakeYourOwnLookTests 77, ScreenToursTests about 250 locally (16b)
+  #   ui-rest                 SavedLooksTests 244, GarmentDetailTests 210, ProfileTests 193,
+  #                           SuitcasesAndLaundryTests 158, and any new class (about 22)
+  #   ui-ipad                 IPadStyleMeAndSavedTests 290, IPadTests 195 (about 14)
+  #   (release-and-package-tests above: SettingsTests 454 to 479, 22 to 26 with the Release build)
+  # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
+  # in ui-rest it would only skip itself on the iPhone.
+  ui-tests:
+    name: ui-tests (${{ matrix.part }})
+    runs-on: macos-26
+    timeout-minutes: 40
+    strategy:
+      # Let every part finish, so one failure doesn't hide another.
+      fail-fast: false
+      matrix:
+        include:
+          - part: ui-home-and-results
+            family: iPhone
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/HomeTests
+              -only-testing:NiftyOutfitNookUITests/YourLooksTests
+              -only-testing:NiftyOutfitNookUITests/StyleMeTests
+              -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -only-testing:NiftyOutfitNookUITests/ClosetTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
+          - part: ui-add-and-variants
+            family: iPhone
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/AddPieceTests
+              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -only-testing:NiftyOutfitNookUITests/CatalogTests
+              -only-testing:NiftyOutfitNookUITests/SwapTests
+              -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -only-testing:NiftyOutfitNookUITests/ScreenToursTests
+          # Every other UI test class, so a new one is never left out.
+          - part: ui-rest
+            family: iPhone
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests
+              -skip-testing:NiftyOutfitNookUITests/HomeTests
+              -skip-testing:NiftyOutfitNookUITests/YourLooksTests
+              -skip-testing:NiftyOutfitNookUITests/StyleMeTests
+              -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -skip-testing:NiftyOutfitNookUITests/ClosetTests
+              -skip-testing:NiftyOutfitNookUITests/AddPieceTests
+              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -skip-testing:NiftyOutfitNookUITests/CatalogTests
+              -skip-testing:NiftyOutfitNookUITests/SwapTests
+              -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
+              -skip-testing:NiftyOutfitNookUITests/SettingsTests
+              -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/IPadTests
+              -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
+          # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
+          # one of these skips itself on an iPhone.
+          - part: ui-ipad
+            family: iPad
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/IPadTests
+              -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -48,27 +171,48 @@ jobs:
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
           xcrun simctl list runtimes available
-      - name: Check the two Package.resolved files agree
-        run: scripts/check-package-pins.sh
-      - name: Build (Release)
-        run: scripts/build.sh Release
-      - name: Check the Release build has no debug or test code
-        run: scripts/check-release.sh
-      - name: Test (package tests, snapshot tests and UI tests)
+      - name: Test (${{ matrix.part }})
         env:
+          NOOK_SIM_FAMILY: ${{ matrix.family }}
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
-        run: scripts/test.sh
+          SELECTION: ${{ matrix.selection }}
+        # SELECTION is a fixed list of xcodebuild flags from the matrix above, split on spaces on purpose.
+        #
+        # A failed UI test runs once more, here only. This is for the hosted runner, not for our
+        # tests: twice in about 25 runs (October 2026) a test was lost to the simulator failing to start the app
+        # ("Timed out while launching application via Xcode", "Failed to get launch progress"),
+        # which no wait in a test can catch. A test that fails twice still fails the job, and the
+        # first failure stays in the test results. Package tests and local runs never retry.
+        run: scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: TestResults
+          name: TestResults-${{ matrix.part }}
           path: |
             build/TestResults.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
+
+  # The required check. It must run even when a job above fails or is cancelled (`always()`),
+  # because GitHub counts a skipped required check as passed.
+  build-and-test:
+    name: build-and-test
+    needs: [release-and-package-tests, ui-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every build and test job passed
+        env:
+          RELEASE_AND_PACKAGE: ${{ needs.release-and-package-tests.result }}
+          UI_TESTS: ${{ needs.ui-tests.result }}
+        run: |
+          echo "release-and-package-tests: $RELEASE_AND_PACKAGE"
+          echo "ui-tests: $UI_TESTS"
+          [[ "$RELEASE_AND_PACKAGE" == "success" && "$UI_TESTS" == "success" ]]
 
   gitleaks:
     name: gitleaks

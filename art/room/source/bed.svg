@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 118 272" width="118" height="272">
+  <!-- Bed corner, anchored to the bottom-right of the screen. Bedding runs off the right edge; the side rail runs from
+       the corner post down to the bottom-right and off the edge, as in ref/bed-rug.png.
+       Read from the left: the cream duvet turned down over the corner and hanging to a flared hem over the post,
+       the pink blanket on the mattress top (its far edges climb to the upper right) and down the side to the rail,
+       then the cream sheet hanging nearest the viewer.
+       Linen: fill #FFF7EA, shade #F3E6D0, outline #D9C6A5. Blanket: fill #F4B4C2, shade #EC9DB0, outline #D97F97,
+       highlight #F9CDD5. Frame: wood #E7BC6E, shade #D9A650, outline #B98632, highlight #F6DDA4.
+       Rail top edge runs from (33,143) to (118,246); everything above it and right of the post is bedding. -->
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- floor shadow under the rail and the post -->
+    <path d="M27,158 L120,268 L120,276 L24,163 Z" fill="#7A4636" opacity=".1"/>
+    <ellipse cx="26" cy="159.6" rx="11" ry="2.6" fill="#7A4636" opacity=".12"/>
+
+    <!-- frame: side rail running toward the viewer -->
+    <path d="M30,141.6 L121,249.8 V262 L30,152.4 Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.4"/>
+    <path d="M30,147.6 L121,256 V262 L30,152.4 Z" fill="#D9A650"/>
+    <path d="M34,145.6 L121,249" fill="none" stroke="#F6DDA4" stroke-width="1" opacity=".8"/>
+
+    <!-- frame: corner post -->
+    <path d="M19,126 H32.6 V156.4 Q32.6,159.4 29.6,159.4 H22 Q19,159.4 19,156.4 Z" fill="#E7BC6E" stroke="#B98632" stroke-width="1.4"/>
+    <path d="M28.4,126.6 H32.6 V156.4 Q32.6,159.4 29.6,159.4 H28.4 Z" fill="#D9A650"/>
+    <line x1="21.8" y1="140" x2="21.8" y2="156" stroke="#F6DDA4" stroke-width="1" opacity=".8"/>
+
+    <!-- cream sheet nearest the viewer (its left part sits under the blanket) -->
+    <path d="M70,46 H121 V251.4 C105,232.6 90,214.4 70,190.6 Z" fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+    <!-- shade where the sheet tucks under the blanket edge -->
+    <path d="M76,86 C76.8,79 80,74.6 86,71.2 C82.6,74.6 81,79 80.6,86 C80.2,120 80,156 80.2,200.6 L75.4,195 C75.4,150 75.6,110 76,86 Z" fill="#F3E6D0"/>
+    <!-- two soft folds, tapering out toward the hem -->
+    <path d="M90.6,82 C91.8,86 92,92 91.8,100 C91.4,130 91.6,170 92.6,209 L90.4,206.4 C89.6,168 89.4,128 89.6,100 C89.8,92 90,86 90.6,82 Z" fill="#F3E6D0"/>
+    <path d="M104.8,72.6 C106,77 106.2,84 106,92 C105.6,126 105.8,182 107,226 L105,223.6 C104,180 103.6,124 103.8,92 C104,84 104.2,77 104.8,72.6 Z" fill="#F3E6D0" opacity=".8"/>
+    <!-- pink blanket: mattress top plus the side hanging to the rail (its left part sits under the duvet) -->
+    <path d="M121,20 L60,38 L36,110 L32.8,146.4 C35.2,149.4 37.6,152.4 40,155.4 C47,163.4 50.6,167.6 54,172 C61,180.2 68,188.4 75.2,197
+             C75.2,150 75.6,110 76.4,88 C77.2,80 80.5,74.4 87,70.6 C94,66.8 106,63 121,60.4 Z"
+      fill="#F4B4C2" stroke="#D97F97" stroke-width="1.4"/>
+    <!-- lit top plane of the mattress -->
+    <path d="M60,66 C67,58.4 86,47.6 121,34 V60.4 C106,63 94,66.8 87,70.6 C83.6,72.6 81,75 79.4,78.2 C73,74.6 66.4,70.4 60,66 Z" fill="#F9CDD5" opacity=".42"/>
+    <!-- shadow the duvet casts on the blanket -->
+    <path d="M54.4,64 C49.4,70.4 46,79 43.6,90 C40,108 38.8,128 39.4,145 L40.6,151.6
+             L45,156.8 C44,130 44.4,110 47.6,93.4 C49.8,82.6 53.2,74.6 58,68.6 Z" fill="#EC9DB0" opacity=".6"/>
+
+    <!-- the cream duvet turned down over the corner, flaring to a hem -->
+    <path d="M121,10.6 C104,13 84,17.4 68,23 C57,27 49.6,32.6 45,41 C39,52 31.6,69 24.6,85 C18.6,99 12.6,112 9.8,120.6
+             C8.4,125.4 9.6,129.6 14,131 C20,133 26,135.4 31,138.4 C34.4,140.4 37.2,142.6 39.4,145
+             C38.8,128 40,108 43.6,90 C46.2,77.4 50.4,68 56.6,61.4 C62.8,54.8 84,42.4 121,28.4 Z"
+      fill="#FFF7EA" stroke="#D9C6A5" stroke-width="1.4"/>
+    <!-- underside of the fold, along the inner edge -->
+    <path d="M121,28.4 C84,42.4 62.8,54.8 56.6,61.4 C50.4,68 46.2,77.4 43.6,90 C40,108 38.8,128 39.4,145
+             C38.2,144 36.8,143 35.6,142.2 C35,126 36,107 39.4,89 C42,76.4 46.4,67 52.6,60.2 C59.6,52.4 82,40 121,25.4 Z" fill="#F3E6D0"/>
+    <!-- underside of the hem -->
+    <path d="M9.4,124.4 C9.2,127.6 10.6,129.9 14,131 C20,133 26,135.4 31,138.4 C34.4,140.4 37.2,142.6 39.4,145
+             C37.4,143.4 35,141.8 32.2,140.4 C26.8,137.6 20.6,135.4 15,133.6 C12,132.6 10,129 9.4,124.4 Z" fill="#F3E6D0"/>
+    <!-- one soft fold -->
+    <path d="M45.6,56 C40.4,72 34.6,96 30.2,133.4" fill="none" stroke="#F3E6D0" stroke-width="2.4"/>
+    <!-- light along the top of the fold -->
+    <path d="M116,14.4 C100,16.6 82,20.8 69.4,25.6 C59.6,29.4 52.6,34.8 48.2,42.4 C43.4,51.4 37.6,64 32.4,76.4" fill="none" stroke="#FFFFFF" stroke-width="1.4" opacity=".9"/>
+    <!-- the blanket's outline where it meets the duvet -->
+    <path d="M121,28.4 C84,42.4 62.8,54.8 56.6,61.4 C50.4,68 46.2,77.4 43.6,90 C40,108 38.8,128 39.4,145" fill="none" stroke="#D97F97" stroke-width="1.25"/>
+  </g>
+</svg>
