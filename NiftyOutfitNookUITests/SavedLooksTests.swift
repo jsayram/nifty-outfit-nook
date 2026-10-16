@@ -174,8 +174,8 @@ final class SavedLooksTests: XCTestCase {
         let app = launch()
         app.tabBars.firstMatch.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         app.buttons["savedLooks.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(element("profile.deleteData", in: app).waitForExistence(timeout: Self.wait), "Profile is missing")
+        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(element("profile.deleteData", in: app).waitUntilExists(timeout: Self.wait), "Profile is missing")
         app.goBack(from: "Profile", to: "Saved Looks", timeout: Self.wait)
     }
 
