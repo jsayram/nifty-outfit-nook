@@ -102,7 +102,7 @@ final class AppRootModel {
     func finish(_ answers: OnboardingAnswers) async -> Bool {
         let services = launch.services(answers.startingCloset)
         do {
-            try await services.profile.change { answers.apply(to: &$0) }
+            try await services.profile.update { answers.apply(to: &$0) }
             try await launch.onboarding.complete(startingCloset: answers.startingCloset)
         } catch {
             return false

@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -19,10 +20,10 @@ import UIKit
 @MainActor
 @Suite(.heavyMainActorWork)
 struct SuitcasesIPadSnapshotTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func data(tracksLaundry: Bool = false) -> FixtureData {
-        var data = FixtureSet.demo.data(now: now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: now, calendar: TestTime.calendar)
         data.profile.remembered.source = .suitcase("s-jose")
         data.profile.preferences.tracksLaundry = tracksLaundry
         data.garments.sort { $0.addedAt > $1.addedAt }

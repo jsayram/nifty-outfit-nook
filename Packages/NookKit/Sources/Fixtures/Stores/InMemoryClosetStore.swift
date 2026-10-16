@@ -27,7 +27,7 @@ public actor InMemoryClosetStore: ClosetStore {
 
     public func save(_ garment: Garment) async throws(StoreError) {
         try await options.begin()
-        garmentsByID[garment.id] = try checked(garment)
+        garmentsByID[garment.id] = try StoreValidation.garment(garment)
     }
 
     @discardableResult
@@ -38,7 +38,7 @@ public actor InMemoryClosetStore: ClosetStore {
         try await options.begin()
         var garment = try existing(id)
         change(&garment)
-        let saved = try checked(garment)
+        let saved = try StoreValidation.garment(garment)
         garmentsByID[id] = saved
         return saved
     }
@@ -83,18 +83,6 @@ public actor InMemoryClosetStore: ClosetStore {
 
     private func existing(_ id: Garment.ID) throws(StoreError) -> Garment {
         guard let garment = garmentsByID[id] else { throw .notFound }
-        return garment
-    }
-
-    private func checked(_ garment: Garment) throws(StoreError) -> Garment {
-        var garment = garment
-        do {
-            garment.name = try NameRules.garmentName(garment.name)
-        } catch {
-            throw .invalidName(error)
-        }
-        let problems = GarmentRules.problems(in: garment)
-        if !problems.isEmpty { throw .invalidDetails(problems) }
         return garment
     }
 

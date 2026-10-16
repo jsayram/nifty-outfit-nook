@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -17,7 +18,7 @@ struct GarmentDetailTextTests {
     ) -> Garment {
         var garment = Garment(
             id: "g-test", name: "Test piece", category: category, ownership: ownership, laundry: laundry,
-            availability: availability, wornOn: worn.map(ClosetTestTime.day), addedAt: ClosetTestTime.day(-400))
+            availability: availability, wornOn: worn.map(TestTime.day), addedAt: TestTime.day(-400))
         configure(&garment)
         return garment
     }
@@ -26,11 +27,11 @@ struct GarmentDetailTextTests {
         _ garment: Garment,
         tracksLaundry: Bool = false,
         repeatWindow: RepeatWindow = .oneWeek,
-        now: Date = ClosetTestTime.now
+        now: Date = TestTime.now
     ) -> GarmentDetailText {
         GarmentDetailText(
             garment: garment, tracksLaundry: tracksLaundry, repeatWindow: repeatWindow, now: now,
-            calendar: ClosetTestTime.calendar, locale: ClosetTestTime.locale)
+            calendar: TestTime.calendar, locale: TestTime.locale)
     }
 
     // MARK: Last worn (LR-10)
@@ -44,8 +45,8 @@ struct GarmentDetailTextTests {
     }
 
     @Test func lateLastNightIsYesterday() {
-        let calendar = ClosetTestTime.calendar
-        let today = calendar.startOfDay(for: ClosetTestTime.now)
+        let calendar = TestTime.calendar
+        let today = calendar.startOfDay(for: TestTime.now)
         var garment = piece()
         garment.wornOn = [today.addingTimeInterval(-30 * 60)]
         #expect(text(garment, now: today.addingTimeInterval(30 * 60)).lastWorn == "Last worn yesterday")
@@ -106,10 +107,10 @@ struct GarmentDetailTextTests {
     }
 
     @Test func statusWhenAwayOrNotHereYet() {
-        #expect(text(piece(availability: .unavailable(until: ClosetTestTime.day(9)))).status == "Away until Oct 23")
+        #expect(text(piece(availability: .unavailable(until: TestTime.day(9)))).status == "Away until Oct 23")
         #expect(text(piece(availability: .unavailable(until: nil))).status == "Away for now")
         // Back already: the date has passed.
-        #expect(text(piece(availability: .unavailable(until: ClosetTestTime.day(-1)))).status == "Available")
+        #expect(text(piece(availability: .unavailable(until: TestTime.day(-1)))).status == "Available")
         #expect(text(piece(ownership: .purchased(.notArrived))).status == "Bought, not here yet")
         #expect(text(piece(ownership: .purchased(.arrived))).status == "Available")
         #expect(
@@ -170,7 +171,7 @@ struct GarmentDetailTextTests {
     /// PRD §7.4: Recently deleted keeps a piece for 30 days.
     @Test func deletionDeadlineIsThirtyDaysOn() {
         #expect(text(piece()).deletionDeadline == "Nov 13")
-        let lateDecember = ClosetTestTime.day(70)
+        let lateDecember = TestTime.day(70)
         #expect(text(piece(), now: lateDecember).deletionDeadline == "Jan 22, 2027")
     }
 }

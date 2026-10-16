@@ -96,7 +96,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 
 ## The store protocol
 
-Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid details, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; Stage B puts persistence behind the same protocols (Phase 20a).
+Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid details, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; Stage B puts real storage behind the same protocols (Phase 21a, after the Phase 20a spike picks how).
 
 ```swift
 protocol ClosetStore: Sendable {
@@ -114,8 +114,8 @@ protocol ClosetStore: Sendable {
 
 protocol LookStore: Sendable { looks, look, save, update, delete, recordWear, removeWear }
 protocol SuitcaseStore: Sendable { suitcases, suitcase, create(name:icon:at:), update, add, remove, markUsed, delete, restore }
-protocol ProfileStore: Sendable { profile, save }   // save checks the sign name, measurements and fit pieces
-// ProfileStore.change { } reads, changes and saves, for one setting at a time (Phase 13)
+protocol ProfileStore: Sendable { profile, save, update }   // both check the sign name, measurements and fit pieces
+// ProfileStore.update { } changes one setting in place, as one step, so two changes at once both land
 
 protocol Stylist: Sendable {
     func style(_ context: StylingContext) async throws(StylistError) -> StyleOutcome
@@ -147,7 +147,7 @@ protocol ErasableStore: Sendable { func eraseAll() async throws(StoreError) }   
 protocol DataDeletionService: Sendable { scopes, parts(in:), delete(_:) -> DeletionReport }
 ```
 
-Every store protocol refines `ErasableStore`, so Delete my data can empty each one through its protocol (a fresh profile for `ProfileStore`, and since Phase 17 the onboarding state last). `NookServices.deletion` is `LocalDataDeletion` over its own stores unless it's given another; it reports each `DataPart` as deleted, pending (a server part, from 24c) or failed. See `docs/settings.md`.
+Every store protocol refines `ErasableStore`, so Delete my data can empty each one through its protocol (a fresh profile for `ProfileStore`, and since Phase 17 the onboarding state last). `NookServices.deletion` is `LocalDataDeletion` over the stores it holds when it's read (so a store swapped in later is the one erased) unless it's given another; it reports each `DataPart` as deleted, pending (a server part, from 24c) or failed. See `docs/settings.md`.
 
 Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture after a moment and sends nothing. The screen keeps the picture in the store before it says it's ready.
 
@@ -155,7 +155,13 @@ Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture 
 
 `NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). The root puts the services in the SwiftUI environment (`\.services`). Screens never build services.
 
-A store returns everything it holds and leaves filtering to the rules: Closet shows `isInCloset`, Saved Looks shows `isSaved`, Suitcases arranges with `SuitcaseShelf`. Wear today on a look is two calls (the look and its pieces); the screen does both, so neither store needs to know about the other.
+A store returns everything it holds and leaves filtering to the rules: Closet shows `isInCloset`, Saved Looks shows `isSaved`, Suitcases arranges with `SuitcaseShelf`. Wear today on a look writes to two stores, the look and then its pieces, so neither store needs to know about the other. `LookWear` (Models) does both: if the pieces can't be written it puts the look back as it was and throws, so the look and its pieces never disagree.
+
+### Store contracts and validation
+
+What a store checks before it keeps a record is in `StoreValidation` (Models/Rules): garments, looks, suitcase names and the profile, each built from `NameRules`, `GarmentRules` and `MeasurementRules`. Every store calls it, so Stage A's in-memory stores and Stage B's real ones refuse the same records.
+
+What every store does is written once as a contract in the `NookTestSupport` target (`Tests/NookTestSupport/StoreContracts`): one per store protocol, each a list of checks run against a factory that makes the store. FixturesTests runs them on every in-memory store, and ServicesTests on the two app-state stores kept in `UserDefaults`. Stage B's real stores run the same contracts. `NookTestSupport` also holds `TestTime` and `SpeedCheck`, which every test target shares; only test targets depend on it.
 
 ## Fixtures
 

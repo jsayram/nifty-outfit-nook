@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 /// Phase 17: the onboarding store in memory, and the services for each starting closet.

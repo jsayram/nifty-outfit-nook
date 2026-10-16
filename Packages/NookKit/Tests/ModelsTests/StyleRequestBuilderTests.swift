@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 /// A small closet with a piece in every state, and suitcases of every size (RD-02, FR-67,

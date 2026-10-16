@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -14,12 +15,12 @@ import Testing
 @MainActor
 @Suite(.heavyMainActorWork)
 struct LargeClosetBrowsingTests {
-    private static let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+    private static let data = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar)
 
     private func loadedModel() -> ClosetModel {
         let model = ClosetModel()
         model.show(
-            Self.data.garments, suitcases: Self.data.suitcases, profile: Self.data.profile, now: ClosetTestTime.now)
+            Self.data.garments, suitcases: Self.data.suitcases, profile: Self.data.profile, now: TestTime.now)
         return model
     }
 

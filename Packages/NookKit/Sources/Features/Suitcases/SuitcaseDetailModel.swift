@@ -175,7 +175,7 @@ final class SuitcaseDetailModel {
         isSaving = true
         defer { isSaving = false }
         let previous = source
-        try await services.profile.change { $0.remembered.source = newSource }
+        try await services.profile.update { $0.remembered.source = newSource }
         if let id = newSource.suitcaseID {
             try await services.suitcases.markUsed(id, at: now)
         }
@@ -205,7 +205,7 @@ final class SuitcaseDetailModel {
         let wasSource = isSource
         try await services.suitcases.update(suitcaseID) { $0.isArchived = archived }
         if archived && wasSource {
-            try await services.profile.change { $0.remembered.source = .mainCloset }
+            try await services.profile.update { $0.remembered.source = .mainCloset }
         }
         await load(from: services, now: now)
         return SuitcaseChange(suitcase: suitcase, kind: archived ? .archived : .broughtBack, wasSource: wasSource)
@@ -221,7 +221,7 @@ final class SuitcaseDetailModel {
         let wasSource = profile.remembered.source == .suitcase(suitcaseID)
         try await services.suitcases.delete(suitcaseID)
         if wasSource {
-            try await services.profile.change { $0.remembered.source = .mainCloset }
+            try await services.profile.update { $0.remembered.source = .mainCloset }
         }
         return SuitcaseChange(suitcase: suitcase, kind: .deleted, wasSource: wasSource)
     }
@@ -278,7 +278,7 @@ nonisolated struct SuitcaseChange: Hashable, Sendable {
         }
         if wasSource {
             let id = suitcase.id
-            try await services.profile.change { $0.remembered.source = .suitcase(id) }
+            try await services.profile.update { $0.remembered.source = .suitcase(id) }
         }
     }
 }

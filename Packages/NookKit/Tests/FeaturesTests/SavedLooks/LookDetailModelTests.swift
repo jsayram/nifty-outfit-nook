@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -9,17 +10,17 @@ import Testing
 /// Undo, and pieces that left her closet (LR-16.4), on the demo closet.
 @MainActor
 struct LookDetailModelTests {
-    private let us = ClosetTestTime.locale
+    private let us = TestTime.locale
 
     private func services(_ behavior: FixtureBehavior = .normal) -> NookServices {
-        FixtureServices.make(set: .demo, behavior: behavior, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, behavior: behavior, now: TestTime.now, calendar: TestTime.calendar)
     }
 
     private func detail(_ id: Look.ID, services: NookServices? = nil) async -> (LookDetailModel, NookServices) {
         let services = services ?? self.services()
         var next = 0
         let model = LookDetailModel(
-            lookID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar,
+            lookID: id, now: { TestTime.now }, calendar: TestTime.calendar,
             makeLookID: {
                 next += 1
                 return Look.ID("o-new-\(next)")
@@ -83,14 +84,14 @@ struct LookDetailModelTests {
         let wear = try await model.wearToday()
         #expect(model.isWornToday)
         #expect(wear.garmentIDs == ["g-navy-cardigan", "g-pink-blouse", "g-navy-trousers", "g-nude-flats"])
-        #expect(try await services.looks.look("o-interview").lastWorn == ClosetTestTime.now)
-        #expect(try await services.closet.garment("g-pink-blouse").lastWorn == ClosetTestTime.now)
+        #expect(try await services.looks.look("o-interview").lastWorn == TestTime.now)
+        #expect(try await services.closet.garment("g-pink-blouse").lastWorn == TestTime.now)
         #expect(model.facts(locale: us).contains("Last worn today"))
 
         try await model.undo(wear)
         #expect(!model.isWornToday)
-        #expect(try await services.looks.look("o-interview").lastWorn == ClosetTestTime.day(-5))
-        #expect(try await services.closet.garment("g-pink-blouse").lastWorn != ClosetTestTime.now)
+        #expect(try await services.looks.look("o-interview").lastWorn == TestTime.day(-5))
+        #expect(try await services.closet.garment("g-pink-blouse").lastWorn != TestTime.now)
     }
 
     /// Tapping Worn today again takes today off.
@@ -106,7 +107,7 @@ struct LookDetailModelTests {
         let (model, services) = await detail("o-blazer-office")
         let wear = try await model.wearToday()
         #expect(!wear.garmentIDs.contains("g-gray-blazer"))
-        #expect(try await services.closet.garment("g-gray-blazer").lastWorn == ClosetTestTime.day(-200))
+        #expect(try await services.closet.garment("g-gray-blazer").lastWorn == TestTime.day(-200))
     }
 
     // MARK: Delete
@@ -149,13 +150,13 @@ struct LookDetailModelTests {
                 == "Gray blazer isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is."
         )
 
-        try await services.closet.delete("g-cream-sweater", at: ClosetTestTime.now)
+        try await services.closet.delete("g-cream-sweater", at: TestTime.now)
         await model.load(from: services)
         #expect(model.removedPieces.map(\.removal) == [.noLongerOwned, .deleted])
         #expect(model.goneCount == 0)
 
         // Purged: the store no longer has it.
-        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         model.show(
             looks: data.looks, garments: data.garments.filter { $0.id != "g-navy-trousers" },
             suitcases: data.suitcases, profile: data.profile)

@@ -27,7 +27,7 @@ public actor InMemoryLookStore: LookStore {
 
     public func save(_ look: Look) async throws(StoreError) {
         try await options.begin()
-        looksByID[look.id] = try checked(look)
+        looksByID[look.id] = try StoreValidation.look(look)
     }
 
     @discardableResult
@@ -35,7 +35,7 @@ public actor InMemoryLookStore: LookStore {
         try await options.begin()
         var look = try existing(id)
         change(&look)
-        let saved = try checked(look)
+        let saved = try StoreValidation.look(look)
         looksByID[id] = saved
         return saved
     }
@@ -61,18 +61,6 @@ public actor InMemoryLookStore: LookStore {
 
     private func existing(_ id: Look.ID) throws(StoreError) -> Look {
         guard let look = looksByID[id] else { throw .notFound }
-        return look
-    }
-
-    /// A named look must have a valid name. Unnamed looks are fine (unsaved results).
-    private func checked(_ look: Look) throws(StoreError) -> Look {
-        guard let name = look.name else { return look }
-        var look = look
-        do {
-            look.name = try NameRules.lookName(name)
-        } catch {
-            throw .invalidName(error)
-        }
         return look
     }
 

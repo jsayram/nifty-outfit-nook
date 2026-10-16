@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -8,10 +9,10 @@ import Testing
 /// Laundry (Phase 13, RD-11, PRD §7.3): what's listed, the scopes, and cleaning with Undo.
 @MainActor
 struct LaundryModelTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func services(laundry: FixtureLaundryState? = .some, source: FixtureSourceState? = nil) -> NookServices {
-        FixtureServices.make(set: .demo, laundry: laundry, source: source, now: now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, laundry: laundry, source: source, now: now, calendar: TestTime.calendar)
     }
 
     private func loaded(_ services: NookServices) async -> LaundryModel {
@@ -27,7 +28,7 @@ struct LaundryModelTests {
         #expect(Set(model.shown.map(\.id)) == ["g-lace-top", "g-black-tee"])
         #expect(model.sourceSuitcase == nil)
         let tee = model.shown.first { $0.id == "g-black-tee" }
-        #expect(tee.map { model.whereItIs($0, locale: ClosetTestTime.locale) } == "packed in Gym and Weekend")
+        #expect(tee.map { model.whereItIs($0, locale: TestTime.locale) } == "packed in Gym and Weekend")
     }
 
     @Test func trackingOffKeepsTheMarksAndTurnOnBringsThemBack() async {

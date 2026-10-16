@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -14,8 +15,8 @@ func editorServices(
     draft: FixtureDraftState? = nil
 ) -> NookServices {
     FixtureServices.make(
-        set: set, behavior: behavior, laundry: laundry, draft: draft, now: ClosetTestTime.now,
-        calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, laundry: laundry, draft: draft, now: TestTime.now,
+        calendar: TestTime.calendar)
 }
 
 /// An editor model loaded the way the screen loads it. Drafts are written at once unless a
@@ -30,7 +31,7 @@ func loadedEditor(
 ) async -> GarmentEditorModel {
     let model = GarmentEditorModel(
         target: target, firstStep: firstStep, resumesDraft: resumesDraft, draftSaveDelay: draftSaveDelay,
-        now: { ClosetTestTime.now })
+        now: { TestTime.now })
     await model.load(from: services)
     return model
 }
@@ -114,7 +115,7 @@ struct AddPieceModelTests {
         }
         let stored = try await services.closet.garment(garment.id)
         #expect(stored.name == "Sage cardigan")
-        #expect(stored.addedAt == ClosetTestTime.now)
+        #expect(stored.addedAt == TestTime.now)
         #expect(stored.isInCloset)
         // Newest first, so it heads the grid.
         #expect(try await services.closet.garments().first?.id == garment.id)
@@ -400,18 +401,18 @@ struct GarmentDraftModelTests {
 struct ClosetDraftTests {
     @Test func offersTheWaitingDraft() async {
         let model = ClosetModel()
-        await model.load(from: editorServices(draft: .add), now: ClosetTestTime.now)
+        await model.load(from: editorServices(draft: .add), now: TestTime.now)
         #expect(model.draft?.target == .newPiece)
         let none = ClosetModel()
-        await none.load(from: editorServices(), now: ClosetTestTime.now)
+        await none.load(from: editorServices(), now: TestTime.now)
         #expect(none.draft == nil)
     }
 
     @Test func aDraftForAPieceThatsGoneIsntOffered() async throws {
         let services = editorServices(draft: .edit)
-        try await services.closet.delete("g-navy-trousers", at: ClosetTestTime.now)
+        try await services.closet.delete("g-navy-trousers", at: TestTime.now)
         let model = ClosetModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         #expect(model.draft == nil)
         // It stays, in case Undo brings the piece back.
         #expect(try await services.drafts.drafts().count == 1)
@@ -420,7 +421,7 @@ struct ClosetDraftTests {
     @Test func discardRemovesIt() async throws {
         let services = editorServices(draft: .add)
         let model = ClosetModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         await model.discardDraft(in: services.drafts)
         #expect(model.draft == nil)
         #expect(try await services.drafts.drafts().isEmpty)
@@ -429,24 +430,24 @@ struct ClosetDraftTests {
     @Test func theCardSaysWhatsWaiting() throws {
         let add = try #require(
             FixtureDrafts.draft(
-                .add, in: FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar),
-                now: ClosetTestTime.now))
+                .add, in: FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar),
+                now: TestTime.now))
         #expect(DraftResumeText.message(for: add) == "Sage cardigan isn’t in your closet yet.")
         #expect(
-            DraftResumeText.age(of: add, now: ClosetTestTime.now, locale: ClosetTestTime.locale)
+            DraftResumeText.age(of: add, now: TestTime.now, locale: TestTime.locale)
                 == "Last changed 5 minutes ago")
         var unnamed = add
         unnamed.details.name = ""
         #expect(DraftResumeText.message(for: unnamed) == "The piece you started adding isn’t in your closet yet.")
         let edit = try #require(
             FixtureDrafts.draft(
-                .edit, in: FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar),
-                now: ClosetTestTime.now))
+                .edit, in: FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar),
+                now: TestTime.now))
         #expect(DraftResumeText.message(for: edit) == "Your changes to Navy dress pants aren’t saved yet.")
         var fresh = edit
-        fresh.savedAt = ClosetTestTime.now
+        fresh.savedAt = TestTime.now
         #expect(
-            DraftResumeText.age(of: fresh, now: ClosetTestTime.now, locale: ClosetTestTime.locale)
+            DraftResumeText.age(of: fresh, now: TestTime.now, locale: TestTime.locale)
                 == "Last changed just now")
     }
 

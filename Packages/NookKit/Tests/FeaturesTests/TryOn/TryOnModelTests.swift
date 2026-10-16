@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -15,7 +16,7 @@ struct TryOnModelTests {
         _ mode: SimulatedTryOn.Mode = .normal, latency: Duration = .zero, behavior: FixtureBehavior = .normal
     ) -> NookServices {
         var services = FixtureServices.make(
-            set: .demo, behavior: behavior, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+            set: .demo, behavior: behavior, now: TestTime.now, calendar: TestTime.calendar)
         services.tryOn = SimulatedTryOn(mode: mode, latency: latency, makeID: { "p-new" })
         return services
     }
@@ -26,7 +27,7 @@ struct TryOnModelTests {
 
     private func model(for look: Look, saveLook: (() async throws(StoreError) -> Look)? = nil) -> TryOnModel {
         TryOnModel(
-            look: look, lookName: look.name ?? "Look", garments: [:], saveLook: saveLook, now: { ClosetTestTime.now })
+            look: look, lookName: look.name ?? "Look", garments: [:], saveLook: saveLook, now: { TestTime.now })
     }
 
     /// The sheet says what will happen and makes nothing until she taps Make a picture (RD-06.2).
@@ -46,7 +47,7 @@ struct TryOnModelTests {
         #expect(model.step == .made(picture))
         #expect(picture.lookID == "o-blazer-office")
         #expect(picture.captured == CapturedLook(blazer))
-        #expect(picture.createdAt == ClosetTestTime.now)
+        #expect(picture.createdAt == TestTime.now)
     }
 
     /// FR-59: a picture of exactly this look is offered first; Make another still makes one.
@@ -123,7 +124,7 @@ struct TryOnModelTests {
             try await looks.update(history.id) { look in
                 look.isSaved = true
                 look.name = "Cream & denim"
-                look.savedAt = ClosetTestTime.now
+                look.savedAt = TestTime.now
             }
         }
         #expect(model.savesLook)

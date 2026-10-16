@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -111,7 +112,7 @@ struct SavedLooksSnapshotTests {
 
     /// Its look was deleted: no See the look, and the picture stays.
     @Test func pictureWhoseLookWasDeleted() async throws {
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         try await services.looks.delete("o-lace-date")
         assertSnapshot(
             PictureDetailPage(model: await picture("p-lace", services: services)), named: "picture-look-deleted")
@@ -127,7 +128,7 @@ struct SavedLooksSnapshotTests {
     /// Try it on from Your looks for a look that isn't saved: what happens, that it saves the
     /// look, and that it's free here.
     @Test func tryOnSheet() async throws {
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         let look = try await services.looks.look("o-history-casual")
         let model = TryOnModel(look: look, lookName: "Cream & denim", garments: [:], saveLook: { look })
         assertSnapshot(tryOnSheet(model), named: "try-on")
@@ -135,7 +136,7 @@ struct SavedLooksSnapshotTests {
 
     /// FR-59: she already has a picture of this look.
     @Test func tryOnSheetWithAPictureSheHas() async throws {
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         let look = try await services.looks.look("o-interview")
         let garments = try await services.closet.garments()
         let model = TryOnModel(
@@ -170,8 +171,8 @@ struct SavedLooksSnapshotTests {
 
     private func picture(_ id: TryOnPicture.ID, services: NookServices? = nil) async -> PictureDetailModel {
         let services =
-            services ?? FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
-        let model = PictureDetailModel(pictureID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+            services ?? FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
+        let model = PictureDetailModel(pictureID: id, now: { TestTime.now }, calendar: TestTime.calendar)
         await model.load(from: services)
         return model
     }
@@ -185,8 +186,8 @@ struct SavedLooksSnapshotTests {
     }
 
     private func detail(_ id: Look.ID) async -> LookDetailModel {
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
-        let model = LookDetailModel(lookID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
+        let model = LookDetailModel(lookID: id, now: { TestTime.now }, calendar: TestTime.calendar)
         await model.load(from: services)
         return model
     }
@@ -213,8 +214,8 @@ struct SavedLooksSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
             .environment(\.scenePhase, scenePhase)
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale

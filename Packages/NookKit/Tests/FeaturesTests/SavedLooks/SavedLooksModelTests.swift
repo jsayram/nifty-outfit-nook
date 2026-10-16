@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -11,9 +12,9 @@ func loadedSavedLooks(
     _ set: FixtureSet = .demo, behavior: FixtureBehavior = .normal, searchDelay: Duration = .milliseconds(250)
 ) async -> SavedLooksModel {
     let services = FixtureServices.make(
-        set: set, behavior: behavior, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, now: TestTime.now, calendar: TestTime.calendar)
     let model = SavedLooksModel(searchDelay: searchDelay)
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }
 
@@ -39,12 +40,12 @@ struct SavedLooksModelTests {
     /// A look saved today goes first, even though its result was made earlier.
     @Test func orderFollowsWhenSaved() async {
         let model = SavedLooksModel()
-        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         var looks = data.looks
         if let index = looks.firstIndex(where: { $0.id == "o-blazer-office" }) {
-            looks[index].savedAt = ClosetTestTime.now
+            looks[index].savedAt = TestTime.now
         }
-        model.show(looks, garments: data.garments, now: ClosetTestTime.now)
+        model.show(looks, garments: data.garments, now: TestTime.now)
         #expect(ids(model).first == "o-blazer-office")
     }
 
@@ -167,18 +168,18 @@ struct SavedLooksModelTests {
 
     /// Delete look from its detail, then Undo from the line over the looks.
     @Test func undoBringsADeletedLookBack() async throws {
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         let model = SavedLooksModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         let detail = LookDetailModel(
-            lookID: "o-weekend", now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+            lookID: "o-weekend", now: { TestTime.now }, calendar: TestTime.calendar)
         await detail.load(from: services)
         model.lastRemoval = try await detail.delete()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         #expect(!ids(model).contains("o-weekend"))
         #expect(model.lastRemoval?.name == "Weekend olive and brick")
 
-        await model.undoLastRemoval(using: services, now: ClosetTestTime.now)
+        await model.undoLastRemoval(using: services, now: TestTime.now)
         #expect(model.lastRemoval == nil)
         #expect(ids(model) == ["o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-blazer-office"])
     }
@@ -187,10 +188,10 @@ struct SavedLooksModelTests {
 
     /// The large set's 480-odd saved looks load, search and filter without a stall.
     @Test(.heavyMainActorWork) func largeSetStaysQuick() async {
-        let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar)
         let model = SavedLooksModel(searchDelay: .zero)
         let loading = SpeedCheck.fastest {
-            model.show(data.looks, garments: data.garments, now: ClosetTestTime.now)
+            model.show(data.looks, garments: data.garments, now: TestTime.now)
         }
         #expect(model.items.count > 400)
         #expect(loading < SpeedCheck.limit(.milliseconds(500)), "Loading took \(loading)")

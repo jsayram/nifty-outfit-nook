@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -8,15 +9,15 @@ import Testing
 /// The source and occasion Style Me remembers (FR-67, Phase 13), and where they show.
 @MainActor
 struct RememberedChoicesTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func services(source: FixtureSourceState? = nil) -> NookServices {
-        FixtureServices.make(set: .demo, source: source, now: now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, source: source, now: now, calendar: TestTime.calendar)
     }
 
     @Test func styleMeStartsFromTheRememberedSourceAndOccasion() async throws {
         let services = services(source: .suitcase)
-        try await services.profile.change { $0.remembered.occasion = .brunch }
+        try await services.profile.update { $0.remembered.occasion = .brunch }
         let model = StyleMeModel()
         await model.load(from: services, now: now)
         #expect(model.draft.source == .suitcase("s-jose"))
@@ -64,7 +65,7 @@ struct RememberedChoicesTests {
 
     @Test func homeShowsTheOccasionOnTheCalendar() async throws {
         let services = services()
-        try await services.profile.change { $0.remembered.occasion = .concert }
+        try await services.profile.update { $0.remembered.occasion = .concert }
         let home = HomeModel()
         await home.load(from: services)
         #expect(home.content.occasion == .concert)

@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -23,22 +24,22 @@ struct ClosetIPadSnapshotTests {
     private static let trousers: Garment.ID = "g-navy-trousers"
 
     private func closetModel() -> ClosetModel {
-        var data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         data.profile.preferences.tracksLaundry = true
         let garments = data.garments.sorted { $0.addedAt > $1.addedAt }
         let model = ClosetModel()
-        model.show(garments, suitcases: data.suitcases, profile: data.profile, now: ClosetTestTime.now)
+        model.show(garments, suitcases: data.suitcases, profile: data.profile, now: TestTime.now)
         return model
     }
 
     private func detailModel() throws -> GarmentDetailModel {
-        var data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         data.profile.preferences.tracksLaundry = true
         let garment = try #require(data.garments.first { $0.id == Self.trousers })
         let model = GarmentDetailModel(garmentID: Self.trousers)
         model.show(
             garment, suitcases: data.suitcases, looks: data.looks.sorted { $0.createdAt > $1.createdAt },
-            profile: data.profile, now: ClosetTestTime.now)
+            profile: data.profile, now: TestTime.now)
         return model
     }
 
@@ -128,8 +129,8 @@ struct ClosetIPadSnapshotTests {
         .environment(\.nookStaticRendering, true)
         .environment(\.colorScheme, colorScheme)
         .environment(\.dynamicTypeSize, dynamicTypeSize)
-        .environment(\.locale, ClosetTestTime.locale)
-        .environment(\.calendar, ClosetTestTime.calendar)
+        .environment(\.locale, TestTime.locale)
+        .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: view)
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(size)

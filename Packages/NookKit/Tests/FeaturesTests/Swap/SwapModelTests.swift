@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -12,7 +13,7 @@ func swappableLooks(
 ) async -> YourLooksModel {
     var next = 0
     let model = YourLooksModel(
-        request: request, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar,
+        request: request, now: { TestTime.now }, calendar: TestTime.calendar,
         makeLookID: {
             next += 1
             return Look.ID("edit-\(next)")
@@ -95,7 +96,7 @@ struct SwapModelTests {
         model.version = .dressedUp
         let swap = try swap(model, on: .bottom)
         #expect(!swap.options.ranked.contains("g-navy-trousers"))
-        #expect(swap.options.wornRecently["g-navy-trousers"] == ClosetTestTime.day(-5))
+        #expect(swap.options.wornRecently["g-navy-trousers"] == TestTime.day(-5))
         #expect(swap.seeAllScope.notes["g-navy-trousers"] == SwapText.wornTogether)
     }
 
@@ -124,24 +125,24 @@ struct SwapModelTests {
         let garments = (0..<8).map { index in
             Garment(
                 id: Garment.ID("t\(index)"), name: "Top \(index)", category: .top, colors: [.white],
-                occasions: [.office], addedAt: ClosetTestTime.day(-10))
+                occasions: [.office], addedAt: TestTime.day(-10))
         }
         let base = [
-            Garment(id: "top", name: "Top", category: .top, colors: [.white], addedAt: ClosetTestTime.now),
-            Garment(id: "bottom", name: "Bottom", category: .bottom, colors: [.navy], addedAt: ClosetTestTime.now),
+            Garment(id: "top", name: "Top", category: .top, colors: [.white], addedAt: TestTime.now),
+            Garment(id: "bottom", name: "Bottom", category: .bottom, colors: [.navy], addedAt: TestTime.now),
         ]
         let look = Look(
             id: "look",
             pieces: [
                 LookPiece(id: "look-top", content: .garment("top")),
                 LookPiece(id: "look-bottom", content: .garment("bottom")),
-            ], occasion: .office, createdAt: ClosetTestTime.now)
+            ], occasion: .office, createdAt: TestTime.now)
         let swap = SwapModel(
             setup: SwapSetup(
                 look: look, simple: nil,
                 garments: Dictionary(uniqueKeysWithValues: (garments + base).map { ($0.id, $0) }), suitcases: [],
                 situation: SwapSituation(
-                    occasion: .office, date: ClosetTestTime.now, calendar: ClosetTestTime.calendar),
+                    occasion: .office, date: TestTime.now, calendar: TestTime.calendar),
                 sourceName: "Main closet", allowsFindOne: false))
         #expect(swap.options.ranked.count == 8)
         #expect(swap.visibleOptions.count == 3)

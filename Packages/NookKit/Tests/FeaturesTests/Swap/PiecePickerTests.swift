@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -8,13 +9,13 @@ import Testing
 /// The picker behind See all and Add a piece: Closet's model over a chosen set of pieces.
 @MainActor
 struct PiecePickerTests {
-    private static let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+    private static let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
 
     private func picker(_ scope: PieceScope, tracksLaundry: Bool = true) -> ClosetModel {
         let model = ClosetModel(scope: scope)
         model.show(
             Self.data.garments, suitcases: Self.data.suitcases,
-            profile: Profile(preferences: Preferences(tracksLaundry: tracksLaundry)), now: ClosetTestTime.now)
+            profile: Profile(preferences: Preferences(tracksLaundry: tracksLaundry)), now: TestTime.now)
         return model
     }
 
@@ -30,7 +31,7 @@ struct PiecePickerTests {
         #expect(!model.showsLaundryFilter)
         #expect(
             model.shown.first?.spokenDetails(
-                now: ClosetTestTime.now, calendar: ClosetTestTime.calendar, locale: ClosetTestTime.locale
+                now: TestTime.now, calendar: TestTime.calendar, locale: TestTime.locale
             )
             .hasPrefix("May not match") == true)
     }
@@ -51,7 +52,7 @@ struct PiecePickerTests {
         let model = ClosetModel()
         model.show(
             Self.data.garments, suitcases: Self.data.suitcases,
-            profile: Profile(preferences: Preferences(tracksLaundry: true)), now: ClosetTestTime.now)
+            profile: Profile(preferences: Preferences(tracksLaundry: true)), now: TestTime.now)
         #expect(model.showsLaundryFilter)
         #expect(model.pieceKinds.starts(with: ClosetModel.standardKinds))
         #expect(model.items.allSatisfy { $0.note == nil })

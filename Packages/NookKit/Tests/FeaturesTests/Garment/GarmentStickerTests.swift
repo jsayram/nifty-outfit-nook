@@ -2,6 +2,7 @@ import CoreGraphics
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -126,7 +127,7 @@ struct GarmentStickerCacheTests {
     private static let cellSize = CGSize(width: 70, height: 90)
 
     private func cells() -> [(id: String, source: StickerSource)] {
-        let data = FixtureSet.large.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let data = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar)
         return data.garments.filter(\.isInCloset).map {
             GarmentPicture.drawingSticker(category: $0.category, colors: $0.colors)
         }

@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -23,10 +24,10 @@ import UIKit
 @Suite(.heavyMainActorWork)
 struct SuitcasesSnapshotTests {
     static let width: CGFloat = 402
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func data(source: Bool = true, tracksLaundry: Bool = false) -> FixtureData {
-        var data = FixtureSet.demo.data(now: now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: now, calendar: TestTime.calendar)
         if source { data.profile.remembered.source = .suitcase("s-jose") }
         data.profile.preferences.tracksLaundry = tracksLaundry
         data.garments.sort { $0.addedAt > $1.addedAt }
@@ -65,7 +66,7 @@ struct SuitcasesSnapshotTests {
     }
 
     @Test func noSuitcasesYet() {
-        let empty = FixtureSet.empty.data(now: now, calendar: ClosetTestTime.calendar)
+        let empty = FixtureSet.empty.data(now: now, calendar: TestTime.calendar)
         assertSnapshot(SuitcasesPage(model: suitcases(empty)), named: "none")
     }
 
@@ -167,8 +168,8 @@ struct SuitcasesSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.displayScale, 2)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)

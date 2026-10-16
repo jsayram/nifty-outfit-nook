@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -27,18 +28,18 @@ struct ScreenTourSnapshotTests {
     static let barsHeight: CGFloat = 116
 
     private var services: NookServices {
-        FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
     }
 
     private var data: FixtureData {
-        FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
     }
 
     // MARK: Closet and pieces
 
     @Test func closetSearch() async {
         let model = ClosetModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(
             ClosetPage(model: model, open: { _ in }, retry: {}), ClosetTour.definition(detailBeside: false), step: 1,
             named: "closet-2")
@@ -46,7 +47,7 @@ struct ScreenTourSnapshotTests {
 
     @Test func closetFiltersAX5() async {
         let model = ClosetModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(
             ClosetPage(model: model, open: { _ in }, retry: {}), ClosetTour.definition(detailBeside: false), step: 2,
             dynamicTypeSize: .accessibility5, named: "closet-3-ax5")
@@ -54,7 +55,7 @@ struct ScreenTourSnapshotTests {
 
     @Test func garmentStyleWithThis() async {
         let model = GarmentDetailModel(garmentID: "g-navy-trousers")
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(GarmentDetailPage(model: model), GarmentTour.definition, step: 1, named: "garment-2")
     }
 
@@ -97,21 +98,21 @@ struct ScreenTourSnapshotTests {
 
     @Test func savedLooksFirstLook() async {
         let model = SavedLooksModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(SavedLooksPage(model: model), SavedLooksTour.definition, step: 0, named: "saved-looks-1")
     }
 
     @Test func lookWearToday() async throws {
         let model = LookDetailModel(
-            lookID: try #require(data.looks.first?.id), now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+            lookID: try #require(data.looks.first?.id), now: { TestTime.now }, calendar: TestTime.calendar)
         await model.load(from: services)
         assertTourSnapshot(LookDetailPage(model: model), LookTour.definition, step: 0, named: "look-1")
     }
 
     @Test func pictureSeeTheLook() async throws {
         let model = PictureDetailModel(
-            pictureID: try #require(data.pictures.first?.id), now: { ClosetTestTime.now },
-            calendar: ClosetTestTime.calendar)
+            pictureID: try #require(data.pictures.first?.id), now: { TestTime.now },
+            calendar: TestTime.calendar)
         await model.load(from: services)
         assertTourSnapshot(PictureDetailPage(model: model), PictureTour.definition, step: 0, named: "picture-1")
     }
@@ -120,21 +121,21 @@ struct ScreenTourSnapshotTests {
 
     @Test func suitcasesFirstFavourite() async {
         let model = SuitcasesModel()
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(SuitcasesPage(model: model), SuitcasesTour.definition, step: 1, named: "suitcases-2")
     }
 
     @Test func suitcasePacking() async throws {
         let suitcase = try #require(data.suitcases.first { !$0.isArchived })
         let model = SuitcaseDetailModel(suitcaseID: suitcase.id)
-        await model.load(from: services, now: ClosetTestTime.now)
+        await model.load(from: services, now: TestTime.now)
         assertTourSnapshot(
             SuitcaseDetailPage(model: model), SuitcaseTour.definition(hasPieces: true), step: 1, named: "suitcase-2")
     }
 
     @Test func laundryMarkClean() async {
         let services = FixtureServices.make(
-            set: .demo, laundry: .some, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+            set: .demo, laundry: .some, now: TestTime.now, calendar: TestTime.calendar)
         let model = LaundryModel()
         await model.load(from: services)
         assertTourSnapshot(
@@ -152,13 +153,13 @@ struct ScreenTourSnapshotTests {
 
     @Test func profileAppTours() async {
         let model = ProfileModel()
-        await model.load(from: services, locale: ClosetTestTime.locale)
+        await model.load(from: services, locale: TestTime.locale)
         assertTourSnapshot(ProfilePage(model: model), ProfileTour.definition, step: 2, named: "profile-3")
     }
 
     @Test func profileAppToursAX5() async {
         let model = ProfileModel()
-        await model.load(from: services, locale: ClosetTestTime.locale)
+        await model.load(from: services, locale: TestTime.locale)
         assertTourSnapshot(
             ProfilePage(model: model), ProfileTour.definition, step: 0, dynamicTypeSize: .accessibility5,
             named: "profile-1-ax5")
@@ -166,7 +167,7 @@ struct ScreenTourSnapshotTests {
 
     @Test func fitUsualFit() async {
         let model = ProfileModel()
-        await model.load(from: services, locale: ClosetTestTime.locale)
+        await model.load(from: services, locale: TestTime.locale)
         assertTourSnapshot(FitPage(model: model), FitTour.definition, step: 0, named: "fit-1")
     }
 
@@ -199,7 +200,7 @@ struct ScreenTourSnapshotTests {
             .background(Color.nook.surface)
             .environment(\.closetIsStillImage, true)
             .environment(\.nookStaticRendering, true)
-            .environment(\.locale, ClosetTestTime.locale)
+            .environment(\.locale, TestTime.locale)
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         renderer.proposedSize = ProposedViewSize(width: Self.phone.width, height: nil)
@@ -222,7 +223,7 @@ struct ScreenTourSnapshotTests {
 
     @Test func fitOnIPadUpright() async {
         let model = ProfileModel()
-        await model.load(from: services, locale: ClosetTestTime.locale)
+        await model.load(from: services, locale: TestTime.locale)
         assertTourSnapshot(
             FitPage(model: model), FitTour.definition, step: 3, size: SnapshotWindow.portrait.size,
             safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0), barsHeight: 86, sizeClass: .regular,
@@ -276,8 +277,8 @@ struct ScreenTourSnapshotTests {
             .environment(\.roomIsStillImage, true)
             .environment(\.nookStaticRendering, true)
             .environment(\.colorScheme, colorScheme)
-            .environment(\.locale, ClosetTestTime.locale)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.locale, TestTime.locale)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: view)
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(size)

@@ -1,4 +1,5 @@
 import DesignSystem
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -70,8 +71,8 @@ func assertWindowSnapshot(
         .environment(\.nookStaticRendering, true)
         .environment(\.colorScheme, colorScheme)
         .environment(\.dynamicTypeSize, dynamicTypeSize)
-        .environment(\.locale, ClosetTestTime.locale)
-        .environment(\.calendar, ClosetTestTime.calendar)
+        .environment(\.locale, TestTime.locale)
+        .environment(\.calendar, TestTime.calendar)
     let renderer = ImageRenderer(content: content)
     renderer.scale = 1
     renderer.proposedSize = ProposedViewSize(size)

@@ -1,22 +1,6 @@
 import Foundation
 import Models
-
-/// A fixed calendar and date, so tests don't depend on the Mac's time zone or today's date.
-enum TestTime {
-    static let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
-        return calendar
-    }()
-
-    /// Noon UTC on 14 October 2026.
-    static let now = Date(timeIntervalSince1970: 1_791_979_200)
-
-    /// `offset` days from `now`, same time of day.
-    static func day(_ offset: Int) -> Date {
-        calendar.date(byAdding: .day, value: offset, to: now) ?? now
-    }
-}
+import NookTestSupport
 
 extension StylingContext {
     /// A context built from fixture data, the way a screen will build it.

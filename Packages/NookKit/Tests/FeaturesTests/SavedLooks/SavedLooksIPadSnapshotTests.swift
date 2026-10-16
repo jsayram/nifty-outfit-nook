@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -81,17 +82,17 @@ struct SavedLooksIPadSnapshotTests {
         let model = await loadedSavedLooks()
         model.tab = tab
         let beside = layout.showsDetailBeside ? selection : nil
-        let services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         var look: LookDetailModel?
         var picture: PictureDetailModel?
         switch beside {
         case .look(let id):
-            let detail = LookDetailModel(lookID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+            let detail = LookDetailModel(lookID: id, now: { TestTime.now }, calendar: TestTime.calendar)
             await detail.load(from: services)
             look = detail
         case .picture(let id):
             let detail = PictureDetailModel(
-                pictureID: id, now: { ClosetTestTime.now }, calendar: ClosetTestTime.calendar)
+                pictureID: id, now: { TestTime.now }, calendar: TestTime.calendar)
             await detail.load(from: services)
             picture = detail
         case nil:

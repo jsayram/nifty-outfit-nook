@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -8,10 +9,10 @@ import Testing
 /// Suitcases (Phase 13): favourites, choosing the source, "+ Add a suitcase", and the words.
 @MainActor
 struct SuitcasesModelTests {
-    private let now = ClosetTestTime.now
+    private let now = TestTime.now
 
     private func services(_ set: FixtureSet = .demo, source: FixtureSourceState? = nil) -> NookServices {
-        FixtureServices.make(set: set, source: source, now: now, calendar: ClosetTestTime.calendar)
+        FixtureServices.make(set: set, source: source, now: now, calendar: TestTime.calendar)
     }
 
     private func loaded(_ services: NookServices) async -> SuitcasesModel {
@@ -92,9 +93,9 @@ struct SuitcasesModelTests {
     func addingASuitcaseShowsItAtOnce(existing: Int) async throws {
         // LR-17.2, RD-09.1
         let suitcases = (0..<existing).map {
-            Suitcase(id: Suitcase.ID("s-\($0)"), name: "Case \($0)", createdAt: ClosetTestTime.day(-10 - $0))
+            Suitcase(id: Suitcase.ID("s-\($0)"), name: "Case \($0)", createdAt: TestTime.day(-10 - $0))
         }
-        var data = FixtureSet.demo.data(now: now, calendar: ClosetTestTime.calendar)
+        var data = FixtureSet.demo.data(now: now, calendar: TestTime.calendar)
         data.suitcases = suitcases
         let services = NookServicesStub.make(data: data)
         let model = await loaded(services)
@@ -117,10 +118,10 @@ struct SuitcasesModelTests {
     }
 
     @Test func lastUsedWords() {
-        let calendar = ClosetTestTime.calendar
-        let locale = ClosetTestTime.locale
+        let calendar = TestTime.calendar
+        let locale = TestTime.locale
         func used(_ days: Int?) -> String {
-            SuitcasesText.lastUsed(days.map { ClosetTestTime.day(-$0) }, now: now, calendar: calendar, locale: locale)
+            SuitcasesText.lastUsed(days.map { TestTime.day(-$0) }, now: now, calendar: calendar, locale: locale)
         }
         #expect(used(nil) == "Not used yet")
         #expect(used(0) == "Used today")
@@ -141,8 +142,8 @@ struct SuitcasesModelTests {
 /// Services from fixture data that's been changed by a test.
 enum NookServicesStub {
     static func make(data: FixtureData) -> NookServices {
-        var services = FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
-        services.closet = InMemoryClosetStore(garments: data.garments, calendar: ClosetTestTime.calendar)
+        var services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
+        services.closet = InMemoryClosetStore(garments: data.garments, calendar: TestTime.calendar)
         services.suitcases = InMemorySuitcaseStore(suitcases: data.suitcases)
         services.profile = InMemoryProfileStore(profile: data.profile)
         return services

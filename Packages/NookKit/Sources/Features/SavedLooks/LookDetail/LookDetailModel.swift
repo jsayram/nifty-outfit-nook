@@ -198,20 +198,15 @@ final class LookDetailModel {
     // MARK: Wear today
 
     /// What Wear today recorded, so Undo can take exactly that back (LR-10.1).
-    struct Wear: Equatable {
-        let lookID: Look.ID
-        /// Her pieces in her closet, which got the wear too. Pieces she no longer has didn't.
-        let garmentIDs: [Garment.ID]
-        let date: Date
-    }
+    typealias Wear = LookWear
 
     /// Wear today: records today on the look and its pieces still in her closet. Laundry is
-    /// untouched (LR-10, option A).
+    /// untouched (LR-10, option A). `LookWear` keeps the look and its pieces in step if a store
+    /// fails.
     func wearToday() async throws(StoreError) -> Wear {
         guard let services, let look else { throw .unavailable }
         let wear = Wear(lookID: look.id, garmentIDs: wornPieces(of: look), date: now())
-        try await services.looks.recordWear(of: wear.lookID, on: wear.date)
-        try await services.closet.recordWear(of: wear.garmentIDs, on: wear.date)
+        try await wear.record(looks: services.looks, closet: services.closet)
         await reload()
         return wear
     }
@@ -219,8 +214,7 @@ final class LookDetailModel {
     /// Undo for Wear today, or taking today's wear off again.
     func undo(_ wear: Wear) async throws(StoreError) {
         guard let services else { throw .unavailable }
-        try await services.looks.removeWear(of: wear.lookID, on: wear.date)
-        try await services.closet.removeWear(of: wear.garmentIDs, on: wear.date)
+        try await wear.remove(looks: services.looks, closet: services.closet)
         await reload()
     }
 

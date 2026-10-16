@@ -1,27 +1,10 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
-
-/// A fixed date and calendar, so the tests don't depend on the Mac's clock or time zone.
-enum ClosetTestTime {
-    static let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
-        return calendar
-    }()
-
-    /// Noon UTC on 14 October 2026.
-    static let now = Date(timeIntervalSince1970: 1_791_979_200)
-
-    static func day(_ offset: Int) -> Date {
-        calendar.date(byAdding: .day, value: offset, to: now) ?? now
-    }
-
-    static let locale = Locale(identifier: "en_US")
-}
 
 /// A model loaded from a fixture set, the way the screen loads it.
 @MainActor
@@ -32,9 +15,9 @@ func loadedClosetModel(
     searchDelay: Duration = .milliseconds(250)
 ) async -> ClosetModel {
     let services = FixtureServices.make(
-        set: set, behavior: behavior, laundry: laundry, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
+        set: set, behavior: behavior, laundry: laundry, now: TestTime.now, calendar: TestTime.calendar)
     let model = ClosetModel(searchDelay: searchDelay)
-    await model.load(from: services, now: ClosetTestTime.now)
+    await model.load(from: services, now: TestTime.now)
     return model
 }
 
@@ -204,8 +187,8 @@ struct ClosetModelFilterTests {
     @Test func aMissingSuitcaseDropsOutOfTheFilter() async {
         let model = await loadedClosetModel(.demo)
         model.setPacking(.suitcase("s-gone"))
-        let data = FixtureSet.demo.data(now: ClosetTestTime.now, calendar: ClosetTestTime.calendar)
-        model.show(data.garments, suitcases: data.suitcases, profile: data.profile, now: ClosetTestTime.now)
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
+        model.show(data.garments, suitcases: data.suitcases, profile: data.profile, now: TestTime.now)
         #expect(model.filter.packing == .any)
         #expect(model.shown.count == 17)
     }
@@ -248,14 +231,14 @@ struct ClosetSearchDelayTests {
 
 /// What VoiceOver reads on a piece (LR-10, LR-11.1, RD-11).
 struct ClosetItemSpeechTests {
-    private let calendar = ClosetTestTime.calendar
-    private let now = ClosetTestTime.now
-    private let locale = ClosetTestTime.locale
+    private let calendar = TestTime.calendar
+    private let now = TestTime.now
+    private let locale = TestTime.locale
 
     private func item(dirty: Bool = false, suitcases: [String] = [], worn: [Int] = []) -> ClosetItem {
         let garment = Garment(
             id: "g-test", name: "Black wide-leg trousers", category: .bottom, colors: [.black],
-            laundry: dirty ? .dirty : .clean, wornOn: worn.map(ClosetTestTime.day), addedAt: ClosetTestTime.day(-90))
+            laundry: dirty ? .dirty : .clean, wornOn: worn.map(TestTime.day), addedAt: TestTime.day(-90))
         return ClosetItem(garment, suitcaseNames: suitcases, tracksLaundry: true)
     }
 
@@ -277,7 +260,7 @@ struct ClosetItemSpeechTests {
 
     @Test func lastWornWords() {
         func text(_ offset: Int) -> String {
-            LastWornText.describe(ClosetTestTime.day(offset), now: now, calendar: calendar, locale: locale)
+            LastWornText.describe(TestTime.day(offset), now: now, calendar: calendar, locale: locale)
         }
         #expect(text(0) == "Last worn today")
         #expect(text(-1) == "Last worn yesterday")

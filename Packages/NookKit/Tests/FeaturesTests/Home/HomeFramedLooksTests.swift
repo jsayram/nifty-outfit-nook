@@ -1,6 +1,7 @@
 import Fixtures
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Features
@@ -11,7 +12,7 @@ struct HomeFramedLooksTests {
     @Test func demoFramesShowTheThreeNewestSavedLooks() async {
         let model = HomeModel()
         await model.load(
-            from: FixtureServices.make(set: .demo, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar))
+            from: FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar))
         let framed = model.content.framedLooks
         #expect(framed.map(\.id) == ["o-brunch-idea", "o-weekend", "o-interview"])
         #expect(
@@ -24,7 +25,7 @@ struct HomeFramedLooksTests {
     @Test func noSavedLooksLeaveTheFramesEmpty() async {
         let model = HomeModel()
         await model.load(
-            from: FixtureServices.make(set: .empty, now: ClosetTestTime.now, calendar: ClosetTestTime.calendar))
+            from: FixtureServices.make(set: .empty, now: TestTime.now, calendar: TestTime.calendar))
         #expect(model.content.framedLooks.isEmpty)
     }
 
@@ -32,9 +33,9 @@ struct HomeFramedLooksTests {
     @Test func fewerLooksThanFrames() {
         let look = Look(
             id: "o-one", pieces: [LookPiece(id: "p-1", content: .garment("g-dress"))], name: "Blue dress",
-            isSaved: true, createdAt: ClosetTestTime.now)
+            isSaved: true, createdAt: TestTime.now)
         let dress = Garment(
-            id: "g-dress", name: "Dress", category: .dress, colors: [.blue], addedAt: ClosetTestTime.now)
+            id: "g-dress", name: "Dress", category: .dress, colors: [.blue], addedAt: TestTime.now)
         let framed = HomeModel.framedLooks(from: [look], garments: [dress])
         #expect(framed.count == 1)
         #expect(framed[0].pieces.map(\.category) == [.dress])

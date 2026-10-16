@@ -8,7 +8,7 @@ All of it is in `Packages/NookKit/Sources/Features/Closet`, apart from the piece
 
 | File | Holds |
 |---|---|
-| `ClosetScreen.swift` | The navigation stack, Add a piece and Profile in the bar, the screens and stand-ins it pushes, and the toasts after a save or a removal |
+| `ClosetScreen.swift` | The navigation stack, Add a piece and Profile in the bar, and the toasts after a save or a removal |
 | `ClosetPage.swift` | The page top to bottom, and the loading, error, empty and no-match states |
 | `ClosetHeader.swift` | The wall with the title and count, and the small armoire |
 | `ClosetFilters.swift` | The piece chips, colour swatches, the Suitcase menu, Dirty and Clear |
@@ -17,10 +17,10 @@ All of it is in `Packages/NookKit/Sources/Features/Closet`, apart from the piece
 | `ClosetModel.swift` | Loading, the filter state, the search delay and the words the page shows |
 | `ClosetItem.swift` | One piece as the grid shows it, and what VoiceOver reads about it |
 | `ClosetDestination.swift` | The screens Closet pushes |
+| `ClosetDestinationScreen.swift` | The screen for each destination, shared with Saved Looks, which pushes the same screens from a look's piece. Its switch has no `default`, so a new destination can't open the wrong screen on one tab |
 | `RecentlyDeleted/` | Recently deleted, with Restore (Phase 7a) |
 | `Shared/GarmentArt/` | Garment pictures: the image loader, the placeholder drawings and garment colours |
 | `Shared/GarmentWords.swift` | The words for kinds of piece and colour families |
-| `Shared/StubScreen.swift` | The stand-in for screens later phases build (Home's stubs use it too) |
 
 ## The page
 

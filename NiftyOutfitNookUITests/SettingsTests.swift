@@ -29,7 +29,6 @@ final class SettingsTests: XCTestCase {
             tap(row, in: app)
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(row) didn't open \(title)")
             XCTAssertTrue(element(control, in: app).waitForExistence(timeout: Self.wait), "\(title) has no \(control)")
-            XCTAssertFalse(stubs(in: app).exists, "\(title) is still a stand-in")
             app.goBack(from: title, to: "Profile", timeout: Self.wait)
         }
 
@@ -235,11 +234,6 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func labelled(_ label: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", label)).firstMatch
-    }
-
-    @MainActor
-    private func stubs(in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'stub.'")).firstMatch
     }
 
     /// Taps an element by identifier, scrolling to it first.

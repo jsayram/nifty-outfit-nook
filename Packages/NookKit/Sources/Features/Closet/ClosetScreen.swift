@@ -156,49 +156,17 @@ struct ClosetScreen: View {
         }
     }
 
-    @ViewBuilder private func screen(for destination: ClosetDestination) -> some View {
-        switch destination {
-        case .garment(let id, let name):
-            GarmentDetailScreen(
-                garmentID: id, name: name, open: { path.append($0) }, back: goBack, removed: pieceRemoved)
-        case .recentlyDeleted:
-            RecentlyDeletedScreen()
-        case .styleMe(let id, _):
-            StyleMeScreen(startingPieceID: id, routes: styleMeRoutes)
-        case .styleMeFrom(let source):
-            StyleMeScreen(source: source, routes: styleMeRoutes)
-        case .suitcases:
-            SuitcasesScreen(open: { path.append($0) }, changes: suitcaseChanges)
-        case .allSuitcases:
-            AllSuitcasesScreen(open: { path.append($0) })
-        case .suitcase(let id, let name, let startsPacking):
-            SuitcaseDetailScreen(
-                suitcaseID: id, name: name, startsPacking: startsPacking, open: { path.append($0) }, back: goBack,
-                deleted: suitcaseDeleted)
-        case .laundry:
-            LaundryScreen(open: { path.append($0) })
-        case .addPiece(let start):
-            GarmentEditorScreen(
-                target: .newPiece, firstStep: start == .words ? .words : .choose, resumesDraft: start == .resume,
-                saved: pieceSaved, close: goBack)
-        case .editPiece(let id, _, let resumesDraft):
-            GarmentEditorScreen(target: .garment(id), resumesDraft: resumesDraft, saved: pieceSaved, close: goBack)
-        case .makeYourOwnLook(let id, _):
-            LookBuilderScreen(startingPieceID: id)
-        case .profile:
-            ProfileScreen()
-        }
+    private func screen(for destination: ClosetDestination) -> some View {
+        ClosetDestinationScreen(
+            destination: destination,
+            actions: ClosetDestinationActions(
+                open: { path.append($0) }, back: goBack, pieceRemoved: pieceRemoved, pieceSaved: pieceSaved,
+                suitcaseDeleted: suitcaseDeleted),
+            suitcaseChanges: suitcaseChanges)
     }
 
     private func reload() {
         Task { await model.load(from: services) }
-    }
-
-    private var styleMeRoutes: StyleMeRoutes {
-        StyleMeRoutes(
-            addPiece: { path.append(.addPiece(.photo)) },
-            openSuitcases: { path.append(.suitcases) },
-            openSuitcase: { id, name in path.append(.suitcase(id, name: name)) })
     }
 
     /// Delete suitcase: back to where she came from, with Undo, which puts back the same

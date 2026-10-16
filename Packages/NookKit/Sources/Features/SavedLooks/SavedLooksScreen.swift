@@ -44,6 +44,8 @@ struct SavedLooksScreen: View {
     /// Bumped when something changes a look from outside its detail (Undo on a removed piece),
     /// so the detail on screen reads it again.
     @State private var changes = 0
+    /// Bumped after Undo on a deleted suitcase, so a Suitcases screen under it reads its list again.
+    @State private var suitcaseChanges = 0
     /// The window's width, which picks the layout.
     @State private var width: CGFloat = 0
     /// The look beside the Looks tab's grid and the picture beside the Pictures tab's, in the
@@ -250,37 +252,14 @@ struct SavedLooksScreen: View {
         }
     }
 
-    /// Garment detail and the screens it opens, as on Closet.
-    @ViewBuilder private func closetScreen(_ destination: ClosetDestination) -> some View {
-        switch destination {
-        case .garment(let id, let name):
-            GarmentDetailScreen(
-                garmentID: id, name: name, open: { path.append(.closet($0)) }, back: goBack, removed: pieceRemoved)
-        case .editPiece(let id, _, let resumesDraft):
-            GarmentEditorScreen(
-                target: .garment(id), resumesDraft: resumesDraft, saved: { _ in goBack() }, close: goBack)
-        case .makeYourOwnLook(let id, _):
-            LookBuilderScreen(startingPieceID: id)
-        case .styleMe(let id, _):
-            StyleMeScreen(startingPieceID: id, routes: styleMeRoutes)
-        case .styleMeFrom(let source):
-            StyleMeScreen(source: source, routes: styleMeRoutes)
-        case .suitcases:
-            SuitcasesScreen(open: { path.append(.closet($0)) })
-        case .allSuitcases:
-            AllSuitcasesScreen(open: { path.append(.closet($0)) })
-        case .suitcase(let id, let name, let startsPacking):
-            SuitcaseDetailScreen(
-                suitcaseID: id, name: name, startsPacking: startsPacking, open: { path.append(.closet($0)) },
-                back: goBack, deleted: suitcaseDeleted)
-        case .laundry:
-            LaundryScreen(open: { path.append(.closet($0)) })
-        case .addPiece:
-            GarmentEditorScreen(target: .newPiece, saved: { _ in goBack() }, close: goBack)
-        default:
-            StubScreen(
-                title: destination.title, systemImage: destination.systemImage, identifier: destination.identifier)
-        }
+    /// Garment detail and the screens it opens, the same screens as on Closet.
+    private func closetScreen(_ destination: ClosetDestination) -> some View {
+        ClosetDestinationScreen(
+            destination: destination,
+            actions: ClosetDestinationActions(
+                open: { path.append(.closet($0)) }, back: goBack, pieceRemoved: pieceRemoved,
+                pieceSaved: { _ in goBack() }, suitcaseDeleted: suitcaseDeleted),
+            suitcaseChanges: suitcaseChanges)
     }
 
     /// Try it on's See the picture opens a picture here from another tab, before this tab may
@@ -293,13 +272,6 @@ struct SavedLooksScreen: View {
         Task { await model.load(from: services) }
     }
 
-    private var styleMeRoutes: StyleMeRoutes {
-        StyleMeRoutes(
-            addPiece: { path.append(.closet(.addPiece(.photo))) },
-            openSuitcases: { path.append(.closet(.suitcases)) },
-            openSuitcase: { id, name in path.append(.closet(.suitcase(id, name: name))) })
-    }
-
     /// Delete suitcase, from a suitcase opened on a piece's detail: back to the piece, with Undo.
     private func suitcaseDeleted(_ change: SuitcaseChange) {
         goBack()
@@ -308,7 +280,10 @@ struct SavedLooksScreen: View {
             change.message, systemImage: "checkmark",
             actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
         ) {
-            Task { try? await change.undo(in: services) }
+            Task {
+                try? await change.undo(in: services)
+                suitcaseChanges += 1
+            }
         }
     }
 

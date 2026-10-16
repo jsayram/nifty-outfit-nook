@@ -87,11 +87,7 @@ public actor InMemorySuitcaseStore: SuitcaseStore {
     }
 
     private func checkedName(_ name: String, renaming: Suitcase.ID?) throws(StoreError) -> String {
-        do {
-            return try NameRules.suitcaseName(name, among: Array(suitcasesByID.values), renaming: renaming)
-        } catch {
-            throw .invalidName(error)
-        }
+        try StoreValidation.suitcaseName(name, among: Array(suitcasesByID.values), renaming: renaming)
     }
 
     /// Delete my data: every suitcase, archived ones included.

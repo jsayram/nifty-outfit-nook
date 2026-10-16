@@ -1,6 +1,7 @@
 import DesignSystem
 import Fixtures
 import Models
+import NookTestSupport
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -140,7 +141,7 @@ struct SettingsSnapshotTests {
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, us)
-            .environment(\.calendar, ClosetTestTime.calendar)
+            .environment(\.calendar, TestTime.calendar)
         let renderer = ImageRenderer(content: content)
         // Very tall pages at AX5 come back empty at 2x (playbook, Phase 7b), so they're drawn at 1x.
         renderer.scale = scale
