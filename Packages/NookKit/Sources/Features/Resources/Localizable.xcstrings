@@ -5825,17 +5825,6 @@
         }
       }
     },
-    "The rest of Style Me is still being built." : {
-      "comment" : "Shown on Style Me under the rows that exist so far",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The rest of Style Me is still being built."
-          }
-        }
-      }
-    },
     "The same outfit, a little classier" : {
       "comment" : "Under the version switch: Dressed up"
     },
@@ -5919,17 +5908,6 @@
     },
     "This look isn’t saved any more" : {
       "comment" : "Look detail: the look is gone"
-    },
-    "This part of the app is still being built." : {
-      "comment" : "Shown on a tab whose screen isn't built yet",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This part of the app is still being built."
-          }
-        }
-      }
     },
     "This picture is simulated: it shows the look’s pieces, not you. In a later version, Try it on will show you wearing the look. Pictures show the style, not the exact fit." : {
       "comment" : "Picture detail: what a simulated picture is"
@@ -6131,7 +6109,7 @@
       "comment" : "Help: Try-on pictures and real fit"
     },
     "Try-on pictures are simulated." : {
-      "comment" : "Fine print under the results buttons (RD-06)"
+      "comment" : "Fine print under the results buttons and on a saved look (RD-06)"
     },
     "Trying %@" : {
       "comment" : "Swap: under the look while she tries one"

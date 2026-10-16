@@ -28,7 +28,8 @@ scripts/test.sh             # package tests, snapshot tests and UI tests on an i
 scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebuild test selection
 scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code or debug flags in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
-scripts/format.sh           # swift-format lint (fails on any finding)
+scripts/format.sh           # swift-format lint (fails on any finding), then check-strings.py
+scripts/check-strings.py    # fails on a String Catalog key no Swift file uses any more
 scripts/format.sh --fix     # rewrite files, then lint
 scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
 scripts/promote.sh "<title>" <body-file>  # at a milestone: open the develop-to-main promotion PR

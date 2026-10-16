@@ -9,28 +9,6 @@ extension EnvironmentValues {
     @Entry var nookStaticRendering = false
 }
 
-/// A scroll view that becomes a plain stack when the view is drawn to a still image.
-struct StaticAwareScrollView<Content: View>: View {
-    let axis: Axis.Set
-    @ViewBuilder let content: Content
-
-    @Environment(\.nookStaticRendering) private var isStatic
-
-    init(_ axis: Axis.Set = .vertical, @ViewBuilder content: () -> Content) {
-        self.axis = axis
-        self.content = content()
-    }
-
-    var body: some View {
-        if isStatic {
-            content
-        } else {
-            ScrollView(axis) { content }
-                .scrollIndicators(.hidden)
-        }
-    }
-}
-
 /// Takes the width it's offered, whatever its content's width, and lines the content up at the
 /// leading edge. A stand-in for a sideways scroll view in still images: the row runs off the
 /// trailing edge as it would on screen, without widening everything around it.

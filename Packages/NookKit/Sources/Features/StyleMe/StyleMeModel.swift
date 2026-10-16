@@ -85,10 +85,6 @@ final class StyleMeModel {
         phase = .loaded
     }
 
-    func showWeather(_ reading: WeatherReading) {
-        weather = reading
-    }
-
     private static func currentWeather(from services: NookServices) async -> WeatherReading {
         do {
             return .loaded(try await services.weather.currentWeather())
