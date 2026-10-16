@@ -31,8 +31,10 @@ struct SuitcasesPage: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(FloorBackground())
         }
@@ -111,6 +113,11 @@ struct SuitcasesPage: View {
                         .padding(.bottom, NookSpacing.xSmall)
                     ForEach(model.favorites) { suitcase in
                         SuitcaseSourceRow(suitcase: suitcase, model: model, choose: actions.choose, open: actions.open)
+                            // The tour points at her first favourite.
+                            .tourAnchor(
+                                SuitcasesTour.Anchor.sources, label: suitcase.name,
+                                isEnabled: suitcase.id == model.favorites.first?.id
+                            ) { actions.choose(.suitcase(suitcase.id)) }
                     }
                 }
                 if model.shelf.showsSeeAll || !model.shelf.archived.isEmpty {
@@ -123,7 +130,8 @@ struct SuitcasesPage: View {
             .floorCard()
             .accessibilityElement(children: .contain)
             .accessibilityLabel(
-                Text("Source for Style Me", bundle: .module, comment: "Suitcases: name of the list of sources"))
+                Text("Source for Style Me", bundle: .module, comment: "Suitcases: name of the list of sources")
+            )
             addButton
             note
         }

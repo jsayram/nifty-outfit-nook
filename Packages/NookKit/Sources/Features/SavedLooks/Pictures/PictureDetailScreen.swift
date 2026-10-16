@@ -41,6 +41,9 @@ struct PictureDetailScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+        // A try-on picture's quick tour (Phase 16b), while its look is still saved to go back to.
+        .screenTour(
+            PictureTour.definition, isReady: model.phase == .loaded && model.item?.look != nil && toast == nil)
     }
 
     private func reload() {

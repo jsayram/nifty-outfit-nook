@@ -101,7 +101,7 @@ jobs:
   #   ui-home-and-results     HomeTests 206, ClosetTests 191, StyleMeTests 182, YourLooksTests 170,
   #                           LaunchTests 85, CutoutBenchTests 20 (job about 20 minutes)
   #   ui-add-and-variants     AddPieceTests 300, HomeVariantTests 207, SwapTests 125, CatalogTests 124,
-  #                           MakeYourOwnLookTests 77 (about 20)
+  #                           MakeYourOwnLookTests 77, ScreenToursTests about 250 locally (16b)
   #   ui-rest                 SavedLooksTests 244, GarmentDetailTests 210, ProfileTests 193,
   #                           SuitcasesAndLaundryTests 158, and any new class (about 22)
   #   ui-ipad                 IPadStyleMeAndSavedTests 290, IPadTests 195 (about 14)
@@ -134,6 +134,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/CatalogTests
               -only-testing:NiftyOutfitNookUITests/SwapTests
               -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -only-testing:NiftyOutfitNookUITests/ScreenToursTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             family: iPhone
@@ -149,6 +150,7 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/SwapTests
               -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/LaunchTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests

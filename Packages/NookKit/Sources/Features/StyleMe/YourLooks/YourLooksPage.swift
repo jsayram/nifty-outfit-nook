@@ -39,7 +39,9 @@ struct YourLooksPage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
+                TourScrollReader {
+                    ScrollView { content }
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())

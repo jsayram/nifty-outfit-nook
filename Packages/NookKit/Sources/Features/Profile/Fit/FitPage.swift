@@ -41,8 +41,10 @@ struct FitPage: View {
                 page
                     .background(Color.nook.floor)
             } else {
-                ScrollView(.vertical) {
-                    page
+                TourScrollReader {
+                    ScrollView(.vertical) {
+                        page
+                    }
                 }
                 .background(FloorBackground())
             }
@@ -141,6 +143,7 @@ struct FitPage: View {
             .padding(.horizontal, NookSpacing.medium)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(Text(FitText.usualFit))
+            .tourAnchor(FitTour.Anchor.usualFit, label: FitText.usualFit)
             note(FitText.usualFitNote, identifier: "fit.usualNote")
             note(FitText.usualFitComfortNote)
         }
@@ -182,7 +185,9 @@ struct FitPage: View {
                 .init(
                     units, title: FitText.unitsTitle(units), hint: FitText.spokenUnits(units),
                     identifier: "fit.units.\(units.rawValue)")
-            })
+            }
+        )
+        .tourAnchor(FitTour.Anchor.units, label: FitText.units)
     }
 
     private func measurementRow(_ field: MeasurementField) -> some View {
@@ -201,6 +206,7 @@ struct FitPage: View {
         .accessibilityValue(Text(shown?.spoken ?? FitText.notAdded))
         .accessibilityHint(Text(shown == nil ? FitText.add(name) : FitText.edit(name)))
         .accessibilityIdentifier("fit.\(field.rawValue)")
+        .tourAnchor(FitTour.Anchor.weight, label: name, isEnabled: field == .weight) { actions.edit(field) }
     }
 
     // MARK: Pieces that fit you well (LR-13)
@@ -225,6 +231,7 @@ struct FitPage: View {
             .padding(.horizontal, NookSpacing.medium)
             .padding(.bottom, NookSpacing.small)
             .accessibilityIdentifier("fit.addPiece")
+            .tourAnchor(FitTour.Anchor.addPiece, label: FitText.addPiece, action: actions.addPiece)
         }
         .padding(.vertical, NookSpacing.xSmall)
         .floorCard()

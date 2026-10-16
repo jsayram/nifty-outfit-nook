@@ -38,8 +38,10 @@ struct GarmentDetailPage: View {
             page
                 .background(Color.nook.wallGradient)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(Color.nook.wallGradient.ignoresSafeArea())
         }
@@ -139,6 +141,7 @@ struct GarmentDetailPage: View {
             }
             .buttonStyle(.nook(.pill, size: .small))
             .accessibilityIdentifier("garment.edit")
+            .tourAnchor(GarmentTour.Anchor.edit, label: GarmentTourText.edit, action: edit)
         }
         .padding(.bottom, NookSpacing.xSmall)
     }
@@ -155,6 +158,10 @@ struct GarmentDetailPage: View {
                     comment: "Hint on Style with this")
             )
             .accessibilityIdentifier("garment.styleWithThis")
+            .tourAnchor(
+                GarmentTour.Anchor.styleWithThis,
+                label: String(localized: "Style with this", bundle: .module, comment: "Button on garment detail"),
+                action: actions.styleWithThis)
             NookButton(
                 String(localized: "Add to a suitcase", bundle: .module, comment: "Button on garment detail (Phase 13)"),
                 systemImage: "suitcase", kind: .soft, fillsWidth: true, action: actions.addToSuitcase
@@ -164,6 +171,11 @@ struct GarmentDetailPage: View {
                     "Choose the suitcases it’s packed in.", bundle: .module, comment: "Hint on Add to a suitcase")
             )
             .accessibilityIdentifier("garment.addToSuitcase")
+            .tourAnchor(
+                GarmentTour.Anchor.addToSuitcase,
+                label: String(
+                    localized: "Add to a suitcase", bundle: .module, comment: "Button on garment detail (Phase 13)"),
+                action: actions.addToSuitcase)
             if model.showsLaundryAction {
                 NookButton(
                     text.isInTheWash

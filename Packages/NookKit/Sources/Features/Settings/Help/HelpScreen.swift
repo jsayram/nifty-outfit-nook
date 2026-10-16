@@ -34,6 +34,8 @@ struct HelpScreen: View {
         .navigationDestination(isPresented: $showsFeedback) {
             FeedbackScreen()
         }
+        // Help's quick tour (Phase 16b).
+        .screenTour(HelpTour.definition, isReady: !showsFeedback)
     }
 }
 
@@ -55,6 +57,11 @@ struct HelpPage: View {
                             HelpTopicView(topic: topic, isOpen: open.contains(topic.id)) {
                                 toggle(topic.id)
                             }
+                            // The tour points at the first question.
+                            .tourAnchor(
+                                HelpTour.Anchor.topic, label: topic.title,
+                                isEnabled: topic.id == HelpContent.topics.first?.id
+                            ) { toggle(topic.id) }
                         }
                     }
                 }
@@ -89,6 +96,10 @@ struct HelpPage: View {
                 .softShadow(.drop, in: NookRadius.shape(NookRadius.group))
         }
         .accessibilityIdentifier("help.stillStuck")
+        .tourAnchor(
+            HelpTour.Anchor.stillStuck,
+            label: String(localized: "Still stuck?", bundle: .module, comment: "Help: the last card"),
+            action: sendFeedback)
     }
 }
 

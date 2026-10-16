@@ -33,8 +33,10 @@ struct LaundryPage: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(FloorBackground())
         }
@@ -126,6 +128,7 @@ struct LaundryPage: View {
                         LaundryRow(
                             garment: garment, place: model.whereItIs(garment, locale: locale),
                             isSelected: model.isSelected(garment.id),
+                            isFirst: garment.id == shown.first?.id,
                             markClean: { actions.markClean(garment.id) },
                             select: { actions.toggleSelected(garment.id) })
                     }
@@ -177,6 +180,9 @@ struct LaundryPage: View {
                 .accessibilityIdentifier("laundry.scope.suitcase")
             }
             .flushChipBar()
+            .tourAnchor(
+                LaundryTour.Anchor.scope,
+                label: String(localized: "Which clothes", bundle: .module, comment: "Laundry: name of the scope chips"))
             Text(
                 model.scope == .mainCloset
                     ? String(
@@ -218,6 +224,12 @@ struct LaundryPage: View {
             )
             .accessibilityValue(Text("\(model.scopeName) · \(SuitcasesText.pieces(count))"))
             .accessibilityIdentifier("laundry.cleanAll")
+            .tourAnchor(
+                LaundryTour.Anchor.cleanAll,
+                label: String(
+                    localized: "Mark all clean", bundle: .module, comment: "Button: marks every piece in the wash clean"
+                ),
+                action: actions.cleanAll)
         }
     }
 
@@ -240,11 +252,22 @@ struct LaundryPage: View {
                 isLoading: isSaving, fillsWidth: true, action: actions.turnOn
             )
             .accessibilityIdentifier("laundry.turnOn")
+            .tourAnchor(
+                LaundryTour.Anchor.turnOn,
+                label: String(localized: "Turn on", bundle: .module, comment: "Button: turns laundry tracking on"),
+                action: actions.turnOn)
             NookButton(
                 String(
                     localized: "You can change this in Profile", bundle: .module,
                     comment: "Link from the laundry tracking sheet to the Profile switch"),
-                kind: .text, action: actions.openProfile)
+                kind: .text, action: actions.openProfile
+            )
+            .tourAnchor(
+                LaundryTour.Anchor.leaveOff,
+                label: String(
+                    localized: "You can change this in Profile", bundle: .module,
+                    comment: "Link from the laundry tracking sheet to the Profile switch"),
+                action: actions.openProfile)
         }
         .floorCard()
     }
@@ -256,6 +279,8 @@ private struct LaundryRow: View {
     let garment: Garment
     let place: String
     let isSelected: Bool
+    /// The first piece in the list, whose Mark clean Laundry's tour points at.
+    var isFirst = false
     /// Mark clean, this piece alone.
     let markClean: () -> Void
     let select: () -> Void
@@ -298,6 +323,11 @@ private struct LaundryRow: View {
                 Text("Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean")
             )
             .accessibilityIdentifier("laundry.markClean.\(garment.id.rawValue)")
+            .tourAnchor(
+                LaundryTour.Anchor.markClean,
+                label: String(
+                    localized: "Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean"),
+                isEnabled: isFirst, action: markClean)
         }
         .padding(.horizontal, NookSpacing.xSmall)
         .frame(minHeight: minHeight)

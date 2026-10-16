@@ -42,6 +42,48 @@ struct AddPieceChoices: View {
 
     private var choices: some View {
         VStack(alignment: .leading, spacing: NookSpacing.small) {
+            photoChoices
+                .tourAnchor(
+                    AddPieceTour.Anchor.photo,
+                    label: String(
+                        localized: "Take photo, Choose from Photos or Paste", bundle: .module,
+                        comment: "VoiceOver name of Add a piece's three photo choices, in its tour"))
+            Button(action: actions.describeInWords) {
+                NookRow(
+                    String(localized: "Describe in words", bundle: .module, comment: "Add a piece choice"),
+                    subtitle: String(
+                        localized: "No photo needed. You can add one later.", bundle: .module,
+                        comment: "Add a piece choice: under Describe in words"),
+                    systemImage: "pencil", accessory: .chevron)
+            }
+            .buttonStyle(.nookRow)
+            .accessibilityIdentifier("addPiece.words")
+            .tourAnchor(
+                AddPieceTour.Anchor.words,
+                label: String(localized: "Describe in words", bundle: .module, comment: "Add a piece choice"),
+                action: actions.describeInWords)
+            Label {
+                Text(
+                    "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos.",
+                    bundle: .module, comment: "Add a piece: under the choices, while photos are a stand-in"
+                )
+                .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "info.circle")
+                    .accessibilityHidden(true)
+            }
+            .nookTextStyle(.note)
+            .foregroundStyle(.nook.textSecondary)
+            .padding(.horizontal, NookSpacing.small)
+            .padding(.top, NookSpacing.small)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("addPiece.standInNote")
+        }
+    }
+
+    /// Take photo, Choose from Photos and Paste, which the tour points at together.
+    private var photoChoices: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
             choice(
                 .camera, title: String(localized: "Take photo", bundle: .module, comment: "Add a piece choice"),
                 subtitle: String(
@@ -61,32 +103,6 @@ struct AddPieceChoices: View {
                     localized: "A photo you copied from somewhere else", bundle: .module,
                     comment: "Add a piece choice: under Paste"),
                 systemImage: "doc.on.clipboard")
-            Button(action: actions.describeInWords) {
-                NookRow(
-                    String(localized: "Describe in words", bundle: .module, comment: "Add a piece choice"),
-                    subtitle: String(
-                        localized: "No photo needed. You can add one later.", bundle: .module,
-                        comment: "Add a piece choice: under Describe in words"),
-                    systemImage: "pencil", accessory: .chevron)
-            }
-            .buttonStyle(.nookRow)
-            .accessibilityIdentifier("addPiece.words")
-            Label {
-                Text(
-                    "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos.",
-                    bundle: .module, comment: "Add a piece: under the choices, while photos are a stand-in"
-                )
-                .fixedSize(horizontal: false, vertical: true)
-            } icon: {
-                Image(systemName: "info.circle")
-                    .accessibilityHidden(true)
-            }
-            .nookTextStyle(.note)
-            .foregroundStyle(.nook.textSecondary)
-            .padding(.horizontal, NookSpacing.small)
-            .padding(.top, NookSpacing.small)
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("addPiece.standInNote")
         }
     }
 

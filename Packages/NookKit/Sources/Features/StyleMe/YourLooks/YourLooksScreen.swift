@@ -74,6 +74,13 @@ struct YourLooksScreen: View {
         .task {
             model.start(with: services)
         }
+        // Your looks' quick tour (Phase 16b), once the looks are ready on the Today tab, with no
+        // problem banner, sheet or toast over them.
+        .screenTour(
+            YourLooksTour.definition(hasVersions: model.versions.count > 1),
+            isReady: model.status == .showing && model.result != nil && model.tab == .today && model.problem == nil
+                && stub == nil && tryingOn == nil && swapping == nil && toast == nil
+        )
         .onDisappear {
             // Leaving stops a request that's still running (Cancel generation on leaving).
             model.cancel()

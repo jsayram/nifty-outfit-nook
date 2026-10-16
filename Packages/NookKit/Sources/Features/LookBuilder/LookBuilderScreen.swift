@@ -52,6 +52,8 @@ struct LookBuilderScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+        // Make your own look's quick tour (Phase 16b), once her closet has loaded.
+        .screenTour(LookBuilderTour.definition, isReady: model.phase == .loaded && picker == nil && toast == nil)
     }
 
     /// The picker is filled from what the screen already loaded.

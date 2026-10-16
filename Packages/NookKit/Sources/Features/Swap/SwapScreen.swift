@@ -42,6 +42,8 @@ struct SwapScreen: View {
         )
         .navigationTitle(Text("Swap a piece", bundle: .module, comment: "Results button (RD-06, LR-08)"))
         .navigationBarTitleDisplayMode(.inline)
+        // Swap a piece's quick tour (Phase 16b), unless See all or Find one is open.
+        .screenTour(SwapTour.definition, isReady: seeAll == nil && !showsFindOne)
         .nookSheet(
             item: $seeAll,
             title: { _ in SwapText(category: model.category, sourceName: model.setup.sourceName).seeAllTitle },

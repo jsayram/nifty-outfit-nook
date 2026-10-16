@@ -35,8 +35,10 @@ struct SuitcaseDetailPage: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
             }
             .background(FloorBackground())
         }
@@ -113,6 +115,12 @@ struct SuitcaseDetailPage: View {
                 systemImage: "pencil", kind: .pill, size: .small, action: actions.edit
             )
             .accessibilityIdentifier("suitcase.edit")
+            .tourAnchor(
+                SuitcaseTour.Anchor.edit,
+                label: String(
+                    localized: "Name and picture", bundle: .module,
+                    comment: "Button: renames a suitcase or changes its picture"),
+                action: actions.edit)
             if model.isArchived {
                 archivedNote
             } else {
@@ -197,6 +205,12 @@ struct SuitcaseDetailPage: View {
                         systemImage: "sparkles", fillsWidth: true, action: actions.styleMe
                     )
                     .accessibilityIdentifier("suitcase.styleMe")
+                    .tourAnchor(
+                        SuitcaseTour.Anchor.styleMe,
+                        label: String(
+                            localized: "Style me from this suitcase", bundle: .module,
+                            comment: "Button: opens Style Me with this suitcase as the source"),
+                        action: actions.styleMe)
                     if model.isSource {
                         NookButton(
                             String(
@@ -283,6 +297,7 @@ struct SuitcaseDetailPage: View {
     private func packButton(title: String) -> some View {
         NookButton(title, systemImage: "plus", kind: .pill, size: .small, action: actions.pack)
             .accessibilityIdentifier("suitcase.pack")
+            .tourAnchor(SuitcaseTour.Anchor.pack, label: title, action: actions.pack)
     }
 
     /// Nothing packed yet: Add pieces opens the packing sheet (PRD §7.7: "including when the
@@ -302,6 +317,10 @@ struct SuitcaseDetailPage: View {
                 systemImage: "plus", fillsWidth: true, action: actions.pack
             )
             .accessibilityIdentifier("suitcase.pack")
+            .tourAnchor(
+                SuitcaseTour.Anchor.pack,
+                label: String(localized: "Add pieces", bundle: .module, comment: "Button: opens the packing sheet"),
+                action: actions.pack)
         }
         .floorCard()
     }

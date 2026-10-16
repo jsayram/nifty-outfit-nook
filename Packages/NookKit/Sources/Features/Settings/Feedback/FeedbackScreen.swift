@@ -47,6 +47,8 @@ struct FeedbackScreen: View {
             // A sent note has nothing left to keep; the next visit starts a new one.
             if case .sent = model.phase { model.startOver() }
         }
+        // Send feedback's quick tour (Phase 16b), while she's writing, before the keyboard is up.
+        .screenTour(FeedbackTour.definition, isReady: model.phase == .writing)
     }
 
     private var sharing: Binding<Bool> {
@@ -109,7 +111,9 @@ struct FeedbackPage: View {
             EditorTextField(
                 label: FeedbackText.messageLabel(model.kind), prompt: FeedbackText.messagePrompt,
                 text: $model.message, isMultiline: true, problem: model.problem.map(FeedbackText.problem),
-                identifier: "feedback.message", focus: focus, focusValue: .message)
+                identifier: "feedback.message", focus: focus, focusValue: .message
+            )
+            .tourAnchor(FeedbackTour.Anchor.message, label: FeedbackText.messageLabel(model.kind))
             Text(FeedbackText.messageHint)
                 .nookTextStyle(.note)
                 .foregroundStyle(.nook.textSecondary)
@@ -134,6 +138,7 @@ struct FeedbackPage: View {
         VStack(alignment: .leading, spacing: NookSpacing.small) {
             NookButton(FeedbackText.send, systemImage: "paperplane", fillsWidth: true, action: send)
                 .accessibilityIdentifier("feedback.send")
+                .tourAnchor(FeedbackTour.Anchor.send, label: FeedbackText.send)
             Label {
                 Text(FeedbackText.howItGoes)
                     .fixedSize(horizontal: false, vertical: true)

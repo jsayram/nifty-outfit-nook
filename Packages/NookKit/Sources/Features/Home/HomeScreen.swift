@@ -17,11 +17,13 @@ struct HomeScreen: View {
     var openLook: (Look.ID) -> Void = { _ in }
     /// Said once in a toast when Home opens, after Delete my data (Phase 14b).
     var notice: String?
+    /// Home's navigation, kept by the root view so App tours can open Style Me or go back to
+    /// the room for a replay (Phase 16b).
+    @Binding var path: [HomeDestination]
 
     @Environment(\.services) private var services
     @Environment(\.openInCloset) private var openInCloset
     @State private var model = HomeModel()
-    @State private var path: [HomeDestination] = []
     @State private var sheet: HomeSheet?
     @State private var toast: NookToastMessage?
     @State private var noticeShown = false
@@ -29,7 +31,6 @@ struct HomeScreen: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.tourCenter) private var tours
 
     private var layout: HomeLayout {
         HomeLayout(dynamicTypeSize: dynamicTypeSize, verticalSizeClass: verticalSizeClass)
@@ -107,15 +108,12 @@ struct HomeScreen: View {
                 noticeShown = true
                 toast = NookToastMessage(notice, systemImage: "checkmark")
             }
-            await startTour()
         }
-        // A toast is said before a tour starts, or VoiceOver would never read it: the tour
-        // waits until the toast has gone (after Delete my data, for one).
-        .onChange(of: toast) { old, new in
-            if old != nil, new == nil { Task { await startTour() } }
-        }
-        // Turning the phone or changing the text size keeps the step, in the new layout's words.
-        .onChange(of: tour) { tours?.update(tour) }
+        // Home's quick tour, the first time Home shows, once its controls are ready, and only over
+        // Home itself: not over a pushed screen, a sheet or a toast (PRD §7.8). A toast is said
+        // before a tour starts, or VoiceOver would never read it, so after Delete my data the
+        // tour waits until the toast has gone.
+        .screenTour(tour, isReady: isReadyForTour)
         .onChange(of: path) { old, new in
             // Back from a pushed screen: Style Me may have changed the source or the occasion.
             if new.count < old.count { Task { await model.load(from: services) } }
@@ -146,11 +144,8 @@ struct HomeScreen: View {
         }
     }
 
-    /// Starts Home's quick tour the first time Home shows, once its controls are ready, and only
-    /// over Home itself: not over a pushed screen, a sheet or a toast (PRD §7.8).
-    private func startTour() async {
-        guard toast == nil else { return }
-        await tours?.startIfNeeded(tour) { path.isEmpty && sheet == nil && toast == nil }
+    private var isReadyForTour: Bool {
+        model.phase != .loading && (notice == nil || noticeShown) && path.isEmpty && sheet == nil && toast == nil
     }
 
     private func turnOnLaundryTracking() async -> Bool {

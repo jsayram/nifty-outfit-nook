@@ -128,6 +128,11 @@ struct TodayResult: View {
                 )
                 // Beside the pieces on iPad it stays as wide as the look under it.
                 .frame(maxWidth: Self.wideBundleMaximumWidth)
+                .tourAnchor(
+                    YourLooksTour.Anchor.versions,
+                    label: String(
+                        localized: "Versions of this outfit", bundle: .module,
+                        comment: "VoiceOver name of the Simple, Dressed up, Something new switch"))
             }
             Text(description)
                 .nookTextStyle(.note)
@@ -282,6 +287,12 @@ struct ResultActions: View {
                 : Text("Keeps this version in Saved Looks.", bundle: .module, comment: "VoiceOver hint on Save look")
         )
         .accessibilityIdentifier("results.save")
+        .tourAnchor(
+            YourLooksTour.Anchor.save,
+            label: isSaved
+                ? String(localized: "Saved", bundle: .module, comment: "Save look button once the look is saved")
+                : String(localized: "Save look", bundle: .module, comment: "Results button (RD-06)")
+        ) { actions.toggleSave(look) }
     }
 
     private var tryOn: some View {
@@ -295,6 +306,12 @@ struct ResultActions: View {
                 "Makes a simulated picture of this look.", bundle: .module, comment: "VoiceOver hint on Try it on")
         )
         .accessibilityIdentifier("results.tryOn")
+        .tourAnchor(
+            YourLooksTour.Anchor.tryOn,
+            label: String(localized: "Try it on", bundle: .module, comment: "Results button (RD-06)")
+        ) {
+            if !needsConnection { actions.tryOn(look) }
+        }
     }
 
     private var swap: some View {
@@ -303,6 +320,10 @@ struct ResultActions: View {
             systemImage: "arrow.left.arrow.right", kind: .soft, fillsWidth: true
         ) { actions.swap(look) }
         .accessibilityIdentifier("results.swap")
+        .tourAnchor(
+            YourLooksTour.Anchor.swap,
+            label: String(localized: "Swap a piece", bundle: .module, comment: "Results button (RD-06, LR-08)")
+        ) { actions.swap(look) }
     }
 
     private var ask: some View {

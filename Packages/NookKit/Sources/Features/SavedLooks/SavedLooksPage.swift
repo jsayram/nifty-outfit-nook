@@ -77,8 +77,10 @@ struct SavedLooksPage: View {
             if isStillImage {
                 page
             } else {
-                ScrollView(.vertical) { page }
-                    .scrollDismissesKeyboard(.immediately)
+                TourScrollReader {
+                    ScrollView(.vertical) { page }
+                        .scrollDismissesKeyboard(.immediately)
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -143,6 +145,7 @@ struct SavedLooksPage: View {
                 ]
             )
             .frame(maxWidth: 420)
+            .tourAnchor(SavedLooksTour.Anchor.tabs, label: SavedLooksText.tabsTitle) { model.tab = .pictures }
             .padding(.horizontal, NookSpacing.screenMargin)
             .padding(.top, NookSpacing.medium)
         }
@@ -225,6 +228,7 @@ struct SavedLooksPage: View {
     private func controls(prompt: String, count: String, chipLayout: NookChipBarLayout) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             NookSearchField(prompt, text: $model.searchText, onSubmit: model.applySearchNow)
+                .tourAnchor(SavedLooksTour.Anchor.search, label: prompt)
                 .padding(.horizontal, NookSpacing.screenMargin)
             SavedLooksFilters(model: model, chipLayout: chipLayout)
                 .padding(.top, NookSpacing.small)

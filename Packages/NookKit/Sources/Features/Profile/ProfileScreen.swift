@@ -6,7 +6,7 @@ import SwiftUI
 nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     /// Fit and measurements (Phase 14a).
     case fit
-    // Phase 14b. App tours joins them in Phase 16b, when there are tours to replay.
+    // Phase 14b.
     case accessibility
     case help
     case feedback
@@ -59,6 +59,8 @@ nonisolated enum ProfileSheet: String, Identifiable, Hashable, Sendable {
     case preferences
     case repeatWindow
     case tryOnPhoto
+    /// App tours (Phase 16b): replay any screen's tour, and the tips switch.
+    case appTours
 
     var id: String { rawValue }
 
@@ -68,12 +70,14 @@ nonisolated enum ProfileSheet: String, Identifiable, Hashable, Sendable {
         case .preferences: ProfileText.preferencesRow
         case .repeatWindow: ProfileText.repeatRow
         case .tryOnPhoto: ProfileText.photoRow
+        case .appTours: AppToursText.row
         }
     }
 
     var subtitle: String? {
         switch self {
         case .name: ProfileText.nameSheetLine
+        case .appTours: AppToursText.sheetLine
         case .preferences, .repeatWindow, .tryOnPhoto: nil
         }
     }
@@ -88,6 +92,9 @@ nonisolated enum ProfileSheet: String, Identifiable, Hashable, Sendable {
 /// laundry is a switch (Phase 14b). Accessibility, Help, Send feedback, Privacy and terms and
 /// Delete my data are pushed (14b). Home reloads when Profile closes, so a new name is on the
 /// sign and the hamper follows Track laundry straight away (RD-03.1, RD-11).
+///
+/// App tours (Phase 16b) is a sheet. Choosing a screen there closes it, then opens the screen:
+/// Profile's own screens are pushed here, and the root view opens the rest on their tabs.
 struct ProfileScreen: View {
     @Environment(\.services) private var services
     @Environment(\.locale) private var locale
@@ -95,6 +102,13 @@ struct ProfileScreen: View {
     @State private var pushed: ProfileDestination?
     @State private var sheet: ProfileSheet?
     @State private var toast: NookToastMessage?
+    /// The tour chosen in App tours, opened once the sheet has gone.
+    @State private var replaying: TourID?
+    /// "Show tips on new screens", read when App tours opens.
+    @State private var showsTips: Bool?
+
+    @Environment(\.tourCenter) private var tours
+    @Environment(\.openForTour) private var openForTour
 
     var body: some View {
         ProfilePage(
@@ -103,7 +117,11 @@ struct ProfileScreen: View {
                 retry: { Task { await model.load(from: services, locale: locale) } },
                 editName: { sheet = .name },
                 open: { pushed = $0 },
-                openSheet: { sheet = $0 },
+                openSheet: { sheet in
+                    // Profile's own tour doesn't start as App tours closes (Phase 16b).
+                    if sheet == .appTours { tours?.holdBack(.profile) }
+                    self.sheet = sheet
+                },
                 setTracksLaundry: { isOn in Task { await setTracksLaundry(isOn) } }
             )
         )
@@ -127,7 +145,7 @@ struct ProfileScreen: View {
         }
         .nookSheet(
             item: $sheet, title: { $0.title }, subtitle: { $0.subtitle },
-            detents: sheetDetents
+            detents: sheetDetents, onDismiss: openReplay
         ) { sheet in
             sheetContent(sheet)
         }
@@ -136,12 +154,32 @@ struct ProfileScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services, locale: locale) }
+        // Profile's quick tour (Phase 16b), once its rows are on screen.
+        .screenTour(
+            ProfileTour.definition,
+            isReady: model.phase == .loaded && sheet == nil && pushed == nil && replaying == nil && toast == nil)
     }
 
-    /// The try-on photo sheet opens full height, so its photo and buttons are never cut off
+    /// The try-on photo sheet and App tours open full height, so nothing in them is cut off
     /// (playbook, Phase 12b).
     private var sheetDetents: Set<PresentationDetent> {
-        sheet == .tryOnPhoto ? [.large] : [.medium, .large]
+        sheet == .tryOnPhoto || sheet == .appTours ? [.large] : [.medium, .large]
+    }
+
+    /// After App tours closes on a choice: the tour waits for its screen (`TourCenter.replay`),
+    /// and the screen opens. Profile's own tour starts here as soon as the sheet has gone.
+    private func openReplay() {
+        guard let tour = replaying else { return }
+        replaying = nil
+        tours?.replay(tour)
+        switch tour {
+        case .profile: break
+        case .fit: pushed = .fit
+        case .help: pushed = .help
+        case .feedback: pushed = .feedback
+        case .privacy: pushed = .privacy
+        default: openForTour(tour)
+        }
     }
 
     @ViewBuilder
@@ -184,6 +222,21 @@ struct ProfileScreen: View {
             } remove: {
                 await model.removePhoto(in: services)
             }
+        case .appTours:
+            AppToursSheet(
+                tracksLaundry: model.profile.preferences.tracksLaundry, showsTips: showsTips,
+                replay: { tour in
+                    replaying = tour
+                    self.sheet = nil
+                },
+                setShowsTips: { isOn in
+                    guard let tours, await tours.setShowsTips(isOn) else { return false }
+                    showsTips = isOn
+                    return true
+                },
+                resetAll: { await tours?.resetAllTips(keeping: [.profile]) ?? false }
+            )
+            .task { showsTips = await tours?.showsTips() }
         }
     }
 

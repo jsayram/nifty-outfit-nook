@@ -38,7 +38,9 @@ struct LookDetailPage: View {
             if isStillImage {
                 content
             } else {
-                ScrollView { content }
+                TourScrollReader {
+                    ScrollView { content }
+                }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -219,6 +221,9 @@ struct LookDetailPage: View {
         .accessibilityAddTraits(worn ? .isSelected : [])
         .accessibilityHint(Text(worn ? LookDetailText.wornTodayHint : LookDetailText.wearTodayHint))
         .accessibilityIdentifier("lookDetail.wearToday")
+        .tourAnchor(LookTour.Anchor.wearToday, label: worn ? LookDetailText.wornToday : LookDetailText.wearToday) {
+            actions.wearToday()
+        }
     }
 
     private var swap: some View {
@@ -232,6 +237,7 @@ struct LookDetailPage: View {
                 comment: "Hint on Swap a piece on a saved look")
         )
         .accessibilityIdentifier("lookDetail.swap")
+        .tourAnchor(LookTour.Anchor.swap, label: LookDetailText.swap) { actions.swap() }
     }
 
     private var tryOn: some View {
@@ -247,5 +253,6 @@ struct LookDetailPage: View {
     private var rename: some View {
         NookButton(LookDetailText.rename, systemImage: "pencil", kind: .soft, fillsWidth: true, action: actions.rename)
             .accessibilityIdentifier("lookDetail.rename")
+            .tourAnchor(LookTour.Anchor.rename, label: LookDetailText.rename) { actions.rename() }
     }
 }

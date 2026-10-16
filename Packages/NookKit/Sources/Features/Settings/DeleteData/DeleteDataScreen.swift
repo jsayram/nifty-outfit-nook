@@ -164,8 +164,9 @@ nonisolated enum DeleteDataText {
         case .pictures, .suitcases: nil
         case .profile:
             String(
-                localized: "Name on your sign, Preferences, fit, measurements and try-on photo", bundle: .module,
-                comment: "Delete my data: under Your profile")
+                localized:
+                    "Name on your sign, Preferences, fit, measurements, try-on photo and the app tours you’ve seen",
+                bundle: .module, comment: "Delete my data: under Your profile (tours since Phase 16b)")
         case .drafts:
             String(
                 localized: "Pieces and looks you started but didn’t save", bundle: .module,

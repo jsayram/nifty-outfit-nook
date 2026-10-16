@@ -84,6 +84,13 @@ struct GarmentEditorScreen: View {
                     comment: "Photo source question while photos are a stand-in")
             }
             .task { await model.load(from: services) }
+            // Add a piece's quick tour (Phase 16b), on its first step only: the photo choices and
+            // Describe in words. Edit starts on the details and has none.
+            .screenTour(
+                AddPieceTour.definition,
+                isReady: model.isNewPiece && model.phase == .editing && model.step == .choose && !confirmsDiscard
+                    && !choosesPhotoSource
+            )
             .onChange(of: scenePhase) { _, phase in
                 // Don't wait for the app to be closed: write the draft as soon as it leaves the
                 // foreground (PRD 7.3).
