@@ -166,7 +166,7 @@ struct HomeLifeModelTests {
 
     @Test func turningOnFailsHonestly() async {
         let model = HomeModel()
-        #expect(await model.turnOnLaundryTracking(using: nil) == false)
+        #expect(await model.turnOnLaundryTracking(using: .unavailable) == false)
         let failing = FixtureServices.make(set: .demo, behavior: .storesFail, now: now)
         #expect(await model.turnOnLaundryTracking(using: failing) == false)
     }

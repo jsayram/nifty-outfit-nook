@@ -66,6 +66,7 @@ final class ClosetModel {
     /// How many times a typed search was applied, for tests of the delay.
     private(set) var searchesApplied = 0
     private var searchTask: Task<Void, Never>?
+    @ObservationIgnored private var loads = LoadGeneration()
 
     private var garments: [Garment] = []
     private var itemsByID: [Garment.ID: ClosetItem] = [:]
@@ -93,29 +94,33 @@ final class ClosetModel {
         refresh()
     }
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    /// Reads her pieces, suitcases, Preferences and any draft. A load that an overlapping newer
+    /// one has overtaken shows nothing (`LoadGeneration`).
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if items.isEmpty { phase = .loading }
+        let loaded: ([Garment], [Suitcase], Profile)
         do {
             async let garmentList = services.closet.garments()
             async let suitcaseList = services.suitcases.suitcases()
             async let profile = services.profile.profile()
-            show(try await garmentList, suitcases: try await suitcaseList, profile: try await profile, now: now)
+            loaded = try await (garmentList, suitcaseList, profile)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
             return
         }
-        await loadDraft(from: services.drafts)
+        guard loads.isCurrent(load) else { return }
+        show(loaded.0, suitcases: loaded.1, profile: loaded.2, now: now)
+        let drafts = (try? await services.drafts.drafts()) ?? []
+        guard loads.isCurrent(load) else { return }
+        offerDraft(from: drafts)
     }
 
     /// The most recent draft with changes. A draft for a piece that's no longer in her closet
     /// isn't offered (it stays, in case Undo brings the piece back). A draft store that can't
     /// be read just means nothing is offered.
-    private func loadDraft(from drafts: any DraftStore) async {
-        let all = (try? await drafts.drafts()) ?? []
+    private func offerDraft(from all: [GarmentDraft]) {
         draft = all.first { draft in
             guard draft.hasChanges else { return false }
             switch draft.target {

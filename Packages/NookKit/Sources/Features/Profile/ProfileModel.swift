@@ -32,24 +32,25 @@ final class ProfileModel {
     /// Pieces in her closet still marked as in the wash, kept while tracking is off (RD-11).
     /// Track laundry's line and toast mention them.
     private(set) var keptDirtyCount = 0
+    @ObservationIgnored private var loads = LoadGeneration()
 
     // MARK: Loading
 
-    func load(from services: NookServices?, locale: Locale) async {
+    func load(from services: NookServices, locale: Locale) async {
         self.locale = locale
-        guard let services else {
-            phase = .loaded
-            return
-        }
+        let load = loads.begin()
         if phase != .loaded { phase = .loading }
         do {
-            show(try await services.profile.profile(), locale: locale)
+            let profile = try await services.profile.profile()
+            guard loads.isCurrent(load) else { return }
+            show(profile, locale: locale)
         } catch {
+            guard loads.isCurrent(load) else { return }
             if phase != .loaded { phase = .failed }
             return
         }
         // Only for Track laundry's words, so Profile still shows if the closet can't be read.
-        if let garments = try? await services.closet.garments() {
+        if let garments = try? await services.closet.garments(), loads.isCurrent(load) {
             keptDirtyCount = Self.dirtyCount(in: garments)
         }
     }
@@ -93,7 +94,7 @@ final class ProfileModel {
     }
 
     /// Saves the sign name. Returns the name as stored (trimmed), or `nil` if it wasn't saved.
-    func saveName(_ text: String, in services: NookServices?) async -> String? {
+    func saveName(_ text: String, in services: NookServices) async -> String? {
         guard let name = try? NameRules.signName(text) else { return nil }
         let saved = await change(in: services) { $0.signName = name }
         return saved?.signName
@@ -101,26 +102,26 @@ final class ProfileModel {
 
     // MARK: Style Me's usual choices (LR-03, LR-10, LR-18)
 
-    func setPieceMode(_ mode: PieceMode, in services: NookServices?) async -> Bool {
+    func setPieceMode(_ mode: PieceMode, in services: NookServices) async -> Bool {
         await change(in: services) { $0.preferences.pieceMode = mode } != nil
     }
 
-    func setRepeatWindow(_ window: RepeatWindow, in services: NookServices?) async -> Bool {
+    func setRepeatWindow(_ window: RepeatWindow, in services: NookServices) async -> Bool {
         await change(in: services) { $0.preferences.repeatWindow = window } != nil
     }
 
-    func setUsualFit(_ fit: Comfort, in services: NookServices?) async -> Bool {
+    func setUsualFit(_ fit: Comfort, in services: NookServices) async -> Bool {
         await change(in: services) { $0.usualFit = fit } != nil
     }
 
     /// Track laundry (RD-11). Turning it off keeps every dirty mark, so turning it on again
     /// brings them back (RD-11.2). Home's hamper and Closet's Laundry tile follow when they next
     /// appear, which is as soon as Profile closes.
-    func setTracksLaundry(_ isOn: Bool, in services: NookServices?) async -> Bool {
+    func setTracksLaundry(_ isOn: Bool, in services: NookServices) async -> Bool {
         await change(in: services) { $0.preferences.tracksLaundry = isOn } != nil
     }
 
-    func setUnits(_ units: MeasurementUnits, in services: NookServices?) async -> Bool {
+    func setUnits(_ units: MeasurementUnits, in services: NookServices) async -> Bool {
         await change(in: services) { $0.units = units } != nil
     }
 
@@ -128,15 +129,15 @@ final class ProfileModel {
 
     /// Saves one length field, or empties it with `nil`. The value was checked by
     /// `MeasurementEntry`; the store checks it again.
-    func save(_ length: Length?, for field: MeasurementField, in services: NookServices?) async -> Bool {
+    func save(_ length: Length?, for field: MeasurementField, in services: NookServices) async -> Bool {
         await change(in: services) { $0.measurements.set(length, for: field) } != nil
     }
 
-    func save(weight: Weight?, in services: NookServices?) async -> Bool {
+    func save(weight: Weight?, in services: NookServices) async -> Bool {
         await change(in: services) { $0.measurements.weight = weight } != nil
     }
 
-    func clear(_ field: MeasurementField, in services: NookServices?) async -> Bool {
+    func clear(_ field: MeasurementField, in services: NookServices) async -> Bool {
         await change(in: services) { $0.measurements.clear(field) } != nil
     }
 
@@ -159,12 +160,12 @@ final class ProfileModel {
     }
 
     /// Adds a fitting piece. Returns false when it wasn't saved.
-    func add(_ piece: FitPiece, in services: NookServices?) async -> Bool {
+    func add(_ piece: FitPiece, in services: NookServices) async -> Bool {
         await change(in: services) { $0.fitPieces.append(piece) } != nil
     }
 
     /// Removes a fitting piece and returns it with its place, for Undo.
-    func remove(_ id: FitPiece.ID, in services: NookServices?) async -> RemovedFitPiece? {
+    func remove(_ id: FitPiece.ID, in services: NookServices) async -> RemovedFitPiece? {
         guard let index = profile.fitPieces.firstIndex(where: { $0.id == id }) else { return nil }
         let piece = profile.fitPieces[index]
         guard await change(in: services, { $0.fitPieces.removeAll { $0.id == id } }) != nil else { return nil }
@@ -172,7 +173,7 @@ final class ProfileModel {
     }
 
     /// Undo: puts the piece back where it was.
-    func restore(_ removed: RemovedFitPiece, in services: NookServices?) async -> Bool {
+    func restore(_ removed: RemovedFitPiece, in services: NookServices) async -> Bool {
         await change(in: services) { profile in
             guard !profile.fitPieces.contains(where: { $0.id == removed.piece.id }) else { return }
             profile.fitPieces.insert(removed.piece, at: min(removed.index, profile.fitPieces.count))
@@ -182,12 +183,12 @@ final class ProfileModel {
     // MARK: Your try-on photo (RD-06, Stage A stand-in)
 
     /// Uses the example photo. No camera, no photo library, nothing uploaded.
-    func useExamplePhoto(in services: NookServices?) async -> Bool {
+    func useExamplePhoto(in services: NookServices) async -> Bool {
         await change(in: services) { $0.tryOnPhoto = Self.exampleTryOnPhoto } != nil
     }
 
     /// Removes the photo. Saved try-on pictures stay (PRD §9.2.1 step 1).
-    func removePhoto(in services: NookServices?) async -> Bool {
+    func removePhoto(in services: NookServices) async -> Bool {
         await change(in: services) { $0.tryOnPhoto = nil } != nil
     }
 
@@ -195,14 +196,8 @@ final class ProfileModel {
 
     /// Reads, changes and saves the profile, then shows what was saved. `nil` when it failed.
     private func change(
-        in services: NookServices?, _ edit: @escaping @Sendable (inout Profile) -> Void
+        in services: NookServices, _ edit: @escaping @Sendable (inout Profile) -> Void
     ) async -> Profile? {
-        guard let services else {
-            var profile = profile
-            edit(&profile)
-            self.profile = profile
-            return profile
-        }
         do {
             let saved = try await services.profile.update(edit)
             profile = saved

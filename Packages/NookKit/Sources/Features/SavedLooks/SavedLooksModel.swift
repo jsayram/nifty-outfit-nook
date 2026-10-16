@@ -69,6 +69,7 @@ final class SavedLooksModel {
     /// How many times a typed search was applied, for tests of the delay.
     private(set) var searchesApplied = 0
     private var searchTask: Task<Void, Never>?
+    @ObservationIgnored private var loads = LoadGeneration()
 
     static let standardKinds: [GarmentCategory] = [.top, .bottom, .dress, .layer, .shoes, .bag]
 
@@ -78,25 +79,32 @@ final class SavedLooksModel {
 
     // MARK: Loading
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    /// Reads the looks, garments and pictures. A load that an overlapping newer one has
+    /// overtaken shows nothing (`LoadGeneration`).
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if items.isEmpty { phase = .loading }
         if pictureItems.isEmpty { picturesPhase = .loading }
+        let looks: [Look]
+        let garments: [Garment]
         do {
-            async let looks = services.looks.looks()
-            async let garments = services.closet.garments()
-            show(try await looks, garments: try await garments, now: now)
+            async let lookList = services.looks.looks()
+            async let garmentList = services.closet.garments()
+            (looks, garments) = try await (lookList, garmentList)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
             picturesPhase = .failed
             return
         }
+        guard loads.isCurrent(load) else { return }
+        show(looks, garments: garments, now: now)
         do {
-            showPictures(try await services.pictures.pictures())
+            let pictures = try await services.pictures.pictures()
+            guard loads.isCurrent(load) else { return }
+            showPictures(pictures)
         } catch {
+            guard loads.isCurrent(load) else { return }
             picturesPhase = .failed
         }
     }
@@ -148,16 +156,16 @@ final class SavedLooksModel {
     }
 
     /// Undo for Delete look: the exact look back in Saved Looks, then the looks read again.
-    func undoLastRemoval(using services: NookServices?, now: Date = .now) async {
-        guard let removal = lastRemoval, let services else { return }
+    func undoLastRemoval(using services: NookServices, now: Date = .now) async {
+        guard let removal = lastRemoval else { return }
         lastRemoval = nil
         try? await removal.undo(in: services.looks)
         await load(from: services, now: now)
     }
 
     /// Undo for Delete picture: the same picture back, linked to its look as before.
-    func undoLastPictureRemoval(using services: NookServices?, now: Date = .now) async {
-        guard let removal = lastPictureRemoval, let services else { return }
+    func undoLastPictureRemoval(using services: NookServices, now: Date = .now) async {
+        guard let removal = lastPictureRemoval else { return }
         lastPictureRemoval = nil
         try? await removal.undo(in: services.pictures)
         await load(from: services, now: now)

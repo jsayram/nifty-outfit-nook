@@ -243,7 +243,7 @@ struct StyleMeModelTests {
 
     @Test func noServicesIsAFailureNotACrash() async {
         let model = StyleMeModel()
-        await model.load(from: nil)
+        await model.load(from: .unavailable)
         #expect(model.phase == .failed)
         #expect(model.weather == .unavailable)
     }

@@ -27,6 +27,7 @@ final class StyleMeModel {
     private(set) var usualFit: Comfort?
     /// True once the draft has been set up from her preferences, so a reload keeps her choices.
     private var hasDraft = false
+    @ObservationIgnored private var loads = LoadGeneration()
     /// The source the opening screen asked for, such as a suitcase's "Style me from this
     /// suitcase" (Phase 13). `nil` starts from the source she chose last.
     private let requestedSource: WardrobeSource?
@@ -46,23 +47,24 @@ final class StyleMeModel {
     /// Loads her closet, suitcases and profile, and the weather alongside them. Weather that
     /// can't be read isn't a failure (LR-04.3). Loading again, for example after adding a piece,
     /// keeps what she has chosen.
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            weather = .unavailable
-            phase = .failed
-            return
-        }
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if builder == nil { phase = .loading }
         async let reading = Self.currentWeather(from: services)
         do {
             async let garments = services.closet.garments()
             async let suitcases = services.suitcases.suitcases()
             async let profile = services.profile.profile()
-            show(garments: try await garments, suitcases: try await suitcases, profile: try await profile, now: now)
+            let loaded = try await (garments, suitcases, profile)
+            if loads.isCurrent(load) {
+                show(garments: loaded.0, suitcases: loaded.1, profile: loaded.2, now: now)
+            }
         } catch {
-            if builder == nil { phase = .failed }
+            if loads.isCurrent(load), builder == nil { phase = .failed }
         }
-        weather = await reading
+        let weather = await reading
+        guard loads.isCurrent(load) else { return }
+        self.weather = weather
     }
 
     /// Sets everything from loaded data. Separate from `load` so tests can hand data straight in.
@@ -114,8 +116,8 @@ final class StyleMeModel {
     /// chooses counts as used, so it moves into her favourites (RD-09.2). Other isn't
     /// remembered, since its words are for this request only. Nothing is saved for a suitcase
     /// that has gone. A store that can't save just means nothing is remembered.
-    func remember(in services: NookServices?, now: Date = .now) async {
-        guard let services, let builder else { return }
+    func remember(in services: NookServices, now: Date = .now) async {
+        guard let builder else { return }
         let source = draft.source
         let sourceIsThere = SourceChoice.isAvailable(source, among: builder.suitcases)
         let occasion = draft.occasion

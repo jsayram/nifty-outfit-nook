@@ -79,7 +79,7 @@ Stage A has no photos, so every piece draws a placeholder: its kind's outline (a
 
 Phase 8b routes every piece's picture through `GarmentPicture`, which picks the drawing, the cutout or the photo tile (`GarmentArtChoice`, see `docs/stickers.md`). The grid keeps the standing look from `closet.html`: a clean cutout stands plain on the floor, and a photo without one shows in a rounded tile the same size.
 
-The path for real photos is already in place. `GarmentPicture` asks `GarmentImageLoader` for the picture at the size it's shown, in pixels. The loader asks the `ImageProvider` (Stage A's answers `nil`), shrinks what comes back with ImageIO's thumbnail call away from the main actor, so a full photo is never decoded, and keeps it in an in-memory cache by picture and size. Pieces with no picture are remembered too, and two cells asking for the same picture share one load. Nothing is written to disk. Phases 7b, 8b and 22b only need a provider that returns bytes.
+The path for real photos is already in place. `GarmentPicture` asks `GarmentImageLoader` for the picture at the size it's shown, in pixels. The loader asks the `ImageProvider` (Stage A's answers `nil`), shrinks what comes back with ImageIO's thumbnail call away from the main actor, so a full photo is never decoded, and keeps it in an in-memory cache by picture and size. Pieces with no picture are remembered too (up to 1,000, then the list starts over), while a load that fails isn't, so it's tried again next time. Two cells asking for the same picture share one load. Nothing is written to disk. Phases 7b, 8b and 22b only need a provider that returns bytes.
 
 ## States
 
@@ -108,7 +108,7 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 
 - `ClosetModelTests`: what each fixture set loads, the suitcase names, laundry tracking on and off, each filter alone and together, search words, Clear, the search delay, and what VoiceOver reads.
 - `LargeClosetBrowsingTests`: timing with the large closet.
-- `GarmentImageLoaderTests`: downsampling, the cache, remembered misses, and the placeholder drawings.
+- `GarmentImageLoaderTests`: downsampling, the cache, remembered misses, retrying a failed load, and the placeholder drawings.
 - `ClosetSnapshotTests`: the demo closet with tracking on, the same in dark, AX5, no matches, empty, and the error state, 402 pt wide.
 - `ClosetTests` (UI): a piece chip and its selected state, Clear, search by name, VoiceOver's value on a piece, opening a piece and coming back, and the empty closet's Add a piece.
 - `LaunchTests` (UI) now reads the piece count from Closet's header for the demo, offline, empty and large sets, and the error state for `stores-fail`.

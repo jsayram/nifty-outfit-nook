@@ -95,10 +95,12 @@ final class YourLooksModel {
 
     /// Main-piece combinations already shown for this request.
     private var shown: Set<Set<Garment.ID>> = []
-    private var services: NookServices?
+    private var services: NookServices = .unavailable
     private var styling: Task<Void, Never>?
     /// Bumped by every new run and by cancelling, so a stale answer is never shown.
     private var run = 0
+    /// Numbers the Saved tab's reloads, which run apart from styling.
+    @ObservationIgnored private var lookLoads = LoadGeneration()
     private let now: () -> Date
     private let calendar: Calendar
     private let makeID: () -> StyleRequest.ID
@@ -122,7 +124,7 @@ final class YourLooksModel {
 
     /// Sends the request the first time the screen appears. Coming back to the screen never
     /// sends it again on its own.
-    func start(with services: NookServices?) {
+    func start(with services: NookServices) {
         guard status == .notStarted else { return }
         self.services = services
         style()
@@ -179,7 +181,6 @@ final class YourLooksModel {
     }
 
     private func perform(_ request: StyleRequest, run thisRun: Int) async {
-        guard let services else { return finish(.closetUnavailable, run: thisRun) }
         let context: StylingContext
         do {
             async let garmentList = services.closet.garments()
@@ -291,11 +292,14 @@ final class YourLooksModel {
 
     /// Reads the looks again, for the Saved tab. Sends nothing.
     func reloadLooks() async {
-        guard let services else { return }
+        let load = lookLoads.begin()
         do {
-            looks = try await services.looks.looks()
+            let looks = try await services.looks.looks()
+            guard lookLoads.isCurrent(load) else { return }
+            self.looks = looks
             looksUnavailable = false
         } catch {
+            guard lookLoads.isCurrent(load) else { return }
             looksUnavailable = true
         }
     }
@@ -437,7 +441,6 @@ final class YourLooksModel {
     }
 
     private func setSaved(_ saved: Bool, look: Look, name: String?) async throws(StoreError) {
-        guard let services else { throw .unavailable }
         var updated = looks.first { $0.id == look.id } ?? look
         updated.isSaved = saved
         updated.name = saved ? (updated.name ?? name) : nil

@@ -129,7 +129,7 @@ struct GarmentEditorScreen: View {
             tryAnotherPhoto: { model.clearPhotoProblem() },
             describeInWords: { model.describeInWords() },
             suggest: {
-                guard let reader = services?.descriptions else { return }
+                let reader = services.descriptions
                 Task { await model.suggest(using: reader) }
             },
             continueFromWords: { model.continueFromWords() },
@@ -190,12 +190,12 @@ struct GarmentEditorScreen: View {
     }
 
     private func choosePhoto(_ source: PhotoSource) {
-        guard let intake = services?.photos else { return }
+        let intake = services.photos
         Task { await model.choosePhoto(from: source, using: intake) }
     }
 
     private func save() {
-        guard let closet = services?.closet else { return }
+        let closet = services.closet
         Task {
             if let result = await model.save(in: closet) {
                 saved(result)

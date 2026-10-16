@@ -217,5 +217,5 @@ struct HomeRoomView: View {
 }
 
 #Preview {
-    RootTabView(services: nil, tours: TourCenter(store: nil))
+    RootTabView(services: .unavailable, tours: TourCenter(store: nil))
 }

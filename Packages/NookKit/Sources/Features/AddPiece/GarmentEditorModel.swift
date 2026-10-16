@@ -114,6 +114,7 @@ final class GarmentEditorModel {
     private var draftTask: Task<Void, Never>?
     /// Set while the model fills itself in, so loading isn't saved as her change.
     private var isRestoring = false
+    @ObservationIgnored private var loads = LoadGeneration()
     private let resumesDraft: Bool
     private let now: () -> Date
 
@@ -143,16 +144,14 @@ final class GarmentEditorModel {
 
     // MARK: Loading
 
-    func load(from services: NookServices?) async {
-        guard let services else {
-            phase = .editing
-            return
-        }
+    func load(from services: NookServices) async {
         drafts = services.drafts
+        let load = loads.begin()
         phase = .loading
         do {
             if case .garment(let id) = target {
                 let garment = try await services.closet.garment(id)
+                guard loads.isCurrent(load) else { return }
                 guard garment.isInCloset else {
                     phase = .gone
                     return
@@ -164,14 +163,15 @@ final class GarmentEditorModel {
                 }
             }
         } catch StoreError.notFound {
-            phase = .gone
+            if loads.isCurrent(load) { phase = .gone }
             return
         } catch {
-            phase = .failed
+            if loads.isCurrent(load) { phase = .failed }
             return
         }
         // A draft store that can't be read only means nothing to resume.
         let draft = try? await services.drafts.draft(for: target)
+        guard loads.isCurrent(load) else { return }
         guard let draft, draft.hasChanges else {
             phase = .editing
             return

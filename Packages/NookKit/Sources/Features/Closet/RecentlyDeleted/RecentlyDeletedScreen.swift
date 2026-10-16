@@ -24,7 +24,7 @@ struct RecentlyDeletedScreen: View {
     }
 
     private func restore(_ piece: Garment) {
-        guard let closet = services?.closet else { return }
+        let closet = services.closet
         Task {
             do {
                 guard let restored = try await model.restore(piece.id, in: closet) else { return }

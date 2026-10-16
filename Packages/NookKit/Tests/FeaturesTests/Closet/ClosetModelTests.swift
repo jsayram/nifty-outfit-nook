@@ -99,10 +99,12 @@ struct ClosetModelLoadingTests {
         #expect(model.countText == "")
     }
 
-    @Test func noServicesMeansNothingToLoad() async {
+    /// Without real services (a preview), Closet shows its error state, not an empty closet.
+    @Test func noServicesIsAFailure() async {
         let model = ClosetModel()
-        await model.load(from: nil)
-        #expect(model.isEmpty)
+        await model.load(from: .unavailable)
+        #expect(model.phase == .failed)
+        #expect(!model.isEmpty)
     }
 }
 

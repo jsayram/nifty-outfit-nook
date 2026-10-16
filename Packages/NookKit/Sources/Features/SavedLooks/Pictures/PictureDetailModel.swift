@@ -23,7 +23,8 @@ final class PictureDetailModel {
     private(set) var item: SavedPictureItem?
     private(set) var garments: [Garment.ID: Garment] = [:]
 
-    private var services: NookServices?
+    private var services: NookServices = .unavailable
+    @ObservationIgnored private var loads = LoadGeneration()
     private let now: () -> Date
     private let calendar: Calendar
 
@@ -37,20 +38,19 @@ final class PictureDetailModel {
 
     /// Reads the picture, its look and the garments. Runs again each time the screen appears, so
     /// a look changed or deleted meanwhile shows.
-    func load(from services: NookServices?) async {
+    func load(from services: NookServices) async {
         self.services = services
-        guard let services else {
-            phase = .missing
-            return
-        }
+        let load = loads.begin()
         if item == nil { phase = .loading }
         do {
             async let pictureList = services.pictures.pictures()
             async let lookList = services.looks.looks()
             async let garmentList = services.closet.garments()
             let (pictures, looks, garments) = try await (pictureList, lookList, garmentList)
+            guard loads.isCurrent(load) else { return }
             show(pictures: pictures, looks: looks, garments: garments)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
         }
     }
@@ -90,7 +90,7 @@ final class PictureDetailModel {
 
     /// Delete picture. Returns what Undo needs.
     func delete() async throws(StoreError) -> PictureRemoval {
-        guard let services, let item else { throw .unavailable }
+        guard let item else { throw .unavailable }
         let removal = PictureRemoval(picture: item.picture)
         try await services.pictures.delete(removal.picture.id)
         self.item = nil

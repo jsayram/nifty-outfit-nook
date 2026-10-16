@@ -45,6 +45,7 @@ final class SuitcasesModel {
     private(set) var loadedAt: Date = .now
     /// True while a change is being saved.
     private(set) var isSaving = false
+    @ObservationIgnored private var loads = LoadGeneration()
 
     /// Typed on All suitcases: matches suitcase names.
     var searchText = ""
@@ -53,20 +54,18 @@ final class SuitcasesModel {
 
     // MARK: Loading
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .loaded
-            return
-        }
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if phase != .loaded { phase = .loading }
         do {
             async let suitcaseList = services.suitcases.suitcases()
             async let garmentList = services.closet.garments()
             async let profile = services.profile.profile()
-            show(
-                suitcases: try await suitcaseList, garments: try await garmentList, profile: try await profile,
-                now: now)
+            let loaded = try await (suitcaseList, garmentList, profile)
+            guard loads.isCurrent(load) else { return }
+            show(suitcases: loaded.0, garments: loaded.1, profile: loaded.2, now: now)
         } catch {
+            guard loads.isCurrent(load) else { return }
             if phase != .loaded { phase = .failed }
         }
     }
@@ -129,10 +128,9 @@ final class SuitcasesModel {
 
     /// Makes `source` the one Style Me uses (FR-67): remembered for next time, and a suitcase is
     /// marked as used, so it's a favourite next time (RD-09.2). An empty suitcase isn't chosen.
-    func choose(_ source: WardrobeSource, in services: NookServices?, now: Date = .now) async throws(StoreError)
+    func choose(_ source: WardrobeSource, in services: NookServices, now: Date = .now) async throws(StoreError)
         -> Choice
     {
-        guard let services else { return .unchanged }
         if let id = source.suitcaseID, let suitcase = suitcase(id), pieceCount(of: suitcase) == 0 {
             return .empty(suitcase)
         }
@@ -150,10 +148,9 @@ final class SuitcasesModel {
     }
 
     /// "+ Add a suitcase" (LR-17): makes it, and it shows at once (LR-17.2).
-    func create(name: String, icon: SuitcaseIcon, in services: NookServices?, now: Date = .now)
+    func create(name: String, icon: SuitcaseIcon, in services: NookServices, now: Date = .now)
         async throws(StoreError) -> Suitcase
     {
-        guard let services else { throw .unavailable }
         isSaving = true
         defer { isSaving = false }
         let suitcase = try await services.suitcases.create(name: name, icon: icon, at: now)

@@ -9,12 +9,12 @@ import SwiftUI
 /// cache and every unsent note from before is gone; nothing can show on a screen that was already
 /// open.
 struct RootTabView: View {
-    private let services: NookServices?
+    private let services: NookServices
     /// The quick tours (Phase 16a). The root keeps it across onboarding and Delete my data, so the
     /// `-tour` flag applies once per launch.
     private let tours: TourCenter
 
-    init(services: NookServices?, tours: TourCenter) {
+    init(services: NookServices, tours: TourCenter) {
         self.services = services
         self.tours = tours
     }
@@ -37,7 +37,7 @@ private struct RootTabs: View {
     /// Closet's navigation, kept here so Home's suitcase and hamper can open Suitcases and
     /// Laundry in it (Phase 13).
     @State private var closetPath: [ClosetDestination] = []
-    private let services: NookServices?
+    private let services: NookServices
     /// Garment pictures, shared by every screen so they're cached once.
     @State private var garmentImages: GarmentImageLoader?
     /// Garment stickers, made once and shared by every screen (Phase 8b).
@@ -50,9 +50,9 @@ private struct RootTabs: View {
     /// the real class back (`windowSizeClass(_:)`).
     @Environment(\.horizontalSizeClass) private var windowSizeClass
 
-    init(services: NookServices?) {
+    init(services: NookServices) {
         self.services = services
-        _garmentImages = State(initialValue: services.map { GarmentImageLoader(provider: $0.images) })
+        _garmentImages = State(initialValue: GarmentImageLoader(provider: services.images))
     }
 
     var body: some View {
@@ -173,5 +173,5 @@ extension View {
 }
 
 #Preview {
-    RootTabView(services: nil, tours: TourCenter(store: nil))
+    RootTabView(services: .unavailable, tours: TourCenter(store: nil))
 }

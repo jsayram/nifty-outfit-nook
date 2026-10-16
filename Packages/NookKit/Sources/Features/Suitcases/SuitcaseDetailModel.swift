@@ -38,6 +38,7 @@ final class SuitcaseDetailModel {
     private(set) var loadedAt: Date = .now
     /// True while a change is being saved, so a second tap does nothing.
     private(set) var isSaving = false
+    @ObservationIgnored private var loads = LoadGeneration()
 
     init(suitcaseID: Suitcase.ID) {
         self.suitcaseID = suitcaseID
@@ -45,20 +46,18 @@ final class SuitcaseDetailModel {
 
     // MARK: Loading
 
-    func load(from services: NookServices?, now: Date = .now) async {
-        guard let services else {
-            phase = .gone
-            return
-        }
+    func load(from services: NookServices, now: Date = .now) async {
+        let load = loads.begin()
         if suitcase == nil { phase = .loading }
         do {
             async let suitcaseList = services.suitcases.suitcases()
             async let garmentList = services.closet.garments()
             async let profile = services.profile.profile()
-            show(
-                suitcases: try await suitcaseList, garments: try await garmentList, profile: try await profile,
-                now: now)
+            let loaded = try await (suitcaseList, garmentList, profile)
+            guard loads.isCurrent(load) else { return }
+            show(suitcases: loaded.0, garments: loaded.1, profile: loaded.2, now: now)
         } catch {
+            guard loads.isCurrent(load) else { return }
             phase = .failed
         }
     }
@@ -130,8 +129,7 @@ final class SuitcaseDetailModel {
 
     /// Packs or unpacks one piece on the packing sheet. Returns true when it's now packed.
     @discardableResult
-    func togglePacked(_ id: Garment.ID, in services: NookServices?, now: Date = .now) async throws(StoreError) -> Bool {
-        guard let services else { throw .unavailable }
+    func togglePacked(_ id: Garment.ID, in services: NookServices, now: Date = .now) async throws(StoreError) -> Bool {
         let packing = !isPacked(id)
         if packing {
             try await services.suitcases.add([id], to: suitcaseID)
@@ -143,8 +141,8 @@ final class SuitcaseDetailModel {
     }
 
     /// Takes a piece out of this suitcase only. It stays in her closet and any other suitcase.
-    func remove(_ id: Garment.ID, in services: NookServices?, now: Date = .now) async throws(StoreError) {
-        guard let services, !isSaving else { return }
+    func remove(_ id: Garment.ID, in services: NookServices, now: Date = .now) async throws(StoreError) {
+        guard !isSaving else { return }
         isSaving = true
         defer { isSaving = false }
         try await services.suitcases.remove([id], from: suitcaseID)
@@ -152,8 +150,7 @@ final class SuitcaseDetailModel {
     }
 
     /// Undo after Remove: packs it again.
-    func putBack(_ id: Garment.ID, in services: NookServices?, now: Date = .now) async throws(StoreError) {
-        guard let services else { return }
+    func putBack(_ id: Garment.ID, in services: NookServices, now: Date = .now) async throws(StoreError) {
         try await services.suitcases.add([id], to: suitcaseID)
         await load(from: services, now: now)
     }
@@ -162,16 +159,16 @@ final class SuitcaseDetailModel {
 
     /// Use for Style Me (FR-67): remembered for next time and marked as used, so it's a
     /// favourite (RD-09.2). Returns the source it replaced, for Undo.
-    func useForStyleMe(in services: NookServices?, now: Date = .now) async throws(StoreError) -> WardrobeSource? {
+    func useForStyleMe(in services: NookServices, now: Date = .now) async throws(StoreError) -> WardrobeSource? {
         try await setSource(.suitcase(suitcaseID), in: services, now: now)
     }
 
     /// Sets the source Style Me uses. Returns the one it replaced.
     @discardableResult
-    func setSource(_ newSource: WardrobeSource, in services: NookServices?, now: Date = .now) async throws(StoreError)
+    func setSource(_ newSource: WardrobeSource, in services: NookServices, now: Date = .now) async throws(StoreError)
         -> WardrobeSource?
     {
-        guard let services, !isSaving else { return nil }
+        guard !isSaving else { return nil }
         isSaving = true
         defer { isSaving = false }
         let previous = source
@@ -185,8 +182,7 @@ final class SuitcaseDetailModel {
 
     // MARK: Name, picture, archive, delete
 
-    func edit(name: String, icon: SuitcaseIcon, in services: NookServices?, now: Date = .now) async throws(StoreError) {
-        guard let services else { throw .unavailable }
+    func edit(name: String, icon: SuitcaseIcon, in services: NookServices, now: Date = .now) async throws(StoreError) {
         try await services.suitcases.update(suitcaseID) { suitcase in
             suitcase.name = name
             suitcase.icon = icon
@@ -196,10 +192,10 @@ final class SuitcaseDetailModel {
 
     /// Archive or bring back (PRD §7.7). Archiving keeps its pieces and hides it from the source
     /// choices; if it was the source, Style Me goes back to the main closet. Returns how to undo it.
-    func setArchived(_ archived: Bool, in services: NookServices?, now: Date = .now) async throws(StoreError)
+    func setArchived(_ archived: Bool, in services: NookServices, now: Date = .now) async throws(StoreError)
         -> SuitcaseChange?
     {
-        guard let services, let suitcase, !isSaving else { return nil }
+        guard let suitcase, !isSaving else { return nil }
         isSaving = true
         defer { isSaving = false }
         let wasSource = isSource
@@ -214,8 +210,8 @@ final class SuitcaseDetailModel {
     /// Delete suitcase (PRD §7.7): its links go, its pieces, saved looks and pictures stay. If it
     /// was the source, Style Me goes back to the main closet with a toast that says so. Undo puts
     /// back the same suitcase.
-    func delete(in services: NookServices?) async throws(StoreError) -> SuitcaseChange? {
-        guard let services, let suitcase, !isSaving else { return nil }
+    func delete(in services: NookServices) async throws(StoreError) -> SuitcaseChange? {
+        guard let suitcase, !isSaving else { return nil }
         isSaving = true
         defer { isSaving = false }
         let wasSource = profile.remembered.source == .suitcase(suitcaseID)
