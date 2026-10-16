@@ -556,19 +556,21 @@ struct YourLooksModelTests {
 
 /// Waits for a condition the model reaches on its own, a few turns on the main actor away.
 ///
-/// The bound is only a guard against a real hang. In Phases 12b and 17 it ran out at 20 and then
-/// 60 seconds on CI and was raised to 600. The cause was the main actor's queue: with every
-/// snapshot test of the target drawing there at once, each of the model's turns came only as the
-/// target drained. Those tests now take turns (`HeavyMainActorWork`), and these waits take about
-/// half a second to two seconds locally while the whole target runs, so 30 seconds is plenty on
-/// a slow runner and still fails a real hang quickly.
+/// The bound counts the wait's own turns on the main actor, not seconds. In Phases 12b and 17 a
+/// bound in seconds ran out at 20 and then 60 seconds on CI and was raised to 600. The model
+/// wasn't slow: the whole target shares the main actor, which takes its jobs in order, so on a
+/// busy runner each turn can take seconds, for the model and for this loop alike. Counting turns
+/// measures what matters, how many chances the model had, however busy the runner is. The model
+/// needs a few; 1,000 turns is about five seconds once the main actor is free, so a real hang
+/// still fails, at the latest a few seconds after the rest of the target has finished.
+/// (`HeavyMainActorWork` keeps the snapshot tests from crowding the queue in the first place.)
 @MainActor
 func waitUntil(_ condition: () -> Bool) async throws {
-    let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: .seconds(30))
+    var turns = 0
     while !condition() {
         // Throwing ends the test here, so it never goes on to wait for something that won't come.
-        guard clock.now < deadline else { throw WaitTimedOut() }
+        guard turns < 1_000 else { throw WaitTimedOut() }
+        turns += 1
         try await Task.sleep(for: .milliseconds(5))
     }
 }
