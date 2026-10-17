@@ -8,7 +8,7 @@ import XCTest
 /// buttons and the overlay being modal are covered by `HomeTourTests`; these check which tour
 /// shows where, and when.
 final class ScreenToursTests: XCTestCase {
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -93,13 +93,13 @@ final class ScreenToursTests: XCTestCase {
         expectNoTour(in: app)
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         app.buttons["home.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
         expectNoTour(in: app)
 
         // App tours lists the screens, with the switch off.
         openAppTours(in: app)
         let tips = app.switches["appTours.showTips"]
-        XCTAssertTrue(tips.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(tips.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForValue("0", of: tips), "Tips should be off")
         XCTAssertTrue(app.buttons["appTours.closet"].exists)
         XCTAssertFalse(app.buttons["appTours.help"].isHittable, "Help should be under More screen tours")
@@ -121,7 +121,7 @@ final class ScreenToursTests: XCTestCase {
         openAppTours(in: app)
         tap("appTours.more", in: app)
         tap("appTours.help", in: app)
-        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait))
         expectTour("Find a simple answer", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Help", to: "Profile", timeout: Self.wait)
@@ -136,14 +136,14 @@ final class ScreenToursTests: XCTestCase {
         skip(in: app)
         app.goBack(from: "Privacy and terms", to: "Profile", timeout: Self.wait)
         tap("profile.privacy", in: app)
-        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitUntilExists(timeout: Self.wait))
         expectNoTour(in: app)
         app.goBack(from: "Privacy and terms", to: "Profile", timeout: Self.wait)
 
         // Reset all tips: the seen one shows again.
         openAppTours(in: app)
         tap("appTours.reset", in: app)
-        XCTAssertTrue(app.staticTexts["appTours.note"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.staticTexts["appTours.note"].waitUntilExists(timeout: Self.wait))
         closeSheet(in: app)
         tap("profile.privacy", in: app)
         expectTour("You choose what to share", step: 1, of: 2, in: app)
@@ -158,17 +158,16 @@ final class ScreenToursTests: XCTestCase {
     ) {
         let words = app.descendants(matching: .any)["tour.text"]
         let predicate = NSPredicate(format: "label BEGINSWITH %@", "Quick tour, step \(step) of \(count). \(title)")
-        let shown = XCTWaiter().wait(
-            for: [XCTNSPredicateExpectation(predicate: predicate, object: words)], timeout: Self.wait)
-        XCTAssertEqual(
-            shown, .completed, "Expected \(title), step \(step) of \(count): \(words.label)", file: file, line: line)
+        XCTAssertTrue(
+            words.waitUntil(predicate, timeout: Self.wait),
+            "Expected \(title), step \(step) of \(count): \(words.label)", file: file, line: line)
     }
 
     @MainActor
     private func expectNoTour(in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
         // Long enough for a tour that would start once the screen has loaded.
         let card = app.descendants(matching: .any)["tour.card"]
-        XCTAssertFalse(card.waitForExistence(timeout: 2), "A tour showed", file: file, line: line)
+        XCTAssertFalse(card.waitUntilExists(timeout: 2), "A tour showed", file: file, line: line)
     }
 
     @MainActor
@@ -179,7 +178,7 @@ final class ScreenToursTests: XCTestCase {
     @MainActor
     private func openAppTours(in app: XCUIApplication) {
         tap("profile.appTours", in: app)
-        XCTAssertTrue(app.switches["appTours.showTips"].waitForExistence(timeout: Self.wait), "App tours didn't open")
+        XCTAssertTrue(app.switches["appTours.showTips"].waitUntilExists(timeout: Self.wait), "App tours didn't open")
     }
 
     @MainActor
@@ -192,19 +191,14 @@ final class ScreenToursTests: XCTestCase {
     @MainActor
     private func tap(_ identifier: String, in app: XCUIApplication) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitForExistence(timeout: Self.wait), "No button \(identifier)")
-        var swipes = 0
-        while !button.isHittable && swipes < 8 {
-            app.swipeUp()
-            swipes += 1
-        }
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        app.scrollUntilHittable(button, up: 16)
         button.tapWhenHittable(timeout: Self.wait)
     }
 
     @MainActor
     private func waitForValue(_ value: String, of element: XCUIElement) -> Bool {
         let predicate = NSPredicate(format: "value == %@", value)
-        return XCTWaiter().wait(
-            for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: Self.wait) == .completed
+        return element.waitUntil(predicate, timeout: Self.wait)
     }
 }

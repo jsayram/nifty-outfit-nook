@@ -5,7 +5,7 @@ import XCTest
 /// drawers open their screens, and Delete my data leaves a fresh app.
 final class SettingsTests: XCTestCase {
     /// Waits end as soon as their condition holds, so this only matters on a slow machine.
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -27,8 +27,8 @@ final class SettingsTests: XCTestCase {
         ]
         for (row, title, control) in pushed {
             tap(row, in: app)
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: Self.wait), "\(row) didn't open \(title)")
-            XCTAssertTrue(element(control, in: app).waitForExistence(timeout: Self.wait), "\(title) has no \(control)")
+            XCTAssertTrue(app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(row) didn't open \(title)")
+            XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(title) has no \(control)")
             app.goBack(from: title, to: "Profile", timeout: Self.wait)
         }
 
@@ -41,7 +41,7 @@ final class SettingsTests: XCTestCase {
         ]
         for (row, control) in sheets {
             tap(row, in: app)
-            XCTAssertTrue(element(control, in: app).waitForExistence(timeout: Self.wait), "\(row) opened no sheet")
+            XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(row) opened no sheet")
             app.buttons["Close"].firstMatch.tapUntilGone(timeout: Self.wait)
         }
 
@@ -69,17 +69,17 @@ final class SettingsTests: XCTestCase {
 
         let tabs = app.tabBars.firstMatch
         tabs.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
-        XCTAssertTrue(element("closet.laundry", in: app).waitForExistence(timeout: Self.wait), "No Laundry tile")
+        XCTAssertTrue(element("closet.laundry", in: app).waitUntilExists(timeout: Self.wait), "No Laundry tile")
 
         // Off again from Closet's Profile button: the tile goes, the marks stay.
         app.buttons["closet.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
         reveal(laundry, in: app)
         flip(laundry)
         XCTAssertTrue(waitForValue(of: laundry, "0"), "Track laundry didn't turn off")
         XCTAssertTrue(waitForLabel(of: laundry, containing: "Your 2 dirty marks are kept."), laundry.label)
         app.goBack(from: "Profile", to: "Closet", timeout: Self.wait)
-        XCTAssertTrue(element("closet.laundry", in: app).waitForNonExistence(timeout: Self.wait))
+        XCTAssertTrue(element("closet.laundry", in: app).waitUntilGone(timeout: Self.wait))
         tabs.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: hamper, containing: "Hamper: Laundry, Off"), hamper.label)
     }
@@ -92,25 +92,25 @@ final class SettingsTests: XCTestCase {
         let app = launch()
 
         tapDrawer("home.helpDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait))
         // The first topic is open; another opens on a tap.
-        XCTAssertTrue(element("help.outfits.answer", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("help.outfits.answer", in: app).waitUntilExists(timeout: Self.wait))
         tap("help.laundry", in: app)
-        XCTAssertTrue(element("help.laundry.answer", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("help.laundry.answer", in: app).waitUntilExists(timeout: Self.wait))
         tap("help.stillStuck", in: app)
-        XCTAssertTrue(app.navigationBars["Send feedback"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Send feedback"].waitUntilExists(timeout: Self.wait))
 
         // Send with nothing written: the problem shows, nothing opens.
         tap("feedback.send", in: app)
-        XCTAssertTrue(element("problem.feedback.message", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("problem.feedback.message", in: app).waitUntilExists(timeout: Self.wait))
 
         let field =
             app.textViews["field.feedback.message"].exists
             ? app.textViews["field.feedback.message"] : app.textFields["field.feedback.message"]
         reveal(field, in: app)
-        field.tap()
+        field.tapUntilFocused(timeout: Self.wait)
         field.typeText("The hamper is lovely")
-        XCTAssertTrue(element("problem.feedback.message", in: app).waitForNonExistence(timeout: Self.wait))
+        XCTAssertTrue(element("problem.feedback.message", in: app).waitUntilGone(timeout: Self.wait))
         let preview = element("feedback.previewText", in: app)
         XCTAssertTrue(waitForLabel(of: preview, containing: "The hamper is lovely"), preview.label)
         XCTAssertFalse(preview.label.contains("Device:"), "App details went in without asking")
@@ -124,9 +124,10 @@ final class SettingsTests: XCTestCase {
         // Send opens the system share sheet; closing it keeps the note.
         tap("feedback.send", in: app)
         let shareSheet = app.otherElements["ActivityListView"]
-        XCTAssertTrue(shareSheet.waitForExistence(timeout: Self.wait), "No share sheet")
-        app.buttons["header.closeButton"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(shareSheet.waitForNonExistence(timeout: Self.wait), "The share sheet didn't close")
+        XCTAssertTrue(shareSheet.waitUntilExists(timeout: Self.wait), "No share sheet")
+        // A tap while the sheet is still coming up can be lost, so tap Close until it goes.
+        app.buttons["header.closeButton"].tapUntilGone(timeout: Self.wait)
+        XCTAssertTrue(shareSheet.waitUntilGone(timeout: Self.wait), "The share sheet didn't close")
         XCTAssertTrue(waitForLabel(of: preview, containing: "The hamper is lovely"))
 
         app.goBack(from: "Send feedback", to: "Help", timeout: Self.wait)
@@ -134,16 +135,16 @@ final class SettingsTests: XCTestCase {
 
         // The note waits for her when she comes back from the drawer.
         tapDrawer("home.feedbackDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Send feedback"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Send feedback"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForLabel(of: element("feedback.previewText", in: app), containing: "The hamper is lovely"))
         app.goBack(from: "Send feedback", to: "Home", timeout: Self.wait)
 
         tapDrawer("home.privacyDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(element("privacy.privacy", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(element("privacy.privacy", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(element("privacy.terms", in: app).exists)
         tap("privacy.deleteData", in: app)
-        XCTAssertTrue(app.navigationBars["Delete my data"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
     }
 
     /// Delete my data: explained, asked once more, then everything goes and the app starts fresh
@@ -151,55 +152,55 @@ final class SettingsTests: XCTestCase {
     @MainActor
     func testDeleteMyDataResetsTheApp() {
         let app = launch()
-        XCTAssertTrue(app.buttons["Name sign: Lily"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.buttons["Name sign: Lily"].waitUntilExists(timeout: Self.wait))
         openProfile(in: app)
         tap("profile.deleteData", in: app)
-        XCTAssertTrue(app.navigationBars["Delete my data"].waitForExistence(timeout: Self.wait))
-        XCTAssertTrue(labelled("21 pieces", in: app).waitForExistence(timeout: Self.wait), "No counts")
+        XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(labelled("21 pieces", in: app).waitUntilExists(timeout: Self.wait), "No counts")
 
         // Cancel first: nothing changes.
         tap("deleteData.delete", in: app)
         let alert = app.alerts["Delete everything?"]
-        XCTAssertTrue(alert.waitForExistence(timeout: Self.wait), "Not asked before deleting")
+        XCTAssertTrue(alert.waitUntilExists(timeout: Self.wait), "Not asked before deleting")
         alert.buttons["Cancel"].tap()
-        XCTAssertTrue(alert.waitForNonExistence(timeout: Self.wait))
+        XCTAssertTrue(alert.waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(app.navigationBars["Delete my data"].exists)
 
         tap("deleteData.delete", in: app)
-        XCTAssertTrue(alert.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(alert.waitUntilExists(timeout: Self.wait))
         alert.buttons["Delete everything"].tap()
 
         // A fresh app: the welcome, with a note that it's done (Phase 17). Onboarding again, this
         // time with no name and the empty closet.
         XCTAssertTrue(
-            app.buttons["welcome.getStarted"].waitForExistence(timeout: Self.wait), "Didn't go back to the welcome")
+            app.buttons["welcome.getStarted"].waitUntilExists(timeout: Self.wait), "Didn't go back to the welcome")
         XCTAssertTrue(
-            labelled("Your data is deleted", in: app).waitForExistence(timeout: Self.wait), "No note that it's done")
+            labelled("Your data is deleted", in: app).waitUntilExists(timeout: Self.wait), "No note that it's done")
         app.buttons["welcome.getStarted"].tapWhenHittable(timeout: Self.wait)
         app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Your closet stays here"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Your closet stays here"].waitUntilExists(timeout: Self.wait))
         app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["How you like clothes to fit"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["How you like clothes to fit"].waitUntilExists(timeout: Self.wait))
         app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
         element("onboarding.closet.empty", in: app).tapWhenHittable(timeout: Self.wait)
         app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
 
         // Home: a sign with no name and an empty source.
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait), "Didn't reach Home")
-        XCTAssertTrue(app.buttons["Name sign, no name yet"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait), "Didn't reach Home")
+        XCTAssertTrue(app.buttons["Name sign, no name yet"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["Suitcase: Source, Main closet, Empty, Whole closet"].exists)
         XCTAssertTrue(app.tabBars.firstMatch.buttons["Home"].isSelected)
 
         // Delete my data forgets the tours seen and turns tips back on, so Home's tour starts as
         // on a fresh install (Phase 16a), once onboarding hands over (Phase 17).
         let skip = app.buttons["tour.skip"]
-        XCTAssertTrue(skip.waitForExistence(timeout: Self.wait), "Home's tour didn't start after a fresh start")
+        XCTAssertTrue(skip.waitUntilExists(timeout: Self.wait), "Home's tour didn't start after a fresh start")
         skip.tapUntilGone(timeout: Self.wait)
 
         // Closet is empty, and Saved Looks has nothing.
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(
-            element("closet.empty.addPiece", in: app).waitForExistence(timeout: Self.wait), "Closet isn't empty")
+            element("closet.empty.addPiece", in: app).waitUntilExists(timeout: Self.wait), "Closet isn't empty")
     }
 
     // MARK: Helpers
@@ -209,14 +210,14 @@ final class SettingsTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo"]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait))
         return app
     }
 
     @MainActor
     private func openProfile(in app: XCUIApplication) {
         app.buttons["home.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
     }
 
     @MainActor
@@ -244,19 +245,12 @@ final class SettingsTests: XCTestCase {
         target.tap()
     }
 
-    /// Scrolls until the element can be tapped.
+    /// Scrolls until the element can be tapped (see `XCUIApplication.reveal`).
     @MainActor
     private func reveal(
         _ element: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
     ) {
-        XCTAssertTrue(element.waitForExistence(timeout: Self.wait), "Missing \(element)", file: file, line: line)
-        for _ in 0..<6 where !element.isHittable {
-            app.swipeUp(velocity: .slow)
-        }
-        for _ in 0..<6 where !element.isHittable {
-            app.swipeDown(velocity: .slow)
-        }
-        XCTAssertTrue(element.isHittable, "Can't reach \(element)", file: file, line: line)
+        app.reveal(element, timeout: Self.wait, file: file, line: line)
     }
 
     /// A SwiftUI switch's label doesn't flip it; the switch at its trailing end does.
@@ -273,14 +267,12 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
         let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: Self.wait) == .completed
+        return element.waitUntil(predicate, timeout: Self.wait)
     }
 
     @MainActor
     private func waitForValue(of element: XCUIElement, _ value: String) -> Bool {
         let predicate = NSPredicate(format: "value == %@", value)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: Self.wait) == .completed
+        return element.waitUntil(predicate, timeout: Self.wait)
     }
 }

@@ -7,14 +7,72 @@ import XCTest
 // tap that lands while a screen is still moving can be lost. Two of those flaked on CI: a tap on
 // Home right after Back, while the pushed screen was still sliding away, and Not now on the
 // laundry sheet at AX5 after the test had swiped the sheet itself.
+//
+// Use these instead of `waitForExistence(timeout:)`, `waitForNonExistence(timeout:)` and
+// `XCTNSPredicateExpectation`. Those look the first time a second after they start, even when
+// the condition already holds, and then once a second; with about a thousand waits in the UI
+// tests that was around a quarter of their time on CI (October 2026). These look at once, then
+// every quarter of a second.
+
+/// How long a UI test waits for something before it fails. A wait ends as soon as its condition
+/// holds, so this only matters when something is wrong or the runner stalls. On CI one query took
+/// from 9 to 55 seconds while the simulator was busy (October 2026), and with 15 seconds tests
+/// failed there and passed on their retry.
+let uiTestWait: TimeInterval = 30
+
+/// How often a wait looks again. On CI one look can itself take most of a second.
+private let pollInterval: TimeInterval = 0.25
+
+/// Waits until `condition` holds, looking at once and then every `pollInterval`, while the
+/// run loop runs (so the app and XCTest keep going). Returns whether it held in time.
+@MainActor
+func waitUntilTrue(timeout: TimeInterval, _ condition: @escaping @MainActor () -> Bool) -> Bool {
+    if condition() { return true }
+    let met = XCTestExpectation(description: "condition met")
+    // The timer can fire again before the wait returns; a second fulfil is ignored.
+    met.assertForOverFulfill = false
+    let timer = Timer(timeInterval: pollInterval, repeats: true) { _ in
+        MainActor.assumeIsolated {
+            if condition() { met.fulfill() }
+        }
+    }
+    RunLoop.current.add(timer, forMode: .default)
+    defer { timer.invalidate() }
+    return XCTWaiter().wait(for: [met], timeout: timeout) == .completed
+}
 
 extension XCUIElement {
+    /// Waits until the element exists.
+    @MainActor
+    @discardableResult
+    func waitUntilExists(timeout: TimeInterval) -> Bool {
+        waitUntilTrue(timeout: timeout) { self.exists }
+    }
+
+    /// Waits until the element doesn't exist.
+    @MainActor
+    @discardableResult
+    func waitUntilGone(timeout: TimeInterval) -> Bool {
+        waitUntilTrue(timeout: timeout) { !self.exists }
+    }
+
+    /// Waits until the element exists and matches `predicate` (for example
+    /// `label CONTAINS "Saved"`, `value == "1"` or `selected == true`).
+    @MainActor
+    func waitUntil(_ predicate: NSPredicate, timeout: TimeInterval) -> Bool {
+        waitUntilTrue(timeout: timeout) { self.exists && predicate.evaluate(with: self) }
+    }
+
+    /// Waits until the element's label contains `text`.
+    @MainActor
+    func waitUntilLabel(contains text: String, timeout: TimeInterval) -> Bool {
+        waitUntil(NSPredicate(format: "label CONTAINS %@", text), timeout: timeout)
+    }
+
     /// Waits until the element exists and can be tapped.
     @MainActor
     func waitUntilHittable(timeout: TimeInterval) -> Bool {
-        let hittable = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "exists == true AND hittable == true"), object: self)
-        return XCTWaiter().wait(for: [hittable], timeout: timeout) == .completed
+        waitUntilTrue(timeout: timeout) { self.exists && self.isHittable }
     }
 
     /// Taps the element once it can be tapped.
@@ -33,7 +91,7 @@ extension XCUIElement {
         for _ in 0..<2 {
             guard waitUntilHittable(timeout: timeout) else { break }
             tap()
-            if waitForNonExistence(timeout: timeout) { return }
+            if waitUntilGone(timeout: timeout) { return }
         }
         XCTAssertFalse(exists, "\(self) is still there after tapping it", file: file, line: line)
     }
@@ -42,23 +100,101 @@ extension XCUIElement {
     /// more if the first tap was lost while the screen was still changing.
     @MainActor
     func tapUntilSelected(timeout: TimeInterval, file: StaticString = #filePath, line: UInt = #line) {
-        let selected = NSPredicate(format: "selected == true")
         for _ in 0..<2 {
             guard waitUntilHittable(timeout: timeout) else { break }
             tap()
-            let expectation = XCTNSPredicateExpectation(predicate: selected, object: self)
-            if XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed { return }
+            if waitUntilSelected(timeout: timeout) { return }
         }
         XCTAssertTrue(isSelected, "\(self) didn't become selected", file: file, line: line)
     }
-}
 
-extension XCUIElement {
+    /// Waits until the element's frame is the same on two looks in a row, a poll apart: a window
+    /// being resized or a page being scrolled has stopped.
+    @MainActor
+    func waitUntilStill(timeout: TimeInterval) -> Bool {
+        let last = FrameBox()
+        return waitUntilTrue(timeout: timeout) {
+            let now = self.frame
+            defer { last.frame = now }
+            return now == last.frame
+        }
+    }
+
     /// Waits until a tab or other selectable button says it's selected.
     @MainActor
     func waitUntilSelected(timeout: TimeInterval) -> Bool {
-        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: self)
-        return XCTWaiter().wait(for: [selected], timeout: timeout) == .completed
+        waitUntilTrue(timeout: timeout) { self.exists && self.isSelected }
+    }
+
+    /// Waits until a text field or search field has the keyboard.
+    @MainActor
+    func waitUntilFocused(timeout: TimeInterval) -> Bool {
+        waitUntil(NSPredicate(format: "hasKeyboardFocus == true"), timeout: timeout)
+    }
+
+    /// Taps a text field or search field and waits until it has the keyboard, tapping once more
+    /// if the first tap was lost. `typeText` straight after a plain tap failed on CI ("Neither
+    /// element nor any descendant has keyboard focus") when the runner took seconds to deliver
+    /// the tap, or the tap landed while the sidebar beside the field was still changing.
+    @MainActor
+    func tapUntilFocused(timeout: TimeInterval, file: StaticString = #filePath, line: UInt = #line) {
+        for _ in 0..<2 {
+            guard waitUntilHittable(timeout: timeout) else { break }
+            tap()
+            if waitUntilFocused(timeout: timeout) { return }
+        }
+        XCTFail("\(self) didn't get the keyboard", file: file, line: line)
+    }
+}
+
+/// The frame `waitUntilStill` saw last. It starts as `.null`, so the first look never matches.
+@MainActor
+private final class FrameBox {
+    var frame = CGRect.null
+}
+
+extension XCUIApplication {
+    /// Scrolls the page until `element` can be tapped, toward it first, then the other way.
+    ///
+    /// Each scroll is a drag that holds still before it lets go, so the page stops where the
+    /// finger stops. A swipe flings the page, and a tap that lands while it's still gliding only
+    /// stops the scroll: on CI that lost taps on Help's Still stuck?, Privacy's Delete my data and
+    /// the Track laundry switch right after a swipe.
+    @MainActor
+    func reveal(
+        _ element: XCUIElement, timeout: TimeInterval, drags: Int = 6, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(element.waitUntilExists(timeout: timeout), "Missing \(element)", file: file, line: line)
+        scrollUntilHittable(element, up: drags, down: drags)
+        XCTAssertTrue(element.isHittable, "Can't reach \(element)", file: file, line: line)
+    }
+
+    /// Drags the page up to `up` times and down to `down` times, until `element` can be tapped,
+    /// without failing if it can't. See `reveal`.
+    @MainActor
+    func scrollUntilHittable(_ element: XCUIElement, up: Int, down: Int = 0) {
+        if element.isHittable { return }
+        // Start toward it: down first when it's above the middle of the screen.
+        let passes = down > 0 && element.frame.midY < frame.midY ? [false, true] : [true, false]
+        for dragsUp in passes {
+            // `for ... where` would ask on every pass, even once it's found; each ask is a query.
+            for _ in 0..<(dragsUp ? up : down) {
+                dragPage(up: dragsUp)
+                if element.isHittable { return }
+            }
+        }
+    }
+
+    /// Drags the page by a third of the screen and holds still before letting go, so it doesn't
+    /// glide on. `up` shows what's further down. The drag stays in the top half of the screen,
+    /// above the keyboard when it's up.
+    @MainActor
+    func dragPage(up: Bool) {
+        let low = coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let high = coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15))
+        let (start, end) = up ? (low, high) : (high, low)
+        start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .fast, thenHoldForDuration: 0.3)
     }
 }
 
@@ -72,8 +208,14 @@ extension XCUIApplication {
         line: UInt = #line
     ) {
         let bar = navigationBars[title]
-        bar.buttons.firstMatch.tapWhenHittable(timeout: timeout, file: file, line: line)
-        XCTAssertTrue(bar.waitForNonExistence(timeout: timeout), "\(title) didn't close", file: file, line: line)
+        let back = bar.buttons.firstMatch
+        // A Back tap can be lost the same way, so tap once more only if the screen is still there.
+        for _ in 0..<2 {
+            guard back.waitUntilHittable(timeout: timeout) else { break }
+            back.tap()
+            if bar.waitUntilGone(timeout: timeout) { break }
+        }
+        XCTAssertFalse(bar.exists, "\(title) didn't close after Back", file: file, line: line)
         XCTAssertTrue(
             navigationBars[destination].waitUntilHittable(timeout: timeout), "No way back from \(title)", file: file,
             line: line)
@@ -92,6 +234,12 @@ enum UITestLaunch {
     /// between tests on one simulator, so each test sets what it relies on with these flags
     /// rather than counting on a fresh install.
     static let skipOnboarding = ["-onboarding", "skip"]
-    /// Tours off and onboarding skipped: what most tests launch with.
-    static let standard = toursOff + skipOnboarding
+    /// Turns UIKit's animations off for this launch (debug builds only), so pushes, sheets and
+    /// alerts appear at once. XCUITest waits for the app to be idle after every action, and on CI
+    /// those waits were the biggest share of a test's time; locally it took Home, Saved Looks and
+    /// Settings from 283 to 235 seconds (October 2026). Tests about tours, onboarding and the iPad
+    /// layouts leave it out, so animated transitions are still exercised.
+    static let animationsOff = ["-animations", "off"]
+    /// Tours off, onboarding skipped and animations off: what most tests launch with.
+    static let standard = toursOff + skipOnboarding + animationsOff
 }

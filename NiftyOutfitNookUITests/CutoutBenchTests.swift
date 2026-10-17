@@ -13,28 +13,28 @@ final class CutoutBenchTests: XCTestCase {
         app.launchArguments = ["-cutout-bench"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["Cutout benchmark"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Cutout benchmark"].waitUntilExists(timeout: uiTestWait))
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The benchmark replaces the app's tabs")
         XCTAssertTrue(app.buttons["Choose photos"].exists)
 
-        app.buttons["cutoutBench.samples"].tap()
+        app.buttons["cutoutBench.samples"].tapWhenHittable(timeout: uiTestWait)
 
-        // Nine drawn samples. Drawing them at full photo size takes a few seconds.
-        XCTAssertTrue(app.staticTexts["9 of 9"].waitForExistence(timeout: 90))
+        // Nine drawn samples. Drawing them at full photo size takes a few seconds here, and once
+        // took more than 90 on a busy CI runner.
+        XCTAssertTrue(app.staticTexts["9 of 9"].waitUntilExists(timeout: 180))
         XCTAssertTrue(app.staticTexts["Results at 1536 px"].exists)
 
         let export = app.buttons["Export results"].firstMatch
-        for _ in 0..<4 where !export.isHittable {
-            app.swipeUp()
-        }
+        app.scrollUntilHittable(export, up: 10)
         XCTAssertTrue(export.isHittable)
 
         // Each sample says how it went: unsupported here, measured on a device.
         let unsupported = app.staticTexts["Subject lifting isn't supported here (the simulator can't run it)."]
             .firstMatch
         let measured = app.staticTexts["Usable as a sticker?"].firstMatch
-        for _ in 0..<4 where !unsupported.exists && !measured.exists {
-            app.swipeUp()
+        for _ in 0..<10 {
+            if unsupported.exists || measured.exists { break }
+            app.dragPage(up: true)
         }
         XCTAssertTrue(unsupported.exists || measured.exists)
     }

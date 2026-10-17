@@ -38,6 +38,15 @@ extension View {
     }
 }
 
+#if DEBUG
+    /// `-toasts-stay` (debug builds only) keeps every toast up ten times longer, so a UI test on a
+    /// slow CI runner can still reach Undo before the toast goes. `scripts/check-release.sh` checks
+    /// the flag isn't in a Release binary.
+    private let toastLifetimeScale: Double = ProcessInfo.processInfo.arguments.contains("-toasts-stay") ? 10 : 1
+#else
+    private let toastLifetimeScale: Double = 1
+#endif
+
 private struct NookToastPresenter: ViewModifier {
     @Binding var toast: NookToastMessage?
 
@@ -61,7 +70,7 @@ private struct NookToastPresenter: ViewModifier {
                 guard let toast else { return }
                 AccessibilityNotification.Announcement(toast.message).post()
                 // A toast with an action stays longer, and longer still with VoiceOver.
-                let seconds = (toast.action == nil ? 4.0 : 6.0) * (voiceOverEnabled ? 2.5 : 1)
+                let seconds = (toast.action == nil ? 4.0 : 6.0) * (voiceOverEnabled ? 2.5 : 1) * toastLifetimeScale
                 try? await Task.sleep(for: .seconds(seconds))
                 if self.toast?.id == toast.id {
                     self.toast = nil

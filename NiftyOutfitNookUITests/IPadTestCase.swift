@@ -4,7 +4,7 @@ import XCTest
 /// resizing the window by its corner, and finding elements. Every test skips itself on an
 /// iPhone, so the classes cost nothing in the phone runs (docs/ipad.md).
 class IPadTestCase: XCTestCase {
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -40,14 +40,15 @@ class IPadTestCase: XCTestCase {
             let corner = origin.withOffset(CGVector(dx: frame.maxX - 5, dy: frame.maxY - 5))
             let goal = origin.withOffset(CGVector(dx: frame.maxX - 5 + (target - frame.width) / 2, dy: frame.maxY - 5))
             corner.press(forDuration: 0.4, thenDragTo: goal)
-            _ = app.windows.firstMatch.waitForExistence(timeout: 2)
+            // Let the window settle before measuring it again.
+            _ = app.windows.firstMatch.waitUntilStill(timeout: 5)
         }
     }
 
     @MainActor
     func assertTabBarAtTheBottom(in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
         let bar = app.tabBars.firstMatch
-        XCTAssertTrue(bar.waitForExistence(timeout: Self.wait), "No tab bar", file: file, line: line)
+        XCTAssertTrue(bar.waitUntilExists(timeout: Self.wait), "No tab bar", file: file, line: line)
         let window = app.windows.firstMatch.frame
         XCTAssertGreaterThan(bar.frame.minY, window.midY, "The tab bar isn't at the bottom", file: file, line: line)
     }

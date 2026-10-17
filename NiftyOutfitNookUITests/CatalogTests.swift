@@ -12,9 +12,9 @@ final class CatalogTests: XCTestCase {
 
     /// Opens the catalog, or only its page `page` (a catalog page ID such as `search`).
     @MainActor
-    private func launchCatalog(page: String? = nil) -> XCUIApplication {
+    private func launchCatalog(page: String? = nil, extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-catalog"] + (page.map { ["-catalog-page", $0] } ?? [])
+        app.launchArguments = ["-catalog"] + (page.map { ["-catalog-page", $0] } ?? []) + extra
         app.launch()
         return app
     }
@@ -22,7 +22,7 @@ final class CatalogTests: XCTestCase {
     @MainActor
     func testCatalogOpensWithTheLaunchArgument() {
         let app = launchCatalog()
-        XCTAssertTrue(app.navigationBars["Component catalog"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Component catalog"].waitUntilExists(timeout: uiTestWait))
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The catalog replaces the app's tabs")
         XCTAssertTrue(app.buttons["Style me"].firstMatch.exists)
     }
@@ -32,7 +32,7 @@ final class CatalogTests: XCTestCase {
         let app = launchCatalog()
         let tops = app.buttons["Tops"]
         let bottoms = app.buttons["Bottoms"]
-        XCTAssertTrue(tops.waitForExistence(timeout: 10))
+        XCTAssertTrue(tops.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(tops.isSelected)
         XCTAssertFalse(bottoms.isSelected)
 
@@ -46,7 +46,7 @@ final class CatalogTests: XCTestCase {
         let app = launchCatalog()
         let simple = app.buttons["Simple"]
         let dressedUp = app.buttons["Dressed up"]
-        XCTAssertTrue(simple.waitForExistence(timeout: 10))
+        XCTAssertTrue(simple.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(simple.isSelected)
 
         dressedUp.tap()
@@ -67,7 +67,7 @@ final class CatalogTests: XCTestCase {
     func testLoadingButtonSaysItIsLoading() {
         let app = launchCatalog()
         let loading = app.buttons["Styling"]
-        XCTAssertTrue(loading.waitForExistence(timeout: 10))
+        XCTAssertTrue(loading.waitUntilExists(timeout: uiTestWait))
         XCTAssertEqual(loading.value as? String, "Loading")
     }
 
@@ -79,23 +79,30 @@ final class CatalogTests: XCTestCase {
         open.tap()
 
         let closeButtons = app.buttons.matching(NSPredicate(format: "label == %@", "Close"))
-        XCTAssertTrue(closeButtons.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(closeButtons.firstMatch.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(app.buttons["I’ll be indoors"].firstMatch.exists)
         // The catalog also draws a copy of the sheet's header behind it; tap the one in the sheet.
         let sheetClose = closeButtons.allElementsBoundByIndex.first { $0.isHittable }
         XCTAssertNotNil(sheetClose, "The sheet has no Close button that can be tapped")
         sheetClose?.tap()
-        XCTAssertTrue(open.waitForExistence(timeout: 5))
+        XCTAssertTrue(open.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(open.isHittable, "The sheet should be gone")
     }
 
     @MainActor
     func testToastAppearsWithItsAction() {
-        let app = launchCatalog(page: "toast")
+        // The toast stays longer, so a slow runner still finds it.
+        let app = launchCatalog(page: "toast", extra: ["-toasts-stay"])
         let show = app.buttons["Show a toast"]
         scrollTo(show, in: app)
-        show.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["Saved to your looks"].firstMatch.waitForExistence(timeout: 5))
+        // On CI the runner once took seconds to deliver the tap and no toast came, so tap once
+        // more if it doesn't show.
+        let toast = app.descendants(matching: .any)["Saved to your looks"].firstMatch
+        for _ in 0..<2 {
+            show.tap()
+            if toast.waitUntilExists(timeout: uiTestWait) { break }
+        }
+        XCTAssertTrue(toast.exists, "No toast")
         XCTAssertTrue(app.buttons["Undo"].firstMatch.exists)
     }
 
@@ -116,23 +123,25 @@ final class CatalogTests: XCTestCase {
         XCTAssertEqual(somethingNew.count, 1)
 
         thumbnail.tap()
-        XCTAssertTrue(app.staticTexts["Tapped: Simple"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Tapped: Simple"].waitUntilExists(timeout: uiTestWait))
 
         let findOne = app.buttons["Find one like Camel blazer"]
         scrollTo(findOne, in: app, swipes: 10, up: false)
         findOne.tap()
-        XCTAssertTrue(app.staticTexts["Tapped: Find one: Camel blazer"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Tapped: Find one: Camel blazer"].waitUntilExists(timeout: uiTestWait))
     }
 
-    /// Swipes until `element` is on screen and can be tapped.
+    /// Scrolls until `element` is on screen and can be tapped (see `XCUIApplication.dragPage`).
     @MainActor
     private func scrollTo(
         _ element: XCUIElement, in app: XCUIApplication, swipes: Int = 15, up: Bool = true,
         file: StaticString = #filePath, line: UInt = #line
     ) {
-        XCTAssertTrue(app.navigationBars["Component catalog"].waitForExistence(timeout: 10), file: file, line: line)
-        for _ in 0..<swipes where !(element.exists && element.isHittable) {
-            if up { app.swipeUp(velocity: .slow) } else { app.swipeDown(velocity: .slow) }
+        XCTAssertTrue(
+            app.navigationBars["Component catalog"].waitUntilExists(timeout: uiTestWait), file: file, line: line)
+        for _ in 0..<swipes {
+            if element.exists && element.isHittable { break }
+            app.dragPage(up: up)
         }
         XCTAssertTrue(element.isHittable, "Couldn't scroll to \(element)", file: file, line: line)
     }

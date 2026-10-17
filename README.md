@@ -26,6 +26,7 @@ scripts/build.sh            # Debug build for the simulator
 scripts/build.sh Release    # Release build
 scripts/test.sh             # package tests, snapshot tests and UI tests on an iPhone simulator
 scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebuild test selection
+NOOK_TEST_PLAN=UITests scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # UI tests only, without building the package tests
 scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code or debug flags in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding), then check-strings.py
@@ -43,7 +44,7 @@ On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet 
 
 `scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests` and `IPadStyleMeAndSavedTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
-The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator.
+The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator. The scheme has a second plan, `UITests.xctestplan`, with only the UI tests, so a UI-only run doesn't build the package test targets.
 
 Warnings are errors in every target: `SWIFT_TREAT_WARNINGS_AS_ERRORS` in `Configs/Base.xcconfig` for the app and UI tests, and `.treatAllWarnings(as: .error)` in `Package.swift` for NookKit.
 
@@ -58,6 +59,8 @@ A fresh install opens on the welcome, then four short steps (a name for the sign
 ## Quick tours
 
 Each screen's quick tour starts the first time the screen shows (Phases 16a and 16b, `docs/tours.md`), and App tours on Profile replays any of them. Since Phase 17 the tours seen and the "Show tips on new screens" switch are kept across launches (with the onboarding state, see below). Debug builds take `-tour home` (or any tour's ID, such as `closet`) to start that tour whatever is recorded, `-tour reset` to forget the tours seen, and `-tour off` to stop tours starting by themselves, which the UI tests use. Both write to the kept state, so `-tour off` stays until a later `-tour reset` or Delete my data. Values combine with commas: `-tour reset,home`.
+
+Two more debug-only flags are there for the UI tests: `-animations off` turns UIKit's animations off, so pushes, sheets and alerts appear at once (most UI tests pass it; the tour, onboarding and iPad tests don't), and `-toasts-stay` keeps toasts up ten times longer, so the Undo test can reach Undo on a slow CI runner. `scripts/check-release.sh` checks neither is in a Release build.
 
 ## Cutout benchmark
 
@@ -160,8 +163,10 @@ GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on push
 
 - `swift-format`: `scripts/format.sh` on a `macos-26` runner.
 - `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
-  - `release-and-package-tests` checks the two `Package.resolved` files agree, makes a Release build and checks it has no debug or test code, runs every package test target, then runs `SettingsTests` on the same simulator;
-  - `ui-tests (ui-home-and-results)`, `(ui-add-and-variants)` and `(ui-rest)` run the other phone UI tests in three parts, by test class, and `ui-tests (ui-ipad)` runs the iPad UI tests on an iPad simulator. `ui-rest` is every UI test class the others don't name, so a new class is never skipped (a new iPad class goes in `ui-ipad`). The workflow lists each part's classes with their CI times; move a class when one part grows well past the others. The free plan runs five macOS jobs at once, so these five are balanced to about the same length rather than split further (Phase 15b).
+  - `build-and-archive` checks the two `Package.resolved` files agree, builds for testing (the UI test plan, then the full plan) and uploads what it built as artifacts of the run, makes an unsigned Release archive for a real iPhone and checks what would ship (`scripts/check-archive.sh`, which also runs `scripts/check-release.sh` on the device binary), then runs `CatalogTests`, `ProfileTests` and `CutoutBenchTests`;
+  - `ui-tests (ui-home-and-settings)`, `(ui-add-and-tours)` and `(ui-rest)` run the other phone UI tests in three parts, by test class, and `ui-tests (ui-ipad)` runs the iPad UI tests on an iPad simulator, then every package test target. These start with `build-and-archive`, boot their simulator while it builds, then download its build (`scripts/wait-for-artifact.sh`, this run's artifacts only) and test without building. `ui-rest` is every UI test class the others don't name, so a new class is never skipped (a new iPad class goes in `ui-ipad`). The workflow lists each part's classes with their CI times; move a class when one part grows well past the others. The free plan runs five macOS jobs at once, so there are five, balanced to about the same length.
+
+  A pull request that only changes docs (Markdown files outside the source folders, `docs/`, `website/`) skips those jobs, and `build-and-test` passes without them. The small `changes` job decides, from the files the pull request changes. Pushes to `develop` and `main` always run everything.
 
   Tests run through `scripts/test.sh` on the iOS 26.5 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 

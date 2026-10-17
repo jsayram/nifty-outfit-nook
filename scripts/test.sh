@@ -10,8 +10,18 @@
 #   scripts/test.sh -skip-testing:NiftyOutfitNookUITests          # package tests only
 #   scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests # one UI test class
 #
-# It builds once with build-for-testing, then tests without building, and prints how long each
-# step took. xcodebuild boots the simulator itself: waiting for a full boot first with
+# NOOK_TEST_PLAN picks another test plan in the scheme. UITests.xctestplan holds only the UI tests,
+# so a run that tests only them doesn't build the package test targets, which took about half of
+# build-for-testing (CI uses it for the UI parts):
+#   NOOK_TEST_PLAN=UITests scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests
+#
+# On CI the build and the test runs can happen on different runners:
+#   NOOK_BUILD_ONLY=1 scripts/test.sh                   builds for testing, and doesn't test
+#   NOOK_XCTESTRUN=<file>.xctestrun scripts/test.sh ... tests what that build made, without building
+# (see .github/workflows/ci.yml).
+#
+# Otherwise it builds once with build-for-testing, then tests without building, and prints how
+# long each step took. xcodebuild boots the simulator itself: waiting for a full boot first with
 # `simctl bootstatus` took 2 to 4 minutes on CI, against about a minute for xcodebuild's own boot.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -33,10 +43,21 @@ common=(
     -derivedDataPath build/DerivedData
     -onlyUsePackageVersionsFromResolvedFile
 )
+if [[ -n "${NOOK_TEST_PLAN:-}" ]]; then
+    common+=(-testPlan "$NOOK_TEST_PLAN")
+fi
 
-SECONDS=0
-xcodebuild build-for-testing "${common[@]}" -quiet
-echo "Built for testing in ${SECONDS}s"
+if [[ -n "${NOOK_XCTESTRUN:-}" ]]; then
+    # The products and the .xctestrun file describing them came from an earlier build.
+    common=(-xctestrun "$NOOK_XCTESTRUN" -destination "id=$simulator_id")
+else
+    SECONDS=0
+    xcodebuild build-for-testing "${common[@]}" -quiet
+    echo "Built for testing in ${SECONDS}s"
+    if [[ -n "${NOOK_BUILD_ONLY:-}" ]]; then
+        exit 0
+    fi
+fi
 
 SECONDS=0
 rm -rf "$result_bundle"

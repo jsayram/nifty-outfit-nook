@@ -10,7 +10,7 @@ import XCTest
 /// Moving VoiceOver focus, the escape gesture, Escape on a keyboard and focus going back to the
 /// control need a check by hand (see `docs/tours.md`).
 final class HomeTourTests: XCTestCase {
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -78,10 +78,10 @@ final class HomeTourTests: XCTestCase {
     func testTappingTheHighlightedControlOpensIt() {
         let app = launch()
         let target = app.buttons["tour.target"]
-        XCTAssertTrue(target.waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(target.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(target.label, "Laptop: Style Me")
         target.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitForExistence(timeout: Self.wait), "Style Me didn't open")
+        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait), "Style Me didn't open")
         XCTAssertFalse(app.descendants(matching: .any)["tour.card"].exists)
         app.goBack(from: "Style Me", to: "Home", timeout: Self.wait)
         XCTAssertFalse(app.descendants(matching: .any)["tour.card"].exists, "The tour came back")
@@ -93,7 +93,7 @@ final class HomeTourTests: XCTestCase {
     func testTheTourIsModal() {
         let app = launch()
         let tour = app.alerts["tour"]
-        XCTAssertTrue(tour.waitForExistence(timeout: Self.wait), "The tour isn't exposed as modal")
+        XCTAssertTrue(tour.waitUntilExists(timeout: Self.wait), "The tour isn't exposed as modal")
 
         // Inside the tour the card's words come before everything else. Queries return elements
         // breadth first, so the order is read from the tree XCUITest prints, which is the order
@@ -140,8 +140,8 @@ final class HomeTourTests: XCTestCase {
             XCTAssertTrue(app.buttons["tour.skip"].isHittable, "Skip is out of reach on step \(index + 1)")
             next.tap()
         }
-        XCTAssertTrue(words.waitForNonExistence(timeout: Self.wait))
-        XCTAssertTrue(app.buttons["home.laptop"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(words.waitUntilGone(timeout: Self.wait))
+        XCTAssertTrue(app.buttons["home.laptop"].waitUntilExists(timeout: Self.wait))
     }
 
     /// `-tour off` keeps the tour from starting by itself; `-tour off,home` still starts it.
@@ -151,7 +151,7 @@ final class HomeTourTests: XCTestCase {
         quiet.launchArguments = UITestLaunch.skipOnboarding + ["-tour", "off", "-fixtures", "demo"]
         quiet.launch()
         XCTAssertTrue(quiet.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait))
-        XCTAssertFalse(quiet.descendants(matching: .any)["tour.card"].waitForExistence(timeout: 3))
+        XCTAssertFalse(quiet.descendants(matching: .any)["tour.card"].waitUntilExists(timeout: 3))
 
         let forced = launch(tour: "off,home")
         XCTAssertTrue(forced.buttons["tour.skip"].exists)
@@ -168,14 +168,13 @@ final class HomeTourTests: XCTestCase {
         app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", tour, "-fixtures", "demo"] + extra
         app.launch()
         XCTAssertTrue(
-            app.descendants(matching: .any)["tour.card"].waitForExistence(timeout: Self.wait), "The tour didn't start")
+            app.descendants(matching: .any)["tour.card"].waitUntilExists(timeout: Self.wait), "The tour didn't start")
         return app
     }
 
     @MainActor
     private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
         let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: Self.wait) == .completed
+        return element.waitUntil(predicate, timeout: Self.wait)
     }
 }

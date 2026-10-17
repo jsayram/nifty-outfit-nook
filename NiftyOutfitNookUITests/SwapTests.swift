@@ -4,7 +4,7 @@ import XCTest
 /// look, See all, and Remove this piece with Undo. The ranking, paging and Undo stack are covered
 /// by the package tests; these check the real screens and their navigation.
 final class SwapTests: XCTestCase {
-    static let wait: TimeInterval = 15
+    static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
@@ -20,12 +20,12 @@ final class SwapTests: XCTestCase {
         XCTAssertTrue(app.buttons["swap.piece.top"].isSelected)
         XCTAssertEqual(element("swap.explanation", in: app).label, "Your tops that go with this look")
         // At the end of the list: the line and See all (LR-07.3), and Find one (LR-07.4).
-        XCTAssertTrue(element("swap.everyOne", in: app).waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(element("swap.everyOne", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["swap.findOne"].exists)
 
         // See all opens her tops with Closet's search; choosing one tries it in the look.
         tap("swap.seeAll", in: app)
-        XCTAssertTrue(app.staticTexts["All Tops"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.staticTexts["All Tops"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.searchFields["Search these pieces"].exists)
         tap("picker.garment.g-pink-blouse", in: app)
         let tagline = element("swap.tagline", in: app)
@@ -44,9 +44,9 @@ final class SwapTests: XCTestCase {
         tapOnScreen(use, in: app)
 
         // Back on Your looks, the look has the heels, marked Swapped, and keeps its version.
-        XCTAssertTrue(app.navigationBars["Your looks"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(
-            app.staticTexts["Black block heels, Swapped"].waitForExistence(timeout: Self.wait),
+            app.staticTexts["Black block heels, Swapped"].waitUntilExists(timeout: Self.wait),
             "The new piece isn't marked Swapped")
         XCTAssertFalse(app.staticTexts["Tan loafers"].exists)
         XCTAssertTrue(app.buttons["results.version.simple"].isSelected)
@@ -59,7 +59,7 @@ final class SwapTests: XCTestCase {
         let changed = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "results.saved.", "Black block heels")
         )
-        XCTAssertTrue(changed.firstMatch.waitForExistence(timeout: Self.wait), "The changed look isn't saved")
+        XCTAssertTrue(changed.firstMatch.waitUntilExists(timeout: Self.wait), "The changed look isn't saved")
     }
 
     /// Remove this piece takes the shoes out; Undo puts back exactly the look before (LR-08.2).
@@ -74,12 +74,12 @@ final class SwapTests: XCTestCase {
         XCTAssertTrue(app.buttons["swap.remove"].isEnabled)
         tap("swap.remove", in: app)
 
-        XCTAssertTrue(app.navigationBars["Your looks"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
         let loafers = app.staticTexts["Tan loafers"]
-        XCTAssertTrue(loafers.waitForNonExistence(timeout: Self.wait), "The shoes are still in the look")
+        XCTAssertTrue(loafers.waitUntilGone(timeout: Self.wait), "The shoes are still in the look")
         // Undo under the pieces lasts longer than the toast, so CI can reach it.
         tap("results.undoChange", in: app)
-        XCTAssertTrue(loafers.waitForExistence(timeout: Self.wait), "Undo didn't put the shoes back")
+        XCTAssertTrue(loafers.waitUntilExists(timeout: Self.wait), "Undo didn't put the shoes back")
         XCTAssertFalse(app.buttons["results.undoChange"].exists)
     }
 
@@ -90,7 +90,7 @@ final class SwapTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = UITestLaunch.standard + ["-fixtures", fixtures]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Home"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait))
         return app
     }
 
@@ -98,11 +98,11 @@ final class SwapTests: XCTestCase {
     @MainActor
     private func openSwap(in app: XCUIApplication) {
         tap("home.laptop", in: app)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
         tap("styleMe.go", in: app)
-        XCTAssertTrue(app.buttons["results.version.simple"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait))
         tap("results.swap", in: app)
-        XCTAssertTrue(app.navigationBars["Swap a piece"].waitForExistence(timeout: Self.wait))
+        XCTAssertTrue(app.navigationBars["Swap a piece"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["swap.piece.top"].waitUntilHittable(timeout: Self.wait))
     }
 
@@ -111,38 +111,28 @@ final class SwapTests: XCTestCase {
     @MainActor
     private func tap(_ identifier: String, in app: XCUIApplication) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitForExistence(timeout: Self.wait), "No button \(identifier)")
-        var swipes = 0
-        while !button.isHittable && swipes < 6 {
-            app.swipeUp(velocity: .slow)
-            swipes += 1
-        }
-        while !button.isHittable && swipes < 12 {
-            app.swipeDown(velocity: .slow)
-            swipes += 1
-        }
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        app.scrollUntilHittable(button, up: 12, down: 12)
         button.tapWhenHittable(timeout: Self.wait)
     }
 
-    /// Taps a control that's on screen. On CI the heels option was in view (the screen recording
-    /// shows it) but XCUITest reported it not hittable, twice in a row, with its scroll view's
-    /// frame as infinite, after See all's sheet had closed. When that happens and the control's
-    /// frame is inside the window, it's tapped at its centre instead. The test then checks the
-    /// tap's effect, so a tap that misses still fails. Use these shoes, under it, gets the same.
+    /// Taps a control that's on screen, at its centre. On CI the heels option was in view (the
+    /// screen recording shows it) but XCUITest reported it not hittable, twice in a row, with its
+    /// scroll view's frame as infinite, after See all's sheet had closed; another time just asking
+    /// whether it was hittable failed the test ("Failed to determine hittability ... Activation
+    /// point invalid"). So this doesn't ask: it scrolls the control above the floating tab bar,
+    /// checks its frame is inside the window, and taps there. The test then checks the tap's
+    /// effect, so a tap that misses still fails. Use these shoes, under it, gets the same.
     @MainActor
     private func tapOnScreen(
         _ control: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
     ) {
-        XCTAssertTrue(control.waitForExistence(timeout: Self.wait), "No \(control)", file: file, line: line)
-        if control.waitUntilHittable(timeout: 5) {
-            control.tap()
-            return
-        }
-        // Bring it above the floating tab bar first, so the tap can't land on the bar.
+        XCTAssertTrue(control.waitUntilExists(timeout: Self.wait), "No \(control)", file: file, line: line)
         let bottom =
             app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.windows.firstMatch.frame.maxY
-        for _ in 0..<4 where control.frame.maxY > bottom {
-            app.swipeUp(velocity: .slow)
+        for _ in 0..<6 {
+            if control.frame.maxY <= bottom { break }
+            app.dragPage(up: true)
         }
         let window = app.windows.firstMatch.frame
         XCTAssertTrue(
@@ -153,8 +143,7 @@ final class SwapTests: XCTestCase {
 
     @MainActor
     private func waitForSelected(_ element: XCUIElement) -> Bool {
-        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: element)
-        return XCTWaiter().wait(for: [selected], timeout: Self.wait) == .completed
+        return element.waitUntil(NSPredicate(format: "selected == true"), timeout: Self.wait)
     }
 
     @MainActor
@@ -164,8 +153,6 @@ final class SwapTests: XCTestCase {
 
     @MainActor
     private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
-        let changed = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "label CONTAINS %@", text), object: element)
-        return XCTWaiter().wait(for: [changed], timeout: Self.wait) == .completed
+        return element.waitUntil(NSPredicate(format: "label CONTAINS %@", text), timeout: Self.wait)
     }
 }
