@@ -146,9 +146,7 @@ struct GarmentFactRow: View {
         VStack(alignment: alignment, spacing: NookSpacing.xxSmall) {
             HStack(spacing: 6) {
                 ForEach(Array(swatches.enumerated()), id: \.offset) { _, swatch in
-                    Circle()
-                        .fill(swatch)
-                        .overlay(Circle().strokeBorder(Color.nook.textPrimary.opacity(0.25), lineWidth: 1))
+                    NookSwatchDot(swatch)
                         .frame(width: swatchSize, height: swatchSize)
                 }
                 Text(value)
