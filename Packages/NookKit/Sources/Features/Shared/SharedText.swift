@@ -14,4 +14,10 @@ enum SharedText {
             localized: "Try-on pictures are simulated.", bundle: .module,
             comment: "Fine print under the results buttons and on a saved look (RD-06)")
     }
+
+    /// The name of Command-F, which goes to search on Closet and Saved Looks, in the keyboard's
+    /// shortcut list (iPad, Stage A).
+    static var searchShortcut: String {
+        String(localized: "Search", bundle: .module, comment: "Keyboard shortcut (Command-F) that goes to search")
+    }
 }

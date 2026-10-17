@@ -120,7 +120,21 @@ In a regular-width window the system shows a sheet as a form in the middle of th
 
 Room controls, pieces in Closet's grid, and looks and pictures in Saved Looks' grids show the system's pointer highlight (`.hoverEffect(.highlight)`). Everything else is standard buttons, fields and the system tab bar, which take the keyboard and pointer as they do anywhere.
 
-No keyboard shortcuts yet. Command-F for search and Escape to close a sheet were tried in 15b (`.keyboardShortcut`), but neither did anything when the UI tests pressed the keys on the iPad simulator, so they were left out rather than shipped unchecked. They need a look on a real iPad with a keyboard.
+### Keyboard shortcuts (Stage A, 17 October 2026)
+
+- **Command-F** puts the keyboard in the search field on Closet and Saved Looks. Each page has an invisible button with the shortcut (`nookKeyboardShortcut` in DesignSystem), named Search in the list that holding Command shows. The button only exists while its page is on screen: SwiftUI keeps the other tabs alive, and while both existed, Command-F on Saved Looks went to Closet's search a tab away.
+- **Escape** (and Command-period) closes the top styled sheet, through `.keyboardShortcut(.cancelAction)` on the sheet's Close button, and skips a quick tour, through the same shortcut on Skip (16a).
+
+15b tried Command-F and Escape and left them out because the UI tests' key presses did nothing. Two things were going on, found on the iOS 26.5 iPad simulator:
+
+1. **The first key press after a launch is lost.** Command-F did nothing the first time and worked the second, every time. `typeKeyUntil` in `UITestSupport.swift` presses again when the effect didn't come.
+2. **XCUITest's Escape never triggers a SwiftUI shortcut.** It reaches the app (it ends editing in a search field), but neither `.cancelAction` nor `.keyboardShortcut(.escape, modifiers: [])` fired, after a tap, a second press or a third. Command-period, which `.cancelAction` also answers, works. So `IPadKeyboardTests` checks the cancel shortcuts with Command-period, and Escape itself needs a real keyboard.
+
+`IPadKeyboardTests` (UI, iPad only): Command-F on Closet, typing straight into the field, then Command-F on Saved Looks; Command-period closing the Preferences sheet; Command-period skipping Home's tour with nothing opened under it.
+
+**Needs a real iPad with a keyboard:** Escape closes a sheet and skips a tour; Command-F works on the first press after launch; holding Command lists Search.
+
+While a search field is editing with a hardware keyboard on the simulator, the tab bar at the bottom couldn't be tapped (the keyboard's small bar sits over it), so the test presses Return first. Worth a look on a real iPad, since RD-01.6 puts the tabs at the bottom.
 
 ## Tests
 
@@ -158,7 +172,7 @@ The phone UI tests (`HomeTests`, `ClosetTests` and the rest) are written for the
 4. **The tall room's window sits lower and its suitcase a little higher** than the mockup, for the longer title and to keep the suitcase's and hamper's tap areas apart.
 5. **At the accessibility text sizes Closet keeps the phone page** even on a wide window, since the columns would squeeze the words.
 6. **The iPad mini upright (744 points) gets the phone page in Closet,** a little narrower than the detail needs beside the grid. Home there gets the tall room.
-7. **No keyboard shortcuts yet.** Pointer highlights are in. Command-F and Escape were tried in 15b and left out (see Pointer and keyboard).
+7. **Keyboard shortcuts came in the Stage A audit**, not 15b: Command-F and Escape (see Keyboard shortcuts). Pointer highlights are in.
 8. **Saved Looks is laid out like Closet** (15b): the mockup's sidebar repeats the tabs, so the sidebar holds Saved Looks' own controls, and the detail is a third of the window, as on Closet.
 9. **Each Saved Looks tab keeps its own look or picture beside the grid** (15b), and going between a picture and its look switches tab, rather than showing a look beside the pictures.
 10. **Your looks' tabs and request line stay above the two panes** (15b), with only the version switch beside the look, so switching versions or tabs doesn't move them.
@@ -170,4 +184,4 @@ The phone UI tests (`HomeTests`, `ClosetTests` and the rest) are written for the
 
 - **16a (done):** Home's tour on the tall and wide rooms, following the furniture through rotation and window resizes (`docs/tours.md`).
 - **16b (done):** the other screens' tours on the iPad layouts, one tour per screen whatever the layout; Closet's last step points at the piece beside the grid (`docs/tours.md`).
-- **Later:** keyboard shortcuts, checked on a real iPad with a keyboard.
+- **Later:** Escape and the first key press checked on a real iPad with a keyboard (see Keyboard shortcuts).

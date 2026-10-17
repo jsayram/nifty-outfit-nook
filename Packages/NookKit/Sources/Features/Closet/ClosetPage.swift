@@ -30,6 +30,8 @@ struct ClosetPage: View {
     var opensBeside = false
 
     @Environment(\.closetIsStillImage) private var isStillImage
+    /// Goes up by one for each Command-F, which puts the keyboard in the search field.
+    @State private var searchFocusRequest = 0
 
     /// Past this the controls read badly; the grid keeps the full width.
     static let controlsMaximumWidth: CGFloat = 640
@@ -181,8 +183,12 @@ struct ClosetPage: View {
             NookSearchField(
                 String(localized: "Search your closet", bundle: .module, comment: "Closet search field prompt"),
                 text: $model.searchText,
+                focusRequest: searchFocusRequest,
                 onSubmit: model.applySearchNow
             )
+            .nookKeyboardShortcut(SharedText.searchShortcut, key: "f") {
+                searchFocusRequest += 1
+            }
             .tourAnchor(
                 ClosetTour.Anchor.search,
                 label: String(localized: "Search your closet", bundle: .module, comment: "Closet search field prompt")

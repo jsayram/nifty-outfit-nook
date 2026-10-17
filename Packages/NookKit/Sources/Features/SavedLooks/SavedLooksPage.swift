@@ -68,6 +68,8 @@ struct SavedLooksPage: View {
     var opensBeside = false
 
     @Environment(\.closetIsStillImage) private var isStillImage
+    /// Goes up by one for each Command-F, which puts the keyboard in the search field.
+    @State private var searchFocusRequest = 0
 
     /// Past this the controls read badly; the grid keeps the full width.
     static let controlsMaximumWidth: CGFloat = 640
@@ -227,9 +229,14 @@ struct SavedLooksPage: View {
     /// set of chips for both tabs.
     private func controls(prompt: String, count: String, chipLayout: NookChipBarLayout) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            NookSearchField(prompt, text: $model.searchText, onSubmit: model.applySearchNow)
-                .tourAnchor(SavedLooksTour.Anchor.search, label: prompt)
-                .padding(.horizontal, NookSpacing.screenMargin)
+            NookSearchField(
+                prompt, text: $model.searchText, focusRequest: searchFocusRequest, onSubmit: model.applySearchNow
+            )
+            .nookKeyboardShortcut(SharedText.searchShortcut, key: "f") {
+                searchFocusRequest += 1
+            }
+            .tourAnchor(SavedLooksTour.Anchor.search, label: prompt)
+            .padding(.horizontal, NookSpacing.screenMargin)
             SavedLooksFilters(model: model, chipLayout: chipLayout)
                 .padding(.top, NookSpacing.small)
             if model.filter.isActive {
