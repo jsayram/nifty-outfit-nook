@@ -152,7 +152,6 @@ jobs:
           scripts/test.sh
           -only-testing:NiftyOutfitNookUITests/CatalogTests
           -only-testing:NiftyOutfitNookUITests/ProfileTests
-          -only-testing:NiftyOutfitNookUITests/LaunchTests
           -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
           -retry-tests-on-failure -test-iterations 2
       - name: Keep test results on failure
@@ -173,13 +172,14 @@ jobs:
   # Each test job spends about 5 minutes before its first test (mostly the simulator's boot),
   # and build-and-archive about 9 before its UI tests (two builds, the archive, then a cold
   # boot), so the parts aim at 8 to 9 minutes of tests and build-and-archive at 5:
-  #   (build-and-archive)     CatalogTests 169, ProfileTests 86, LaunchTests 51, CutoutBenchTests 22
+  #   (build-and-archive)     CatalogTests 169, ProfileTests 86, CutoutBenchTests 22
   #   ui-home-and-settings    SettingsTests 169, HomeTests 102, StyleMeTests 86, YourLooksTests 75,
   #                           ClosetTests 56, MakeYourOwnLookTests 46
   #   ui-add-and-tours        AddPieceTests 236, ScreenToursTests 124, HomeVariantTests 94,
   #                           OnboardingTests 70
   #   ui-rest                 GarmentDetailTests 145, SavedLooksTests 137, HomeTourTests 125,
-  #                           SuitcasesAndLaundryTests 77, SwapTests 58, and any new class
+  #                           SuitcasesAndLaundryTests 77, SwapTests 58, LaunchTests 51, and any
+  #                           new class
   #   ui-ipad                 IPadTests 190, IPadStyleMeAndSavedTests 166, package tests about 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
@@ -224,7 +224,6 @@ jobs:
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/ProfileTests
-              -skip-testing:NiftyOutfitNookUITests/LaunchTests
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
