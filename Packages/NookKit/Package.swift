@@ -42,7 +42,13 @@ let package = Package(
             swiftSettings: uiSettings
         ),
         .target(name: "Models", swiftSettings: strictSettings),
-        .target(name: "Fixtures", dependencies: ["Models"], swiftSettings: strictSettings),
+        // The sample wardrobe's photos ship in the target (Resources/SampleWardrobe, copied as they
+        // are). Phase 20a takes the fixtures out of Release.
+        .target(
+            name: "Fixtures", dependencies: ["Models"],
+            resources: [.copy("Resources/SampleWardrobe")],
+            swiftSettings: strictSettings
+        ),
         // Real services built on Apple frameworks only (decision 0001, item 4). Phase 8a adds
         // on-device subject lifting with Vision.
         .target(name: "Services", dependencies: ["Models"], swiftSettings: strictSettings),

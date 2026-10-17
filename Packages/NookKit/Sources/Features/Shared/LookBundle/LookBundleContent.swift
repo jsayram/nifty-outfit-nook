@@ -16,6 +16,10 @@ struct LookBundleContent: Identifiable, Hashable {
     /// The look's name, when she's named it.
     let name: String?
     let pieces: [LookBundlePiece]
+    /// A try-on picture's photo of her wearing the look, when it has one (a generated picture,
+    /// or in the fixtures a sample preview). Only try-on pictures set it; a bundle drawn from the
+    /// pieces ignores it.
+    var tryOnPhoto: PhotoReference?
 
     init(id: String, name: String? = nil, layoutSeed: String? = nil, pieces: [LookBundlePiece]) {
         self.id = id

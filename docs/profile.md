@@ -71,7 +71,7 @@ The ranges are `MeasurementRules.allowedRange`, rounded inwards to whole numbers
 
 A full-height sheet. It says what the photo is for (try-on pictures, once they're ready; styling never needs it), then four points: kept on this iPhone and hidden when she switches apps, asked first before any picture is made from it, never used to guess her size, hers to remove (pictures she saved stay). Then **Choose example photo** (Change once added), **Remove photo**, **Done**, and "This test build uses an example photo. It doesn't ask for your camera or your photos, and nothing is uploaded."
 
-Choose shows what she'd pick in the finished app (a clear, full-length photo, standing naturally in fitted clothes, in good light) and an example, with **Use example photo**. Remove asks first: "Remove your try-on photo? Try-on pictures you saved will stay." No camera, no photo library, no Info.plist keys and no permission prompt. The example is the try-on backdrop with a photo symbol and Simulated, no person, as in 12b.
+Choose shows what she'd pick in the finished app (a clear, full-length photo, standing naturally in fitted clothes, in good light) and an example, with **Use example photo**. Remove asks first: "Remove your try-on photo? Try-on pictures you saved will stay." No camera, no photo library, no Info.plist keys and no permission prompt. The example is a sample photo of a woman standing (AI-generated, not a real person and not her) from the sample wardrobe, 9:16 on the try-on backdrop with the Simulated badge and "Example photo · Simulated" under it. Without a photo to show (`-fixtures demo:photos=drawn`) it is the backdrop with a photo symbol, as in 12b.
 
 ## Sensitive data
 
@@ -110,7 +110,7 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 4. **Weight isn't promised "never shared".** The mockup says so; DATA_MAP lets the minimum relevant fact go out in a consented request. The row says optional and approximate, and the privacy line says nothing is sent in this build.
 5. **Units follow the region until she picks.** The UK gets inches and pounds.
 6. **Height in inches has two boxes**, feet and inches, instead of the mockup's one box of inches.
-7. **The example try-on photo shows no person,** like 12b's pictures, though the README's exception allows a generic one here.
+7. **The example try-on photo shows no person,** like 12b's pictures, though the README's exception allows a generic one here. (Changed on 17 October 2026: it is now an AI-generated sample photo of a woman, from `Fixtures/Resources/SampleWardrobe`.)
 8. **Rows stood in for 14b**, which built them (`docs/settings.md`). Styling access, Closet and suitcases and Demo controls from the mockup aren't on Profile.
 9. **A fitting piece's kind is required** and starts empty, as on Add a piece.
 

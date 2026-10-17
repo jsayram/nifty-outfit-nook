@@ -103,11 +103,24 @@ public enum FixtureDraftState: String, CaseIterable, Sendable {
 
 /// Garment pictures in the fixture closet (Phase 8b).
 public enum FixturePhotoState: String, CaseIterable, Sendable {
-    /// Every piece shows its drawing, the default.
+    /// Pieces with a photo show the sample wardrobe's real photo, or its cutout as a sticker, and
+    /// pieces without one show their drawing, the default (`SampleWardrobe`).
+    case real
+    /// Every piece shows its drawing, as the app did before the sample wardrobe.
     case drawn
-    /// Eight more pieces with drawn sample photos and stand-in cutouts, six shown as stickers and
-    /// two as photo tiles (`SamplePhotoGarments`).
+    /// `real`, plus eight more pieces with drawn sample photos and stand-in cutouts, six shown as
+    /// stickers and two as photo tiles (`SamplePhotoGarments`).
     case samples
+}
+
+/// How much clothing the demo set has.
+public enum FixtureWardrobeState: String, CaseIterable, Sendable {
+    /// The demo closet's 21 pieces, the default.
+    case demo
+    /// The demo closet plus 30 more pieces with real photos, one or more of every kind in the
+    /// app, and two more saved looks with their try-on previews. Applies to the demo set only
+    /// (`SampleWardrobe`).
+    case full
 }
 
 /// A fixture set plus options, as read from `-fixtures <set>[:<option>]...`.
@@ -118,6 +131,7 @@ public enum FixturePhotoState: String, CaseIterable, Sendable {
 /// - `laundry=<state>` (`FixtureLaundryState`), such as `laundry=full`;
 /// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`;
 /// - `photos=<state>` (`FixturePhotoState`), such as `photos=samples`;
+/// - `wardrobe=<state>` (`FixtureWardrobeState`), such as `wardrobe=full`;
 /// - `source=<state>` (`FixtureSourceState`), such as `source=suitcase`.
 ///
 /// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
@@ -130,8 +144,10 @@ public struct FixtureConfiguration: Hashable, Sendable {
     public var laundry: FixtureLaundryState?
     /// An unsaved draft waiting at launch. `nil` starts with none.
     public var draft: FixtureDraftState?
-    /// Whether sample photos are added to the closet.
+    /// Which pictures the closet shows, and whether drawn sample photos are added to it.
     public var photos: FixturePhotoState
+    /// How much clothing the demo set has.
+    public var wardrobe: FixtureWardrobeState
     /// `nil` keeps the set's own remembered source (the main closet).
     public var source: FixtureSourceState?
 
@@ -141,7 +157,8 @@ public struct FixtureConfiguration: Hashable, Sendable {
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
         draft: FixtureDraftState? = nil,
-        photos: FixturePhotoState = .drawn,
+        photos: FixturePhotoState = .real,
+        wardrobe: FixtureWardrobeState = .demo,
         source: FixtureSourceState? = nil
     ) {
         self.set = set
@@ -150,6 +167,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
         self.laundry = laundry
         self.draft = draft
         self.photos = photos
+        self.wardrobe = wardrobe
         self.source = source
     }
 
@@ -177,6 +195,7 @@ public struct FixtureConfiguration: Hashable, Sendable {
             case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
             case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
             case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
+            case "wardrobe": wardrobe = FixtureWardrobeState(rawValue: pair[1]) ?? wardrobe
             case "source": source = FixtureSourceState(rawValue: pair[1]) ?? source
             default: continue
             }

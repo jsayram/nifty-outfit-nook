@@ -172,7 +172,7 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | Set | Contents |
 |---|---|
 | `empty` | A fresh install: nothing, default preferences, empty sign name |
-| `demo` | The prototype's 21 garments in the new model (every state: wishlist, bought not arrived, no longer owned, Recently deleted, archived, at the tailor, dirty, text-only, worn recently and long ago), six looks (including a saved Something new with an idea piece, one she made herself, and an unsaved result), three simulated try-on pictures (two of Interview, one of an earlier version), six suitcases (one empty, one archived, five active so See all shows), and a profile named Lily. Weather: 58° and rain |
+| `demo` | The prototype's 21 garments in the new model (every state: wishlist, bought not arrived, no longer owned, Recently deleted, archived, at the tailor, dirty, text-only (the old gray leggings; the other 20 pieces have a sample photo and cutout), worn recently and long ago), ten looks (including a saved Something new with an idea piece, one she made herself, an unsaved result, and four matching the sample try-on previews), seven try-on pictures (three simulated, two of Interview and one of an earlier version, and four previews of her wearing a look), six suitcases (one empty, one archived, five active so See all shows), and a profile named Lily. Weather: 58° and rain |
 | `large` | 2,400 generated garments, 600 looks, 40 suitcases and a simulated picture for every third saved look, from a fixed seed, so every run is the same |
 
 | Behaviour | What happens |
@@ -188,6 +188,8 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 | `stores-fail` | Every store call throws `unavailable` (error states) |
 | `photo-fails` | Add a piece's photo stand-in says the photo couldn't be read |
 | `picture-fails` | Try it on doesn't finish (Phase 12b) |
+
+`photos=` is `real` (the default: pieces with a photo show the bundled sample wardrobe through `SampleWardrobeProvider`, the drawings are the fallback), `drawn` (the drawings only, as before) or `samples`. `wardrobe=full` adds 30 more pieces with photos (one or more of every category), the sundress and cool-weather looks and their previews, to the demo set only. Pieces carry the photo and cutout as `PhotoReference.sample` names; the shape of `Garment`, `GarmentCutout` and `TryOnPicture` didn't change, and a `.generated` picture now has a fixture meaning (`docs/try-on-pictures.md`). The large set takes the same photos by kind and colour. The images, their README and the script that makes them are in `Fixtures/Resources/SampleWardrobe` and `scripts/build-sample-wardrobe.swift`.
 
 `photos=samples` adds eight pieces with drawn sample photos and stand-in cutouts, and an image provider (`SamplePhotoProvider`) that draws them, so stickers and tiles can be seen without real photos (Phase 8b, `docs/stickers.md`).
 
