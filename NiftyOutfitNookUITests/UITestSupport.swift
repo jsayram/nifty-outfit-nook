@@ -11,6 +11,13 @@ import XCTest
 // (pushes, sheets, alerts, tabs) confirms its effect with `tapUntil`, `tapUntilGone` or
 // `tapUntilSelected` instead of a bare `tap()`.
 //
+// Every tap in the UI tests says what it should do, so a lost tap is tapped again and a tap that
+// did nothing fails where it happened, not a few lines later. The retry is only taken when the
+// effect didn't come, so a toggle, Save or Undo isn't done twice. `scripts/check-ui-taps.sh`
+// (run by `scripts/format.sh` and CI) fails on a bare `tap()` outside this file. A tap with no
+// effect to wait for (one that checks nothing happens) keeps a bare `tap()` with
+// `// tap-unconfirmed: <why>` on the same line.
+//
 // Use these instead of `waitForExistence(timeout:)`, `waitForNonExistence(timeout:)` and
 // `XCTNSPredicateExpectation`. Those look the first time a second after they start, even when
 // the condition already holds, and then once a second; with about a thousand waits in the UI
@@ -78,13 +85,6 @@ extension XCUIElement {
         waitUntilTrue(timeout: timeout) { self.exists && self.isHittable }
     }
 
-    /// Taps the element once it can be tapped.
-    @MainActor
-    func tapWhenHittable(timeout: TimeInterval, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(waitUntilHittable(timeout: timeout), "Can't tap \(self)", file: file, line: line)
-        tap()
-    }
-
     /// Taps a button that closes what it's on (a sheet's Not now or Close) and waits for it to
     /// go. If the first tap was lost because the sheet was still settling, the button is still
     /// there and can be tapped, so it's tapped once more. A button that stays after two taps
@@ -127,6 +127,32 @@ extension XCUIElement {
         return effect()
     }
 
+    /// `tapUntil(timeout:_:)` that fails the test with `message` when the effect doesn't come.
+    @MainActor
+    func tapUntil(
+        timeout: TimeInterval, else message: @autoclosure () -> String, file: StaticString = #filePath,
+        line: UInt = #line, _ effect: @escaping @MainActor () -> Bool
+    ) {
+        XCTAssertTrue(tapUntil(timeout: timeout, effect), message(), file: file, line: line)
+    }
+
+    /// Types `text` into a field that has the keyboard (see `tapUntilFocused`) and waits until the
+    /// field's value contains `expected`, which is the text without a final Return unless given.
+    /// The text is never typed again: a second go would type it twice. A field that didn't get
+    /// it fails the test here rather than at a later check.
+    @MainActor
+    func typeTextAndWait(
+        _ text: String, expecting expected: String? = nil, timeout: TimeInterval, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        typeText(text)
+        let wanted = expected ?? (text.hasSuffix("\n") ? String(text.dropLast()) : text)
+        let landed = waitUntilTrue(timeout: timeout) {
+            self.exists && (self.value as? String)?.contains(wanted) == true
+        }
+        XCTAssertTrue(landed, "\(self) doesn't show \"\(wanted)\"", file: file, line: line)
+    }
+
     /// Taps a tab or other selectable button and waits until it says it's selected, tapping once
     /// more if the first tap was lost while the screen was still changing.
     @MainActor
@@ -157,6 +183,12 @@ extension XCUIElement {
         waitUntilTrue(timeout: timeout) { self.exists && self.isSelected }
     }
 
+    /// Whether a text field or search field is there and has the keyboard, looked at once.
+    @MainActor
+    var hasKeyboardNow: Bool {
+        exists && NSPredicate(format: "hasKeyboardFocus == true").evaluate(with: self)
+    }
+
     /// Waits until a text field or search field has the keyboard.
     @MainActor
     func waitUntilFocused(timeout: TimeInterval) -> Bool {
@@ -175,6 +207,21 @@ extension XCUIElement {
             if waitUntilFocused(timeout: timeout) { return }
         }
         XCTFail("\(self) didn't get the keyboard", file: file, line: line)
+    }
+}
+
+extension XCUICoordinate {
+    /// Taps this point and waits until `effect` holds, tapping once more if it didn't. For a spot
+    /// with no element of its own to tap: the end of a text field, a switch at the end of its row,
+    /// a control XCUITest wrongly calls not hittable. Returns whether the effect held.
+    @MainActor
+    @discardableResult
+    func tapUntil(timeout: TimeInterval, _ effect: @escaping @MainActor () -> Bool) -> Bool {
+        for _ in 0..<2 {
+            tap()
+            if waitUntilTrue(timeout: timeout, effect) { return true }
+        }
+        return effect()
     }
 }
 

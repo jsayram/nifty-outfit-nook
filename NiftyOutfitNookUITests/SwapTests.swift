@@ -24,24 +24,23 @@ final class SwapTests: XCTestCase {
         XCTAssertTrue(app.buttons["swap.findOne"].exists)
 
         // See all opens her tops with Closet's search; choosing one tries it in the look.
-        tap("swap.seeAll", in: app)
-        XCTAssertTrue(app.staticTexts["All Tops"].waitUntilExists(timeout: Self.wait))
+        tap("swap.seeAll", in: app, showing: app.staticTexts["All Tops"])
         XCTAssertTrue(app.searchFields["Search these pieces"].exists)
-        tap("picker.garment.g-pink-blouse", in: app)
         let tagline = element("swap.tagline", in: app)
-        XCTAssertTrue(waitForLabel(of: tagline, containing: "Trying Cute pink shirt"), tagline.label)
-        tap("swap.keep", in: app)
-        XCTAssertTrue(waitForLabel(of: tagline, containing: "Top now: Cream knit sweater"), tagline.label)
+        tap("picker.garment.g-pink-blouse", in: app) { self.label(of: tagline, contains: "Trying Cute pink shirt") }
+        tap("swap.keep", in: app) { self.label(of: tagline, contains: "Top now: Cream knit sweater") }
 
         // The shoes: try the heels, then use them.
-        tap("swap.piece.shoes", in: app)
+        let shoes = app.buttons["swap.piece.shoes"]
+        tap("swap.piece.shoes", in: app) { shoes.exists && shoes.isSelected }
         XCTAssertFalse(app.buttons["swap.use"].isEnabled, "Nothing to use until she tries one")
         let heels = app.buttons["swap.option.g-black-heels"]
-        tapOnScreen(heels, in: app)
-        XCTAssertTrue(waitForSelected(heels), "The heels weren't tried")
+        tapOnScreen(heels, in: app, else: "The heels weren't tried") { heels.exists && heels.isSelected }
         let use = app.buttons["swap.use"]
         XCTAssertEqual(use.label, "Use these shoes")
-        tapOnScreen(use, in: app)
+        // Back on Your looks once Swap a piece has gone.
+        let swapBar = app.navigationBars["Swap a piece"]
+        tapOnScreen(use, in: app, else: "Swap a piece didn't close") { !swapBar.exists }
 
         // Back on Your looks, the look has the heels, marked Swapped, and keeps its version.
         XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
@@ -52,10 +51,11 @@ final class SwapTests: XCTestCase {
         XCTAssertTrue(app.buttons["results.version.simple"].isSelected)
 
         // Save look works on the changed look.
+        // A second tap would unsave it, so it's tapped again only if the label didn't change.
         let save = app.buttons["results.save"]
-        tap("results.save", in: app)
-        XCTAssertTrue(waitForLabel(of: save, containing: "Saved"), save.label)
-        tap("results.tab.saved", in: app)
+        tap("results.save", in: app) { self.label(of: save, contains: "Saved") }
+        let savedTab = app.buttons["results.tab.saved"]
+        tap("results.tab.saved", in: app) { savedTab.exists && savedTab.isSelected }
         let changed = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "results.saved.", "Black block heels")
         )
@@ -70,16 +70,17 @@ final class SwapTests: XCTestCase {
         openSwap(in: app)
 
         XCTAssertFalse(app.buttons["swap.remove"].isEnabled, "Without the top it wouldn't be a look")
-        tap("swap.piece.shoes", in: app)
+        let shoes = app.buttons["swap.piece.shoes"]
+        tap("swap.piece.shoes", in: app) { shoes.exists && shoes.isSelected }
         XCTAssertTrue(app.buttons["swap.remove"].isEnabled)
-        tap("swap.remove", in: app)
+        let swapBar = app.navigationBars["Swap a piece"]
+        tap("swap.remove", in: app) { !swapBar.exists }
 
         XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
         let loafers = app.staticTexts["Tan loafers"]
         XCTAssertTrue(loafers.waitUntilGone(timeout: Self.wait), "The shoes are still in the look")
         // Undo under the pieces lasts longer than the toast, so CI can reach it.
-        tap("results.undoChange", in: app)
-        XCTAssertTrue(loafers.waitUntilExists(timeout: Self.wait), "Undo didn't put the shoes back")
+        tap("results.undoChange", in: app, showing: loafers)
         XCTAssertFalse(app.buttons["results.undoChange"].exists)
     }
 
@@ -97,23 +98,32 @@ final class SwapTests: XCTestCase {
     /// From the Home laptop, Style me with the defaults, then Swap a piece on Simple.
     @MainActor
     private func openSwap(in app: XCUIApplication) {
-        tap("home.laptop", in: app)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
-        tap("styleMe.go", in: app)
-        XCTAssertTrue(app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait))
-        tap("results.swap", in: app)
-        XCTAssertTrue(app.navigationBars["Swap a piece"].waitUntilExists(timeout: Self.wait))
+        tap("home.laptop", in: app, showing: app.navigationBars["Style Me"])
+        tap("styleMe.go", in: app, showing: app.buttons["results.version.simple"])
+        tap("results.swap", in: app, showing: app.navigationBars["Swap a piece"])
         XCTAssertTrue(app.buttons["swap.piece.top"].waitUntilHittable(timeout: Self.wait))
     }
 
-    /// Taps a button by identifier once it can be tapped, scrolling to find it if it's off the
-    /// screen.
+    /// Taps a button by identifier, scrolling to find it if it's off the screen, until `effect`
+    /// holds (see `XCUIElement.tapUntil(timeout:_:)`).
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
         app.scrollUntilHittable(button, up: 12, down: 12)
-        button.tapWhenHittable(timeout: Self.wait)
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
+    }
+
+    /// Taps a button by identifier until `next` appears.
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
     }
 
     /// Taps a control that's on screen, at its centre. On CI the heels option was in view (the
@@ -122,10 +132,12 @@ final class SwapTests: XCTestCase {
     /// whether it was hittable failed the test ("Failed to determine hittability ... Activation
     /// point invalid"). So this doesn't ask: it scrolls the control above the floating tab bar,
     /// checks its frame is inside the window, and taps there. The test then checks the tap's
-    /// effect, so a tap that misses still fails. Use these shoes, under it, gets the same.
+    /// effect, and taps once more if it didn't come, so a tap that misses still fails. Use these
+    /// shoes, under it, gets the same.
     @MainActor
     private func tapOnScreen(
-        _ control: XCUIElement, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+        _ control: XCUIElement, in app: XCUIApplication, else message: String, file: StaticString = #filePath,
+        line: UInt = #line, until effect: @escaping @MainActor () -> Bool
     ) {
         XCTAssertTrue(control.waitUntilExists(timeout: Self.wait), "No \(control)", file: file, line: line)
         let bottom =
@@ -138,21 +150,18 @@ final class SwapTests: XCTestCase {
         XCTAssertTrue(
             window.contains(control.frame) && control.frame.maxY <= bottom, "\(control) is off the screen", file: file,
             line: line)
-        control.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let centre = control.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        XCTAssertTrue(centre.tapUntil(timeout: Self.wait, effect), message, file: file, line: line)
     }
 
+    /// Whether the element is there and its label contains `text`.
     @MainActor
-    private func waitForSelected(_ element: XCUIElement) -> Bool {
-        return element.waitUntil(NSPredicate(format: "selected == true"), timeout: Self.wait)
+    private func label(of element: XCUIElement, contains text: String) -> Bool {
+        element.exists && element.label.contains(text)
     }
 
     @MainActor
     private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any)[identifier]
-    }
-
-    @MainActor
-    private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
-        return element.waitUntil(NSPredicate(format: "label CONTAINS %@", text), timeout: Self.wait)
     }
 }

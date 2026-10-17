@@ -33,22 +33,20 @@ final class StyleMeTests: XCTestCase {
         XCTAssertTrue(waitForLabel(of: comfort, containing: "Today: fitted (you usually like relaxed)"), comfort.label)
 
         // The Colour sheet stays open while she picks a colour, a strength and a place.
-        tap("styleMe.color", in: app)
-        tap("color.navy", in: app)
-        tap("color.strength.required", in: app)
-        tap("color.scope.shoes", in: app)
+        tap("styleMe.color", in: app, showing: app.buttons["color.navy"])
+        for chip in ["color.navy", "color.strength.required", "color.scope.shoes"] {
+            tap(chip, in: app) { app.buttons[chip].exists && app.buttons[chip].isSelected }
+        }
         XCTAssertTrue(app.buttons["color.navy"].isSelected)
         app.buttons["Close"].tapUntilGone(timeout: Self.wait)
         let color = app.buttons["styleMe.color"]
         XCTAssertTrue(waitForLabel(of: color, containing: "Navy · shoes · required"), color.label)
 
         // LR-03: Preferences, with exactly the two values.
-        tap("styleMe.preferences", in: app)
-        XCTAssertTrue(app.buttons["preferences.mineAndOneIdea"].waitUntilExists(timeout: Self.wait))
+        tap("styleMe.preferences", in: app, showing: app.buttons["preferences.mineAndOneIdea"])
         XCTAssertTrue(app.buttons["preferences.mineAndOneIdea"].isSelected)
-        tap("preferences.onlyMine", in: app)
         let preferences = app.buttons["styleMe.preferences"]
-        XCTAssertTrue(waitForLabel(of: preferences, containing: "Only mine"), preferences.label)
+        tap("preferences.onlyMine", in: app) { preferences.exists && preferences.label.contains("Only mine") }
 
         // The weather row keeps 5a's sheet.
         choose("styleMe.weather", then: "weather.indoors", in: app)
@@ -61,12 +59,12 @@ final class StyleMeTests: XCTestCase {
 
         // Style me: Your looks repeats the request (LR-05a), and Only mine from a suitcase means
         // Something new has no piece she doesn't own (LR-05b.2).
-        tap("styleMe.go", in: app)
-        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
+        tap("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
         let line = element("results.request", in: app)
         XCTAssertTrue(line.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(line.label, "Brunch · Weekend · Indoors")
-        tap("results.version.somethingNew", in: app)
+        let somethingNew = app.buttons["results.version.somethingNew"]
+        tap("results.version.somethingNew", in: app) { somethingNew.exists && somethingNew.isSelected }
         let description = element("results.versionDescription", in: app)
         XCTAssertTrue(waitForLabel(of: description, containing: "another way with your own pieces"), description.label)
 
@@ -86,10 +84,9 @@ final class StyleMeTests: XCTestCase {
         let note = app.textFields["occasion.otherNote"]
         other.tapUntil(note, appears: Self.wait)
         note.tapUntilFocused(timeout: Self.wait)
-        note.typeText("Museum visit")
-        tap("occasion.done", in: app)
+        note.typeTextAndWait("Museum visit", timeout: Self.wait)
         let occasion = app.buttons["styleMe.occasion"]
-        XCTAssertTrue(waitForLabel(of: occasion, containing: "Other: Museum visit"), occasion.label)
+        tap("occasion.done", in: app) { occasion.exists && occasion.label.contains("Other: Museum visit") }
     }
 
     /// An empty suitcase stops Style me and offers another source (PRD §8.1, FR-67).
@@ -103,9 +100,8 @@ final class StyleMeTests: XCTestCase {
         XCTAssertTrue(notice.label.contains("Spring trip is empty"), notice.label)
         XCTAssertFalse(app.buttons["styleMe.go"].isEnabled)
 
-        tap("styleMe.notice.suitcaseEmpty.chooseSource", in: app)
-        tap("source.mainCloset", in: app)
-        XCTAssertTrue(notice.waitUntilGone(timeout: Self.wait))
+        tap("styleMe.notice.suitcaseEmpty.chooseSource", in: app, showing: app.buttons["source.mainCloset"])
+        tap("source.mainCloset", in: app) { !notice.exists }
         XCTAssertTrue(app.buttons["styleMe.go"].isEnabled)
     }
 
@@ -114,8 +110,7 @@ final class StyleMeTests: XCTestCase {
     func testAnEmptyClosetOffersAddAPiece() {
         let app = launch("empty")
         open("home.laptop", in: app)
-        tap("styleMe.notice.closetEmpty.addPiece", in: app)
-        XCTAssertTrue(app.navigationBars["Add a piece"].waitUntilExists(timeout: Self.wait))
+        tap("styleMe.notice.closetEmpty.addPiece", in: app, showing: app.navigationBars["Add a piece"])
     }
 
     /// "Style me with it" on a garment opens Style Me with that piece, and it goes in the request.
@@ -126,16 +121,15 @@ final class StyleMeTests: XCTestCase {
         let search = app.searchFields["Search your closet"]
         XCTAssertTrue(search.waitUntilExists(timeout: Self.wait))
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy pants\n")
-        tap("closet.garment.g-navy-trousers", in: app)
-        tap("garment.styleWithThis", in: app)
-        tap("styleWithThis.styleMe", in: app)
-
+        search.typeTextAndWait("navy pants\n", timeout: Self.wait)
+        tap("closet.garment.g-navy-trousers", in: app, showing: app.buttons["garment.styleWithThis"])
+        tap("garment.styleWithThis", in: app, showing: app.buttons["styleWithThis.styleMe"])
         let start = app.buttons["styleMe.startingPiece"]
-        XCTAssertTrue(start.waitUntilExists(timeout: Self.wait))
+        tap("styleWithThis.styleMe", in: app, showing: start)
+
         XCTAssertTrue(waitForLabel(of: start, containing: "Navy dress pants"), start.label)
         // Every version is built around it.
-        tap("styleMe.go", in: app)
+        tap("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
         let piece = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Navy dress pants")).firstMatch
         XCTAssertTrue(piece.waitUntilExists(timeout: Self.wait), "The starting piece isn't in the look")
     }
@@ -154,27 +148,37 @@ final class StyleMeTests: XCTestCase {
     /// Taps a Home control and waits for Style Me.
     @MainActor
     private func open(_ identifier: String, in app: XCUIApplication) {
-        tap(identifier, in: app)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        tap(identifier, in: app, showing: app.navigationBars["Style Me"])
     }
 
     /// Opens a row's sheet, picks a choice that closes it, and waits for it to close.
     @MainActor
     private func choose(_ row: String, then choice: String, in app: XCUIApplication) {
-        tap(row, in: app)
         let button = app.buttons[choice]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No \(choice) in the sheet")
-        tap(choice, in: app)
-        XCTAssertTrue(button.waitUntilGone(timeout: Self.wait), "Choosing \(choice) should close the sheet")
+        tap(row, in: app, showing: button)
+        tap(choice, in: app) { !button.exists }
     }
 
-    /// Taps a button by identifier, scrolling to find it if it's off the screen.
+    /// Taps a button by identifier, scrolling to find it if it's off the screen, until `effect`
+    /// holds (see `XCUIElement.tapUntil(timeout:_:)`).
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
         app.scrollUntilHittable(button, up: 12, down: 12)
-        button.tap()
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
+    }
+
+    /// Taps a button by identifier until `next` appears.
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
     }
 
     @MainActor

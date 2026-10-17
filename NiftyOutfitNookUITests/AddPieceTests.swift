@@ -14,22 +14,19 @@ final class AddPieceTests: XCTestCase {
     @MainActor
     func testAddByWordsAndSeeItInCloset() {
         let app = launchOnCloset("demo")
-        tap("closet.addPiece", in: app)
-        tap("addPiece.words", in: app)
+        openDescribeInWords(in: app)
 
         // Continue with nothing typed, then Save: the form says what's missing.
-        tap("words.continue", in: app)
-        tap("editor.toolbarSave", in: app)
-        XCTAssertTrue(element("problem.name", in: app).waitUntilExists(timeout: Self.wait))
+        tap("words.continue", in: app, showing: app.buttons["editor.toolbarSave"])
+        tap("editor.toolbarSave", in: app, showing: element("problem.name", in: app))
         XCTAssertEqual(element("problem.name", in: app).label, "Give it a name.")
         XCTAssertTrue(element("problem.category", in: app).exists)
 
         // Back to the words, describe it and accept every suggestion.
-        tap("editor.back", in: app)
+        tap("editor.back", in: app, showing: element("field.description", in: app))
         type("Navy wool coat with big buttons", into: "field.description", in: app)
-        tap("words.suggest", in: app)
-        acceptEverySuggestion(in: app)
-        tap("words.continue", in: app)
+        suggestAndAcceptEverySuggestion(in: app)
+        tap("words.continue", in: app, showing: element("field.name", in: app))
         let name = element("field.name", in: app)
         XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(name.value as? String, "Navy coat")
@@ -38,8 +35,7 @@ final class AddPieceTests: XCTestCase {
 
         // The toast isn't checked: on a slow CI runner it can come and go while XCUITest waits for
         // the app to settle. The piece in the grid is what matters.
-        tap("editor.toolbarSave", in: app)
-        XCTAssertTrue(gridPiece("Navy coat", in: app).waitUntilExists(timeout: Self.wait))
+        tap("editor.toolbarSave", in: app, showing: gridPiece("Navy coat", in: app))
     }
 
     /// Edit from garment detail: Cancel asks first when something changed, and Save changes
@@ -50,24 +46,23 @@ final class AddPieceTests: XCTestCase {
         openNavyTrousers(in: app)
 
         // Change the name, then Cancel: it asks, Keep editing stays, Discard changes leaves it.
-        tap("garment.edit", in: app)
+        tap("garment.edit", in: app, showing: element("field.name", in: app))
         replaceText(in: "field.name", with: "Navy work trousers", in: app)
-        tap("editor.cancel", in: app)
         let keepEditing = app.buttons["Keep editing"]
-        XCTAssertTrue(keepEditing.waitUntilExists(timeout: Self.wait))
+        tap("editor.cancel", in: app, showing: keepEditing)
         keepEditing.tapUntilGone(timeout: Self.wait)
         XCTAssertEqual(element("field.name", in: app).value as? String, "Navy work trousers")
-        tap("editor.cancel", in: app)
         let discard = app.buttons["Discard changes"]
-        XCTAssertTrue(discard.waitUntilExists(timeout: Self.wait))
+        tap("editor.cancel", in: app, showing: discard)
         discard.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(element("garment.name", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(element("garment.name", in: app).label, "Navy dress pants")
 
         // Change it again and save: the detail shows the new name.
-        tap("garment.edit", in: app)
+        tap("garment.edit", in: app, showing: element("field.name", in: app))
         replaceText(in: "field.name", with: "Navy work trousers", in: app)
-        tap("editor.toolbarSave", in: app)
+        // Save closes the form.
+        tap("editor.toolbarSave", in: app) { !app.buttons["editor.toolbarSave"].exists }
         let title = element("garment.name", in: app)
         XCTAssertTrue(title.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForLabel("Navy work trousers", of: title))
@@ -81,12 +76,10 @@ final class AddPieceTests: XCTestCase {
     @MainActor
     func testAbandonMidAddThenResumeAfterRelaunch() {
         var app = launchOnCloset("demo")
-        tap("closet.addPiece", in: app)
-        tap("addPiece.words", in: app)
+        openDescribeInWords(in: app)
         type("Sage green cardigan with gold buttons, soft and cozy", into: "field.description", in: app)
-        tap("words.suggest", in: app)
-        acceptEverySuggestion(in: app)
-        tap("words.continue", in: app)
+        suggestAndAcceptEverySuggestion(in: app)
+        tap("words.continue", in: app, showing: element("field.name", in: app))
         XCTAssertEqual(element("field.name", in: app).value as? String, "Sage cardigan")
         app.terminate()
 
@@ -96,15 +89,14 @@ final class AddPieceTests: XCTestCase {
         XCTAssertTrue(message.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(message.label, "Sage cardigan isn’t in your closet yet.")
         // So does Add a piece, which is where she resumes it from here.
-        tap("closet.addPiece", in: app)
-        tap("draft.resume", in: app)
+        tap("closet.addPiece", in: app, showing: app.buttons["draft.resume"])
+        tap("draft.resume", in: app, showing: element("field.name", in: app))
         let name = element("field.name", in: app)
         XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(name.value as? String, "Sage cardigan")
         XCTAssertTrue(app.buttons["editor.back"].exists)
 
-        tap("editor.toolbarSave", in: app)
-        XCTAssertTrue(gridPiece("Sage cardigan", in: app).waitUntilExists(timeout: Self.wait))
+        tap("editor.toolbarSave", in: app, showing: gridPiece("Sage cardigan", in: app))
         // Saved, so nothing is waiting any more.
         XCTAssertTrue(message.waitUntilGone(timeout: Self.wait))
     }
@@ -126,7 +118,7 @@ final class AddPieceTests: XCTestCase {
         let search = app.searchFields["Search your closet"]
         XCTAssertTrue(search.waitUntilExists(timeout: Self.wait))
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy pants\n")
+        search.typeTextAndWait("navy pants\n", timeout: Self.wait)
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
         trousers.tapUntil(element("garment.name", in: app), appears: Self.wait)
@@ -139,12 +131,22 @@ final class AddPieceTests: XCTestCase {
             .firstMatch
     }
 
+    /// Closet's Add a piece, then Describe in words.
     @MainActor
-    private func acceptEverySuggestion(in app: XCUIApplication) {
+    private func openDescribeInWords(in app: XCUIApplication) {
+        tap("closet.addPiece", in: app, showing: app.buttons["addPiece.words"])
+        tap("addPiece.words", in: app, showing: element("field.description", in: app))
+    }
+
+    /// Suggest details, then Accept on every suggestion. Accept says it's selected once taken.
+    @MainActor
+    private func suggestAndAcceptEverySuggestion(in app: XCUIApplication) {
         let accepts = app.buttons.matching(NSPredicate(format: "identifier ENDSWITH '.accept'"))
-        XCTAssertTrue(accepts.firstMatch.waitUntilExists(timeout: Self.wait))
+        tap("words.suggest", in: app, showing: accepts.firstMatch)
         for index in 0..<accepts.count {
-            tap(accepts.element(boundBy: index).identifier, in: app)
+            let identifier = accepts.element(boundBy: index).identifier
+            let accept = app.buttons[identifier]
+            tap(identifier, in: app) { accept.exists && accept.isSelected }
         }
     }
 
@@ -153,7 +155,7 @@ final class AddPieceTests: XCTestCase {
         let field = element(identifier, in: app)
         XCTAssertTrue(field.waitUntilExists(timeout: Self.wait))
         field.tapUntilFocused(timeout: Self.wait)
-        field.typeText(text)
+        field.typeTextAndWait(text, timeout: Self.wait)
     }
 
     @MainActor
@@ -161,11 +163,13 @@ final class AddPieceTests: XCTestCase {
         let field = element(identifier, in: app)
         XCTAssertTrue(field.waitUntilExists(timeout: Self.wait))
         // Tap near the end, so the cursor lands after the text before deleting it.
-        field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tap()
-        XCTAssertTrue(field.waitUntilFocused(timeout: Self.wait), "\(identifier) didn't get the keyboard")
+        let focused = field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tapUntil(timeout: Self.wait) {
+            field.hasKeyboardNow
+        }
+        XCTAssertTrue(focused, "\(identifier) didn't get the keyboard")
         let current = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
-        field.typeText(text)
+        field.typeTextAndWait(text, timeout: Self.wait)
     }
 
     @MainActor
@@ -178,12 +182,25 @@ final class AddPieceTests: XCTestCase {
         return element.waitUntil(NSPredicate(format: "label == %@", label), timeout: Self.wait)
     }
 
-    /// Taps a button by identifier, scrolling up to find it if it's below the screen.
+    /// Taps a button by identifier, scrolling up to find it if it's below the screen, until
+    /// `effect` holds (see `XCUIElement.tapUntil(timeout:_:)`).
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
         app.scrollUntilHittable(button, up: 16)
-        button.tap()
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
+    }
+
+    /// Taps a button by identifier until `next` appears.
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
     }
 }

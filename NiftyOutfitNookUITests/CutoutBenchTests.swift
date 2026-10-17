@@ -17,7 +17,13 @@ final class CutoutBenchTests: XCTestCase {
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The benchmark replaces the app's tabs")
         XCTAssertTrue(app.buttons["Choose photos"].exists)
 
-        app.buttons["cutoutBench.samples"].tapWhenHittable(timeout: uiTestWait)
+        // The samples start loading: the count of photos done shows nine, or the button is off
+        // while they load and run.
+        let samples = app.buttons["cutoutBench.samples"]
+        let nine = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", " of 9")).firstMatch
+        samples.tapUntil(timeout: uiTestWait, else: "The drawn samples didn't start") {
+            nine.exists || (samples.exists && !samples.isEnabled)
+        }
 
         // Nine drawn samples. Drawing them at full photo size takes a few seconds here, and once
         // took more than 90 on a busy CI runner.

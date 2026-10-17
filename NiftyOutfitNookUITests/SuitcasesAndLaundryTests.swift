@@ -16,21 +16,17 @@ final class SuitcasesAndLaundryTests: XCTestCase {
     func testPackASuitcaseAndStyleFromIt() {
         let app = launch("demo")
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
-        tap("closet.suitcases", in: app)
-        XCTAssertTrue(app.navigationBars["Suitcases"].waitUntilExists(timeout: Self.wait))
+        tap("closet.suitcases", in: app, showing: app.navigationBars["Suitcases"])
 
         // "+ Add a suitcase" is in the bar, whatever is below (LR-17.1).
-        app.buttons["suitcases.add"].tapWhenHittable(timeout: Self.wait)
         let name = app.textFields["field.suitcaseEditor.name"]
-        XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
+        app.buttons["suitcases.add"].tapUntil(name, appears: Self.wait)
         name.tapUntilFocused(timeout: Self.wait)
-        name.typeText("Beach week")
-        app.buttons["suitcaseEditor.icon.backpack"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.buttons["suitcaseEditor.icon.backpack"].isSelected)
-        app.buttons["suitcaseEditor.save"].tapWhenHittable(timeout: Self.wait)
+        name.typeTextAndWait("Beach week", timeout: Self.wait)
+        app.buttons["suitcaseEditor.icon.backpack"].tapUntilSelected(timeout: Self.wait)
+        app.buttons["suitcaseEditor.save"].tapUntil(app.navigationBars["Beach week"], appears: Self.wait)
 
         // The new suitcase opens on the packing sheet.
-        XCTAssertTrue(app.navigationBars["Beach week"].waitUntilExists(timeout: Self.wait))
         let count = element("packing.count", in: app)
         XCTAssertTrue(count.waitUntilExists(timeout: Self.wait), "The packing sheet didn't open")
         XCTAssertTrue(count.label.hasPrefix("Nothing packed yet"), count.label)
@@ -39,30 +35,31 @@ final class SuitcasesAndLaundryTests: XCTestCase {
             XCTAssertTrue(field.waitUntilExists(timeout: Self.wait))
             // Empties the last search before typing the next.
             let clear = app.buttons["Clear search"]
-            if clear.exists { clear.tap() }
+            if clear.exists { clear.tapUntilGone(timeout: Self.wait) }
             field.tapUntilFocused(timeout: Self.wait)
-            field.typeText("\(search)\n")
+            field.typeTextAndWait("\(search)\n", timeout: Self.wait)
+            // A second tap would unpack it, so it's tapped again only if it didn't say it's packed.
             let piece = app.buttons["packing.garment.\(id)"]
-            piece.tapWhenHittable(timeout: Self.wait)
-            XCTAssertTrue(waitUntilSelected(piece), "\(id) wasn't packed")
+            piece.tapUntil(timeout: Self.wait, else: "\(id) wasn't packed") { piece.exists && piece.isSelected }
         }
         XCTAssertTrue(waitForLabel(of: count, containing: "3 packed"), count.label)
         app.buttons["Close"].tapUntilGone(timeout: Self.wait)
 
         // The three pieces are on the suitcase. One comes out, and Undo puts it back.
-        XCTAssertTrue(waitForLabel(of: element("suitcase.count", in: app), containing: "3 pieces"))
-        app.buttons["suitcase.garment.g-pink-blouse.remove"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(waitForLabel(of: element("suitcase.count", in: app), containing: "2 pieces"))
-        app.buttons["Undo"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(waitForLabel(of: element("suitcase.count", in: app), containing: "3 pieces"))
+        let suitcaseCount = element("suitcase.count", in: app)
+        XCTAssertTrue(waitForLabel(of: suitcaseCount, containing: "3 pieces"))
+        app.buttons["suitcase.garment.g-pink-blouse.remove"].tapUntil(timeout: Self.wait, else: "It wasn't taken out") {
+            self.label(of: suitcaseCount, contains: "2 pieces")
+        }
+        app.buttons["Undo"].tapUntil(timeout: Self.wait, else: "Undo didn't put it back") {
+            self.label(of: suitcaseCount, contains: "3 pieces")
+        }
 
         // Style me from this suitcase opens Style Me with it as the source, strict to it.
-        tap("suitcase.styleMe", in: app)
         let source = app.buttons["styleMe.source"]
-        XCTAssertTrue(source.waitUntilExists(timeout: Self.wait))
+        tap("suitcase.styleMe", in: app, showing: source)
         XCTAssertTrue(waitForLabel(of: source, containing: "Beach week"), source.label)
-        tap("styleMe.go", in: app)
-        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
+        tap("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
 
         // Home's suitcase shows it now, as a favourite source (RD-01.3, RD-09.2).
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
@@ -72,8 +69,7 @@ final class SuitcasesAndLaundryTests: XCTestCase {
             suitcase.label)
 
         // And it opens Suitcases on the Closet tab, where it's the chosen source.
-        suitcase.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Suitcases"].waitUntilExists(timeout: Self.wait))
+        suitcase.tapUntil(app.navigationBars["Suitcases"], appears: Self.wait)
         XCTAssertTrue(app.tabBars.firstMatch.buttons["Closet"].isSelected)
         let row = app.buttons.matching(identifier: "suitcases.row.mainCloset.choose").firstMatch
         XCTAssertTrue(row.waitUntilExists(timeout: Self.wait))
@@ -93,42 +89,47 @@ final class SuitcasesAndLaundryTests: XCTestCase {
         let search = app.searchFields["Search your closet"]
         XCTAssertTrue(search.waitUntilExists(timeout: Self.wait))
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy pants\n")
-        app.buttons["closet.garment.g-navy-trousers"].tapWhenHittable(timeout: Self.wait)
-        tap("garment.laundry", in: app)
-        XCTAssertTrue(labelled("Marked as dirty", in: app).waitUntilExists(timeout: Self.wait))
+        search.typeTextAndWait("navy pants\n", timeout: Self.wait)
+        let status = element("garment.fact.status", in: app)
+        app.buttons["closet.garment.g-navy-trousers"].tapUntil(status, appears: Self.wait)
+        // The button marks it clean again, so it's tapped again only if the status didn't change.
+        // The status lasts; the "Marked as dirty" toast can be gone before a slow runner looks.
+        tap("garment.laundry", in: app) { status.exists && status.value as? String == "Dirty" }
 
         // Home's hamper has three now, without a relaunch.
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: hamper, containing: "Hamper: Laundry, 3 to wash"), hamper.label)
 
         // The hamper opens Laundry on the Closet tab.
-        hamper.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Laundry"].waitUntilExists(timeout: Self.wait))
+        hamper.tapUntil(app.navigationBars["Laundry"], appears: Self.wait)
         let count = element("laundry.count", in: app)
         XCTAssertTrue(waitForLabel(of: count, containing: "3 pieces in the wash"), count.label)
 
         // Mark clean on one piece, then Undo.
-        tap("laundry.markClean.g-navy-trousers", in: app)
-        XCTAssertTrue(waitForLabel(of: count, containing: "2 pieces in the wash"), count.label)
-        app.buttons["Undo"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(waitForLabel(of: count, containing: "3 pieces in the wash"), count.label)
+        tap("laundry.markClean.g-navy-trousers", in: app) { self.label(of: count, contains: "2 pieces in the wash") }
+        app.buttons["Undo"].tapUntil(timeout: Self.wait, else: "Undo didn't put it back") {
+            self.label(of: count, contains: "3 pieces in the wash")
+        }
 
-        // Two ticked, Clean selected asks first.
-        tap("laundry.select.g-navy-trousers", in: app)
-        XCTAssertTrue(app.buttons["laundry.select.g-navy-trousers"].isSelected)
+        // Two ticked, Clean selected asks first. A second tap would untick one, so each is
+        // tapped again only if it didn't say it's ticked.
+        let navy = app.buttons["laundry.select.g-navy-trousers"]
+        tap("laundry.select.g-navy-trousers", in: app) { navy.exists && navy.isSelected }
         let firstOther = app.buttons.matching(
             NSPredicate(
                 format: "identifier BEGINSWITH 'laundry.select.' AND identifier != 'laundry.select.g-navy-trousers'")
         ).firstMatch
-        firstOther.tapWhenHittable(timeout: Self.wait)
-        tap("laundry.cleanSelected", in: app)
-        app.buttons["laundry.confirm"].tapUntilGone(timeout: Self.wait)
+        firstOther.tapUntil(timeout: Self.wait, else: "The second piece wasn't ticked") {
+            firstOther.exists && firstOther.isSelected
+        }
+        let confirm = app.buttons["laundry.confirm"]
+        tap("laundry.cleanSelected", in: app) { confirm.exists }
+        confirm.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: count, containing: "1 piece in the wash"), count.label)
 
         // Mark all clean asks too, then nothing is in the wash.
-        tap("laundry.cleanAll", in: app)
-        app.buttons["laundry.confirm"].tapUntilGone(timeout: Self.wait)
+        tap("laundry.cleanAll", in: app) { confirm.exists }
+        confirm.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(element("laundry.empty", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(waitForLabel(of: count, containing: "Nothing in the wash"), count.label)
 
@@ -197,28 +198,37 @@ final class SuitcasesAndLaundryTests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
+    /// Taps a button by identifier, scrolling up to find it if it's below the screen, until
+    /// `effect` holds (see `XCUIElement.tapUntil(timeout:_:)`).
     @MainActor
-    private func labelled(_ label: String, in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
+        let button = app.buttons[identifier].firstMatch
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
+        app.scrollUntilHittable(button, up: 12)
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
     }
 
-    /// Taps a button by identifier, scrolling up to find it if it's below the screen.
+    /// Taps a button by identifier until `next` appears.
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
-        let button = app.buttons[identifier].firstMatch
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
-        app.scrollUntilHittable(button, up: 12)
-        button.tap()
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
+    }
+
+    /// Whether the element is there and its label contains `text`.
+    @MainActor
+    private func label(of element: XCUIElement, contains text: String) -> Bool {
+        element.exists && element.label.contains(text)
     }
 
     @MainActor
     private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
         let predicate = NSPredicate(format: "label CONTAINS %@", text)
         return element.waitUntil(predicate, timeout: Self.wait)
-    }
-
-    @MainActor
-    private func waitUntilSelected(_ element: XCUIElement) -> Bool {
-        return element.waitUntil(NSPredicate(format: "selected == true"), timeout: Self.wait)
     }
 }

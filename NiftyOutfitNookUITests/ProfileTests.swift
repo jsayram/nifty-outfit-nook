@@ -33,22 +33,22 @@ final class ProfileTests: XCTestCase {
     func testAFitValueIsRefusedWhenWrongAndSavedWhenRight() {
         let app = launch()
         openProfile(in: app)
-        app.buttons["profile.fit"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Fit and measurements"].waitUntilExists(timeout: Self.wait))
+        app.buttons["profile.fit"].tapUntil(app.navigationBars["Fit and measurements"], appears: Self.wait)
 
         // The simulator is set to the US, so Waist is in inches.
         let waist = app.buttons["fit.waist"]
-        waist.tapWhenHittable(timeout: Self.wait)
         let box = app.textFields["measurement.value"]
-        XCTAssertTrue(box.waitUntilExists(timeout: Self.wait), "No measurement sheet")
+        waist.tapUntil(box, appears: Self.wait)
         box.tapUntilFocused(timeout: Self.wait)
-        box.typeText("270")
+        box.typeTextAndWait("270", timeout: Self.wait)
         let problem = app.descendants(matching: .any)["measurement.problem"]
         app.buttons["measurement.save"].tapUntil(problem, appears: Self.wait)
         XCTAssertTrue(problem.label.contains("between 15 and 70"), problem.label)
 
         // Fix it: the problem goes as she types, and Save keeps it.
-        box.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "27.5")
+        box.typeTextAndWait(
+            String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "27.5", expecting: "27.5", timeout: Self.wait
+        )
         XCTAssertTrue(problem.waitUntilGone(timeout: Self.wait))
         app.buttons["measurement.save"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(box.waitUntilGone(timeout: Self.wait), "The sheet didn't close after saving")
@@ -56,27 +56,25 @@ final class ProfileTests: XCTestCase {
 
         // Height in feet and inches.
         let height = app.buttons["fit.height"]
-        height.tapWhenHittable(timeout: Self.wait)
         let feet = app.textFields["measurement.feet"]
-        XCTAssertTrue(feet.waitUntilExists(timeout: Self.wait))
+        height.tapUntil(feet, appears: Self.wait)
         feet.tapUntilFocused(timeout: Self.wait)
-        feet.typeText("4")
+        feet.typeTextAndWait("4", timeout: Self.wait)
         let inches = app.textFields["measurement.inches"]
         inches.tapUntilFocused(timeout: Self.wait)
-        inches.typeText("11")
+        inches.typeTextAndWait("11", timeout: Self.wait)
         app.buttons["measurement.save"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(feet.waitUntilGone(timeout: Self.wait))
         XCTAssertEqual(height.value as? String, "4 feet 11 inches")
 
         // The usual fit is saved with one tap (LR-18).
         let fitted = app.buttons["fit.usual.fitted"]
-        fitted.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(fitted.waitUntilSelected(timeout: Self.wait))
+        fitted.tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.staticTexts["fit.usualNote"].exists)
 
         // Back on Profile and in again, the values are still there.
         app.goBack(from: "Fit and measurements", to: "Profile", timeout: Self.wait)
-        app.buttons["profile.fit"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["profile.fit"].tapUntil(app.navigationBars["Fit and measurements"], appears: Self.wait)
         XCTAssertTrue(app.buttons["fit.waist"].waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(app.buttons["fit.waist"].value as? String, "27.5 inches")
     }
@@ -86,10 +84,9 @@ final class ProfileTests: XCTestCase {
         let app = launch()
         openProfile(in: app)
         let row = app.buttons["profile.tryOnPhoto"]
-        row.tapWhenHittable(timeout: Self.wait)
-        app.buttons["tryOnPhoto.choose"].tapWhenHittable(timeout: Self.wait)
-        app.buttons["tryOnPhoto.useExample"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.buttons["tryOnPhoto.remove"].waitUntilExists(timeout: Self.wait))
+        row.tapUntil(app.buttons["tryOnPhoto.choose"], appears: Self.wait)
+        app.buttons["tryOnPhoto.choose"].tapUntil(app.buttons["tryOnPhoto.useExample"], appears: Self.wait)
+        app.buttons["tryOnPhoto.useExample"].tapUntil(app.buttons["tryOnPhoto.remove"], appears: Self.wait)
         XCTAssertTrue(app.descendants(matching: .any)["tryOnPhoto.example"].exists)
         app.buttons["tryOnPhoto.remove"].tapUntil(app.buttons["tryOnPhoto.confirmRemove"], appears: Self.wait)
         app.buttons["tryOnPhoto.confirmRemove"].tapUntilGone(timeout: Self.wait)
@@ -112,20 +109,26 @@ final class ProfileTests: XCTestCase {
 
     @MainActor
     private func openProfile(in app: XCUIApplication) {
-        app.buttons["home.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
     }
 
     @MainActor
     private func rename(to name: String, in app: XCUIApplication) {
-        app.buttons["profile.name"].tapWhenHittable(timeout: Self.wait)
         let field = app.descendants(matching: .any)["field.profile.nameField"]
-        XCTAssertTrue(field.waitUntilExists(timeout: Self.wait), "No name field")
+        app.buttons["profile.name"].tapUntil(field, appears: Self.wait)
         // Tap near the end, so the cursor lands after the text before deleting it.
-        field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tap()
-        XCTAssertTrue(field.waitUntilFocused(timeout: Self.wait), "The name field didn't get the keyboard")
+        let focused = field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.5)).tapUntil(timeout: Self.wait) {
+            field.hasKeyboardNow
+        }
+        XCTAssertTrue(focused, "The name field didn't get the keyboard")
         let current = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2) + name)
+        // An empty field shows its prompt as its value, so check the old name went instead.
+        let typed = waitUntilTrue(timeout: Self.wait) {
+            let value = (field.value as? String) ?? ""
+            return name.isEmpty ? !value.contains(current) : value == name
+        }
+        XCTAssertTrue(typed, "The name field shows \(String(describing: field.value)), not \"\(name)\"")
         app.buttons["profile.nameSave"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(field.waitUntilGone(timeout: Self.wait), "The name sheet didn't close")
     }

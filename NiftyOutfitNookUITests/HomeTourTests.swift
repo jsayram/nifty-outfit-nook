@@ -35,14 +35,12 @@ final class HomeTourTests: XCTestCase {
             XCTAssertTrue(words.label.contains("Highlighted: "), "Step \(index + 1) doesn't name its control")
             if index == 1 {
                 // Back goes to the step before, and Next comes back.
-                app.buttons["tour.back"].tapWhenHittable(timeout: Self.wait)
-                XCTAssertTrue(waitForLabel(of: words, containing: "step 1 of 4"), words.label)
-                app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-                XCTAssertTrue(waitForLabel(of: words, containing: "step 2 of 4"), words.label)
+                tap("tour.back", in: app, until: "step 1 of 4")
+                tap("tour.next", in: app, until: "step 2 of 4")
             }
             if index < steps.count - 1 {
                 XCTAssertEqual(app.buttons["tour.next"].label, "Next")
-                app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
+                tap("tour.next", in: app, until: "step \(index + 2) of 4")
             }
         }
         let finish = app.buttons["tour.next"]
@@ -61,14 +59,12 @@ final class HomeTourTests: XCTestCase {
     @MainActor
     func testSkippingTheTour() {
         let app = launch()
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        let words = app.descendants(matching: .any)["tour.text"]
-        XCTAssertTrue(waitForLabel(of: words, containing: "step 2 of 4"), words.label)
+        tap("tour.next", in: app, until: "step 2 of 4")
         app.buttons["tour.skip"].tapUntilGone(timeout: Self.wait)
 
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait))
         XCTAssertTrue(app.navigationBars["Home"].exists, "Skip opened something")
-        app.buttons["home.helpDrawer"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["home.helpDrawer"].tapUntil(app.navigationBars["Help"], appears: Self.wait)
         app.goBack(from: "Help", to: "Home", timeout: Self.wait)
         XCTAssertFalse(app.descendants(matching: .any)["tour.card"].exists, "The tour came back")
     }
@@ -80,8 +76,7 @@ final class HomeTourTests: XCTestCase {
         let target = app.buttons["tour.target"]
         XCTAssertTrue(target.waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(target.label, "Laptop: Style Me")
-        target.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait), "Style Me didn't open")
+        target.tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
         XCTAssertFalse(app.descendants(matching: .any)["tour.card"].exists)
         app.goBack(from: "Style Me", to: "Home", timeout: Self.wait)
         XCTAssertFalse(app.descendants(matching: .any)["tour.card"].exists, "The tour came back")
@@ -116,7 +111,8 @@ final class HomeTourTests: XCTestCase {
         }
 
         // A tap on the dim does nothing.
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1)).tap()
+        let dim = app.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1))
+        dim.tap()  // tap-unconfirmed: the test checks that nothing happens
         XCTAssertTrue(waitForLabel(of: words, containing: "step 1 of 4"), words.label)
         XCTAssertTrue(app.navigationBars["Home"].exists)
         // Escape and the VoiceOver escape gesture can't be sent from here: on the iOS 26.5
@@ -174,6 +170,18 @@ final class HomeTourTests: XCTestCase {
         XCTAssertTrue(
             app.descendants(matching: .any)["tour.card"].waitUntilExists(timeout: Self.wait), "The tour didn't start")
         return app
+    }
+
+    /// Taps a tour button until the card's words contain `text` (a step such as "step 2 of 4").
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, until text: String, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let words = app.descendants(matching: .any)["tour.text"]
+        app.buttons[identifier].tapUntil(
+            timeout: Self.wait, else: "\(identifier) didn't move the tour to \(text)", file: file, line: line
+        ) { words.exists && words.label.contains(text) }
     }
 
     @MainActor

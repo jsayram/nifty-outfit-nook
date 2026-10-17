@@ -21,14 +21,12 @@ final class IPadTests: IPadTestCase {
             ("home.laptop", "Style Me"), ("home.helpDrawer", "Help"), ("home.privacyDrawer", "Privacy and terms"),
             ("home.nameSign", "Profile"),
         ] {
-            app.buttons[identifier].tapWhenHittable(timeout: Self.wait)
-            XCTAssertTrue(app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(identifier)")
+            app.buttons[identifier].tapUntil(app.navigationBars[title], appears: Self.wait)
             app.goBack(from: title, to: "Home", timeout: Self.wait)
         }
 
         // Turning it keeps Style Me open and sends nothing (RD-01.6).
-        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.laptop"].tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(app.navigationBars["Your looks"].exists, "Turning the iPad started a request")
@@ -37,19 +35,19 @@ final class IPadTests: IPadTestCase {
         XCTAssertTrue(room("wide", in: app).waitUntilExists(timeout: Self.wait), "No wide room sideways")
         assertTabBarAtTheBottom(in: app)
         for (identifier, title) in [("home.feedbackDrawer", "Send feedback"), ("home.occasion", "Style Me")] {
-            app.buttons[identifier].tapWhenHittable(timeout: Self.wait)
-            XCTAssertTrue(app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(identifier)")
+            app.buttons[identifier].tapUntil(app.navigationBars[title], appears: Self.wait)
             if identifier == "home.occasion" {
                 app.buttons["Close"].tapUntilGone(timeout: Self.wait)
             }
             app.goBack(from: title, to: "Home", timeout: Self.wait)
         }
         // The wardrobe and the suitcase switch to Closet.
-        app.buttons["home.wardrobe"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.tabBars.firstMatch.buttons["Closet"].waitUntilSelected(timeout: Self.wait))
+        let closetTab = app.tabBars.firstMatch.buttons["Closet"]
+        app.buttons["home.wardrobe"].tapUntil(timeout: Self.wait, else: "The wardrobe didn't switch to Closet") {
+            closetTab.exists && closetTab.isSelected
+        }
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
-        app.buttons["home.suitcase"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Suitcases"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.suitcase"].tapUntil(app.navigationBars["Suitcases"], appears: Self.wait)
     }
 
     /// Closet sideways: the sidebar, search, a filter, and a piece beside the grid with Edit.
@@ -86,24 +84,24 @@ final class IPadTests: IPadTestCase {
         shoes.tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.buttons["closet.garment.g-black-heels"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(app.buttons["closet.garment.g-navy-trousers"].exists)
-        app.buttons["closet.filter.clear"].tapWhenHittable(timeout: Self.wait)
+        // Clear shows only while a filter is on.
+        app.buttons["closet.filter.clear"].tapUntilGone(timeout: Self.wait)
 
         // Search, then a piece opens beside the grid, not over it.
         let search = app.searchFields["Search your closet"]
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy dress")
+        search.typeTextAndWait("navy dress", timeout: Self.wait)
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
-        trousers.tapWhenHittable(timeout: Self.wait)
         let name = app.descendants(matching: .any)["garment.name"]
-        XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
+        trousers.tapUntil(name, appears: Self.wait)
         XCTAssertEqual(name.label, "Navy dress pants")
         XCTAssertTrue(trousers.isSelected, "The piece beside the grid should read as selected")
         XCTAssertTrue(element("closet.sidebar", in: app).exists, "The piece should open beside the grid")
 
         // Edit on the page opens the form over everything, and Back returns to the same piece.
-        app.buttons["garment.edit"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Edit piece"].waitUntilExists(timeout: Self.wait))
-        app.navigationBars["Edit piece"].buttons.firstMatch.tapWhenHittable(timeout: Self.wait)
+        let editBar = app.navigationBars["Edit piece"]
+        app.buttons["garment.edit"].tapUntil(editBar, appears: Self.wait)
+        editBar.buttons.firstMatch.tapUntil(timeout: Self.wait, else: "Edit piece didn't close") { !editBar.exists }
         XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
 
         // Upright: no sidebar, the piece still beside the grid.
@@ -132,9 +130,9 @@ final class IPadTests: IPadTestCase {
         XCTAssertFalse(element("closet.sidebar", in: app).exists)
         let search = app.searchFields["Search your closet"]
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy dress\n")
-        app.buttons["closet.garment.g-navy-trousers"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Navy dress pants"].waitUntilExists(timeout: Self.wait), "Not pushed")
+        search.typeTextAndWait("navy dress\n", timeout: Self.wait)
+        app.buttons["closet.garment.g-navy-trousers"].tapUntil(
+            app.navigationBars["Navy dress pants"], appears: Self.wait)
 
         // Wide again: the same piece, now beside the grid.
         resize(app, toWidth: full)
@@ -152,8 +150,9 @@ final class IPadTests: IPadTestCase {
         let app = try launch(orientation: .landscapeLeft, tour: "reset")
         let words = element("tour.text", in: app)
         XCTAssertTrue(words.waitUntilExists(timeout: Self.wait), "The tour didn't start")
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(wait(for: words, toContain: "step 2 of 4. Your closet."), words.label)
+        app.buttons["tour.next"].tapUntil(timeout: Self.wait, else: "Next didn't move the tour on") {
+            words.exists && words.label.contains("step 2 of 4. Your closet.")
+        }
 
         let target = app.buttons["tour.target"]
         func assertOnTheWardrobe(_ when: String) {

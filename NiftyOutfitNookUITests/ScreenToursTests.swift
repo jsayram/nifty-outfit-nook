@@ -29,45 +29,46 @@ final class ScreenToursTests: XCTestCase {
         // Closet, walked to the end.
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         expectTour("Add your clothes", step: 1, of: 3, in: app)
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        expectTour("Find a piece", step: 2, of: 3, in: app)
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        expectTour("Narrow it down", step: 3, of: 3, in: app)
+        next(to: "Find a piece", step: 2, of: 3, in: app)
+        next(to: "Narrow it down", step: 3, of: 3, in: app)
         XCTAssertEqual(app.buttons["tour.next"].label, "Got it")
         app.buttons["tour.next"].tapUntilGone(timeout: Self.wait)
 
         // A piece, then back to Closet: its tour doesn't come back.
         let piece = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'closet.garment.'")).firstMatch
-        piece.tapWhenHittable(timeout: Self.wait)
+        piece.tapUntil(app.buttons["garment.edit"], appears: Self.wait)
         expectTour("Change the details", step: 1, of: 3, in: app)
         skip(in: app)
         // Editing it has its own tour (Stage A audit). Cancel with nothing changed just closes.
-        tap("garment.edit", in: app)
+        tap("garment.edit", in: app, showing: app.buttons["editor.cancel"])
         expectTour("The picture", step: 1, of: 3, in: app)
         skip(in: app)
         app.buttons["editor.cancel"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["garment.edit"].waitUntilHittable(timeout: Self.wait))
-        app.navigationBars.buttons.element(boundBy: 0).tapWhenHittable(timeout: Self.wait)
+        let edit = app.buttons["garment.edit"]
+        app.navigationBars.buttons.element(boundBy: 0).tapUntil(timeout: Self.wait, else: "The piece didn't close") {
+            !edit.exists
+        }
         XCTAssertTrue(app.buttons["closet.addPiece"].waitUntilHittable(timeout: Self.wait))
         expectNoTour(in: app)
 
         // Recently deleted (Stage A audit).
-        tap("closet.recentlyDeleted", in: app)
+        tap("closet.recentlyDeleted", in: app, showing: app.navigationBars["Recently deleted"])
         expectTour("Kept for 30 days", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Recently deleted", to: "Closet", timeout: Self.wait)
 
         // Suitcases and Laundry, on the Closet tab.
-        tap("closet.suitcases", in: app)
+        tap("closet.suitcases", in: app, showing: app.navigationBars["Suitcases"])
         expectTour("Pack a little collection", step: 1, of: 2, in: app)
         skip(in: app)
         // See all (Stage A audit). The demo has an archived suitcase, so three tips.
-        tap("suitcases.seeAll", in: app)
+        tap("suitcases.seeAll", in: app, showing: app.navigationBars["All suitcases"])
         expectTour("Find a suitcase", step: 1, of: 3, in: app)
         skip(in: app)
         app.goBack(from: "All suitcases", to: "Suitcases", timeout: Self.wait)
         app.goBack(from: "Suitcases", to: "Closet", timeout: Self.wait)
-        tap("closet.laundry", in: app)
+        tap("closet.laundry", in: app, showing: app.navigationBars["Laundry"])
         expectTour("Fresh from the wash?", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Laundry", to: "Closet", timeout: Self.wait)
@@ -77,28 +78,27 @@ final class ScreenToursTests: XCTestCase {
         expectTour("Your favourite outfits", step: 1, of: 3, in: app)
         skip(in: app)
         let look = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'savedLooks.look.'")).firstMatch
-        look.tapWhenHittable(timeout: Self.wait)
+        look.tapUntil(app.buttons["lookDetail.swap"], appears: Self.wait)
         expectTour("Wear this one", step: 1, of: 3, in: app)
         skip(in: app)
-        tap("lookDetail.swap", in: app)
+        tap("lookDetail.swap", in: app, showing: app.navigationBars["Swap a piece"])
         expectTour("Which piece?", step: 1, of: 4, in: app)
         skip(in: app)
 
         // Style Me from the laptop, then Your looks once the looks are ready.
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         expectNoTour(in: app)
-        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["home.laptop"].tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
         expectTour("Which clothes?", step: 1, of: 3, in: app)
         skip(in: app)
-        tap("styleMe.go", in: app)
+        tap("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
         expectTour("Three versions", step: 1, of: 4, in: app)
         skip(in: app)
 
         // Try it on is a sheet, which draws its own tour over itself (Stage A audit).
-        tap("results.tryOn", in: app)
+        tap("results.tryOn", in: app, showing: app.buttons["tryOn.make"])
         expectTour("A simulated picture", step: 1, of: 2, in: app)
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        expectTour("Only when you ask", step: 2, of: 2, in: app)
+        next(to: "Only when you ask", step: 2, of: 2, in: app)
         app.buttons["tour.next"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["tryOn.make"].waitUntilHittable(timeout: Self.wait), "The sheet is still covered")
         app.buttons["Close"].firstMatch.tapUntilGone(timeout: Self.wait)
@@ -110,11 +110,11 @@ final class ScreenToursTests: XCTestCase {
         app.buttons["home.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
         expectTour("Your name on the sign", step: 1, of: 3, in: app)
         skip(in: app)
-        tap("profile.accessibility", in: app)
+        tap("profile.accessibility", in: app, showing: app.navigationBars["Accessibility"])
         expectTour("It follows your iPhone", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Accessibility", to: "Profile", timeout: Self.wait)
-        tap("profile.deleteData", in: app)
+        tap("profile.deleteData", in: app, showing: app.navigationBars["Delete my data"])
         expectTour("What goes", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Delete my data", to: "Profile", timeout: Self.wait)
@@ -135,8 +135,7 @@ final class ScreenToursTests: XCTestCase {
         XCTAssertTrue(app.buttons["closet.addPiece"].waitUntilHittable(timeout: Self.wait))
         expectNoTour(in: app)
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
-        app.buttons["home.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
         expectNoTour(in: app)
 
         // App tours lists the screens, with the switch off.
@@ -148,60 +147,58 @@ final class ScreenToursTests: XCTestCase {
         XCTAssertFalse(app.buttons["appTours.help"].isHittable, "Help should be under More screen tours")
 
         // Replay Closet: the sheet closes, Closet opens, and its tour starts at step 1.
-        app.buttons["appTours.closet"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.tabBars.firstMatch.buttons["Closet"].waitUntilSelected(timeout: Self.wait))
+        let closetTab = app.tabBars.firstMatch.buttons["Closet"]
+        app.buttons["appTours.closet"].tapUntil(timeout: Self.wait, else: "Closet didn't open") {
+            closetTab.exists && closetTab.isSelected
+        }
         expectTour("Add your clothes", step: 1, of: 3, in: app)
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
+        next(to: "Find a piece", step: 2, of: 3, in: app)
         skip(in: app)
 
         // Replay Profile's own tour from App tours, then a screen under More screen tours.
         app.tabBars.firstMatch.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         openAppTours(in: app)
-        tap("appTours.more", in: app)
-        tap("appTours.profile", in: app)
+        openMoreScreenTours(in: app)
+        let appTours = app.switches["appTours.showTips"]
+        tap("appTours.profile", in: app) { !appTours.exists }
         expectTour("Your name on the sign", step: 1, of: 3, in: app)
         skip(in: app)
         openAppTours(in: app)
-        tap("appTours.more", in: app)
-        tap("appTours.help", in: app)
-        XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait))
+        openMoreScreenTours(in: app)
+        tap("appTours.help", in: app, showing: app.navigationBars["Help"])
         expectTour("Find a simple answer", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Help", to: "Profile", timeout: Self.wait)
         // One of the Stage A audit's tours, on a screen Profile opens itself.
         openAppTours(in: app)
-        tap("appTours.more", in: app)
-        tap("appTours.deleteData", in: app)
-        XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
+        openMoreScreenTours(in: app)
+        tap("appTours.deleteData", in: app, showing: app.navigationBars["Delete my data"])
         expectTour("What goes", step: 1, of: 2, in: app)
         // Its last step scrolls down to the button. When the tour ends the page goes back up, so
         // the title isn't left half under the bar (QA, October 2026).
-        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
-        expectTour("It asks once more", step: 2, of: 2, in: app)
+        next(to: "It asks once more", step: 2, of: 2, in: app)
         app.buttons["tour.next"].tapUntilGone(timeout: Self.wait)
         expectTitleClear("Delete my data", in: app)
         app.goBack(from: "Delete my data", to: "Profile", timeout: Self.wait)
 
         // Tips on: a screen she hasn't seen shows its tour by itself.
         openAppTours(in: app)
-        tips.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(waitForValue("1", of: tips), "Tips didn't turn on")
+        // A second tap would turn it off again, so it's tapped again only if it didn't turn on.
+        tips.tapUntil(timeout: Self.wait, else: "Tips didn't turn on") { tips.exists && tips.value as? String == "1" }
         closeSheet(in: app)
-        tap("profile.privacy", in: app)
+        tap("profile.privacy", in: app, showing: app.navigationBars["Privacy and terms"])
         expectTour("You choose what to share", step: 1, of: 2, in: app)
         skip(in: app)
         app.goBack(from: "Privacy and terms", to: "Profile", timeout: Self.wait)
-        tap("profile.privacy", in: app)
-        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitUntilExists(timeout: Self.wait))
+        tap("profile.privacy", in: app, showing: app.navigationBars["Privacy and terms"])
         expectNoTour(in: app)
         app.goBack(from: "Privacy and terms", to: "Profile", timeout: Self.wait)
 
         // Reset all tips: the seen one shows again.
         openAppTours(in: app)
-        tap("appTours.reset", in: app)
-        XCTAssertTrue(app.staticTexts["appTours.note"].waitUntilExists(timeout: Self.wait))
+        tap("appTours.reset", in: app, showing: app.staticTexts["appTours.note"])
         closeSheet(in: app)
-        tap("profile.privacy", in: app)
+        tap("profile.privacy", in: app, showing: app.navigationBars["Privacy and terms"])
         expectTour("You choose what to share", step: 1, of: 2, in: app)
     }
 
@@ -244,10 +241,30 @@ final class ScreenToursTests: XCTestCase {
         app.buttons["tour.skip"].tapUntilGone(timeout: Self.wait)
     }
 
+    /// Taps the tour's Next until the card shows the step after.
+    @MainActor
+    private func next(
+        to title: String, step: Int, of count: Int, in app: XCUIApplication, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let words = app.descendants(matching: .any)["tour.text"]
+        let predicate = NSPredicate(format: "label BEGINSWITH %@", "Quick tour, step \(step) of \(count). \(title)")
+        app.buttons["tour.next"].tapUntil(
+            timeout: Self.wait, else: "Next didn't move on to \(title)", file: file, line: line
+        ) { words.exists && predicate.evaluate(with: words) }
+    }
+
     @MainActor
     private func openAppTours(in app: XCUIApplication) {
-        tap("profile.appTours", in: app)
-        XCTAssertTrue(app.switches["appTours.showTips"].waitUntilExists(timeout: Self.wait), "App tours didn't open")
+        tap("profile.appTours", in: app, showing: app.switches["appTours.showTips"])
+    }
+
+    /// Opens More screen tours. The button opens and closes the list, so it's tapped again only
+    /// if the list didn't open.
+    @MainActor
+    private func openMoreScreenTours(in app: XCUIApplication) {
+        let more = app.buttons["appTours.more"]
+        tap("appTours.more", in: app) { more.exists && more.value as? String == "Open" }
     }
 
     @MainActor
@@ -257,13 +274,26 @@ final class ScreenToursTests: XCTestCase {
     }
 
     /// Taps a button by identifier, scrolling to find it if it's off the screen (Closet stays
-    /// scrolled down after Recently deleted, so Suitcases is above).
+    /// scrolled down after Recently deleted, so Suitcases is above), until `effect` holds (see
+    /// `XCUIElement.tapUntil(timeout:_:)`).
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
         app.scrollUntilHittable(button, up: 16, down: 16)
-        button.tapWhenHittable(timeout: Self.wait)
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
+    }
+
+    /// Taps a button by identifier until `next` appears.
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
     }
 
     @MainActor
