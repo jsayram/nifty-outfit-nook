@@ -24,29 +24,29 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["welcome.title"].waitUntilExists(timeout: Self.wait), "No welcome")
         XCTAssertTrue(app.buttons["welcome.alreadyUsing"].exists)
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The tabs show behind onboarding")
-        app.buttons["welcome.getStarted"].tapWhenHittable(timeout: Self.wait)
+        // Each step's button moves on to the next step; on CI a lost tap is tapped once more.
+        app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
 
         // Step 1: her name, which the sign on the wall shows as she types.
-        XCTAssertTrue(app.navigationBars["Your name"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["welcome.getStarted"].waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(label("Step 1 of 4", in: app).exists)
         let field = app.textFields["field.onboarding.name"]
         field.tapUntilFocused(timeout: Self.wait)
         field.typeText("Lily")
-        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
 
         // Step 2: where her things stay. Nothing to choose.
         waitForStep("Your closet stays here", after: "Your name", in: app)
         XCTAssertTrue(element("onboarding.forgets", in: app).exists, "No word that the test build forgets")
         XCTAssertFalse(app.buttons["onboarding.skip"].exists, "The privacy step can be skipped")
-        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(
+            app.navigationBars["How you like clothes to fit"], appears: Self.wait)
 
         // Step 3: her usual fit.
         waitForStep("How you like clothes to fit", after: "Your closet stays here", in: app)
         let comfortable = app.buttons["onboarding.fit.comfortable"]
-        comfortable.tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(comfortable.waitUntilSelected(timeout: Self.wait))
-        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+        comfortable.tapUntilSelected(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Choose a starting closet"], appears: Self.wait)
 
         // Step 4: the sample closet is chosen to start; Go to my room.
         waitForStep("Choose a starting closet", after: "How you like clothes to fit", in: app)
