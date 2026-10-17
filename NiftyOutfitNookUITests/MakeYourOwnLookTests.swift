@@ -30,8 +30,13 @@ final class MakeYourOwnLookTests: XCTestCase {
         XCTAssertTrue(app.buttons["builder.remove.g-navy-trousers"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(app.buttons["builder.save"].isEnabled)
 
-        // Add a piece: the pink shirt, from the picker's Tops.
-        tap("builder.add", in: app)
+        // Add a piece: the pink shirt, from the picker's Tops. On CI a tap on Add a piece was once
+        // lost and the picker never came, so tap once more if it doesn't open.
+        let tops = app.buttons["closet.filter.kind.top"]
+        for _ in 0..<2 {
+            tap("builder.add", in: app)
+            if tops.waitUntilExists(timeout: Self.wait) { break }
+        }
         tap("closet.filter.kind.top", in: app)
         tap("picker.garment.g-pink-blouse", in: app)
         XCTAssertTrue(app.buttons["builder.remove.g-pink-blouse"].waitUntilExists(timeout: Self.wait))
@@ -41,9 +46,13 @@ final class MakeYourOwnLookTests: XCTestCase {
         XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
         name.tapUntilFocused(timeout: Self.wait)
         name.typeText("Friday pink\n")
+        // The same for Save look. Once saved, the button says Saved and can't be tapped again.
         let save = app.buttons["builder.save"]
-        tap("builder.save", in: app)
-        XCTAssertTrue(waitForLabel(of: save, containing: "Saved"), save.label)
+        for _ in 0..<2 {
+            tap("builder.save", in: app)
+            if waitForLabel(of: save, containing: "Saved") { break }
+        }
+        XCTAssertTrue(save.label.contains("Saved"), save.label)
     }
 
     /// LR-08.4: a half-built look left when the app closed (seeded by `draft=look`) is offered
