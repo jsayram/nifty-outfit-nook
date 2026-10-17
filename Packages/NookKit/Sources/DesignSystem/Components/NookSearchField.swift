@@ -28,6 +28,10 @@ public struct NookSearchField: View {
         HStack(spacing: NookSpacing.small) {
             Image(systemName: "magnifyingglass")
                 .font(Font.nook.body.weight(.medium))
+                // The glyph stops growing at AX2, so a long word in the prompt ("pictures" at
+                // AX5 on a 402 point iPhone) has room and doesn't push the field past the
+                // screen's edge (QA, October 2026).
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 .foregroundStyle(.nook.textSecondary)
                 .accessibilityHidden(true)
             field

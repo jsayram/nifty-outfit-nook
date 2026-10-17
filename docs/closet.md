@@ -30,7 +30,7 @@ Top to bottom, as RD-13 orders it:
 2. **"Continue where you left off?"**, only when a piece she started adding or editing wasn't saved (Phase 7b, see `docs/add-a-piece.md`), with Resume and Discard.
 3. **Search.** "Search your closet". See [Search](#search).
 4. **Filters.** Three rows of chips: the kinds of piece, a swatch for each colour in her closet, then the Suitcase menu, Dirty while laundry tracking is on, and Clear once anything is set.
-5. **Suitcases and Laundry** as soft tiles with their small drawings. Laundry only shows while tracking is on (RD-11.1), and its basket is full or empty to match.
+5. **Suitcases and Laundry** as soft tiles with their small drawings. Laundry only shows while tracking is on (RD-11.1), and its basket is full or empty to match. They sit side by side while each tile's words fit on their lines in half the width (`ClosetTilesLayout`), and one above the other otherwise: at the accessibility sizes, and on a 375 point iPhone SE, where "Suitcases" broke as "Suitcas-es" (QA, 17 October 2026).
 6. **Her pieces**, standing on the floor with a soft shadow under each and the name below.
 7. **"Recently deleted · N"** at the bottom when anything is in it (LR-16).
 
@@ -109,7 +109,7 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 - `ClosetModelTests`: what each fixture set loads, the suitcase names, laundry tracking on and off, each filter alone and together, search words, Clear, the search delay, and what VoiceOver reads.
 - `LargeClosetBrowsingTests`: timing with the large closet.
 - `GarmentImageLoaderTests`: downsampling, the cache, remembered misses, retrying a failed load, and the placeholder drawings.
-- `ClosetSnapshotTests`: the demo closet with tracking on, the same in dark, AX5, no matches, empty, and the error state, 402 pt wide.
+- `ClosetSnapshotTests`: the demo closet with tracking on, the same in dark, AX5, no matches, empty, and the error state, 402 pt wide; and the tiles alone on a 375 pt iPhone SE, stacked.
 - `ClosetTests` (UI): a piece chip and its selected state, Clear, search by name, VoiceOver's value on a piece, opening a piece and coming back, and the empty closet's Add a piece.
 - `LaunchTests` (UI) now reads the piece count from Closet's header for the demo, offline, empty and large sets, and the error state for `stores-fail`.
 

@@ -137,6 +137,50 @@ final class SuitcasesAndLaundryTests: XCTestCase {
         XCTAssertTrue(waitForLabel(of: hamper, containing: "Hamper: Laundry, All clean"), hamper.label)
     }
 
+    /// At the largest text size each row in Laundry stacks, so the page stays inside the screen:
+    /// every piece's name has room and its Mark clean can be reached. In one line the page was
+    /// 435 points wide in a 402 point window, the names had no width at all, and Mark clean was
+    /// cut off (QA, October 2026).
+    @MainActor
+    func testLaundryAtTheLargestTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments =
+            UITestLaunch.standard + [
+                "-fixtures", "demo:laundry=some",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+            ]
+        app.launch()
+        app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
+        let tile = app.buttons["closet.laundry"]
+        XCTAssertTrue(tile.waitUntilExists(timeout: Self.wait), "No Laundry tile")
+        app.scrollUntilHittable(tile, up: 12)
+        tile.tapUntil(app.navigationBars["Laundry"], appears: Self.wait)
+
+        let window = app.windows.firstMatch.frame
+        let count = element("laundry.count", in: app)
+        XCTAssertTrue(count.waitUntilExists(timeout: Self.wait))
+        XCTAssertGreaterThanOrEqual(count.frame.minX, window.minX + 8, "The header starts at the screen's edge")
+
+        let buttons = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'laundry.markClean.'"))
+        XCTAssertEqual(buttons.count, 2)
+        for name in ["Black tee", "White lace top"] {
+            let words = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label BEGINSWITH %@ AND NOT (identifier BEGINSWITH 'laundry.')", name))
+                .firstMatch
+            XCTAssertTrue(words.waitUntilExists(timeout: Self.wait), "No row for \(name)")
+            app.scrollUntilHittable(words, up: 12)
+            XCTAssertGreaterThan(words.frame.width, 150, "\(name) has no room: \(words.frame)")
+            XCTAssertLessThanOrEqual(words.frame.maxX, window.maxX)
+        }
+        for index in 0..<buttons.count {
+            let button = buttons.element(boundBy: index)
+            app.scrollUntilHittable(button, up: 12, down: 12)
+            XCTAssertTrue(button.isHittable, "Can't reach \(button)")
+            XCTAssertGreaterThanOrEqual(button.frame.minX, window.minX)
+            XCTAssertLessThanOrEqual(button.frame.maxX, window.maxX, "Mark clean is cut off: \(button.frame)")
+        }
+    }
+
     // MARK: Helpers
 
     @MainActor

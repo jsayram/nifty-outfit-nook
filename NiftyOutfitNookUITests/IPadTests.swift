@@ -56,13 +56,33 @@ final class IPadTests: IPadTestCase {
     /// Turning the iPad upright keeps the piece beside the grid, without the sidebar.
     @MainActor
     func testClosetSidebarAndPieceBesideTheGrid() throws {
-        let app = try launch(orientation: .landscapeLeft)
+        let app = try launch(orientation: .landscapeLeft, fixtures: "demo:laundry=some")
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
-        XCTAssertTrue(element("closet.sidebar", in: app).waitUntilExists(timeout: Self.wait), "No sidebar")
+        let sidebar = element("closet.sidebar", in: app)
+        XCTAssertTrue(sidebar.waitUntilExists(timeout: Self.wait), "No sidebar")
         XCTAssertTrue(app.staticTexts["Pick a piece"].exists)
 
-        // A chip in the sidebar filters the grid beside it.
+        // Suitcases and Laundry sit at the foot of the sidebar, which scrolls on its own: a drag
+        // in the middle of the screen moves the grid instead (QA, October 2026).
+        let laundry = app.buttons["closet.laundry"]
+        XCTAssertTrue(laundry.waitUntilExists(timeout: Self.wait))
+        for _ in 0..<4 where !laundry.isHittable {
+            let low = sidebar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+            let high = sidebar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+            low.press(forDuration: 0.05, thenDragTo: high, withVelocity: .fast, thenHoldForDuration: 0.3)
+        }
+        XCTAssertTrue(app.buttons["closet.suitcases"].isHittable, "Can't reach Suitcases in the sidebar")
+        laundry.tapUntil(app.navigationBars["Laundry"], appears: Self.wait)
+        app.goBack(from: "Laundry", to: "Closet", timeout: Self.wait)
+        XCTAssertTrue(sidebar.waitUntilExists(timeout: Self.wait))
         let shoes = app.buttons["closet.filter.kind.shoes"]
+        for _ in 0..<4 where !shoes.isHittable {
+            let low = sidebar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+            let high = sidebar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2))
+            high.press(forDuration: 0.05, thenDragTo: low, withVelocity: .fast, thenHoldForDuration: 0.3)
+        }
+
+        // A chip in the sidebar filters the grid beside it.
         shoes.tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.buttons["closet.garment.g-black-heels"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(app.buttons["closet.garment.g-navy-trousers"].exists)

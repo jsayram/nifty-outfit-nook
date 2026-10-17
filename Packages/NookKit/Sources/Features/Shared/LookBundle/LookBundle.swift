@@ -191,16 +191,25 @@ struct BundleTagLayout: Layout {
 }
 
 /// The soft tag on an idea piece: words on a plate with a shadow below, no outline
-/// (`.newtag` in `results-versions.html`).
+/// (`.newtag` in `results-versions.html`). On one line, or the thumbnails' round icon when one
+/// line doesn't fit across the bundle: wrapped onto two lines it covered the picture of a narrow
+/// card on iPad (QA, October 2026).
 struct IdeaTag: View {
     var body: some View {
+        ViewThatFits(in: .horizontal) {
+            words
+            IdeaTagIcon(diameter: 24)
+        }
+    }
+
+    private var words: some View {
         HStack(spacing: NookSpacing.xSmall) {
             Image(systemName: "tag")
                 .accessibilityHidden(true)
             Text(LookBundleText.notInYourCloset)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(1)
         }
+        .fixedSize()
         .nookTextStyle(.caption)
         .fontWeight(.bold)
         .foregroundStyle(.nook.accent)

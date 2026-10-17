@@ -133,6 +133,9 @@ struct GarmentDetailSnapshotTests {
         line: UInt = #line,
         column: UInt = #column
     ) {
+        expectFitsWidth(
+            view, width: Self.width, colorScheme: colorScheme, dynamicTypeSize: dynamicTypeSize, named: name,
+            fileID: fileID, filePath: filePath, line: line, column: column)
         let content =
             view
             .frame(width: Self.width)

@@ -174,7 +174,12 @@ final class ScreenToursTests: XCTestCase {
         tap("appTours.deleteData", in: app)
         XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
         expectTour("What goes", step: 1, of: 2, in: app)
-        skip(in: app)
+        // Its last step scrolls down to the button. When the tour ends the page goes back up, so
+        // the title isn't left half under the bar (QA, October 2026).
+        app.buttons["tour.next"].tapWhenHittable(timeout: Self.wait)
+        expectTour("It asks once more", step: 2, of: 2, in: app)
+        app.buttons["tour.next"].tapUntilGone(timeout: Self.wait)
+        expectTitleClear("Delete my data", in: app)
         app.goBack(from: "Delete my data", to: "Profile", timeout: Self.wait)
 
         // Tips on: a screen she hasn't seen shows its tour by itself.
@@ -219,6 +224,19 @@ final class ScreenToursTests: XCTestCase {
         // Long enough for a tour that would start once the screen has loaded.
         let card = app.descendants(matching: .any)["tour.card"]
         XCTAssertFalse(card.waitUntilExists(timeout: 2), "A tour showed", file: file, line: line)
+    }
+
+    /// The page's own title is back below the navigation bar once the page has stopped moving.
+    @MainActor
+    private func expectTitleClear(
+        _ title: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+    ) {
+        let bar = app.navigationBars[title]
+        let heading = app.scrollViews.staticTexts[title].firstMatch
+        XCTAssertTrue(heading.waitUntilExists(timeout: Self.wait), "No title on the page", file: file, line: line)
+        XCTAssertTrue(
+            waitUntilTrue(timeout: Self.wait) { heading.frame.minY >= bar.frame.maxY - 1 },
+            "The title is under the bar: \(heading.frame), bar \(bar.frame)", file: file, line: line)
     }
 
     @MainActor

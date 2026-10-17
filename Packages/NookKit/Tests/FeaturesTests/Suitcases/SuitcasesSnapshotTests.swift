@@ -18,8 +18,10 @@ import UIKit
 ///   no suitcases yet; All suitcases with the archived filter on.
 /// - A suitcase: Jose's house as the source, Weekend in dark with tracking on, Spring trip empty,
 ///   and Old dorm archived; the packing sheet and the name and picture sheet.
-/// - Laundry: two in the wash with a suitcase source, all clean in dark, tracking off, and the
-///   confirmation.
+/// - Laundry: two in the wash with a suitcase source, the same at AX5, all clean in dark,
+///   tracking off, and the confirmation.
+///
+/// Each page is also checked for width: offered 402 points, it mustn't be wider (`expectFitsWidth`).
 @MainActor
 @Suite(.heavyMainActorWork)
 struct SuitcasesSnapshotTests {
@@ -78,6 +80,19 @@ struct SuitcasesSnapshotTests {
 
     // MARK: A suitcase
 
+    /// A suitcase and All suitcases at AX5 have no picture of their own, but stay inside the
+    /// window (QA, October 2026).
+    @Test func suitcaseAndAllSuitcasesFitAtAX5() {
+        let data = data(tracksLaundry: true)
+        expectFitsWidth(
+            SuitcaseDetailPage(model: detail("s-jose", data)), width: Self.width, dynamicTypeSize: .accessibility5,
+            named: "jose-ax5")
+        let all = suitcases(data)
+        all.showsArchived = true
+        expectFitsWidth(
+            AllSuitcasesPage(model: all), width: Self.width, dynamicTypeSize: .accessibility5, named: "all-ax5")
+    }
+
     @Test func theSourceSuitcase() {
         assertSnapshot(SuitcaseDetailPage(model: detail("s-jose", data())), named: "jose")
     }
@@ -130,6 +145,13 @@ struct SuitcasesSnapshotTests {
         assertSnapshot(LaundryPage(model: laundry(data(tracksLaundry: true))), named: "laundry")
     }
 
+    /// The rows stack at AX5, so the page stays inside the window (QA, October 2026).
+    @Test func laundryAX5() {
+        assertSnapshot(
+            LaundryPage(model: laundry(data(source: false, tracksLaundry: true))), dynamicTypeSize: .accessibility5,
+            named: "laundry-ax5")
+    }
+
     @Test func laundryAllCleanInDarkAndOff() {
         var clean = data(source: false, tracksLaundry: true)
         for index in clean.garments.indices { clean.garments[index].laundry = .clean }
@@ -159,6 +181,9 @@ struct SuitcasesSnapshotTests {
         line: UInt = #line,
         column: UInt = #column
     ) {
+        expectFitsWidth(
+            view, width: Self.width, colorScheme: colorScheme, dynamicTypeSize: dynamicTypeSize, named: name,
+            fileID: fileID, filePath: filePath, line: line, column: column)
         let content =
             view
             .frame(width: Self.width)

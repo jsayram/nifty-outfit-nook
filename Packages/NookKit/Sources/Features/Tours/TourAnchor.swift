@@ -115,18 +115,38 @@ private struct TourFocusTargetModifier: ViewModifier {
 /// Puts a scroll view's anchored controls in view as the tour reaches them, so a step never
 /// points at something off screen. Wrap the `ScrollView`. With Reduce Motion the page jumps
 /// instead of scrolling.
+///
+/// When the tour ends, however it ends, the page goes back to where it was before the tour
+/// moved it. Left where the last step was, a page could end with its title half under the back
+/// button (QA, October 2026: a look, Profile, Delete my data).
 struct TourScrollReader<Content: View>: View {
     @ViewBuilder let content: Content
 
     @Environment(\.tourCenter) private var tours
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    @State private var position = ScrollPosition()
+    /// How far down the page is scrolled, kept up to date.
+    @State private var offset: CGFloat = 0
+    /// Where the page was when the tour first moved it, until the tour ends.
+    @State private var offsetBeforeTour: CGFloat?
+
     var body: some View {
         if let tours {
             ScrollViewReader { proxy in
                 content
+                    .scrollPosition($position)
+                    .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                        geometry.contentOffset.y + geometry.contentInsets.top
+                    } action: { _, offset in
+                        self.offset = offset
+                    }
                     .onChange(of: tours.currentAnchor, initial: true) { _, anchor in
-                        guard let anchor else { return }
+                        guard let anchor else {
+                            restore()
+                            return
+                        }
+                        if offsetBeforeTour == nil { offsetBeforeTour = offset }
                         // Near the top, which leaves the most room for the card below it.
                         withAnimation(reduceMotion ? nil : .smooth(duration: 0.35)) {
                             proxy.scrollTo(anchor, anchor: UnitPoint(x: 0.5, y: 0.2))
@@ -135,6 +155,20 @@ struct TourScrollReader<Content: View>: View {
             }
         } else {
             content
+        }
+    }
+
+    /// Scrolls back to where the page was before the tour, if the tour moved it.
+    private func restore() {
+        guard let before = offsetBeforeTour else { return }
+        offsetBeforeTour = nil
+        guard abs(offset - before) > 1 else { return }
+        withAnimation(reduceMotion ? nil : .smooth(duration: 0.35)) {
+            if before <= 1 {
+                position.scrollTo(edge: .top)
+            } else {
+                position.scrollTo(y: before)
+            }
         }
     }
 }
