@@ -94,8 +94,7 @@ final class YourLooksTests: XCTestCase {
         tap("results.seeSaved", in: app)
         XCTAssertTrue(app.buttons["results.saved.o-interview"].waitUntilExists(timeout: Self.wait))
         tap("results.tab.today", in: app)
-        app.buttons["Retry"].tap()
-        XCTAssertTrue(app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait))
+        app.buttons["Retry"].tapUntil(app.buttons["results.version.simple"], appears: Self.wait)
     }
 
     /// The other states, each forced by its flag: partial, insufficient and didn't finish.

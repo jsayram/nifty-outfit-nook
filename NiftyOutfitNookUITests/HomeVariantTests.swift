@@ -41,9 +41,7 @@ final class HomeVariantTests: XCTestCase {
         for (identifier, title) in pushed {
             let control = app.buttons[identifier]
             reveal(control, in: app)
-            control.tap()
-            XCTAssertTrue(
-                app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(identifier) didn't open \(title)")
+            control.tapUntil(app.navigationBars[title], appears: Self.wait)
             if identifier == "home.occasion" {
                 // The calendar opens Style Me on the Occasion sheet (Phase 10a); close it first.
                 XCTAssertTrue(app.buttons["occasion.office"].waitUntilExists(timeout: Self.wait), "No Occasion sheet")
@@ -57,9 +55,9 @@ final class HomeVariantTests: XCTestCase {
         let laundry = app.buttons["home.hamper"]
         reveal(laundry, in: app)
         XCTAssertEqual(laundry.label, "Laundry: Off")
-        laundry.tap()
+        // On CI this tap was once lost at AX5 (October 2026): tap again if the sheet didn't come.
         let notNow = app.buttons["Not now"]
-        XCTAssertTrue(notNow.waitUntilExists(timeout: Self.wait), "The laundry sheet didn't open")
+        laundry.tapUntil(notNow, appears: Self.wait)
         // The sheet opens full height here, with Not now below the fold. Only swipe up: a swipe
         // down on a sheet can start closing it. In one CI failure Not now stayed on screen after
         // its tap, following swipes both ways.
@@ -95,8 +93,7 @@ final class HomeVariantTests: XCTestCase {
 
         // The Source row opens Suitcases on the Closet tab (Phase 13).
         reveal(source, in: app)
-        source.tap()
-        XCTAssertTrue(app.navigationBars["Suitcases"].waitUntilExists(timeout: Self.wait), "No Suitcases")
+        source.tapUntil(app.navigationBars["Suitcases"], appears: Self.wait)
         XCTAssertTrue(tabBar.buttons["Closet"].isSelected)
     }
 
@@ -124,8 +121,7 @@ final class HomeVariantTests: XCTestCase {
             reveal(control, in: app)
         }
 
-        app.buttons["home.helpDrawer"].tap()
-        XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.helpDrawer"].tapUntil(app.navigationBars["Help"], appears: Self.wait)
         XCUIDevice.shared.orientation = .portrait
         XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait), "Turning the phone closed Help")
         app.goBack(from: "Help", to: "Home", timeout: Self.wait)

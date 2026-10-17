@@ -38,7 +38,7 @@ final class StyleMeTests: XCTestCase {
         tap("color.strength.required", in: app)
         tap("color.scope.shoes", in: app)
         XCTAssertTrue(app.buttons["color.navy"].isSelected)
-        app.buttons["Close"].tap()
+        app.buttons["Close"].tapUntilGone(timeout: Self.wait)
         let color = app.buttons["styleMe.color"]
         XCTAssertTrue(waitForLabel(of: color, containing: "Navy · shoes · required"), color.label)
 
@@ -71,7 +71,7 @@ final class StyleMeTests: XCTestCase {
         XCTAssertTrue(waitForLabel(of: description, containing: "another way with your own pieces"), description.label)
 
         // Back on Style Me, every choice is still there.
-        app.navigationBars["Your looks"].buttons.firstMatch.tap()
+        app.goBack(from: "Your looks", to: "Style Me", timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: color, containing: "Navy · shoes · required"), color.label)
     }
 
@@ -83,9 +83,8 @@ final class StyleMeTests: XCTestCase {
         let other = app.buttons["occasion.other"]
         XCTAssertTrue(other.waitUntilExists(timeout: Self.wait), "The Occasion sheet didn't open")
         XCTAssertTrue(app.buttons["occasion.office"].isSelected)
-        other.tap()
         let note = app.textFields["occasion.otherNote"]
-        XCTAssertTrue(note.waitUntilExists(timeout: Self.wait))
+        other.tapUntil(note, appears: Self.wait)
         note.tapUntilFocused(timeout: Self.wait)
         note.typeText("Museum visit")
         tap("occasion.done", in: app)

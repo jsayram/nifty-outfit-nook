@@ -138,7 +138,11 @@ final class HomeTourTests: XCTestCase {
             let next = app.buttons["tour.next"]
             XCTAssertTrue(next.waitUntilHittable(timeout: Self.wait), "Next is out of reach on step \(index + 1)")
             XCTAssertTrue(app.buttons["tour.skip"].isHittable, "Skip is out of reach on step \(index + 1)")
-            next.tap()
+            // The words move on to the next step, or the tour closes after the last.
+            let movedOn = next.tapUntil(timeout: Self.wait) {
+                !words.exists || !words.label.contains("step \(index + 1) of 4")
+            }
+            XCTAssertTrue(movedOn, "Next didn't move on from step \(index + 1)")
         }
         XCTAssertTrue(words.waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilExists(timeout: Self.wait))
