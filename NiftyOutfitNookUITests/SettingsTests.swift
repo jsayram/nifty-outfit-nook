@@ -26,8 +26,7 @@ final class SettingsTests: XCTestCase {
             ("profile.deleteData", "Delete my data", "deleteData.delete"),
         ]
         for (row, title, control) in pushed {
-            tap(row, in: app)
-            XCTAssertTrue(app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(row) didn't open \(title)")
+            tap(row, in: app, opens: app.navigationBars[title])
             XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(title) has no \(control)")
             app.goBack(from: title, to: "Profile", timeout: Self.wait)
         }
@@ -40,8 +39,7 @@ final class SettingsTests: XCTestCase {
             ("profile.repeat", "profile.repeat.oneWeek"),
         ]
         for (row, control) in sheets {
-            tap(row, in: app)
-            XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(row) opened no sheet")
+            tap(row, in: app, opens: element(control, in: app))
             app.buttons["Close"].firstMatch.tapUntilGone(timeout: Self.wait)
         }
 
@@ -91,18 +89,14 @@ final class SettingsTests: XCTestCase {
     func testDrawersAndSendFeedback() {
         let app = launch()
 
-        tapDrawer("home.helpDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait))
+        tapDrawer("home.helpDrawer", in: app, opens: app.navigationBars["Help"])
         // The first topic is open; another opens on a tap.
         XCTAssertTrue(element("help.outfits.answer", in: app).waitUntilExists(timeout: Self.wait))
-        tap("help.laundry", in: app)
-        XCTAssertTrue(element("help.laundry.answer", in: app).waitUntilExists(timeout: Self.wait))
-        tap("help.stillStuck", in: app)
-        XCTAssertTrue(app.navigationBars["Send feedback"].waitUntilExists(timeout: Self.wait))
+        tap("help.laundry", in: app, opens: element("help.laundry.answer", in: app))
+        tap("help.stillStuck", in: app, opens: app.navigationBars["Send feedback"])
 
         // Send with nothing written: the problem shows, nothing opens.
-        tap("feedback.send", in: app)
-        XCTAssertTrue(element("problem.feedback.message", in: app).waitUntilExists(timeout: Self.wait))
+        tap("feedback.send", in: app, opens: element("problem.feedback.message", in: app))
 
         let field =
             app.textViews["field.feedback.message"].exists
@@ -122,9 +116,8 @@ final class SettingsTests: XCTestCase {
         XCTAssertFalse(preview.label.contains("Lily"), "Her name went into the note")
 
         // Send opens the system share sheet; closing it keeps the note.
-        tap("feedback.send", in: app)
         let shareSheet = app.otherElements["ActivityListView"]
-        XCTAssertTrue(shareSheet.waitUntilExists(timeout: Self.wait), "No share sheet")
+        tap("feedback.send", in: app, opens: shareSheet)
         // A tap while the sheet is still coming up can be lost, so tap Close until it goes.
         app.buttons["header.closeButton"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(shareSheet.waitUntilGone(timeout: Self.wait), "The share sheet didn't close")
@@ -134,17 +127,14 @@ final class SettingsTests: XCTestCase {
         app.goBack(from: "Help", to: "Home", timeout: Self.wait)
 
         // The note waits for her when she comes back from the drawer.
-        tapDrawer("home.feedbackDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Send feedback"].waitUntilExists(timeout: Self.wait))
+        tapDrawer("home.feedbackDrawer", in: app, opens: app.navigationBars["Send feedback"])
         XCTAssertTrue(waitForLabel(of: element("feedback.previewText", in: app), containing: "The hamper is lovely"))
         app.goBack(from: "Send feedback", to: "Home", timeout: Self.wait)
 
-        tapDrawer("home.privacyDrawer", in: app)
-        XCTAssertTrue(app.navigationBars["Privacy and terms"].waitUntilExists(timeout: Self.wait))
+        tapDrawer("home.privacyDrawer", in: app, opens: app.navigationBars["Privacy and terms"])
         XCTAssertTrue(element("privacy.privacy", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(element("privacy.terms", in: app).exists)
-        tap("privacy.deleteData", in: app)
-        XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
+        tap("privacy.deleteData", in: app, opens: app.navigationBars["Delete my data"])
     }
 
     /// Delete my data: explained, asked once more, then everything goes and the app starts fresh
@@ -154,21 +144,19 @@ final class SettingsTests: XCTestCase {
         let app = launch()
         XCTAssertTrue(app.buttons["Name sign: Lily"].waitUntilExists(timeout: Self.wait))
         openProfile(in: app)
-        tap("profile.deleteData", in: app)
-        XCTAssertTrue(app.navigationBars["Delete my data"].waitUntilExists(timeout: Self.wait))
+        tap("profile.deleteData", in: app, opens: app.navigationBars["Delete my data"])
         XCTAssertTrue(labelled("21 pieces", in: app).waitUntilExists(timeout: Self.wait), "No counts")
 
-        // Cancel first: nothing changes.
-        tap("deleteData.delete", in: app)
+        // Cancel first: nothing changes. On CI the first tap on Delete was once lost (October
+        // 2026), so each tap waits for the question and taps again if it didn't come.
         let alert = app.alerts["Delete everything?"]
-        XCTAssertTrue(alert.waitUntilExists(timeout: Self.wait), "Not asked before deleting")
-        alert.buttons["Cancel"].tap()
+        tap("deleteData.delete", in: app, opens: alert)
+        alert.buttons["Cancel"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(alert.waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(app.navigationBars["Delete my data"].exists)
 
-        tap("deleteData.delete", in: app)
-        XCTAssertTrue(alert.waitUntilExists(timeout: Self.wait))
-        alert.buttons["Delete everything"].tap()
+        tap("deleteData.delete", in: app, opens: alert)
+        alert.buttons["Delete everything"].tapUntilGone(timeout: Self.wait)
 
         // A fresh app: the welcome, with a note that it's done (Phase 17). Onboarding again, this
         // time with no name and the empty closet.
@@ -219,11 +207,15 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
     }
 
+    /// Taps a desk drawer on Home and waits for what it opens.
     @MainActor
-    private func tapDrawer(_ identifier: String, in app: XCUIApplication) {
+    private func tapDrawer(
+        _ identifier: String, in app: XCUIApplication, opens next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         let drawer = app.buttons[identifier]
-        reveal(drawer, in: app)
-        drawer.tap()
+        reveal(drawer, in: app, file: file, line: line)
+        drawer.tapUntil(next, appears: Self.wait, file: file, line: line)
     }
 
     @MainActor
@@ -236,12 +228,15 @@ final class SettingsTests: XCTestCase {
         app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", label)).firstMatch
     }
 
-    /// Taps an element by identifier, scrolling to it first.
+    /// Taps an element by identifier, scrolling to it first, and waits for what it opens.
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, opens next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         let target = element(identifier, in: app)
-        reveal(target, in: app)
-        target.tap()
+        reveal(target, in: app, file: file, line: line)
+        target.tapUntil(next, appears: Self.wait, file: file, line: line)
     }
 
     /// Scrolls until the element can be tapped (see `XCUIApplication.reveal`).
@@ -252,15 +247,22 @@ final class SettingsTests: XCTestCase {
         app.reveal(element, timeout: Self.wait, file: file, line: line)
     }
 
-    /// A SwiftUI switch's label doesn't flip it; the switch at its trailing end does.
+    /// A SwiftUI switch's label doesn't flip it; the switch at its trailing end does. Waits until
+    /// its value changes, tapping once more if the first tap was lost.
     @MainActor
-    private func flip(_ toggle: XCUIElement) {
-        let inner = toggle.switches.firstMatch
-        if inner.exists {
-            inner.tap()
-        } else {
-            toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+    private func flip(_ toggle: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+        let before = toggle.value as? String
+        let flipped: @MainActor () -> Bool = { (toggle.value as? String) != before }
+        for _ in 0..<2 {
+            let inner = toggle.switches.firstMatch
+            if inner.exists {
+                inner.tap()
+            } else {
+                toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+            }
+            if waitUntilTrue(timeout: Self.wait, flipped) { return }
         }
+        XCTFail("\(toggle) didn't flip", file: file, line: line)
     }
 
     @MainActor

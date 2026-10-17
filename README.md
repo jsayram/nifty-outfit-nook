@@ -72,7 +72,7 @@ Lily's builds go out through TestFlight as internal-only builds with sample data
 
 ## Sample data
 
-Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are a few app-state flags in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch (`docs/onboarding.md`). Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
+Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch, and (since the Stage A audit) the name on her sign and her Style Me settings (Preferences, Avoid repeating outfits for, Track laundry). See `docs/onboarding.md`. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
 - a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail`, `photo-fails` or `picture-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
@@ -148,7 +148,7 @@ The local package is added to the project as a folder reference rather than a pa
 
 - No App Transport Security exceptions. The generated Info.plist has no `NSAppTransportSecurity` keys.
 - Data Protection is `NSFileProtectionComplete` through the `com.apple.developer.default-data-protection` entitlement.
-- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains and no collected data. Its one required-reason API is `UserDefaults` (reason `CA92.1`, data only this app reads), since Phase 17 keeps the onboarding and tour flags there. It's updated whenever that changes.
+- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains and no collected data. Its one required-reason API is `UserDefaults` (reason `CA92.1`, data only this app reads), since Phase 17 keeps the onboarding and tour flags there, and the Stage A audit the sign name and Style Me settings. It's updated whenever that changes.
 - No secrets anywhere. `Secrets.xcconfig` and `*.local.xcconfig` are ignored by git and only ever hold non-secret identifiers such as a team ID.
 
 ## Branches

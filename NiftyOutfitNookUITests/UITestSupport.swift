@@ -4,9 +4,12 @@ import XCTest
 // as soon as its condition holds, and fails with a message when it doesn't within the timeout.
 //
 // They exist because the hosted CI runner is slow and uneven (one query can take seconds), and a
-// tap that lands while a screen is still moving can be lost. Two of those flaked on CI: a tap on
-// Home right after Back, while the pushed screen was still sliding away, and Not now on the
-// laundry sheet at AX5 after the test had swiped the sheet itself.
+// tap that lands while a screen is still moving can be lost. Several of those flaked on CI: a tap
+// on Home right after Back, while the pushed screen was still sliding away; Not now on the
+// laundry sheet at AX5 after the test had swiped the sheet itself; Delete my data's
+// button and Home's hamper at AX5 (October 2026). So a tap on anything that moves the app on
+// (pushes, sheets, alerts, tabs) confirms its effect with `tapUntil`, `tapUntilGone` or
+// `tapUntilSelected` instead of a bare `tap()`.
 //
 // Use these instead of `waitForExistence(timeout:)`, `waitForNonExistence(timeout:)` and
 // `XCTNSPredicateExpectation`. Those look the first time a second after they start, even when
@@ -103,12 +106,25 @@ extension XCUIElement {
     func tapUntil(
         _ next: XCUIElement, appears timeout: TimeInterval, file: StaticString = #filePath, line: UInt = #line
     ) {
+        let appeared = tapUntil(timeout: timeout) { next.exists }
+        XCTAssertTrue(appeared, "\(next) didn't appear after tapping \(self)", file: file, line: line)
+    }
+
+    /// Taps the element and waits until `effect` holds (a label changed, a step moved on), tapping
+    /// once more if it didn't and the element can still be tapped. Returns whether it held. For
+    /// any tap whose effect isn't a new element appearing or this one going.
+    @MainActor
+    @discardableResult
+    func tapUntil(timeout: TimeInterval, _ effect: @escaping @MainActor () -> Bool) -> Bool {
         for _ in 0..<2 {
-            guard waitUntilHittable(timeout: timeout) else { break }
+            // Wait a moment for it to settle. A few elements never say they're hittable but take
+            // a tap anyway (a Closet piece after a search, Closet's Recently deleted tile), so
+            // after that one that exists is tapped.
+            guard waitUntilHittable(timeout: min(timeout, 5)) || exists else { break }
             tap()
-            if next.waitUntilExists(timeout: timeout) { return }
+            if waitUntilTrue(timeout: timeout, effect) { return true }
         }
-        XCTAssertTrue(next.exists, "\(next) didn't appear after tapping \(self)", file: file, line: line)
+        return effect()
     }
 
     /// Taps a tab or other selectable button and waits until it says it's selected, tapping once

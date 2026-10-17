@@ -27,9 +27,7 @@ final class HomeTests: XCTestCase {
         for (identifier, title) in pushed {
             let control = app.buttons[identifier]
             reveal(control, in: app)
-            control.tap()
-            XCTAssertTrue(
-                app.navigationBars[title].waitUntilExists(timeout: Self.wait), "\(identifier) didn't open \(title)")
+            control.tapUntil(app.navigationBars[title], appears: Self.wait)
             if identifier == "home.occasion" {
                 // The calendar opens Style Me on the Occasion sheet (Phase 10a); close it first.
                 XCTAssertTrue(app.buttons["occasion.office"].waitUntilExists(timeout: Self.wait), "No Occasion sheet")
@@ -45,8 +43,7 @@ final class HomeTests: XCTestCase {
         // The suitcase opens Suitcases on the Closet tab, where Suitcases lives (Phase 13).
         let suitcase = app.buttons["home.suitcase"]
         reveal(suitcase, in: app)
-        suitcase.tap()
-        XCTAssertTrue(app.navigationBars["Suitcases"].waitUntilExists(timeout: Self.wait), "No Suitcases")
+        suitcase.tapUntil(app.navigationBars["Suitcases"], appears: Self.wait)
         XCTAssertTrue(tabBar.buttons["Closet"].isSelected)
         tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
@@ -54,9 +51,8 @@ final class HomeTests: XCTestCase {
         for (identifier, tab) in [("home.wardrobe", "Closet"), ("home.savedLooks", "Saved Looks")] {
             let control = app.buttons[identifier]
             reveal(control, in: app)
-            control.tap()
-            XCTAssertTrue(tabBar.buttons[tab].waitUntilExists(timeout: Self.wait))
-            XCTAssertTrue(tabBar.buttons[tab].isSelected, "\(identifier) didn't switch to \(tab)")
+            let switched = control.tapUntil(timeout: Self.wait) { tabBar.buttons[tab].isSelected }
+            XCTAssertTrue(switched, "\(identifier) didn't switch to \(tab)")
             tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
             XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))
         }
@@ -88,17 +84,15 @@ final class HomeTests: XCTestCase {
         reveal(hamper, in: app)
         XCTAssertEqual(hamper.label, "Hamper: Laundry, Off")
 
-        hamper.tap()
         let notNow = app.buttons["Not now"]
-        XCTAssertTrue(notNow.waitUntilExists(timeout: Self.wait), "The laundry sheet didn't open")
+        hamper.tapUntil(notNow, appears: Self.wait)
         XCTAssertTrue(app.staticTexts["Laundry tracking is off"].exists)
         notNow.tapUntilGone(timeout: Self.wait)
         XCTAssertEqual(hamper.label, "Hamper: Laundry, Off")
 
         reveal(hamper, in: app)
-        hamper.tap()
         let turnOn = app.buttons["laundryTracking.turnOn"]
-        XCTAssertTrue(turnOn.waitUntilExists(timeout: Self.wait))
+        hamper.tapUntil(turnOn, appears: Self.wait)
         // The sheet closes once tracking is on.
         turnOn.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(
@@ -106,8 +100,7 @@ final class HomeTests: XCTestCase {
             "The hamper didn't update: \(hamper.label)")
         // Now it's a real Laundry control.
         reveal(hamper, in: app)
-        hamper.tap()
-        XCTAssertTrue(app.navigationBars["Laundry"].waitUntilExists(timeout: Self.wait))
+        hamper.tapUntil(app.navigationBars["Laundry"], appears: Self.wait)
     }
 
     /// RD-01.4 and LR-04: the window shows the forced weather, and Style Me's Weather row and
@@ -121,37 +114,33 @@ final class HomeTests: XCTestCase {
 
         let laptop = app.buttons["home.laptop"]
         reveal(laptop, in: app)
-        laptop.tap()
         let row = app.buttons["styleMe.weather"]
-        XCTAssertTrue(row.waitUntilExists(timeout: Self.wait))
+        laptop.tapUntil(row, appears: Self.wait)
         XCTAssertTrue(waitForLabel(of: row, containing: "30° and snow"), row.label)
         XCTAssertTrue(row.label.contains("Your looks are picked for today’s weather."), row.label)
 
         for (option, value) in [("weather.indoors", "Indoors"), ("weather.ignore", "Ignored")] {
-            row.tap()
             let choice = app.buttons[option]
-            XCTAssertTrue(choice.waitUntilExists(timeout: Self.wait), "No \(option) in the sheet")
+            row.tapUntil(choice, appears: Self.wait)
             XCTAssertTrue(app.buttons["weather.useToday"].isSelected || option == "weather.ignore")
-            choice.tap()
-            XCTAssertTrue(choice.waitUntilGone(timeout: Self.wait), "Choosing should close the sheet")
+            // Choosing closes the sheet.
+            choice.tapUntilGone(timeout: Self.wait)
             XCTAssertTrue(waitForLabel(of: row, containing: value), "\(option): \(row.label)")
         }
         // The sheet marks the current choice.
-        row.tap()
-        XCTAssertTrue(app.buttons["weather.ignore"].waitUntilExists(timeout: Self.wait))
+        row.tapUntil(app.buttons["weather.ignore"], appears: Self.wait)
         XCTAssertTrue(app.buttons["weather.ignore"].isSelected)
         XCTAssertFalse(app.buttons["weather.useToday"].isSelected)
-        app.buttons["weather.useToday"].tap()
+        app.buttons["weather.useToday"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: row, containing: "30° and snow"), row.label)
 
         // The choice is for one request: leaving and coming back starts on today's weather.
-        row.tap()
-        app.buttons["weather.indoors"].tap()
+        row.tapUntil(app.buttons["weather.indoors"], appears: Self.wait)
+        app.buttons["weather.indoors"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: row, containing: "Indoors"), row.label)
         app.goBack(from: "Style Me", to: "Home", timeout: Self.wait)
         reveal(laptop, in: app)
-        laptop.tap()
-        XCTAssertTrue(row.waitUntilExists(timeout: Self.wait))
+        laptop.tapUntil(row, appears: Self.wait)
         XCTAssertTrue(waitForLabel(of: row, containing: "30° and snow"), row.label)
     }
 

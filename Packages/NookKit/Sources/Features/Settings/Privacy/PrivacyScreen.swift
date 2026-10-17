@@ -151,7 +151,7 @@ nonisolated enum PrivacyText {
     static var staysNote: String {
         String(
             localized:
-                "Fit and measurements and your try-on pictures are hidden when you switch apps. This test build forgets your changes when it closes, and the closet you started with comes back as it was. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen.",
+                "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, and your fit, measurements and try-on photo are cleared.",
             bundle: .module, comment: "Privacy and terms: under what stays on the iPhone")
     }
 

@@ -143,11 +143,11 @@ nonisolated enum OnboardingText {
             bundle: .module, comment: "Onboarding privacy: consent later")
     }
 
-    static var forgets: String {
+    static var whatsKept: String {
         String(
             localized:
-                "This test build forgets your changes when it closes. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen.",
-            bundle: .module, comment: "Onboarding privacy: Stage A keeps nothing she adds")
+                "When this test build closes, it keeps your name and your Style Me settings in Profile, which closet you chose and which tips you’ve seen. It forgets the rest, like your fit and the pieces and looks you add.",
+            bundle: .module, comment: "Onboarding privacy: what Stage A keeps across launches and what it forgets")
     }
 
     // MARK: Fit

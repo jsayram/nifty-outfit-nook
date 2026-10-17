@@ -71,7 +71,7 @@ struct OnboardingNameStep: View {
 
 /// The privacy step, in plain words: what the app does, that everything stays on the phone, that
 /// this test build sends nothing and asks for no permissions, that later features ask first, and
-/// that the test build forgets her changes when it closes. It asks for nothing.
+/// what the test build keeps when it closes. It asks for nothing.
 struct OnboardingPrivacyStep: View {
     let model: OnboardingModel
 
@@ -97,8 +97,8 @@ struct OnboardingPrivacyStep: View {
                     title: OnboardingText.asksFirstTitle, detail: OnboardingText.asksFirstDetail,
                     systemImage: "hand.raised")
             }
-            NookBanner(OnboardingText.forgets, systemImage: "info.circle", tone: .neutral)
-                .accessibilityIdentifier("onboarding.forgets")
+            NookBanner(OnboardingText.whatsKept, systemImage: "info.circle", tone: .neutral)
+                .accessibilityIdentifier("onboarding.kept")
         }
     }
 }

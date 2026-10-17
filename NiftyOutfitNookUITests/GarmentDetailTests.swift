@@ -34,17 +34,14 @@ final class GarmentDetailTests: XCTestCase {
         let recentlyDeleted = app.buttons["closet.recentlyDeleted"]
         XCTAssertTrue(recentlyDeleted.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(recentlyDeleted.label.contains("2"), recentlyDeleted.label)
-        recentlyDeleted.tap()
-
         // Restore it from Recently deleted.
         let restore = app.buttons["recentlyDeleted.restore.g-navy-trousers"]
-        XCTAssertTrue(restore.waitUntilExists(timeout: Self.wait))
+        recentlyDeleted.tapUntil(restore, appears: Self.wait)
         XCTAssertTrue(app.buttons["recentlyDeleted.restore.g-gray-leggings"].exists)
-        restore.tap()
-        XCTAssertTrue(labelled("Navy dress pants is back in your closet", in: app).waitUntilExists(timeout: Self.wait))
+        restore.tapUntil(labelled("Navy dress pants is back in your closet", in: app), appears: Self.wait)
         XCTAssertTrue(waitForNonExistence(restore))
 
-        app.navigationBars.firstMatch.buttons.firstMatch.tap()
+        app.goBack(from: "Recently deleted", to: "Closet", timeout: Self.wait)
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
     }
 
@@ -73,7 +70,8 @@ final class GarmentDetailTests: XCTestCase {
         XCTAssertTrue(start.label.contains("Navy dress pants"), start.label)
         XCTAssertTrue(start.label.contains("In the wash"), start.label)
         XCTAssertFalse(app.buttons["styleMe.go"].isEnabled)
-        app.navigationBars.firstMatch.buttons.firstMatch.tap()
+        let back = app.navigationBars.firstMatch.buttons.firstMatch
+        XCTAssertTrue(back.tapUntil(timeout: Self.wait) { !start.exists }, "Style Me didn't close")
 
         // I don't have it any more, then Undo from the toast.
         tap("garment.remove", in: app)
@@ -107,8 +105,7 @@ final class GarmentDetailTests: XCTestCase {
         search.typeText("navy pants\n")
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
-        trousers.tap()
-        XCTAssertTrue(element("garment.name", in: app).waitUntilExists(timeout: Self.wait))
+        trousers.tapUntil(element("garment.name", in: app), appears: Self.wait)
         return trousers
     }
 

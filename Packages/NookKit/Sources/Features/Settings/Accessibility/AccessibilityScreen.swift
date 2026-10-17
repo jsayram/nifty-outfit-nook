@@ -58,7 +58,7 @@ struct AccessibilityPage: View {
                     value: (reduceMotionOverride ?? reduceMotion) ? ProfileText.on : ProfileText.off,
                     systemImage: "wind")
                 SettingsInfoRow(
-                    title: AccessibilityText.darkMode, detail: AccessibilityText.darkModeDetail,
+                    title: AccessibilityText.darkAppearance, detail: AccessibilityText.darkAppearanceDetail,
                     value: colorScheme == .dark ? ProfileText.on : ProfileText.off, systemImage: "moon")
             }
 
@@ -124,14 +124,14 @@ nonisolated enum AccessibilityText {
             comment: "Accessibility: what the app does with Reduce Motion")
     }
 
-    static var darkMode: String {
-        String(localized: "Dark Mode", bundle: .module, comment: "Accessibility: a setting")
+    static var darkAppearance: String {
+        String(localized: "Dark appearance", bundle: .module, comment: "Accessibility: a setting")
     }
 
-    static var darkModeDetail: String {
+    static var darkAppearanceDetail: String {
         String(
             localized: "Your room changes to evening, with the lamp on.", bundle: .module,
-            comment: "Accessibility: what the app does in Dark Mode")
+            comment: "Accessibility: what the app does in dark appearance")
     }
 
     static var openSettings: String {

@@ -1,3 +1,4 @@
+import Fixtures
 import Foundation
 import Models
 import Testing
@@ -5,7 +6,8 @@ import Testing
 @testable import Services
 
 /// Phase 17: the onboarding state and the tours seen, kept across launches in the app's own
-/// `UserDefaults` suite. Each test uses a suite of its own and removes it afterwards, so nothing
+/// `UserDefaults` suite. Since the Stage A audit, also the name on the sign and the Style Me
+/// settings. Each test uses a suite of its own and removes it afterwards, so nothing
 /// touches the app's real suite or another test's.
 ///
 /// "A relaunch" here is a second store made on the same suite, which is what the app does at
@@ -142,32 +144,144 @@ struct AppStateDefaultsTests {
         #expect(await DefaultsTourProgressStore(suiteName: suite.name).progress().seenVersions.isEmpty)
     }
 
+    // MARK: The name on the sign and the Style Me settings (Stage A audit)
+
+    /// A profile store as the app makes one at launch: the sample's profile (or a fresh one) with
+    /// what's kept in `suite` put in.
+    private func profileStore(_ suite: Suite, starting profile: Profile = Profile()) -> KeptSettingsProfileStore {
+        KeptSettingsProfileStore(profile: profile, keeper: DefaultsProfileSettingsKeeper(suiteName: suite.name)) {
+            InMemoryProfileStore(profile: $0)
+        }
+    }
+
+    @Test func theNameAndSettingsAreKeptAcrossALaunch() async throws {
+        let suite = Suite()
+        let store = profileStore(suite)
+        #expect(try await store.profile() == Profile())
+        try await store.update {
+            $0.signName = " Lily "
+            $0.preferences = Preferences(pieceMode: .onlyMine, repeatWindow: .noLimit, tracksLaundry: true)
+            $0.usualFit = .fitted
+            $0.measurements.waist = Length(27.5, .inches)
+            $0.units = .metric
+            $0.remembered.occasion = .concert
+        }
+
+        let relaunched = try await profileStore(suite).profile()
+        #expect(relaunched.signName == "Lily")
+        #expect(
+            relaunched.preferences == Preferences(pieceMode: .onlyMine, repeatWindow: .noLimit, tracksLaundry: true))
+        // The rest is in memory only: her fit and measurements are Sensitive.
+        var expected = Profile()
+        expected.signName = "Lily"
+        expected.preferences = relaunched.preferences
+        #expect(relaunched == expected)
+    }
+
+    @Test func aClearedNameStaysCleared() async throws {
+        let suite = Suite()
+        let store = profileStore(suite)
+        try await store.save(Profile(signName: "Lily"))
+        try await store.update { $0.signName = "" }
+        // The sample's profile is named, but she cleared it.
+        #expect(try await profileStore(suite, starting: Profile(signName: "Sample")).profile().signName == "")
+    }
+
+    @Test func aRefusedSaveKeepsNothing() async throws {
+        let suite = Suite()
+        let store = profileStore(suite)
+        try await store.update { $0.signName = "Lily" }
+        _ = try? await store.update {
+            $0.signName = "Ana"
+            $0.measurements.height = Length(400, .inches)
+        }
+        #expect(try await profileStore(suite).profile().signName == "Lily")
+    }
+
+    /// Changes made at once can come back in either order; what's kept is always the latest.
+    @Test func changesMadeAtOnceKeepTheLatest() async throws {
+        let suite = Suite()
+        let store = profileStore(suite)
+        await withTaskGroup(of: Void.self) { group in
+            for index in 0..<40 {
+                group.addTask {
+                    _ = try? await store.update {
+                        $0.signName = "Name \(index)"
+                        $0.preferences.tracksLaundry = index.isMultiple(of: 2)
+                    }
+                }
+            }
+        }
+        let final = try await store.profile()
+        let relaunched = try await profileStore(suite).profile()
+        #expect(relaunched.signName == final.signName)
+        #expect(relaunched.preferences == final.preferences)
+    }
+
+    @Test func erasingTheProfileForgetsTheSettings() async throws {
+        let suite = Suite()
+        let store = profileStore(suite)
+        try await store.update {
+            $0.signName = "Lily"
+            $0.preferences.tracksLaundry = true
+        }
+        try await store.eraseAll()
+        #expect(try await store.profile() == Profile())
+        #expect(try await profileStore(suite).profile() == Profile())
+        #expect(suite.contents.isEmpty)
+    }
+
+    @Test func damagedProfileValuesReadSafely() async throws {
+        let suite = Suite()
+        suite.set(String(repeating: "L", count: NameRules.signNameMaximum + 1), for: AppStateDefaults.Key.signName)
+        suite.set("sometimes", for: AppStateDefaults.Key.pieceMode)
+        suite.set(14, for: AppStateDefaults.Key.repeatWindow)
+        suite.set("yes", for: AppStateDefaults.Key.tracksLaundry)
+        // Each damaged value is left out, so the launch's own values stay.
+        let start = Profile(signName: "Sample", preferences: Preferences(repeatWindow: .twoWeeks))
+        #expect(try await profileStore(suite, starting: start).profile() == start)
+    }
+
     // MARK: What's in the file
 
-    /// Only the four flags are written: no name, nothing she typed, no dates and no identifier
-    /// (`closet/DATA_MAP.md`, the app state row).
-    @Test func onlyTheFlagsAreWritten() async {
+    /// Only the flags, the name and the three settings are written: nothing about her body or
+    /// closet, no dates and no identifier (`closet/DATA_MAP.md`).
+    @Test func onlyTheFlagsNameAndSettingsAreWritten() async throws {
         let suite = Suite()
         let onboarding = DefaultsOnboardingStore(suiteName: suite.name)
         let tours = DefaultsTourProgressStore(suiteName: suite.name)
         await onboarding.complete(startingCloset: .sample)
         await tours.record(record(.home, outcome: .controlActivated))
         await tours.setShowsTipsOnNewScreens(true)
+        try await profileStore(suite).update {
+            $0.signName = "Lily"
+            $0.usualFit = .relaxed
+            $0.measurements.waist = Length(27.5, .inches)
+            $0.fitPieces = [FitPiece(id: "f1", brand: "Example Denim Co.", category: .bottom, sizeLabel: "S")]
+            $0.likedColors = [.cream]
+        }
 
         let contents = suite.contents
         #expect(
             Set(contents.keys) == [
                 AppStateDefaults.Key.onboardingCompleted, AppStateDefaults.Key.startingCloset,
                 AppStateDefaults.Key.showsTips, AppStateDefaults.Key.seenVersions,
+                AppStateDefaults.Key.signName, AppStateDefaults.Key.pieceMode, AppStateDefaults.Key.repeatWindow,
+                AppStateDefaults.Key.tracksLaundry,
             ])
         #expect(contents[AppStateDefaults.Key.onboardingCompleted] as? Bool == true)
         #expect(contents[AppStateDefaults.Key.startingCloset] as? String == "sample")
         #expect(contents[AppStateDefaults.Key.showsTips] as? Bool == true)
         #expect(contents[AppStateDefaults.Key.seenVersions] as? [String: Int] == ["home": 1])
-        // Nothing that looks like a date or how the tour ended.
+        #expect(contents[AppStateDefaults.Key.signName] as? String == "Lily")
+        #expect(contents[AppStateDefaults.Key.pieceMode] as? String == "mineAndOneIdea")
+        #expect(contents[AppStateDefaults.Key.repeatWindow] as? String == "oneWeek")
+        #expect(contents[AppStateDefaults.Key.tracksLaundry] as? Bool == false)
+        // Nothing that looks like a date, how the tour ended, her fit or her closet.
         let text = "\(contents)"
-        #expect(!text.contains("controlActivated"))
-        #expect(!text.contains("2026"))
+        for word in ["controlActivated", "2026", "relaxed", "27.5", "Denim", "cream"] {
+            #expect(!text.contains(word), "\(word) was written")
+        }
     }
 
     @Test func theAppSuiteIsTheAppsOwn() {

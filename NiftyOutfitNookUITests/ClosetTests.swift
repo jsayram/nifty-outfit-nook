@@ -45,11 +45,11 @@ final class ClosetTests: XCTestCase {
         XCTAssertTrue((trousers.value as? String)?.hasPrefix("In Jose's house and Weekend") == true)
 
         // Opening a piece goes to its detail (Phase 7a), and back.
-        trousers.tap()
         let name = app.descendants(matching: .any)["garment.name"]
-        XCTAssertTrue(name.waitUntilExists(timeout: Self.wait))
+        trousers.tapUntil(name, appears: Self.wait)
         XCTAssertEqual(name.label, "Navy dress pants")
-        app.navigationBars.firstMatch.buttons.firstMatch.tap()
+        let back = app.navigationBars.firstMatch.buttons.firstMatch
+        XCTAssertTrue(back.tapUntil(timeout: Self.wait) { !name.exists }, "The piece didn't close")
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
     }
 
@@ -59,10 +59,9 @@ final class ClosetTests: XCTestCase {
         let app = launchOnCloset("empty")
         XCTAssertTrue(app.staticTexts["Your closet is empty"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(searchFieldExists(in: app))
-        app.buttons["closet.empty.addPiece"].tap()
-        XCTAssertTrue(app.navigationBars["Add a piece"].waitUntilExists(timeout: Self.wait))
-        app.navigationBars["Add a piece"].buttons.firstMatch.tap()
-        XCTAssertTrue(app.buttons["closet.empty.describe"].waitUntilExists(timeout: Self.wait))
+        app.buttons["closet.empty.addPiece"].tapUntil(app.navigationBars["Add a piece"], appears: Self.wait)
+        app.navigationBars["Add a piece"].buttons.firstMatch.tapUntil(
+            app.buttons["closet.empty.describe"], appears: Self.wait)
     }
 
     @MainActor

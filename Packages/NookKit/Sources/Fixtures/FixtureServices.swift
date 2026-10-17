@@ -9,16 +9,18 @@ public enum FixtureServices {
     ///   - startingCloset: the closet chosen in onboarding (Phase 17). `nil` uses the set the
     ///     configuration names, as it is, which is what the debug `-onboarding skip` flag and the
     ///     tests want. `.sample` is that set too (the demo set if the configuration names the
-    ///     empty one), with no name on the sign: her name comes from onboarding and, in Stage A,
-    ///     isn't kept across launches. `.empty` is the empty set with the configuration's other
-    ///     options.
+    ///     empty one), with no name on the sign: her name comes from onboarding, or from
+    ///     `profileSettings`. `.empty` is the empty set with the configuration's other options.
     ///   - tours, onboarding: the stores kept across launches. `nil` gives in-memory ones that
     ///     start fresh.
+    ///   - profileSettings: where the name on the sign and the Style Me settings are kept across
+    ///     launches (Stage A audit). `nil` keeps the whole profile in memory.
     public static func make(
         _ configuration: FixtureConfiguration,
         startingCloset: StartingCloset? = nil,
         tours: (any TourProgressStore)? = nil,
         onboarding: (any OnboardingStateStore)? = nil,
+        profileSettings: (any ProfileSettingsKeeper)? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -39,6 +41,7 @@ public enum FixtureServices {
             unnamed: startingCloset != nil,
             tours: tours,
             onboarding: onboarding,
+            profileSettings: profileSettings,
             now: now,
             calendar: calendar
         )
@@ -50,6 +53,8 @@ public enum FixtureServices {
     /// sample photo pieces and the provider that draws their pictures. `source` sets the
     /// remembered source. `unnamed` leaves the sign without a name, for a closet started from
     /// onboarding. `tours` and `onboarding` are the stores to use; `nil` gives fresh in-memory ones.
+    /// `profileSettings` keeps the name on the sign and the Style Me settings; with `nil` the
+    /// whole profile is in memory.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
@@ -61,6 +66,7 @@ public enum FixtureServices {
         unnamed: Bool = false,
         tours: (any TourProgressStore)? = nil,
         onboarding: (any OnboardingStateStore)? = nil,
+        profileSettings: (any ProfileSettingsKeeper)? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -111,7 +117,7 @@ public enum FixtureServices {
             closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: stores),
             looks: InMemoryLookStore(looks: data.looks, calendar: calendar, options: stores),
             suitcases: InMemorySuitcaseStore(suitcases: data.suitcases, options: stores),
-            profile: InMemoryProfileStore(profile: data.profile, options: stores),
+            profile: profileStore(data.profile, settings: profileSettings, options: stores),
             stylist: MockStylist(mode: stylistMode, latency: stylistLatency),
             weather: FixtureWeatherProvider(
                 snapshot: snapshot,
@@ -132,5 +138,14 @@ public enum FixtureServices {
             tours: tours ?? InMemoryTourProgressStore(options: stores),
             onboarding: onboarding ?? InMemoryOnboardingStore(options: stores)
         )
+    }
+
+    private static func profileStore(
+        _ profile: Profile, settings: (any ProfileSettingsKeeper)?, options: StoreOptions
+    ) -> any ProfileStore {
+        guard let settings else { return InMemoryProfileStore(profile: profile, options: options) }
+        return KeptSettingsProfileStore(profile: profile, keeper: settings) {
+            InMemoryProfileStore(profile: $0, options: options)
+        }
     }
 }

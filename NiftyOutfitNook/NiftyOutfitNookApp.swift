@@ -63,12 +63,14 @@ struct NiftyOutfitNookApp: App {
     /// `-fixtures large` or `-fixtures demo:offline`; the default is the demo closet, which is
     /// also the sample closet onboarding offers.
     ///
-    /// The onboarding state and the tours seen are kept in the app's own `UserDefaults` suite
-    /// (`AppStateDefaults`); everything else is in memory. See `docs/onboarding.md`.
+    /// The onboarding state, the tours seen, the name on the sign and the Style Me settings are
+    /// kept in the app's own `UserDefaults` suite (`AppStateDefaults`); everything else is in
+    /// memory. See `docs/onboarding.md`.
     private static func makeLaunch(arguments: [String]) -> AppLaunch {
         let configuration = FixtureConfiguration(launchArguments: arguments)
         let onboarding = DefaultsOnboardingStore()
         let tours = DefaultsTourProgressStore()
+        let profileSettings = DefaultsProfileSettingsKeeper()
         #if DEBUG
             // `-onboarding reset|skip` (Phase 17) and `-tour home|reset|off` (Phase 16a), debug
             // builds only.
@@ -81,8 +83,13 @@ struct NiftyOutfitNookApp: App {
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
+            profileSettings: profileSettings,
             services: { closet in
-                FixtureServices.make(configuration, startingCloset: closet, tours: tours, onboarding: onboarding)
+                // `-onboarding skip` (`closet` is nil) opens the sample data as it is and writes
+                // nothing, so the UI tests start from the same profile every time.
+                FixtureServices.make(
+                    configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
+                    profileSettings: closet == nil ? nil : profileSettings)
             },
             onboardingOptions: onboardingOptions,
             tourOptions: tourOptions)

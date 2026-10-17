@@ -55,12 +55,12 @@ final class AddPieceTests: XCTestCase {
         tap("editor.cancel", in: app)
         let keepEditing = app.buttons["Keep editing"]
         XCTAssertTrue(keepEditing.waitUntilExists(timeout: Self.wait))
-        keepEditing.tap()
+        keepEditing.tapUntilGone(timeout: Self.wait)
         XCTAssertEqual(element("field.name", in: app).value as? String, "Navy work trousers")
         tap("editor.cancel", in: app)
         let discard = app.buttons["Discard changes"]
         XCTAssertTrue(discard.waitUntilExists(timeout: Self.wait))
-        discard.tap()
+        discard.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(element("garment.name", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertEqual(element("garment.name", in: app).label, "Navy dress pants")
 
@@ -129,8 +129,7 @@ final class AddPieceTests: XCTestCase {
         search.typeText("navy pants\n")
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
-        trousers.tap()
-        XCTAssertTrue(element("garment.name", in: app).waitUntilExists(timeout: Self.wait))
+        trousers.tapUntil(element("garment.name", in: app), appears: Self.wait)
     }
 
     /// A piece in the Closet grid, by its name.

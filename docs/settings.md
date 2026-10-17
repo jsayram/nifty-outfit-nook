@@ -47,7 +47,7 @@ Neither the PRD nor the mockups list in-app accessibility options. PRD §16 asks
 - **Text size** (Default, Larger, Smaller or Largest): every screen grows with it; at the largest sizes Home turns into big rows.
 - **VoiceOver** (On or Off): every button and everything in the room says what it is and where it goes.
 - **Reduce Motion**: things fade instead of sliding, and Maya's z's stay still.
-- **Dark Mode**: the room changes to evening with the lamp on.
+- **Dark appearance**: the room changes to evening with the lamp on. The Stage A audit renamed it from "Dark Mode", so no user-facing words say "Mode" (Lily's sign-off renamed Mode to Preferences).
 
 **Open Settings** opens the app's own page in Settings (`UIApplication.openSettingsURLString`), and a note says where Text size, VoiceOver and Reduce Motion live, including Per-App Settings for this app only. Each line only claims what earlier phases checked.
 
@@ -59,7 +59,7 @@ Since Phase 16b, a row under Help ("Replay the tips for any screen") opens App t
 
 The chest with its top drawer open, then "Everyday" (Get outfit ideas, Swap save and try on a look, Add a piece, Suitcases, Laundry) and "Good to know" (What needs a connection, Try-on pictures and real fit, Your data). Each topic opens and closes on a tap, with its answer and a quieter line; the first is open to start. VoiceOver hears each as a button with "Open" or "Closed" and a hint. Then "Still stuck?", which opens Send feedback, and the version line ("Nifty Outfit Nook · 0.1 (1) · test build with sample data").
 
-The words are in the String Catalog, so they work offline. They describe this build as it is: the sample photos, Something new's one idea, that nothing is sent, and since Phase 17 (under Your data) that it forgets her changes when it closes. The mockup's "Free and paid" topic waits for the subscription phase, and "What changed" (§22.2) for the first public release. There's no search: eight short topics don't need it, and neither the mockup nor §22.3 asks for one.
+The words are in the String Catalog, so they work offline. They describe this build as it is: the sample photos, Something new's one idea, that nothing is sent, and since the Stage A audit (under Your data) that it keeps her name and Style Me settings when it closes and forgets her fit and the pieces and looks she adds. The mockup's "Free and paid" topic waits for the subscription phase, and "What changed" (§22.2) for the first public release. There's no search: eight short topics don't need it, and neither the mockup nor §22.3 asks for one.
 
 ## Send feedback (`feedback.html`, PRD §22)
 
@@ -91,7 +91,7 @@ Send with nothing written shows "Write a few words to send the note." under the 
 ## Privacy and terms (`privacy.html`)
 
 1. A butter note: a test build with no account, nothing sent by the app, and no tracking or analytics.
-2. **Stays on this iPhone**: pieces with their pictures and details; suitcases and laundry marks; saved looks and try-on pictures; her name, measurements, weight and fit; Preferences and what Style Me remembers. Then: Fit and measurements and try-on pictures are hidden in the app switcher, and this build forgets her changes when it closes: the closet she started with comes back as it was, and it only remembers that she set it up, which closet she chose and which tips she has seen (Phase 17).
+2. **Stays on this iPhone**: pieces with their pictures and details; suitcases and laundry marks; saved looks and try-on pictures; her name, measurements, weight and fit; Preferences and what Style Me remembers. Then: Fit and measurements and try-on pictures are hidden in the app switcher, and what this build keeps when it closes: the name on her sign, Preferences, Avoid repeating outfits for and Track laundry, that she set it up, which closet she chose and which tips she has seen. Everything else goes back to how it started: the closet she chose comes back as it was, and her fit, measurements and try-on photo are cleared (Phase 17, Stage A audit).
 3. **Later, sent only if you allow it**: Style Me and swaps, Try-on pictures, Weather, each with what it would send and what it never sends, from DATA_MAP. "None of these is in this test build. Each will ask first, and allowing one never allows another."
 4. **Your data**: Delete my data.
 5. **Policies**: Privacy policy and Terms of use, "On the website", opened in the system's in-app Safari view at `https://niftyoutfitnook.pages.dev/privacy` and `/terms`, with "The full privacy policy and terms are still being written." Those pages don't exist yet, and the site currently answers both addresses with its coming-soon page. Phase 19b writes them.
@@ -106,7 +106,7 @@ The button asks once more: "Delete everything?" with Delete everything and Cance
 
 If a part fails (`-fixtures demo:stores-fail`), the screen stays and a note names what's left ("Most of your data is deleted, but not: Looks and Try-on pictures. Try again to finish.", or "Nothing was deleted. Try again in a moment."), and the button becomes Try again. Deleting is safe to repeat.
 
-**In Stage A a relaunch brings back the closet she chose in onboarding,** because the fixtures are built at launch; only the onboarding and tour flags are kept (Phase 17). Deleting erases those too, so the next launch opens on the welcome. From Phase 21a the stores are on disk and deletion lasts.
+**In Stage A a relaunch brings back the closet she chose in onboarding,** because the fixtures are built at launch; only the onboarding and tour flags (Phase 17) and the name and Style Me settings (Stage A audit) are kept. Deleting erases those too, so the next launch opens on the welcome. From Phase 21a the stores are on disk and deletion lasts.
 
 ### The service, built for Phase 24c
 

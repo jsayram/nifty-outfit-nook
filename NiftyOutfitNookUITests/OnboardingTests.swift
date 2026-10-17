@@ -3,7 +3,8 @@ import XCTest
 /// Onboarding (Phase 17), the checkpoint "delete, reinstall, and go from first launch to the first
 /// look": a fresh install (`-onboarding reset -tour reset`) opens on the welcome, the four steps
 /// lead into Home with its tour, the laptop opens Style Me, and Style me shows the first look.
-/// Then a relaunch opens Home straight away, and the tours she has seen don't come back.
+/// Then a relaunch opens Home straight away with her name on the sign, and the tours she has seen
+/// don't come back.
 ///
 /// These tests leave out `UITestLaunch.skipOnboarding` on purpose, and they leave the simulator's
 /// app state as "onboarding done" with tours seen. Every other test sets its own with flags.
@@ -37,7 +38,7 @@ final class OnboardingTests: XCTestCase {
 
         // Step 2: where her things stay. Nothing to choose.
         waitForStep("Your closet stays here", after: "Your name", in: app)
-        XCTAssertTrue(element("onboarding.forgets", in: app).exists, "No word that the test build forgets")
+        XCTAssertTrue(element("onboarding.kept", in: app).exists, "No word on what the test build keeps")
         XCTAssertFalse(app.buttons["onboarding.skip"].exists, "The privacy step can be skipped")
         app.buttons["onboarding.continue"].tapUntil(
             app.navigationBars["How you like clothes to fit"], appears: Self.wait)
@@ -85,8 +86,8 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait), "Didn't open on Home")
         XCTAssertFalse(app.buttons["welcome.getStarted"].exists, "Onboarding showed again")
         XCTAssertFalse(card.waitUntilExists(timeout: 3), "Home's tour came back after a relaunch")
-        // The test build forgets her name: the sample closet comes back as it started.
-        XCTAssertTrue(app.buttons["Name sign, no name yet"].exists)
+        // The test build keeps her name (Stage A audit); the sample closet comes back as it started.
+        XCTAssertTrue(app.buttons["Name sign: Lily"].waitUntilExists(timeout: Self.wait), "The name wasn't kept")
 
         // Style Me's tour was seen too.
         app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)

@@ -43,15 +43,14 @@ final class ProfileTests: XCTestCase {
         XCTAssertTrue(box.waitUntilExists(timeout: Self.wait), "No measurement sheet")
         box.tapUntilFocused(timeout: Self.wait)
         box.typeText("270")
-        app.buttons["measurement.save"].tap()
         let problem = app.descendants(matching: .any)["measurement.problem"]
-        XCTAssertTrue(problem.waitUntilExists(timeout: Self.wait), "A waist of 270 inches was accepted")
+        app.buttons["measurement.save"].tapUntil(problem, appears: Self.wait)
         XCTAssertTrue(problem.label.contains("between 15 and 70"), problem.label)
 
         // Fix it: the problem goes as she types, and Save keeps it.
         box.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "27.5")
         XCTAssertTrue(problem.waitUntilGone(timeout: Self.wait))
-        app.buttons["measurement.save"].tap()
+        app.buttons["measurement.save"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(box.waitUntilGone(timeout: Self.wait), "The sheet didn't close after saving")
         XCTAssertEqual(waist.value as? String, "27.5 inches")
 
@@ -65,7 +64,7 @@ final class ProfileTests: XCTestCase {
         let inches = app.textFields["measurement.inches"]
         inches.tapUntilFocused(timeout: Self.wait)
         inches.typeText("11")
-        app.buttons["measurement.save"].tap()
+        app.buttons["measurement.save"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(feet.waitUntilGone(timeout: Self.wait))
         XCTAssertEqual(height.value as? String, "4 feet 11 inches")
 
@@ -92,8 +91,8 @@ final class ProfileTests: XCTestCase {
         app.buttons["tryOnPhoto.useExample"].tapWhenHittable(timeout: Self.wait)
         XCTAssertTrue(app.buttons["tryOnPhoto.remove"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.descendants(matching: .any)["tryOnPhoto.example"].exists)
-        app.buttons["tryOnPhoto.remove"].tap()
-        app.buttons["tryOnPhoto.confirmRemove"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["tryOnPhoto.remove"].tapUntil(app.buttons["tryOnPhoto.confirmRemove"], appears: Self.wait)
+        app.buttons["tryOnPhoto.confirmRemove"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["tryOnPhoto.choose"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(app.buttons["tryOnPhoto.remove"].exists)
         app.buttons["tryOnPhoto.done"].tapUntilGone(timeout: Self.wait)
@@ -127,7 +126,7 @@ final class ProfileTests: XCTestCase {
         XCTAssertTrue(field.waitUntilFocused(timeout: Self.wait), "The name field didn't get the keyboard")
         let current = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2) + name)
-        app.buttons["profile.nameSave"].tap()
+        app.buttons["profile.nameSave"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(field.waitUntilGone(timeout: Self.wait), "The name sheet didn't close")
     }
 }
