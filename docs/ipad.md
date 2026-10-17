@@ -171,3 +171,4 @@ The phone UI tests (`HomeTests`, `ClosetTests` and the rest) are written for the
 - **16a (done):** Home's tour on the tall and wide rooms, following the furniture through rotation and window resizes (`docs/tours.md`).
 - **16b (done):** the other screens' tours on the iPad layouts, one tour per screen whatever the layout; Closet's last step points at the piece beside the grid (`docs/tours.md`).
 - **Later:** keyboard shortcuts, checked on a real iPad with a keyboard.
+
