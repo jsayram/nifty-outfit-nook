@@ -12,9 +12,9 @@ final class CatalogTests: XCTestCase {
 
     /// Opens the catalog, or only its page `page` (a catalog page ID such as `search`).
     @MainActor
-    private func launchCatalog(page: String? = nil) -> XCUIApplication {
+    private func launchCatalog(page: String? = nil, extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-catalog"] + (page.map { ["-catalog-page", $0] } ?? [])
+        app.launchArguments = ["-catalog"] + (page.map { ["-catalog-page", $0] } ?? []) + extra
         app.launch()
         return app
     }
@@ -91,12 +91,18 @@ final class CatalogTests: XCTestCase {
 
     @MainActor
     func testToastAppearsWithItsAction() {
-        let app = launchCatalog(page: "toast")
+        // The toast stays longer, so a slow runner still finds it.
+        let app = launchCatalog(page: "toast", extra: ["-toasts-stay"])
         let show = app.buttons["Show a toast"]
         scrollTo(show, in: app)
-        show.tap()
-        XCTAssertTrue(
-            app.descendants(matching: .any)["Saved to your looks"].firstMatch.waitUntilExists(timeout: uiTestWait))
+        // On CI the runner once took seconds to deliver the tap and no toast came, so tap once
+        // more if it doesn't show.
+        let toast = app.descendants(matching: .any)["Saved to your looks"].firstMatch
+        for _ in 0..<2 {
+            show.tap()
+            if toast.waitUntilExists(timeout: uiTestWait) { break }
+        }
+        XCTAssertTrue(toast.exists, "No toast")
         XCTAssertTrue(app.buttons["Undo"].firstMatch.exists)
     }
 
