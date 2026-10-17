@@ -87,7 +87,7 @@ struct HomeIPadSnapshotTests {
         line: UInt = #line,
         column: UInt = #column
     ) {
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: size.width, height: size.height > 0 ? size.height : nil)
         guard let image = renderer.uiImage else {

@@ -136,7 +136,7 @@ struct ClosetIPadSnapshotTests {
         .environment(\.dynamicTypeSize, dynamicTypeSize)
         .environment(\.locale, TestTime.locale)
         .environment(\.calendar, TestTime.calendar)
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(size)
         guard let image = renderer.uiImage else {

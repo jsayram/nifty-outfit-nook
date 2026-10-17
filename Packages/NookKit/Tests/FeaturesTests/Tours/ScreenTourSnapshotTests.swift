@@ -252,7 +252,7 @@ struct ScreenTourSnapshotTests {
             .environment(\.closetIsStillImage, true)
             .environment(\.nookStaticRendering, true)
             .environment(\.locale, TestTime.locale)
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: Self.phone.width, height: nil)
         guard let image = renderer.uiImage else {
@@ -330,7 +330,7 @@ struct ScreenTourSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.locale, TestTime.locale)
             .environment(\.calendar, TestTime.calendar)
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(size)
         guard let image = renderer.uiImage else {

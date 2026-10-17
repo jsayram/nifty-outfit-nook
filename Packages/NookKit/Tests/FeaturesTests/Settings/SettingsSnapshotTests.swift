@@ -145,7 +145,7 @@ struct SettingsSnapshotTests {
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, us)
             .environment(\.calendar, TestTime.calendar)
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         // Drawn at 1x, like every screen snapshot (DesignSystem README, "Snapshot policy"). Very
         // tall pages at AX5 come back empty at 2x anyway (playbook, Phase 7b).
         renderer.scale = scale
