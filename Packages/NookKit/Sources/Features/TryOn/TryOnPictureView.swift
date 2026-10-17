@@ -37,8 +37,8 @@ struct TryOnPictureView: View {
                 LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
                     .accessibilityHidden(true)
                 if width >= Self.badgeMinimumWidth {
-                    NookBadge(SharedText.simulated, systemImage: "camera")
-                        .padding(width >= 240 ? NookSpacing.medium : NookSpacing.small)
+                    Self.badge
+                        .padding(Self.badgePadding(width: width))
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
             } else {
@@ -57,6 +57,19 @@ struct TryOnPictureView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(TryOnText.spokenPicture(of: content, lookName: lookName, locale: locale)))
         .accessibilityAddTraits(.isImage)
+    }
+
+    /// The Simulated badge in the picture's corner. It's words on the picture, like the room's
+    /// plates, so it stops growing at xxxLarge: at AX5 it broke as "Simu-lated" over two lines
+    /// and covered the top of the picture (QA, 17 October 2026, iPhone 12). The page says the
+    /// picture is simulated at full size, and VoiceOver reads it with the picture.
+    static var badge: some View {
+        NookBadge(SharedText.simulated, systemImage: "camera")
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+    }
+
+    static func badgePadding(width: CGFloat) -> CGFloat {
+        width >= 240 ? NookSpacing.medium : NookSpacing.small
     }
 
     private var shape: some Shape {
