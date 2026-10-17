@@ -27,7 +27,8 @@ final class ClosetTests: XCTestCase {
         XCTAssertTrue(count.label.hasSuffix("4 of 17 pieces"), count.label)
 
         // Clear brings everything back.
-        app.buttons["closet.filter.clear"].tap()
+        // Clear shows only while a filter is on.
+        app.buttons["closet.filter.clear"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["closet.garment.g-cream-crop"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(shoes.isSelected)
 
@@ -35,7 +36,7 @@ final class ClosetTests: XCTestCase {
         let search = searchField(in: app)
         XCTAssertTrue(search.waitUntilExists(timeout: Self.wait))
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText("navy")
+        search.typeTextAndWait("navy", timeout: Self.wait)
         let trousers = app.buttons["closet.garment.g-navy-trousers"]
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["closet.garment.g-navy-cardigan"].exists)

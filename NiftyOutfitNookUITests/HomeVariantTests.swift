@@ -82,11 +82,9 @@ final class HomeVariantTests: XCTestCase {
         // still be moving and the tap only stops it, so wait for the tab, and tap once more if
         // it didn't switch.
         let closetTab = tabBar.buttons["Closet"]
-        for _ in 0..<2 where !closetTab.isSelected {
-            wardrobe.tapWhenHittable(timeout: Self.wait)
-            _ = closetTab.waitUntilSelected(timeout: Self.wait)
+        wardrobe.tapUntil(timeout: Self.wait, else: "The wardrobe didn't switch to Closet") {
+            closetTab.exists && closetTab.isSelected
         }
-        XCTAssertTrue(closetTab.isSelected, "The wardrobe didn't switch to Closet")
         tabBar.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         tabBar.buttons["Home"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.navigationBars["Home"].waitUntilHittable(timeout: Self.wait))

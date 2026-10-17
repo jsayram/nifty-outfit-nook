@@ -33,7 +33,7 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(label("Step 1 of 4", in: app).exists)
         let field = app.textFields["field.onboarding.name"]
         field.tapUntilFocused(timeout: Self.wait)
-        field.typeText("Lily")
+        field.typeTextAndWait("Lily", timeout: Self.wait)
         app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
 
         // Step 2: where her things stay. Nothing to choose.
@@ -54,25 +54,27 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(element("onboarding.closet.sample", in: app).isSelected)
         let finish = app.buttons["onboarding.continue"]
         XCTAssertEqual(finish.label, "Go to my room")
-        finish.tapWhenHittable(timeout: Self.wait)
+        let lastStep = app.navigationBars["Choose a starting closet"]
+        finish.tapUntil(timeout: Self.wait, else: "Onboarding didn't hand over to Home") { !lastStep.exists }
 
         // Home, with its tour straight away (PRD §7.8). Through to Start styling.
         let card = app.descendants(matching: .any)["tour.card"]
         XCTAssertTrue(card.waitUntilExists(timeout: Self.wait), "Home's tour didn't start after onboarding")
         let next = app.buttons["tour.next"]
-        for _ in 0..<3 {
-            next.tapWhenHittable(timeout: Self.wait)
+        let words = app.descendants(matching: .any)["tour.text"]
+        for step in 2...4 {
+            next.tapUntil(timeout: Self.wait, else: "Next didn't move the tour to step \(step)") {
+                words.exists && words.label.contains("step \(step) of 4")
+            }
         }
         XCTAssertTrue(waitForLabel(of: next, "Start styling"))
         next.tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["Name sign: Lily"].waitUntilExists(timeout: Self.wait), "The sign lost her name")
 
         // The laptop opens Style Me, whose own tour shows the first time; Style me shows the look.
-        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.laptop"].tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
         skipTour(in: app)
-        tapScrolling("styleMe.go", in: app)
-        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
+        tapScrolling("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
         XCTAssertTrue(
             app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait), "No first look")
         skipTour(in: app)
@@ -90,8 +92,7 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(app.buttons["Name sign: Lily"].waitUntilExists(timeout: Self.wait), "The name wasn't kept")
 
         // Style Me's tour was seen too.
-        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.laptop"].tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
         XCTAssertFalse(card.waitUntilExists(timeout: 3), "Style Me's tour came back after a relaunch")
     }
 
@@ -101,7 +102,7 @@ final class OnboardingTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"]
         app.launch()
-        app.buttons["welcome.alreadyUsing"].tapWhenHittable(timeout: Self.wait)
+        app.buttons["welcome.alreadyUsing"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait), "Didn't open Home")
         XCTAssertTrue(app.buttons["Name sign, no name yet"].exists)
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
@@ -134,13 +135,14 @@ final class OnboardingTests: XCTestCase {
         skip.tapUntilGone(timeout: Self.wait)
     }
 
-    /// Taps a button by identifier, scrolling up to find it if it's below the screen.
+    /// Taps a button by identifier, scrolling up to find it if it's below the screen, until
+    /// `next` appears.
     @MainActor
-    private func tapScrolling(_ identifier: String, in app: XCUIApplication) {
+    private func tapScrolling(_ identifier: String, in app: XCUIApplication, showing next: XCUIElement) {
         let button = app.buttons[identifier]
         XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
         app.scrollUntilHittable(button, up: 12)
-        button.tapWhenHittable(timeout: Self.wait)
+        button.tapUntil(next, appears: Self.wait)
     }
 
     @MainActor

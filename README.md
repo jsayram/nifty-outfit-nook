@@ -29,8 +29,9 @@ scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebu
 NOOK_TEST_PLAN=UITests scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # UI tests only, without building the package tests
 scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code or debug flags in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
-scripts/format.sh           # swift-format lint (fails on any finding), then check-strings.py
+scripts/format.sh           # swift-format lint (fails on any finding), then check-strings.py and check-ui-taps.sh
 scripts/check-strings.py    # fails on a String Catalog key no Swift file uses any more
+scripts/check-ui-taps.sh    # fails on a UI test tap that doesn't wait for its effect (see UITestSupport.swift)
 scripts/format.sh --fix     # rewrite files, then lint
 scripts/install-hooks.sh    # once per clone: the gitleaks pre-commit hook
 scripts/promote.sh "<title>" <body-file>  # at a milestone: open the develop-to-main promotion PR
@@ -112,7 +113,8 @@ Configs/                     Build settings as xcconfig files.
   UITests.xcconfig           UI test target.
   Environments/              Dev, Staging and Production. Non-secret settings only.
 scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-release.sh, check-archive.sh,
-                             check-package-pins.sh, bump-build.sh, install-hooks.sh, merge-pr.sh, promote.sh.
+                             check-package-pins.sh, check-ui-taps.sh, bump-build.sh, install-hooks.sh,
+                             merge-pr.sh, promote.sh.
 art/                         Sources for the room drawings (room/) and the app icon (app-icon/).
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.

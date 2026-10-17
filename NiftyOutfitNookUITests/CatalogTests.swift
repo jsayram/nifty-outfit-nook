@@ -36,8 +36,10 @@ final class CatalogTests: XCTestCase {
         XCTAssertTrue(tops.isSelected)
         XCTAssertFalse(bottoms.isSelected)
 
-        bottoms.tap()
-        XCTAssertTrue(bottoms.isSelected)
+        // The catalog's chips never say they're hittable, but take a tap.
+        bottoms.tapUntil(timeout: uiTestWait, else: "\(bottoms) didn't become selected") {
+            bottoms.exists && bottoms.isSelected
+        }
         XCTAssertTrue(tops.isSelected, "Piece filters combine")
     }
 
@@ -49,8 +51,10 @@ final class CatalogTests: XCTestCase {
         XCTAssertTrue(simple.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(simple.isSelected)
 
-        dressedUp.tap()
-        XCTAssertTrue(dressedUp.isSelected)
+        // The catalog's chips never say they're hittable, but take a tap.
+        dressedUp.tapUntil(timeout: uiTestWait, else: "\(dressedUp) didn't become selected") {
+            dressedUp.exists && dressedUp.isSelected
+        }
         XCTAssertFalse(simple.isSelected)
     }
 
@@ -59,8 +63,7 @@ final class CatalogTests: XCTestCase {
         let app = launchCatalog(page: "search")
         let clear = app.buttons["Clear search"]
         scrollTo(clear, in: app)
-        clear.tap()
-        XCTAssertFalse(app.buttons["Clear search"].exists)
+        clear.tapUntilGone(timeout: uiTestWait)
     }
 
     @MainActor
@@ -76,15 +79,18 @@ final class CatalogTests: XCTestCase {
         let app = launchCatalog(page: "sheet")
         let open = app.buttons["Open the sheet"]
         scrollTo(open, in: app)
-        open.tap()
-
+        // The catalog also draws a copy of the sheet's header on the page, Close and all, so the
+        // sheet adds a second Close.
         let closeButtons = app.buttons.matching(NSPredicate(format: "label == %@", "Close"))
-        XCTAssertTrue(closeButtons.firstMatch.waitUntilExists(timeout: uiTestWait))
+        let onThePage = closeButtons.count
+        open.tapUntil(timeout: uiTestWait, else: "The sheet didn't open") { closeButtons.count > onThePage }
         XCTAssertTrue(app.buttons["I’ll be indoors"].firstMatch.exists)
-        // The catalog also draws a copy of the sheet's header behind it; tap the one in the sheet.
+        // Tap the one in the sheet.
         let sheetClose = closeButtons.allElementsBoundByIndex.first { $0.isHittable }
         XCTAssertNotNil(sheetClose, "The sheet has no Close button that can be tapped")
-        sheetClose?.tap()
+        sheetClose?.tapUntil(timeout: uiTestWait, else: "The sheet didn't close") {
+            closeButtons.count == onThePage
+        }
         XCTAssertTrue(open.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(open.isHittable, "The sheet should be gone")
     }
@@ -98,11 +104,7 @@ final class CatalogTests: XCTestCase {
         // On CI the runner once took seconds to deliver the tap and no toast came, so tap once
         // more if it doesn't show.
         let toast = app.descendants(matching: .any)["Saved to your looks"].firstMatch
-        for _ in 0..<2 {
-            show.tap()
-            if toast.waitUntilExists(timeout: uiTestWait) { break }
-        }
-        XCTAssertTrue(toast.exists, "No toast")
+        show.tapUntil(toast, appears: uiTestWait)
         XCTAssertTrue(app.buttons["Undo"].firstMatch.exists)
     }
 
@@ -122,13 +124,11 @@ final class CatalogTests: XCTestCase {
                 "Office, something new: Camel blazer (not in your closet), Cream blouse, Navy trousers, Tan loafers"))
         XCTAssertEqual(somethingNew.count, 1)
 
-        thumbnail.tap()
-        XCTAssertTrue(app.staticTexts["Tapped: Simple"].waitUntilExists(timeout: uiTestWait))
+        thumbnail.tapUntil(app.staticTexts["Tapped: Simple"], appears: uiTestWait)
 
         let findOne = app.buttons["Find one like Camel blazer"]
         scrollTo(findOne, in: app, swipes: 10, up: false)
-        findOne.tap()
-        XCTAssertTrue(app.staticTexts["Tapped: Find one: Camel blazer"].waitUntilExists(timeout: uiTestWait))
+        findOne.tapUntil(app.staticTexts["Tapped: Find one: Camel blazer"], appears: uiTestWait)
     }
 
     /// Scrolls until `element` is on screen and can be tapped (see `XCUIApplication.dragPage`).

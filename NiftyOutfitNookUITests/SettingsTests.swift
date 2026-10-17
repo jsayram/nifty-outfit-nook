@@ -70,8 +70,7 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(element("closet.laundry", in: app).waitUntilExists(timeout: Self.wait), "No Laundry tile")
 
         // Off again from Closet's Profile button: the tile goes, the marks stay.
-        app.buttons["closet.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
+        app.buttons["closet.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
         reveal(laundry, in: app)
         flip(laundry)
         XCTAssertTrue(waitForValue(of: laundry, "0"), "Track laundry didn't turn off")
@@ -103,7 +102,7 @@ final class SettingsTests: XCTestCase {
             ? app.textViews["field.feedback.message"] : app.textFields["field.feedback.message"]
         reveal(field, in: app)
         field.tapUntilFocused(timeout: Self.wait)
-        field.typeText("The hamper is lovely")
+        field.typeTextAndWait("The hamper is lovely", timeout: Self.wait)
         XCTAssertTrue(element("problem.feedback.message", in: app).waitUntilGone(timeout: Self.wait))
         let preview = element("feedback.previewText", in: app)
         XCTAssertTrue(waitForLabel(of: preview, containing: "The hamper is lovely"), preview.label)
@@ -203,8 +202,7 @@ final class SettingsTests: XCTestCase {
 
     @MainActor
     private func openProfile(in app: XCUIApplication) {
-        app.buttons["home.profile"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Profile"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
     }
 
     /// Taps a desk drawer on Home and waits for what it opens.
@@ -252,17 +250,13 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func flip(_ toggle: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
         let before = toggle.value as? String
-        let flipped: @MainActor () -> Bool = { (toggle.value as? String) != before }
-        for _ in 0..<2 {
-            let inner = toggle.switches.firstMatch
-            if inner.exists {
-                inner.tap()
-            } else {
-                toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
-            }
-            if waitUntilTrue(timeout: Self.wait, flipped) { return }
-        }
-        XCTFail("\(toggle) didn't flip", file: file, line: line)
+        let flipped: @MainActor () -> Bool = { toggle.exists && (toggle.value as? String) != before }
+        let inner = toggle.switches.firstMatch
+        let didFlip =
+            inner.exists
+            ? inner.tapUntil(timeout: Self.wait, flipped)
+            : toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tapUntil(timeout: Self.wait, flipped)
+        XCTAssertTrue(didFlip, "\(toggle) didn't flip", file: file, line: line)
     }
 
     @MainActor

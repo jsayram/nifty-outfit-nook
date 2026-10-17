@@ -15,8 +15,7 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
     func testStyleMeSaveAndSeeTheLookBesideTheGrid() throws {
         let app = try launch(orientation: .landscapeLeft)
         XCTAssertTrue(room("wide", in: app).waitUntilExists(timeout: Self.wait), "No wide room")
-        app.buttons["home.laptop"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        app.buttons["home.laptop"].tapUntil(app.navigationBars["Style Me"], appears: Self.wait)
 
         // The request on the left, the options beside it.
         let source = element("styleMe.source", in: app)
@@ -24,9 +23,8 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         XCTAssertTrue(source.waitUntilExists(timeout: Self.wait))
         XCTAssertLessThan(source.frame.maxX, comfort.frame.minX, "The options aren't beside the request")
 
-        app.buttons["styleMe.go"].tapWhenHittable(timeout: Self.wait)
         let save = app.buttons["results.save"]
-        XCTAssertTrue(save.waitUntilExists(timeout: Self.wait))
+        app.buttons["styleMe.go"].tapUntil(save, appears: Self.wait)
         assertTheLookIsBesideTheButtons(in: app)
         let request = element("results.request", in: app).label
 
@@ -39,16 +37,11 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
 
         // A tap that lands while the turned layout is still settling can be lost on CI, so tap
         // once more only if the button didn't change.
-        save.tapWhenHittable(timeout: Self.wait)
-        if !waitForLabel(of: save, containing: "Saved") {
-            save.tapWhenHittable(timeout: Self.wait)
-        }
-        XCTAssertTrue(waitForLabel(of: save, containing: "Saved"), save.label)
+        save.tapUntil(timeout: Self.wait, else: "Save look didn't save") { save.exists && save.label.contains("Saved") }
 
         // The Saved tab fills the width; its tile names the look.
-        app.buttons["results.tab.saved"].tapWhenHittable(timeout: Self.wait)
         let tile = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "results.saved.r-")).firstMatch
-        XCTAssertTrue(tile.waitUntilExists(timeout: Self.wait), "The saved look isn't on the Saved tab")
+        app.buttons["results.tab.saved"].tapUntil(tile, appears: Self.wait)
         let lookID = String(tile.identifier.dropFirst("results.saved.".count))
         let name = String(tile.label.prefix { $0 != ":" })
 
@@ -57,11 +50,10 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         XCTAssertTrue(app.staticTexts["Pick a look"].waitUntilExists(timeout: Self.wait))
         let search = app.searchFields["Search your looks"]
         search.tapUntilFocused(timeout: Self.wait)
-        search.typeText(name + "\n")
+        search.typeTextAndWait(name + "\n", timeout: Self.wait)
         let cell = app.buttons["savedLooks.look.\(lookID)"]
-        cell.tapWhenHittable(timeout: Self.wait)
         let title = element("lookDetail.name", in: app)
-        XCTAssertTrue(title.waitUntilExists(timeout: Self.wait))
+        cell.tapUntil(title, appears: Self.wait)
         XCTAssertEqual(title.label, name)
         XCTAssertTrue(cell.isSelected, "The look beside the grid should read as selected")
         XCTAssertTrue(element("savedLooks.detail", in: app).exists)
@@ -85,14 +77,12 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
 
         app.buttons["savedLooks.tab.pictures"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.staticTexts["Pick a picture"].waitUntilExists(timeout: Self.wait))
-        app.buttons["savedLooks.picture.p-lace"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(element("picture.title", in: app).waitUntilExists(timeout: Self.wait))
+        app.buttons["savedLooks.picture.p-lace"].tapUntil(element("picture.title", in: app), appears: Self.wait)
         XCTAssertTrue(app.buttons["savedLooks.picture.p-lace"].isSelected)
 
         // See the look: the Looks tab, with the look beside its grid.
-        element("picture.seeLook", in: app).tapWhenHittable(timeout: Self.wait)
         let title = element("lookDetail.name", in: app)
-        XCTAssertTrue(title.waitUntilExists(timeout: Self.wait))
+        element("picture.seeLook", in: app).tapUntil(title, appears: Self.wait)
         XCTAssertEqual(title.label, "Lace date night")
         XCTAssertTrue(app.buttons["savedLooks.tab.looks"].waitUntilSelected(timeout: Self.wait))
         XCTAssertTrue(app.buttons["savedLooks.look.o-lace-date"].isSelected)
@@ -108,8 +98,8 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         app.goBack(from: "Lace date night", to: "Saved Looks", timeout: Self.wait)
 
         // Opened in the narrow window, then widened: beside the grid again.
-        app.buttons["savedLooks.look.o-interview"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Interview navy and pink"].waitUntilExists(timeout: Self.wait))
+        app.buttons["savedLooks.look.o-interview"].tapUntil(
+            app.navigationBars["Interview navy and pink"], appears: Self.wait)
         resize(app, toWidth: full)
         XCTAssertTrue(element("savedLooks.sidebar", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(title.waitUntilExists(timeout: Self.wait))
@@ -130,11 +120,5 @@ final class IPadStyleMeAndSavedTests: IPadTestCase {
         let save = app.buttons["results.save"]
         XCTAssertLessThan(
             bundle.frame.maxX, save.frame.minX, "The look isn't beside its buttons", file: file, line: line)
-    }
-
-    @MainActor
-    private func waitForLabel(of element: XCUIElement, containing text: String) -> Bool {
-        let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        return element.waitUntil(predicate, timeout: Self.wait)
     }
 }

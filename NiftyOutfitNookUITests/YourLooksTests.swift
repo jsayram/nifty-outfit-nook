@@ -24,23 +24,22 @@ final class YourLooksTests: XCTestCase {
         let description = element("results.versionDescription", in: app)
         XCTAssertEqual(description.label, "Easy and safe")
 
-        tap("results.version.dressedUp", in: app)
-        XCTAssertTrue(app.buttons["results.version.dressedUp"].isSelected)
+        select("results.version.dressedUp", in: app)
         XCTAssertTrue(waitForLabel(of: description, containing: "a little classier"), description.label)
         XCTAssertTrue(
             app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "Same as Simple")).firstMatch.exists)
 
         // Something new adds one piece she doesn't own, with Find one (LR-05b.1).
-        tap("results.version.somethingNew", in: app)
+        select("results.version.somethingNew", in: app)
         XCTAssertTrue(waitForLabel(of: description, containing: "plus one piece you don’t have"), description.label)
         let findOne = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "lookPieces.findOne."))
         XCTAssertEqual(findOne.count, 1)
 
         // Save look: the button says Saved, and the look is on the Saved tab.
+        // A second tap would unsave it, so it's tapped again only if the label didn't change.
         let save = app.buttons["results.save"]
-        tap("results.save", in: app)
-        XCTAssertTrue(waitForLabel(of: save, containing: "Saved"), save.label)
-        tap("results.tab.saved", in: app)
+        tap("results.save", in: app) { save.exists && save.label.contains("Saved") }
+        select("results.tab.saved", in: app)
         let saved = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "results.saved.r-"))
         XCTAssertTrue(saved.firstMatch.waitUntilExists(timeout: Self.wait), "The saved look isn't on the Saved tab")
         XCTAssertEqual(saved.count, 1)
@@ -50,13 +49,11 @@ final class YourLooksTests: XCTestCase {
 
         // Back on Today, Try it on says what it will do and makes nothing until asked (RD-06.2;
         // making a picture is in SavedLooksTests).
-        tap("results.tab.today", in: app)
-        tap("results.tryOn", in: app)
-        XCTAssertTrue(element("tryOn.ready", in: app).waitUntilExists(timeout: Self.wait))
+        select("results.tab.today", in: app)
+        tap("results.tryOn", in: app, showing: element("tryOn.ready", in: app))
         app.buttons["Close"].tapUntilGone(timeout: Self.wait)
         // Swap a piece opens Swap (Phase 11); Back leaves the look as it was.
-        tap("results.swap", in: app)
-        XCTAssertTrue(app.navigationBars["Swap a piece"].waitUntilExists(timeout: Self.wait))
+        tap("results.swap", in: app, showing: app.navigationBars["Swap a piece"])
         app.goBack(from: "Swap a piece", to: "Your looks", timeout: Self.wait)
 
         // Try a different outfit: a new look replaces all three versions (LR-05a.4), back on
@@ -64,12 +61,13 @@ final class YourLooksTests: XCTestCase {
         let bundles = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH %@", "lookBundle."))
         let first = bundles.firstMatch.identifier
-        tap("results.tryDifferent", in: app)
         let replaced = NSPredicate(format: "identifier BEGINSWITH %@ AND identifier != %@", "lookBundle.r-", first)
-        XCTAssertTrue(bundles.firstMatch.waitUntil(replaced, timeout: Self.wait), "The look wasn't replaced")
+        tap("results.tryDifferent", in: app) {
+            bundles.firstMatch.exists && replaced.evaluate(with: bundles.firstMatch)
+        }
         XCTAssertTrue(app.buttons["results.version.simple"].isSelected)
         XCTAssertTrue(waitForLabel(of: save, containing: "Save look"), save.label)
-        tap("results.tab.saved", in: app)
+        select("results.tab.saved", in: app)
         XCTAssertEqual(saved.count, 1)
     }
 
@@ -79,8 +77,7 @@ final class YourLooksTests: XCTestCase {
         let app = launch("demo:stylist-waits")
         styleMe(in: app, waitForResult: false)
         XCTAssertTrue(element("results.styling", in: app).waitUntilExists(timeout: Self.wait))
-        tap("results.cancel", in: app)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        leaveYourLooks(with: "results.cancel", in: app)
         XCTAssertTrue(app.buttons["styleMe.go"].isEnabled)
     }
 
@@ -91,9 +88,8 @@ final class YourLooksTests: XCTestCase {
         styleMe(in: app, waitForResult: false)
         XCTAssertTrue(app.staticTexts["Styling needs a connection"].waitUntilExists(timeout: Self.wait))
         // The Saved tab works offline.
-        tap("results.seeSaved", in: app)
-        XCTAssertTrue(app.buttons["results.saved.o-interview"].waitUntilExists(timeout: Self.wait))
-        tap("results.tab.today", in: app)
+        tap("results.seeSaved", in: app, showing: app.buttons["results.saved.o-interview"])
+        select("results.tab.today", in: app)
         app.buttons["Retry"].tapUntil(app.buttons["results.version.simple"], appears: Self.wait)
     }
 
@@ -112,15 +108,13 @@ final class YourLooksTests: XCTestCase {
         let insufficient = launch("demo:stylist-insufficient")
         styleMe(in: insufficient, waitForResult: false)
         XCTAssertTrue(element("results.insufficient", in: insufficient).waitUntilExists(timeout: Self.wait))
-        tap("results.changeRequest", in: insufficient)
-        XCTAssertTrue(insufficient.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        leaveYourLooks(with: "results.changeRequest", in: insufficient)
         insufficient.terminate()
 
         let failing = launch("demo:stylist-fails")
         styleMe(in: failing, waitForResult: false)
         XCTAssertTrue(failing.staticTexts["Styling didn’t finish"].waitUntilExists(timeout: Self.wait))
-        tap("results.backToStyleMe", in: failing)
-        XCTAssertTrue(failing.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+        leaveYourLooks(with: "results.backToStyleMe", in: failing)
     }
 
     // MARK: Helpers
@@ -137,22 +131,51 @@ final class YourLooksTests: XCTestCase {
     /// From the Home laptop, Style me with the defaults (Office, Main closet).
     @MainActor
     private func styleMe(in app: XCUIApplication, waitForResult: Bool = true) {
-        tap("home.laptop", in: app)
-        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
-        tap("styleMe.go", in: app)
-        XCTAssertTrue(app.navigationBars["Your looks"].waitUntilExists(timeout: Self.wait))
+        tap("home.laptop", in: app, showing: app.navigationBars["Style Me"])
+        tap("styleMe.go", in: app, showing: app.navigationBars["Your looks"])
         if waitForResult {
             XCTAssertTrue(app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait))
         }
     }
 
-    /// Taps a button by identifier, scrolling to find it if it's off the screen.
+    /// Taps a button that goes back from Your looks to Style Me, and waits for Your looks to go.
+    /// Style Me's bar is there while Your looks is still sliding away.
     @MainActor
-    private func tap(_ identifier: String, in app: XCUIApplication) {
+    private func leaveYourLooks(with identifier: String, in app: XCUIApplication) {
+        let yourLooks = app.navigationBars["Your looks"]
+        tap(identifier, in: app) { !yourLooks.exists }
+        XCTAssertTrue(app.navigationBars["Style Me"].waitUntilExists(timeout: Self.wait))
+    }
+
+    /// Taps a version or tab until it says it's selected.
+    @MainActor
+    private func select(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line
+    ) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
+        tap(identifier, in: app, file: file, line: line) { button.exists && button.isSelected }
+    }
+
+    /// Taps a button by identifier, scrolling to find it if it's off the screen, until `effect`
+    /// holds (see `XCUIElement.tapUntil(timeout:_:)`).
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line,
+        until effect: @escaping @MainActor () -> Bool
+    ) {
+        let button = app.buttons[identifier]
+        XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)", file: file, line: line)
         app.scrollUntilHittable(button, up: 12, down: 12)
-        button.tap()
+        button.tapUntil(timeout: Self.wait, else: "\(identifier) didn't do its job", file: file, line: line, effect)
+    }
+
+    /// Taps a button by identifier until `next` appears.
+    @MainActor
+    private func tap(
+        _ identifier: String, in app: XCUIApplication, showing next: XCUIElement, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        tap(identifier, in: app, file: file, line: line) { next.exists }
     }
 
     @MainActor
