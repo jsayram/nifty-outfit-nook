@@ -105,20 +105,7 @@ struct SourceRow: View {
     }
 
     private var tick: some View {
-        ZStack {
-            Circle()
-                .fill(isChosen ? Color.nook.accent : Color.nook.tintStrong)
-            if isChosen {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.nook.onAccent)
-            } else {
-                Circle()
-                    .strokeBorder(Color.nook.chevron, lineWidth: 2)
-            }
-        }
-        .frame(width: 24, height: 24)
-        .accessibilityHidden(true)
+        SoftTick(isSelected: isChosen, size: 24)
     }
 
     @ViewBuilder private var art: some View {

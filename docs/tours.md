@@ -6,6 +6,8 @@ Phase 16b, the same day, added the other screens' tours, App tours on Profile (r
 
 Phase 17 keeps the tours seen and the switch across launches, and Home's tour now starts as onboarding hands over; see [Kept across launches](#kept-across-launches-phase-17).
 
+The Stage A audit (17 October 2026) added tours for the six screens that had none; see [The Stage A audit's six](#the-stage-a-audits-six).
+
 ## What's where
 
 | File | Holds |
@@ -114,7 +116,7 @@ UI tests can't run VoiceOver, and on the iOS 26.5 simulator `typeKey(.escape)` r
 
 Spec: PRD §7.8, FR-73 and AC-103 ("every shipped user-facing screen"), the amendment's 16b items (LR-08, LR-13 and LR-18 wording, LR-02 colours) and Lily's sign-off. Copy comes from `js/screen-tours.js`; where the mockups are older than the sign-off, the words follow the amendment (see [Copy changed from the mockups](#copy-changed-from-the-mockups)).
 
-Every screen that has a tour page in the mockups and exists in the app has a tour. The mockup's other tours are for screens the app doesn't have yet (Styling access, Subscription, Picture packs, Demo controls, Ask stylist, Ask another stylist, Find One, Purchase review, Visiting a shop, Saved products, Welcome) and come with their phases. Recently deleted, Delete my data, Accessibility and the Try it on sheet have no tour in the mockups, so none was invented.
+Every screen that has a tour page in the mockups and exists in the app has a tour. The mockup's other tours are for screens the app doesn't have yet (Styling access, Subscription, Picture packs, Demo controls, Ask stylist, Ask another stylist, Find One, Purchase review, Visiting a shop, Saved products, Welcome) and come with their phases. Recently deleted, All suitcases, Delete my data, Accessibility, the Try it on sheet and editing a piece had no tour in the mockups, so 16b left them out; the Stage A audit added them (below).
 
 | Tour (`TourID`) | Steps | Starts when |
 |---|---|---|
@@ -216,3 +218,24 @@ App tours' short descriptions are new: the mockup lists only the tip count, and 
 Reset all tips clears both and keeps the switch; Delete my data and `-tour reset` clear everything. A value that can't be read counts as not seen, so a tour can show again but never gets stuck hidden.
 
 Home's tour starts when Home first shows after onboarding, as on any first visit: the root keeps the `TourCenter` above both onboarding and the tabs. `OnboardingTests` (UI) goes through onboarding to Home's tour and Style Me's, then relaunches and checks neither comes back.
+
+## The Stage A audit's six
+
+Jose's Stage A audit decision 3: short tours for the six screens without one, in the same style. The mockups have no tour pages for them, so the words are new, written to the amendment's rules (PRD §7.8): two or three steps on real controls, one or two plain sentences each, Got it at the end, version 1.
+
+| Tour (`TourID`) | Steps | Starts when |
+|---|---|---|
+| Recently deleted (`recentlyDeleted`) | "Kept for 30 days" on the first piece, "Changed your mind?" on its Restore | A deleted piece is listed, no toast |
+| All suitcases (`allSuitcases`) | "Find a suitcase" on search, "Put away, not gone" on the Archived filter (only when she has archived suitcases), "Back to everything" on Main closet | Loaded, no sheet or toast |
+| Delete my data (`deleteData`) | "What goes" on the list, "It asks once more" on the button | The counts are read, not asking or deleting, nothing left from a failed deletion |
+| Accessibility (`accessibility`) | "It follows your iPhone" on the settings, "Change them in Settings" on Open Settings | Always |
+| Try it on (`tryOn`) | "A simulated picture" on what it makes, "Only when you ask" on Make a picture | The sheet is on its first step (nothing made, no picture she already has) |
+| Editing a piece (`editPiece`) | "The picture" on the photo button, "Fix any detail" on the name, "Keep your changes" on Save in the bar | Editing a piece she has, not the draft card, no question or photo choice open |
+
+Tapping a highlighted control does what it does, as on every tour: Restore restores, Open Settings opens Settings, Make a picture makes it, Save saves, Delete my data asks once more.
+
+**A tour on a sheet.** Try it on is a sheet, and a sheet covers everything the root draws, including the tour. So `TourDefinition.isInSheet` marks it, the root's overlay leaves it out, and every styled sheet draws an overlay of its own (`nookSheetOverlay`, set by `RootTabView`) that draws only tours on sheets. The tabs stay readable to VoiceOver underneath, since the sheet covers them and the tour is modal on it.
+
+**App tours.** All six are under More screen tours. Accessibility and Delete my data open on Profile. Recently deleted opens on Closet, All suitcases on Closet with Suitcases under it, and editing a piece opens her first piece in Edit. Try it on opens her first saved look, and the tour shows when she taps Try it on ("Opens your first saved look. Shows when you tap Try it on.").
+
+**Tests.** `ScreenToursTests` (Features) has the six in every check (two to four steps on their own controls, Got it, the catalog's tip counts) and checks only Try it on is on a sheet. `ScreenTourSnapshotTests` adds one key step of each: Restore, the Archived filter, Delete my data's button, Open Settings, Make a picture on the sheet, and the name while editing (Save is in the bar, which the still image doesn't draw). The UI walk `testFreshInstallShowsEachTourOnce` visits all six, including the Try it on tour through to Got it with Make a picture tappable afterwards, and `testReplayFromProfileAndTipsOff` replays Delete my data.

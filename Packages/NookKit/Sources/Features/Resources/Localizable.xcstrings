@@ -652,6 +652,9 @@
     "A saved look" : {
       "comment" : "App tours: a screen"
     },
+    "A simulated picture" : {
+      "comment" : "Try it on tour, step 1 title"
+    },
     "A suitcase is a smaller set of your pieces, for a trip or a second home. Style Me can then pick from just what’s packed." : {
       "comment" : "Suitcases: empty message"
     },
@@ -772,6 +775,9 @@
     },
     "Add and pack" : {
       "comment" : "Button: makes the suitcase, then packs it"
+    },
+    "Add or change the photo here. For now it adds a sample picture." : {
+      "comment" : "Edit a piece tour, step 1"
     },
     "Add or remove" : {
       "comment" : "Button: opens the packing sheet"
@@ -919,6 +925,9 @@
     "Archived" : {
       "comment" : "All suitcases: heading and filter for archived ones"
     },
+    "Archived suitcases are kept here, out of the way. Tap to show them." : {
+      "comment" : "All suitcases tour, archived step"
+    },
     "Archived · %lld" : {
       "comment" : "All suitcases: filter that shows archived suitcases, with how many"
     },
@@ -997,6 +1006,9 @@
     },
     "Back to Style Me" : {
       "comment" : "Your looks button"
+    },
+    "Back to everything" : {
+      "comment" : "All suitcases tour, last step title"
     },
     "Back to how it was" : {
       "comment" : "Toast after undoing a swap or removal"
@@ -1133,6 +1145,9 @@
     },
     "Bring it back" : {
       "comment" : "Button: unarchives a suitcase"
+    },
+    "Bringing a piece back" : {
+      "comment" : "App tours: what Recently deleted's tour covers"
     },
     "Brown" : {
       "comment" : "Colour name",
@@ -1280,11 +1295,20 @@
     "Change the details" : {
       "comment" : "Garment tour, step 1 title"
     },
+    "Change the name, kind, colours or anything else. The rest stays as it was." : {
+      "comment" : "Edit a piece tour, step 2"
+    },
     "Change the occasion" : {
       "comment" : "Style Me button"
     },
+    "Change them in Settings" : {
+      "comment" : "Accessibility tour, step 2 title"
+    },
     "Change your request" : {
       "comment" : "Your looks: back to Style Me"
+    },
+    "Changed your mind?" : {
+      "comment" : "Recently deleted tour, step 2 title"
     },
     "Changes one piece, from your own. Nothing is sent." : {
       "comment" : "Hint on Swap a piece on a saved look"
@@ -1895,6 +1919,9 @@
         }
       }
     },
+    "Editing a piece" : {
+      "comment" : "App tours: a screen"
+    },
     "Editing, styling and packing it" : {
       "comment" : "App tours: what a piece's tour covers"
     },
@@ -2111,6 +2138,9 @@
     "Find a simple answer" : {
       "comment" : "Help tour, step 1 title"
     },
+    "Find a suitcase" : {
+      "comment" : "All suitcases tour, step 1 title"
+    },
     "Find one" : {
       "comment" : "Button on a look's piece she doesn't own",
       "localizations" : {
@@ -2138,6 +2168,9 @@
     },
     "Finding a piece like this comes in a later version. Nothing was searched." : {
       "comment" : "Find one stand-in (LR-05b.4)"
+    },
+    "Finding one, archived ones and your whole closet" : {
+      "comment" : "App tours: what All suitcases' tour covers"
     },
     "First name" : {
       "comment" : "Onboarding: the name field's label"
@@ -2172,6 +2205,9 @@
           }
         }
       }
+    },
+    "Fix any detail" : {
+      "comment" : "Edit a piece tour, step 2 title"
     },
     "For a day inside, whatever it’s like out." : {
       "comment" : "Weather sheet",
@@ -2655,6 +2691,12 @@
     "It all stays on this iPhone" : {
       "comment" : "Onboarding privacy: row title"
     },
+    "It asks once more" : {
+      "comment" : "Delete my data tour, step 2 title"
+    },
+    "It follows your iPhone" : {
+      "comment" : "Accessibility tour, step 1 title"
+    },
     "It goes on the little sign in your room." : {
       "comment" : "Onboarding: under the name step's title"
     },
@@ -2812,8 +2854,14 @@
     "Keep your change" : {
       "comment" : "Swap tour, step 3 title"
     },
+    "Keep your changes" : {
+      "comment" : "Edit a piece tour, step 3 title"
+    },
     "Keeps this version in Saved Looks." : {
       "comment" : "VoiceOver hint on Save look"
+    },
+    "Kept for 30 days" : {
+      "comment" : "Recently deleted tour, step 1 title"
     },
     "Kept on this iPhone" : {
       "comment" : "Try-on photo sheet point"
@@ -3782,6 +3830,9 @@
     "Nothing about you is kept anywhere else. This test build has no account and sends nothing." : {
       "comment" : "Delete my data: nothing is held off the iPhone in Stage A"
     },
+    "Nothing goes until you say yes a second time. Deleting can’t be undone." : {
+      "comment" : "Delete my data tour, step 2"
+    },
     "Nothing here" : {
       "comment" : "Recently deleted is empty",
       "localizations" : {
@@ -4041,6 +4092,9 @@
     "Only the top changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
     },
+    "Only when you ask" : {
+      "comment" : "Try it on tour, step 2 title"
+    },
     "Open" : {
       "comment" : "VoiceOver: a Help topic shows its answer"
     },
@@ -4049,6 +4103,9 @@
     },
     "Open Settings" : {
       "comment" : "Accessibility: the button"
+    },
+    "Open Settings takes you to this app’s page in the Settings app." : {
+      "comment" : "Accessibility tour, step 2"
     },
     "Open Style Me from the laptop on Home and ask for a look." : {
       "comment" : "Saved Looks empty state: step 1"
@@ -4257,6 +4314,9 @@
           }
         }
       }
+    },
+    "Opens your first saved look. Shows when you tap Try it on." : {
+      "comment" : "App tours: the Try it on tour starts when she opens the sheet"
     },
     "Opens your saved looks." : {
       "comment" : "VoiceOver hint",
@@ -4479,6 +4539,9 @@
         }
       }
     },
+    "Pieces you delete wait here. Each one shows the day it goes for good." : {
+      "comment" : "Recently deleted tour, step 1"
+    },
     "Pieces you mark stay marked while it’s off." : {
       "comment" : "Laundry tracking sheet, when nothing is marked as in the wash",
       "localizations" : {
@@ -4568,6 +4631,9 @@
           }
         }
       }
+    },
+    "Put away, not gone" : {
+      "comment" : "All suitcases tour, archived step title"
     },
     "Puts back the look as it was before your last change." : {
       "comment" : "VoiceOver hint on Undo under a changed look"
@@ -5612,11 +5678,20 @@
     "Tap Edit to change the name, photo or details of this piece." : {
       "comment" : "Garment tour, step 1"
     },
+    "Tap Main closet to style from all your clothes again." : {
+      "comment" : "All suitcases tour, last step"
+    },
+    "Tap Make a picture when you’re ready. Nothing is made until you do." : {
+      "comment" : "Try it on tour, step 2"
+    },
     "Tap Mark clean when a piece is ready to wear again." : {
       "comment" : "Laundry tour, Mark clean"
     },
     "Tap Rename to change what this outfit is called." : {
       "comment" : "Saved look tour, step 3"
+    },
+    "Tap Restore to put a piece back in your closet." : {
+      "comment" : "Recently deleted tour, step 2"
     },
     "Tap Retry when you’re back online. Nothing was charged, and your saved looks still work." : {
       "comment" : "Your looks offline state"
@@ -5626,6 +5701,9 @@
     },
     "Tap Save look when it feels right. You can change a piece later with Swap a piece." : {
       "comment" : "Make your own look tour, step 3 (LR-08)"
+    },
+    "Tap Save when you’re done. Cancel leaves the piece as it was." : {
+      "comment" : "Edit a piece tour, step 3"
     },
     "Tap See the look to open the outfit behind the picture." : {
       "comment" : "Try-on picture tour, step 1"
@@ -5799,6 +5877,12 @@
     "The look it came from didn’t change." : {
       "comment" : "Picture detail: picture gone"
     },
+    "The photo, the details and Save" : {
+      "comment" : "App tours: what the Edit a piece tour covers"
+    },
+    "The picture" : {
+      "comment" : "Edit a piece tour, step 1 title"
+    },
     "The picture couldn’t be kept" : {
       "comment" : "Try it on sheet: not saved"
     },
@@ -5863,6 +5947,9 @@
     "The weather couldn’t be read, so these looks don’t use it." : {
       "comment" : "Note on Your looks (LR-04.3)"
     },
+    "These are your iPhone’s settings right now, and what the app does with each one." : {
+      "comment" : "Accessibility tour, step 1"
+    },
     "These looks are kept on this iPhone." : {
       "comment" : "Offline banner over results"
     },
@@ -5899,6 +5986,9 @@
     },
     "This is the photo of you that try-on pictures will start from, once they’re ready. It’s optional: styling never needs it." : {
       "comment" : "Try-on photo sheet: what the photo is for"
+    },
+    "This list shows everything that’s deleted, and how much of each." : {
+      "comment" : "Delete my data tour, step 1"
     },
     "This look can’t be kept as a draft right now. Save it to keep it." : {
       "comment" : "Make your own look: the draft couldn't be written"
@@ -6142,6 +6232,9 @@
         }
       }
     },
+    "Type a name to find one quickly." : {
+      "comment" : "All suitcases tour, step 1"
+    },
     "Type a word, like blue or jeans, to find your clothes." : {
       "comment" : "Closet tour, step 2"
     },
@@ -6302,6 +6395,12 @@
     "What are your plans?" : {
       "comment" : "Style Me tour, step 2 title"
     },
+    "What goes" : {
+      "comment" : "Delete my data tour, step 1 title"
+    },
+    "What goes, and how it asks first" : {
+      "comment" : "App tours: what Delete my data's tour covers"
+    },
     "What happened?" : {
       "comment" : "Send feedback: the field's name"
     },
@@ -6316,6 +6415,9 @@
     },
     "What the app does, and where your things are kept." : {
       "comment" : "Onboarding: under the privacy step's title"
+    },
+    "What the picture is, and making it" : {
+      "comment" : "App tours: what the Try it on sheet's tour covers"
     },
     "What would you like to say?" : {
       "comment" : "Send feedback: the field's name"
@@ -6690,6 +6792,9 @@
     "Your iPhone’s settings now" : {
       "comment" : "Accessibility: section header"
     },
+    "Your iPhone’s settings, and where to change them" : {
+      "comment" : "App tours: what Accessibility's tour covers"
+    },
     "Your information" : {
       "comment" : "Privacy tour, step 2 title"
     },
@@ -6792,6 +6897,9 @@
     },
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
+    },
+    "Your pieces on a plain background, with no person in it. It shows the style, not the exact fit." : {
+      "comment" : "Try it on tour, step 1"
     },
     "Your pieces to swap in" : {
       "comment" : "VoiceOver name of Swap's options, in its tour"

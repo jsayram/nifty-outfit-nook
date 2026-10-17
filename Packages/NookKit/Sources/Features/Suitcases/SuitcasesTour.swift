@@ -69,3 +69,37 @@ enum SuitcaseTour {
         return .gotIt(.suitcase, steps: hasPieces ? steps : Array(steps.prefix(2)))
     }
 }
+
+/// All suitcases' quick tour (Stage A audit; the mockups have none), from See all: search, the
+/// Archived filter when she has archived suitcases, and the main closet.
+enum AllSuitcasesTour {
+    enum Anchor {
+        static let search = TourAnchorID("allSuitcases.search")
+        static let archived = TourAnchorID("allSuitcases.archived")
+        static let mainCloset = TourAnchorID("allSuitcases.mainCloset")
+    }
+
+    static func definition(hasArchived: Bool) -> TourDefinition {
+        let search = TourStep(
+            Anchor.search,
+            title: String(localized: "Find a suitcase", bundle: .module, comment: "All suitcases tour, step 1 title"),
+            message: String(
+                localized: "Type a name to find one quickly.", bundle: .module, comment: "All suitcases tour, step 1"))
+        let archived = TourStep(
+            Anchor.archived,
+            title: String(
+                localized: "Put away, not gone", bundle: .module, comment: "All suitcases tour, archived step title"),
+            message: String(
+                localized: "Archived suitcases are kept here, out of the way. Tap to show them.", bundle: .module,
+                comment: "All suitcases tour, archived step"))
+        let mainCloset = TourStep(
+            Anchor.mainCloset,
+            title: String(
+                localized: "Back to everything", bundle: .module, comment: "All suitcases tour, last step title"),
+            message: String(
+                localized: "Tap Main closet to style from all your clothes again.", bundle: .module,
+                comment: "All suitcases tour, last step"))
+        // Without archived suitcases there's no filter to show.
+        return .gotIt(.allSuitcases, steps: hasArchived ? [search, archived, mainCloset] : [search, mainCloset])
+    }
+}

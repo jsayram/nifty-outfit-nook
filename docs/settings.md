@@ -51,6 +51,8 @@ Neither the PRD nor the mockups list in-app accessibility options. PRD §16 asks
 
 **Open Settings** opens the app's own page in Settings (`UIApplication.openSettingsURLString`), and a note says where Text size, VoiceOver and Reduce Motion live, including Per-App Settings for this app only. Each line only claims what earlier phases checked.
 
+Since the Stage A audit Accessibility and Delete my data have quick tours of their own (`docs/tours.md`, The Stage A audit's six).
+
 ## App tours
 
 Since Phase 16b, a row under Help ("Replay the tips for any screen") opens App tours: every screen's quick tour with its tip count, the "Show tips on new screens" switch and Reset all tips. See `docs/tours.md`, App tours.

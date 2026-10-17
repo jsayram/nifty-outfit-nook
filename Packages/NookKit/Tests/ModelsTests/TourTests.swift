@@ -88,7 +88,8 @@ struct TourTests {
     /// Phase 16b: every tour has its own stable ID, and Reset all tips forgets them all.
     @Test func everyTourHasItsOwnIDAndResetForgetsThemAll() {
         #expect(Set(TourID.all).count == TourID.all.count)
-        #expect(TourID.all.count == 20)
+        // 20 from Phase 16b, and six more from the Stage A audit.
+        #expect(TourID.all.count == 26)
         #expect(TourID.all.first == .home)
         var progress = TourProgress(showsTipsOnNewScreens: false)
         for tour in TourID.all {

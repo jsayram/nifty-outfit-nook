@@ -236,22 +236,35 @@ struct GarmentCell: View {
 }
 
 /// The round tick on a piece in a grid that picks several: a solid accent circle with a check
-/// when it's picked, an empty ring when it isn't. VoiceOver hears Selected from the cell.
+/// when it's picked, a soft tinted circle with the small shadow below when it isn't, with no
+/// ring (soft no-box, Stage A audit). VoiceOver hears Selected from the cell.
 struct SelectionTick: View {
     let isSelected: Bool
 
     var body: some View {
+        SoftTick(isSelected: isSelected, size: 26)
+    }
+}
+
+/// A selection tick: solid accent with a check when chosen, otherwise a soft circle in the strong
+/// tint, lifted by the small shadow below instead of an outline. Shared by the grids and the
+/// suitcase rows.
+struct SoftTick: View {
+    let isSelected: Bool
+    let size: CGFloat
+
+    var body: some View {
         ZStack {
-            Circle().fill(isSelected ? Color.nook.accent : Color.nook.tintStrong)
+            Circle()
+                .fill(isSelected ? Color.nook.accent : Color.nook.tintStrong)
+                .softShadow(.drop, in: Circle())
             if isSelected {
                 Image(systemName: "checkmark")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.nook.onAccent)
-            } else {
-                Circle().strokeBorder(Color.nook.chevron, lineWidth: 2)
             }
         }
-        .frame(width: 26, height: 26)
+        .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
 }

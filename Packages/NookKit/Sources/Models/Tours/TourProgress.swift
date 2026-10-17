@@ -49,10 +49,19 @@ public struct TourID: RawRepresentable, Hashable, Comparable, Codable, Sendable,
     public static let feedback = TourID("feedback")
     public static let privacy = TourID("privacy")
 
+    // Stage A audit: the six screens that had no tour in the mockups.
+    public static let recentlyDeleted = TourID("recentlyDeleted")
+    public static let allSuitcases = TourID("allSuitcases")
+    public static let deleteData = TourID("deleteData")
+    public static let accessibility = TourID("accessibility")
+    public static let tryOn = TourID("tryOn")
+    public static let editPiece = TourID("editPiece")
+
     /// Every tour, in the order App tours lists them.
     public static let all: [TourID] = [
         .home, .closet, .styleMe, .yourLooks, .savedLooks, .suitcases, .fit, .swap, .lookBuilder, .look, .picture,
-        .garment, .addPiece, .laundry, .laundryOff, .suitcase, .profile, .help, .feedback, .privacy,
+        .tryOn, .garment, .addPiece, .editPiece, .recentlyDeleted, .laundry, .laundryOff, .suitcase, .allSuitcases,
+        .profile, .accessibility, .help, .feedback, .privacy, .deleteData,
     ]
 
     public static func < (lhs: TourID, rhs: TourID) -> Bool { lhs.rawValue < rhs.rawValue }

@@ -64,6 +64,24 @@ struct ScreenTourSnapshotTests {
         assertTourSnapshot(GarmentEditorPage(model: model), AddPieceTour.definition, step: 0, named: "add-piece-1")
     }
 
+    /// Stage A audit: editing a piece she has. Save is in the bar, which the still image
+    /// doesn't draw, so the key step is the details.
+    @Test func editPieceDetails() async {
+        let model = await loadedEditor(.garment("g-navy-trousers"), firstStep: .details, services: editorServices())
+        assertTourSnapshot(
+            GarmentEditorPage(model: model, now: TestTime.now), EditPieceTour.definition, step: 1,
+            named: "edit-piece-2")
+    }
+
+    /// Stage A audit: Restore, on the first deleted piece.
+    @Test func recentlyDeletedRestore() async {
+        let model = RecentlyDeletedModel()
+        await model.load(from: services, now: TestTime.now)
+        assertTourSnapshot(
+            RecentlyDeletedPage(model: model), RecentlyDeletedTour.definition, step: 1,
+            named: "recently-deleted-2")
+    }
+
     // MARK: Style Me
 
     @Test func styleMeSource() async {
@@ -125,6 +143,15 @@ struct ScreenTourSnapshotTests {
         assertTourSnapshot(SuitcasesPage(model: model), SuitcasesTour.definition, step: 1, named: "suitcases-2")
     }
 
+    /// Stage A audit: the Archived filter on All suitcases.
+    @Test func allSuitcasesArchived() async {
+        let model = SuitcasesModel()
+        await model.load(from: services, now: TestTime.now)
+        assertTourSnapshot(
+            AllSuitcasesPage(model: model), AllSuitcasesTour.definition(hasArchived: true), step: 1,
+            named: "all-suitcases-2")
+    }
+
     @Test func suitcasePacking() async throws {
         let suitcase = try #require(data.suitcases.first { !$0.isArchived })
         let model = SuitcaseDetailModel(suitcaseID: suitcase.id)
@@ -183,6 +210,30 @@ struct ScreenTourSnapshotTests {
 
     @Test func privacyDeleteMyData() {
         assertTourSnapshot(PrivacyPage(), PrivacyTour.definition, step: 1, named: "privacy-2")
+    }
+
+    /// Stage A audit: Delete my data's button, which asks once more.
+    @Test func deleteDataAsksOnceMore() async {
+        let model = DeleteDataModel()
+        await model.load(from: services)
+        assertTourSnapshot(DeleteDataPage(model: model), DeleteDataTour.definition, step: 1, named: "delete-data-2")
+    }
+
+    /// Stage A audit: Accessibility's Open Settings.
+    @Test func accessibilityOpenSettings() {
+        assertTourSnapshot(
+            AccessibilityPage(voiceOverOverride: false, reduceMotionOverride: false), AccessibilityTour.definition,
+            step: 1, named: "accessibility-2")
+    }
+
+    /// Stage A audit: the Try it on sheet, drawn as the sheet shows it, with its own tour over it.
+    @Test func tryOnMakeAPicture() async throws {
+        let look = try await services.looks.look("o-history-casual")
+        let model = TryOnModel(look: look, lookName: "Cream & denim", garments: [:], saveLook: { look })
+        let sheet = NookSheetContainer(title: TryOnText.tryOn, subtitle: SharedText.simulated) {
+            TryOnSheetContent(model: model, seePicture: { _ in })
+        }
+        assertTourSnapshot(sheet, TryOnTour.definition, step: 1, barsHeight: 0, named: "try-on-2")
     }
 
     // MARK: App tours

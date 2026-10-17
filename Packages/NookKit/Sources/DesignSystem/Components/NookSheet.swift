@@ -48,6 +48,22 @@ extension View {
     }
 }
 
+/// Something the app draws over every styled sheet, above the header and content: Features puts
+/// a quick tour there when the tour's step is on a sheet (Stage A audit), since anything drawn
+/// under the sheet is covered by it. Set it once near the root; sheets inherit it.
+public struct NookSheetOverlay: Sendable {
+    let make: @MainActor @Sendable () -> AnyView
+
+    public init(_ make: @escaping @MainActor @Sendable () -> AnyView) {
+        self.make = make
+    }
+}
+
+extension EnvironmentValues {
+    /// Drawn over every `nookSheet`. `nil`, the default, draws nothing.
+    @Entry public var nookSheetOverlay: NookSheetOverlay? = nil
+}
+
 /// `nookSheet(isPresented:…)`. A modifier, so it can read the width class of the window the
 /// sheet opens over, which picks a bottom sheet or a form.
 private struct NookSheetModifier<SheetContent: View>: ViewModifier {
@@ -59,10 +75,12 @@ private struct NookSheetModifier<SheetContent: View>: ViewModifier {
     let sheetContent: () -> SheetContent
 
     @Environment(\.horizontalSizeClass) private var windowSizeClass
+    @Environment(\.nookSheetOverlay) private var overlay
 
     func body(content: Content) -> some View {
         content.sheet(isPresented: $isPresented, onDismiss: onDismiss) {
             NookSheetContainer(title: title, subtitle: subtitle, content: sheetContent)
+                .overlay { overlay?.make() }
                 .modifier(NookSheetPresentation(detents: detents, isForm: windowSizeClass == .regular))
         }
     }
@@ -78,10 +96,12 @@ private struct NookItemSheetModifier<Item: Identifiable, SheetContent: View>: Vi
     let sheetContent: (Item) -> SheetContent
 
     @Environment(\.horizontalSizeClass) private var windowSizeClass
+    @Environment(\.nookSheetOverlay) private var overlay
 
     func body(content: Content) -> some View {
         content.sheet(item: $item, onDismiss: onDismiss) { item in
             NookSheetContainer(title: title(item), subtitle: subtitle?(item)) { sheetContent(item) }
+                .overlay { overlay?.make() }
                 .modifier(NookSheetPresentation(detents: detents, isForm: windowSizeClass == .regular))
         }
     }

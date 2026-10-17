@@ -43,6 +43,13 @@ struct RoomLayoutTests {
         }
     }
 
+    /// Stage A audit: the frames under the shelf are 44 x 44 points or more, don't overlap each
+    /// other or any control, stay on the screen, and each covers the middle of its own card.
+    @Test(arguments: PhoneScreen.allCases)
+    func shelfFramesAreFullTargets(phone: PhoneScreen) {
+        FrameTargetChecks.check(phone.layout, on: "\(phone)")
+    }
+
     @Test func largerPhonesFitWithoutScrolling() {
         #expect(!PhoneScreen.iPhone17.layout.scrolls)
         #expect(!PhoneScreen.iPhone17ProMax.layout.scrolls)
@@ -106,4 +113,27 @@ enum PhoneScreen: String, CaseIterable, CustomTestStringConvertible {
     var layout: RoomLayout { RoomLayout(size: size, insets: insets) }
 
     var testDescription: String { rawValue }
+}
+
+/// The shelf frames' tap areas in a room layout, checked the same way on phones and iPads.
+enum FrameTargetChecks {
+    static func check(_ layout: RoomLayout, on window: String) {
+        let targets = layout.frameTargets
+        #expect(targets.count == 3, "\(window)")
+        for (index, target) in targets.enumerated() {
+            #expect(target.width >= 44 && target.height >= 44, "Frame \(index) on \(window) is \(target.size)")
+            #expect(target.minX >= -0.5 && target.maxX <= layout.size.width + 0.5, "Frame \(index) is off \(window)")
+            let card = layout.rect(layout.plan.frameWindows[index])
+            #expect(target.contains(CGPoint(x: card.midX, y: card.midY)), "Frame \(index) misses its card on \(window)")
+            for control in RoomControl.allCases {
+                let overlap = target.intersection(layout.target(for: control))
+                #expect(
+                    overlap.isNull || overlap.width < 0.5 || overlap.height < 0.5,
+                    "Frame \(index) and \(control) overlap by \(overlap.size) on \(window)")
+            }
+        }
+        for (first, second) in zip(targets, targets.dropFirst()) {
+            #expect(first.maxX <= second.minX + 0.01, "Frames overlap on \(window)")
+        }
+    }
 }

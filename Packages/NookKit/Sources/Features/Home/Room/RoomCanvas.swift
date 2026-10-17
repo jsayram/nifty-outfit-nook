@@ -150,10 +150,12 @@ struct RoomCanvas: View {
     private var shelfFrames: some View {
         ZStack(alignment: .topLeading) {
             art(.shelfFrames, at: plan.shelfFrames)
+            // Over the same strip as the frames' 44-point tap areas, so an empty frame is as easy
+            // to hit as a full one.
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture { open(.savedLooks) }
-                .roomFrame(layout.rect(plan.framedLooks))
+                .roomFrame(layout.frameTargets.reduce(CGRect.null) { $0.union($1) })
                 .accessibilityHidden(true)
             ForEach(Array(content.framedLooks.prefix(FramedLook.frameCount).enumerated()), id: \.element.id) {
                 index, look in
@@ -176,7 +178,7 @@ struct RoomCanvas: View {
             .buttonStyle(RoomControlButtonStyle())
             // A pointer on iPad shows what it's over (PRD §7.2).
             .hoverEffect(.highlight)
-            .roomFrame(layout.rect(plan.frameTargets[index]))
+            .roomFrame(layout.frameTargets[index])
             .accessibilityLabel(
                 Text(
                     "Saved look: \(look.name)", bundle: .module,

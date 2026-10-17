@@ -40,10 +40,12 @@ struct GarmentEditorPage: View {
                 .background(Color.nook.wallGradient)
         } else {
             ScrollViewReader { proxy in
-                ScrollView(.vertical) {
-                    page
+                TourScrollReader {
+                    ScrollView(.vertical) {
+                        page
+                    }
+                    .scrollDismissesKeyboard(.interactively)
                 }
-                .scrollDismissesKeyboard(.interactively)
                 .background(Color.nook.wallGradient.ignoresSafeArea())
                 .onChange(of: model.problemCheckCount) {
                     showProblems(scrolling: proxy)

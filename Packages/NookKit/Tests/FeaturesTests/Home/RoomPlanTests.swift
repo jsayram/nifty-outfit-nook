@@ -54,6 +54,12 @@ struct RoomPlanTests {
         }
     }
 
+    /// Stage A audit: the shelf frames are full targets in the iPad rooms too.
+    @Test(arguments: IPadWindow.allCases)
+    func shelfFramesAreFullTargets(window: IPadWindow) {
+        FrameTargetChecks.check(window.roomLayout, on: "\(window)")
+    }
+
     /// Every control is inside the window and between the bars.
     @Test(arguments: IPadWindow.allCases)
     func everyControlIsBetweenTheBars(window: IPadWindow) {

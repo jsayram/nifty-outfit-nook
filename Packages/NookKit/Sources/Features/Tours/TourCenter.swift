@@ -80,6 +80,9 @@ final class TourCenter {
 
     var isShowing: Bool { active != nil }
 
+    /// True while the tour showing is on a sheet, which draws it itself.
+    var isShowingInSheet: Bool { active?.definition.isInSheet == true }
+
     // MARK: Starting
 
     /// Starts `definition` if it should start by itself: no tour is showing, it hasn't started

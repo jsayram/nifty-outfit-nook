@@ -96,11 +96,7 @@ struct NookChipLabel: View {
 
     @ViewBuilder private var leading: some View {
         if let swatch {
-            // A hairline in the text colour keeps white and cream dots visible on the pill.
-            Circle()
-                .fill(swatch)
-                .overlay(Circle().strokeBorder(Color.nook.textPrimary.opacity(0.25), lineWidth: 1))
-                .overlay(Circle().strokeBorder(Color.nook.onAccent.opacity(isSelected ? 0.6 : 0), lineWidth: 1))
+            NookSwatchDot(swatch, onAccent: isSelected)
                 .frame(width: swatchSize, height: swatchSize)
                 .accessibilityHidden(true)
         } else if let systemImage {
@@ -234,5 +230,35 @@ public struct NookChipBar<Content: View>: View {
         case .scroll: false
         case .wrap: true
         }
+    }
+}
+
+/// A colour dot, as on a colour chip or a piece's colours (Phase 6). No outline (soft no-box,
+/// Stage A audit): a soft, blurred halo in the ink of what it sits on keeps a white or cream dot
+/// apart from a light background, and a dark dot apart from the chosen accent pill, without a
+/// hard line. A darker tint inside its lower edge gives a light dot some body. Decorative: the
+/// colour's name is always written beside it.
+public struct NookSwatchDot: View {
+    private let color: Color
+    private let onAccent: Bool
+
+    /// - Parameter onAccent: true when the dot sits on the solid accent (a chosen chip).
+    public init(_ color: Color, onAccent: Bool = false) {
+        self.color = color
+        self.onAccent = onAccent
+    }
+
+    public var body: some View {
+        Circle()
+            .fill(color)
+            .overlay {
+                Circle().fill(
+                    LinearGradient(colors: [.clear, Color.black.opacity(0.14)], startPoint: .center, endPoint: .bottom))
+            }
+            .background {
+                Circle()
+                    .fill(onAccent ? Color.nook.onAccent.opacity(0.7) : Color.nook.textPrimary.opacity(0.32))
+                    .blur(radius: 1.2)
+            }
     }
 }

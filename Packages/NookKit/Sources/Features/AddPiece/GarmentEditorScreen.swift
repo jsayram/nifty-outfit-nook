@@ -52,6 +52,11 @@ struct GarmentEditorScreen: View {
                         }
                         .disabled(model.isSaving)
                         .accessibilityIdentifier("editor.toolbarSave")
+                        .tourAnchor(
+                            EditPieceTour.Anchor.save,
+                            label: String(
+                                localized: "Save", bundle: .module, comment: "Toolbar button: saves the piece"),
+                            action: save)
                     }
                 }
             }
@@ -85,11 +90,18 @@ struct GarmentEditorScreen: View {
             }
             .task { await model.load(from: services) }
             // Add a piece's quick tour (Phase 16b), on its first step only: the photo choices and
-            // Describe in words. Edit starts on the details and has none.
+            // Describe in words.
             .screenTour(
                 AddPieceTour.definition,
                 isReady: model.isNewPiece && model.phase == .editing && model.step == .choose && !confirmsDiscard
                     && !choosesPhotoSource
+            )
+            // Editing a piece she has has its own tour (Stage A audit): the photo, the details and
+            // Save. Not over the card that offers to carry on with a draft.
+            .screenTour(
+                EditPieceTour.definition,
+                isReady: !model.isNewPiece && model.phase == .editing && model.step == .details
+                    && model.pendingDraft == nil && !confirmsDiscard && !choosesPhotoSource
             )
             .onChange(of: scenePhase) { _, phase in
                 // Don't wait for the app to be closed: write the draft as soon as it leaves the
