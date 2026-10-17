@@ -122,7 +122,7 @@ Everything here is local, so offline doesn't apply.
 
 - The hall is hidden from VoiceOver: the rows under it are the same choices with words. Each row is two buttons, the choice ("Weekend", "8 pieces · Used 2 weeks ago", selected when it's the source, hint "Makes it the source for Style Me.") and "Open Weekend".
 - Packed pieces read as in Closet, plus their minus, "Remove Navy dress pants from Weekend". Packing ticks and Laundry's ticks add the selected trait; the tick isn't the only signal.
-- At the accessibility sizes the hall is left out (it only repeats the rows and its tags can't grow), each row's words go under its tick and drawing, and the headers' drawings go above the title.
+- At the accessibility sizes the hall is left out (it only repeats the rows and its tags can't grow), each row's words go under its tick and drawing, and the headers' drawings go above the title. Laundry's rows do the same, with Mark clean under the words: in one line at AX5 the row made the page 435 points wide on a 402 point iPhone and left the names no width (QA, 17 October 2026).
 - Dark appearance uses the tokens; the new drawings get the room's lamplight. No new animation, so Reduce Motion has nothing to change.
 
 ## Tests
@@ -133,8 +133,8 @@ Everything here is local, so offline doesn't apply.
 - `SuitcaseDetailModelTests`: pieces, packing, remove and Undo, the source, rename and picture, archive and delete with Undo, gone and failing.
 - `LaundryModelTests`: listing, scopes, tracking off and on, one, selected and all clean with Undo, Undo leaving a re-dirtied piece, the hamper after cleaning, and Style Me leaving out pieces in the wash.
 - `RememberedChoicesTests`: Style Me's start, what's remembered, a missing suitcase, the calendar's words, Add to a suitcase.
-- `SuitcasesSnapshotTests`: Suitcases light, dark, AX5 and empty; All suitcases; a suitcase as source, in dark, empty and archived; the packing and name sheets; Laundry with a suitcase source, all clean in dark, off, and the confirmation. `HomeSnapshotTests.suitcaseSourceAndOccasion` and `GarmentDetailSnapshotTests.addToSuitcaseSheet`.
-- `SuitcasesAndLaundryTests` (UI): add a suitcase, pack three pieces, remove one and Undo, Style me from it, and see it on Home's suitcase; mark a piece dirty on its detail, see the hamper fill, clean one with Undo, two selected and the rest in Laundry, and see the hamper empty.
+- `SuitcasesSnapshotTests`: Suitcases light, dark, AX5 and empty; All suitcases; a suitcase as source, in dark, empty and archived; the packing and name sheets; Laundry with a suitcase source, at AX5, all clean in dark, off, and the confirmation. A suitcase and All suitcases at AX5 are checked for width only (no picture). `HomeSnapshotTests.suitcaseSourceAndOccasion` and `GarmentDetailSnapshotTests.addToSuitcaseSheet`.
+- `SuitcasesAndLaundryTests` (UI): Laundry at AX5 stays inside the screen, with every name and Mark clean in reach; add a suitcase, pack three pieces, remove one and Undo, Style me from it, and see it on Home's suitcase; mark a piece dirty on its detail, see the hamper fill, clean one with Undo, two selected and the rest in Laundry, and see the hamper empty.
 
 ## Decisions for Jose
 

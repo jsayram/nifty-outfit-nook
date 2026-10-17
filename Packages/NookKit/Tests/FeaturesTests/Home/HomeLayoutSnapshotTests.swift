@@ -75,6 +75,9 @@ struct HomeLayoutSnapshotTests {
         column: UInt = #column
     ) {
         let height: CGFloat? = size.height > 0 ? size.height : nil
+        expectFitsWidth(
+            view, width: size.width, colorScheme: colorScheme, dynamicTypeSize: dynamicTypeSize, named: name,
+            fileID: fileID, filePath: filePath, line: line, column: column)
         let content =
             view
             .frame(width: size.width, height: height)

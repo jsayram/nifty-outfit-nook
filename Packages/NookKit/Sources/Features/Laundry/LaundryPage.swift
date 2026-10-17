@@ -279,6 +279,10 @@ struct LaundryPage: View {
 
 /// One piece in the wash (`.item`): a tick to clean it with others, its sticker, its name with
 /// its kind and where it is, and Mark clean.
+///
+/// At the accessibility sizes the words go under the tick and the sticker, and Mark clean under
+/// the words, so nothing has to fit beside a button that size. In one line at AX5 the row was
+/// wider than the screen and the name had no room at all (QA, October 2026).
 private struct LaundryRow: View {
     let garment: Garment
     let place: String
@@ -290,54 +294,89 @@ private struct LaundryRow: View {
     let select: () -> Void
 
     @ScaledMetric(relativeTo: .body) private var minHeight: CGFloat = 72
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: NookSpacing.small) {
-            Button(action: select) {
-                SelectionTick(isSelected: isSelected)
-                    .frame(width: NookSpacing.minimumTapTarget, height: NookSpacing.minimumTapTarget)
-                    .contentShape(Rectangle())
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
+                    HStack(spacing: NookSpacing.small) {
+                        tick
+                        picture
+                    }
+                    words
+                    markCleanButton
+                        .padding(.leading, NookSpacing.xSmall)
+                        .padding(.bottom, NookSpacing.xSmall)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: NookSpacing.small) {
+                    tick
+                    picture
+                    words
+                    markCleanButton
+                }
             }
-            .buttonStyle(ClosetPressStyle())
-            .accessibilityLabel(
-                Text("Select \(garment.name)", bundle: .module, comment: "Laundry: ticks a piece to clean with others")
-            )
-            .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-            .accessibilityIdentifier("laundry.select.\(garment.id.rawValue)")
-            GarmentPicture(garment, size: CGSize(width: 48, height: 56), presentation: .sticker(.centred))
-                .rotationEffect(.degrees(-3))
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(garment.name)
-                    .nookTextStyle(.label)
-                    .foregroundStyle(.nook.textPrimary)
-                Text(
-                    "\(garment.category.singularTitle) · \(place)", bundle: .module,
-                    comment: "Laundry row: the kind of piece, then where it is"
-                )
-                .nookTextStyle(.note)
-                .foregroundStyle(.nook.textSecondary)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            NookButton(
-                String(localized: "Mark clean", bundle: .module, comment: "Button: marks one piece clean"),
-                kind: .pill, size: .small, action: markClean
-            )
-            .fixedSize()
-            .accessibilityLabel(
-                Text("Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean")
-            )
-            .accessibilityIdentifier("laundry.markClean.\(garment.id.rawValue)")
-            .tourAnchor(
-                LaundryTour.Anchor.markClean,
-                label: String(
-                    localized: "Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean"),
-                isEnabled: isFirst, action: markClean)
         }
         .padding(.horizontal, NookSpacing.xSmall)
         .frame(minHeight: minHeight)
+    }
+
+    private var tick: some View {
+        Button(action: select) {
+            SelectionTick(isSelected: isSelected)
+                .frame(width: NookSpacing.minimumTapTarget, height: NookSpacing.minimumTapTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(ClosetPressStyle())
+        .accessibilityLabel(
+            Text("Select \(garment.name)", bundle: .module, comment: "Laundry: ticks a piece to clean with others")
+        )
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityIdentifier("laundry.select.\(garment.id.rawValue)")
+    }
+
+    private var picture: some View {
+        GarmentPicture(garment, size: CGSize(width: 48, height: 56), presentation: .sticker(.centred))
+            .rotationEffect(.degrees(-3))
+            .accessibilityHidden(true)
+    }
+
+    private var words: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(garment.name)
+                .nookTextStyle(.label)
+                .foregroundStyle(.nook.textPrimary)
+            Text(
+                "\(garment.category.singularTitle) · \(place)", bundle: .module,
+                comment: "Laundry row: the kind of piece, then where it is"
+            )
+            .nookTextStyle(.note)
+            .foregroundStyle(.nook.textSecondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var markCleanButton: some View {
+        NookButton(
+            String(localized: "Mark clean", bundle: .module, comment: "Button: marks one piece clean"),
+            kind: .pill, size: .small, action: markClean
+        )
+        // Its own width beside the words; at the accessibility sizes it may wrap rather than
+        // push the row past the screen's edge.
+        .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
+        .accessibilityLabel(
+            Text("Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean")
+        )
+        .accessibilityIdentifier("laundry.markClean.\(garment.id.rawValue)")
+        .tourAnchor(
+            LaundryTour.Anchor.markClean,
+            label: String(
+                localized: "Mark \(garment.name) clean", bundle: .module, comment: "Laundry: marks one piece clean"),
+            isEnabled: isFirst, action: markClean)
     }
 }
 
