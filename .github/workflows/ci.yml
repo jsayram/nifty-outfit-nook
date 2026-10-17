@@ -92,12 +92,10 @@ jobs:
   # for a later run on develop or main to pick up.
   #
   # This job builds for testing (the UI test plan first, so the UI jobs can start sooner, then
-  # the full plan with the package tests), makes an unsigned Release archive for a real iPhone
-  # and checks it (scripts/check-archive.sh: Info.plist, privacy manifest, entitlements, no test
-  # or debug code, and scripts/check-release.sh on the device binary), then runs a few UI test
-  # classes on an iPhone simulator.
-  build-and-archive:
-    name: build-and-archive
+  # the full plan with the package tests), then runs a few UI test classes on an iPhone
+  # simulator. The Release check is in the ui-ipad part.
+  build-for-testing:
+    name: build-for-testing
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: macos-26
@@ -142,16 +140,13 @@ jobs:
           path: ${{ runner.temp }}/all-test-products.tgz
           retention-days: 1
           overwrite: true
-      - name: Archive (Release, unsigned) and check what would ship
-        run: scripts/check-archive.sh
-      - name: Test (ui-catalog-profile-and-swap)
+      - name: Test (ui-catalog-and-profile)
         # The UI tests' retry is explained in the ui-tests job below.
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_UITests_*.xctestrun)"
           scripts/test.sh
           -only-testing:NiftyOutfitNookUITests/CatalogTests
           -only-testing:NiftyOutfitNookUITests/ProfileTests
-          -only-testing:NiftyOutfitNookUITests/SwapTests
           -only-testing:NiftyOutfitNookUITests/LaunchTests
           -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
           -retry-tests-on-failure -test-iterations 2
@@ -159,28 +154,30 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: TestResults-build-and-archive
+          name: TestResults-build-for-testing
           path: build/TestResults.xcresult
           retention-days: 7
           if-no-files-found: ignore
 
   # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
-  # iPad layouts, on an iPad simulator. The iPad part also runs every package test target: they
-  # don't depend on the device, and that part has the most room.
+  # iPad layouts, on an iPad simulator. The iPad part, which has the most room, also runs every
+  # package test target (they don't depend on the device), then makes an unsigned Release
+  # archive for a real iPhone and checks it (scripts/check-archive.sh: Info.plist, privacy
+  # manifest, entitlements, no test or debug code, and scripts/check-release.sh on the device
+  # binary).
   # Balanced in October 2026 from the classes' mean times over four CI runs, in seconds, from
   # the test log ("Test Suite 'Class' passed ... in N seconds"). A class can take 1.5 to 2 times
   # as long from one run to the next, and a part's first class also carries the first launch.
   # Each test job spends about 5 minutes before its first test (mostly the simulator's boot),
-  # and build-and-archive about 7 before its UI tests, so the parts aim at 8 to 9 minutes of
-  # tests and build-and-archive at 6:
-  #   (build-and-archive)     CatalogTests 169, ProfileTests 86, SwapTests 58, LaunchTests 51,
-  #                           CutoutBenchTests 22
+  # and build-for-testing about 8 before its UI tests (two builds, then a cold boot), so the
+  # parts aim at 8 to 9 minutes of tests and build-for-testing at 5 to 6:
+  #   (build-for-testing)     CatalogTests 169, ProfileTests 86, LaunchTests 51, CutoutBenchTests 22
   #   ui-home-and-settings    SettingsTests 169, HomeTests 102, StyleMeTests 86, YourLooksTests 75,
   #                           ClosetTests 56, MakeYourOwnLookTests 46
   #   ui-add-and-tours        AddPieceTests 236, ScreenToursTests 124, HomeVariantTests 94,
   #                           OnboardingTests 70
   #   ui-rest                 GarmentDetailTests 145, SavedLooksTests 137, HomeTourTests 125,
-  #                           SuitcasesAndLaundryTests 77, and any new class
+  #                           SuitcasesAndLaundryTests 77, SwapTests 58, and any new class
   #   ui-ipad                 IPadTests 190, IPadStyleMeAndSavedTests 166, package tests about 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
@@ -225,7 +222,6 @@ jobs:
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/ProfileTests
-              -skip-testing:NiftyOutfitNookUITests/SwapTests
               -skip-testing:NiftyOutfitNookUITests/LaunchTests
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
@@ -267,13 +263,13 @@ jobs:
         id: build
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/wait-for-artifact.sh ${{ matrix.products }} build-and-archive
+        run: scripts/wait-for-artifact.sh ${{ matrix.products }} build-for-testing
       - if: steps.build.outputs.ready == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ${{ matrix.products }}
           path: ${{ runner.temp }}
-      - name: Unpack the build, or build here if build-and-archive couldn't start
+      - name: Unpack the build, or build here if build-for-testing couldn't start
         env:
           PRODUCTS: ${{ matrix.products }}
           READY: ${{ steps.build.outputs.ready }}
@@ -311,6 +307,10 @@ jobs:
         run: >-
           NOOK_XCTESTRUN="$(ls "$PRODUCTS_DIR"/*.xctestrun)"
           scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      # The Release check runs here, where there's the most room, after the tests.
+      - name: Archive (Release, unsigned) and check what would ship
+        if: ${{ !cancelled() && matrix.family == 'iPad' }}
+        run: scripts/check-archive.sh
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -328,7 +328,7 @@ jobs:
   # pull request, the build and test jobs are skipped on purpose and this passes.
   build-and-test:
     name: build-and-test
-    needs: [changes, build-and-archive, ui-tests]
+    needs: [changes, build-for-testing, ui-tests]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -337,18 +337,18 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           CODE: ${{ needs.changes.outputs.code }}
-          BUILD_AND_ARCHIVE: ${{ needs.build-and-archive.result }}
+          BUILD_FOR_TESTING: ${{ needs.build-for-testing.result }}
           UI_TESTS: ${{ needs.ui-tests.result }}
         run: |
           echo "changes: $CHANGES (build and test: $CODE)"
-          echo "build-and-archive: $BUILD_AND_ARCHIVE"
+          echo "build-for-testing: $BUILD_FOR_TESTING"
           echo "ui-tests: $UI_TESTS"
           [[ "$CHANGES" == "success" ]] || exit 1
           if [[ "$CODE" == "false" ]]; then
             echo "Docs only: nothing to build or test."
             exit 0
           fi
-          [[ "$BUILD_AND_ARCHIVE" == "success" && "$UI_TESTS" == "success" ]]
+          [[ "$BUILD_FOR_TESTING" == "success" && "$UI_TESTS" == "success" ]]
 
   gitleaks:
     name: gitleaks
