@@ -53,6 +53,18 @@ struct LookBundleSnapshotTests {
             dynamicTypeSize: .accessibility5, named: "catalog-ax5")
     }
 
+    /// The "Not in your closet" tag stays on one line: across a bundle too narrow for that, as on
+    /// a Saved Looks card on iPad, it's the thumbnails' round icon instead of two lines over the
+    /// picture (QA, October 2026). No picture: the tag is too small a part of any page for a
+    /// snapshot to notice the change.
+    @Test func ideaTagIsOneLineOrTheIcon() {
+        let words = fittedWidth(of: IdeaTag(), width: 300)
+        let oneLine = fittedWidth(of: Text(LookBundleText.notInYourCloset).nookTextStyle(.caption), width: 1000)
+        #expect(words > oneLine)
+        #expect(fittedWidth(of: IdeaTag(), width: words - 1) == 24)
+        #expect(fittedWidth(of: IdeaTag(), width: 120) == 24)
+    }
+
     @Test func photosMixedIn() async {
         let look = photoLook
         let loader = await loadedPictures(for: look, sizes: [.large, .small])
