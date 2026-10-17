@@ -321,3 +321,22 @@ enum UITestLaunch {
     /// Tours off, onboarding skipped and animations off: what most tests launch with.
     static let standard = toursOff + skipOnboarding + animationsOff
 }
+
+extension XCUIApplication {
+    /// Presses a key on the hardware keyboard and waits until `effect` holds, pressing once more
+    /// if it didn't. On the iPad simulator the first key press after a launch is lost: Command-F
+    /// did nothing the first time and focused search the second, every time (iOS 26.5, October
+    /// 2026). Returns whether the effect held.
+    @MainActor
+    @discardableResult
+    func typeKeyUntil(
+        _ key: String, modifierFlags: XCUIElement.KeyModifierFlags, timeout: TimeInterval,
+        _ effect: @escaping @MainActor () -> Bool
+    ) -> Bool {
+        for _ in 0..<2 {
+            typeKey(key, modifierFlags: modifierFlags)
+            if waitUntilTrue(timeout: timeout, effect) { return true }
+        }
+        return effect()
+    }
+}

@@ -4936,6 +4936,9 @@
         }
       }
     },
+    "Search" : {
+      "comment" : "Keyboard shortcut (Command-F) that goes to search"
+    },
     "Search %@" : {
       "comment" : "Starting piece sheet search; the source's name"
     },

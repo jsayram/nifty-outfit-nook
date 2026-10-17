@@ -223,6 +223,8 @@ public struct NookSheetContainer<Content: View>: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // Escape (and Command-period) on a hardware keyboard closes the sheet.
+        .keyboardShortcut(.cancelAction)
         .accessibilityLabel(Text("Close", bundle: .module, comment: "Button that closes a sheet"))
     }
 }

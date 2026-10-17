@@ -117,8 +117,24 @@ final class HomeTourTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Home"].exists)
         // Escape and the VoiceOver escape gesture can't be sent from here: on the iOS 26.5
         // simulator `typeKey(.escape)` reached neither `.keyboardShortcut(.cancelAction)` nor a
-        // focused `.onKeyPress(.escape)` (tried in 16a). Skip's keyboard shortcut and the
+        // focused `.onKeyPress(.escape)` (tried in 16a). Command-period does reach the cancel
+        // action, so `IPadKeyboardTests` skips a tour with it. Skip's keyboard shortcut and the
         // VoiceOver escape action call the same skip as the Skip button (docs/tours.md).
+    }
+
+    /// What VoiceOver meets on every step, as far as XCUITest can see it (Stage A device
+    /// substitutes; nobody can run VoiceOver here). On each step of Home's tour and of Closet's,
+    /// the first element in the tour is the card's words, which name the step and the
+    /// highlighted control; then Back (from step 2), Skip and Next; then the highlighted control.
+    /// Nothing from the screen under the dim is inside the tour.
+    @MainActor
+    func testTheCardComesFirstOnEveryStep() {
+        let app = launch()
+        assertEveryStepReadsCardFirst(steps: 4, in: app, under: ["home.wardrobe", "home.laptop"])
+        app.terminate()
+
+        let closet = launch(tour: "off,closet", openCloset: true)
+        assertEveryStepReadsCardFirst(steps: 3, in: closet, under: ["closet.addPiece"])
     }
 
     /// At the largest text size Home is the banner and large rows, and the tour walks them in
@@ -163,10 +179,15 @@ final class HomeTourTests: XCTestCase {
     /// off, so the other screens' tours (Phase 16b, `ScreenToursTests`) stay out of the way when
     /// these tests leave Home.
     @MainActor
-    private func launch(tour: String = "off,home", extra: [String] = []) -> XCUIApplication {
+    private func launch(tour: String = "off,home", extra: [String] = [], openCloset: Bool = false)
+        -> XCUIApplication
+    {
         let app = XCUIApplication()
         app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", tour, "-fixtures", "demo"] + extra
         app.launch()
+        if openCloset {
+            app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
+        }
         XCTAssertTrue(
             app.descendants(matching: .any)["tour.card"].waitUntilExists(timeout: Self.wait), "The tour didn't start")
         return app
@@ -182,6 +203,51 @@ final class HomeTourTests: XCTestCase {
         app.buttons[identifier].tapUntil(
             timeout: Self.wait, else: "\(identifier) didn't move the tour to \(text)", file: file, line: line
         ) { words.exists && words.label.contains(text) }
+    }
+
+    /// Walks a tour's steps with Next, checking on each one that the tour, which XCUITest sees
+    /// as an alert, starts with the card's words for that step and keeps its buttons and the
+    /// highlighted control after them, and that none of `under` (controls on the screen under
+    /// the dim) is in it. Queries return elements breadth first, so the order is read from the
+    /// tree XCUITest prints, which is the order the app exposes.
+    @MainActor
+    private func assertEveryStepReadsCardFirst(
+        steps: Int, in app: XCUIApplication, under: [String], file: StaticString = #filePath, line: UInt = #line
+    ) {
+        let tour = app.alerts["tour"]
+        let words = app.descendants(matching: .any)["tour.text"]
+        for step in 1...steps {
+            XCTAssertTrue(
+                waitForLabel(of: words, containing: "step \(step) of \(steps)"), "No step \(step)", file: file,
+                line: line)
+            XCTAssertTrue(tour.waitUntilExists(timeout: Self.wait), "The tour isn't modal", file: file, line: line)
+            let tree = tour.debugDescription
+            // The first element below the tour's own line that VoiceOver could land on, the
+            // first with a label (the card itself is an unlabelled container).
+            let first = tree.split(separator: "\n").dropFirst().first { $0.contains("label: '") }
+            XCTAssertTrue(
+                first?.contains("identifier: 'tour.text'") == true, "Step \(step) doesn't start on the card: \(tree)",
+                file: file, line: line)
+            var order = ["tour.text", "tour.skip", "tour.next", "tour.target"]
+            if step > 1 { order.insert("tour.back", at: 1) }
+            let places = order.map { tree.range(of: "identifier: '\($0)'")?.lowerBound }
+            XCTAssertFalse(
+                places.contains(nil), "Step \(step) is missing one of \(order): \(tree)", file: file, line: line)
+            XCTAssertEqual(
+                places.compactMap(\.self), places.compactMap(\.self).sorted(),
+                "Step \(step) reads out of order: \(tree)",
+                file: file, line: line)
+            for identifier in under {
+                XCTAssertFalse(
+                    tree.contains("identifier: '\(identifier)'"), "\(identifier) is inside the tour on step \(step)",
+                    file: file, line: line)
+            }
+            XCTAssertTrue(
+                words.label.contains("Highlighted: "), "Step \(step) doesn't name its control", file: file, line: line)
+            if step < steps {
+                tap("tour.next", in: app, until: "step \(step + 1) of \(steps)", file: file, line: line)
+            }
+        }
     }
 
     @MainActor

@@ -100,7 +100,11 @@ For example `-fixtures demo -tour reset,home`. `scripts/check-release.sh` checks
 
 ### Needs a check with VoiceOver on
 
-UI tests can't run VoiceOver, and on the iOS 26.5 simulator `typeKey(.escape)` reached neither Skip's `.keyboardShortcut(.cancelAction)` nor a focused `.onKeyPress(.escape)`, as 15b found for its shortcuts. On a device (an iPad with a keyboard for Escape) with VoiceOver on: focus lands on the card's words on each step; Escape and the two-finger scrub skip; activating the highlighted control opens it; nothing under the dim can be reached; and focus lands on that step's control when the tour closes.
+UI tests can't run VoiceOver, and on the iOS 26.5 simulator `typeKey(.escape)` reached neither Skip's `.keyboardShortcut(.cancelAction)` nor a focused `.onKeyPress(.escape)`, as 15b found for its shortcuts. Command-period does reach the cancel action, so since 17 October 2026 `IPadKeyboardTests` skips Home's tour with it (`docs/ipad.md`).
+
+What a UI test can check without VoiceOver, it does. `HomeTourTests.testTheCardComesFirstOnEveryStep` walks every step of Home's tour and Closet's and reads the tour's accessibility tree (the order the app exposes, from `debugDescription`): the first element with a label is the card's words for that step, then Back (from step 2), Skip and Next, then the highlighted control, and nothing from the screen under the dim is inside the tour. The accessibility audit runs on a tour step too (`docs/accessibility-audit.md`).
+
+On a device (an iPad with a keyboard for Escape) with VoiceOver on: focus lands on the card's words on each step; Escape and the two-finger scrub skip; activating the highlighted control opens it; nothing under the dim can be reached; and focus lands on that step's control when the tour closes.
 
 ## Decisions for Jose
 

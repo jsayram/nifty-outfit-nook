@@ -4,6 +4,8 @@ Phase 8a, 14 October 2026. Can Lily's iPhone 12 lift her garments out of their p
 
 The real answer needs her iPhone 12 and real photos of her clothes. Everything else is ready, so the test takes about 15 minutes.
 
+**When it happens (17 October 2026).** No simulator can run the cutout (see below), and Jose doesn't have her phone during Stage A. So the go/no-go moves to Phase 22a, run on her iPhone 12 with her own photos, as described under [Running the benchmark](#running-the-benchmark-on-lilys-iphone-12). Before that, any real iPhone Jose owns can run the same benchmark as a quality-only check: whether the drawn samples and a few real garment photos come out clean enough for stickers. Its times and memory say nothing about an A14 and don't count toward the go/no-go.
+
 ## What's where
 
 | File | Holds |
@@ -53,6 +55,8 @@ These are a starting point, not a decision (`CutoutThresholds.proposed`). The be
 
 - On the iOS 26.5 and 27.0 simulators on an Apple-silicon Mac (Xcode 26.6), the request fails with Vision error 9, "Could not create inference context". The simulator offers only its GPU as a compute device for this request (`supportedComputeStageDevices`), and there's no CPU fallback to choose.
 - On GitHub's `macos-26` runners the same request runs without an error but finds no subject, even in the plain drawn flat lay. That showed up in CI on this phase's first run.
+
+- On an iPhone 12 simulator (iOS 26.5, Xcode 26.6, 17 October 2026), made to stand in for Lily's phone, the result is the same. Called directly, Vision lists one compute device for the request, "Apple iOS simulator GPU", and `perform` fails with error 9 (`com.apple.Vision`), "Could not create inference context". The service says `unsupported`, and the benchmark (`-cutout-bench`, `CutoutBenchTests`) shows "Subject lifting isn't supported here" for each sample. A simulator runs on the Mac's chip, not an A14, so even a working request there would time the Mac, not her phone.
 
 So on any simulator the service reads the photo (bad input still gets `unreadableImage` or `imageTooLarge`) and then reports `unsupported` without asking Vision. The benchmark says "Subject lifting isn't supported here". The five tests that need a real cutout skip themselves with that reason (Swift Testing's `.enabled(_:_:)` with an async probe) and run on a device. Everything else is tested on the simulator: reading and shrinking photos, the orientation flag, the pixel limit, unreadable data, cancellation, error mapping, the signal arithmetic on hand-made masks and pixel buffers, the thresholds, the stand-in, the benchmark's report and runs, and a UI test of the benchmark screen. A build for a real device (`generic/platform=iOS`, no signing) compiles the device-only path.
 

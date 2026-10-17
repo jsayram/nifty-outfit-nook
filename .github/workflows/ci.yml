@@ -208,6 +208,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/YourLooksTests
               -only-testing:NiftyOutfitNookUITests/ClosetTests
               -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
           - part: ui-add-and-tours
             family: iPhone
             products: ui-test-products
@@ -216,6 +217,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/ScreenToursTests
               -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/OnboardingTests
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             family: iPhone
@@ -237,6 +239,9 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/OnboardingTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
+              -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
           # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
           # one of these skips itself on an iPhone.
           - part: ui-ipad
@@ -245,6 +250,7 @@ jobs:
             selection: >-
               -only-testing:NiftyOutfitNookUITests/IPadTests
               -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
+              -only-testing:NiftyOutfitNookUITests/IPadKeyboardTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

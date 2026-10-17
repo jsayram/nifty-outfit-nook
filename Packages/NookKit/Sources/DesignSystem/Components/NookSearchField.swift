@@ -9,6 +9,7 @@ public struct NookSearchField: View {
     @Binding private var text: String
     private let prompt: String
     private let onSubmit: () -> Void
+    private let focusRequest: Int
 
     @FocusState private var isFocused: Bool
     @Environment(\.nookStaticRendering) private var isStatic
@@ -18,9 +19,14 @@ public struct NookSearchField: View {
     ///   - prompt: The placeholder, already localized, like "Search your looks". VoiceOver uses
     ///     it as the field's name.
     ///   - onSubmit: Called when she presses Search on the keyboard.
-    public init(_ prompt: String, text: Binding<String>, onSubmit: @escaping () -> Void = {}) {
+    ///   - focusRequest: The field takes the keyboard each time this changes, as Command-F does
+    ///     on Closet and Saved Looks.
+    public init(
+        _ prompt: String, text: Binding<String>, focusRequest: Int = 0, onSubmit: @escaping () -> Void = {}
+    ) {
         self.prompt = prompt
         self._text = text
+        self.focusRequest = focusRequest
         self.onSubmit = onSubmit
     }
 
@@ -96,6 +102,9 @@ public struct NookSearchField: View {
         .nookTextStyle(.body)
         .foregroundStyle(.nook.textPrimary)
         .focused($isFocused)
+        .onChange(of: focusRequest) {
+            isFocused = true
+        }
         .submitLabel(.search)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
