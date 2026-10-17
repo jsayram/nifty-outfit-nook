@@ -122,6 +122,9 @@ final class HomeVariantTests: XCTestCase {
         app.buttons["home.helpDrawer"].tapUntil(app.navigationBars["Help"], appears: Self.wait)
         XCUIDevice.shared.orientation = .portrait
         XCTAssertTrue(app.navigationBars["Help"].waitUntilExists(timeout: Self.wait), "Turning the phone closed Help")
+        // Asking whether Back can be tapped while the bar is still turning failed the test
+        // ("Activation point invalid"), so wait for the bar to stop moving first.
+        XCTAssertTrue(app.navigationBars["Help"].waitUntilStill(timeout: Self.wait), "Help kept moving")
         app.goBack(from: "Help", to: "Home", timeout: Self.wait)
         XCTAssertTrue(waitForLabel(of: source, containing: "Suitcase: Source"), "Upright again, it's the room")
     }
