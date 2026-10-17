@@ -2,28 +2,230 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Nifty Outfit Nook is a wardrobe and outfit styling app in development. A little home for your clothes and looks.">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta name="description" content="Meet Nifty Outfit Nook. A thoughtful wardrobe and personal styling app in the making. Coming soon for iPhone and iPad.">
+  <meta property="og:title" content="Nifty Outfit Nook. A little nook. A whole new look.">
+  <meta property="og:description" content="A new home for your wardrobe. A little help finding your next great outfit. Coming soon.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://niftyoutfitnook.pages.dev/">
+  <meta property="og:image" content="https://niftyoutfitnook.pages.dev/assets/home-preview-light.webp">
   <title>Nifty Outfit Nook | Coming soon</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" as="image" href="/assets/home-preview-light.webp?v=20261015-tour" fetchpriority="high">
   <link rel="stylesheet" href="/style.css">
+  <script src="/site.js" defer></script>
 </head>
-<body>
-  <header>Nifty Outfit Nook</header>
-  <main>
-    <section class="intro" aria-labelledby="title">
-      <div class="copy">
-        <p class="status">Coming soon</p>
-        <h1 id="title">Your wardrobe,<br>a little wiser.</h1>
-        <p class="description">A little home for your clothes and looks, with a personal styling assistant in the works.</p>
+<body id="top">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">n.</span><span>Nifty Outfit Nook</span></a>
+      <div class="nav-links"><a href="#idea">The idea</a><a href="#progress">Progress</a><a href="#questions">Questions</a></div>
+      <a class="status-link" href="#launch">Coming soon <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero hero-compact" aria-labelledby="hero-title">
+      <div class="hero-copy wrap">
+        <p class="eyebrow enter">Meet your wardrobe's next chapter.</p>
+        <h1 id="hero-title" class="enter">A little nook.<br><span>A whole new look.</span></h1>
+        <p class="hero-description enter">A new home for your wardrobe.<br>A little help finding your next great outfit.</p>
+        <a class="button enter" href="#preview">See the app <span aria-hidden="true">↓</span></a>
       </div>
-      <div class="illustration"><img src="/wardrobe.svg" alt="A pastel blue wardrobe" width="164" height="394" fetchpriority="high"></div>
     </section>
-    <section class="about" aria-labelledby="about-title">
-      <h2 id="about-title">Meet your outfit nook.</h2>
-      <p>We're building Nifty Outfit Nook to help you keep track of your clothes and put outfits together. The app is still in development.</p>
+
+    <section class="app-preview" id="preview" aria-labelledby="preview-title">
+      <div class="preview-inner wrap reveal">
+        <div class="preview-copy">
+          <p class="section-label">A first look.</p>
+          <h2 id="preview-title">The nook is<br><span>taking shape.</span></h2>
+          <p>The Home screen is already in progress. Your closet, saved looks, a little styling desk, and the small details that make it feel like yours.</p>
+          <div class="ios-badge" aria-label="Coming to iOS for iPhone and iPad"><span class="ios-badge-mark" aria-hidden="true">iOS</span><span><strong>Coming to iOS</strong><small>for iPhone and iPad</small></span></div>
+        </div>
+        <div class="screen-gallery" aria-label="Nifty Outfit Nook Home screen previews">
+          <figure class="app-screen light-screen">
+            <img src="/assets/home-preview-light.webp?v=20261015-tour" width="804" height="1748" alt="Nifty Outfit Nook Home screen in light appearance, with a wardrobe, saved looks shelf, styling desk and suitcase." fetchpriority="high">
+            <figcaption>Home in light appearance</figcaption>
+          </figure>
+          <figure class="app-screen dark-screen">
+            <img src="/assets/home-preview-dark.webp?v=20261015-tour" width="804" height="1748" alt="Nifty Outfit Nook Home screen in dark appearance, with a wardrobe, saved looks shelf, styling desk and suitcase.">
+            <figcaption>Home in dark appearance</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-tour wrap" id="idea" aria-labelledby="idea-title">
+      <div class="tour-heading reveal">
+        <p class="section-label">More than a digital closet.</p>
+        <h2 id="idea-title">Your clothes.<br><span>Working together.</span></h2>
+        <p>Nifty Outfit Nook is being built to remember what you own, help style it, picture new looks, pack for trips, and keep laundry in the plan.</p>
+      </div>
+
+      <article class="feature feature-closet reveal">
+        <div class="feature-copy">
+          <p class="feature-name">Closet</p>
+          <h3>Everything you own, easy to find.</h3>
+          <p>Search and filter by type, colour, suitcase, and laundry status. Open any piece to style with it, edit it, or pack it.</p>
+        </div>
+        <figure class="capture capture-tall">
+          <img src="/assets/app-closet.webp?v=20261015-tour" width="804" height="2728" loading="lazy" alt="The Closet screen showing search, filters, suitcase and laundry shortcuts, and a grid of clothing pieces.">
+          <figcaption>The Closet brings pieces, trips, and laundry into one view.</figcaption>
+        </figure>
+      </article>
+
+      <article class="feature feature-ai reveal">
+        <div class="feature-copy feature-copy-wide">
+          <p class="feature-name">AI styling assistant</p>
+          <h3>Outfit help that starts with your wardrobe.</h3>
+          <p>Choose an occasion, weather, comfort, colours, and a closet or suitcase. The assistant is being built to create outfit ideas from the pieces you already own.</p>
+          <div class="assistant-capabilities" aria-label="How the styling assistant helps">
+            <div class="assistant-capability">
+              <span class="assistant-number" aria-hidden="true">01</span>
+              <div><h4>Start with what is available</h4><p>Style from your whole closet or only the pieces packed in a suitcase, while keeping laundry status in view.</p></div>
+            </div>
+            <div class="assistant-capability">
+              <span class="assistant-number" aria-hidden="true">02</span>
+              <div><h4>Tell it what today needs</h4><p>Add the occasion, weather, comfort, colour, and a preference for this request without changing your whole profile.</p></div>
+            </div>
+            <div class="assistant-capability">
+              <span class="assistant-number" aria-hidden="true">03</span>
+              <div><h4>Keep shaping the look</h4><p>Save an outfit, swap one piece, ask the stylist about it, or choose Try It On when you want a picture.</p></div>
+            </div>
+          </div>
+          <p class="development-note">AI styling is in development. These app captures use sample wardrobe data.</p>
+        </div>
+        <div class="capture-pair" aria-label="AI styling request and outfit result screens">
+          <figure class="capture capture-phone">
+            <img src="/assets/app-style-request.webp?v=20261015-tour" width="804" height="1478" loading="lazy" alt="Style Me request screen with closet source, office occasion, weather, comfort, colour, and preference choices.">
+            <figcaption>Tell the assistant what today needs.</figcaption>
+          </figure>
+          <figure class="capture capture-phone capture-lower">
+            <img src="/assets/app-ai-looks.webp?v=20261015-tour" width="804" height="2031" loading="lazy" alt="Your Looks screen showing an outfit created from four wardrobe pieces and actions to save, try on, swap, or ask the stylist.">
+            <figcaption>Get looks you can save, adjust, or ask about.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="feature feature-try-on reveal">
+        <figure class="capture capture-try-on">
+          <img src="/assets/app-try-on.webp?v=20261015-tour" width="804" height="1499" loading="lazy" alt="Try-on picture development screen showing an outfit preview and its linked saved look.">
+          <figcaption>Current development capture with the simulated label.</figcaption>
+        </figure>
+        <div class="feature-copy">
+          <p class="feature-name">AI Try It On</p>
+          <h3>Picture the look before wearing it.</h3>
+          <p>Try It On is planned as an on-demand AI preview. You choose when to create a picture, and saved pictures stay connected to their looks.</p>
+          <p class="development-note">The current build shows a clearly labelled simulation while the image feature is developed.</p>
+        </div>
+      </article>
+
+      <section class="travel-tools reveal" aria-labelledby="travel-title">
+        <div class="travel-heading">
+          <p class="section-label">The practical details matter too.</p>
+          <h2 id="travel-title">Ready for trips.<br><span>Aware of laundry.</span></h2>
+        </div>
+        <div class="travel-grid">
+          <article class="travel-feature">
+            <div class="travel-copy"><h3>Suitcases</h3><p>Make a suitcase, choose it as the styling source, and get outfit ideas from only the pieces packed inside.</p></div>
+            <figure class="capture capture-travel"><img src="/assets/app-suitcases.webp?v=20261015-tour" width="804" height="1944" loading="lazy" alt="Suitcases screen with Weekend, Jose's house, and Gym suitcases plus a selected styling source."><figcaption>Keep trips separate without duplicating your closet.</figcaption></figure>
+          </article>
+          <article class="travel-feature">
+            <div class="travel-copy"><h3>Laundry</h3><p>Optional laundry tracking shows what is in the wash and helps the styling assistant skip pieces that are not ready.</p></div>
+            <figure class="capture capture-travel"><img src="/assets/app-laundry.webp?v=20261015-tour" width="804" height="1272" loading="lazy" alt="Laundry screen showing two pieces in the wash with controls to mark them clean."><figcaption>Turn tracking on when it is useful to you.</figcaption></figure>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="announcements" id="progress" aria-labelledby="progress-title">
+      <div class="announcements-inner wrap">
+        <div class="announcements-heading reveal">
+          <p class="section-label">Current announcements.</p>
+          <h2 id="progress-title">Follow the nook<br><span>as it takes shape.</span></h2>
+          <p>This is the working build story. New milestones will appear here as the app moves from plans and pictures into a complete iPhone and iPad experience.</p>
+        </div>
+
+        <ol class="timeline reveal" aria-label="Nifty Outfit Nook development progress">
+          <li class="timeline-item is-complete">
+            <div class="timeline-dot" aria-hidden="true"><span>✓</span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">Starting point</p>
+              <h3>The product plan</h3>
+              <p>The PRD set the purpose: organise the clothes you own, build useful outfits, save looks, and make personal styling feel easier.</p>
+              <span class="timeline-status">Complete</span>
+            </div>
+          </li>
+          <li class="timeline-item is-complete">
+            <div class="timeline-dot" aria-hidden="true"><span>✓</span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">Product review</p>
+              <h3>Reviewed with Lily</h3>
+              <p>Lily reviewed the idea and helped shape the experience around real wardrobe needs, easy outfit changes, colour variety, and useful everyday context.</p>
+              <span class="timeline-status">Complete</span>
+            </div>
+          </li>
+          <li class="timeline-item is-complete">
+            <div class="timeline-dot" aria-hidden="true"><span>✓</span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">The foundation</p>
+              <h3>The SwiftUI pieces</h3>
+              <p>The colour, type, spacing, controls, illustrations, and reusable SwiftUI components were built into a working design system.</p>
+              <span class="timeline-status">Complete</span>
+            </div>
+          </li>
+          <li class="timeline-item is-complete">
+            <div class="timeline-dot" aria-hidden="true"><span>✓</span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">The app takes shape</p>
+              <h3>The rooms became screens</h3>
+              <p>Home, Closet, garments, outfit ideas, saved looks, Try It On, Suitcases, Laundry, and Profile moved into the native app as tested SwiftUI screens using sample data.</p>
+              <span class="timeline-status">Complete</span>
+            </div>
+          </li>
+          <li class="timeline-item is-current" aria-current="step">
+            <div class="timeline-dot" aria-hidden="true"><span></span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">Working on it now</p>
+              <h3>Putting the experience together</h3>
+              <p>The visual assets and reusable UI are in place. Screens, settings, tutorial pages, and navigation are being connected and tested so the app feels like one thoughtful experience.</p>
+              <p class="timeline-note">The app is still using sample data. AI services and launch systems are not live yet.</p>
+              <span class="timeline-status">In progress</span>
+            </div>
+          </li>
+          <li class="timeline-item is-next">
+            <div class="timeline-dot" aria-hidden="true"><span></span></div>
+            <div class="timeline-card">
+              <p class="timeline-step">Coming next</p>
+              <h3>More building, testing, and polish</h3>
+              <p>Future updates will be added here as meaningful app milestones are completed and verified.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="launch" id="launch" aria-labelledby="launch-title">
+      <div class="launch-inner wrap reveal">
+        <span class="launch-pill">An app in the making</span>
+        <h2 id="launch-title">Something good<br>is getting dressed.</h2>
+        <p>Nifty Outfit Nook is coming soon.<br>Thoughtfully made for iPhone and iPad.</p>
+        <span class="launch-ios">Coming to iOS</span>
+        <div class="launch-detail"><span>Currently in development</span><span>Launch date to be announced</span></div>
+      </div>
+    </section>
+
+    <section class="questions wrap" id="questions" aria-labelledby="questions-title">
+      <h2 id="questions-title" class="reveal">A few little details.</h2>
+      <div class="faq-list reveal">
+        <details><summary>Can I download it yet?<span aria-hidden="true" class="plus">+</span></summary><div class="answer"><p>Not just yet. Nifty Outfit Nook is still in development. This is our first hello, and we'll share download details here when it's ready.</p></div></details>
+        <details><summary>What are you building?<span aria-hidden="true" class="plus">+</span></summary><div class="answer"><p>A personal wardrobe and outfit styling app, with plans for clothing organisation, saved looks, and an AI styling assistant. Features are being developed and may evolve before launch.</p></div></details>
+        <details><summary>When will it launch?<span aria-hidden="true" class="plus">+</span></summary><div class="answer"><p>We haven't announced a date. Check back here for launch news as the app takes shape.</p></div></details>
+      </div>
     </section>
   </main>
-  <footer><p>Nifty Outfit Nook</p><p>More to share soon.</p></footer>
+  <footer class="footer wrap"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">n.</span><span>Nifty Outfit Nook</span></a><p>A little more you. Coming soon.</p><small>© 2026 Nifty Outfit Nook</small></footer>
 </body>
 </html>
