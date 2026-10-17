@@ -107,6 +107,15 @@ nonisolated enum TourCatalog {
                     comment: "App tours: what a try-on picture's tour covers"),
                 stepCount: 2, systemImage: "camera", isCommon: false),
             TourCatalogEntry(
+                id: .tryOn, title: String(localized: "Try it on", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "What the picture is, and making it", bundle: .module,
+                    comment: "App tours: what the Try it on sheet's tour covers"),
+                stepCount: 2, systemImage: "camera", isCommon: false,
+                startsLater: String(
+                    localized: "Opens your first saved look. Shows when you tap Try it on.", bundle: .module,
+                    comment: "App tours: the Try it on tour starts when she opens the sheet")),
+            TourCatalogEntry(
                 id: .garment,
                 title: String(localized: "A piece of clothing", bundle: .module, comment: "App tours: a screen"),
                 summary: String(
@@ -120,6 +129,20 @@ nonisolated enum TourCatalog {
                     comment: "App tours: what Add a piece's tour covers"
                 ),
                 stepCount: 2, systemImage: "plus", isCommon: false),
+            TourCatalogEntry(
+                id: .editPiece,
+                title: String(localized: "Editing a piece", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "The photo, the details and Save", bundle: .module,
+                    comment: "App tours: what the Edit a piece tour covers"),
+                stepCount: 3, systemImage: "pencil", isCommon: false),
+            TourCatalogEntry(
+                id: .recentlyDeleted,
+                title: String(localized: "Recently deleted", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "Bringing a piece back", bundle: .module,
+                    comment: "App tours: what Recently deleted's tour covers"),
+                stepCount: 2, systemImage: "trash", isCommon: false),
             TourCatalogEntry(
                 id: .laundry, title: String(localized: "Laundry", bundle: .module, comment: "App tours: a screen"),
                 summary: String(
@@ -141,11 +164,25 @@ nonisolated enum TourCatalog {
                     comment: "App tours: what a suitcase's tour covers"),
                 stepCount: 3, systemImage: "suitcase", isCommon: false),
             TourCatalogEntry(
+                id: .allSuitcases,
+                title: String(localized: "All suitcases", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "Finding one, archived ones and your whole closet", bundle: .module,
+                    comment: "App tours: what All suitcases' tour covers"),
+                stepCount: 3, systemImage: "suitcase.rolling", isCommon: false),
+            TourCatalogEntry(
                 id: .profile, title: String(localized: "Profile", bundle: .module, comment: "App tours: a screen"),
                 summary: String(
                     localized: "Your sign, your fit and these tours", bundle: .module,
                     comment: "App tours: what Profile's tour covers"),
                 stepCount: 3, systemImage: "person.crop.circle", isCommon: false),
+            TourCatalogEntry(
+                id: .accessibility,
+                title: String(localized: "Accessibility", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "Your iPhone’s settings, and where to change them", bundle: .module,
+                    comment: "App tours: what Accessibility's tour covers"),
+                stepCount: 2, systemImage: "accessibility", isCommon: false),
             TourCatalogEntry(
                 id: .help, title: String(localized: "Help", bundle: .module, comment: "App tours: a screen"),
                 summary: String(
@@ -167,6 +204,13 @@ nonisolated enum TourCatalog {
                     localized: "What’s shared, and deleting your data", bundle: .module,
                     comment: "App tours: what Privacy and terms' tour covers"),
                 stepCount: 2, systemImage: "hand.raised", isCommon: false),
+            TourCatalogEntry(
+                id: .deleteData,
+                title: String(localized: "Delete my data", bundle: .module, comment: "App tours: a screen"),
+                summary: String(
+                    localized: "What goes, and how it asks first", bundle: .module,
+                    comment: "App tours: what Delete my data's tour covers"),
+                stepCount: 2, systemImage: "trash", isCommon: false),
         ]
     }
 

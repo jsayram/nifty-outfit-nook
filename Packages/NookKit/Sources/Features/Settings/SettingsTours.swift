@@ -90,3 +90,65 @@ enum PrivacyTour {
             ])
     }
 }
+
+/// Delete my data's quick tour (Stage A audit; the mockups have none): what goes, and the button
+/// that asks once more.
+enum DeleteDataTour {
+    enum Anchor {
+        static let parts = TourAnchorID("deleteData.parts")
+        static let delete = TourAnchorID("deleteData.delete")
+    }
+
+    static var definition: TourDefinition {
+        .gotIt(
+            .deleteData,
+            steps: [
+                TourStep(
+                    Anchor.parts,
+                    title: String(
+                        localized: "What goes", bundle: .module, comment: "Delete my data tour, step 1 title"),
+                    message: String(
+                        localized: "This list shows everything that’s deleted, and how much of each.",
+                        bundle: .module, comment: "Delete my data tour, step 1")),
+                TourStep(
+                    Anchor.delete,
+                    title: String(
+                        localized: "It asks once more", bundle: .module, comment: "Delete my data tour, step 2 title"),
+                    message: String(
+                        localized: "Nothing goes until you say yes a second time. Deleting can’t be undone.",
+                        bundle: .module, comment: "Delete my data tour, step 2")),
+            ])
+    }
+}
+
+/// Accessibility's quick tour (Stage A audit; the mockups have none): the iPhone's settings as
+/// they are, and Open Settings.
+enum AccessibilityTour {
+    enum Anchor {
+        static let settings = TourAnchorID("accessibility.settings")
+        static let openSettings = TourAnchorID("accessibility.openSettings")
+    }
+
+    static var definition: TourDefinition {
+        .gotIt(
+            .accessibility,
+            steps: [
+                TourStep(
+                    Anchor.settings,
+                    title: String(
+                        localized: "It follows your iPhone", bundle: .module,
+                        comment: "Accessibility tour, step 1 title"),
+                    message: String(
+                        localized: "These are your iPhone’s settings right now, and what the app does with each one.",
+                        bundle: .module, comment: "Accessibility tour, step 1")),
+                TourStep(
+                    Anchor.openSettings,
+                    title: String(
+                        localized: "Change them in Settings", bundle: .module,
+                        comment: "Accessibility tour, step 2 title"),
+                    message: String(
+                        localized: "Open Settings takes you to this app’s page in the Settings app.", bundle: .module,
+                        comment: "Accessibility tour, step 2")),
+            ])
+    }
+}

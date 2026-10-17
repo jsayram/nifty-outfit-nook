@@ -30,6 +30,9 @@ struct DeleteDataScreen: View {
                 Text(DeleteDataText.askMessage)
             }
             .task { await model.load(from: services) }
+            // Delete my data's quick tour (Stage A audit), once the counts are read. Not while it
+            // asks or deletes, or after a deletion that didn't finish.
+            .screenTour(DeleteDataTour.definition, isReady: model.counts != nil && model.phase == .ready && !isAsking)
     }
 
     private func delete() async {
@@ -63,6 +66,7 @@ struct DeleteDataPage: View {
                         systemImage: DeleteDataText.systemImage(part))
                 }
             }
+            .tourAnchor(DeleteDataTour.Anchor.parts, label: DeleteDataText.whatGoesHeader)
 
             SettingsGroup(header: DeleteDataText.afterHeader) {
                 SettingsNote(DeleteDataText.after)
@@ -72,7 +76,10 @@ struct DeleteDataPage: View {
             VStack(spacing: NookSpacing.small) {
                 DeleteButton(
                     title: model.phase.isIncomplete ? DeleteDataText.tryAgain : SettingsText.deleteTitle,
-                    isDeleting: model.phase == .deleting, action: delete)
+                    isDeleting: model.phase == .deleting, action: delete
+                )
+                // From the tour it asks once more, as the button does.
+                .tourAnchor(DeleteDataTour.Anchor.delete, label: SettingsText.deleteTitle, action: delete)
                 Text(DeleteDataText.cantUndo)
                     .nookTextStyle(.note)
                     .foregroundStyle(.nook.textSecondary)

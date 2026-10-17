@@ -24,6 +24,7 @@ struct GarmentDetailsForm: View {
                 focusValue: .name
             )
             .id(GarmentField.name)
+            .tourAnchor(EditPieceTour.Anchor.name, label: GarmentEditorText.label(for: .name))
             kind
                 .id(GarmentField.category)
             colours
@@ -211,6 +212,12 @@ private struct PhotoRow: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .body) private var thumbSize: CGFloat = 72
 
+    private var photoButtonTitle: String {
+        model.details.photo == .noPhoto
+            ? String(localized: "Add a photo", bundle: .module, comment: "Button on the Add a piece form")
+            : String(localized: "Change photo", bundle: .module, comment: "Button on the Add a piece form")
+    }
+
     var body: some View {
         let layout =
             dynamicTypeSize.isAccessibilitySize
@@ -233,18 +240,15 @@ private struct PhotoRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("editor.photoCaption")
                     NookButton(
-                        model.details.photo == .noPhoto
-                            ? String(
-                                localized: "Add a photo", bundle: .module, comment: "Button on the Add a piece form")
-                            : String(
-                                localized: "Change photo", bundle: .module, comment: "Button on the Add a piece form"),
-                        systemImage: "camera", kind: .soft, size: .small, isLoading: model.photoState == .loading,
+                        photoButtonTitle, systemImage: "camera", kind: .soft, size: .small,
+                        isLoading: model.photoState == .loading,
                         action: addPhoto
                     )
                     // Its ideal width, so the icon stays beside the words. The row measures it with
                     // a narrow width first, which made the button stack its icon above the words.
                     .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
                     .accessibilityIdentifier("editor.addPhoto")
+                    .tourAnchor(EditPieceTour.Anchor.photo, label: photoButtonTitle, action: addPhoto)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

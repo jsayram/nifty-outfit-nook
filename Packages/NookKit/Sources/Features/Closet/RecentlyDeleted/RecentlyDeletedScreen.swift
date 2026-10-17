@@ -17,6 +17,9 @@ struct RecentlyDeletedScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .nookToast($toast)
             .task { await model.load(from: services) }
+            // Recently deleted's quick tour (Stage A audit), once a deleted piece is listed.
+            .screenTour(
+                RecentlyDeletedTour.definition, isReady: model.phase == .loaded && !model.isEmpty && toast == nil)
     }
 
     private func reload() {
@@ -56,8 +59,10 @@ struct RecentlyDeletedPage: View {
         if isStillImage {
             page.background(Color.nook.wallGradient)
         } else {
-            ScrollView(.vertical) { page }
-                .background(Color.nook.wallGradient.ignoresSafeArea())
+            TourScrollReader {
+                ScrollView(.vertical) { page }
+            }
+            .background(Color.nook.wallGradient.ignoresSafeArea())
         }
     }
 
@@ -111,7 +116,8 @@ struct RecentlyDeletedPage: View {
             .fixedSize(horizontal: false, vertical: true)
             ForEach(model.pieces) { piece in
                 RecentlyDeletedRow(
-                    piece: piece, now: model.loadedAt, isRestoring: model.restoring == piece.id
+                    piece: piece, now: model.loadedAt, isRestoring: model.restoring == piece.id,
+                    isFirst: piece.id == model.pieces.first?.id
                 ) {
                     restore(piece)
                 }
@@ -125,6 +131,8 @@ private struct RecentlyDeletedRow: View {
     let piece: Garment
     let now: Date
     let isRestoring: Bool
+    /// The first piece is the one the quick tour points at.
+    let isFirst: Bool
     let restore: () -> Void
 
     @Environment(\.calendar) private var calendar
@@ -137,6 +145,10 @@ private struct RecentlyDeletedRow: View {
         return String(
             localized: "Kept until \(date)", bundle: .module,
             comment: "Recently deleted: the day a piece is deleted for good, such as Nov 13")
+    }
+
+    private var restoreLabel: String {
+        String(localized: "Restore \(piece.name)", bundle: .module, comment: "Spoken on Restore, with the piece's name")
     }
 
     var body: some View {
@@ -162,15 +174,16 @@ private struct RecentlyDeletedRow: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("recentlyDeleted.piece.\(piece.id.rawValue)")
+            .tourAnchor(RecentlyDeletedTour.Anchor.piece, label: "\(piece.name), \(deadline)", isEnabled: isFirst)
             NookButton(
                 String(localized: "Restore", bundle: .module, comment: "Button: brings a deleted piece back"),
                 systemImage: "arrow.uturn.backward", kind: .pill, size: .small, isLoading: isRestoring,
                 fillsWidth: stacked, action: restore
             )
-            .accessibilityLabel(
-                Text("Restore \(piece.name)", bundle: .module, comment: "Spoken on Restore, with the piece's name")
-            )
+            .accessibilityLabel(Text(restoreLabel))
             .accessibilityIdentifier("recentlyDeleted.restore.\(piece.id.rawValue)")
+            .tourAnchor(
+                RecentlyDeletedTour.Anchor.restore, label: restoreLabel, isEnabled: isFirst, action: restore)
         }
         .padding(NookSpacing.medium)
         .background(Color.nook.tint, in: NookRadius.shape(NookRadius.group))

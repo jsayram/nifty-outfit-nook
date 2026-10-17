@@ -25,6 +25,8 @@ struct AccessibilityScreen: View {
                 Text(verbatim: "").accessibilityHidden(true)
             }
         }
+        // Accessibility's quick tour (Stage A audit). Nothing loads, so it's always ready.
+        .screenTour(AccessibilityTour.definition, isReady: true)
     }
 }
 
@@ -61,6 +63,7 @@ struct AccessibilityPage: View {
                     title: AccessibilityText.darkAppearance, detail: AccessibilityText.darkAppearanceDetail,
                     value: colorScheme == .dark ? ProfileText.on : ProfileText.off, systemImage: "moon")
             }
+            .tourAnchor(AccessibilityTour.Anchor.settings, label: AccessibilityText.nowHeader)
 
             VStack(spacing: NookSpacing.small) {
                 NookButton(
@@ -68,6 +71,9 @@ struct AccessibilityPage: View {
                 )
                 .accessibilityHint(Text(AccessibilityText.openSettingsHint))
                 .accessibilityIdentifier("accessibility.openSettings")
+                .tourAnchor(
+                    AccessibilityTour.Anchor.openSettings, label: AccessibilityText.openSettings,
+                    hint: TourText.hint(AccessibilityText.openSettingsHint), action: openSettings)
                 SettingsNote(AccessibilityText.whereToChange)
                     .floorCard()
             }

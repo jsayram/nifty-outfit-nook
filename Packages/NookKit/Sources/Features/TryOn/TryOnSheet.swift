@@ -60,20 +60,26 @@ struct TryOnSheetContent: View {
                 AccessibilityNotification.Announcement(TryOnSheetText.madeTitle).post()
             }
         }
+        // The sheet's quick tour (Stage A audit), before anything is made. The sheet draws it.
+        .screenTour(TryOnTour.definition, isReady: model.step == .ready)
     }
 
     // MARK: Steps
 
     private var ready: some View {
         VStack(alignment: .leading, spacing: NookSpacing.medium) {
-            line(TryOnSheetText.what, systemImage: "camera")
-            line(TryOnSheetText.simulatedHere, systemImage: "sparkles")
+            VStack(alignment: .leading, spacing: NookSpacing.medium) {
+                line(TryOnSheetText.what, systemImage: "camera")
+                line(TryOnSheetText.simulatedHere, systemImage: "sparkles")
+            }
+            .tourAnchor(TryOnTour.Anchor.about, label: TryOnSheetText.what)
             if model.savesLook {
                 line(TryOnSheetText.savesTheLook, systemImage: "heart")
             }
             note(TryOnSheetText.free)
             NookButton(TryOnSheetText.make, systemImage: "camera", fillsWidth: true, action: model.make)
                 .accessibilityIdentifier("tryOn.make")
+                .tourAnchor(TryOnTour.Anchor.make, label: TryOnSheetText.make, action: model.make)
         }
         // A container keeps its children's own identifiers.
         .accessibilityElement(children: .contain)

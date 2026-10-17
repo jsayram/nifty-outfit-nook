@@ -34,6 +34,9 @@ struct TourDefinition: Hashable, Sendable {
     /// Where VoiceOver goes when the last step's button closes the tour. Skip and the other ways
     /// out send it to the control of the step that was showing.
     var finishFocus: TourAnchorID?
+    /// True for a tour on a sheet (Try it on, Stage A audit). The sheet draws it over itself,
+    /// since anything the root draws stays under a sheet (`TourOverlay`, `RootTabView`).
+    var isInSheet = false
 }
 
 extension TourStep {
@@ -46,7 +49,8 @@ extension TourDefinition {
     /// A screen's tour that ends with Got it, as every tour but Home's does (Phase 16b). Every
     /// tour starts at version 1; a version goes up only when the screen's controls or the steps
     /// really change, never for a copy fix (PRD §7.8).
-    static func gotIt(_ id: TourID, version: Int = 1, steps: [TourStep]) -> TourDefinition {
-        TourDefinition(id: id, version: version, steps: steps, finishTitle: TourText.gotIt, finishFocus: nil)
+    static func gotIt(_ id: TourID, version: Int = 1, isInSheet: Bool = false, steps: [TourStep]) -> TourDefinition {
+        TourDefinition(
+            id: id, version: version, steps: steps, finishTitle: TourText.gotIt, finishFocus: nil, isInSheet: isInSheet)
     }
 }

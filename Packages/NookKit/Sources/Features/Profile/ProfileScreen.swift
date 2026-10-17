@@ -178,6 +178,8 @@ struct ProfileScreen: View {
         case .help: pushed = .help
         case .feedback: pushed = .feedback
         case .privacy: pushed = .privacy
+        case .accessibility: pushed = .accessibility
+        case .deleteData: pushed = .deleteData
         default: openForTour(tour)
         }
     }

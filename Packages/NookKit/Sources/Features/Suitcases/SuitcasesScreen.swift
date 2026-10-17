@@ -213,6 +213,10 @@ struct AllSuitcasesScreen: View {
                 .nookToast($toast)
         }
         .task { await model.load(from: services) }
+        // All suitcases' quick tour (Stage A audit), once the list is on screen.
+        .screenTour(
+            AllSuitcasesTour.definition(hasArchived: !model.shelf.archived.isEmpty),
+            isReady: model.phase == .loaded && !showsAdd && made == nil && toast == nil)
     }
 }
 
@@ -229,10 +233,12 @@ struct AllSuitcasesPage: View {
             page
                 .background(Color.nook.floor)
         } else {
-            ScrollView(.vertical) {
-                page
+            TourScrollReader {
+                ScrollView(.vertical) {
+                    page
+                }
+                .scrollDismissesKeyboard(.immediately)
             }
-            .scrollDismissesKeyboard(.immediately)
             .background(FloorBackground())
         }
     }
@@ -270,23 +276,30 @@ struct AllSuitcasesPage: View {
             .floorCard()
         case .loaded:
             VStack(alignment: .leading, spacing: NookSpacing.medium) {
-                NookSearchField(
-                    String(localized: "Search suitcases", bundle: .module, comment: "All suitcases search prompt"),
-                    text: $model.searchText)
+                NookSearchField(searchPrompt, text: $model.searchText)
+                    .tourAnchor(AllSuitcasesTour.Anchor.search, label: searchPrompt)
                 if !model.shelf.archived.isEmpty {
-                    NookChip(
-                        String(
-                            localized: "Archived · \(model.shelf.archived.count)", bundle: .module,
-                            comment: "All suitcases: filter that shows archived suitcases, with how many"),
-                        systemImage: "archivebox", isSelected: model.showsArchived
-                    ) {
+                    NookChip(archivedTitle, systemImage: "archivebox", isSelected: model.showsArchived) {
                         model.showsArchived.toggle()
                     }
                     .accessibilityIdentifier("allSuitcases.archived")
+                    .tourAnchor(AllSuitcasesTour.Anchor.archived, label: archivedTitle) {
+                        model.showsArchived.toggle()
+                    }
                 }
                 list
             }
         }
+    }
+
+    private var searchPrompt: String {
+        String(localized: "Search suitcases", bundle: .module, comment: "All suitcases search prompt")
+    }
+
+    private var archivedTitle: String {
+        String(
+            localized: "Archived · \(model.shelf.archived.count)", bundle: .module,
+            comment: "All suitcases: filter that shows archived suitcases, with how many")
     }
 
     @ViewBuilder private var list: some View {
@@ -317,6 +330,9 @@ struct AllSuitcasesPage: View {
                     NookDivider()
                         .padding(.vertical, NookSpacing.xSmall)
                     MainClosetSourceRow(model: model, choose: actions.choose)
+                        .tourAnchor(AllSuitcasesTour.Anchor.mainCloset, label: SuitcasesText.mainCloset) {
+                            actions.choose(.mainCloset)
+                        }
                 }
             }
             .padding(NookSpacing.xSmall)

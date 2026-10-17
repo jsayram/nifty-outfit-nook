@@ -22,8 +22,12 @@ struct RootTabView: View {
     var body: some View {
         RootTabs(services: services)
             // While a tour shows, VoiceOver reads only the tour, over every tab and the tab bar.
-            .accessibilityHidden(tours.isShowing)
+            // A tour on a sheet is modal on its sheet, and the tabs are under the sheet.
+            .accessibilityHidden(tours.isShowing && !tours.isShowingInSheet)
             .overlay { TourOverlay(tours: tours) }
+            // Every styled sheet draws a tour that's on a sheet over itself (Stage A audit).
+            .environment(
+                \.nookSheetOverlay, NookSheetOverlay { [tours] in AnyView(TourOverlay(tours: tours, inSheet: true)) })
     }
 }
 
@@ -90,8 +94,8 @@ private struct RootTabs: View {
     /// Replay from App tours (Phase 16b): opens the tour's screen, where it starts from step 1
     /// (`TourCenter.replay`). A screen about one thing opens on her first one: the first piece
     /// in Closet, her first look, picture or suitcase. With none yet, or for a screen that needs
-    /// her to act first (Your looks, Swap a piece), it opens the screen before it, and the tour
-    /// starts when she gets there. Profile opens its own screens.
+    /// her to act first (Your looks, Swap a piece, Try it on), it opens the screen before it, and
+    /// the tour starts when she gets there. Profile opens its own screens.
     private func openForTour(_ tour: TourID) {
         Task {
             switch tour {
@@ -107,6 +111,19 @@ private struct RootTabs: View {
                 show(.closet, closet: closet.shown.first.map { [.garment($0.id, name: $0.name)] } ?? [])
             case .addPiece:
                 show(.closet, closet: [.addPiece(.photo)])
+            case .editPiece:
+                // Her first piece, open in Edit.
+                let closet = ClosetModel()
+                await closet.load(from: services)
+                show(
+                    .closet,
+                    closet: closet.shown.first.map {
+                        [.garment($0.id, name: $0.name), .editPiece($0.id, name: $0.name)]
+                    } ?? [])
+            case .recentlyDeleted:
+                show(.closet, closet: [.recentlyDeleted])
+            case .allSuitcases:
+                show(.closet, closet: [.suitcases, .allSuitcases])
             case .suitcases:
                 show(.closet, closet: [.suitcases])
             case .suitcase:
@@ -119,7 +136,7 @@ private struct RootTabs: View {
                 show(.closet, closet: [.laundry])
             case .savedLooks:
                 show(.savedLooks, savedLooks: [])
-            case .look, .swap:
+            case .look, .swap, .tryOn:
                 let looks = SavedLooksModel()
                 await looks.load(from: services)
                 show(.savedLooks, savedLooks: looks.items.first.map { [.look($0.id)] } ?? [])

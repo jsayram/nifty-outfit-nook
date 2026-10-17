@@ -24,6 +24,10 @@ struct ScreenToursTests {
             SuitcaseTour.definition(hasPieces: false), LaundryTour.definition(hasScope: true),
             LaundryTour.definition(hasScope: false), LaundryTour.offDefinition, ProfileTour.definition,
             FitTour.definition, HelpTour.definition, FeedbackTour.definition, PrivacyTour.definition,
+            // The Stage A audit's six.
+            RecentlyDeletedTour.definition, AllSuitcasesTour.definition(hasArchived: true),
+            AllSuitcasesTour.definition(hasArchived: false), DeleteDataTour.definition,
+            AccessibilityTour.definition, TryOnTour.definition, EditPieceTour.definition,
         ]
     }
 
@@ -46,6 +50,25 @@ struct ScreenToursTests {
             }
         }
         #expect(Set(Self.definitions.map(\.id)) == Set(TourID.all))
+    }
+
+    /// The Stage A audit's tours: short, on the screens' own controls, and only Try it on is on a
+    /// sheet, which draws it over itself.
+    @Test func theSixNewToursAreShortAndOnlyTryOnIsOnASheet() async {
+        #expect(Self.definitions.filter(\.isInSheet).map(\.id) == [.tryOn])
+        #expect(
+            AllSuitcasesTour.definition(hasArchived: false).steps.map(\.anchor) == [
+                AllSuitcasesTour.Anchor.search, AllSuitcasesTour.Anchor.mainCloset,
+            ])
+        #expect(EditPieceTour.definition.steps.last?.anchor == EditPieceTour.Anchor.save)
+        #expect(DeleteDataTour.definition.steps.last?.message.contains("can’t be undone") == true)
+
+        let tours = center()
+        #expect(await tours.startIfNeeded(TryOnTour.definition))
+        #expect(tours.isShowingInSheet)
+        tours.skip()
+        #expect(await tours.startIfNeeded(AccessibilityTour.definition))
+        #expect(!tours.isShowingInSheet)
     }
 
     @Test func layoutsOfAScreenShareItsTourAndStepCount() {
