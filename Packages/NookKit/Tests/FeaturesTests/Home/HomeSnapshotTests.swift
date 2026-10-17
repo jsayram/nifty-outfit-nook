@@ -145,7 +145,7 @@ struct HomeSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, .large)
             .environment(\.locale, Locale(identifier: "en_US"))
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: layout.size.width, height: layout.contentHeight)
         guard let image = renderer.uiImage else {
@@ -183,7 +183,7 @@ struct HomeSnapshotTests {
         }
         .environment(\.dynamicTypeSize, .large)
         .environment(\.locale, Locale(identifier: "en_US"))
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = 1
         guard let image = renderer.uiImage else {
             Issue.record("ImageRenderer produced no image for \(name)")

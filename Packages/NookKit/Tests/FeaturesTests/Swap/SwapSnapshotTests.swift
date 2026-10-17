@@ -117,7 +117,7 @@ struct SwapSnapshotTests {
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, TestTime.locale)
             .environment(\.calendar, TestTime.calendar)
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
         guard let image = renderer.uiImage else {

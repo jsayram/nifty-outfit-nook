@@ -64,6 +64,7 @@ func assertWindowSnapshot(
             case .floor: Color.nook.floor
             }
         }
+        .snapshotPhotos()
         .environment(\.horizontalSizeClass, window.sizeClass)
         .environment(\.scenePhase, .active)
         .environment(\.closetIsStillImage, true)
@@ -73,7 +74,7 @@ func assertWindowSnapshot(
         .environment(\.dynamicTypeSize, dynamicTypeSize)
         .environment(\.locale, TestTime.locale)
         .environment(\.calendar, TestTime.calendar)
-    let renderer = ImageRenderer(content: content)
+    let renderer = ImageRenderer(content: content.snapshotPhotos())
     renderer.scale = 1
     renderer.proposedSize = ProposedViewSize(size)
     guard let image = renderer.uiImage else {

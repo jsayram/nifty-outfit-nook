@@ -110,7 +110,7 @@ struct HomeTourSnapshotTests {
         .environment(\.nookStaticRendering, true)
         .environment(\.colorScheme, colorScheme)
         .environment(\.locale, Locale(identifier: "en_US"))
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.snapshotPhotos())
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(size)
         guard let image = renderer.uiImage else {

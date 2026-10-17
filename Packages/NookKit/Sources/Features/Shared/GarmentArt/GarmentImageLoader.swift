@@ -28,6 +28,11 @@ final class GarmentImageLoader {
     /// How many times the provider was asked, for tests.
     private(set) var providerRequests = 0
 
+    /// Test hook for still snapshots: the picture's bytes, read at once. When set, `cachedImage`
+    /// decodes a picture it doesn't hold yet from these bytes, so a still render shows the real
+    /// photo on its first pass at whatever size the view asks for. Never set in the app.
+    var synchronousData: ((PhotoReference) -> Data?)?
+
     struct Key: Hashable {
         let reference: PhotoReference
         let maxPixelSize: Int
@@ -93,7 +98,13 @@ final class GarmentImageLoader {
     /// The picture if it has already loaded, without asking the provider. Lets a view show a
     /// loaded picture on its first frame, and still images draw one at all.
     func cachedImage(for reference: PhotoReference, maxPixelSize: Int) -> UIImage? {
-        cache.object(forKey: Key(reference: reference, maxPixelSize: maxPixelSize).cacheName)
+        let name = Key(reference: reference, maxPixelSize: maxPixelSize).cacheName
+        if let cached = cache.object(forKey: name) { return cached }
+        guard let data = synchronousData?(reference),
+            let image = Self.thumbnail(data, maxPixelSize: maxPixelSize)
+        else { return nil }
+        cache.setObject(image, forKey: name)
+        return image
     }
 
     /// True when the provider had no picture for `reference` at this size.
@@ -105,6 +116,10 @@ final class GarmentImageLoader {
     /// Decodes `data` straight to a thumbnail no larger than `maxPixelSize`, off the main actor.
     @concurrent
     nonisolated static func downsample(_ data: Data, maxPixelSize: Int) async -> UIImage? {
+        thumbnail(data, maxPixelSize: maxPixelSize)
+    }
+
+    nonisolated static func thumbnail(_ data: Data, maxPixelSize: Int) -> UIImage? {
         let sourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions) else { return nil }
         let options =

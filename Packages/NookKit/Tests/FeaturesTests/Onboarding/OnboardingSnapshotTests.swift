@@ -122,7 +122,7 @@ struct OnboardingSnapshotTests {
             .environment(\.displayScale, scale)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, us)
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: width, height: height)
         guard let image = renderer.uiImage else {

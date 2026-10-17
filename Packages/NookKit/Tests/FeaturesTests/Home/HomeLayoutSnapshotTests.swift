@@ -87,7 +87,7 @@ struct HomeLayoutSnapshotTests {
             .environment(\.colorScheme, colorScheme)
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, Locale(identifier: "en_US"))
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: size.width, height: height)
         guard let image = renderer.uiImage else {

@@ -60,7 +60,7 @@ struct ClosetSnapshotTests {
             .environment(\.nookStaticRendering, true)
             .environment(\.dynamicTypeSize, .large)
             .environment(\.locale, TestTime.locale)
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: 375, height: nil)
         guard let image = renderer.uiImage else {
@@ -121,7 +121,7 @@ struct ClosetSnapshotTests {
             .environment(\.dynamicTypeSize, dynamicTypeSize)
             .environment(\.locale, TestTime.locale)
             .environment(\.calendar, TestTime.calendar)
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.snapshotPhotos())
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
         guard let image = renderer.uiImage else {
