@@ -43,7 +43,7 @@ The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commi
 
 On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet speed checks allow three times their local bound. Each speed check also takes the fastest of three runs, so a stall from tests running in parallel doesn't fail it.
 
-`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests` and `IPadStyleMeAndSavedTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
+`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests`, `IPadStyleMeAndSavedTests` and `IPadKeyboardTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator. The scheme has a second plan, `UITests.xctestplan`, with only the UI tests, so a UI-only run doesn't build the package test targets.
 
@@ -138,6 +138,7 @@ docs/settings.md             Track laundry, Accessibility, Help, Send feedback, 
 docs/tours.md                Quick tours: the tour system, every screen's tour, App tours, the -tour flag, VoiceOver and the tests.
 docs/onboarding.md           Onboarding: the welcome and its steps, what's kept across launches, a relaunch, and the -onboarding flag.
 docs/testflight.md           Lily's TestFlight build: setup, each build, What to Test, her notes, and the release checks.
+docs/accessibility-audit.md  The accessibility audit on every main screen, what it excuses and why, and what still needs a device.
 docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet's and Saved Looks' columns, two panes, readable widths, sheets and window sizes.
 website/                     The app's static website.
 ```
