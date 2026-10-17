@@ -18,8 +18,11 @@ name="${1:?usage: scripts/wait-for-artifact.sh <artifact> <job>}"
 job="${2:?usage: scripts/wait-for-artifact.sh <artifact> <job>}"
 run="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
+# A failed API call (CI once got a TLS handshake timeout) counts as "not yet", never as "yes".
 uploaded() {
-    [[ "$(gh api "$run/artifacts?name=$name" --jq '.total_count')" != "0" ]]
+    local count
+    count="$(gh api "$run/artifacts?name=$name" --jq '.total_count')" || return 1
+    [[ "$count" =~ ^[0-9]+$ ]] && ((count > 0))
 }
 
 SECONDS=0
@@ -29,12 +32,13 @@ while ((SECONDS < 1200)); do
         echo "ready=true" >> "$GITHUB_OUTPUT"
         exit 0
     fi
-    status="$(gh api "$run/attempts/$GITHUB_RUN_ATTEMPT/jobs" --jq ".jobs[] | select(.name == \"$job\") | .status")"
+    status="$(gh api "$run/attempts/$GITHUB_RUN_ATTEMPT/jobs" --jq ".jobs[] | select(.name == \"$job\") | .status")" ||
+        status=""
     if [[ "$status" == "completed" ]] && ! uploaded; then
         echo "$job ended without uploading $name" >&2
         exit 1
     fi
-    if [[ "$status" != "in_progress" ]] && ((SECONDS >= 180)); then
+    if [[ "$status" == "queued" || "$status" == "waiting" || "$status" == "pending" ]] && ((SECONDS >= 180)); then
         echo "$job hasn't started after ${SECONDS}s ($status), so this job builds for itself"
         echo "ready=false" >> "$GITHUB_OUTPUT"
         exit 0
