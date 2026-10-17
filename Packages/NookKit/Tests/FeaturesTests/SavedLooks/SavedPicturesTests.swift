@@ -38,8 +38,11 @@ struct SavedPicturesTests {
     @Test func picturesNewestFirstWithTheirLooks() async throws {
         let model = await loadedSavedLooks()
         #expect(model.picturesPhase == .loaded)
-        #expect(ids(model) == ["p-interview", "p-interview-earlier", "p-lace"])
-        #expect(model.picturesCountText == "3 pictures")
+        #expect(
+            ids(model) == [
+                "p-interview", "p-interview-earlier", "p-lace", "p-office", "p-casual", "p-date", "p-weekend",
+            ])
+        #expect(model.picturesCountText == "7 pictures")
         #expect(!model.hasNoPictures)
         let earlier = try #require(model.pictureItem("p-interview-earlier"))
         #expect(earlier.lookName == "Interview navy and pink")
@@ -72,10 +75,10 @@ struct SavedPicturesTests {
         model.tab = .pictures
         for (query, expected) in [
             ("interview", ["p-interview", "p-interview-earlier"]),
-            ("date night", ["p-lace"]),
-            ("cream sweater", ["p-interview-earlier"]),
+            ("date night", ["p-lace", "p-date"]),
+            ("cream sweater", ["p-interview-earlier", "p-weekend"]),
             ("navy cardigan", ["p-interview", "p-interview-earlier"]),
-            ("weekend", []),
+            ("weekend", ["p-weekend"]),
         ] {
             model.searchText = query
             await model.settleSearch()
@@ -83,8 +86,8 @@ struct SavedPicturesTests {
         }
         model.clearFilters()
         model.toggle(.bag)
-        #expect(ids(model) == ["p-lace"])
-        #expect(model.picturesCountText == "1 of 3 pictures")
+        #expect(ids(model) == ["p-lace", "p-casual"])
+        #expect(model.picturesCountText == "2 of 7 pictures")
         model.toggle(.burgundy)
         model.toggle(.bag)
         model.toggle(.dress)
@@ -94,9 +97,9 @@ struct SavedPicturesTests {
 
     @Test func oneIsSingular() async {
         let model = await loadedSavedLooks(searchDelay: .zero)
-        model.searchText = "lace"
+        model.searchText = "tee"
         await model.settleSearch()
-        #expect(model.picturesCountText == "1 of 3 pictures")
+        #expect(model.picturesCountText == "1 of 7 pictures")
         #expect(TryOnText.pictures(1) == "1 picture")
     }
 
@@ -120,7 +123,9 @@ struct SavedPicturesTests {
         let detail = await picture("p-lace", services: services)
         let removal = try await detail.delete()
         #expect(detail.phase == .missing)
-        #expect(try await services.pictures.pictures().map(\.id) == ["p-interview", "p-interview-earlier"])
+        #expect(
+            try await services.pictures.pictures().map(\.id)
+                == ["p-interview", "p-interview-earlier", "p-office", "p-casual", "p-date", "p-weekend"])
         // The look is untouched and no longer lists the picture.
         let lace = await look("o-lace-date", services: services)
         #expect(lace.phase == .loaded)
@@ -131,7 +136,10 @@ struct SavedPicturesTests {
         await grid.load(from: services, now: TestTime.now)
         await grid.undoLastPictureRemoval(using: services, now: TestTime.now)
         #expect(grid.lastPictureRemoval == nil)
-        #expect(ids(grid) == ["p-interview", "p-interview-earlier", "p-lace"])
+        #expect(
+            ids(grid) == [
+                "p-interview", "p-interview-earlier", "p-lace", "p-office", "p-casual", "p-date", "p-weekend",
+            ])
         await lace.load(from: services)
         #expect(lace.pictures.map(\.id) == ["p-lace"])
     }
@@ -165,7 +173,7 @@ struct SavedPicturesTests {
         #expect(grid.pictureItem("p-lace")?.lookName == "Lace date night")
         grid.searchText = "lace"
         await grid.settleSearch()
-        #expect(ids(grid) == ["p-lace"])
+        #expect(ids(grid) == ["p-lace", "p-office", "p-date"])
 
         try await removal.undo(in: services.looks)
         await picture.load(from: services)

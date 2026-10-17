@@ -32,8 +32,12 @@ struct SavedLooksModelTests {
     @Test func showsSavedLooksNewestFirst() async {
         let model = await loadedSavedLooks()
         #expect(model.phase == .loaded)
-        #expect(ids(model) == ["o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-blazer-office"])
-        #expect(model.countText == "5 looks")
+        #expect(
+            ids(model) == [
+                "o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-office-lace", "o-casual-jeans",
+                "o-date-crop", "o-weekend-olive", "o-blazer-office",
+            ])
+        #expect(model.countText == "9 looks")
         #expect(!model.isEmpty)
     }
 
@@ -78,10 +82,16 @@ struct SavedLooksModelTests {
         let model = await loadedSavedLooks(searchDelay: .zero)
         for (query, expected) in [
             ("interview", ["o-interview"]),
-            ("loafers", ["o-brunch-idea"]),
-            ("date night", ["o-lace-date"]),
+            ("loafers", ["o-brunch-idea", "o-weekend-olive"]),
+            ("date night", ["o-lace-date", "o-date-crop"]),
             ("cardigan", ["o-brunch-idea", "o-interview"]),
-            ("shoes", ["o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-blazer-office"]),
+            (
+                "shoes",
+                [
+                    "o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-office-lace", "o-casual-jeans",
+                    "o-date-crop", "o-weekend-olive", "o-blazer-office",
+                ]
+            ),
             ("navy heels", ["o-blazer-office"]),
         ] {
             model.searchText = query
@@ -97,10 +107,10 @@ struct SavedLooksModelTests {
         #expect(model.searchesApplied == 0)
         await model.settleSearch()
         #expect(model.searchesApplied == 1)
-        #expect(ids(model) == ["o-lace-date"])
+        #expect(ids(model) == ["o-lace-date", "o-office-lace", "o-date-crop"])
         // Emptying the field shows everything at once.
         model.searchText = ""
-        #expect(model.shown.count == 5)
+        #expect(model.shown.count == 9)
     }
 
     // MARK: Filters
@@ -109,23 +119,23 @@ struct SavedLooksModelTests {
     @Test func chipsAndSwatchesFilter() async {
         let model = await loadedSavedLooks(searchDelay: .zero)
         model.toggle(.bag)
-        #expect(ids(model) == ["o-lace-date"])
+        #expect(ids(model) == ["o-lace-date", "o-casual-jeans"])
         model.toggle(.bag)
         model.toggle(.bottom)
         model.toggle(.black)
-        // Black bottoms: only the lace look's skirt.
-        #expect(ids(model) == ["o-lace-date"])
-        #expect(model.countText == "1 of 5 looks")
+        // Black bottoms: the black midi skirt, in the lace look and the cream crop look.
+        #expect(ids(model) == ["o-lace-date", "o-date-crop"])
+        #expect(model.countText == "2 of 9 looks")
         #expect(model.filterSummary == "Bottoms · Black")
         model.toggle(.black)
         model.toggle(.olive)
-        #expect(ids(model) == ["o-brunch-idea", "o-weekend"])
+        #expect(ids(model) == ["o-brunch-idea", "o-weekend", "o-weekend-olive"])
         model.searchText = "brick"
         await model.settleSearch()
         #expect(ids(model) == ["o-weekend"])
         #expect(model.filterSummary == "Bottoms · Olive · “brick”")
         model.clearFilters()
-        #expect(model.shown.count == 5)
+        #expect(model.shown.count == 9)
         #expect(!model.filter.isActive)
         #expect(model.searchText == "")
     }
@@ -181,7 +191,11 @@ struct SavedLooksModelTests {
 
         await model.undoLastRemoval(using: services, now: TestTime.now)
         #expect(model.lastRemoval == nil)
-        #expect(ids(model) == ["o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-blazer-office"])
+        #expect(
+            ids(model) == [
+                "o-brunch-idea", "o-weekend", "o-interview", "o-lace-date", "o-office-lace", "o-casual-jeans",
+                "o-date-crop", "o-weekend-olive", "o-blazer-office",
+            ])
     }
 
     // MARK: Large set

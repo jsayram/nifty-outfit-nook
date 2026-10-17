@@ -38,7 +38,7 @@ struct TryOnModelTests {
         await model.start(with: services)
         #expect(model.step == .ready)
         #expect(!model.savesLook)
-        #expect(try await services.pictures.pictures().count == 3)
+        #expect(try await services.pictures.pictures().count == 7)
 
         model.make()
         #expect(model.step == .making)
@@ -61,7 +61,7 @@ struct TryOnModelTests {
 
         model.make()
         await model.settle()
-        #expect(try await services.pictures.pictures().count == 4)
+        #expect(try await services.pictures.pictures().count == 8)
         #expect(model.step == .made(try await services.pictures.picture("p-new")))
     }
 
@@ -74,7 +74,7 @@ struct TryOnModelTests {
         model.make()
         await model.settle()
         #expect(model.step == .failed(.offline))
-        #expect(try await offline.pictures.pictures().count == 3)
+        #expect(try await offline.pictures.pictures().count == 7)
 
         let unfinished = services(.failing(.notCompleted))
         let other = self.model(for: blazer)
@@ -111,7 +111,7 @@ struct TryOnModelTests {
         #expect(model.step == .ready)
         await model.settle()
         #expect(model.step == .ready)
-        #expect(try await services.pictures.pictures().count == 3)
+        #expect(try await services.pictures.pictures().count == 7)
     }
 
     /// From Your looks, a look that isn't saved is saved first, and the picture keeps its name.

@@ -35,7 +35,7 @@ struct GarmentDetailLoadingTests {
         // LR-11: every active suitcase it's in, by name.
         #expect(model.suitcases.map(\.name) == ["Jose's house", "Weekend"])
         // Saved looks only, newest first. Unsaved results don't count.
-        #expect(model.savedLookNames == ["Interview navy and pink", "Gray blazer office"])
+        #expect(model.savedLookNames == ["Interview navy and pink", "Office navy and lace", "Gray blazer office"])
         #expect(model.isInCloset)
         #expect(!model.tracksLaundry)
         #expect(!model.showsLaundryAction)
@@ -50,7 +50,7 @@ struct GarmentDetailLoadingTests {
     @Test func aPieceInNoSuitcaseOrLook() async {
         let model = await loadedDetailModel("g-black-heels", services: garmentTestServices())
         #expect(model.suitcases.isEmpty)
-        #expect(model.savedLooks.map(\.id) == ["o-lace-date", "o-blazer-office"])
+        #expect(model.savedLooks.map(\.id) == ["o-lace-date", "o-date-crop", "o-blazer-office"])
     }
 
     @Test func laundryTrackingShowsTheLaundryAction() async {

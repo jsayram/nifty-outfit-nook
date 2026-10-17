@@ -1,5 +1,6 @@
 import DesignSystem
 import SwiftUI
+import UIKit
 
 /// Your try-on photo (RD-06, PRD §9.2.1 step 1, `settings.html`'s photo sheet), Stage A.
 ///
@@ -8,7 +9,7 @@ import SwiftUI
 /// camera, no photo library, no permission prompt and nothing uploaded. She can add the example,
 /// change it and remove it, and removing never touches the try-on pictures she saved.
 ///
-/// The example has no person in it, like Stage A's try-on pictures (Phase 12b). It is hidden in
+/// The example is a sample photo of a woman standing, AI-generated and not her. It is hidden in
 /// the app switcher, as the real photo will be.
 struct TryOnPhotoSheet: View {
     let hasPhoto: Bool
@@ -252,20 +253,40 @@ struct TryOnPhotoSheet: View {
     }
 }
 
-/// Stage A's example try-on photo: the try-on backdrop with a photo symbol and "Example photo ·
-/// Simulated". It isn't a person and isn't her. Hidden in the app switcher like a real photo.
+/// Stage A's example try-on photo: a photo of a woman standing, from the sample wardrobe (an
+/// AI-generated picture, not a person and not her), or the try-on backdrop with a photo symbol
+/// when the provider has none. Under it, "Example photo · Simulated", and the Simulated badge sits
+/// on the photo. Hidden in the app switcher like a real photo.
 struct ExamplePhoto: View {
-    static let size = CGSize(width: 168, height: 210)
+    /// 9:16, the shape of a full-length phone photo.
+    static let size = CGSize(width: 126, height: 224)
+
+    @Environment(\.garmentImages) private var loader
+    @Environment(\.displayScale) private var displayScale
+    @State private var loaded: UIImage?
+
+    private var pixelSize: Int { Int((Self.size.height * displayScale).rounded(.up)) }
+
+    private var photo: UIImage? {
+        loaded ?? loader?.cachedImage(for: ProfileModel.exampleTryOnPhoto, maxPixelSize: pixelSize)
+    }
 
     var body: some View {
         let shape = NookRadius.shape(NookRadius.tile)
         VStack(spacing: NookSpacing.small) {
             ZStack {
                 LinearGradient(colors: [.nook.artStone, .nook.artSand], startPoint: .top, endPoint: .bottom)
-                Image(systemName: "photo")
-                    .font(.system(size: 44, weight: .regular))
-                    .foregroundStyle(.nook.textSecondary)
+                if let photo {
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image(systemName: "photo")
+                        .font(.system(size: 44, weight: .regular))
+                        .foregroundStyle(.nook.textSecondary)
+                }
                 NookBadge(SharedText.simulated, systemImage: "camera")
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .padding(NookSpacing.small)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
@@ -280,6 +301,11 @@ struct ExamplePhoto: View {
             Text("Example photo · Simulated", bundle: .module, comment: "Under the example try-on photo")
                 .nookTextStyle(.caption)
                 .foregroundStyle(.nook.textSecondary)
+        }
+        .task {
+            guard let loader, loaded == nil else { return }
+            let image = await loader.image(for: ProfileModel.exampleTryOnPhoto, maxPixelSize: pixelSize)
+            if !Task.isCancelled { loaded = image }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(

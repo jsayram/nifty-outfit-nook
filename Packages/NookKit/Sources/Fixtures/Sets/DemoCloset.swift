@@ -1,8 +1,10 @@
 import Foundation
 import Models
 
-/// The demo closet: the old prototype's 21 garments in the new model, six looks (five saved),
-/// three simulated try-on pictures, six suitcases and a profile named Lily.
+/// The demo closet: the old prototype's 21 garments in the new model, ten looks (nine saved),
+/// seven try-on pictures, six suitcases and a profile named Lily. Twenty of the garments have a
+/// photo and a cutout from the sample wardrobe (`SampleWardrobe`); the old gray leggings were
+/// added by words alone.
 ///
 /// It covers every state a screen needs to show: owned, bought but not arrived, wishlist, no
 /// longer owned, Recently deleted, archived, unavailable until a date, dirty (with tracking
@@ -21,7 +23,7 @@ enum DemoCloset {
     static func make(now: Date, calendar: Calendar) -> FixtureData {
         let day = { (offset: Int) in calendar.day(offset, from: now) }
         let garments = garments(day: day)
-        let looks = looks(day: day)
+        let looks = looks(day: day) + SampleWardrobe.previewLooks(full: false, day: day)
         return FixtureData(
             garments: garments,
             looks: looks,
@@ -35,7 +37,12 @@ enum DemoCloset {
     /// Three simulated try-on pictures, as in `saved.html` and `picture.html`: two of the
     /// Interview look (the newer one of the look as it is, the older one of an earlier version
     /// with the cream sweater) and one of Lace date night. Simulated pictures show no person.
+    /// Four more show her wearing a look, from the sample wardrobe's previews.
     static func pictures(looks: [Look], day: (Int) -> Date) -> [TryOnPicture] {
+        simulatedPictures(looks: looks, day: day) + SampleWardrobe.previewPictures(looks: looks, day: day)
+    }
+
+    private static func simulatedPictures(looks: [Look], day: (Int) -> Date) -> [TryOnPicture] {
         let byID = Dictionary(looks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         guard let interview = byID["o-interview"], let lace = byID["o-lace-date"] else { return [] }
         var earlier = CapturedLook(interview)
@@ -70,7 +77,13 @@ enum DemoCloset {
         ]
     )
 
+    /// The garments with their photos and cutouts.
     static func garments(day: (Int) -> Date) -> [Garment] {
+        SampleWardrobe.dressedDemo(drawnGarments(day: day))
+    }
+
+    /// The garments as the old prototype had them, with sample art names and no cutouts.
+    private static func drawnGarments(day: (Int) -> Date) -> [Garment] {
         [
             Garment(
                 id: "g-navy-trousers", name: "Navy dress pants", category: .bottom, colors: [.navy], fit: .regular,
@@ -155,7 +168,7 @@ enum DemoCloset {
             ),
             Garment(
                 id: "g-tan-loafers", name: "Tan loafers", category: .shoes, colors: [.tan],
-                occasions: [.office, .casual, .brunch], notes: "Added by text only", photo: .noPhoto,
+                occasions: [.office, .casual, .brunch], notes: "Comfortable for long days", photo: .noPhoto,
                 addedAt: day(-30)
             ),
             Garment(
@@ -254,7 +267,7 @@ enum DemoCloset {
         ]
     }
 
-    private static func look(
+    static func look(
         _ id: Look.ID,
         name: String?,
         version: LookVersion?,

@@ -1,6 +1,6 @@
 # Try it on and the Pictures tab
 
-Phase 12b, 15 October 2026. Try it on makes a try-on picture of one look, only when she asks. Her pictures live on Saved Looks' Pictures tab, each linked to its look, and each look lists its pictures. In Stage A every picture is simulated: the look's pieces on a plain backdrop, with no person in it, made on the phone. Real pictures are Phase 33, behind its gates.
+Phase 12b, 15 October 2026. Try it on makes a try-on picture of one look, only when she asks. Her pictures live on Saved Looks' Pictures tab, each linked to its look, and each look lists its pictures. In Stage A every picture is simulated: the look's pieces on a plain backdrop, with no person in it, made on the phone. Real pictures are Phase 33, behind its gates. Since 17 October 2026 the fixtures also hold six sample previews of a woman wearing a look (see "Sample previews" below).
 
 Spec: amendment RD-06 (Try it on per look, only on tap, labelled Simulated, linked to its look), RD-08 (Pictures holds only saved try-on pictures, each linked to its look; search on each tab), RD-08.2 (each picture opens its look, and the look shows its pictures), RD-04.2 (every try-on picture says Simulated) and the mockup README's decisions 3 to 5 (no avatar; the only image of her in clothes is an optional try-on picture). PRD §7.5 and §9.2.4 (every delivered picture is kept until she deletes it, with the look as it was), §9.2.1 step 5 (keep the picture before saying it's ready), FR-56 (simulated services in development), FR-59 (offer a matching picture before making another) and §14.4 (pictures will use an allowance). DATA_MAP.md: try-on pictures are Sensitive. The visual references are `saved.html?tab=pictures`, `picture.html` and the picture row in `look.html` in `closet/prototypes/RoomDirectionMockups/screens`.
 
@@ -135,3 +135,12 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 - **30a:** the picture allowance and purchases.
 - **33:** real pictures from the gated image service, its permission and cost check, behind `TryOnService`.
 - **Stage B:** deleting a garment for good should remove the pictures that depend on it where the purge rules say so (PRD §9.2.4). Today a purged piece is only left out of the drawing.
+
+## Sample previews
+
+The fixtures carry six AI-generated pictures of the sample woman wearing a look (`Fixtures/Resources/SampleWardrobe/tryon`, no real person). They are `.generated` pictures with a `PhotoReference.sample`, shown through the image loader.
+
+- `TryOnPictureView` draws the photo whole on the backdrop (the previews are 9:16, the frame stays 4:5) with the Simulated badge. Until the photo has loaded, or if the provider has none, it draws the look's bundle as for any simulated picture. A still image uses only a photo that is already cached.
+- The demo set has four of the looks and previews (office, casual, date night, weekend), so the Pictures tab has seven pictures. `wardrobe=full` adds the sundress and cool-weather looks, which use pieces only the full wardrobe has (a straw bag, black jeans, ankle boots).
+- `SimulatedTryOn` gives a look that matches a preview exactly (the same garments, no piece ideas) that preview instead of the drawing. Any other look keeps the drawing. `photos=drawn` turns this off.
+- Tests: `SampleWardrobeTests` (the previews, their looks and the matching), `SampleWardrobeSnapshotTests.tryOnPictures`.

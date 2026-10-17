@@ -5,7 +5,10 @@ import Models
 /// suitcases and a simulated try-on picture for every third saved look, with every state mixed
 /// in at realistic rates.
 ///
-/// Generated from a fixed seed, so every run makes the same closet (for the same `now`).
+/// Generated from a fixed seed, so every run makes the same closet (for the same `now`). The nine
+/// in ten pieces that have a photo take one of the sample wardrobe's, by kind and colour, so the
+/// same few dozen photos and cutouts are shared by the whole closet and the image loader keeps
+/// just the ones on screen.
 enum LargeCloset {
     static let garmentCount = 2_400
     static let lookCount = 600
@@ -81,6 +84,13 @@ enum LargeCloset {
             photo: random.chance(0.9) ? .sample("large-\(category.rawValue)") : .noPhoto,
             addedAt: day(-addedDaysAgo)
         )
+        // A real photo of the same kind of piece (the same colour when there is one), picked from
+        // the index and not from the generator, so nothing else about the closet changes.
+        if garment.photo != .noPhoto,
+            let asset = SampleWardrobe.pick(category: category, noun: noun, color: colors.first, index: index)
+        {
+            garment = SampleWardrobe.dressed(garment, asset: asset)
+        }
 
         let roll = random.unit()
         if roll < 0.03 {

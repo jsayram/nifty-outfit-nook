@@ -109,6 +109,26 @@ extension FixtureData {
     }
 }
 
+extension FixtureData {
+    /// The same records with the full wardrobe: the 30 extra pieces, and the two looks and try-on
+    /// previews that need them (`SampleWardrobe`). Only the demo set has it, so anything else
+    /// is unchanged.
+    func applying(wardrobe state: FixtureWardrobeState, to set: FixtureSet, now: Date, calendar: Calendar)
+        -> FixtureData
+    {
+        guard state == .full, set == .demo else { return self }
+        var data = self
+        let day = { (offset: Int) in calendar.day(offset, from: now) }
+        data.garments += SampleWardrobe.extraGarments(day: day)
+        let looks = SampleWardrobe.previewLooks(full: true, day: day).filter { look in
+            !self.looks.contains { $0.id == look.id }
+        }
+        data.looks += looks
+        data.pictures += SampleWardrobe.previewPictures(looks: looks, day: day)
+        return data
+    }
+}
+
 /// A fresh install.
 enum EmptyCloset {
     static func make(now: Date) -> FixtureData {

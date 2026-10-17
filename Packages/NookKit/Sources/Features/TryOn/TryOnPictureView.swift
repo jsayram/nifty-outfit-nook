@@ -1,13 +1,16 @@
 import DesignSystem
 import Models
 import SwiftUI
+import UIKit
 
 /// A try-on picture as the screens draw it (RD-06, RD-08).
 ///
 /// Stage A's pictures are simulated: the look's pieces as they were when the picture was made,
 /// laid out as its sticker bundle on a plain warm backdrop, with a "Simulated" badge. There is no
 /// person and no body in it (the brief for Phase 12b; RD-03.4). A generated picture (Phase 33)
-/// will draw its image here instead, keeping the badge (RD-04.2).
+/// draws its image here instead, keeping the badge (RD-04.2). The fixtures' sample previews are
+/// generated pictures: the photo shows whole on the backdrop, and until it has loaded, or when
+/// there's no provider for it, the bundle is drawn as for any simulated picture.
 ///
 /// A picture is Sensitive, so it's hidden while the app isn't active: the app switcher keeps a
 /// snapshot of the screen, and it shouldn't hold a picture of her (SECURITY_STANDARD §4).
@@ -21,6 +24,9 @@ struct TryOnPictureView: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.locale) private var locale
+    @Environment(\.garmentImages) private var loader
+    @Environment(\.displayScale) private var displayScale
+    @State private var loadedPhoto: LoadedPhoto?
 
     static let aspectRatio: CGFloat = 4 / 5
 
@@ -30,12 +36,39 @@ struct TryOnPictureView: View {
 
     var height: CGFloat { width / Self.aspectRatio }
 
+    /// A photo at the size it was asked for.
+    private struct LoadedPhoto {
+        let reference: PhotoReference
+        let pixelSize: Int
+        let image: UIImage?
+    }
+
+    /// The photo is as tall as the picture, so that's the long side to load.
+    private var photoPixelSize: Int { Int((height * displayScale).rounded(.up)) }
+
+    /// The try-on photo, once it's loaded (or already cached, which still images need).
+    private var photo: UIImage? {
+        guard let reference = content.tryOnPhoto else { return nil }
+        if let loadedPhoto, loadedPhoto.reference == reference, loadedPhoto.pixelSize == photoPixelSize {
+            return loadedPhoto.image
+        }
+        return loader?.cachedImage(for: reference, maxPixelSize: photoPixelSize)
+    }
+
     var body: some View {
         ZStack {
             backdrop
             if scenePhase == .active {
-                LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
-                    .accessibilityHidden(true)
+                if let photo {
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: width, height: height)
+                        .accessibilityHidden(true)
+                } else {
+                    LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
+                        .accessibilityHidden(true)
+                }
                 if width >= Self.badgeMinimumWidth {
                     Self.badge
                         .padding(Self.badgePadding(width: width))
@@ -53,6 +86,14 @@ struct TryOnPictureView: View {
             shape
                 .fill(Color.nook.tint)
                 .softShadow(.drop, in: shape)
+        }
+        .task(id: TryOnPhotoRequest(reference: content.tryOnPhoto, pixelSize: photoPixelSize)) {
+            guard let reference = content.tryOnPhoto, let loader else { return }
+            let pixelSize = photoPixelSize
+            let image = await loader.image(for: reference, maxPixelSize: pixelSize)
+            if !Task.isCancelled {
+                loadedPhoto = LoadedPhoto(reference: reference, pixelSize: pixelSize, image: image)
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(TryOnText.spokenPicture(of: content, lookName: lookName, locale: locale)))
@@ -88,6 +129,12 @@ struct TryOnPictureView: View {
     }
 }
 
+/// What `TryOnPictureView` loads: the photo, at a size, and nothing for a simulated picture.
+private struct TryOnPhotoRequest: Hashable {
+    let reference: PhotoReference?
+    let pixelSize: Int
+}
+
 extension LookBundleContent {
     /// What a try-on picture shows: the look's pieces when the picture was made. Nothing is faded,
     /// since the picture doesn't change when a piece later leaves her closet. A garment deleted
@@ -106,5 +153,6 @@ extension LookBundleContent {
                     id: piece.id, name: piece.name, category: piece.category, colors: piece.colors,
                     photo: piece.photo, cutout: piece.cutout, isIdea: piece.isIdea)
             })
+        if case .generated(let photo) = picture.image { tryOnPhoto = photo }
     }
 }

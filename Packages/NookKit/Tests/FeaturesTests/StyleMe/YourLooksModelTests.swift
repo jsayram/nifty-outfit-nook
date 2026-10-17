@@ -406,7 +406,7 @@ struct YourLooksModelTests {
         let stylist = ScriptedStylist()
         let model = await styledLooks(services: yourLooksServices(stylist: stylist))
         model.tab = .saved
-        #expect(model.savedLooks.map(\.id) == ["o-interview", "o-blazer-office"])
+        #expect(model.savedLooks.map(\.id) == ["o-interview", "o-office-lace", "o-blazer-office"])
         #expect(await stylist.calls == 1)
 
         let weekend = await styledLooks(lookRequest(source: .suitcase("s-weekend"), occasion: .casual))

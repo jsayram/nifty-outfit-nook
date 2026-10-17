@@ -17,7 +17,10 @@ struct TryOnFixtureTests {
 
     @Test func listsPicturesNewestFirst() async throws {
         let store = InMemoryTryOnPictureStore(pictures: data.pictures)
-        #expect(try await store.pictures().map(\.id) == ["p-interview", "p-interview-earlier", "p-lace"])
+        #expect(
+            try await store.pictures().map(\.id) == [
+                "p-interview", "p-interview-earlier", "p-lace", "p-office", "p-casual", "p-date", "p-weekend",
+            ])
         #expect(try await store.picture("p-lace").lookID == "o-lace-date")
         await #expect(throws: StoreError.notFound) { try await store.picture("p-nope") }
     }
@@ -27,7 +30,9 @@ struct TryOnFixtureTests {
         let store = InMemoryTryOnPictureStore(pictures: data.pictures)
         let lace = try await store.picture("p-lace")
         try await store.delete("p-lace")
-        #expect(try await store.pictures().map(\.id) == ["p-interview", "p-interview-earlier"])
+        #expect(
+            try await store.pictures().map(\.id)
+                == ["p-interview", "p-interview-earlier", "p-office", "p-casual", "p-date", "p-weekend"])
         await #expect(throws: StoreError.notFound) { try await store.delete("p-lace") }
         try await store.save(lace)
         #expect(try await store.picture("p-lace") == lace)
@@ -72,18 +77,23 @@ struct TryOnFixtureTests {
 
     // MARK: Fixture sets
 
-    /// The demo's pictures: two of Interview (one of an earlier version with the cream sweater)
-    /// and one of Lace date night, each linked to a saved look.
+    /// The demo's pictures: two of Interview (one of an earlier version with the cream sweater),
+    /// one of Lace date night and four sample previews of her wearing a look, each linked to a
+    /// saved look.
     @Test func demoPicturesLinkToSavedLooks() throws {
         let looks = Dictionary(uniqueKeysWithValues: data.looks.map { ($0.id, $0) })
         let statuses = data.pictures.map { TryOnLinks.status(of: $0, looks: looks) }
         let interview = try look("o-interview")
         let lace = try look("o-lace-date")
-        #expect(statuses == [.current(interview), .changed(interview), .current(lace)])
+        let previews = try ["o-office-lace", "o-casual-jeans", "o-date-crop", "o-weekend-olive"].map {
+            TryOnLinks.Status.current(try look(Look.ID($0)))
+        }
+        #expect(statuses == [.current(interview), .changed(interview), .current(lace)] + previews)
         let earlier = try #require(data.pictures.first { $0.id == "p-interview-earlier" })
         #expect(earlier.captured.pieces.compactMap(\.garmentID).contains("g-cream-sweater"))
         #expect(!earlier.captured.pieces.compactMap(\.garmentID).contains("g-pink-blouse"))
-        #expect(data.pictures.allSatisfy { $0.image == .simulated })
+        #expect(data.pictures.prefix(3).allSatisfy { $0.image == .simulated })
+        #expect(data.pictures.suffix(4).allSatisfy { if case .generated = $0.image { true } else { false } })
     }
 
     @Test func emptyHasNoPictures() {
@@ -116,7 +126,7 @@ struct TryOnFixtureTests {
             set: .demo, behavior: .storesFail, now: TestTime.now, calendar: TestTime.calendar)
         await #expect(throws: StoreError.unavailable) { try await storesFail.pictures.pictures() }
         let normal = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
-        #expect(try await normal.pictures.pictures().count == 3)
+        #expect(try await normal.pictures.pictures().count == 7)
         #expect(FixtureConfiguration(launchArguments: ["-fixtures", "demo:picture-fails"]).behavior == .pictureFails)
     }
 }

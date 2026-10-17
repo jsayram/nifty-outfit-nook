@@ -37,6 +37,7 @@ public enum FixtureServices {
             laundry: configuration.laundry,
             draft: configuration.draft,
             photos: startingCloset == .empty ? .drawn : configuration.photos,
+            wardrobe: configuration.wardrobe,
             source: configuration.source,
             unnamed: startingCloset != nil,
             tours: tours,
@@ -49,8 +50,9 @@ public enum FixtureServices {
 
     /// Services filled with `set`, behaving as `behavior` says. `weather` and `laundry` force
     /// the weather service and the closet's laundry into one state; `nil` keeps the set's own.
-    /// `draft` puts an unsaved Add a piece, Edit or Make your own look draft in its store. `photos` adds the
-    /// sample photo pieces and the provider that draws their pictures. `source` sets the
+    /// `draft` puts an unsaved Add a piece, Edit or Make your own look draft in its store. `photos` picks
+    /// the provider of garment pictures (the sample wardrobe's photos, or none) and can add the drawn
+    /// sample photo pieces. `wardrobe` adds the full wardrobe to the demo set. `source` sets the
     /// remembered source. `unnamed` leaves the sign without a name, for a closet started from
     /// onboarding. `tours` and `onboarding` are the stores to use; `nil` gives fresh in-memory ones.
     /// `profileSettings` keeps the name on the sign and the Style Me settings; with `nil` the
@@ -61,7 +63,8 @@ public enum FixtureServices {
         weather: FixtureWeatherState? = nil,
         laundry: FixtureLaundryState? = nil,
         draft: FixtureDraftState? = nil,
-        photos: FixturePhotoState = .drawn,
+        photos: FixturePhotoState = .real,
+        wardrobe: FixtureWardrobeState = .demo,
         source: FixtureSourceState? = nil,
         unnamed: Bool = false,
         tours: (any TourProgressStore)? = nil,
@@ -71,6 +74,7 @@ public enum FixtureServices {
         calendar: Calendar = .current
     ) -> NookServices {
         var data = set.data(now: now, calendar: calendar)
+            .applying(wardrobe: wardrobe, to: set, now: now, calendar: calendar)
         if unnamed {
             data.profile.signName = ""
         }
@@ -124,7 +128,7 @@ public enum FixtureServices {
                 isOffline: behavior == .offline || weather == .unavailable,
                 latency: slow ? .seconds(1) : .zero
             ),
-            images: photos == .samples ? SamplePhotoProvider() : PlaceholderImageProvider(),
+            images: imageProvider(for: photos),
             drafts: InMemoryDraftStore(drafts: drafts, options: stores),
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
             descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),
@@ -132,12 +136,22 @@ public enum FixtureServices {
             lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores),
             pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: stores),
             // A moment, so the making state shows; a real picture takes much longer (Phase 33).
-            tryOn: SimulatedTryOn(mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800)),
+            tryOn: SimulatedTryOn(
+                mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800), usesSamplePreviews: photos != .drawn),
             // Every set starts as a fresh install: no tour seen, tips on (Phase 16a), unless the
             // app passes the stores it keeps across launches (Phase 17).
             tours: tours ?? InMemoryTourProgressStore(options: stores),
             onboarding: onboarding ?? InMemoryOnboardingStore(options: stores)
         )
+    }
+
+    /// Garment pictures: the sample wardrobe's, plus the drawn sample photos for `samples`, or none.
+    private static func imageProvider(for photos: FixturePhotoState) -> any ImageProvider {
+        switch photos {
+        case .real: SampleWardrobeProvider()
+        case .samples: SampleWardrobeProvider(drawnSamples: true)
+        case .drawn: PlaceholderImageProvider()
+        }
     }
 
     private static func profileStore(

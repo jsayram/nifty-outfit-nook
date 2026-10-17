@@ -77,3 +77,7 @@ The `-cutout-bench` screen now shows each photo three ways: the photo, the cutou
 4. **In dark the edge is a warm off-white** (`#EEE7DE`), not pure white, to match the garments dimmed to 92%.
 5. **Cache by picture, not garment ID.** See Loading above.
 6. **Thresholds stay at 8a's proposal** until the benchmark on her phone.
+
+## The sample wardrobe (17 October 2026)
+
+The demo closet's pieces now show real-looking photos. Each has a photo and a cutout from `Fixtures/Resources/SampleWardrobe`, with quality signals measured from the cutout (`manifest.json`), so `GarmentArtChoice` decides as it would on a phone: most pieces are stickers, and the lace tops, the gold clutch and the jewellery fall back to the photo in a tile (soft edges, or too small). The old drawings are the fallback for a piece with no photo (the old gray leggings). `wardrobe=full` adds 30 more pieces, and the large closet shares the photos by kind and colour. See `SampleWardrobe/README.md`.

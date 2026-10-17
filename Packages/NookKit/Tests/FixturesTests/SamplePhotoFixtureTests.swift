@@ -13,8 +13,9 @@ struct SamplePhotoFixtureTests {
     @Test func theOptionIsRead() {
         let configuration = FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:photos=samples:offline"])
         #expect(configuration == FixtureConfiguration(set: .demo, behavior: .offline, photos: .samples))
-        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:photos=nope"]).photos == .drawn)
-        #expect(FixtureConfiguration(launchArguments: []).photos == .drawn)
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:photos=nope"]).photos == .real)
+        #expect(FixtureConfiguration(launchArguments: []).photos == .real)
+        #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:photos=drawn"]).photos == .drawn)
     }
 
     /// Six clean cutouts become stickers; the fuzzy white tee and the tee with shoes fall back.

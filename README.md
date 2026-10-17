@@ -79,10 +79,13 @@ Stage A runs on sample data only, in memory: whatever she adds or changes is gon
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
 - `laundry=` with `off`, `clean`, `some` (2 dirty) or `full` (8 dirty), to force laundry tracking and the hamper;
 - `draft=` with `add`, `edit` or `look`, to start with an unsaved Add a piece, Edit or Make your own look draft, as if the app had been closed mid-way;
-- `photos=samples`, to add eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`);
+- `photos=` with `real` (the default), `drawn` or `samples`. `real` gives every piece that has a photo the AI-generated sample photo or its cutout (see below); `drawn` shows the drawings as before; `samples` is `real` plus eight pieces with drawn sample photos and stand-in cutouts, six shown as stickers and two as photo tiles (Phase 8b, `docs/stickers.md`);
+- `wardrobe=full`, to add 30 more pieces with real photos to the demo set, one or more of every kind of piece, and two more saved looks with their try-on previews. The default is the demo closet's 21 pieces. It does nothing on the empty and large sets;
 - `source=suitcase`, to start with her most recently used suitcase as Style Me's remembered source, on Home's suitcase and in Suitcases (Phase 13, `docs/suitcases-and-laundry.md`).
 
-For example `-fixtures demo:weather=snow:laundry=full`. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, no draft and the main closet.
+For example `-fixtures demo:weather=snow:laundry=full` or `-fixtures demo:wardrobe=full`.
+
+The photos are real-looking sample images (AI-generated, no real people) bundled in `Packages/NookKit/Sources/Fixtures/Resources/SampleWardrobe`: a photo and a cutout for every demo piece except the old gray leggings, the 30 extras, the try-on photo and six try-on previews. They go through the same path real photos will (`Garment.photo`, `Garment.cutout`, `GarmentArtChoice`, the image loader), and the drawings stay as the fallback for a piece with no photo. The large set uses the same photos by kind and colour. The folder adds about 12.7 MB to the app while Release still ships the fixtures (until Phase 20a). Its README says where the images came from and how `scripts/build-sample-wardrobe.swift` rebuilds them. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, no draft and the main closet.
 
 The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
