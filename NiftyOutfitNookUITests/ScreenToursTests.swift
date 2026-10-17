@@ -238,12 +238,13 @@ final class ScreenToursTests: XCTestCase {
         close.tapUntilGone(timeout: Self.wait)
     }
 
-    /// Taps a button by identifier, scrolling up to find it if it's below the screen.
+    /// Taps a button by identifier, scrolling to find it if it's off the screen (Closet stays
+    /// scrolled down after Recently deleted, so Suitcases is above).
     @MainActor
     private func tap(_ identifier: String, in app: XCUIApplication) {
         let button = app.buttons[identifier]
         XCTAssertTrue(button.waitUntilExists(timeout: Self.wait), "No button \(identifier)")
-        app.scrollUntilHittable(button, up: 16)
+        app.scrollUntilHittable(button, up: 16, down: 16)
         button.tapWhenHittable(timeout: Self.wait)
     }
 
