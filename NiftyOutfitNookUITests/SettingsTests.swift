@@ -176,17 +176,16 @@ final class SettingsTests: XCTestCase {
             app.buttons["welcome.getStarted"].waitUntilExists(timeout: Self.wait), "Didn't go back to the welcome")
         XCTAssertTrue(
             labelled("Your data is deleted", in: app).waitUntilExists(timeout: Self.wait), "No note that it's done")
-        app.buttons["welcome.getStarted"].tapWhenHittable(timeout: Self.wait)
-        app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["Your closet stays here"].waitUntilExists(timeout: Self.wait))
-        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
-        XCTAssertTrue(app.navigationBars["How you like clothes to fit"].waitUntilExists(timeout: Self.wait))
-        app.buttons["onboarding.skip"].tapWhenHittable(timeout: Self.wait)
-        element("onboarding.closet.empty", in: app).tapWhenHittable(timeout: Self.wait)
-        app.buttons["onboarding.continue"].tapWhenHittable(timeout: Self.wait)
+        // Each step's button moves on to the next step; a lost tap is tapped once more.
+        app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(
+            app.navigationBars["How you like clothes to fit"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Choose a starting closet"], appears: Self.wait)
+        element("onboarding.closet.empty", in: app).tapUntilSelected(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Home"], appears: Self.wait)
 
         // Home: a sign with no name and an empty source.
-        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait), "Didn't reach Home")
         XCTAssertTrue(app.buttons["Name sign, no name yet"].waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(app.buttons["Suitcase: Source, Main closet, Empty, Whole closet"].exists)
         XCTAssertTrue(app.tabBars.firstMatch.buttons["Home"].isSelected)

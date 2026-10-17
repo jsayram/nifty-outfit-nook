@@ -96,6 +96,21 @@ extension XCUIElement {
         XCTAssertFalse(exists, "\(self) is still there after tapping it", file: file, line: line)
     }
 
+    /// Taps a button that moves on to another screen, like an onboarding step's Continue, and
+    /// waits for `next` (that screen's bar, say) to appear, tapping once more if it didn't and
+    /// the button can still be tapped. On CI the runner sometimes loses a tap.
+    @MainActor
+    func tapUntil(
+        _ next: XCUIElement, appears timeout: TimeInterval, file: StaticString = #filePath, line: UInt = #line
+    ) {
+        for _ in 0..<2 {
+            guard waitUntilHittable(timeout: timeout) else { break }
+            tap()
+            if next.waitUntilExists(timeout: timeout) { return }
+        }
+        XCTAssertTrue(next.exists, "\(next) didn't appear after tapping \(self)", file: file, line: line)
+    }
+
     /// Taps a tab or other selectable button and waits until it says it's selected, tapping once
     /// more if the first tap was lost while the screen was still changing.
     @MainActor
