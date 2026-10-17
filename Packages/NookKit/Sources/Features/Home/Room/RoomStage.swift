@@ -68,8 +68,8 @@ nonisolated enum RoomStage {
     static let framedLooks = CGRect(x: 266, y: 154, width: 104, height: 62)
     /// Inside each frame's card, where a saved look's pieces sit (`.card-ov` in `home.html`).
     static let frameWindows = [3.5, 38.7, 73.9].map { CGRect(x: 266 + $0, y: 158, width: 27, height: 55) }
-    /// Each frame's tap area: a column of the frames' strip, centred on its card. The cards are
-    /// 35.2 apart, so the columns meet without overlapping.
+    /// Each frame's column of the strip, centred on its card. The cards are 35.2 apart, so the
+    /// columns meet without overlapping. `RoomLayout.frameTargets` widens them to 44 points.
     static let frameTargets = frameWindows.map { CGRect(x: $0.midX - 17.6, y: 154, width: 35.2, height: 62) }
     /// In a frame window: the upper piece, the lower piece, or a dress (`data-box` in `home.html`).
     static let frameUpper = CGRect(x: 2, y: 2, width: 23, height: 21)
@@ -159,6 +159,26 @@ nonisolated struct RoomLayout: Equatable, Sendable {
     /// A control's tap area in this plan.
     func target(for control: RoomControl) -> CGRect {
         target(plan.rect(for: control))
+    }
+
+    /// The tap areas of the frames under the shelf (Phase 12a; 44 points since the Stage A
+    /// audit). The cards are only 35 stage units apart, about 34 points on an iPhone 17, so a
+    /// 44-point area centred on each would overlap its neighbour. Instead the areas stand side by
+    /// side, each at least 44 x 44 points, as a strip centred where the frames are, and kept on
+    /// the canvas. The outer two reach a little past their cards, over the wall beside the
+    /// window, which isn't a control; each still covers the middle of its own card.
+    var frameTargets: [CGRect] {
+        let columns = plan.frameTargets.map(rect)
+        guard let first = columns.first, let last = columns.last else { return [] }
+        let width = max(first.width, NookSpacing.minimumTapTarget)
+        let height = max(first.height, NookSpacing.minimumTapTarget)
+        let total = width * CGFloat(columns.count)
+        let centre = (first.minX + last.maxX) / 2
+        let minX = min(max(centre - total / 2, 0), size.width - total)
+        return columns.indices.map { index in
+            CGRect(
+                x: minX + width * CGFloat(index), y: first.midY - height / 2, width: width, height: height)
+        }
     }
 
     var floorY: CGFloat { originY + plan.floorY * scale }
