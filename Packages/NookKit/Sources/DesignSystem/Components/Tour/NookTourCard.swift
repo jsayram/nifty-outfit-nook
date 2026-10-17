@@ -86,16 +86,21 @@ public struct NookTourCard: View {
         .accessibilityIdentifier("tour.card")
     }
 
-    /// The words in a scroll view whose indicator flashes once, so it's clear there's more.
+    /// The words in a scroll view, when they're taller than the card can be. Its indicator
+    /// flashes as each step appears, and the last line fades out while there's more below, so
+    /// it's clear the words go on (QA, October 2026: at AX5 the card ended on "something you"
+    /// with nothing to say "own." was below).
     @ViewBuilder private var scrollingWords: some View {
         if isStatic {
             // A still image can't scroll: the words are cut where the scroll view would end.
             words
                 .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
                 .clipped()
+                .modifier(MoreBelowFade(isMoreBelow: true))
         } else {
-            ScrollView { words }
-                .scrollIndicatorsFlash(onAppear: true)
+            TourScrollingWords(words: words)
+                // Each step starts at the top, and flashes the indicator again.
+                .id(step.index)
         }
     }
 
@@ -147,6 +152,45 @@ public struct NookTourCard: View {
     private static func sentence(_ text: String) -> String {
         guard let last = text.last, !".!?…".contains(last) else { return text }
         return text + "."
+    }
+}
+
+/// The card's words in a scroll view that fades its last line while more is below.
+private struct TourScrollingWords<Words: View>: View {
+    let words: Words
+
+    @State private var isMoreBelow = true
+
+    var body: some View {
+        ScrollView { words }
+            .scrollIndicators(.visible)
+            .scrollIndicatorsFlash(onAppear: true)
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                geometry.contentOffset.y + geometry.containerSize.height
+                    < geometry.contentSize.height + geometry.contentInsets.bottom - 1
+            } action: { _, moreBelow in
+                isMoreBelow = moreBelow
+            }
+            .modifier(MoreBelowFade(isMoreBelow: isMoreBelow))
+    }
+}
+
+/// Fades the bottom of the words out while there's more of them below.
+private struct MoreBelowFade: ViewModifier {
+    let isMoreBelow: Bool
+
+    @ScaledMetric(relativeTo: .body) private var fadeHeight: CGFloat = 36
+
+    func body(content: Content) -> some View {
+        content.mask {
+            VStack(spacing: 0) {
+                Color.black
+                LinearGradient(
+                    colors: [.black, isMoreBelow ? .clear : .black], startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: fadeHeight)
+            }
+        }
     }
 }
 
