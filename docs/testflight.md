@@ -18,7 +18,7 @@ Nothing here was uploaded, created or sent by an agent. Every step in App Store 
 ## What this build is
 
 - Version **0.1.0**. The build number is the UTC date and time it was archived, such as `20261016.1420` (see "Versioning" below).
-- **Sample data only.** Everything Lily adds or changes is in memory and gone when the app closes. Only a few app-state flags are kept (onboarding done, the starting closet, the tips seen). The app says so in onboarding (step 2 and step 4), on Privacy and terms, and at the end of Help, where the version line reads "Nifty Outfit Nook · 0.1.0 (20261016.1420) · test build with sample data".
+- **Sample data only.** Everything Lily adds or changes is in memory and gone when the app closes, except her name on the sign and her Style Me settings in Profile (Preferences, Avoid repeating outfits for, Track laundry), which are kept since the Stage A audit, and a few app-state flags (onboarding done, the starting closet, the tips seen). The app says so in onboarding (step 2 and step 4), on Privacy and terms, and at the end of Help, where the version line reads "Nifty Outfit Nook · 0.1.0 (20261016.1420) · test build with sample data".
 - No network, no account, no permissions, no analytics. The one web address in the app is the website, for Privacy and terms, and it opens only when she taps it. Those pages are still the "Coming soon" page (Phase 19b writes them).
 - **Internal only.** The upload is marked TestFlight Internal Only, so this build can never go to external testers or the App Store, even by mistake.
 
@@ -121,7 +121,7 @@ Under 4,000 characters, as App Store Connect requires.
 ```text
 Hi Lily! This is the first test of Nifty Outfit Nook on your phone.
 
-It runs on sample data. Everything you add or change goes away when the app closes, and the sample closet comes back. Nothing is sent anywhere, and it doesn't ask for your camera, photos or location yet. Style Me uses a stand-in stylist for now, so the looks are only examples.
+It runs on sample data. Your name and your Style Me settings in Profile stay when the app closes. Everything else you add or change goes away, and the sample closet comes back. Nothing is sent anywhere, and it doesn't ask for your camera, photos or location yet. Style Me uses a stand-in stylist for now, so the looks are only examples.
 
 Things to try, in any order:
 - Set it up: your name for the sign, then the sample closet (or an empty one).
@@ -131,7 +131,7 @@ Things to try, in any order:
 - Style Me: pick an occasion and get a look. Switch between Simple, Dressed up and Something new, try a different outfit, swap a piece, and save a look you like.
 - Saved Looks, Suitcases and Laundry.
 - Profile: your fit, the app tips, and Help.
-- Turn your phone sideways, try dark mode, and bigger text in Settings.
+- Turn your phone sideways, try the dark appearance, and bigger text in Settings.
 
 Please tell me about anything that's confusing, hard to read or tap, slow, ugly, or broken, and anything you love. The easiest way: take a screenshot in the app, tap the little picture in the corner, tap Done, then Share Beta Feedback and write what you noticed. You can also open TestFlight, tap Outfit Nook and Send Beta Feedback. If it crashes, you'll get an alert where you can tap Share and add a note.
 

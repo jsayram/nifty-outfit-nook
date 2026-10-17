@@ -8,24 +8,29 @@ import Testing
 
 /// Phase 17: what the app opens on, finishing onboarding, a relaunch and Delete my data. The
 /// stores kept across launches are in-memory stand-ins here; `AppStateDefaultsTests` checks the
-/// real ones keep their values.
+/// real ones keep their values. Since the Stage A audit the name on the sign and the Style Me
+/// settings are kept too.
 @MainActor
 struct AppRootModelTests {
     /// One "install": the stores that outlive a launch, and the launch options.
     struct Install {
         var onboarding = InMemoryOnboardingStore()
         var tours = InMemoryTourProgressStore()
+        var profileSettings = InMemoryProfileSettingsKeeper()
         var configuration = FixtureConfiguration()
 
+        /// As the app target builds it: `-onboarding skip` keeps nothing.
         func launch(_ options: OnboardingLaunchOptions = .standard) -> AppLaunch {
             let onboarding = onboarding
             let tours = tours
+            let profileSettings = profileSettings
             let configuration = configuration
             return AppLaunch(
-                onboarding: onboarding, tours: tours,
+                onboarding: onboarding, tours: tours, profileSettings: profileSettings,
                 services: { closet in
                     FixtureServices.make(
                         configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
+                        profileSettings: closet == nil ? nil : profileSettings,
                         now: TestTime.now, calendar: TestTime.calendar)
                 },
                 onboardingOptions: options)
@@ -94,24 +99,41 @@ struct AppRootModelTests {
             TourRecord(tour: .home, version: HomeTour.version, outcome: .finished, date: TestTime.now))
 
         // The same install, launched again: Home straight away, on the empty closet she chose.
-        // In Stage A what she added and her name are gone; the tours she saw stay seen.
+        // In Stage A what she added is gone; her name and the tours she saw are kept.
         let second = await started(install)
         let again = try self.services(second)
         #expect(try await again.closet.garments().isEmpty)
-        #expect(try await again.profile.profile().signName.isEmpty)
+        #expect(try await again.profile.profile().signName == "Lily")
         #expect(
             try await !TourRules.startsAutomatically(.home, version: HomeTour.version, progress: again.tours.progress())
         )
     }
 
-    @Test func aRelaunchAfterTheSampleClosetBringsItBackWithoutTheName() async throws {
+    /// The sample closet comes back as it ships, with her name and Style Me settings as she left
+    /// them. Her fit and measurements are Sensitive and stay in memory, so they're gone.
+    @Test func aRelaunchKeepsHerNameAndSettingsButNotHerFit() async throws {
         let install = Install()
         let first = await started(install)
-        #expect(await first.finish(OnboardingAnswers(signName: "Lily", startingCloset: .sample)))
+        #expect(
+            await first.finish(OnboardingAnswers(signName: "Ana", usualFit: .fitted, startingCloset: .sample)))
+        try await services(first).profile.update {
+            $0.preferences = Preferences(pieceMode: .onlyMine, repeatWindow: .twoWeeks, tracksLaundry: true)
+            $0.measurements.waist = Length(27.5, .inches)
+        }
+
         let second = await started(install)
         let services = try services(second)
         #expect(try await !services.closet.garments().isEmpty)
-        #expect(try await services.profile.profile().signName.isEmpty)
+        let profile = try await services.profile.profile()
+        #expect(profile.signName == "Ana")
+        #expect(profile.preferences == Preferences(pieceMode: .onlyMine, repeatWindow: .twoWeeks, tracksLaundry: true))
+        // Her fit and measurements are back to the sample's own.
+        let sample = try await FixtureServices.make(
+            FixtureConfiguration(), startingCloset: .sample, now: TestTime.now, calendar: TestTime.calendar
+        ).profile.profile()
+        #expect(profile.usualFit == sample.usualFit)
+        #expect(sample.usualFit != .fitted)
+        #expect(profile.measurements == sample.measurements)
     }
 
     @Test func skipOpensTheLaunchSetAndWritesNothing() async throws {
@@ -119,17 +141,24 @@ struct AppRootModelTests {
         let model = await started(install, .skip)
         let services = try services(model)
         #expect(try await services.profile.profile().signName == "Lily")
+        try await services.profile.update { $0.signName = "Ana" }
         #expect(try await install.onboarding.state() == .fresh)
+        #expect(install.profileSettings.kept() == .none)
     }
 
     @Test func resetForgetsThatOnboardingWasFinished() async throws {
         let install = Install()
         try await install.onboarding.complete(startingCloset: .sample)
-        // Finished: the tabs open straight away.
-        #expect(await started(install).screen == .ready(1))
+        install.profileSettings.keep(KeptProfileSettings(signName: "Ana"))
+        // Finished: the tabs open straight away, with her name.
+        let finished = await started(install)
+        #expect(finished.screen == .ready(1))
+        #expect(try await services(finished).profile.profile().signName == "Ana")
         let reset = await started(install, .reset)
         #expect(isOnboarding(reset) == .some(nil))
         #expect(try await install.onboarding.state() == .fresh)
+        // A fresh start forgets the name and settings too.
+        #expect(install.profileSettings.kept() == .none)
     }
 
     @Test func aFailedSaveStaysOnOnboarding() async throws {
@@ -152,6 +181,7 @@ struct AppRootModelTests {
         #expect(isOnboarding(model) == .some(OnboardingText.deleted))
         #expect(model.generation > generation)
         #expect(try await install.onboarding.state() == .fresh)
+        #expect(install.profileSettings.kept() == .none)
         // Finishing again builds a new closet.
         #expect(await model.finish(OnboardingAnswers(startingCloset: .sample)))
         #expect(try await !self.services(model).closet.garments().isEmpty)

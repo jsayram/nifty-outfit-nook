@@ -110,7 +110,7 @@ nonisolated enum HelpContent {
                 systemImage: "lock",
                 answer: String(
                     localized:
-                        "Everything you add stays on this iPhone. This test build forgets your changes when it closes. Privacy and terms says what’s kept, and Delete my data removes all of it.",
+                        "Everything you add stays on this iPhone. When this test build closes, it keeps your name and your Style Me settings, and forgets your fit and the pieces and looks you add. Privacy and terms says what’s kept, and Delete my data removes all of it.",
                     bundle: .module, comment: "Help: Your data")),
         ]
     }

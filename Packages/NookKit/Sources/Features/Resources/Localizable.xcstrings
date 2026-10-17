@@ -1564,7 +1564,7 @@
         }
       }
     },
-    "Dark Mode" : {
+    "Dark appearance" : {
       "comment" : "Accessibility: a setting"
     },
     "Date night" : {
@@ -2031,7 +2031,7 @@
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
     },
-    "Everything you add stays on this iPhone. This test build forgets your changes when it closes. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
+    "Everything you add stays on this iPhone. When this test build closes, it keeps your name and your Style Me settings, and forgets your fit and the pieces and looks you add. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
       "comment" : "Help: Your data"
     },
     "Everything you can wear today from %@. Pieces marked May not match don’t go with the rest of the look as well." : {
@@ -2156,7 +2156,7 @@
     "Fit and measurements" : {
       "comment" : "Profile row and screen title"
     },
-    "Fit and measurements and your try-on pictures are hidden when you switch apps. This test build forgets your changes when it closes, and the closet you started with comes back as it was. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen." : {
+    "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, and your fit, measurements and try-on photo are cleared." : {
       "comment" : "Privacy and terms: under what stays on the iPhone"
     },
     "Fits well" : {
@@ -5949,9 +5949,6 @@
     "This test build can start with sample clothes, or with nothing." : {
       "comment" : "Onboarding: under the starting closet title"
     },
-    "This test build forgets your changes when it closes. It only remembers that you’ve set it up, which closet you chose and which tips you’ve seen." : {
-      "comment" : "Onboarding privacy: Stage A keeps nothing she adds"
-    },
     "This test build sends nothing. It doesn’t ask for your camera, photos, location or notifications." : {
       "comment" : "Onboarding privacy: nothing leaves the phone in Stage A"
     },
@@ -6362,6 +6359,9 @@
     },
     "When styling uses the internet, the app will say exactly what it sends and ask you before it sends anything." : {
       "comment" : "Onboarding privacy: consent later"
+    },
+    "When this test build closes, it keeps your name and your Style Me settings in Profile, which closet you chose and which tips you’ve seen. It forgets the rest, like your fit and the pieces and looks you add." : {
+      "comment" : "Onboarding privacy: what Stage A keeps across launches and what it forgets"
     },
     "When you see a look you like on Today, tap Save look. Looks you save for %@ from %@ show up here." : {
       "comment" : "Saved tab empty state: the occasion and the source"
@@ -6821,7 +6821,7 @@
       "comment" : "Your looks when the suitcase or starting piece changed"
     },
     "Your room changes to evening, with the lamp on." : {
-      "comment" : "Accessibility: what the app does in Dark Mode"
+      "comment" : "Accessibility: what the app does in dark appearance"
     },
     "Your saved looks didn’t load" : {
       "comment" : "Saved Looks error title"

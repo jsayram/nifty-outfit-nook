@@ -27,6 +27,17 @@ struct InMemoryStoreContractTests {
         try await ProfileStoreContract { InMemoryProfileStore(profile: $0) }.run(check)
     }
 
+    /// The profile with the name on the sign and the Style Me settings kept across launches
+    /// (Stage A audit), in front of the in-memory store.
+    @Test(arguments: ProfileStoreContract.Check.allCases)
+    func profileWithKeptSettings(_ check: ProfileStoreContract.Check) async throws {
+        try await ProfileStoreContract {
+            KeptSettingsProfileStore(profile: $0, keeper: InMemoryProfileSettingsKeeper()) {
+                InMemoryProfileStore(profile: $0)
+            }
+        }.run(check)
+    }
+
     @Test(arguments: TryOnPictureStoreContract.Check.allCases)
     func pictures(_ check: TryOnPictureStoreContract.Check) async throws {
         try await TryOnPictureStoreContract { InMemoryTryOnPictureStore(pictures: $0) }.run(check)

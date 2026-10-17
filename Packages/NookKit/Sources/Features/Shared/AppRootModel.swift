@@ -9,6 +9,10 @@ nonisolated public struct AppLaunch: Sendable {
     public var onboarding: any OnboardingStateStore
     /// The tours seen, kept across launches. Also the `tours` of every `NookServices` made.
     public var tours: any TourProgressStore
+    /// The name on the sign and the Style Me settings, kept across launches (Stage A audit). The
+    /// services keep them through their profile store; this is here so the debug
+    /// `-onboarding reset` flag can forget them too. `nil` when nothing is kept.
+    public var profileSettings: (any ProfileSettingsKeeper)?
     /// Makes the services for a starting closet. `nil` is the launch's own sample data as it is,
     /// for the debug `-onboarding skip` flag.
     public var services: @Sendable (StartingCloset?) -> NookServices
@@ -20,12 +24,14 @@ nonisolated public struct AppLaunch: Sendable {
     public init(
         onboarding: any OnboardingStateStore,
         tours: any TourProgressStore,
+        profileSettings: (any ProfileSettingsKeeper)? = nil,
         services: @escaping @Sendable (StartingCloset?) -> NookServices,
         onboardingOptions: OnboardingLaunchOptions = .standard,
         tourOptions: TourLaunchOptions = .standard
     ) {
         self.onboarding = onboarding
         self.tours = tours
+        self.profileSettings = profileSettings
         self.services = services
         self.onboardingOptions = onboardingOptions
         self.tourOptions = tourOptions
@@ -36,8 +42,9 @@ nonisolated public struct AppLaunch: Sendable {
 /// once she has finished it (Phase 17).
 ///
 /// After a relaunch Home opens straight away, on the closet she chose: the sample closet comes
-/// back as it ships, without the name she typed, and an empty closet starts empty again. Stage A
-/// keeps nothing she adds (see `docs/onboarding.md`).
+/// back as it ships and an empty closet starts empty again, with the name on her sign and her
+/// Style Me settings as she left them. Stage A keeps nothing else she adds (see
+/// `docs/onboarding.md`).
 @MainActor
 @Observable
 final class AppRootModel {
@@ -85,6 +92,7 @@ final class AppRootModel {
             return
         case .reset:
             try? await launch.onboarding.eraseAll()
+            launch.profileSettings?.forget()
         case .standard:
             break
         }

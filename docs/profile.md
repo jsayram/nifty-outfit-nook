@@ -77,7 +77,7 @@ Choose shows what she'd pick in the finished app (a clear, full-length photo, st
 
 - **App switcher.** The Fit page, the measurement and fitting piece sheets and the example photo are covered while the scene isn't active (`hiddenWhenInactive`). Checked on the iOS 26.5 simulator by reading the app's own snapshots in `Library/SplashBoard/Snapshots` after pressing Home: the cover is what iOS keeps, in light and dark. The first try left the measurements header visible through the navigation bar's blur, so the cover now runs under the bars.
 - **Logs.** Nothing here logs. `BodyMeasurements` prints as "BodyMeasurements(redacted, 3 filled in)" and has no children for `dump` or a debugger, so a later log line can't leak it by accident. A test checks this.
-- **Storage.** In memory in Stage A, through `ProfileStore`. Phase 21a stores it with Data Protection `complete`.
+- **Storage.** In memory in Stage A, through `ProfileStore`. Phase 21a stores it with Data Protection `complete`. Since the Stage A audit the name on the sign and the three Style Me settings (Preferences, Avoid repeating outfits for, Track laundry) are kept across launches in the app's `UserDefaults` suite (`KeptSettingsProfileStore`, `docs/onboarding.md`); fit, measurements, fitting pieces and the try-on photo never are.
 
 ## States
 
@@ -118,6 +118,6 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 
 - **14b (done):** Track laundry, Accessibility, Help, Send feedback, Privacy and terms, Delete my data (`docs/settings.md`). The default wardrobe view stays with Style Me's remembered source (Phase 13).
 - **16b (done):** App tours, under Help (`docs/tours.md`).
-- **21a:** keeping the profile across launches, with Data Protection `complete`.
+- **21a:** keeping the whole profile across launches, with Data Protection `complete`. Until then only the name and the Style Me settings are kept (Stage A audit).
 - **22a, 33:** a real try-on photo through the system picker, its metadata stripped, then the image service behind its gate.
 - **34:** fit checks that use the pieces that fit her well (LR-12).
