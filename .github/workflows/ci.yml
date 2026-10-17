@@ -144,12 +144,14 @@ jobs:
           overwrite: true
       - name: Archive (Release, unsigned) and check what would ship
         run: scripts/check-archive.sh
-      - name: Test (ui-catalog-and-launch)
+      - name: Test (ui-catalog-profile-and-swap)
         # The UI tests' retry is explained in the ui-tests job below.
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_UITests_*.xctestrun)"
           scripts/test.sh
           -only-testing:NiftyOutfitNookUITests/CatalogTests
+          -only-testing:NiftyOutfitNookUITests/ProfileTests
+          -only-testing:NiftyOutfitNookUITests/SwapTests
           -only-testing:NiftyOutfitNookUITests/LaunchTests
           -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
           -retry-tests-on-failure -test-iterations 2
@@ -165,17 +167,21 @@ jobs:
   # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
   # iPad layouts, on an iPad simulator. The iPad part also runs every package test target: they
   # don't depend on the device, and that part has the most room.
-  # Balanced in October 2026 from the classes' times on CI, in seconds, from the test log
-  # ("Test Suite 'Class' passed ... in N seconds"). The same class can take up to 1.5 times as
-  # long from one run to the next:
-  #   (build-and-archive)     CatalogTests 154, LaunchTests 45, CutoutBenchTests 25
-  #   ui-home-and-settings    SettingsTests 146, StyleMeTests 106, HomeTests 77, ProfileTests 64,
-  #                           ClosetTests 56, MakeYourOwnLookTests 42
-  #   ui-looks-and-add        AddPieceTests 131, ScreenToursTests 123, OnboardingTests 73,
-  #                           HomeVariantTests 71, YourLooksTests 70, SwapTests 57
-  #   ui-rest                 GarmentDetailTests 183, SavedLooksTests 124, HomeTourTests 106,
-  #                           SuitcasesAndLaundryTests 72, and any new class
-  #   ui-ipad                 IPadTests 236, IPadStyleMeAndSavedTests 154, package tests 125
+  # Balanced in October 2026 from the classes' mean times over four CI runs, in seconds, from
+  # the test log ("Test Suite 'Class' passed ... in N seconds"). A class can take 1.5 to 2 times
+  # as long from one run to the next, and a part's first class also carries the first launch.
+  # Each test job spends about 5 minutes before its first test (mostly the simulator's boot),
+  # and build-and-archive about 7 before its UI tests, so the parts aim at 8 to 9 minutes of
+  # tests and build-and-archive at 6:
+  #   (build-and-archive)     CatalogTests 169, ProfileTests 86, SwapTests 58, LaunchTests 51,
+  #                           CutoutBenchTests 22
+  #   ui-home-and-settings    SettingsTests 169, HomeTests 102, StyleMeTests 86, YourLooksTests 75,
+  #                           ClosetTests 56, MakeYourOwnLookTests 46
+  #   ui-add-and-tours        AddPieceTests 236, ScreenToursTests 124, HomeVariantTests 94,
+  #                           OnboardingTests 70
+  #   ui-rest                 GarmentDetailTests 145, SavedLooksTests 137, HomeTourTests 125,
+  #                           SuitcasesAndLaundryTests 77, and any new class
+  #   ui-ipad                 IPadTests 190, IPadStyleMeAndSavedTests 166, package tests about 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
   ui-tests:
@@ -200,19 +206,17 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/SettingsTests
               -only-testing:NiftyOutfitNookUITests/HomeTests
               -only-testing:NiftyOutfitNookUITests/StyleMeTests
+              -only-testing:NiftyOutfitNookUITests/YourLooksTests
               -only-testing:NiftyOutfitNookUITests/ClosetTests
-              -only-testing:NiftyOutfitNookUITests/ProfileTests
               -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
-          - part: ui-looks-and-add
+          - part: ui-add-and-tours
             family: iPhone
             products: ui-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
               -only-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -only-testing:NiftyOutfitNookUITests/YourLooksTests
               -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/OnboardingTests
-              -only-testing:NiftyOutfitNookUITests/SwapTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
             family: iPhone
@@ -220,20 +224,20 @@ jobs:
             selection: >-
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
+              -skip-testing:NiftyOutfitNookUITests/ProfileTests
+              -skip-testing:NiftyOutfitNookUITests/SwapTests
               -skip-testing:NiftyOutfitNookUITests/LaunchTests
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
               -skip-testing:NiftyOutfitNookUITests/StyleMeTests
+              -skip-testing:NiftyOutfitNookUITests/YourLooksTests
               -skip-testing:NiftyOutfitNookUITests/ClosetTests
-              -skip-testing:NiftyOutfitNookUITests/ProfileTests
               -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
               -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -skip-testing:NiftyOutfitNookUITests/YourLooksTests
               -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/OnboardingTests
-              -skip-testing:NiftyOutfitNookUITests/SwapTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
           # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
