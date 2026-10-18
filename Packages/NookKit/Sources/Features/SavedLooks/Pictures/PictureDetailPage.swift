@@ -75,7 +75,7 @@ struct PictureDetailPage: View {
             .accessibilityHint(Text(TryOnText.deleteHint))
             .accessibilityIdentifier("picture.delete")
             .tourAnchor(PictureTour.Anchor.delete, label: TryOnText.delete) { actions.delete() }
-        about
+        about(showsPerson: item.content.tryOnPhoto != nil)
     }
 
     private var header: some View {
@@ -166,12 +166,12 @@ struct PictureDetailPage: View {
     }
 
     /// What a simulated picture is, on a soft tint.
-    private var about: some View {
+    private func about(showsPerson: Bool) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: NookSpacing.small) {
             Image(systemName: "info.circle")
                 .foregroundStyle(.nook.accent)
                 .accessibilityHidden(true)
-            Text(TryOnText.aboutSimulated)
+            Text(TryOnText.aboutSimulated(showsPerson: showsPerson))
                 .nookTextStyle(.note)
                 .foregroundStyle(.nook.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)

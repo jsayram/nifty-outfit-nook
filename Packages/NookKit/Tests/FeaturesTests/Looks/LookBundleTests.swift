@@ -46,7 +46,7 @@ struct LookBundleTests {
         var remaining = garments
         remaining["g-navy-trousers"] = nil
         let content = LookBundleContent(look: try look("o-interview"), garments: remaining)
-        #expect(content.pieces.map(\.name) == ["Navy cardigan", "Cute pink shirt", "Nude pointed flats"])
+        #expect(content.pieces.map(\.name) == ["Navy cardigan", "Cute pink shirt", "Nude pointed pumps"])
     }
 
     @Test func garmentPiecesKeepTheirPhotoAndCutout() {
@@ -84,7 +84,7 @@ struct LookBundleTests {
         let content = LookBundleContent(look: try look("o-interview"), garments: garments)
         #expect(
             LookBundleText.summary(of: content, title: nil, locale: english)
-                == "Interview navy and pink: Navy cardigan, Cute pink shirt, Navy dress pants, Nude pointed flats")
+                == "Interview navy and pink: Navy cardigan, Cute pink shirt, Navy dress pants, Nude pointed pumps")
         #expect(
             LookBundleText.summary(of: content, title: "Look 2", locale: english).hasPrefix("Look 2: Navy cardigan"))
     }

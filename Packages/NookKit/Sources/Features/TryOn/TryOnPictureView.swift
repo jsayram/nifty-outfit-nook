@@ -5,12 +5,17 @@ import UIKit
 
 /// A try-on picture as the screens draw it (RD-06, RD-08).
 ///
-/// Stage A's pictures are simulated: the look's pieces as they were when the picture was made,
-/// laid out as its sticker bundle on a plain warm backdrop, with a "Simulated" badge. There is no
-/// person and no body in it (the brief for Phase 12b; RD-03.4). A generated picture (Phase 33)
-/// draws its image here instead, keeping the badge (RD-04.2). The fixtures' sample previews are
-/// generated pictures: the photo shows whole on the backdrop, and until it has loaded, or when
-/// there's no provider for it, the bundle is drawn as for any simulated picture.
+/// Two kinds, both with a "Simulated" badge (RD-04.2):
+/// - A picture drawn from the pieces (`TryOnImage.simulated`): the look's pieces as they were
+///   when the picture was made, laid out as its sticker bundle on a plain warm backdrop, with no
+///   one wearing them.
+/// - A picture of a person wearing the look (`TryOnImage.generated`, Phase 33; in the fixtures,
+///   the sample previews of the person in the example try-on photo). The photo is a tall phone
+///   photo, so it fills the 4:5 frame at its full height, a little cropped at the top and bottom,
+///   over a soft blurred copy of itself where it doesn't reach the sides: no flat bands. Its badge
+///   sits in the bottom corner, on the floor, so it never covers her face, and only on a picture
+///   wide enough to keep it off her feet too. Until the photo has
+///   loaded, or when there's no provider for it, the bundle is drawn as for the first kind.
 ///
 /// A picture is Sensitive, so it's hidden while the app isn't active: the app switcher keeps a
 /// snapshot of the screen, and it shouldn't hold a picture of her (SECURITY_STANDARD §4).
@@ -33,6 +38,14 @@ struct TryOnPictureView: View {
     /// Below this width the badge is left off (a small thumbnail in a list says Simulated in its
     /// words instead).
     static let badgeMinimumWidth: CGFloat = 120
+    /// Over a person the badge needs a wider picture: in a narrower one, even in the bottom
+    /// corner it reached her feet. There the words beside the picture say Simulated (the grid's
+    /// date line, the Try it on sheet's subtitle, look detail's picture rows).
+    static let photoBadgeMinimumWidth: CGFloat = 240
+
+    static func showsBadge(width: CGFloat, showsPerson: Bool) -> Bool {
+        width >= (showsPerson ? photoBadgeMinimumWidth : badgeMinimumWidth)
+    }
 
     var height: CGFloat { width / Self.aspectRatio }
 
@@ -60,19 +73,18 @@ struct TryOnPictureView: View {
             backdrop
             if scenePhase == .active {
                 if let photo {
-                    Image(uiImage: photo)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: width, height: height)
+                    Self.photoFill(photo, width: width, height: height)
                         .accessibilityHidden(true)
                 } else {
                     LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
                         .accessibilityHidden(true)
                 }
-                if width >= Self.badgeMinimumWidth {
+                if Self.showsBadge(width: width, showsPerson: photo != nil) {
                     Self.badge
                         .padding(Self.badgePadding(width: width))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .frame(
+                            maxWidth: .infinity, maxHeight: .infinity,
+                            alignment: Self.badgeAlignment(showsPerson: photo != nil))
                 }
             } else {
                 Image(systemName: "eye.slash")
@@ -107,6 +119,57 @@ struct TryOnPictureView: View {
     static var badge: some View {
         NookBadge(SharedText.simulated, systemImage: "camera")
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+    }
+
+    /// Over a drawn picture the top corner is empty space. Over a person it's her head, so the
+    /// badge goes to the bottom corner, on the floor beside her feet.
+    static func badgeAlignment(showsPerson: Bool) -> Alignment {
+        showsPerson ? .bottomLeading : .topLeading
+    }
+
+    /// How much of a tall photo's height the frame shows: it trims a little off the top and the
+    /// bottom (empty wall and floor in a full-length photo), more off the top, so the feet stay
+    /// in.
+    static let photoHeightShown: CGFloat = 0.94
+
+    /// A tall photo in the 4:5 frame: at its full height, trimmed a little top and bottom, over a
+    /// blurred copy that fills the sides. A photo as wide as the frame or wider just fills it.
+    @ViewBuilder
+    static func photoFill(_ photo: UIImage, width: CGFloat, height: CGFloat) -> some View {
+        let aspect = photo.size.height > 0 ? photo.size.width / photo.size.height : aspectRatio
+        let shownHeight = height / photoHeightShown
+        let shownWidth = shownHeight * aspect
+        if shownWidth >= width {
+            Image(uiImage: photo)
+                .resizable()
+                .scaledToFill()
+                .frame(width: width, height: height)
+                .clipped()
+        } else {
+            ZStack {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width, height: height)
+                    .blur(radius: width * 0.06, opaque: true)
+                    .clipped()
+                Image(uiImage: photo)
+                    .resizable()
+                    .frame(width: shownWidth, height: shownHeight)
+                    // Soft sides, so the photo melts into its blurred copy instead of ending in a line.
+                    .mask {
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0), .init(color: .black, location: 0.08),
+                                .init(color: .black, location: 0.92), .init(color: .clear, location: 1),
+                            ], startPoint: .leading, endPoint: .trailing)
+                    }
+                    // A full-length photo has more room over the head than under the feet.
+                    .offset(y: -(shownHeight - height) * 0.3)
+            }
+            .frame(width: width, height: height)
+            .clipped()
+        }
     }
 
     static func badgePadding(width: CGFloat) -> CGFloat {

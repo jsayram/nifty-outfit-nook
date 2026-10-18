@@ -117,11 +117,13 @@ public enum FixtureServices {
         let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
         let lookDraft = draft == .look ? FixtureDrafts.lookDraft(in: data, now: now) : nil
 
+        let profile = profileStore(data.profile, settings: profileSettings, options: stores)
+
         return NookServices(
             closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: stores),
             looks: InMemoryLookStore(looks: data.looks, calendar: calendar, options: stores),
             suitcases: InMemorySuitcaseStore(suitcases: data.suitcases, options: stores),
-            profile: profileStore(data.profile, settings: profileSettings, options: stores),
+            profile: profile,
             stylist: MockStylist(mode: stylistMode, latency: stylistLatency),
             weather: FixtureWeatherProvider(
                 snapshot: snapshot,
@@ -137,7 +139,8 @@ public enum FixtureServices {
             pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: stores),
             // A moment, so the making state shows; a real picture takes much longer (Phase 33).
             tryOn: SimulatedTryOn(
-                mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800), usesSamplePreviews: photos != .drawn),
+                mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800), usesSamplePreviews: photos != .drawn,
+                hasTryOnPhoto: { (try? await profile.profile().tryOnPhoto) != nil }),
             // Every set starts as a fresh install: no tour seen, tips on (Phase 16a), unless the
             // app passes the stores it keeps across launches (Phase 17).
             tours: tours ?? InMemoryTourProgressStore(options: stores),

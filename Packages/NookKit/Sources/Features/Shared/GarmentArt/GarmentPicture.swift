@@ -22,7 +22,12 @@ enum GarmentPresentation: Equatable {
 /// choice takes exactly `size`, so a piece that falls back never moves the layout.
 ///
 /// Photos and cutouts load through `GarmentImageLoader` at the size shown, away from the main
-/// actor. A picture the provider doesn't have (every Stage A sample) falls back to the drawing.
+/// actor, and fade in. While one loads the space stays empty (a drawing there flashed a cartoon
+/// before every photo); a picture the provider doesn't have falls back to the drawing.
+///
+/// Standing on the Closet floor a cutout has no sticker edge, so a faint shadow (light) or glow
+/// (dark) keeps a white piece off the cream page and a black one off the espresso page. Photo
+/// tiles are dimmed a little in dark appearance, so they aren't the brightest thing on screen.
 struct GarmentPicture: View {
     let photo: PhotoReference
     let cutout: GarmentCutout?
@@ -35,6 +40,7 @@ struct GarmentPicture: View {
     @Environment(\.garmentImages) private var loader
     @Environment(\.displayScale) private var displayScale
     @Environment(\.closetIsStillImage) private var isStillImage
+    @Environment(\.colorScheme) private var colorScheme
     @State private var loaded: Loaded?
 
     init(
@@ -80,8 +86,10 @@ struct GarmentPicture: View {
         ZStack {
             Color.clear
             content(choice, request: request)
+                .transition(.opacity)
         }
         .frame(width: size.width, height: size.height)
+        .animation(.easeOut(duration: 0.2), value: loaded?.request)
         .task(id: request) {
             guard let request, let loader, loaded?.request != request else { return }
             let image = await loader.image(for: request.reference, maxPixelSize: request.pixelSize)
@@ -97,13 +105,15 @@ struct GarmentPicture: View {
         case (.photoTile, .ready(let image)?):
             if let photo = image.cgImage {
                 NookPhotoTile(
-                    TileFraming.crop(photo, subject: cutout?.quality.subjectBounds, tileSize: size), size: size)
+                    TileFraming.crop(photo, subject: cutout?.quality.subjectBounds, tileSize: size), size: size
+                )
+                .brightness(colorScheme == .dark ? Self.darkTileDimming : 0)
             } else {
                 drawing
             }
         case (_, .loading?):
-            // The plain drawing keeps the grid steady while a photo loads; a sticker waits.
-            if presentation == .standing { drawing }
+            // Nothing while a photo loads: the space is fixed, so the grid stays steady.
+            Color.clear
         default:
             drawing
         }
@@ -123,8 +133,18 @@ struct GarmentPicture: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
+                .shadow(color: standingEdge, radius: colorScheme == .dark ? 6 : 2.5, y: colorScheme == .dark ? 0 : 1)
         }
     }
+
+    /// The faint edge around a cutout standing on the floor, in the text colour: a soft espresso
+    /// shadow on the light page, a soft cream glow on the dark one.
+    private var standingEdge: Color {
+        Color.nook.textPrimary.opacity(colorScheme == .dark ? 0.22 : 0.16)
+    }
+
+    /// How much photo tiles are dimmed in dark appearance.
+    static let darkTileDimming: Double = -0.07
 
     /// The drawing of its kind in its colours, as a sticker or standing plain.
     @ViewBuilder private var drawing: some View {

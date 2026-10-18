@@ -273,10 +273,11 @@ struct SwapOption: View {
                 ? AnyLayout(HStackLayout(spacing: NookSpacing.medium))
                 : AnyLayout(VStackLayout(spacing: NookSpacing.xSmall))
             layout {
+                // A few points inside the tile, so a dark sleeve or hem never touches its edge.
                 GarmentPicture(
-                    garment, size: CGSize(width: 64, height: 72), presentation: .sticker(.centred)
+                    garment, size: CGSize(width: 58, height: 66), presentation: .sticker(.centred)
                 )
-                .padding(NookSpacing.xSmall)
+                .padding(NookSpacing.xSmall + 3)
                 .background(
                     isSelected ? Color.nook.tintStrong : Color.nook.tint, in: NookRadius.shape(NookRadius.tile)
                 )

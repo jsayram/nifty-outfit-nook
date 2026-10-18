@@ -25,14 +25,16 @@ struct LookBundleSize: Hashable {
 }
 
 /// A look as a sticker bundle (RD-07): her pieces cut out with a white sticker edge, laid out
-/// where they're worn, slightly tilted and overlapping. No tiles, no hangers. The one view used
+/// where they're worn, slightly tilted and overlapping. The one view used
 /// wherever a look appears: results, Saved Looks, look detail and swap.
 ///
 /// - Pieces come through `GarmentPicture`, so a clean cutout is a sticker, a photo without one
 ///   is a rounded tile in the same space (RD-07.2), and a piece with no photo is its drawing.
-/// - An idea piece she doesn't own (LR-05b) is drawn from its kind and colours and carries a
-///   soft "Not in your closet" tag; thumbnails show just the tag icon.
-/// - A piece of hers that has since left her closet is faded (LR-16.4).
+/// - An idea piece she doesn't own (LR-05b) is a soft dashed silhouette in its colours
+///   (`IdeaSilhouette`) with a "Not in your closet" tag under it; thumbnails show just the tag
+///   icon.
+/// - A piece of hers that has since left her closet is a little faded, with a small minus mark
+///   (LR-16.4).
 /// - The layout (`StickerBundleLayout`) is seeded by the look's ID, so a look lies the same way
 ///   on every screen and launch.
 /// - VoiceOver reads the bundle as one element that names the pieces in body order, with each
@@ -73,13 +75,16 @@ struct LookBundle: View {
     }
 
     var body: some View {
-        let placements = StickerBundleLayout.place(content.pieces.map(\.role), seed: content.layoutSeed)
+        let placements = StickerBundleLayout.place(content.pieces.map(\.bundleItem), seed: content.layoutSeed)
         ZStack(alignment: .topLeading) {
             ForEach(placements, id: \.index) { placement in
                 piece(content.pieces[placement.index], placement: placement)
             }
             ForEach(placements.filter { content.pieces[$0.index].isIdea }, id: \.index) { placement in
                 ideaTag(at: placement.frame(forWidth: size.width))
+            }
+            ForEach(placements.filter { content.pieces[$0.index].isRemoved }, id: \.index) { placement in
+                removedMark(at: placement.frame(forWidth: size.width))
             }
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
@@ -97,10 +102,17 @@ struct LookBundle: View {
         let settled = isSettled
         // Under Reduce Motion the pieces only fade: no tilt, rise or scale is animated.
         let moves = !settled && !reduceMotion
-        return GarmentPicture(
-            photo: piece.photo, cutout: piece.cutout, category: piece.category, colors: piece.colors,
-            size: frame.size, presentation: .sticker(.centred)
-        )
+        return Group {
+            if piece.isIdea {
+                IdeaSilhouette(category: piece.category, colors: piece.colors)
+                    .frame(width: frame.width, height: frame.height)
+            } else {
+                GarmentPicture(
+                    photo: piece.photo, cutout: piece.cutout, category: piece.category, colors: piece.colors,
+                    size: frame.size, presentation: .sticker(.centred)
+                )
+            }
+        }
         .rotationEffect(.degrees(moves ? placement.angle * 2.4 : placement.angle))
         .scaleEffect(moves ? 0.94 : 1)
         .offset(y: moves ? -10 : 0)
@@ -111,19 +123,44 @@ struct LookBundle: View {
     }
 
     /// Pieces step back while another is being swapped, and a piece that has left her closet
-    /// stays faded (LR-16.4). The words say so too: the list under the bundle and VoiceOver.
+    /// is faded a little and marked (LR-16.4). The words say so too: the list under the bundle
+    /// and VoiceOver.
     private func restingOpacity(of piece: LookBundlePiece) -> Double {
         if let focusedPieceID, focusedPieceID != piece.id { return Self.steppedBack }
-        return piece.isRemoved ? Self.steppedBack : 1
+        return piece.isRemoved ? Self.removedOpacity : 1
     }
 
-    static let steppedBack = 0.42
+    /// The other pieces while one is being swapped.
+    static let steppedBack = 0.5
+    /// A piece that has left her closet keeps its colour and is only a little faded, with a small
+    /// mark: at 42% a real photo of a black skirt read as a gray one on the cream card, right
+    /// above the note that names it black, and greying it turned the taupe blazer gray
+    /// (real-photo audit, 17 October 2026).
+    static let removedOpacity = 0.8
 
     /// Back to front, a little apart, so the bundle is laid down piece by piece.
     private func entrance(order: Double) -> Animation {
         reduceMotion
             ? .easeOut(duration: 0.25)
             : .spring(response: 0.45, dampingFraction: 0.78).delay(order * 0.05)
+    }
+
+    /// A small round mark by the top corner of a piece that has left her closet.
+    private func removedMark(at frame: CGRect) -> some View {
+        let diameter: CGFloat = size.isThumbnail ? 14 : 22
+        return BundleTagLayout(centre: CGPoint(x: frame.maxX - diameter / 2, y: frame.minY + diameter / 2)) {
+            Image(systemName: "minus")
+                .font(.system(size: diameter * 0.5, weight: .bold))
+                .foregroundStyle(.nook.textSecondary)
+                .frame(width: diameter, height: diameter)
+                .background(Color.nook.surface, in: Circle())
+                .softShadow(.drop, in: Circle())
+                .allowsHitTesting(false)
+        }
+        .frame(width: size.width, height: size.height)
+        .zIndex(99)
+        .opacity(isSettled ? 1 : 0)
+        .accessibilityHidden(true)
     }
 
     @ViewBuilder
@@ -137,8 +174,9 @@ struct LookBundle: View {
             .zIndex(100)
             .opacity(isSettled ? 1 : 0)
         } else {
-            // Across the piece's lower half, as in `results-versions.html`.
-            BundleTagLayout(centre: CGPoint(x: frame.midX, y: frame.maxY - frame.height * 0.22)) {
+            // Under the piece's bottom edge, so it never hides a small idea (a hat), kept inside
+            // the bundle.
+            BundleTagLayout(centre: CGPoint(x: frame.midX, y: frame.maxY + 4)) {
                 IdeaTag()
             }
             .frame(width: size.width, height: size.height)

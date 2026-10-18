@@ -50,6 +50,19 @@ nonisolated public enum BundleRole: Int, CaseIterable, Hashable, Sendable {
     }
 }
 
+/// One piece as the layout sees it: its role, and for a photo cutout, its shape.
+nonisolated public struct BundleItem: Hashable, Sendable {
+    public let role: BundleRole
+    /// The cutout's width over its height, or `nil` for a drawing or a photo tile, which keep
+    /// the role's usual space. Only shoes use it so far (`StickerBundleLayout.shoeSize`).
+    public let aspectRatio: CGFloat?
+
+    public init(_ role: BundleRole, aspectRatio: CGFloat? = nil) {
+        self.role = role
+        self.aspectRatio = aspectRatio.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
+    }
+}
+
 /// Where one piece lies in a bundle.
 nonisolated public struct BundlePlacement: Hashable, Sendable {
     /// The piece's position in the list given to `StickerBundleLayout.place`.
@@ -110,14 +123,21 @@ nonisolated public enum StickerBundleLayout {
     /// How much a small arrangement may grow to fill the box.
     static let maximumGrowth: CGFloat = 1.25
 
-    /// Places `roles`, one placement per role in the same order.
+    /// Places `roles`, one placement per role in the same order, each in its role's usual space.
     public static func place(_ roles: [BundleRole], seed: String) -> [BundlePlacement] {
-        guard !roles.isEmpty else { return [] }
+        place(roles.map { BundleItem($0) }, seed: seed)
+    }
+
+    /// Places `items`, one placement per item in the same order. A cutout's shape sizes its space
+    /// where the role's usual space would be the wrong shape (shoes).
+    public static func place(_ items: [BundleItem], seed: String) -> [BundlePlacement] {
+        guard !items.isEmpty else { return [] }
+        let roles = items.map(\.role)
         var generator = BundleSeed(seed)
         // Small nudges and tilts, drawn in piece order so the same seed gives the same look.
         let nudges = roles.map { _ in CGPoint(x: generator.unit(in: -3...3), y: generator.unit(in: -3...3)) }
         let tilts = roles.map { _ in generator.unit(in: -2.5...2.5) }
-        var spots = assignSpots(roles, nudges: nudges)
+        var spots = assignSpots(roles, aspects: items.map(\.aspectRatio), nudges: nudges)
         for index in spots.indices {
             spots[index].angle += Double(tilts[spots[index].index])
         }
@@ -168,7 +188,8 @@ nonisolated public enum StickerBundleLayout {
     /// Gives each piece its usual spot, moved by its nudge, then the leftovers the free space
     /// that overlaps least. Nudging before checking the overlaps means a nudge can't push two
     /// pieces over the limit.
-    static func assignSpots(_ roles: [BundleRole], nudges: [CGPoint]) -> [Spot] {
+    static func assignSpots(_ roles: [BundleRole], aspects: [CGFloat?]? = nil, nudges: [CGPoint]) -> [Spot] {
+        func aspect(_ index: Int) -> CGFloat? { aspects.flatMap { $0.indices.contains(index) ? $0[index] : nil } }
         func indices(_ role: BundleRole) -> [Int] { roles.indices.filter { roles[$0] == role } }
         let dresses = indices(.dress)
         let uppers = indices(.layer) + indices(.top)
@@ -208,8 +229,20 @@ nonisolated public enum StickerBundleLayout {
 
         if let shoe = shoes.first {
             // Over the trousers' hem; higher up and nearer the middle when nothing hangs there.
-            usual.append(
-                hasLowerBody ? spot(shoe, .shoes, 232, 318, 116, 48, -8) : spot(shoe, .shoes, 176, 228, 128, 54, -6))
+            // A drawing is a wide side view and keeps the wide box. A photo cutout gets a space of
+            // its own shape, standing on the same line, so heels, sneakers and knee boots all read
+            // at about a real size next to the bag.
+            if let aspect = aspect(shoe) {
+                let size = shoeSize(aspect: aspect, area: hasLowerBody ? shoeArea : shoeAreaAlone)
+                usual.append(
+                    hasLowerBody
+                        ? spot(shoe, .shoes, 232, shoeFloor - size.height / 2, size.width, size.height, -8)
+                        : spot(shoe, .shoes, 176, 228, size.width, size.height, -6))
+            } else {
+                usual.append(
+                    hasLowerBody
+                        ? spot(shoe, .shoes, 232, 318, 116, 48, -8) : spot(shoe, .shoes, 176, 228, 128, 54, -6))
+            }
         }
         spare += shoes.dropFirst()
 
@@ -235,7 +268,8 @@ nonisolated public enum StickerBundleLayout {
             if crowding <= usualOverlap { placed.append(candidate) } else { spare.append(candidate.index) }
         }
         for index in spare.sorted() {
-            placed.append(leastCrowdedSpot(for: index, role: roles[index], among: placed))
+            let size = roles[index] == .shoes ? aspect(index).map { shoeSize(aspect: $0, area: shoeSpareArea) } : nil
+            placed.append(leastCrowdedSpot(for: index, role: roles[index], size: size, among: placed))
         }
         return placed.sorted { $0.index < $1.index }
     }
@@ -244,8 +278,10 @@ nonisolated public enum StickerBundleLayout {
     /// frame overlaps the placed pieces by at most `spareOverlap`. The search spirals out from
     /// there and reaches well past the box, so such a spot is found; `fitted` then shrinks the
     /// arrangement back inside.
-    private static func leastCrowdedSpot(for index: Int, role: BundleRole, among placed: [Spot]) -> Spot {
-        let size = role.spareSize
+    private static func leastCrowdedSpot(for index: Int, role: BundleRole, size: CGSize?, among placed: [Spot])
+        -> Spot
+    {
+        let size = size ?? role.spareSize
         let preferred = role.preferredCentre
         let tilt: Double = index.isMultiple(of: 2) ? -5 : 5
         var leastCrowded: (spot: Spot, crowding: CGFloat)?
@@ -274,6 +310,38 @@ nonisolated public enum StickerBundleLayout {
             return first != second ? first < second : ($0.y, $0.x) < ($1.y, $1.x)
         }
     }()
+
+    // MARK: Shoes
+
+    /// Where the shoes stand over the trousers' hem: the bottom of the drawn shoes' box.
+    static let shoeFloor: CGFloat = 342
+
+    /// The space a pair of shoes from a photo gets, in square design points: a little less than
+    /// the bag's 88 x 96, as a pair of shoes and a bag are next to each other on a bed.
+    public static let shoeArea: CGFloat = 6_200
+    /// With no trousers or dress, the shoes sit higher and nearer the middle, a little larger.
+    static let shoeAreaAlone: CGFloat = 6_800
+    /// A second pair, placed like any leftover piece.
+    static let shoeSpareArea: CGFloat = 4_600
+
+    /// The tallest and widest a pair of shoes may be, in design points. Knee boots stop at the
+    /// height of a skirt's lower half; a wide side view stops short of the box's middle.
+    public static let shoeMaximumSize = CGSize(width: 124, height: 104)
+
+    /// The space for shoes whose cutout is `aspect` (width over height) wide: the cutout's own
+    /// shape with `area` square design points, kept inside `shoeMaximumSize`. Shapes past 0.5
+    /// and 2.4 are treated as those.
+    public static func shoeSize(aspect: CGFloat, area: CGFloat = shoeArea) -> CGSize {
+        let shape = min(max(aspect, 0.5), 2.4)
+        var size = CGSize(width: (area * shape).squareRoot(), height: (area / shape).squareRoot())
+        if size.height > shoeMaximumSize.height {
+            size = CGSize(width: shoeMaximumSize.height * shape, height: shoeMaximumSize.height)
+        }
+        if size.width > shoeMaximumSize.width {
+            size = CGSize(width: shoeMaximumSize.width, height: shoeMaximumSize.width / shape)
+        }
+        return size
+    }
 
     /// The most a leftover piece may overlap the others.
     static let spareOverlap: CGFloat = 0.2

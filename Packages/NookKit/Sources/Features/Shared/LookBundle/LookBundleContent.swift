@@ -115,6 +115,15 @@ struct LookBundlePiece: Identifiable, Hashable {
         self.init(id: id, name: idea.name, category: idea.category, colors: idea.colors, isIdea: true)
     }
 
+    /// The piece as the bundle's layout sees it: its role, and its cutout's shape when it shows
+    /// as a sticker from a photo.
+    var bundleItem: BundleItem {
+        guard !isIdea, case .cutout = GarmentArtChoice(photo: photo, cutout: cutout),
+            let aspect = cutout?.aspectRatio
+        else { return BundleItem(role) }
+        return BundleItem(role, aspectRatio: CGFloat(aspect))
+    }
+
     /// Where the piece lies in the bundle.
     var role: BundleRole {
         switch category {

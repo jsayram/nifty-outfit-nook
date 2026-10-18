@@ -30,7 +30,7 @@ final class SuitcasesAndLaundryTests: XCTestCase {
         let count = element("packing.count", in: app)
         XCTAssertTrue(count.waitUntilExists(timeout: Self.wait), "The packing sheet didn't open")
         XCTAssertTrue(count.label.hasPrefix("Nothing packed yet"), count.label)
-        for (search, id) in [("navy pants", "g-navy-trousers"), ("pink", "g-pink-blouse"), ("flats", "g-nude-flats")] {
+        for (search, id) in [("navy pants", "g-navy-trousers"), ("pink", "g-pink-blouse"), ("pumps", "g-nude-flats")] {
             let field = app.searchFields["Search your closet"]
             XCTAssertTrue(field.waitUntilExists(timeout: Self.wait))
             // Empties the last search before typing the next.

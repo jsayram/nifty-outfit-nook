@@ -31,7 +31,7 @@ extension View {
 /// already has, making it, the picture, or what went wrong.
 ///
 /// Before anything is made it says, in plain words, that the picture is simulated in this build
-/// and shows her pieces, not her; that it's free here (pictures will use an allowance later, PRD
+/// and shows either the person in her try-on photo wearing the look or her pieces alone; that it's free here (pictures will use an allowance later, PRD
 /// §14.4, but there's no purchase screen in Stage A); and, from Your looks, that the look gets
 /// saved too.
 struct TryOnSheetContent: View {
@@ -199,7 +199,7 @@ enum TryOnSheetText {
     static var simulatedHere: String {
         String(
             localized:
-                "In this test build the picture is simulated: your pieces on a plain background, with no person in it. Nothing leaves your phone.",
+                "In this test build the picture is simulated: the person in your try-on photo wearing the look, or your pieces on their own. Nothing leaves your phone.",
             bundle: .module, comment: "Try it on sheet")
     }
 

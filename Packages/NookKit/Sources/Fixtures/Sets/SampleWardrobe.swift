@@ -81,6 +81,12 @@ public enum SampleWardrobe {
         var y: Double
         var width: Double
         var height: Double
+        var pixelWidth: Int
+        var pixelHeight: Int
+
+        var aspectRatio: Double? {
+            pixelHeight > 0 ? Double(pixelWidth) / Double(pixelHeight) : nil
+        }
 
         var quality: CutoutQuality {
             CutoutQuality(
@@ -103,7 +109,7 @@ public enum SampleWardrobe {
 
     /// The cutout of an asset with the signals measured from it, or `nil` for an unknown asset.
     public static func garmentCutout(_ asset: String) -> GarmentCutout? {
-        signals[asset].map { GarmentCutout(image: cutout(asset), quality: $0.quality) }
+        signals[asset].map { GarmentCutout(image: cutout(asset), quality: $0.quality, aspectRatio: $0.aspectRatio) }
     }
 
     /// `garment` with the photo and cutout of `asset`.
@@ -117,15 +123,13 @@ public enum SampleWardrobe {
 
     // MARK: Demo pieces
 
-    /// Demo pieces left without a photo, as pieces added by words alone are. Old gray leggings
-    /// sit in Recently deleted and were never photographed.
-    static let textOnlyDemoPieces: Set<Garment.ID> = ["g-gray-leggings"]
-
     /// The demo closet's pieces with their real photos and cutouts. The photos are named for the
-    /// piece's ID.
+    /// piece's ID. A piece the demo lists with no photo (the brick knit top and the old gray
+    /// leggings, added by words alone) keeps its drawing, so Closet and the bundles still show
+    /// that state.
     static func dressedDemo(_ garments: [Garment]) -> [Garment] {
         garments.map { garment in
-            guard !textOnlyDemoPieces.contains(garment.id) else { return garment }
+            guard garment.photo != .noPhoto else { return garment }
             return dressed(garment, asset: garment.id.rawValue)
         }
     }
@@ -148,7 +152,7 @@ public enum SampleWardrobe {
         "g-cream-sweater": ["sweater", "knit top"], "g-brick-top": ["knit top", "sweater"],
         "g-black-tee": ["tee", "tank"],
         "g-wide-jeans": ["jeans"], "g-black-skirt": ["skirt"], "g-blue-dress": ["midi dress", "shirt dress"],
-        "g-nude-flats": ["flats"], "g-black-heels": ["heels"], "g-white-sneakers": ["sneakers"],
+        "g-nude-flats": ["heels"], "g-black-heels": ["heels"], "g-white-sneakers": ["sneakers"],
         "g-tan-loafers": ["loafers"], "g-burgundy-bag": ["crossbody bag"], "g-gray-blazer": ["blazer"],
         "g-cream-crop": ["blouse", "tank"], "g-camel-trench": ["coat"], "g-gray-leggings": ["trousers"],
     ]
@@ -168,8 +172,9 @@ public enum SampleWardrobe {
 
     /// The photo for generated piece number `index`: a photo of the same kind of piece if there is
     /// one, in the same colour if there is one, and picked by `index` among those, so the same
-    /// closet gets the same pictures every run.
-    static func pick(category: GarmentCategory, noun: String, color: ColorName?, index: Int) -> String? {
+    /// closet gets the same pictures every run. The piece then takes its colours from the photo
+    /// (`LargeCloset`), so colour search and filters match what she sees.
+    static func pick(category: GarmentCategory, noun: String, color: ColorName?, index: Int) -> PoolEntry? {
         let ofCategory = pool.filter { $0.category == category }
         guard !ofCategory.isEmpty else { return nil }
         let sameKind = ofCategory.filter { $0.words.contains(noun) }
@@ -181,6 +186,6 @@ public enum SampleWardrobe {
         // A mixed-up index, so neighbouring pieces don't take neighbouring photos.
         var mixed = UInt64(truncatingIfNeeded: index) &* 0x9E37_79B9_7F4A_7C15
         mixed ^= mixed >> 29
-        return candidates[Int(mixed % UInt64(candidates.count))].asset
+        return candidates[Int(mixed % UInt64(candidates.count))]
     }
 }

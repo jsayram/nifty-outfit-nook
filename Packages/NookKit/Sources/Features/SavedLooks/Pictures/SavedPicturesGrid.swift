@@ -171,9 +171,12 @@ struct SavedPictureCell: View {
     }
 
     /// "28 Aug", "28 Aug · Earlier version", "28 Aug · Look deleted". In a row the picture is
-    /// too small for its Simulated badge, so the line starts with Simulated (RD-04.2).
+    /// too small for its Simulated badge, and a tile of a person keeps the badge off her
+    /// (`TryOnPictureView.photoBadgeMinimumWidth`), so then the line starts with Simulated
+    /// (RD-04.2).
     private var dateLine: String {
-        var parts = style == .row ? [SharedText.simulated, date] : [date]
+        let saysSimulated = style == .row || item.content.tryOnPhoto != nil
+        var parts = saysSimulated ? [SharedText.simulated, date] : [date]
         switch item.status {
         case .current: break
         case .changed: parts.append(TryOnText.earlierVersionShort)

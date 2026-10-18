@@ -2070,13 +2070,13 @@
     "Everything you’ve added, from this iPhone." : {
       "comment" : "Delete my data, under the title"
     },
-    "Example photo · Simulated" : {
-      "comment" : "Under the example try-on photo"
+    "Example photo" : {
+      "comment" : "Add a piece form: an example photo stands in for her own until photos are built"
     },
     "Example pieces, looks and suitcases, so you can try Style Me straight away. It comes back each time the app opens." : {
       "comment" : "Onboarding: what the sample closet is"
     },
-    "Example try-on photo, simulated. It isn’t a photo of you." : {
+    "Example try-on photo. It isn’t a photo of you." : {
       "comment" : "VoiceOver: the example try-on photo"
     },
     "Explains laundry tracking." : {
@@ -2189,7 +2189,7 @@
     "Fit and measurements" : {
       "comment" : "Profile row and screen title"
     },
-    "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, and your fit, measurements and try-on photo are cleared." : {
+    "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, with its own fit details and try-on photo, and anything you changed in them is cleared." : {
       "comment" : "Privacy and terms: under what stays on the iPhone"
     },
     "Fits well" : {
@@ -2645,7 +2645,7 @@
     "In this test build nothing needs a connection, and nothing you add is sent anywhere." : {
       "comment" : "Help: What needs a connection"
     },
-    "In this test build the picture is simulated: your pieces on a plain background, with no person in it. Nothing leaves your phone." : {
+    "In this test build the picture is simulated: the person in your try-on photo wearing the look, or your pieces on their own. Nothing leaves your phone." : {
       "comment" : "Try it on sheet"
     },
     "In your own words" : {
@@ -4439,16 +4439,8 @@
         }
       }
     },
-    "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos." : {
-      "comment" : "Add a piece: under the choices, while photos are a stand-in",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos."
-          }
-        }
-      }
+    "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos." : {
+      "comment" : "Add a piece: under the choices, while photos are a stand-in"
     },
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
@@ -4814,17 +4806,6 @@
     "Sample closet" : {
       "comment" : "Onboarding: starting closet choice"
     },
-    "Sample photo" : {
-      "comment" : "Add a piece form: a sample picture stands in for a real photo until photos are built",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sample photo"
-          }
-        }
-      }
-    },
     "Save" : {
       "comment" : "Toolbar button: saves the piece",
       "localizations" : {
@@ -5147,8 +5128,11 @@
     "Simulated stylist" : {
       "comment" : "Styling step detail"
     },
-    "Simulated try-on picture of %@: %@. No person is shown." : {
-      "comment" : "Spoken for a simulated try-on picture: the look's name, then its pieces"
+    "Simulated try-on picture of %@: %@. The pieces only, with no one wearing them." : {
+      "comment" : "Spoken for a simulated try-on picture drawn from the pieces: the look's name, then its pieces"
+    },
+    "Simulated try-on picture of %@: the person in your try-on photo wearing %@." : {
+      "comment" : "Spoken for a simulated try-on picture that shows a person: the look's name, then its pieces"
     },
     "Simulated. Leaving stops it, and nothing is kept." : {
       "comment" : "Try it on sheet, while making"
@@ -5880,6 +5864,9 @@
     "The look it came from didn’t change." : {
       "comment" : "Picture detail: picture gone"
     },
+    "The person in your try-on photo wearing the look, or your pieces on their own. It shows the style, not the exact fit." : {
+      "comment" : "Try it on tour, step 1"
+    },
     "The photo, the details and Save" : {
       "comment" : "App tours: what the Edit a piece tour covers"
     },
@@ -5987,7 +5974,7 @@
     "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics." : {
       "comment" : "Privacy and terms: the banner at the top"
     },
-    "This is the photo of you that try-on pictures will start from, once they’re ready. It’s optional: styling never needs it." : {
+    "This is the photo of you that try-on pictures start from. It’s optional: styling never needs it." : {
       "comment" : "Try-on photo sheet: what the photo is for"
     },
     "This list shows everything that’s deleted, and how much of each." : {
@@ -6002,8 +5989,11 @@
     "This look isn’t saved any more" : {
       "comment" : "Look detail: the look is gone"
     },
-    "This picture is simulated: it shows the look’s pieces, not you. In a later version, Try it on will show you wearing the look. Pictures show the style, not the exact fit." : {
-      "comment" : "Picture detail: what a simulated picture is"
+    "This picture is simulated from the look’s pieces alone, with no one wearing them. Pictures show the style, not the exact fit." : {
+      "comment" : "Picture detail: what a simulated picture drawn from the pieces is"
+    },
+    "This picture is simulated: the person in your try-on photo, wearing the look. Pictures show the style, not the exact fit." : {
+      "comment" : "Picture detail: what a simulated picture of a person wearing the look is"
     },
     "This picture was deleted" : {
       "comment" : "Picture detail: picture gone"
@@ -6177,7 +6167,7 @@
     "Try it on and Ask stylist need a connection. Save and Swap work offline." : {
       "comment" : "Under the results buttons while offline"
     },
-    "Try it on makes a simulated picture of the look, only when you ask. In this test build it’s drawn on your iPhone." : {
+    "Try it on makes a simulated picture of the look, only when you ask: the person in your try-on photo wearing it, or your pieces on their own. Nothing leaves your iPhone." : {
       "comment" : "Help: Swap, save and try on, the quieter line"
     },
     "Try it on makes a simulated picture of this outfit. It shows the style, not the exact fit." : {
@@ -6900,9 +6890,6 @@
     },
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
-    },
-    "Your pieces on a plain background, with no person in it. It shows the style, not the exact fit." : {
-      "comment" : "Try it on tour, step 1"
     },
     "Your pieces to swap in" : {
       "comment" : "VoiceOver name of Swap's options, in its tour"

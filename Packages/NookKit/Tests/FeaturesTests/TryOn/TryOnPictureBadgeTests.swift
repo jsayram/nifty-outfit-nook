@@ -28,4 +28,18 @@ struct TryOnPictureBadgeTests {
         let capped = fittedHeight(of: TryOnPictureView.badge, width: room, dynamicTypeSize: .xxxLarge)
         #expect(capped > standard)
     }
+
+    /// Over a person the badge never covers her: it sits in the bottom corner, on the floor, and
+    /// only on a picture wide enough to keep it off her feet (real-photo audit, 17 October 2026).
+    /// A drawn picture keeps it in the top corner, over empty space.
+    @Test func theBadgeKeepsOffAPerson() {
+        #expect(TryOnPictureView.badgeAlignment(showsPerson: true) == .bottomLeading)
+        #expect(TryOnPictureView.badgeAlignment(showsPerson: false) == .topLeading)
+        // Picture detail is wide enough; a grid tile and the Try it on sheet's preview aren't, and
+        // say Simulated in their words instead.
+        #expect(TryOnPictureView.showsBadge(width: PictureDetailPage.pictureWidth, showsPerson: true))
+        #expect(!TryOnPictureView.showsBadge(width: 200, showsPerson: true))
+        #expect(TryOnPictureView.showsBadge(width: 200, showsPerson: false))
+        #expect(!TryOnPictureView.showsBadge(width: 104, showsPerson: false))
+    }
 }

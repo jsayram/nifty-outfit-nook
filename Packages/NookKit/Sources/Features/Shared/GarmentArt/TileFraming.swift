@@ -7,10 +7,22 @@ import Models
 nonisolated enum TileFraming {
     /// Room left around the garment, as a share of its size on each side.
     static let margin: CGFloat = 0.12
+    /// In a small tile (a bundle, a thumbnail, a swap row) the room around the garment is mostly
+    /// bed sheet, so the crop comes in closer (real-photo audit, 17 October 2026).
+    static let smallMargin: CGFloat = 0.03
+    /// Tiles narrower than this, in points, are small.
+    static let smallTileWidth: CGFloat = 100
+
+    /// The room for a tile `tileWidth` points wide.
+    static func margin(forTileWidth tileWidth: CGFloat) -> CGFloat {
+        tileWidth < smallTileWidth ? smallMargin : margin
+    }
 
     /// The crop, as fractions of the photo with the origin at the top left, that fills a tile of
     /// `tileAspect` (width over height) from a photo of `photoAspect`.
-    static func crop(subject: CutoutBounds?, photoAspect: CGFloat, tileAspect: CGFloat) -> CGRect {
+    static func crop(
+        subject: CutoutBounds?, photoAspect: CGFloat, tileAspect: CGFloat, margin: CGFloat = margin
+    ) -> CGRect {
         guard photoAspect > 0, tileAspect > 0 else { return CGRect(x: 0, y: 0, width: 1, height: 1) }
         // Work in a space where the photo is `photoAspect` wide and 1 high, so aspects are real.
         let wanted: CGRect
@@ -41,7 +53,7 @@ nonisolated enum TileFraming {
         guard image.width > 0, image.height > 0, tileSize.width > 0, tileSize.height > 0 else { return image }
         let unit = crop(
             subject: subject, photoAspect: CGFloat(image.width) / CGFloat(image.height),
-            tileAspect: tileSize.width / tileSize.height)
+            tileAspect: tileSize.width / tileSize.height, margin: margin(forTileWidth: tileSize.width))
         let pixels = CGRect(
             x: unit.minX * CGFloat(image.width), y: unit.minY * CGFloat(image.height),
             width: unit.width * CGFloat(image.width), height: unit.height * CGFloat(image.height)

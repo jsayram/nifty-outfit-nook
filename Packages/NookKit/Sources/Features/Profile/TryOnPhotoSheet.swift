@@ -67,7 +67,7 @@ struct TryOnPhotoSheet: View {
             lead(
                 String(
                     localized:
-                        "This is the photo of you that try-on pictures will start from, once they’re ready. It’s optional: styling never needs it.",
+                        "This is the photo of you that try-on pictures start from. It’s optional: styling never needs it.",
                     bundle: .module, comment: "Try-on photo sheet: what the photo is for"),
                 step: .main)
             if hasPhoto {
@@ -254,9 +254,10 @@ struct TryOnPhotoSheet: View {
 }
 
 /// Stage A's example try-on photo: a photo of a woman standing, from the sample wardrobe (an
-/// AI-generated picture, not a person and not her), or the try-on backdrop with a photo symbol
-/// when the provider has none. Under it, "Example photo · Simulated", and the Simulated badge sits
-/// on the photo. Hidden in the app switcher like a real photo.
+/// AI-generated picture, not a real person and not her), or the try-on backdrop with a photo
+/// symbol when the provider has none. Under it, "Example photo". It isn't a try-on picture, so it
+/// has no Simulated badge, and nothing covers her face. Hidden in the app switcher like a real
+/// photo.
 struct ExamplePhoto: View {
     /// 9:16, the shape of a full-length phone photo.
     static let size = CGSize(width: 126, height: 224)
@@ -285,10 +286,6 @@ struct ExamplePhoto: View {
                         .font(.system(size: 44, weight: .regular))
                         .foregroundStyle(.nook.textSecondary)
                 }
-                NookBadge(SharedText.simulated, systemImage: "camera")
-                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                    .padding(NookSpacing.small)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .frame(width: Self.size.width, height: Self.size.height)
             .clipShape(shape)
@@ -298,7 +295,7 @@ struct ExamplePhoto: View {
                     .softShadow(.drop, in: shape)
             }
             .hiddenWhenInactive()
-            Text("Example photo · Simulated", bundle: .module, comment: "Under the example try-on photo")
+            Text("Example photo", bundle: .module, comment: "Under the example try-on photo")
                 .nookTextStyle(.caption)
                 .foregroundStyle(.nook.textSecondary)
         }
@@ -310,7 +307,7 @@ struct ExamplePhoto: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             Text(
-                "Example try-on photo, simulated. It isn’t a photo of you.", bundle: .module,
+                "Example try-on photo. It isn’t a photo of you.", bundle: .module,
                 comment: "VoiceOver: the example try-on photo")
         )
         .accessibilityAddTraits(.isImage)

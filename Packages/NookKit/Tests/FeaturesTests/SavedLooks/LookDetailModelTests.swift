@@ -143,11 +143,11 @@ struct LookDetailModelTests {
     /// deleted for good is counted.
     @Test func removedPieces() async throws {
         let (model, services) = await detail("o-blazer-office")
-        #expect(model.removedPieces.map(\.name) == ["Gray blazer"])
+        #expect(model.removedPieces.map(\.name) == ["Taupe blazer"])
         #expect(model.removedPieces.first?.removal == .noLongerOwned)
         #expect(
             LookDetailText.removedNote(model.removedPieces)
-                == "Gray blazer isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is."
+                == "Taupe blazer isn’t in your closet any more. Swap it for one of your pieces, or keep the look as it is."
         )
 
         try await services.closet.delete("g-cream-sweater", at: TestTime.now)

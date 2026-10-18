@@ -94,6 +94,10 @@ struct Signals: Codable {
     var y: Double
     var width: Double
     var height: Double
+    /// The bundled cutout's size, after cropping and shrinking. Its shape sizes shoes in a look
+    /// bundle (`GarmentCutout.aspectRatio`).
+    var pixelWidth = 0
+    var pixelHeight = 0
 }
 
 /// The cutout's alpha at full size, its signals, and the garment's bounds in pixels.
@@ -218,13 +222,16 @@ for stem in garmentStems {
         to: root.appendingPathComponent("photos/\(stem).jpg"), longSide: 1024)
 
     let cutout = load(source.appendingPathComponent("nook_b2_cutouts/\(stem).png"))
-    let (signals, bounds) = measure(cutout)
-    manifest[stem] = signals
+    let (measured, bounds) = measure(cutout)
+    var signals = measured
     // Crop to the garment with a margin of about 1%, then shrink.
     let margin = CGFloat(max(cutout.width, cutout.height)) * 0.01
     let crop = bounds.insetBy(dx: -margin, dy: -margin)
         .intersection(CGRect(x: 0, y: 0, width: cutout.width, height: cutout.height)).integral
     let (width, height) = fit(Int(crop.width), Int(crop.height), longSide: 640)
+    signals.pixelWidth = width
+    signals.pixelHeight = height
+    manifest[stem] = signals
     write(
         rgba(cutout, width: width, height: height, crop: crop),
         to: root.appendingPathComponent("cutouts/\(stem).jp2"), type: UTType("public.jpeg-2000")!, quality: 0.75)
@@ -233,7 +240,8 @@ for stem in garmentStems {
 jpeg(
     source.appendingPathComponent("nook_b3/person-c.jpg"), to: root.appendingPathComponent("people/person.jpg"),
     longSide: 1280)
-for stem in stems("nook_b4_tryon", ext: "jpg") where stem.hasPrefix("look-") {
+// The cool-weather preview showed a sleeveless vest, not the trench, in another room, so it's left out.
+for stem in stems("nook_b4_tryon", ext: "jpg") where stem.hasPrefix("look-") && stem != "look-cool-weather" {
     jpeg(
         source.appendingPathComponent("nook_b4_tryon/\(stem).jpg"),
         to: root.appendingPathComponent("tryon/\(stem.dropFirst(5)).jpg"), longSide: 1280)
