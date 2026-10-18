@@ -161,17 +161,17 @@ struct SavedLooksModelTests {
 
     // MARK: Pieces that left her closet
 
-    /// LR-16.4: the gray blazer she gave away, and the archived skirt, show as removed.
+    /// LR-16.4: the taupe blazer she gave away, and the archived skirt, show as removed.
     @Test func removedPiecesAreCounted() async throws {
         let model = await loadedSavedLooks()
         #expect(try #require(model.item("o-blazer-office")).removedCount == 1)
         #expect(try #require(model.item("o-lace-date")).removedCount == 1)
         #expect(try #require(model.item("o-interview")).removedCount == 0)
         let blazer = try #require(model.item("o-blazer-office")?.content.removed.first)
-        #expect(blazer.name == "Gray blazer")
+        #expect(blazer.name == "Taupe blazer")
         #expect(blazer.removal == .noLongerOwned)
         #expect(
-            LookBundleText.spokenName(of: blazer) == "Gray blazer (No longer in your closet)")
+            LookBundleText.spokenName(of: blazer) == "Taupe blazer (No longer in your closet)")
     }
 
     // MARK: Delete and Undo

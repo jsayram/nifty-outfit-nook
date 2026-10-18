@@ -19,7 +19,7 @@ enum TryOnTour {
                     // The last line is Your looks' tour's (RD-06, LR-12).
                     message: String(
                         localized:
-                            "Your pieces on a plain background, with no person in it. It shows the style, not the exact fit.",
+                            "The person in your try-on photo wearing the look, or your pieces on their own. It shows the style, not the exact fit.",
                         bundle: .module, comment: "Try it on tour, step 1")),
                 TourStep(
                     Anchor.make,

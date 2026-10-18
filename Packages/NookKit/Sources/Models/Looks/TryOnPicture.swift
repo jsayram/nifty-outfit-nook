@@ -4,9 +4,10 @@ import Foundation
 /// when she taps Try it on. Every one is labelled Simulated (RD-04.2).
 ///
 /// Data tier: **Sensitive** (DATA_MAP.md, "Try-on pictures"). A real one is a picture of her, so
-/// it stays on the phone and in her iCloud, and the app hides it in the app switcher. Stage A only
-/// has the simulated picture, drawn on the phone from the look's pieces with no person in it;
-/// generated pictures wait for Phase 33's gates.
+/// it stays on the phone and in her iCloud, and the app hides it in the app switcher. Stage A
+/// makes nothing for real: a picture is drawn on the phone from the look's pieces, or, in the
+/// fixtures, is a bundled sample of the person in the example try-on photo wearing the look.
+/// Real generated pictures wait for Phase 33's gates.
 ///
 /// A picture keeps the look as it was when it was made (`captured`, PRD §9.2.1 step 6). The look
 /// can change or leave Saved Looks later, and the picture stays as it was until she deletes it
@@ -60,6 +61,7 @@ public enum TryOnImage: Hashable, Sendable, Codable {
     /// Stage A: drawn on the phone from the captured pieces on a plain backdrop. No person, no
     /// photo of her, nothing sent anywhere.
     case simulated
-    /// A generated picture in the app's picture store (Phase 33). Still labelled Simulated.
+    /// A generated picture in the app's picture store (Phase 33), showing a person wearing the
+    /// look. In Stage A, the fixtures' sample previews. Still labelled Simulated.
     case generated(PhotoReference)
 }

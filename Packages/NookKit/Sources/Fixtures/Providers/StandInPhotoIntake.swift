@@ -2,11 +2,14 @@ import Foundation
 import Models
 
 /// The photo step's stand-in for Stage A (Phase 7b). It asks for no permission and opens no
-/// camera or picker: it hands back the same sample picture for every source, or fails like an
-/// unreadable photo. Phase 22a replaces it with PhotosUI and the camera.
+/// camera or picker: it hands back the same example photo for every source, a real photo from
+/// the sample wardrobe, or fails like an unreadable photo. Phase 22a replaces it with PhotosUI
+/// and the camera.
 public struct StandInPhotoIntake: PhotoIntake {
-    /// The sample picture every source returns. Screens draw it as the piece's placeholder art.
-    public static let samplePhoto = PhotoReference.sample("stand-in-photo")
+    /// The example photo every source returns: the navy striped tee from the sample wardrobe,
+    /// so a piece added in the demo shows a real photo like the rest of the closet. It has no
+    /// cutout, so it shows in a tile.
+    public static let samplePhoto = SampleWardrobe.photo("x-striped-tee")
 
     public var fails: Bool
     public var latency: Duration

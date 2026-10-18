@@ -223,6 +223,31 @@ struct GarmentPlaceholderArt: View {
     }
 }
 
+/// An idea for a piece she doesn't own (LR-05b), in a look bundle: its kind's outline filled
+/// softly in its colour, with a dashed edge. Among her photo stickers a full drawing looked like a
+/// cartoon pretending to be a photo (real-photo audit, 17 October 2026); this reads as a
+/// suggestion. VoiceOver and the list under the bundle name it.
+struct IdeaSilhouette: View {
+    let category: GarmentCategory
+    let colors: [ColorName]
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        let main = colors.first.map(GarmentColor.fill(for:)) ?? .unknown
+        ZStack {
+            GarmentSilhouette(category: category)
+                .fill(main.color(in: colorScheme).opacity(0.5))
+            GarmentSilhouette(category: category)
+                .stroke(
+                    Color.nook.accent,
+                    style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round, dash: [4, 3]))
+        }
+        .aspectRatio(GarmentSilhouette.designSize, contentMode: .fit)
+        .accessibilityHidden(true)
+    }
+}
+
 /// The soft oval shadow a piece stands on (`.gcard::before` in `closet.html`). A gradient, not a
 /// blur, so a long grid stays cheap to scroll.
 struct GarmentContactShadow: View {

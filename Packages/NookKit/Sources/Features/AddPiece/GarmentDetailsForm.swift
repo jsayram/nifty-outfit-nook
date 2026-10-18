@@ -267,8 +267,8 @@ private struct PhotoRow: View {
             String(localized: "No photo yet", bundle: .module, comment: "Add a piece form: the piece has no photo")
         case .sample:
             String(
-                localized: "Sample photo", bundle: .module,
-                comment: "Add a piece form: a sample picture stands in for a real photo until photos are built")
+                localized: "Example photo", bundle: .module,
+                comment: "Add a piece form: an example photo stands in for her own until photos are built")
         case .stored:
             String(localized: "Your photo", bundle: .module, comment: "Add a piece form: her own photo")
         }

@@ -106,7 +106,7 @@ extension SampleWardrobe.Extra {
             dressiness: .dressy, warmth: .warm, seasons: [.fall, .winter], occasions: [.office, .event, .dateNight],
             words: ["coat", "blazer"]),
         .init(
-            asset: "x-ballet-flats", name: "Black ballet flats", category: .shoes, colors: [.black],
+            asset: "x-ballet-flats", name: "Navy ballet flats", category: .shoes, colors: [.navy],
             dressiness: .smart, warmth: .light, occasions: [.office, .brunch, .dateNight], wornDaysAgo: [9],
             words: ["flats"]),
         .init(
@@ -161,9 +161,11 @@ extension SampleWardrobe {
     /// The looks and pictures are dated 3 to 5 months back, older than the demo's own, so the
     /// newest looks, Home's shelf and the first pictures stay as they were.
     ///
-    /// One preview of her wearing a look (`Resources/SampleWardrobe/tryon`), the look it belongs
-    /// to and the pieces it shows. Four use only demo pieces. Two use pieces only the full
-    /// wardrobe has, so they're seeded there.
+    /// One preview of the person in the example try-on photo wearing a look
+    /// (`Resources/SampleWardrobe/tryon`), the look it belongs to and the pieces it shows. Four use
+    /// only demo pieces. The sundress uses a piece only the full wardrobe has, so it's seeded
+    /// there. (A sixth, the cool-weather look, was dropped: the picture showed a sleeveless vest,
+    /// not the camel trench, in a different room.)
     struct TryOnPreview: Sendable {
         let name: String
         let lookID: Look.ID
@@ -199,10 +201,6 @@ extension SampleWardrobe {
             name: "sundress", lookID: "o-sundress", lookName: "Sundress and sneakers", occasion: .brunch,
             pieces: ["g-blue-dress", "g-white-sneakers", "g-straw-bag"], needsFullWardrobe: true,
             lookCreatedDaysAgo: 136, pictureCreatedDaysAgo: 133),
-        TryOnPreview(
-            name: "cool-weather", lookID: "o-cool-weather", lookName: "Cool-weather trench", occasion: .casual,
-            pieces: ["g-camel-trench", "g-black-tee", "g-black-jeans", "g-ankle-boots"], needsFullWardrobe: true,
-            lookCreatedDaysAgo: 146, pictureCreatedDaysAgo: 143),
     ]
 
     /// The looks for these previews, saved, in the order of `previews`.
@@ -214,8 +212,8 @@ extension SampleWardrobe {
         }
     }
 
-    /// The pictures: each preview worn by her, linked to its look. They're still labelled
-    /// Simulated, like every try-on picture.
+    /// The pictures: each preview, linked to its look. Labelled Simulated like every try-on
+    /// picture, and described as the person in her try-on photo wearing the look.
     static func previewPictures(looks: [Look], day: (Int) -> Date) -> [TryOnPicture] {
         let byID = Dictionary(looks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         return previews.compactMap { preview in

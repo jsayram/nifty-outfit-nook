@@ -264,8 +264,15 @@ struct GarmentStage: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     /// A little smaller at the accessibility sizes, so the words that matter come sooner.
+    /// A wide, short piece (a pair of shoes, a bag) gets a shorter space, so it doesn't rest at
+    /// the bottom of a tall one with the top half empty.
     private var pictureSize: CGSize {
-        dynamicTypeSize.isAccessibilitySize ? CGSize(width: 150, height: 190) : CGSize(width: 190, height: 236)
+        let full =
+            dynamicTypeSize.isAccessibilitySize ? CGSize(width: 150, height: 190) : CGSize(width: 190, height: 236)
+        guard case .cutout = GarmentArtChoice(garment), let aspect = garment.cutout?.aspectRatio, aspect > 1 else {
+            return full
+        }
+        return CGSize(width: full.width, height: max(full.width * 0.7, full.width / aspect + 24))
     }
 
     var body: some View {

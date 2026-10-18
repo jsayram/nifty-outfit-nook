@@ -114,7 +114,7 @@ struct LookBundleSnapshotTests {
     /// image can't wait for one. The sizes are worked out the way the bundle works them out.
     private func loadedPictures(for look: LookBundleContent, sizes: [LookBundleSize]) async -> GarmentImageLoader {
         let loader = GarmentImageLoader(provider: SamplePhotoProvider())
-        let placements = StickerBundleLayout.place(look.pieces.map(\.role), seed: look.id)
+        let placements = StickerBundleLayout.place(look.pieces.map(\.bundleItem), seed: look.id)
         for size in sizes {
             for placement in placements {
                 let piece = look.pieces[placement.index]

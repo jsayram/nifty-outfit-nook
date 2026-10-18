@@ -64,7 +64,7 @@ struct AddPieceChoices: View {
                 action: actions.describeInWords)
             Label {
                 Text(
-                    "Photos aren’t built yet. For now each photo choice adds a sample picture, and nothing asks for your camera or photos.",
+                    "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos.",
                     bundle: .module, comment: "Add a piece: under the choices, while photos are a stand-in"
                 )
                 .fixedSize(horizontal: false, vertical: true)

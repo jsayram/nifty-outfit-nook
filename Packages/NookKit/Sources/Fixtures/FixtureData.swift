@@ -12,7 +12,8 @@ public struct FixtureData: Sendable {
     public var suitcases: [Suitcase]
     public var profile: Profile
     public var weather: WeatherSnapshot
-    /// Try-on pictures (Phase 12b). Simulated: drawn from their looks' pieces, with no person.
+    /// Try-on pictures (Phase 12b), all Simulated: drawn from their looks' pieces, or a sample
+    /// preview of the person in the example try-on photo wearing the look.
     public var pictures: [TryOnPicture]
 
     public init(
@@ -110,8 +111,8 @@ extension FixtureData {
 }
 
 extension FixtureData {
-    /// The same records with the full wardrobe: the 30 extra pieces, and the two looks and try-on
-    /// previews that need them (`SampleWardrobe`). Only the demo set has it, so anything else
+    /// The same records with the full wardrobe: the 30 extra pieces, and the look and try-on
+    /// preview that need them (`SampleWardrobe`). Only the demo set has it, so anything else
     /// is unchanged.
     func applying(wardrobe state: FixtureWardrobeState, to set: FixtureSet, now: Date, calendar: Calendar)
         -> FixtureData

@@ -2,9 +2,9 @@ import Foundation
 import Models
 
 /// The demo closet: the old prototype's 21 garments in the new model, ten looks (nine saved),
-/// seven try-on pictures, six suitcases and a profile named Lily. Twenty of the garments have a
-/// photo and a cutout from the sample wardrobe (`SampleWardrobe`); the old gray leggings were
-/// added by words alone.
+/// seven try-on pictures, six suitcases and a profile named Lily, with the example try-on photo
+/// added. Nineteen of the garments have a photo and a cutout from the sample wardrobe
+/// (`SampleWardrobe`); the brick knit top and the old gray leggings were added by words alone.
 ///
 /// It covers every state a screen needs to show: owned, bought but not arrived, wishlist, no
 /// longer owned, Recently deleted, archived, unavailable until a date, dirty (with tracking
@@ -24,6 +24,10 @@ enum DemoCloset {
         let day = { (offset: Int) in calendar.day(offset, from: now) }
         let garments = garments(day: day)
         let looks = looks(day: day) + SampleWardrobe.previewLooks(full: false, day: day)
+        // Her try-on photo is the example, the person the sample pictures show, so the pictures
+        // and Profile tell one story.
+        var profile = profile
+        profile.tryOnPhoto = SampleWardrobe.person
         return FixtureData(
             garments: garments,
             looks: looks,
@@ -36,8 +40,9 @@ enum DemoCloset {
 
     /// Three simulated try-on pictures, as in `saved.html` and `picture.html`: two of the
     /// Interview look (the newer one of the look as it is, the older one of an earlier version
-    /// with the cream sweater) and one of Lace date night. Simulated pictures show no person.
-    /// Four more show her wearing a look, from the sample wardrobe's previews.
+    /// with the cream sweater) and one of Lace date night, drawn from the pieces with no one in
+    /// them. Four more show the person in her try-on photo wearing a look, from the sample
+    /// wardrobe's previews.
     static func pictures(looks: [Look], day: (Int) -> Date) -> [TryOnPicture] {
         simulatedPictures(looks: looks, day: day) + SampleWardrobe.previewPictures(looks: looks, day: day)
     }
@@ -77,12 +82,13 @@ enum DemoCloset {
         ]
     )
 
-    /// The garments with their photos and cutouts.
+    /// The garments with their photos and cutouts. A piece listed with `.noPhoto` stays a drawing.
     static func garments(day: (Int) -> Date) -> [Garment] {
         SampleWardrobe.dressedDemo(drawnGarments(day: day))
     }
 
-    /// The garments as the old prototype had them, with sample art names and no cutouts.
+    /// The garments as the old prototype had them, with sample art names and no cutouts. Each
+    /// `.sample` photo is swapped for the real one with the piece's ID.
     private static func drawnGarments(day: (Int) -> Date) -> [Garment] {
         [
             Garment(
@@ -125,7 +131,7 @@ enum DemoCloset {
             ),
             Garment(
                 id: "g-brick-top", name: "Brick knit top", category: .top, colors: [.brick], fit: .regular,
-                occasions: [.casual, .brunch, .office], photo: .sample("brick-top"), wornOn: [day(-20)],
+                occasions: [.casual, .brunch, .office], photo: .noPhoto, wornOn: [day(-20)],
                 addedAt: day(-45)
             ),
             Garment(
@@ -152,7 +158,7 @@ enum DemoCloset {
                 availability: .unavailable(until: day(9)), addedAt: day(-35)
             ),
             Garment(
-                id: "g-nude-flats", name: "Nude pointed flats", category: .shoes, colors: [.beige], dressiness: .dressy,
+                id: "g-nude-flats", name: "Nude pointed pumps", category: .shoes, colors: [.beige], dressiness: .dressy,
                 occasions: [.office, .dateNight, .brunch, .event], photo: .sample("nude-flats"),
                 wornOn: [day(-5)], addedAt: day(-110)
             ),
@@ -168,7 +174,8 @@ enum DemoCloset {
             ),
             Garment(
                 id: "g-tan-loafers", name: "Tan loafers", category: .shoes, colors: [.tan],
-                occasions: [.office, .casual, .brunch], notes: "Comfortable for long days", photo: .noPhoto,
+                occasions: [.office, .casual, .brunch], notes: "Comfortable for long days",
+                photo: .sample("tan-loafers"),
                 addedAt: day(-30)
             ),
             Garment(
@@ -177,15 +184,15 @@ enum DemoCloset {
                 wornOn: [day(-70)], addedAt: day(-80)
             ),
             Garment(
-                id: "g-gray-blazer", name: "Gray blazer", category: .layer, colors: [.gray],
-                colorNote: "Heather gray", fit: .regular, dressiness: .dressy, occasions: [.office, .event],
+                id: "g-gray-blazer", name: "Taupe blazer", category: .layer, colors: [.brown],
+                colorNote: "Warm taupe", fit: .regular, dressiness: .dressy, occasions: [.office, .event],
                 notes: "Donated, the sleeves were too long", photo: .sample("gray-blazer"),
                 ownership: .noLongerOwned, wornOn: [day(-200)], addedAt: day(-300)
             ),
             Garment(
                 id: "g-cream-crop", name: "Cream lace crop top", category: .top, colors: [.cream], fit: .fitted,
                 warmth: .light, seasons: [.spring, .summer], occasions: [.brunch, .dateNight], brand: "Demo Store",
-                sizeLabel: "XS", photo: .noPhoto, ownership: .purchased(.notArrived), addedAt: day(-2)
+                sizeLabel: "XS", photo: .sample("cream-crop"), ownership: .purchased(.notArrived), addedAt: day(-2)
             ),
             Garment(
                 id: "g-camel-trench", name: "Camel trench coat", category: .layer, colors: [.tan], fit: .regular,
@@ -250,7 +257,7 @@ enum DemoCloset {
                 wornOn: [day(-70)], createdAt: day(-75)
             ),
             look(
-                "o-blazer-office", name: "Gray blazer office", version: .simple, occasion: .office,
+                "o-blazer-office", name: "Taupe blazer office", version: .simple, occasion: .office,
                 pieces: ["g-gray-blazer", "g-cream-sweater", "g-navy-trousers", "g-black-heels"],
                 wornOn: [day(-200)], createdAt: day(-210)
             ),

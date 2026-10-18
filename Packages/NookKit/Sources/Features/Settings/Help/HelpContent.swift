@@ -47,7 +47,7 @@ nonisolated enum HelpContent {
                     bundle: .module, comment: "Help: Swap, save and try on"),
                 note: String(
                     localized:
-                        "Try it on makes a simulated picture of the look, only when you ask. In this test build it’s drawn on your iPhone.",
+                        "Try it on makes a simulated picture of the look, only when you ask: the person in your try-on photo wearing it, or your pieces on their own. Nothing leaves your iPhone.",
                     bundle: .module, comment: "Help: Swap, save and try on, the quieter line")),
             HelpTopic(
                 id: "addPiece", section: .everyday,

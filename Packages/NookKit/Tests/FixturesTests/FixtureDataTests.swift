@@ -44,7 +44,14 @@ struct DemoClosetTests {
     @Test func holdsNoBodyMeasurements() {
         // The repo is public: fixtures carry no body or health details (DATA_MAP.md).
         #expect(data.profile.measurements.isEmpty)
-        #expect(data.profile.tryOnPhoto == nil)
+    }
+
+    /// Her try-on photo is the example, the person the seeded sample pictures show, so Profile
+    /// and the pictures agree (real-photo audit). It's an AI-generated sample, not a real person.
+    @Test func herTryOnPhotoIsTheExample() {
+        #expect(data.profile.tryOnPhoto == SampleWardrobe.person)
+        // The large closet's pictures are all drawn, so it has none.
+        #expect(FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar).profile.tryOnPhoto == nil)
     }
 
     @Test func coversEveryGarmentState() {

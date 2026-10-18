@@ -11,13 +11,24 @@ enum TryOnText {
         String(localized: "Try-on picture", bundle: .module, comment: "Title of one try-on picture")
     }
 
-    /// What VoiceOver says for a picture: "Simulated try-on picture of Interview navy and pink:
-    /// Navy cardigan, Cute pink shirt, … No person is shown."
+    /// What VoiceOver says for a picture. A picture of the person in her try-on photo wearing the
+    /// look says so; a picture drawn from the pieces says no one is in it: "Simulated try-on
+    /// picture of Interview navy and pink: Navy cardigan, Cute pink shirt, … The pieces only, with
+    /// no one wearing them."
     static func spokenPicture(of content: LookBundleContent, lookName: String, locale: Locale) -> String {
-        let pieces = content.pieces.map(\.name).formatted(.list(type: .and, width: .narrow).locale(locale))
+        let names = content.pieces.map(\.name)
+        if content.tryOnPhoto != nil {
+            let worn = names.formatted(.list(type: .and, width: .standard).locale(locale))
+            return String(
+                localized: "Simulated try-on picture of \(lookName): the person in your try-on photo wearing \(worn).",
+                bundle: .module,
+                comment: "Spoken for a simulated try-on picture that shows a person: the look's name, then its pieces")
+        }
+        let pieces = names.formatted(.list(type: .and, width: .narrow).locale(locale))
         return String(
-            localized: "Simulated try-on picture of \(lookName): \(pieces). No person is shown.", bundle: .module,
-            comment: "Spoken for a simulated try-on picture: the look's name, then its pieces")
+            localized: "Simulated try-on picture of \(lookName): \(pieces). The pieces only, with no one wearing them.",
+            bundle: .module,
+            comment: "Spoken for a simulated try-on picture drawn from the pieces: the look's name, then its pieces")
     }
 
     /// "Made today", "Made yesterday", "Made 28 Aug".
@@ -87,12 +98,18 @@ enum TryOnText {
         String(localized: "Look deleted", bundle: .module, comment: "Under a picture whose look was deleted")
     }
 
-    /// The note at the end of picture detail.
-    static var aboutSimulated: String {
-        String(
-            localized:
-                "This picture is simulated: it shows the look’s pieces, not you. In a later version, Try it on will show you wearing the look. Pictures show the style, not the exact fit.",
-            bundle: .module, comment: "Picture detail: what a simulated picture is")
+    /// The note at the end of picture detail: what this picture shows, a person wearing the look
+    /// or the pieces alone, and that it's simulated (RD-04.2) and shows the style, not the fit.
+    static func aboutSimulated(showsPerson: Bool) -> String {
+        showsPerson
+            ? String(
+                localized:
+                    "This picture is simulated: the person in your try-on photo, wearing the look. Pictures show the style, not the exact fit.",
+                bundle: .module, comment: "Picture detail: what a simulated picture of a person wearing the look is")
+            : String(
+                localized:
+                    "This picture is simulated from the look’s pieces alone, with no one wearing them. Pictures show the style, not the exact fit.",
+                bundle: .module, comment: "Picture detail: what a simulated picture drawn from the pieces is")
     }
 
     // MARK: Delete

@@ -4,6 +4,7 @@ import Testing
 import UIKit
 
 @testable import Features
+@testable import Fixtures
 
 /// Garment pictures come through the `ImageProvider`, shrunk to the size shown and cached, so
 /// real photos can replace the placeholders in later phases without touching the grid.
@@ -157,5 +158,45 @@ struct GarmentPlaceholderTests {
     @Test func everyColourHasAName() {
         #expect(Set(ColorName.allCases.map(\.title)).count == ColorName.allCases.count)
         #expect(Set(GarmentCategory.allCases.map(\.chipTitle)).count == GarmentCategory.allCases.count)
+    }
+}
+
+/// The sample wardrobe's cutouts are JPEG 2000 (real-photo audit, item 4).
+@MainActor
+struct GarmentImageLoaderCutoutTests {
+    /// A sample cutout is JPEG 2000, slow to decode. The first size above half of it decodes it
+    /// whole, once; every other size, larger or smaller, is scaled from that decode.
+    @Test(.heavyMainActorWork) func aCutoutIsDecodedOnceForEverySize() async throws {
+        let cutout = try #require(SampleWardrobe.garmentCutout("x-knee-boots")).image
+        let loader = GarmentImageLoader(provider: SampleWardrobeProvider())
+        let large = try #require(await loader.image(for: cutout, maxPixelSize: 600)?.cgImage)
+        #expect(max(large.width, large.height) == 600)
+        #expect(loader.originalDecodes == 1)
+        for size in [330, 180, 64] {
+            let image = try #require(await loader.image(for: cutout, maxPixelSize: size)?.cgImage)
+            #expect(max(image.width, image.height) == size)
+            // Still transparent around the boots.
+            #expect(image.alphaInfo != .none && image.alphaInfo != .noneSkipLast)
+        }
+        #expect(loader.originalDecodes == 1)
+    }
+
+    /// A small size first doesn't decode the whole picture: it comes cheaply from the file's
+    /// lower resolution levels.
+    @Test(.heavyMainActorWork) func aSmallCutoutFirstIsAThumbnail() async throws {
+        let cutout = try #require(SampleWardrobe.garmentCutout("g-black-heels")).image
+        let loader = GarmentImageLoader(provider: SampleWardrobeProvider())
+        let small = try #require(await loader.image(for: cutout, maxPixelSize: 90)?.cgImage)
+        #expect(max(small.width, small.height) == 90)
+        #expect(loader.originalDecodes == 0)
+        _ = await loader.image(for: cutout, maxPixelSize: 500)
+        #expect(loader.originalDecodes == 1)
+    }
+
+    /// JPEG photos decode quickly, so they never keep a full-size copy.
+    @Test(.heavyMainActorWork) func aPhotoIsNeverKeptWhole() async {
+        let loader = GarmentImageLoader(provider: SampleWardrobeProvider())
+        _ = await loader.image(for: SampleWardrobe.photo("g-black-heels"), maxPixelSize: 900)
+        #expect(loader.originalDecodes == 0)
     }
 }

@@ -31,7 +31,8 @@ struct ProfileModelTests {
         #expect(model.phase == .loaded)
         #expect(model.profile.signName == "Lily")
         #expect(model.profile.preferences == Preferences())
-        #expect(!model.hasTryOnPhoto)
+        // The demo has the example try-on photo, the person its sample pictures show.
+        #expect(model.hasTryOnPhoto)
     }
 
     @Test func aNewNameReachesTheSignOnHome() async throws {
@@ -242,6 +243,8 @@ struct ProfileModelTests {
         let services = services()
         let model = await loaded(services)
         let pictures = try await services.pictures.pictures()
+        #expect(await model.removePhoto(in: services))
+        #expect(!model.hasTryOnPhoto)
         #expect(await model.useExamplePhoto(in: services))
         #expect(model.hasTryOnPhoto)
         #expect(try await services.profile.profile().tryOnPhoto == ProfileModel.exampleTryOnPhoto)

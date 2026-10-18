@@ -28,12 +28,16 @@ struct SampleWardrobeTests {
         #expect(FixtureConfiguration(launchArguments: ["App", "-fixtures", "demo:wardrobe=nope"]).wardrobe == .demo)
     }
 
-    @Test func everyDemoPieceButOneHasARealPhotoAndCutout() async throws {
+    /// Every demo piece but the two added by words alone, so Closet and the bundles still show
+    /// a piece with no photo.
+    @Test func everyDemoPieceButTwoHasARealPhotoAndCutout() async throws {
         let services = services(FixtureConfiguration())
         let garments = try await services.closet.garments()
         #expect(garments.count == 21)
+        let brick = try #require(garments.first { $0.id == "g-brick-top" })
+        #expect(brick.isInCloset, "A piece with no photo she can see in Closet")
         for garment in garments {
-            if garment.id == "g-gray-leggings" {
+            if garment.id == "g-gray-leggings" || garment.id == "g-brick-top" {
                 #expect(garment.photo == .noPhoto && garment.cutout == nil)
                 continue
             }
@@ -63,7 +67,7 @@ struct SampleWardrobeTests {
         #expect(extras.count == 30)
         #expect(Set(extras.map(\.category)) == Set(GarmentCategory.allCases))
         #expect(Set(full.map(\.id)).count == 51)
-        #expect(full.allSatisfy { $0.id == "g-gray-leggings" || $0.cutout != nil })
+        #expect(full.allSatisfy { ["g-gray-leggings", "g-brick-top"].contains($0.id) || $0.cutout != nil })
         // Only the demo set takes it.
         let large = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar)
         #expect(
@@ -75,7 +79,7 @@ struct SampleWardrobeTests {
         let demo = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         let full = demo.applying(wardrobe: .full, to: .demo, now: TestTime.now, calendar: TestTime.calendar)
         #expect(demo.pictures.filter { if case .generated = $0.image { true } else { false } }.count == 4)
-        #expect(full.pictures.filter { if case .generated = $0.image { true } else { false } }.count == 6)
+        #expect(full.pictures.filter { if case .generated = $0.image { true } else { false } }.count == 5)
         let garmentIDs = Set(full.garments.map(\.id))
         for picture in full.pictures {
             let look = try #require(full.looks.first { $0.id == picture.lookID })
@@ -111,6 +115,31 @@ struct SampleWardrobeTests {
         #expect(
             try await SimulatedTryOn(usesSamplePreviews: false).makePicture(of: casual, at: TestTime.now).image
                 == .simulated)
+        // A preview shows the person in her try-on photo, so with no photo the picture is drawn.
+        #expect(
+            try await SimulatedTryOn(hasTryOnPhoto: { false }).makePicture(of: casual, at: TestTime.now).image
+                == .simulated)
+    }
+
+    /// The app's Try it on follows her profile: removing the try-on photo turns previews off.
+    @Test func tryItOnFollowsHerTryOnPhoto() async throws {
+        let services = services(FixtureConfiguration())
+        let casual = try await services.looks.look("o-casual-jeans")
+        #expect(try await services.tryOn.makePicture(of: casual, at: TestTime.now).image != .simulated)
+        try await services.profile.update { $0.tryOnPhoto = nil }
+        #expect(try await services.tryOn.makePicture(of: casual, at: TestTime.now).image == .simulated)
+    }
+
+    /// Each cutout knows its shape, which sizes shoes in a look bundle.
+    @Test func everyCutoutKnowsItsShape() throws {
+        for asset in SampleWardrobe.assets {
+            let cutout = try #require(SampleWardrobe.garmentCutout(asset))
+            let aspect = try #require(cutout.aspectRatio, "\(asset)")
+            #expect((0.3...3).contains(aspect), "\(asset): \(aspect)")
+        }
+        // Knee boots stand tall; heels lie wide.
+        #expect(try #require(SampleWardrobe.garmentCutout("x-knee-boots")?.aspectRatio) < 0.8)
+        #expect(try #require(SampleWardrobe.garmentCutout("g-black-heels")?.aspectRatio) > 1.2)
     }
 
     @Test func theLargeClosetUsesRealPhotosByCategoryAndTheSameEveryTime() async throws {
@@ -130,5 +159,22 @@ struct SampleWardrobeTests {
             #expect(pool[String(asset)] == garment.category)
         }
         #expect(Set(withPhoto.map(\.photo)).count > 30)
+    }
+
+    /// A piece with a photo takes the photo's colours and is named for them, so colour search and
+    /// filters find what she sees (real-photo audit: "green" found a white lace top).
+    @Test func theLargeClosetsColoursMatchItsPhotos() {
+        let garments = FixtureSet.large.data(now: TestTime.now, calendar: TestTime.calendar).garments
+        let pool = Dictionary(uniqueKeysWithValues: SampleWardrobe.pool.map { ($0.asset, $0) })
+        var checked = 0
+        for garment in garments {
+            guard case .sample(let name) = garment.photo, let asset = name.split(separator: ":").last,
+                let entry = pool[String(asset)]
+            else { continue }
+            #expect(garment.colors == entry.colors, "\(garment.name)")
+            #expect(garment.name.contains(entry.colors[0].rawValue), "\(garment.name)")
+            checked += 1
+        }
+        #expect(checked > 2_000)
     }
 }

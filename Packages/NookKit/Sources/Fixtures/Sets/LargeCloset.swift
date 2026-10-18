@@ -6,9 +6,9 @@ import Models
 /// in at realistic rates.
 ///
 /// Generated from a fixed seed, so every run makes the same closet (for the same `now`). The nine
-/// in ten pieces that have a photo take one of the sample wardrobe's, by kind and colour, so the
-/// same few dozen photos and cutouts are shared by the whole closet and the image loader keeps
-/// just the ones on screen.
+/// in ten pieces that have a photo take one of the sample wardrobe's, by kind and colour, and the
+/// photo's colours, so the same few dozen photos and cutouts are shared by the whole closet and
+/// the image loader keeps just the ones on screen.
 enum LargeCloset {
     static let garmentCount = 2_400
     static let lookCount = 600
@@ -67,7 +67,8 @@ enum LargeCloset {
         let category = random.weighted(categoryWeights)
         let colors = random.distinctElements(from: ColorName.allCases, count: random.int(in: 1...2))
         let noun = random.element(of: nouns[category] ?? ["piece"])
-        let name = "\(random.element(of: adjectives)) \(colors[0].rawValue) \(noun)"
+        let adjective = random.element(of: adjectives)
+        let name = "\(adjective) \(colors[0].rawValue) \(noun)"
         let addedDaysAgo = random.int(in: 0...900)
 
         var garment = Garment(
@@ -85,11 +86,15 @@ enum LargeCloset {
             addedAt: day(-addedDaysAgo)
         )
         // A real photo of the same kind of piece (the same colour when there is one), picked from
-        // the index and not from the generator, so nothing else about the closet changes.
+        // the index and not from the generator, so nothing else about the closet changes. The
+        // piece takes the photo's colours and is named for them, so searching "green" finds green
+        // pieces. A piece with no photo keeps its random colours, which its drawing shows.
         if garment.photo != .noPhoto,
-            let asset = SampleWardrobe.pick(category: category, noun: noun, color: colors.first, index: index)
+            let entry = SampleWardrobe.pick(category: category, noun: noun, color: colors.first, index: index)
         {
-            garment = SampleWardrobe.dressed(garment, asset: asset)
+            garment = SampleWardrobe.dressed(garment, asset: entry.asset)
+            garment.colors = entry.colors
+            garment.name = "\(adjective) \(entry.colors[0].rawValue) \(noun)"
         }
 
         let roll = random.unit()

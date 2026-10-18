@@ -18,7 +18,7 @@ import UIKit
 /// - the grid in light, dark and AX5, filtered to black bottoms, with no matches, and empty;
 /// - the Pictures tab in light, dark and AX5, and empty;
 /// - look detail for the Interview look, with its two pictures (light, dark, AX5), and for the
-///   Gray blazer office look, whose blazer she gave away (faded, with Swap it);
+///   Taupe blazer office look, whose blazer she gave away (faded, with Swap it);
 /// - picture detail (light, dark, AX5), a picture of an earlier version, and one whose look was
 ///   deleted; a picture hidden while the app isn't active;
 /// - the Try it on sheet from Your looks, and with a picture she already has.

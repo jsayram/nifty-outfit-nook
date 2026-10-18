@@ -73,7 +73,8 @@ struct StickerBundleLayoutTests {
     }
 
     @Test func noPiecesNoPlacements() {
-        #expect(StickerBundleLayout.place([], seed: "x").isEmpty)
+        #expect(StickerBundleLayout.place([BundleRole](), seed: "x").isEmpty)
+        #expect(StickerBundleLayout.place([BundleItem](), seed: "x").isEmpty)
     }
 
     @Test func sameLookSamePlacements() {
@@ -197,5 +198,80 @@ struct StickerBundleLayoutTests {
         let isOnCI = ProcessInfo.processInfo.environment["NOOK_CI"] != nil
         let bound: Duration = isOnCI ? .milliseconds(1_500) : .milliseconds(500)
         #expect(fastest < bound, "Placing 300 looks took \(fastest)")
+    }
+
+    // MARK: Shoes from photos
+
+    /// The shapes of the sample wardrobe's shoe cutouts, width over height: knee boots, ankle
+    /// boots, ballet flats, sneakers and heels.
+    static let shoeShapes: [CGFloat] = [0.68, 0.98, 1.08, 1.16, 1.35]
+
+    /// Every mix with shoes, with the shoes given each real shape.
+    static func shoeMixes(_ shape: CGFloat) -> [[BundleItem]] {
+        everyMix.filter { $0.contains(.shoes) }.map { mix in
+            mix.map { $0 == .shoes ? BundleItem(.shoes, aspectRatio: shape) : BundleItem($0) }
+        }
+    }
+
+    @Test func shoesFromPhotosStayInsideTheBoxAndTheOverlapLimit() {
+        for shape in Self.shoeShapes {
+            for mix in Self.shoeMixes(shape) {
+                let placements = StickerBundleLayout.place(mix, seed: "o-interview")
+                for placement in placements {
+                    let tilted = StickerBundleLayout.rotatedBounds(placement.frame, degrees: placement.angle)
+                    #expect(Self.box.insetBy(dx: -0.01, dy: -0.01).contains(tilted), "\(mix): leaves the box")
+                }
+                for (offset, first) in placements.enumerated() {
+                    for second in placements[(offset + 1)...] {
+                        let overlap = StickerBundleLayout.overlap(first.frame, second.frame)
+                        #expect(overlap <= StickerBundleLayout.maximumOverlap, "\(mix): overlap \(overlap)")
+                    }
+                }
+            }
+        }
+    }
+
+    /// The space takes the cutout's shape, so the sticker fills it: knee boots stand tall, heels
+    /// lie wide, and none is the old 116 x 48 strip that left a pair of boots a third of the bag.
+    @Test func shoesTakeTheirCutoutsShape() {
+        for shape in Self.shoeShapes {
+            let size = StickerBundleLayout.shoeSize(aspect: shape)
+            #expect(abs(size.width / size.height - shape) < 0.01, "\(shape): \(size)")
+            #expect(size.width <= StickerBundleLayout.shoeMaximumSize.width)
+            #expect(size.height <= StickerBundleLayout.shoeMaximumSize.height)
+        }
+        let boots = StickerBundleLayout.shoeSize(aspect: 0.68)
+        let heels = StickerBundleLayout.shoeSize(aspect: 1.35)
+        #expect(boots.height > heels.height && heels.width > boots.width)
+        // Odd shapes are held to sensible ones.
+        #expect(StickerBundleLayout.shoeSize(aspect: 9).width <= StickerBundleLayout.shoeMaximumSize.width)
+        #expect(StickerBundleLayout.shoeSize(aspect: 0.01).height <= StickerBundleLayout.shoeMaximumSize.height)
+    }
+
+    /// Beside a bag, in a full look: the shoes are about the bag's size, never a sliver of it.
+    @Test func shoesAreABelievableSizeBesideTheBag() {
+        for shape in Self.shoeShapes {
+            let items = [
+                BundleItem(.top), BundleItem(.bottom), BundleItem(.shoes, aspectRatio: shape), BundleItem(.bag),
+            ]
+            for seed in Self.seeds {
+                let placements = StickerBundleLayout.place(items, seed: seed)
+                let shoes = placements[2].frame
+                let bag = placements[3].frame
+                let ratio = (shoes.width * shoes.height) / (bag.width * bag.height)
+                #expect((0.6...0.95).contains(ratio), "\(shape): shoes are \(ratio) of the bag")
+                // Still low, over the trousers' hem, under the bag.
+                #expect(shoes.midY > bag.midY && shoes.midY > placements[1].frame.midY)
+            }
+        }
+    }
+
+    /// A drawing (or a photo in a tile) keeps the wide box the drawn shoes were made for.
+    @Test func drawnShoesKeepTheirBox() {
+        let drawn = StickerBundleLayout.place([.top, .bottom, .shoes], seed: "o-interview")
+        let items = StickerBundleLayout.place(
+            [BundleItem(.top), BundleItem(.bottom), BundleItem(.shoes)], seed: "o-interview")
+        #expect(drawn == items)
+        #expect(drawn[2].frame.width / drawn[2].frame.height > 2)
     }
 }
