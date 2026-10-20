@@ -110,7 +110,7 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 4. **Weight isn't promised "never shared".** The mockup says so; DATA_MAP lets the minimum relevant fact go out in a consented request. The row says optional and approximate, and the privacy line says nothing is sent in this build.
 5. **Units follow the region until she picks.** The UK gets inches and pounds.
 6. **Height in inches has two boxes**, feet and inches, instead of the mockup's one box of inches.
-7. **The example try-on photo shows no person,** like 12b's pictures, though the README's exception allows a generic one here. (Changed on 17 October 2026: it is now an AI-generated sample photo of a woman, from `Fixtures/Resources/SampleWardrobe`.)
+7. **The example try-on photo shows no person,** like 12b's pictures, though the README's exception allows a generic one here. (Changed on 17 October 2026: it is now an AI-generated sample photo of a woman, from `Tests/NookTestSupport/SampleWardrobe`.)
 8. **Rows stood in for 14b**, which built them (`docs/settings.md`). Styling access, Closet and suitcases and Demo controls from the mockup aren't on Profile.
 9. **A fitting piece's kind is required** and starts empty, as on Add a piece.
 

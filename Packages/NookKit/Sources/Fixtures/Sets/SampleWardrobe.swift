@@ -5,7 +5,7 @@ import Models
 #if DEBUG
     /// The bundled sample wardrobe: AI-generated photos of clothing as she'd photograph it, the
     /// cutouts a subject-lifting step would make from them, a try-on photo and previews of looks
-    /// worn. Test data only, with no real people (`Resources/SampleWardrobe/README.md`).
+    /// worn. Test data only, with no real people (`SampleWardrobe/README.md`).
     ///
     /// A piece's picture is a `PhotoReference.sample` named for its asset, so it goes through the same
     /// path as a real photo: `Garment.photo` and `Garment.cutout`, `GarmentArtChoice`, the
@@ -65,10 +65,29 @@ import Models
             }
         }
 
-        static var folder: URL {
-            (Bundle.module.resourceURL ?? Bundle.module.bundleURL)
-                .appendingPathComponent("SampleWardrobe", isDirectory: true)
-        }
+        /// The folder of photos, or a folder that doesn't exist if there is none (then every piece
+        /// keeps its drawing, as in Release).
+        ///
+        /// The photos aren't a resource of this package: SwiftPM would copy them into Release builds
+        /// too. A Debug build of the app copies the folder into its own bundle, and the package tests
+        /// find it in the `NookTestSupport` resource bundle, next to the test bundle.
+        static let folder: URL = {
+            let name = "SampleWardrobe"
+            var places = [Bundle.main.resourceURL ?? Bundle.main.bundleURL]
+            for bundle in Bundle.allBundles + Bundle.allFrameworks {
+                places.append(bundle.resourceURL ?? bundle.bundleURL)
+                places.append(bundle.bundleURL.deletingLastPathComponent())
+            }
+            for place in places {
+                for base in [place, place.appendingPathComponent("NookKit_NookTestSupport.bundle", isDirectory: true)] {
+                    let folder = base.appendingPathComponent(name, isDirectory: true)
+                    if FileManager.default.fileExists(atPath: folder.appendingPathComponent("manifest.json").path) {
+                        return folder
+                    }
+                }
+            }
+            return Bundle.main.bundleURL.appendingPathComponent(name, isDirectory: true)
+        }()
 
         // MARK: Cutouts
 
