@@ -57,7 +57,7 @@ After either one the screen goes back to the grid, which reloads. Archive isn't 
 - "Your unsaved changes to it go too.", when she left an Edit of it unsaved. The draft is discarded first, then the piece.
 - "Saved looks that use it keep their other pieces: Office navy and Rainy Monday." Saved looks then say a piece was deleted for good, as after the 30-day purge (`LookDetailModel.goneCount`).
 - "It comes out of Weekend.", for the suitcases it's packed in. Suitcases only show pieces that exist, as after the 30-day purge.
-- "Try-on pictures with it in stay until you delete them.", when any picture shows it (PRD §7.5 and §9.2.4: pictures stay until she deletes them).
+- "Try-on pictures with it in are deleted too.", when any picture shows it. Since Phase 21b the pictures that show a piece go when it's deleted for good, by Delete now or the 30-day purge, as PRD §7.4 says (Jose, 20 October 2026). Pictures of a look she deletes still stay (`docs/try-on-pictures.md`).
 
 Delete for good removes it and shows "Navy dress pants is deleted for good". Only a piece in Recently deleted can go this way (`ClosetStore.deletePermanently` says not found for any other). A failed save leaves it in the list with the usual toast. The button is a quiet text button under Restore, or under it full width at the accessibility sizes, and reads "Delete Navy dress pants now" to VoiceOver.
 
@@ -91,6 +91,6 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 2. **The recent-wear note names the setting** rather than repeating "You wore this last week", which LR-10 puts on Your looks. Last worn already says when.
 3. **"Add to a suitcase"** came in Phase 13: a soft button under Style with this opens a sheet of her suitcases with a tick each (`docs/suitcases-and-laundry.md`). The suitcase names open the real suitcase.
 4. **Undo after Delete it** as well as after "I don't have it any more". LR-16 only asks for the first, but both ask first and Undo is cheap and safe.
-5. **"Delete permanently now" came with real storage (Phase 21a),** as Delete now on each row, asking in an alert with the preview. Two parts of PRD §7.4's purge wait: try-on pictures that show the piece stay (Stage A's rule that pictures stay until she deletes them; the PRD would purge them), and the content-free deletion markers that stop a synced device bringing it back come with sync (21b). Jose to confirm the first.
+5. **"Delete permanently now" came with real storage (Phase 21a),** as Delete now on each row, asking in an alert with the preview. Both parts of PRD §7.4's purge that waited came in 21b: the try-on pictures that show the piece go with it (Jose decided on 20 October 2026), and the piece leaves a content-free deletion marker, so a restore never brings the piece or those pictures back.
 6. **"I don't have it any more" keeps suitcase membership** in the data. The piece no longer shows in Closet or styling, and Undo needs nothing else. Suitcases (13) must filter with `isInCloset`.
 7. **Style me with it is offered for any piece in her closet**, even one in the wash or away. Style Me then says why it can't start a look ("In the wash") and offers another (Phase 10a, `docs/style-me.md`).

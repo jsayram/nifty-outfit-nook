@@ -112,6 +112,29 @@ struct RestoreTests {
         #expect(!(try newPhone.rows()).contains { $0.kind == "garment" && $0.key == Self.garments[0].id.rawValue })
     }
 
+    /// A try-on picture that shows a piece deleted for good stays deleted too, by either path:
+    /// the copy still has the picture, and this phone has since purged the piece.
+    @Test(arguments: [RestoreMode.replace, .addMissing])
+    func picturesOfAPurgedPieceDontComeBack(_ mode: RestoreMode) async throws {
+        let phone = try BackupTestBed("purged-pictures")
+        try await phone.seedDemo()
+        let look = try #require(BackupTestBed.demo.looks.first { !$0.garmentIDs.isEmpty })
+        let piece = look.garmentIDs[0]
+        try await phone.storage.pictures.save(
+            TryOnPicture(id: "t-purged", of: look, image: .simulated, createdAt: TestTime.now))
+        let file = try await phone.export()
+        try await phone.storage.pictures.delete("t-purged")
+        try await phone.storage.closet.delete(piece, at: TestTime.day(-1))
+        try await phone.storage.closet.deletePermanently(piece)
+
+        let service = phone.service()
+        _ = try await service.restore(
+            try await service.check(file.url, passphrase: BackupTestBed.passphrase), as: mode)
+        let after = try phone.rows()
+        #expect(!after.contains { $0.kind == "picture" && $0.key == "t-purged" })
+        #expect(!after.contains { $0.kind == "garment" && $0.key == piece.rawValue })
+    }
+
     @Test func aRestoreNeedsACheckedCopy() async throws {
         let phone = try BackupTestBed("unchecked")
         let preview = BackupPreview(id: UUID(), createdAt: TestTime.now, inCopy: .init(), onPhone: .init())

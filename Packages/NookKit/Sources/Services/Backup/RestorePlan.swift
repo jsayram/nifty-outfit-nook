@@ -9,8 +9,9 @@ import Models
 ///   a different value keeps this iPhone's version, and the copy's is kept as a `restoreConflict`.
 ///   Nothing is removed.
 ///
-/// Either way, a piece deleted for good, in the copy or on this iPhone, never comes back, and the
-/// deletion markers of both are kept. Onboarding is finished afterwards, on her own closet.
+/// Either way, a piece deleted for good, in the copy or on this iPhone, never comes back, nor do
+/// the try-on pictures that show it, and the deletion markers of both are kept. Onboarding is
+/// finished afterwards, on her own closet.
 struct RestorePlan: Equatable, Sendable {
     /// The rows of the restored kinds when the restore is done. Replace: all of them. Add what's
     /// missing: only the new and changed ones.
@@ -31,7 +32,10 @@ struct RestorePlan: Equatable, Sendable {
         for row in phoneRows where row.kind == deletion { markers[row.key] = row }
         let candidates = copy.filter { $0.kind != deletion }
         let deleted = candidates.filter { $0.kind == garment && markers[$0.key] != nil }
-        let incoming = candidates.filter { !($0.kind == garment && markers[$0.key] != nil) }
+        // A piece deleted for good takes the try-on pictures that show it (Jose, 20 October 2026).
+        let incoming = candidates.filter {
+            !($0.kind == garment && markers[$0.key] != nil) && !showsDeletedPiece($0, deleted: markers)
+        }
 
         switch mode {
         case .replace:
@@ -63,6 +67,14 @@ struct RestorePlan: Equatable, Sendable {
                 rows: rows.sorted { $0.id < $1.id }, replacesEverything: false, added: added, conflicts: conflicts,
                 deletedForGood: deleted.count)
         }
+    }
+
+    /// A try-on picture that shows a piece deleted for good.
+    private static func showsDeletedPiece(_ row: StoreRow, deleted markers: [String: StoreRow]) -> Bool {
+        guard row.kind == RecordKind.picture.rawValue,
+            let picture = try? RecordPayload.decode(TryOnPicture.self, from: row.payload, version: row.payloadVersion)
+        else { return false }
+        return picture.captured.pieces.contains { $0.garmentID.map { markers[$0.rawValue] != nil } ?? false }
     }
 
     /// The copy's version of a record, kept for review.

@@ -6909,13 +6909,13 @@
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons and on a saved look (RD-06)"
     },
-    "Try-on pictures with it in stay until you delete them." : {
-      "comment" : "Delete for good: try-on pictures showing the piece are kept",
+    "Try-on pictures with it in are deleted too." : {
+      "comment" : "Delete for good: try-on pictures showing the piece go with it",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try-on pictures with it in stay until you delete them."
+            "value" : "Try-on pictures with it in are deleted too."
           }
         }
       }
