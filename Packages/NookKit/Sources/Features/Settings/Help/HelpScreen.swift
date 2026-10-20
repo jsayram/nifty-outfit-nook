@@ -1,4 +1,5 @@
 import DesignSystem
+import Models
 import SwiftUI
 
 /// Help (RD-10, `help.html`): the top desk drawer, also on Profile. Short answers bundled with
@@ -8,6 +9,7 @@ import SwiftUI
 /// Help has no search: the mockup and PRD §22.3 ask for a short task list, and eight topics fit on
 /// two screens. "What changed" (PRD §22.2, release notes) comes with the first public release.
 struct HelpScreen: View {
+    @Environment(\.services) private var services
     @State private var open: Set<HelpTopic.ID> = [HelpContent.topics[0].id]
     @State private var showsFeedback = false
 
@@ -16,6 +18,7 @@ struct HelpScreen: View {
     var body: some View {
         HelpPage(
             open: open,
+            keepsChanges: services.keepsChanges,
             toggle: { id in
                 withAnimation(reduceMotion ? nil : .snappy) {
                     if open.contains(id) { open.remove(id) } else { open.insert(id) }
@@ -42,6 +45,8 @@ struct HelpScreen: View {
 /// Help, top to bottom. Separate from `HelpScreen` so snapshot tests can draw it.
 struct HelpPage: View {
     let open: Set<HelpTopic.ID>
+    /// Whether her changes are kept when the app closes (`NookServices.keepsChanges`).
+    var keepsChanges = false
     var toggle: (HelpTopic.ID) -> Void = { _ in }
     var sendFeedback: () -> Void = {}
     var version = AppVersion.current
@@ -53,7 +58,8 @@ struct HelpPage: View {
             ForEach(HelpTopic.Section.allCases, id: \.self) { section in
                 SettingsGroup(header: HelpContent.title(section)) {
                     VStack(spacing: NookSpacing.xxSmall) {
-                        ForEach(HelpContent.topics.filter { $0.section == section }) { topic in
+                        ForEach(HelpContent.topics(keepsChanges: keepsChanges).filter { $0.section == section }) {
+                            topic in
                             HelpTopicView(topic: topic, isOpen: open.contains(topic.id)) {
                                 toggle(topic.id)
                             }

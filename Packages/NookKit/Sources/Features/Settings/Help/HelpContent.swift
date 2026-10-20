@@ -23,7 +23,12 @@ nonisolated struct HelpTopic: Identifiable, Hashable, Sendable {
 /// Help's topics, in order (`help.html`). "Free and paid" from the mockup waits for the
 /// subscription phase (30a): Stage A has no prices.
 nonisolated enum HelpContent {
-    static var topics: [HelpTopic] {
+    /// The topics for the debug sample closet, which comes back as it ships at each launch.
+    static var topics: [HelpTopic] { topics(keepsChanges: false) }
+
+    /// The topics, with "Your data" saying whether her changes are kept when the app closes
+    /// (`NookServices.keepsChanges`, Phase 21a).
+    static func topics(keepsChanges: Bool) -> [HelpTopic] {
         [
             HelpTopic(
                 id: "outfits", section: .everyday,
@@ -108,10 +113,15 @@ nonisolated enum HelpContent {
                 id: "data", section: .goodToKnow,
                 title: String(localized: "Your data", bundle: .module, comment: "Help topic"),
                 systemImage: "lock",
-                answer: String(
-                    localized:
-                        "Everything you add stays on this iPhone. When this test build closes, it keeps your name and your Style Me settings, and forgets your fit and the pieces and looks you add. Privacy and terms says what’s kept, and Delete my data removes all of it.",
-                    bundle: .module, comment: "Help: Your data")),
+                answer: keepsChanges
+                    ? String(
+                        localized:
+                            "Everything you add stays on this iPhone, and is kept when the app closes. Delete my data in Profile removes all of it.",
+                        bundle: .module, comment: "Help: Your data, when her data is kept")
+                    : String(
+                        localized:
+                            "Everything you add stays on this iPhone. When this test build closes, it keeps your name and your Style Me settings, and forgets your fit and the pieces and looks you add. Privacy and terms says what’s kept, and Delete my data removes all of it.",
+                        bundle: .module, comment: "Help: Your data")),
         ]
     }
 

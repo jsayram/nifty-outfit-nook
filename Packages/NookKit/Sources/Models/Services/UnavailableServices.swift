@@ -21,8 +21,17 @@ extension NookServices {
         pictures: UnavailableStore(),
         tryOn: UnavailableProvider(),
         tours: UnavailableStore(),
-        onboarding: UnavailableStore()
+        onboarding: UnavailableStore(),
+        feedbackDrafts: UnavailableFeedbackDrafts()
     )
+}
+
+/// The unsent feedback note's store, failing every call with `unavailable`.
+private struct UnavailableFeedbackDrafts: FeedbackDraftStore {
+    func eraseAll() async throws(StoreError) { throw .unavailable }
+    func draft() async throws(StoreError) -> FeedbackDraft? { throw .unavailable }
+    func save(_ draft: FeedbackDraft) async throws(StoreError) { throw .unavailable }
+    func discard() async throws(StoreError) { throw .unavailable }
 }
 
 /// Every store protocol, failing every call with `unavailable`.
@@ -44,6 +53,7 @@ private struct UnavailableStore: ClosetStore, LookStore, SuitcaseStore, ProfileS
     func delete(_ id: Garment.ID, at date: Date) async throws(StoreError) { throw .unavailable }
     func restore(_ id: Garment.ID) async throws(StoreError) { throw .unavailable }
     func purgeExpired(asOf date: Date) async throws(StoreError) -> [Garment.ID] { throw .unavailable }
+    func deletePermanently(_ id: Garment.ID) async throws(StoreError) { throw .unavailable }
 
     // LookStore
     func looks() async throws(StoreError) -> [Look] { throw .unavailable }

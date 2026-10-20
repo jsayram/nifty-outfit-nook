@@ -46,9 +46,9 @@ private struct RootTabs: View {
     @State private var garmentImages: GarmentImageLoader?
     /// Garment stickers, made once and shared by every screen (Phase 8b).
     @State private var stickers = StickerCache()
-    /// A Send feedback note she hasn't sent yet, kept while she moves around the app (Phase 14b).
-    /// In memory only, like every Stage A draft.
-    @State private var feedback = FeedbackModel()
+    /// A Send feedback note she hasn't sent yet, kept while she moves around the app (Phase 14b),
+    /// and since Phase 21a in `services.feedbackDrafts` too, so it's there after a relaunch.
+    @State private var feedback: FeedbackModel
     /// The window's real width class, read above the tab view. The tab view itself is told the
     /// width is compact so it puts its bar at the bottom on iPad (RD-01.6), and every tab gets
     /// the real class back (`windowSizeClass(_:)`).
@@ -57,6 +57,7 @@ private struct RootTabs: View {
     init(services: NookServices) {
         self.services = services
         _garmentImages = State(initialValue: GarmentImageLoader(provider: services.images))
+        _feedback = State(initialValue: FeedbackModel(store: services.feedbackDrafts))
     }
 
     var body: some View {
@@ -89,6 +90,8 @@ private struct RootTabs: View {
         .environment(\.garmentImages, garmentImages)
         .environment(\.stickerCache, stickers)
         .environment(\.feedbackDraft, feedback)
+        // The note she left unsent before the app last closed (Phase 21a).
+        .task { await feedback.restore() }
     }
 
     /// Replay from App tours (Phase 16b): opens the tour's screen, where it starts from step 1

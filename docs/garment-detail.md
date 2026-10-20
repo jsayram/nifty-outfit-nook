@@ -49,7 +49,17 @@ A sheet with two choices. Both ask first, inside the sheet, and VoiceOver moves 
 
 After either one the screen goes back to the grid, which reloads. Archive isn't offered. If the save fails, nothing changes and a toast says so.
 
-**Recently deleted** lists deleted pieces, most recent first, each with "Kept until Nov 13" and Restore. Restore brings back the same piece with its links (LR-16.3) and shows a toast. Opening it first removes pieces whose 30 days are up (`purgeExpired`), as PRD §7.4 asks when the app next runs.
+**Recently deleted** lists deleted pieces, most recent first, each with "Kept until Nov 13", Restore and Delete now. Restore brings back the same piece with its links (LR-16.3) and shows a toast. Opening it first removes pieces whose 30 days are up (`purgeExpired`), as PRD §7.4 asks when the app next runs.
+
+**Delete now** (Phase 21a, PRD §7.4) deletes one piece for good before its 30 days are up. It asks first, in an alert titled "Delete Navy dress pants for good?", with the preview the PRD asks for, one sentence each (`PermanentDeletion` in Models works it out from the stores):
+
+- "Its photo and details are deleted from this iPhone. This can't be undone." ("Its details" for a piece with no photo.)
+- "Your unsaved changes to it go too.", when she left an Edit of it unsaved. The draft is discarded first, then the piece.
+- "Saved looks that use it keep their other pieces: Office navy and Rainy Monday." Saved looks then say a piece was deleted for good, as after the 30-day purge (`LookDetailModel.goneCount`).
+- "It comes out of Weekend.", for the suitcases it's packed in. Suitcases only show pieces that exist, as after the 30-day purge.
+- "Try-on pictures with it in stay until you delete them.", when any picture shows it (PRD §7.5 and §9.2.4: pictures stay until she deletes them).
+
+Delete for good removes it and shows "Navy dress pants is deleted for good". Only a piece in Recently deleted can go this way (`ClosetStore.deletePermanently` says not found for any other). A failed save leaves it in the list with the usual toast. The button is a quiet text button under Restore, or under it full width at the accessibility sizes, and reads "Delete Navy dress pants now" to VoiceOver.
 
 ## States
 
@@ -71,9 +81,9 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 ## Tests
 
 - `GarmentDetailTextTests`: Last worn with a fixed clock and calendar (today, yesterday, a late night, days, dates, another year), the recent-wear rule for each window and kind of piece, status in every case, the facts, the saved-look count and the deletion deadline.
-- `GarmentDetailModelTests`: what loads for each kind of piece, gone and failing stores, mark dirty and Undo, "I don't have it any more" and Undo, Delete it then Restore from Recently deleted, a failed save, and the 30-day purge.
+- `GarmentDetailModelTests`: what loads for each kind of piece, gone and failing stores, mark dirty and Undo, "I don't have it any more" and Undo, Delete it then Restore from Recently deleted, a failed save, the 30-day purge, and Delete now: the preview, the piece and its unsaved Edit gone with looks unchanged, the question's words, and a failed delete keeping the piece. `PermanentDeletionTests` (Models): what the preview lists.
 - `GarmentDetailSnapshotTests`: navy trousers (light and AX5), the lace top in the wash in dark, the tan loafers (never worn, no picture), the blue dress (away, two colours), the gone and error states, both sheets and Recently deleted.
-- `GarmentDetailTests` (UI): open a piece from Closet, Delete it, find it in Recently deleted and restore it; mark it dirty, Style with this to Style Me, and "I don't have it any more" with Undo.
+- `GarmentDetailTests` (UI): open a piece from Closet, Delete it, find it in Recently deleted and restore it, then Delete now on the leggings, confirm, and Recently deleted is empty; mark it dirty, Style with this to Style Me, and "I don't have it any more" with Undo.
 
 ## Decisions for Jose
 
@@ -81,6 +91,6 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 2. **The recent-wear note names the setting** rather than repeating "You wore this last week", which LR-10 puts on Your looks. Last worn already says when.
 3. **"Add to a suitcase"** came in Phase 13: a soft button under Style with this opens a sheet of her suitcases with a tick each (`docs/suitcases-and-laundry.md`). The suitcase names open the real suitcase.
 4. **Undo after Delete it** as well as after "I don't have it any more". LR-16 only asks for the first, but both ask first and Undo is cheap and safe.
-5. **No "Delete permanently now"** in Recently deleted yet. PRD §7.4 asks for it with a preview of what's purged, which belongs with real storage (Phases 21a and 21b).
+5. **"Delete permanently now" came with real storage (Phase 21a),** as Delete now on each row, asking in an alert with the preview. Two parts of PRD §7.4's purge wait: try-on pictures that show the piece stay (Stage A's rule that pictures stay until she deletes them; the PRD would purge them), and the content-free deletion markers that stop a synced device bringing it back come with sync (21b). Jose to confirm the first.
 6. **"I don't have it any more" keeps suitcase membership** in the data. The piece no longer shows in Closet or styling, and Undo needs nothing else. Suitcases (13) must filter with `isInCloset`.
 7. **Style me with it is offered for any piece in her closet**, even one in the wash or away. Style Me then says why it can't start a look ("In the wash") and offers another (Phase 10a, `docs/style-me.md`).

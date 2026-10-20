@@ -41,6 +41,16 @@ final class GarmentDetailTests: XCTestCase {
         restore.tapUntil(labelled("Navy dress pants is back in your closet", in: app), appears: Self.wait)
         XCTAssertTrue(waitForNonExistence(restore))
 
+        // Delete now (PRD §7.4, Phase 21a): it asks first, saying what goes, then the leggings
+        // are deleted for good and Recently deleted is empty.
+        let alert = app.alerts["Delete Old gray leggings for good?"]
+        app.buttons["recentlyDeleted.deleteNow.g-gray-leggings"].tapUntil(alert, appears: Self.wait)
+        XCTAssertTrue(
+            alert.staticTexts.containing(NSPredicate(format: "label CONTAINS 'This can’t be undone'")).firstMatch.exists
+        )
+        alert.buttons["Delete for good"].tapUntilGone(timeout: Self.wait)
+        XCTAssertTrue(element("recentlyDeleted.empty", in: app).waitUntilExists(timeout: Self.wait))
+
         app.goBack(from: "Recently deleted", to: "Closet", timeout: Self.wait)
         XCTAssertTrue(trousers.waitUntilExists(timeout: Self.wait))
     }

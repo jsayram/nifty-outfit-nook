@@ -38,6 +38,40 @@ final class AddPieceTests: XCTestCase {
         tap("editor.toolbarSave", in: app, showing: gridPiece("Navy coat", in: app))
     }
 
+    /// Phase 21a: a piece added to her own closet is still there after the app closes. A fresh
+    /// install (`-onboarding reset` also clears the store) through onboarding to the empty closet,
+    /// a piece added by words, then a relaunch with no flags but the fixtures.
+    @MainActor
+    func testAPieceInHerOwnClosetIsKeptAfterARelaunch() {
+        var app = XCUIApplication()
+        app.launchArguments =
+            ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+        app.launch()
+        app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(
+            app.navigationBars["How you like clothes to fit"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Choose a starting closet"], appears: Self.wait)
+        element("onboarding.closet.empty", in: app).tapUntilSelected(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Home"], appears: Self.wait)
+        app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
+        XCTAssertTrue(element("closet.empty.addPiece", in: app).waitUntilExists(timeout: Self.wait))
+
+        openDescribeInWords(in: app)
+        type("Navy wool coat with big buttons", into: "field.description", in: app)
+        suggestAndAcceptEverySuggestion(in: app)
+        tap("words.continue", in: app, showing: element("field.name", in: app))
+        tap("editor.toolbarSave", in: app, showing: gridPiece("Navy coat", in: app))
+        app.terminate()
+
+        // The relaunch: Home straight away, and the coat is in Closet.
+        app = XCUIApplication()
+        app.launchArguments = ["-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+        app.launch()
+        app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
+        XCTAssertTrue(gridPiece("Navy coat", in: app).waitUntilExists(timeout: Self.wait), "The piece wasn't kept")
+    }
+
     /// Edit from garment detail: Cancel asks first when something changed, and Save changes
     /// shows on the detail.
     @MainActor

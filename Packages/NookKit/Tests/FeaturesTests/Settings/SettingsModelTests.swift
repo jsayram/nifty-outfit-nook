@@ -260,3 +260,79 @@ struct DeleteDataModelTests {
                 == "Most of your data is deleted, but not: Looks and Try-on pictures. Try again to finish.")
     }
 }
+
+/// Phase 21a: the unsent note is kept in a `FeedbackDraftStore`, so it's there after a relaunch
+/// (a new model on the same store), until she sends it or clears it.
+@MainActor
+struct FeedbackDraftKeepingTests {
+    private let details = FeedbackDiagnostics(
+        appVersion: "0.1", build: "14", systemVersion: "26.5", deviceModel: "iPhone13,2")
+
+    @Test func anUnsentNoteComesBackAfterARelaunch() async throws {
+        let store = InMemoryFeedbackDraftStore()
+        let model = FeedbackModel(diagnostics: details, store: store)
+        model.kind = .idea
+        model.message = "The hamper is lovely"
+        model.includesDetails = true
+        await model.finishWriting()
+        #expect(
+            try await store.draft()
+                == FeedbackDraft(kind: .idea, message: "The hamper is lovely", includesDetails: true))
+
+        let relaunched = FeedbackModel(diagnostics: details, store: store)
+        await relaunched.restore()
+        #expect(relaunched.kind == .idea)
+        #expect(relaunched.message == "The hamper is lovely")
+        #expect(relaunched.includesDetails)
+    }
+
+    @Test func sendingOrClearingItForgetsTheNote() async throws {
+        let store = InMemoryFeedbackDraftStore()
+        let model = FeedbackModel(diagnostics: details, store: store)
+        model.message = "Hamper didn't open"
+        #expect(model.send())
+        model.shareFinished(completed: true)
+        await model.finishWriting()
+        #expect(try await store.draft() == nil)
+
+        model.startOver()
+        model.message = "Another one"
+        await model.finishWriting()
+        #expect(try await store.draft()?.message == "Another one")
+        // Emptying the words is clearing it.
+        model.message = "  "
+        await model.finishWriting()
+        #expect(try await store.draft() == nil)
+    }
+
+    /// A share sheet closed without sending keeps the note.
+    @Test func aCancelledShareKeepsTheNote() async throws {
+        let store = InMemoryFeedbackDraftStore()
+        let model = FeedbackModel(diagnostics: details, store: store)
+        model.message = "Hamper didn't open"
+        model.send()
+        model.shareFinished(completed: false)
+        await model.finishWriting()
+        #expect(try await store.draft()?.message == "Hamper didn't open")
+    }
+
+    /// A kept note read late never replaces what she has started typing.
+    @Test func restoringNeverReplacesHerTyping() async throws {
+        let store = InMemoryFeedbackDraftStore(draft: FeedbackDraft(message: "Old note"))
+        let model = FeedbackModel(diagnostics: details, store: store)
+        model.message = "New note"
+        await model.restore()
+        #expect(model.message == "New note")
+    }
+
+    /// A store that fails leaves the page working, in memory.
+    @Test func aFailingStoreLeavesTheNoteOnScreen() async {
+        let store = InMemoryFeedbackDraftStore(options: StoreOptions(fails: true))
+        let model = FeedbackModel(diagnostics: details, store: store)
+        await model.restore()
+        model.message = "Still here"
+        await model.finishWriting()
+        #expect(model.message == "Still here")
+        #expect(model.preview != nil)
+    }
+}

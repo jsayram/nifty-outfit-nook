@@ -72,7 +72,7 @@ It opens from a garment's Style with this, Make my own look (starting with that 
 
 `LookRules` checks the look: 2 to 6 pieces (RD-07.1), a dress or a top and a bottom (the same shape the mock stylist builds from; shoes aren't required), one of each kind, and every piece one she can wear today. The name follows `NameRules.lookName`. Save puts a named look (`isMadeByHer`, no version) in the look store and drops the draft; saving again after more changes updates the same look (PRD §7.3). It works offline and sends nothing (FR-32).
 
-**Drafts (LR-08.4).** Every change writes a `LookDraft` (name, source, pieces, the starting piece) to `NookServices.lookDrafts`, in order. Opening Make your own look again offers a draft with work in it. While it's offered, the old draft is kept even if she changes the new look; Resume replaces the screen with it, Start over drops it and keeps what's on screen. Stage A keeps the draft in memory, so a UI test seeds one at launch with `-fixtures demo:draft=look` ("Pink for Friday": the pink shirt and the navy dress pants).
+**Drafts (LR-08.4).** Every change writes a `LookDraft` (name, source, pieces, the starting piece) to `NookServices.lookDrafts`, in order. Opening Make your own look again offers a draft with work in it. While it's offered, the old draft is kept even if she changes the new look; Resume replaces the screen with it, Start over drops it and keeps what's on screen. Since Phase 21a her own closet keeps the draft in the real store (`StoredLookDraftStore`), so it's there after a relaunch. The debug sample closet keeps it in memory, so a UI test seeds one at launch with `-fixtures demo:draft=look` ("Pink for Friday": the pink shirt and the navy dress pants).
 
 ## Accessibility
 
@@ -108,5 +108,5 @@ It opens from a garment's Style with this, Make my own look (starting with that 
 
 - **12a (done):** Swap it on a saved look's faded piece (LR-16) and Swap a piece from look detail, which change the saved look in place; the saved looks list and renaming.
 - **16b (done):** the Make your own look and Swap a piece tours; Make your own look's starts "Build an outfit yourself, piece by piece." (`docs/tours.md`).
-- **21a:** durable storage behind `LookDraftStore`.
+- **21a (done):** durable storage behind `LookDraftStore` (`StoredLookDraftStore`).
 - **34:** Find one.

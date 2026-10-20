@@ -150,11 +150,22 @@ nonisolated enum OnboardingText {
             bundle: .module, comment: "Onboarding privacy: consent later")
     }
 
+    /// With the sample closet on offer (debug builds): the sample comes back as it ships, and an
+    /// empty closet keeps everything (Phase 21a).
     static var whatsKept: String {
         String(
             localized:
-                "When this test build closes, it keeps your name and your Style Me settings in Profile, which closet you chose and which tips you’ve seen. It forgets the rest, like your fit and the pieces and looks you add.",
-            bundle: .module, comment: "Onboarding privacy: what Stage A keeps across launches and what it forgets")
+                "In this test build the sample closet comes back as it was each time the app opens, with your name and your Style Me settings. An empty closet keeps everything you add when the app closes.",
+            bundle: .module, comment: "Onboarding privacy: what's kept across launches, with the sample closet offered")
+    }
+
+    /// Without the sample closet (Release builds): everything is kept (Phase 21a).
+    static var whatsKeptOnDevice: String {
+        String(
+            localized:
+                "Everything you add is kept on this iPhone when the app closes, until you delete it. Delete my data in Profile removes all of it.",
+            bundle: .module,
+            comment: "Onboarding privacy: what's kept across launches, in a build with no sample closet")
     }
 
     // MARK: Fit
@@ -210,7 +221,7 @@ nonisolated enum OnboardingText {
     static var emptyDetail: String {
         String(
             localized:
-                "Add your own pieces, with sample pictures for now. In this test build they’re gone when the app closes.",
+                "Add your own pieces, with sample pictures for now. They’re kept when the app closes.",
             bundle: .module, comment: "Onboarding: what the empty closet is")
     }
 

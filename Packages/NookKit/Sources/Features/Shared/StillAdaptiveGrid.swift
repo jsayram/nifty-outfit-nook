@@ -7,12 +7,22 @@ import SwiftUI
 /// points taller with the page moved down 9, about half the time (Phase 20a). This lays out the
 /// same columns eagerly: as many columns of at least `minimum` as fit, sharing the width, each
 /// row as tall as its tallest item, items centred in their cells, as `LazyVGrid` does.
+///
+/// Closet's garment grid uses it too since Phase 21a, with its items at the top of their cells as
+/// its `GridItem` asks: `SuitcasesSnapshotTests.anotherSuitcaseInDark` came out 1,030 or 1,039
+/// points tall on iOS 27.0 CI, from one run to the next.
 struct StillAdaptiveGrid: Layout {
     var minimum: CGFloat
     var spacing: CGFloat
     var rowSpacing: CGFloat
+    /// Items at the top of their cells instead of centred.
+    var alignsTop = false
 
+    /// The columns for a width. A width that isn't a finite number (a stack asking how wide the
+    /// grid could be, with an infinite proposal) gets one column at the minimum width: turning
+    /// it into a column count would trap (Phase 21a, seen on CI).
     private func columns(for width: CGFloat) -> (count: Int, width: CGFloat) {
+        guard width.isFinite, width > 0 else { return (1, minimum) }
         let count = max(1, Int(((width + spacing) / (minimum + spacing)).rounded(.down)))
         return (count, (width - CGFloat(count - 1) * spacing) / CGFloat(count))
     }
@@ -26,7 +36,7 @@ struct StillAdaptiveGrid: Layout {
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? minimum
+        let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? minimum
         let heights = rowHeights(subviews, columns: columns(for: width))
         let height = heights.reduce(0, +) + CGFloat(max(0, heights.count - 1)) * rowSpacing
         return CGSize(width: width, height: height)
@@ -41,9 +51,15 @@ struct StillAdaptiveGrid: Layout {
                 let index = row * layout.count + column
                 guard index < subviews.count else { break }
                 let x = bounds.minX + CGFloat(column) * (layout.width + spacing)
-                subviews[index].place(
-                    at: CGPoint(x: x + layout.width / 2, y: y + height / 2), anchor: .center,
-                    proposal: ProposedViewSize(width: layout.width, height: height))
+                if alignsTop {
+                    subviews[index].place(
+                        at: CGPoint(x: x + layout.width / 2, y: y), anchor: .top,
+                        proposal: ProposedViewSize(width: layout.width, height: nil))
+                } else {
+                    subviews[index].place(
+                        at: CGPoint(x: x + layout.width / 2, y: y + height / 2), anchor: .center,
+                        proposal: ProposedViewSize(width: layout.width, height: height))
+                }
             }
             y += height + rowSpacing
         }

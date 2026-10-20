@@ -86,6 +86,17 @@
     "%@ is back." : {
       "comment" : "Toast after bringing back an archived suitcase"
     },
+    "%@ is deleted for good" : {
+      "comment" : "Toast after Delete now, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is deleted for good"
+          }
+        }
+      }
+    },
     "%@ is deleted. Its pieces are still in your closet." : {
       "comment" : "Toast after deleting a suitcase"
     },
@@ -815,8 +826,16 @@
     "Add your clothes" : {
       "comment" : "Closet tour, step 1 title"
     },
-    "Add your own pieces, with sample pictures for now. In this test build they’re gone when the app closes." : {
-      "comment" : "Onboarding: what the empty closet is"
+    "Add your own pieces, with sample pictures for now. They’re kept when the app closes." : {
+      "comment" : "Onboarding: what the empty closet is",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your own pieces, with sample pictures for now. They’re kept when the app closes."
+          }
+        }
+      }
     },
     "Add your pieces, then tap the laptop in your room. You’ll get one outfit in three versions." : {
       "comment" : "Onboarding privacy: what the app does, the line under it"
@@ -1605,6 +1624,28 @@
     "Default" : {
       "comment" : "Accessibility: text size value"
     },
+    "Delete %@ for good?" : {
+      "comment" : "Recently deleted: asks before deleting a piece for good",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@ for good?"
+          }
+        }
+      }
+    },
+    "Delete %@ now" : {
+      "comment" : "Spoken on Delete now in Recently deleted, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@ now"
+          }
+        }
+      }
+    },
     "Delete %@?" : {
       "comment" : "Remove from closet: asks before Delete it",
       "localizations" : {
@@ -1621,6 +1662,17 @@
     },
     "Delete everything?" : {
       "comment" : "Delete my data: the question's title"
+    },
+    "Delete for good" : {
+      "comment" : "Button: confirms deleting a piece for good",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete for good"
+          }
+        }
+      }
     },
     "Delete it" : {
       "comment" : "Remove from closet choice",
@@ -1641,6 +1693,17 @@
     },
     "Delete my data erases everything the app keeps about you. It asks you first." : {
       "comment" : "Privacy tour, step 2"
+    },
+    "Delete now" : {
+      "comment" : "Button: deletes a piece in Recently deleted for good",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete now"
+          }
+        }
+      }
     },
     "Delete picture" : {
       "comment" : "Button on picture detail"
@@ -2058,6 +2121,28 @@
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
     },
+    "Everything you add is kept on this iPhone when the app closes, until you delete it. Delete my data in Profile removes all of it." : {
+      "comment" : "Onboarding privacy: what's kept across launches, in a build with no sample closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything you add is kept on this iPhone when the app closes, until you delete it. Delete my data in Profile removes all of it."
+          }
+        }
+      }
+    },
+    "Everything you add stays on this iPhone, and is kept when the app closes. Delete my data in Profile removes all of it." : {
+      "comment" : "Help: Your data, when her data is kept",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything you add stays on this iPhone, and is kept when the app closes. Delete my data in Profile removes all of it."
+          }
+        }
+      }
+    },
     "Everything you add stays on this iPhone. When this test build closes, it keeps your name and your Style Me settings, and forgets your fit and the pieces and looks you add. Privacy and terms says what’s kept, and Delete my data removes all of it." : {
       "comment" : "Help: Your data"
     },
@@ -2188,6 +2273,17 @@
     },
     "Fit and measurements" : {
       "comment" : "Profile row and screen title"
+    },
+    "Fit and measurements and your try-on pictures are hidden when you switch apps. Everything you add or change is kept on this iPhone when the app closes, until you delete it. Delete my data removes all of it." : {
+      "comment" : "Privacy and terms: under what stays on the iPhone, when her data is kept",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fit and measurements and your try-on pictures are hidden when you switch apps. Everything you add or change is kept on this iPhone when the app closes, until you delete it. Delete my data removes all of it."
+          }
+        }
+      }
     },
     "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, with its own fit details and try-on photo, and anything you changed in them is cleared." : {
       "comment" : "Privacy and terms: under what stays on the iPhone"
@@ -2648,6 +2744,17 @@
     "In this test build the picture is simulated: the person in your try-on photo wearing the look, or your pieces on their own. Nothing leaves your phone." : {
       "comment" : "Try it on sheet"
     },
+    "In this test build the sample closet comes back as it was each time the app opens, with your name and your Style Me settings. An empty closet keeps everything you add when the app closes." : {
+      "comment" : "Onboarding privacy: what's kept across launches, with the sample closet offered",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In this test build the sample closet comes back as it was each time the app opens, with your name and your Style Me settings. An empty closet keeps everything you add when the app closes."
+          }
+        }
+      }
+    },
     "In your own words" : {
       "comment" : "Describe in words: field label",
       "localizations" : {
@@ -2693,6 +2800,17 @@
     },
     "It asks once more" : {
       "comment" : "Delete my data tour, step 2 title"
+    },
+    "It comes out of %@." : {
+      "comment" : "Delete for good: the suitcases the piece leaves, by name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It comes out of %@."
+          }
+        }
+      }
     },
     "It follows your iPhone" : {
       "comment" : "Accessibility tour, step 1 title"
@@ -2751,6 +2869,17 @@
     "It stays with your profile and is hidden when you switch apps." : {
       "comment" : "Try-on photo sheet point"
     },
+    "Its details are deleted from this iPhone. This can’t be undone." : {
+      "comment" : "Delete for good: what goes, for a piece with no photo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its details are deleted from this iPhone. This can’t be undone."
+          }
+        }
+      }
+    },
     "Its details show here, next to your closet." : {
       "comment" : "Beside Closet's grid on iPad, before she picks a piece"
     },
@@ -2759,6 +2888,17 @@
     },
     "Its look, and deleting it" : {
       "comment" : "App tours: what a try-on picture's tour covers"
+    },
+    "Its photo and details are deleted from this iPhone. This can’t be undone." : {
+      "comment" : "Delete for good: what goes, for a piece with a photo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its photo and details are deleted from this iPhone. This can’t be undone."
+          }
+        }
+      }
     },
     "Its pieces are still in your closet." : {
       "comment" : "Suitcase gone: the pieces stay"
@@ -3876,6 +4016,28 @@
         }
       }
     },
+    "Nothing is lost. Free up some space on this iPhone, then open the app again." : {
+      "comment" : "Recovery screen: not enough free space",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is lost. Free up some space on this iPhone, then open the app again."
+          }
+        }
+      }
+    },
+    "Nothing is lost. The copy from before the update is safe on this iPhone." : {
+      "comment" : "Recovery screen: the store's update failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is lost. The copy from before the update is safe on this iPhone."
+          }
+        }
+      }
+    },
     "Nothing is sent" : {
       "comment" : "Onboarding privacy: row title"
     },
@@ -3887,6 +4049,17 @@
     },
     "Nothing was charged, and nothing was made up to fill the gap." : {
       "comment" : "Your looks: insufficient wardrobe"
+    },
+    "Nothing was deleted. Close the app and open it again." : {
+      "comment" : "Recovery screen: the store couldn't be opened",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was deleted. Close the app and open it again."
+          }
+        }
+      }
     },
     "Nothing was deleted. Try again in a moment." : {
       "comment" : "Delete my data: every part failed"
@@ -4884,6 +5057,17 @@
     },
     "Saved looks didn’t load" : {
       "comment" : "Saved tab error title"
+    },
+    "Saved looks that use it keep their other pieces: %@." : {
+      "comment" : "Delete for good: the saved looks that use the piece, by name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved looks that use it keep their other pieces: %@."
+          }
+        }
+      }
     },
     "Saved looks work without pictures or credits." : {
       "comment" : "Make your own look: under Save once she typed a name"
@@ -5974,6 +6158,17 @@
         }
       }
     },
+    "This closet was saved by a newer version" : {
+      "comment" : "Recovery screen title: the store is from a newer app version",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closet was saved by a newer version"
+          }
+        }
+      }
+    },
     "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics." : {
       "comment" : "Privacy and terms: the banner at the top"
     },
@@ -6194,6 +6389,17 @@
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons and on a saved look (RD-06)"
     },
+    "Try-on pictures with it in stay until you delete them." : {
+      "comment" : "Delete for good: try-on pictures showing the piece are kept",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try-on pictures with it in stay until you delete them."
+          }
+        }
+      }
+    },
     "Trying %@" : {
       "comment" : "Swap: under the look while she tries one"
     },
@@ -6253,6 +6459,17 @@
     },
     "Unsaved work" : {
       "comment" : "Delete my data: a part"
+    },
+    "Update Nifty Outfit Nook to open it. Nothing was changed or deleted." : {
+      "comment" : "Recovery screen: the store is from a newer app version",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Nifty Outfit Nook to open it. Nothing was changed or deleted."
+          }
+        }
+      }
     },
     "Use %@" : {
       "comment" : "Swap: commits the swap, as in Use this top"
@@ -6457,9 +6674,6 @@
     },
     "When styling uses the internet, the app will say exactly what it sends and ask you before it sends anything." : {
       "comment" : "Onboarding privacy: consent later"
-    },
-    "When this test build closes, it keeps your name and your Style Me settings in Profile, which closet you chose and which tips you’ve seen. It forgets the rest, like your fit and the pieces and looks you add." : {
-      "comment" : "Onboarding privacy: what Stage A keeps across launches and what it forgets"
     },
     "When you see a look you like on Today, tap Save look. Looks you save for %@ from %@ show up here." : {
       "comment" : "Saved tab empty state: the occasion and the source"
@@ -6745,6 +6959,17 @@
     "Your closet couldn’t be read just now. Nothing was sent." : {
       "comment" : "Style Me error state"
     },
+    "Your closet couldn’t be updated" : {
+      "comment" : "Recovery screen title: the store's update failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet couldn’t be updated"
+          }
+        }
+      }
+    },
     "Your closet didn’t load" : {
       "comment" : "Closet error title",
       "localizations" : {
@@ -6756,6 +6981,17 @@
         }
       }
     },
+    "Your closet didn’t open" : {
+      "comment" : "Recovery screen title: the store couldn't be opened",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet didn’t open"
+          }
+        }
+      }
+    },
     "Your closet is empty" : {
       "comment" : "Empty closet title",
       "localizations" : {
@@ -6763,6 +6999,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your closet is empty"
+          }
+        }
+      }
+    },
+    "Your closet needs more space to update" : {
+      "comment" : "Recovery screen title: not enough free space for the update's safety copy",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet needs more space to update"
           }
         }
       }
@@ -6947,6 +7194,17 @@
     },
     "Your try-on photo" : {
       "comment" : "Profile row and sheet title (RD-06)"
+    },
+    "Your unsaved changes to it go too." : {
+      "comment" : "Delete for good: its unsaved Edit draft goes too",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your unsaved changes to it go too."
+          }
+        }
+      }
     },
     "Your usual fit is set in Profile. Picking another one changes only this outfit." : {
       "comment" : "Comfort sheet note (LR-18)"

@@ -67,7 +67,11 @@ Everything in the form is a draft until she saves: the step she's on, the detail
 
 Next time she opens Add a piece, or Edit on the same piece, the form asks **"Continue where you left off?"** with what's waiting ("Sage cardigan isn’t in your closet yet.", "Last changed 5 minutes ago"), Resume and Discard. Resume opens the same step with everything as she left it. The same card sits at the top of Closet, so she sees it without opening the form. A draft for a piece that's no longer in her closet isn't offered, but it's kept in case Undo brings the piece back.
 
-### Why Stage A drafts live in memory
+### Drafts in the real store (Phase 21a)
+
+Since Phase 21a `StoredDraftStore` keeps every draft in the real store on the iPhone, one record per target, with Data Protection `complete`, for her own closet and every Release build. Each write is saved before the call returns, so the half-second save and the save when the app leaves the foreground are durable. `closet/DATA_MAP.md` has a row for the drafts (Sensitive). Delete my data erases them, and Delete now in Recently deleted removes a piece's unsaved Edit with it. The debug sample closet keeps its drafts in memory, as below, so `-fixtures demo:draft=add` still seeds one for the UI tests.
+
+### Why Stage A drafts lived in memory
 
 The brief allowed a small on-disk draft (a JSON file in Application Support with complete file protection, kept out of backups) only if the security standard and the data map allow it for this data in Stage A. They don't, yet, so `DraftStore` has only an in-memory implementation, and a draft lasts until the app is closed.
 
@@ -105,7 +109,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 
 ## Decisions for Jose
 
-1. **Drafts are in memory in Stage A** (see above). Phase 21a should give `DraftStore` a durable implementation with complete file protection, and add drafts to the data map.
+1. **Drafts were in memory in Stage A** (see above). Phase 21a gave `DraftStore` a durable implementation in the real store with complete file protection, and added drafts to the data map.
 2. **A kind is required as well as a name.** The mockup says "Only a name is needed", but every garment has a kind, and guessing one would quietly file her piece in the wrong place. The line now says "Only a name and the kind of piece are needed."
 3. **No "Other names" (aliases) or sub-kind (Cardigan, Blazer) fields.** The mockup shows both, but the model has neither yet. They'd come with search aliases (PRD §7.6) in a later phase.
 4. **No cleanup or "Check the photo" step.** The mockup's simulated background cleanup and original-or-cleaned-up choice are cutouts, which Phases 8a and 8b decide.

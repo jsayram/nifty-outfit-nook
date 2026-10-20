@@ -2,6 +2,7 @@ import Fixtures
 import Foundation
 import Models
 import NookTestSupport
+import Synchronization
 import Testing
 
 @testable import Features
@@ -194,4 +195,53 @@ struct AppRootModelTests {
         let model = await started(install)
         #expect(isOnboarding(model) == .some(nil))
     }
+
+    /// Phase 21a: a store that couldn't be opened shows what happened, and nothing else runs:
+    /// not the preparation, not onboarding, not the tabs.
+    @Test func aStoreProblemShowsInsteadOfTheApp() async throws {
+        let prepared = Flag()
+        let install = Install()
+        var launch = install.launch()
+        launch.storeProblem = .newerVersion
+        launch.prepare = { prepared.set() }
+        let model = AppRootModel(launch: launch)
+        await model.start()
+        guard case .storeProblem(.newerVersion) = model.phase else {
+            Issue.record("Expected the store problem, got \(model.screen)")
+            return
+        }
+        #expect(!prepared.isSet)
+        #expect(try await install.onboarding.state() == .fresh)
+    }
+
+    /// The preparation (moving the Stage A suite in) runs before onboarding is read.
+    @Test func preparationRunsBeforeAnythingIsRead() async throws {
+        let install = Install()
+        var launch = install.launch()
+        let onboarding = install.onboarding
+        launch.prepare = { try? await onboarding.complete(startingCloset: .sample) }
+        let model = AppRootModel(launch: launch)
+        await model.start()
+        #expect(model.screen == .ready(1))
+    }
+
+    /// `-onboarding reset` is a fresh install for her data in the store too.
+    @Test func resetAlsoErasesHerStoredData() async throws {
+        let install = Install()
+        let closet = InMemoryClosetStore(
+            garments: [Garment(id: "g1", name: "Kept tee", category: .top, addedAt: TestTime.now)],
+            calendar: TestTime.calendar)
+        var launch = install.launch(.reset)
+        launch.erasedOnReset = [closet]
+        let model = AppRootModel(launch: launch)
+        await model.start()
+        #expect(try await closet.garments().isEmpty)
+    }
+}
+
+/// Set once, from any task.
+private final class Flag: Sendable {
+    private let value = Mutex(false)
+    var isSet: Bool { value.withLock { $0 } }
+    func set() { value.withLock { $0 = true } }
 }

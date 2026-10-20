@@ -96,7 +96,7 @@ Pure functions in `Models/Rules`, each with unit tests. Stores and screens both 
 
 ## The store protocol
 
-Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid details, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; Stage B puts real storage behind the same protocols (Phase 21a, after the Phase 20a spike picks how).
+Features talk only to these. Each is `Sendable` with `async` calls and typed errors (`StoreError`: not found, unavailable, cancelled, invalid name, invalid details, invalid measurements), so an actor, a database or a sync engine can sit behind it. Stage A has in-memory actors; since Phase 21a the real stores keep her data in a SwiftData store on the iPhone, behind the same protocols (see Real storage below).
 
 ```swift
 protocol ClosetStore: Sendable {
@@ -110,6 +110,7 @@ protocol ClosetStore: Sendable {
     func delete(_ id: Garment.ID, at date: Date) async throws(StoreError)           // to Recently deleted
     func restore(_ id: Garment.ID) async throws(StoreError)
     func purgeExpired(asOf date: Date) async throws(StoreError) -> [Garment.ID]
+    func deletePermanently(_ id: Garment.ID) async throws(StoreError)  // Phase 21a: only from Recently deleted
 }
 
 protocol LookStore: Sendable { looks, look, save, update, delete, recordWear, removeWear }
@@ -138,9 +139,12 @@ protocol LookDraftStore: Sendable { draft, save, discard }      // the one unsav
 protocol TryOnPictureStore: Sendable { pictures, picture, save, delete }   // every picture, newest first
 protocol TryOnService: Sendable { func makePicture(of: Look, at: Date) async throws(TryOnError) -> TryOnPicture }
 
-// Phase 16a and 17, kept across launches by Services' `UserDefaults` stores in the app
+// Phase 16a and 17, kept across launches (in the real store since Phase 21a)
 protocol TourProgressStore: ErasableStore { progress, record, setShowsTipsOnNewScreens, forgetSeenTours }
 protocol OnboardingStateStore: ErasableStore { state, complete(startingCloset:) }
+
+// Phase 21a, the unsent Send feedback note
+protocol FeedbackDraftStore: ErasableStore { draft, save, discard }
 
 // Phase 14b, Delete my data
 protocol ErasableStore: Sendable { func eraseAll() async throws(StoreError) }   // every store above refines it
@@ -153,7 +157,7 @@ Stage A's `TryOnService` is `SimulatedTryOn`: it returns a `.simulated` picture 
 
 `CutoutResult` is the subject as a PNG on transparency with `CutoutQuality` signals; `CutoutThresholds` (a rule) turns them into sticker or tile. Stage A's `NookServices.cutouts` is `StandInCutoutService`, which hands the photo back with the signals it was given. The Vision implementation lives in the `Services` module and is described in `docs/cutout-feasibility.md`.
 
-`NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). The root puts the services in the SwiftUI environment (`\.services`). Screens never build services. Without them (a preview, or a test that doesn't need data) a screen gets `NookServices.unavailable`, whose every call fails, so it shows its error state rather than pretending to load or save.
+`NookServices` bundles one of each. Since Phase 17 the app target hands `AppRootView` an `AppLaunch`: the two stores kept across launches and a way to build the services for the closet she chose in onboarding (`FixtureServices.make(_:startingCloset:tours:onboarding:)`). Since Phase 21a `FixtureServices.make` also takes `stores:`, a `NookStoreSet` of real stores that replaces the in-memory ones (the sample set's data, the store options and `draft=` then don't apply), and `NookServices.keepsChanges` says whether her changes outlive the app (true for the real stores, false for the debug sample closet), which Help and Privacy and terms use for their words. The root puts the services in the SwiftUI environment (`\.services`). Screens never build services. Without them (a preview, or a test that doesn't need data) a screen gets `NookServices.unavailable`, whose every call fails, so it shows its error state rather than pretending to load or save.
 
 Screens load from `.task` and again after a pushed screen closes, Undo or Try again, so loads can overlap. Each model numbers its loads (`LoadGeneration` in Features/Shared) and only the newest shows what it read, so an older load that finishes last can't put back data from before a change.
 
@@ -163,7 +167,39 @@ A store returns everything it holds and leaves filtering to the rules: Closet sh
 
 What a store checks before it keeps a record is in `StoreValidation` (Models/Rules): garments, looks, suitcase names and the profile, each built from `NameRules`, `GarmentRules` and `MeasurementRules`. Every store calls it, so Stage A's in-memory stores and Stage B's real ones refuse the same records.
 
-What every store does is written once as a contract in the `NookTestSupport` target (`Tests/NookTestSupport/StoreContracts`): one per store protocol, each a list of checks run against a factory that makes the store. FixturesTests runs them on every in-memory store, and ServicesTests on the two app-state stores kept in `UserDefaults`. Stage B's real stores run the same contracts. `NookTestSupport` also holds `TestTime` and `SpeedCheck`, which every test target shares; only test targets depend on it.
+What every store does is written once as a contract in the `NookTestSupport` target (`Tests/NookTestSupport/StoreContracts`): one per store protocol, each a list of checks run against a factory that makes the store. FixturesTests runs them on every in-memory store, and ServicesTests on every real store, each on a store file of its own (`StoredStoreContractTests`, Phase 21a), and on the old `UserDefaults` app-state stores the import reads. `NookTestSupport` also holds `TestTime` and `SpeedCheck`, which every test target shares; only test targets depend on it.
+
+## Real storage (Phase 21a)
+
+Her data lives in one SwiftData store on the iPhone, in `Application Support/Store/Nook.store`, as Phase 20a recommended (`docs/decisions/0003-persistence-spike.md`). The code is in `Services/Storage`.
+
+| Part | File | What it does |
+|---|---|---|
+| Schema | `StoreSchema.swift` | One entity, `StoredRecord`: a kind (`garment`, `look`, `suitcase`, `picture`, `garmentDraft`, `lookDraft`, `feedbackDraft`, `profile`, `onboarding`, `tours`, `defaultsImport`), the record's stable ID within it, the value type as JSON (`payload`) and the JSON's version (`payloadVersion`). Kind and key are unique together. `NookSchemaV1` is the first version and `NookMigrationPlan` lists every version and stage |
+| Payloads | `RecordPayload.swift` | Encodes and decodes the value types' own `Codable` JSON. Reads every payload version up to its own and refuses a newer one. `RecordPayloadTests` holds a version 1 payload of every kind, which every later build must still read |
+| Stores | `StoredClosetStores.swift`, `StoredSmallStores.swift` | A `@ModelActor` per protocol, each with its own context, handing out value types only. The closet, look, suitcase and picture stores keep what they read in memory and write through, so lists come back as fast as from memory. Every write is saved before the call returns |
+| Opening and migrations | `MigrationCoordinator.swift`, `StoreLocation.swift` | The spike's coordinator, promoted: the store's version read from its metadata before anything opens it, a free-space check, a journal before every step, a snapshot (left out of device backups) and a manifest of every record's kind, key and payload hash, SwiftData's migration, a check against the manifest, the snapshot put back at the next launch if anything stopped or didn't match, three tries per app build, and the snapshot deleted seven days after a verified migration. A store from a newer app, or a file that isn't a store, is never opened or reset |
+| The whole store | `NookStorage.swift` | Opens the store and makes every store on it; the store set for `FixtureServices`, the kept-settings keeper for the debug sample closet, and the list Delete my data erases |
+| Moving Stage A's suite in | `AppState/AppStateDefaultsImport.swift` | At the first launch of a 21a build, the onboarding state, tours seen, tips switch, name on the sign and three Style Me settings move from the `UserDefaults` suite into the store, then the suite is emptied. Values already in the store win; killed half way, it runs again with the same result |
+
+**One table with a payload per record.** The 20b design exports JSON records and puts one encrypted payload in each CloudKit record, so the store keeps the same JSON. The value types change often; a change to one is a change to its `Codable` shape (a new payload version when old JSON no longer decodes), not to the SwiftData schema, which stays small. Schema changes still happen (new columns or entities for sync), and each one goes through `NookMigrationPlan` and the coordinator. Records refer to each other by stable ID inside the payload, never by SwiftData relationship, so a look keeps a piece that was deleted for good as a gap (20a's finding).
+
+**Where each build keeps what.**
+
+| | Her closet, looks, suitcases, pictures, profile, drafts, feedback note | Onboarding and tours seen |
+|---|---|---|
+| Release | The store | The store |
+| Debug, empty closet | The store | The store |
+| Debug, sample closet | In memory, from the fixtures, as it ships at each launch; only the name on the sign and the Style Me settings are kept, in the store's profile record (`StoredProfileSettingsKeeper`); the feedback note is kept | The store |
+| Debug, `-onboarding skip` | In memory, from the fixtures; nothing kept | The store |
+
+So `-fixtures` and its options keep working for the sample closet, and the UI tests (all on `-onboarding skip`) start from the same data every time. Delete my data on the sample closet also erases the store, and `-onboarding reset` erases everything in it but the tours, so nothing from an earlier closet comes back.
+
+**Protection.** The app's entitlement makes Data Protection `complete` the default for every file; the store's folder and files and the journal are also given it in code. The simulator doesn't keep protection classes, so the classes on a device are still to check (with the store's `-wal` and `-shm`, and that it can't be read while the phone is locked). No store error is logged: SwiftData errors can quote the values being saved.
+
+**If the store can't be opened** (a newer app's store, a failed migration after three tries, not enough space for the safety copy, or a file it can't read), the app shows a short screen saying what happened and that nothing was deleted (`StoreProblemView`, words from 0004 §7), instead of onboarding or the tabs. Try again, Export a copy and Send feedback come with 21b.
+
+**Tests.** `StoredStoreContractTests` (every contract on every real store), `StoragePersistenceTests` (every demo record and 300 large-closet garments round-trip through a relaunch field for field; changes on disk when the call returns; drafts, the note, onboarding and tours kept; a piece deleted for good stays gone; Delete my data leaves no record; no CloudKit), `MigrationCoordinatorTests` (a test-only version 2, lightweight and custom; a crash at each of 11 checkpoints recovering with every record intact; a newer or damaged store left alone; not enough space; a migration that loses a record rolled back, stopping after three tries and retrying in a new build; the seven-day cleanup), `AppStateDefaultsImportTests` and `RecordPayloadTests`. The test version 2 adds an entity rather than changing `StoredRecord`, because 20a found that changing a class other tests in the same process still use makes SwiftData crash; the manual run in the build plan's 21a entry changed `StoredRecord` itself.
 
 ## Fixtures
 
@@ -193,7 +229,7 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 
 `photos=samples` adds eight pieces with drawn sample photos and stand-in cutouts, and an image provider (`SamplePhotoProvider`) that draws them, so stickers and tiles can be seen without real photos (Phase 8b, `docs/stickers.md`).
 
-`draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). `draft=look` puts a half-built Make your own look in the look draft store ("Pink for Friday": the pink shirt and the navy dress pants, Phase 11). Stage A drafts live in memory, so UI tests use it after a relaunch.
+`draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). `draft=look` puts a half-built Make your own look in the look draft store ("Pink for Friday": the pink shirt and the navy dress pants, Phase 11). The sample closet's drafts live in memory, so UI tests use it after a relaunch. It doesn't apply to her own closet in the real store, where drafts are kept anyway.
 
 Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample picture for every source, no permission asked) and `WordMatchDescriptionReader` (Describe in words, a deterministic word matcher on the phone with no style rules).
 
@@ -205,7 +241,7 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 
 ## Left out on purpose
 
-- **Persistence, revisions and sync.** Stage A keeps only the onboarding and tour flags across launches (Phase 17). The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork. Phase 20b's design (`docs/decisions/0004-backup-and-recovery.md`) keeps sync bookkeeping (change tags, the ancestor payload for three-way merges, the `CKSyncEngine` state) in the store beside the records, never in these value types, and exports and syncs the value types themselves as versioned JSON.
+- **Revisions and sync.** Since Phase 21a her data is kept in the real store (below). The PRD's revision numbers, deletion markers and sync conflicts arrive with sync (Phase 21b). Adding them to in-memory fixtures now would be guesswork. Phase 20b's design (`docs/decisions/0004-backup-and-recovery.md`) keeps sync bookkeeping (change tags, the ancestor payload for three-way merges, the `CKSyncEngine` state) in the store beside the records, never in these value types, and exports and syncs the value types themselves as versioned JSON.
 - **Favourites and collections** (PRD §8.2) have no Stage A screen (RD-08), so no type yet.
 - **Find One, shopping and the fit check** (Phase 34). Wishlist pieces exist as an ownership state only.
 - **More than one colour.** Since 10a the request has one colour wish, preferred or required, with its place (PRD §8.3). Several colours at once, or explicit monochrome, can come later if Lily asks.

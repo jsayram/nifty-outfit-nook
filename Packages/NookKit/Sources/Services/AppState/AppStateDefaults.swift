@@ -1,7 +1,10 @@
 import Foundation
 import Models
 
-// App state kept across launches in Stage A (Phase 17).
+// App state kept across launches in Stage A (Phase 17). Since Phase 21a the app keeps all of this
+// in the real store (`Services/Storage`) and moves what's here into it once, at the first launch
+// of a 21a build (`AppStateDefaultsImport`), then empties the suite. The stores below are only
+// read by that import and its tests.
 //
 // Stage A has no real storage: the closet, looks, profile and everything she types live in
 // memory and are gone when the app closes. A few flags would make a test build feel broken if
@@ -38,6 +41,7 @@ public enum AppStateDefaults {
         static let tracksLaundry = "profile.tracksLaundry"
 
         static let profileSettings = [signName, pieceMode, repeatWindow, tracksLaundry]
+        static let all = [onboardingCompleted, startingCloset, showsTips, seenVersions] + profileSettings
     }
 
     /// The tour versions accepted when reading. Anything else in the file is ignored.
@@ -48,6 +52,44 @@ public enum AppStateDefaults {
     /// defaults, also readable by this app alone, stand in if it ever happens.
     static func suite(named name: String) -> UserDefaults {
         UserDefaults(suiteName: name) ?? .standard
+    }
+
+    // MARK: Reading
+
+    /// The onboarding state. Anything unexpected reads as a fresh install, so the worst a damaged
+    /// value can do is show onboarding again.
+    static func onboardingState(in defaults: UserDefaults) -> OnboardingState {
+        guard defaults.object(forKey: Key.onboardingCompleted) as? Bool == true else { return .fresh }
+        let closet = (defaults.object(forKey: Key.startingCloset) as? String).flatMap(StartingCloset.init(rawValue:))
+        return OnboardingState(isCompleted: true, startingCloset: closet ?? .sample)
+    }
+
+    /// Tips are on unless she turned them off.
+    static func showsTips(in defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: Key.showsTips) as? Bool ?? true
+    }
+
+    /// The seen versions, keeping only tours the app knows with a sensible version. A value of
+    /// the wrong type reads as nothing seen, so a tour shows again rather than never.
+    static func seenVersions(in defaults: UserDefaults) -> [TourID: Int] {
+        guard let stored = defaults.dictionary(forKey: Key.seenVersions) else { return [:] }
+        var seen: [TourID: Int] = [:]
+        for tour in TourID.all {
+            if let version = stored[tour.rawValue] as? Int, versionRange.contains(version) {
+                seen[tour] = version
+            }
+        }
+        return seen
+    }
+
+    /// The name and Style Me settings. A value of the wrong type, or one the app doesn't know,
+    /// reads as not kept, so the profile keeps its default for it.
+    static func keptProfileSettings(in defaults: UserDefaults) -> KeptProfileSettings {
+        KeptProfileSettings(
+            signName: defaults.object(forKey: Key.signName) as? String,
+            pieceMode: (defaults.object(forKey: Key.pieceMode) as? String).flatMap(PieceMode.init(rawValue:)),
+            repeatWindow: (defaults.object(forKey: Key.repeatWindow) as? String).flatMap(RepeatWindow.init(rawValue:)),
+            tracksLaundry: defaults.object(forKey: Key.tracksLaundry) as? Bool)
     }
 }
 
@@ -64,12 +106,7 @@ public actor DefaultsOnboardingStore: OnboardingStateStore {
     /// What's kept. Anything unexpected in the file reads as a fresh install, so the worst a
     /// damaged value can do is show onboarding again.
     public func state() -> OnboardingState {
-        guard defaults.object(forKey: AppStateDefaults.Key.onboardingCompleted) as? Bool == true else {
-            return .fresh
-        }
-        let closet = (defaults.object(forKey: AppStateDefaults.Key.startingCloset) as? String)
-            .flatMap(StartingCloset.init(rawValue:))
-        return OnboardingState(isCompleted: true, startingCloset: closet ?? .sample)
+        AppStateDefaults.onboardingState(in: defaults)
     }
 
     public func complete(startingCloset closet: StartingCloset) {
@@ -126,22 +163,12 @@ public actor DefaultsTourProgressStore: TourProgressStore {
 
     // MARK: Reading and writing
 
-    /// Tips are on unless she turned them off.
     private func showsTips() -> Bool {
-        defaults.object(forKey: AppStateDefaults.Key.showsTips) as? Bool ?? true
+        AppStateDefaults.showsTips(in: defaults)
     }
 
-    /// The seen versions, keeping only tours the app knows with a sensible version. A value of
-    /// the wrong type reads as nothing seen, so a tour shows again rather than never.
     private func seenVersions() -> [TourID: Int] {
-        guard let stored = defaults.dictionary(forKey: AppStateDefaults.Key.seenVersions) else { return [:] }
-        var seen: [TourID: Int] = [:]
-        for tour in TourID.all {
-            if let version = stored[tour.rawValue] as? Int, AppStateDefaults.versionRange.contains(version) {
-                seen[tour] = version
-            }
-        }
-        return seen
+        AppStateDefaults.seenVersions(in: defaults)
     }
 
     private func write(_ seen: [TourID: Int]) {
@@ -165,12 +192,7 @@ public final class DefaultsProfileSettingsKeeper: ProfileSettingsKeeper {
     /// What's kept. A value of the wrong type, or one the app doesn't know, reads as not kept,
     /// so the profile keeps its default for it.
     public func kept() -> KeptProfileSettings {
-        typealias Key = AppStateDefaults.Key
-        return KeptProfileSettings(
-            signName: defaults.object(forKey: Key.signName) as? String,
-            pieceMode: (defaults.object(forKey: Key.pieceMode) as? String).flatMap(PieceMode.init(rawValue:)),
-            repeatWindow: (defaults.object(forKey: Key.repeatWindow) as? String).flatMap(RepeatWindow.init(rawValue:)),
-            tracksLaundry: defaults.object(forKey: Key.tracksLaundry) as? Bool)
+        AppStateDefaults.keptProfileSettings(in: defaults)
     }
 
     public func keep(_ settings: KeptProfileSettings) {

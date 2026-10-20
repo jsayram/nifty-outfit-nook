@@ -3,7 +3,8 @@ import Models
 import Observation
 
 /// Recently deleted (LR-16, PRD §7.4): pieces she chose Delete it for, each kept for 30 days,
-/// with Restore.
+/// with Restore, and since Phase 21a Delete now, which deletes one for good after showing what
+/// goes with it (`PermanentDeletion`).
 ///
 /// Loading first removes any piece whose 30 days are up (`purgeExpired`), as the PRD asks when
 /// the app next runs, so the list never shows a piece past its deadline.
@@ -22,6 +23,10 @@ final class RecentlyDeletedModel {
     private(set) var loadedAt: Date = .now
     /// The piece being restored, so its button shows the dots and a second tap does nothing.
     private(set) var restoring: Garment.ID?
+    /// The piece whose Delete now is being prepared or done, so its button shows the dots.
+    private(set) var deleting: Garment.ID?
+    /// What Delete now would take, while she's asked to confirm.
+    var confirming: PermanentDeletionPreview?
     @ObservationIgnored private var loads = LoadGeneration()
 
     func load(from services: NookServices, now: Date = .now) async {
@@ -52,7 +57,7 @@ final class RecentlyDeletedModel {
     /// Restore: back in her closet, the same piece with its links (LR-16.3).
     @discardableResult
     func restore(_ id: Garment.ID, in closet: any ClosetStore) async throws(StoreError) -> Garment? {
-        guard restoring == nil, let piece = pieces.first(where: { $0.id == id }) else { return nil }
+        guard restoring == nil, deleting == nil, let piece = pieces.first(where: { $0.id == id }) else { return nil }
         restoring = id
         defer { restoring = nil }
         try await closet.restore(id)
@@ -60,6 +65,29 @@ final class RecentlyDeletedModel {
         var restored = piece
         restored.deletedAt = nil
         return restored
+    }
+
+    /// Delete now: works out what goes with the piece and asks her to confirm.
+    func askToDeletePermanently(_ id: Garment.ID, in services: NookServices) async throws(StoreError) {
+        guard restoring == nil, deleting == nil, let piece = pieces.first(where: { $0.id == id }) else { return }
+        deleting = id
+        defer { deleting = nil }
+        confirming = try await PermanentDeletion.preview(of: piece, in: services)
+    }
+
+    /// She confirmed: the piece is deleted for good and leaves the list. Returns its name.
+    @discardableResult
+    func deletePermanently(_ preview: PermanentDeletionPreview, in services: NookServices) async throws(StoreError)
+        -> String?
+    {
+        let id = preview.piece.id
+        guard restoring == nil, deleting == nil, pieces.contains(where: { $0.id == id }) else { return nil }
+        confirming = nil
+        deleting = id
+        defer { deleting = nil }
+        try await PermanentDeletion.delete(id, in: services)
+        pieces.removeAll { $0.id == id }
+        return preview.piece.name
     }
 
     var isEmpty: Bool { phase == .loaded && pieces.isEmpty }

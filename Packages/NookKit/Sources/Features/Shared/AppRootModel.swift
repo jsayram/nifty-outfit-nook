@@ -23,6 +23,16 @@ nonisolated public struct AppLaunch: Sendable {
     /// Whether onboarding offers the sample closet. Release builds ship no sample data
     /// (Phase 20a), so they pass false and onboarding starts on an empty closet.
     public var offersSampleCloset: Bool
+    /// Why the store on the iPhone couldn't be opened, if it couldn't (Phase 21a). The app then
+    /// shows what happened instead of onboarding or the tabs, and changes nothing.
+    public var storeProblem: StoreOpenProblem?
+    /// Runs once before anything is read: since Phase 21a, moving the Stage A `UserDefaults`
+    /// suite into the store.
+    public var prepare: @Sendable () async -> Void
+    /// What the debug `-onboarding reset` flag erases besides the onboarding state and the kept
+    /// settings: her data in the store, as on a fresh install (Phase 21a). The tours have their
+    /// own flag.
+    public var erasedOnReset: [any ErasableStore]
 
     public init(
         onboarding: any OnboardingStateStore,
@@ -31,7 +41,10 @@ nonisolated public struct AppLaunch: Sendable {
         services: @escaping @Sendable (StartingCloset?) -> NookServices,
         onboardingOptions: OnboardingLaunchOptions = .standard,
         tourOptions: TourLaunchOptions = .standard,
-        offersSampleCloset: Bool = true
+        offersSampleCloset: Bool = true,
+        storeProblem: StoreOpenProblem? = nil,
+        prepare: @escaping @Sendable () async -> Void = {},
+        erasedOnReset: [any ErasableStore] = []
     ) {
         self.onboarding = onboarding
         self.tours = tours
@@ -40,16 +53,32 @@ nonisolated public struct AppLaunch: Sendable {
         self.onboardingOptions = onboardingOptions
         self.tourOptions = tourOptions
         self.offersSampleCloset = offersSampleCloset
+        self.storeProblem = storeProblem
+        self.prepare = prepare
+        self.erasedOnReset = erasedOnReset
     }
+}
+
+/// Why the store on the iPhone couldn't be opened (Phase 21a). Mirrors `StoreProblem` in
+/// Services, which Features doesn't depend on. Nothing was reset or deleted in any of them.
+nonisolated public enum StoreOpenProblem: Hashable, Sendable {
+    /// Saved by a newer version of the app, or not readable by this one.
+    case newerVersion
+    /// Not enough free space for the safety copy an update needs.
+    case notEnoughSpace
+    /// An update to the store failed; the copy from before is kept.
+    case updateFailed
+    /// The store couldn't be opened.
+    case couldNotOpen
 }
 
 /// Decides what the app shows: onboarding on a fresh install and after Delete my data, Home
 /// once she has finished it (Phase 17).
 ///
-/// After a relaunch Home opens straight away, on the closet she chose: the sample closet comes
-/// back as it ships and an empty closet starts empty again, with the name on her sign and her
-/// Style Me settings as she left them. Stage A keeps nothing else she adds (see
-/// `docs/onboarding.md`).
+/// After a relaunch Home opens straight away, on the closet she chose. Since Phase 21a her own
+/// closet (the empty one she started, and every Release build) is kept in the store on the
+/// iPhone, with everything she adds. The debug sample closet comes back as it ships, with the
+/// name on her sign and her Style Me settings as she left them (see `docs/onboarding.md`).
 @MainActor
 @Observable
 final class AppRootModel {
@@ -60,6 +89,8 @@ final class AppRootModel {
         case onboarding(notice: String?)
         /// The tabs, on these services.
         case ready(NookServices)
+        /// The store couldn't be opened (Phase 21a). Nothing else shows.
+        case storeProblem(StoreOpenProblem)
     }
 
     /// What's showing, without the services, so a view can animate between them.
@@ -67,6 +98,7 @@ final class AppRootModel {
         case loading
         case onboarding(Int)
         case ready(Int)
+        case storeProblem
     }
 
     private(set) var phase: Phase = .loading
@@ -87,6 +119,7 @@ final class AppRootModel {
         case .loading: .loading
         case .onboarding: .onboarding(generation)
         case .ready: .ready(generation)
+        case .storeProblem: .storeProblem
         }
     }
 
@@ -94,6 +127,11 @@ final class AppRootModel {
     /// opens onboarding, which is safe: finishing it again changes nothing she can't change later.
     func start() async {
         guard case .loading = phase else { return }
+        if let problem = launch.storeProblem {
+            phase = .storeProblem(problem)
+            return
+        }
+        await launch.prepare()
         switch launch.onboardingOptions {
         case .skip:
             open(launch.services(nil))
@@ -101,6 +139,9 @@ final class AppRootModel {
         case .reset:
             try? await launch.onboarding.eraseAll()
             launch.profileSettings?.forget()
+            for store in launch.erasedOnReset {
+                try? await store.eraseAll()
+            }
         case .standard:
             break
         }
