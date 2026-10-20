@@ -87,15 +87,16 @@ struct NiftyOutfitNookApp: App {
         #endif
 
         let storage: NookStorage
-        switch NookStorage.open() {
+        switch NookStorage.open(backups: .app) {
         case .ready(let opened):
             storage = opened
         case .problem(let problem):
+            // The recovery screen can still export the raw store, encrypted (Phase 21b).
             return AppLaunch(
                 onboarding: InMemoryOnboardingStore(), tours: InMemoryTourProgressStore(),
                 services: { _ in FixtureServices.make(FixtureConfiguration(set: .empty)) },
                 tourOptions: .standard, offersSampleCloset: offersSampleCloset,
-                storeProblem: StoreOpenProblem(problem))
+                storeProblem: StoreOpenProblem(problem), storeCopy: StoreCopyExport(location: .app))
         }
         let onboarding = storage.onboarding
         let tours = storage.tours
@@ -106,13 +107,17 @@ struct NiftyOutfitNookApp: App {
             services: { closet in
                 switch offersSampleCloset ? closet : .empty {
                 case .empty:
-                    // Her own closet, kept in the store. Delete my data also deletes the
-                    // migration's safety copy.
+                    // Her own closet, kept in the store, with Backups (Phase 21b). Delete my data
+                    // also deletes the migration's safety copy and the backups' files. The stores
+                    // are read here, so after a restore (`reload`) the services get fresh ones.
+                    let tours = storage.tours
+                    let onboarding = storage.onboarding
                     var services = FixtureServices.make(
                         configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
                         stores: storage.stores)
                     services.deletion = LocalDataDeletion(
                         stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
+                    services.backups = storage.backups
                     return services
                 case .sample, nil:
                     // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
@@ -133,7 +138,9 @@ struct NiftyOutfitNookApp: App {
             offersSampleCloset: offersSampleCloset,
             // The Stage A `UserDefaults` suite moves into the store once.
             prepare: { AppStateDefaultsImport.run(into: storage.container) },
-            erasedOnReset: storage.erasableData.map(\.1))
+            erasedOnReset: storage.erasableData.map(\.1),
+            backups: storage.backups,
+            reload: { storage.reload() })
     }
 }
 

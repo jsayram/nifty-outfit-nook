@@ -33,9 +33,12 @@ public struct AppRootView: View {
             Color.nook.background
                 .ignoresSafeArea()
         case .onboarding(let notice):
-            OnboardingFlow(notice: notice, offersSampleCloset: model.offersSampleCloset) { await model.finish($0) }
-                .id(model.generation)
-                .transition(.opacity)
+            OnboardingFlow(
+                notice: notice, offersSampleCloset: model.offersSampleCloset, backups: model.backups
+            ) { await model.finish($0) }
+            .id(model.generation)
+            .transition(.opacity)
+            .environment(\.backupRestored, BackupRestoredAction { model.restored() })
         case .ready(let services):
             RootTabView(services: services, tours: tours)
                 .id(model.generation)
@@ -46,9 +49,11 @@ public struct AppRootView: View {
                         // As on a fresh install, the tours can start again once she's back on Home.
                         tours.forgetSession()
                         model.dataDeleted()
-                    })
+                    }
+                )
+                .environment(\.backupRestored, BackupRestoredAction { model.restored() })
         case .storeProblem(let problem):
-            StoreProblemView(problem: problem)
+            StoreProblemView(problem: problem, exporter: model.storeCopy)
                 .transition(.opacity)
         }
     }

@@ -10,16 +10,18 @@ import SwiftUI
 ///
 /// The mockup's permission switches (Style Me, Ask stylist, Try-on, Describe my photos, Weather,
 /// analytics) aren't here: nothing is sent in Stage A, so a switch would control nothing. They
-/// arrive with the features that need them (19b, 24a, 27a, 29, 31, 33). Export a copy waits for
-/// 20b/21b.
+/// arrive with the features that need them (19b, 24a, 27a, 29, 31, 33). Backups (export and
+/// restore) sits in Your data since Phase 21b, where her closet is in the store.
 struct PrivacyScreen: View {
     @Environment(\.services) private var services
     @State private var showsDeleteData = false
+    @State private var showsBackups = false
     @State private var page: WebsiteLink?
 
     var body: some View {
         PrivacyPage(
             keepsChanges: services.keepsChanges,
+            backups: services.backups == nil ? nil : { showsBackups = true },
             deleteData: { showsDeleteData = true },
             open: { page = $0 }
         )
@@ -34,12 +36,15 @@ struct PrivacyScreen: View {
         .navigationDestination(isPresented: $showsDeleteData) {
             DeleteDataScreen()
         }
+        .navigationDestination(isPresented: $showsBackups) {
+            BackupsScreen()
+        }
         .fullScreenCover(item: $page) { link in
             SafariView(url: link.url)
                 .ignoresSafeArea()
         }
         // Privacy and terms' quick tour (Phase 16b).
-        .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && page == nil)
+        .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && !showsBackups && page == nil)
     }
 }
 
@@ -48,6 +53,8 @@ struct PrivacyPage: View {
     /// Whether her changes are kept when the app closes (`NookServices.keepsChanges`). The debug
     /// sample closet, which snapshot tests show, comes back as it ships.
     var keepsChanges = false
+    /// Opens Backups (Phase 21b). `nil` hides the row: the debug sample closet has nothing to back up.
+    var backups: (() -> Void)?
     var deleteData: () -> Void = {}
     var open: (WebsiteLink) -> Void = { _ in }
 
@@ -75,6 +82,15 @@ struct PrivacyPage: View {
             .tourAnchor(PrivacyTour.Anchor.later, label: PrivacyText.laterHeader)
 
             SettingsGroup(header: PrivacyText.yourDataHeader) {
+                if let backups {
+                    Button(action: backups) {
+                        NookRow(
+                            BackupsText.title, subtitle: BackupsText.rowDetail, systemImage: "externaldrive",
+                            accessory: .chevron)
+                    }
+                    .buttonStyle(.nookRow)
+                    .accessibilityIdentifier("privacy.backups")
+                }
                 Button(action: deleteData) {
                     NookRow(
                         SettingsText.deleteTitle, subtitle: PrivacyText.deleteDetail, systemImage: "trash",

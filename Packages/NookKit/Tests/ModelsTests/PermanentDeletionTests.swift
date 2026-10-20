@@ -53,4 +53,17 @@ struct PermanentDeletionTests {
         #expect(
             !PermanentDeletion.preview(of: piece, looks: [], suitcases: [], drafts: [add], pictures: []).hasUnsavedEdit)
     }
+
+    /// The pictures that show any of the pieces: ideas and other pieces don't count.
+    @Test func picturesShowingPieces() {
+        let first = look("l1", saved: true, pieces: ["g1", "g2"])
+        let second = look("l2", saved: true, pieces: ["g3"])
+        let pictures = [
+            TryOnPicture(id: "p1", of: first, image: .simulated, createdAt: TestTime.now),
+            TryOnPicture(id: "p2", of: second, image: .simulated, createdAt: TestTime.now),
+        ]
+        #expect(PermanentDeletion.showing(["g2"], in: pictures).map(\.id) == ["p1"])
+        #expect(PermanentDeletion.showing(["g1", "g3"], in: pictures).map(\.id) == ["p1", "p2"])
+        #expect(PermanentDeletion.showing(["g9"], in: pictures).isEmpty)
+    }
 }

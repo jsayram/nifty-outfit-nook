@@ -4,12 +4,34 @@
 <dict>
 	<!-- The launch screen is the room's wall colour, light or dark, so the first frame doesn't
 	     flash white or black before the app draws (Phase 18). LaunchBackground in the app's
-	     asset catalog holds the DesignSystem background token's values. Every other key is
-	     generated from Configs/App.xcconfig. -->
+	     asset catalog holds the DesignSystem background token's values. Every other key but the
+	     backup type below is generated from Configs/App.xcconfig. -->
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
+	<!-- Backups (Phase 21b): the export file's type, so the Files sheet names it and Restore's
+	     picker can ask for it. An encrypted archive; nothing else opens it on iOS. -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.jsayram.niftyoutfitnook.backup</string>
+			<key>UTTypeDescription</key>
+			<string>Nifty Outfit Nook backup</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>nookbackup</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

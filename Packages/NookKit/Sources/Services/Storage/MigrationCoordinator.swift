@@ -374,6 +374,36 @@ enum StoreSQLite {
         return StoreManifest(records: records)
     }
 
+    /// Moves everything in a closed store's write-ahead log into the store file itself and
+    /// empties the log, so the one file is the whole store (Phase 21b: the recovery screen's
+    /// store copy carries only that file).
+    static func checkpoint(_ url: URL) throws {
+        var database: OpaquePointer?
+        guard sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READWRITE, nil) == SQLITE_OK else {
+            sqlite3_close(database)
+            throw SQLiteFailure.open
+        }
+        defer { sqlite3_close(database) }
+        guard sqlite3_wal_checkpoint_v2(database, nil, SQLITE_CHECKPOINT_TRUNCATE, nil, nil) == SQLITE_OK,
+            sqlite3_exec(database, "PRAGMA journal_mode=DELETE", nil, nil, nil) == SQLITE_OK
+        else { throw SQLiteFailure.prepare }
+    }
+
+    /// Every row of a closed store file, as stored, for Undo restore (Phase 21b).
+    static func rows(of url: URL) throws -> [(kind: String, key: String, payloadVersion: Int, payload: Data)] {
+        var rows: [(kind: String, key: String, payloadVersion: Int, payload: Data)] = []
+        try query(url, "SELECT ZKIND, ZKEY, ZPAYLOADVERSION, ZPAYLOAD FROM ZSTOREDRECORD") { statement in
+            guard let kind = sqlite3_column_text(statement, 0), let key = sqlite3_column_text(statement, 1) else {
+                return
+            }
+            let count = Int(sqlite3_column_bytes(statement, 3))
+            let payload = sqlite3_column_blob(statement, 3).map { Data(bytes: $0, count: count) } ?? Data()
+            rows.append(
+                (String(cString: kind), String(cString: key), Int(sqlite3_column_int64(statement, 2)), payload))
+        }
+        return rows
+    }
+
     static func hash(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }

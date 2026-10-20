@@ -35,6 +35,9 @@ public struct NookServices: Sendable {
     /// the store on the iPhone (Phase 21a); false for the debug sample closet, which comes back as
     /// it ships at each launch. Help and Privacy and terms say which.
     public var keepsChanges = true
+    /// Export a copy, Check a copy and Restore (Phase 21b). `nil` where there's nothing to back
+    /// up: the debug sample closet in memory, previews and most tests.
+    public var backups: (any BackupService)?
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
