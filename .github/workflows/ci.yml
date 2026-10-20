@@ -170,21 +170,27 @@ jobs:
   # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
   # iPad layouts, on an iPad simulator. The iPad part also runs every package test target: they
   # don't depend on the device, and that part has the most room.
-  # Balanced in October 2026 from the classes' mean times over four CI runs, in seconds, from
-  # the test log ("Test Suite 'Class' passed ... in N seconds"). A class can take 1.5 to 2 times
-  # as long from one run to the next, and a part's first class also carries the first launch.
-  # Each test job spends about 5 minutes before its first test (mostly the simulator's boot),
-  # and build-and-archive about 9 before its UI tests (two builds, the archive, then a cold
-  # boot), so the parts aim at 8 to 9 minutes of tests and build-and-archive at 5:
-  #   (build-and-archive)     CatalogTests 169, ProfileTests 86, CutoutBenchTests 22
-  #   ui-home-and-settings    SettingsTests 169, HomeTests 102, StyleMeTests 86, YourLooksTests 75,
-  #                           ClosetTests 56, MakeYourOwnLookTests 46
-  #   ui-add-and-tours        AddPieceTests 236, ScreenToursTests 124, HomeVariantTests 94,
-  #                           OnboardingTests 70
-  #   ui-rest                 GarmentDetailTests 145, SavedLooksTests 137, HomeTourTests 125,
-  #                           SuitcasesAndLaundryTests 77, SwapTests 58, LaunchTests 51, and any
-  #                           new class
-  #   ui-ipad                 IPadTests 190, IPadStyleMeAndSavedTests 166, package tests about 90
+  # Rebalanced on 20 October 2026 from 6 CI runs on Xcode 27.1 (the classes' mean times, in
+  # seconds, from the test log: "Test Suite 'Class' passed ... in N seconds"). Before this, the
+  # home-and-settings part had 1224 seconds of tests (it took 24 to 39 minutes, and hit the
+  # 40-minute cap on a slow runner), and ui-rest had 766 (12 to 22 minutes). A class can take
+  # 1.5 to 2 times as long from one run to the next, and a failed test that retries adds its
+  # own time again plus a few minutes for xcodebuild to collect the failure's logs.
+  # A test job spends 6 to 7 minutes outside its tests (waiting for the build, downloading it,
+  # booting the simulator), and build-and-archive about 13 (two builds, the archive, then a cold
+  # boot while the others boot too). So the three iPhone parts below get about 1000 to 1050
+  # seconds of tests each, which is 23 to 25 minutes a job, and build-and-archive keeps about
+  # 500. The free plan runs five macOS jobs at once, so more parts would only queue.
+  #   (build-and-archive)     CatalogTests 274, ProfileTests 175, CutoutBenchTests 57
+  #   ui-home-and-settings    AccessibilityAuditTests 479, SettingsTests 276, HomeTests 132,
+  #                           StyleMeTests 119
+  #   ui-add-and-tours        AccessibilityAuditLargeTextTests 464, AddPieceTests 237,
+  #                           ScreenToursTests 230, OnboardingTests 76, MakeYourOwnLookTests 49
+  #   ui-rest                 SavedLooksTests 192, HomeTourTests 178, SuitcasesAndLaundryTests 121,
+  #                           YourLooksTests 111, LaunchTests 110, GarmentDetailTests 101,
+  #                           HomeVariantTests 91, SwapTests 64, ClosetTests 58, and any new class
+  #   ui-ipad                 IPadTests 174, IPadKeyboardTests 118, IPadStyleMeAndSavedTests 98,
+  #                           package tests about 90 to 360
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone.
   ui-tests:
@@ -206,21 +212,18 @@ jobs:
             family: iPhone
             products: ui-test-products
             selection: >-
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -only-testing:NiftyOutfitNookUITests/SettingsTests
               -only-testing:NiftyOutfitNookUITests/HomeTests
               -only-testing:NiftyOutfitNookUITests/StyleMeTests
-              -only-testing:NiftyOutfitNookUITests/YourLooksTests
-              -only-testing:NiftyOutfitNookUITests/ClosetTests
-              -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
-              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
           - part: ui-add-and-tours
             family: iPhone
             products: ui-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
               -only-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
               -only-testing:NiftyOutfitNookUITests/OnboardingTests
+              -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
@@ -231,21 +234,18 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
               -skip-testing:NiftyOutfitNookUITests/ProfileTests
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/HomeTests
               -skip-testing:NiftyOutfitNookUITests/StyleMeTests
-              -skip-testing:NiftyOutfitNookUITests/YourLooksTests
-              -skip-testing:NiftyOutfitNookUITests/ClosetTests
-              -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
               -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/OnboardingTests
+              -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
-              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
-              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
           # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
           # one of these skips itself on an iPhone.
           - part: ui-ipad
