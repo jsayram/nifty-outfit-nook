@@ -17,8 +17,6 @@ enum OnboardingStep: Int, CaseIterable, Hashable, Sendable {
     /// "Step 1 of 4".
     var number: Int { rawValue + 1 }
 
-    var next: OnboardingStep? { OnboardingStep(rawValue: rawValue + 1) }
-
     /// The steps she can skip. The privacy step only has Continue, and the closet step always has
     /// a choice made.
     var isOptional: Bool { self == .name || self == .fit }
@@ -37,6 +35,13 @@ final class OnboardingModel {
     var name = ""
     var usualFit: Comfort?
     var startingCloset: StartingCloset = .sample
+    /// False in Release builds, which ship no sample data (Phase 20a): the closet step is left
+    /// out and she starts with an empty closet.
+    let offersSampleCloset: Bool
+    /// The steps after the welcome, in order.
+    var steps: [OnboardingStep] {
+        offersSampleCloset ? OnboardingStep.allCases : OnboardingStep.allCases.filter { $0 != .closet }
+    }
     /// True while the answers are being saved.
     private(set) var isFinishing = false
     /// The last try at finishing didn't work.
@@ -47,11 +52,13 @@ final class OnboardingModel {
 
     init(
         name: String = "", usualFit: Comfort? = nil, startingCloset: StartingCloset = .sample,
+        offersSampleCloset: Bool = true,
         finish: @escaping @MainActor (OnboardingAnswers) async -> Bool = { _ in true }
     ) {
         self.name = name
         self.usualFit = usualFit
-        self.startingCloset = startingCloset
+        self.offersSampleCloset = offersSampleCloset
+        self.startingCloset = offersSampleCloset ? startingCloset : .empty
         finishing = finish
     }
 
@@ -92,7 +99,8 @@ final class OnboardingModel {
     /// Continue on `step`: the next step, or finishing on the last one.
     func advance(from step: OnboardingStep) async {
         guard canContinue(step) else { return }
-        if let next = step.next {
+        if let index = steps.firstIndex(of: step), steps.indices.contains(index + 1) {
+            let next = steps[index + 1]
             path.append(next)
         } else {
             await finish(answers)
@@ -111,7 +119,7 @@ final class OnboardingModel {
 
     /// "I already use Nifty Outfit Nook": straight to Home with the sample closet.
     func skipSetup() async {
-        await finish(.alreadyUsing)
+        await finish(offersSampleCloset ? .alreadyUsing : OnboardingAnswers(startingCloset: .empty))
     }
 
     /// Tapping a fit chip chooses it; tapping the chosen one clears it.

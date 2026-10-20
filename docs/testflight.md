@@ -1,5 +1,7 @@
 # Lily's TestFlight build
 
+> **Since Phase 20a (20 October 2026), a Release archive has no sample data.** It starts on an empty closet and, until real storage arrives in Phase 21a, keeps nothing Lily adds. Some wording below and in the app (the Help version line, What to Test) still describes the sample closet. Jose decides whether to upload before 21a; see `docs/decisions/0003-persistence-spike.md`.
+
 Phase 18, 16 October 2026. How to get the Stage A app onto Lily's iPhone through TestFlight, as an internal build with sample data only, and how her notes come back. Spec: `closet/SWIFT_BUILD_PLAN.md` (Phase 18), `closet/SECURITY_STANDARD.md` §9 and §11, and `closet/DATA_MAP.md` (TestFlight feedback and crash reports).
 
 Nothing here was uploaded, created or sent by an agent. Every step in App Store Connect and every signed build is Jose's.

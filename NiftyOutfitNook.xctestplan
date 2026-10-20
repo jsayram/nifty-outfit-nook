@@ -45,6 +45,13 @@
     {
       "target": {
         "containerPath": "container:Packages/NookKit",
+        "identifier": "PersistenceSpikeTests",
+        "name": "PersistenceSpikeTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
         "identifier": "FeaturesTests",
         "name": "FeaturesTests"
       }

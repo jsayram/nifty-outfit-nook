@@ -112,7 +112,9 @@ fi
 if otool -L "$binary" | grep -E -i "xctest|/Testing\.framework|snapshot"; then
     fail "the binary links a test framework"
 fi
-if strings "$binary" | grep -q "/Users/"; then
+# Not `strings | grep -q`: under pipefail, grep stopping early makes strings die of SIGPIPE and the
+# check pass by mistake (Phase 20a).
+if grep -q "/Users/" <<<"$(strings "$binary")"; then
     fail "the binary holds a path from the build Mac"
 fi
 scripts/check-release.sh "$binary" || failed=1

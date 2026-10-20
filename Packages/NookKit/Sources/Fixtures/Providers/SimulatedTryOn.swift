@@ -49,9 +49,11 @@ public struct SimulatedTryOn: TryOnService {
         if Task.isCancelled { throw .cancelled }
         if case .failing(let error) = mode { throw error }
         var image = TryOnImage.simulated
-        if usesSamplePreviews, let preview = SampleWardrobe.previewPhoto(for: look), await hasTryOnPhoto() {
-            image = .generated(preview)
-        }
+        #if DEBUG
+            if usesSamplePreviews, let preview = SampleWardrobe.previewPhoto(for: look), await hasTryOnPhoto() {
+                image = .generated(preview)
+            }
+        #endif
         return TryOnPicture(id: makeID(), of: look, image: image, createdAt: date)
     }
 }

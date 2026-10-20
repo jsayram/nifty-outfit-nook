@@ -106,6 +106,7 @@ struct OnboardingHeader<Art: View>: View {
     @ViewBuilder let art: Art
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.onboardingStepCount) private var stepCount
 
     var body: some View {
         HStack(alignment: standsOnFloor ? .bottom : .center, spacing: NookSpacing.small) {
@@ -115,7 +116,7 @@ struct OnboardingHeader<Art: View>: View {
                     .foregroundStyle(.nook.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("onboarding.title")
-                Text(OnboardingText.step(step.number, of: OnboardingStep.allCases.count))
+                Text(OnboardingText.step(step.number, of: stepCount))
                     .nookTextStyle(.caption)
                     .foregroundStyle(.nook.textSecondary)
                     .accessibilityIdentifier("onboarding.stepCount")
@@ -146,4 +147,10 @@ struct OnboardingHeader<Art: View>: View {
                 .accessibilityHidden(true)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// How many steps onboarding has: four, or three in Release, which has no closet step
+    /// (Phase 20a).
+    @Entry var onboardingStepCount = OnboardingStep.allCases.count
 }

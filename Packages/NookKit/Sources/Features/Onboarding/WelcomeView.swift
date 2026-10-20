@@ -23,6 +23,8 @@ struct WelcomeView: View {
     var isWorking = false
     /// Under the buttons when finishing didn't work.
     var problem: String?
+    /// False in Release, which ships no sample closet (Phase 20a).
+    var offersSampleCloset = true
 
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -110,7 +112,9 @@ struct WelcomeView: View {
             NookButton(OnboardingText.getStarted, isLoading: isWorking, fillsWidth: true, action: getStarted)
                 .accessibilityIdentifier("welcome.getStarted")
             NookButton(OnboardingText.alreadyUsing, kind: .text, fillsWidth: true, action: alreadyUsing)
-                .accessibilityHint(Text(OnboardingText.alreadyUsingHint))
+                .accessibilityHint(
+                    Text(offersSampleCloset ? OnboardingText.alreadyUsingHint : OnboardingText.alreadyUsingEmptyHint)
+                )
                 .accessibilityIdentifier("welcome.alreadyUsing")
                 .disabled(isWorking)
             if let problem {

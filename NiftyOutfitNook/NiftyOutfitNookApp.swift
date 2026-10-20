@@ -59,15 +59,21 @@ struct NiftyOutfitNookApp: App {
         }
     }
 
-    /// Stage A runs on sample data. `-fixtures <set>[:<behavior>]` picks it, for example
+    /// Debug builds run on sample data. `-fixtures <set>[:<behavior>]` picks it, for example
     /// `-fixtures large` or `-fixtures demo:offline`; the default is the demo closet, which is
-    /// also the sample closet onboarding offers.
+    /// also the sample closet onboarding offers. Release builds have no sample data (Phase 20a).
     ///
     /// The onboarding state, the tours seen, the name on the sign and the Style Me settings are
     /// kept in the app's own `UserDefaults` suite (`AppStateDefaults`); everything else is in
     /// memory. See `docs/onboarding.md`.
     private static func makeLaunch(arguments: [String]) -> AppLaunch {
-        let configuration = FixtureConfiguration(launchArguments: arguments)
+        #if DEBUG
+            let configuration = FixtureConfiguration(launchArguments: arguments)
+        #else
+            // Release builds ship no sample data and read no `-fixtures` argument (Phase 20a):
+            // an empty closet, in memory, until real storage arrives (Phase 21a).
+            let configuration = FixtureConfiguration(set: .empty)
+        #endif
         let onboarding = DefaultsOnboardingStore()
         let tours = DefaultsTourProgressStore()
         let profileSettings = DefaultsProfileSettingsKeeper()
@@ -76,9 +82,11 @@ struct NiftyOutfitNookApp: App {
             // builds only.
             let onboardingOptions = OnboardingLaunchOptions(launchArguments: arguments)
             let tourOptions = TourLaunchOptions(launchArguments: arguments)
+            let offersSampleCloset = true
         #else
             let onboardingOptions = OnboardingLaunchOptions.standard
             let tourOptions = TourLaunchOptions.standard
+            let offersSampleCloset = false
         #endif
         return AppLaunch(
             onboarding: onboarding,
@@ -92,6 +100,7 @@ struct NiftyOutfitNookApp: App {
                     profileSettings: closet == nil ? nil : profileSettings)
             },
             onboardingOptions: onboardingOptions,
-            tourOptions: tourOptions)
+            tourOptions: tourOptions,
+            offersSampleCloset: offersSampleCloset)
     }
 }

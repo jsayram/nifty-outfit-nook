@@ -72,6 +72,10 @@ Onboarding (the privacy step's note), Help ("Your data") and Privacy and terms s
 
 Delete my data now goes back to the welcome, with "Your data is deleted. The app is starting fresh." as a toast, instead of to an empty Home. Finishing onboarding again builds a new closet: she can choose the sample or the empty one. The "Afterwards" words on Delete my data and the Your profile row say so.
 
+## Release builds
+
+Since Phase 20a, Release builds ship no sample data. `AppLaunch.offersSampleCloset` is false there, so onboarding has three steps (name, privacy, fit), the fit step finishes with Go to my room, and she starts on an empty closet, also from "I already use Nifty Outfit Nook", whose VoiceOver hint drops "with the sample closet". Debug builds, and so every test, keep all four steps. `OnboardingModelTests.withoutTheSampleClosetThereAreThreeStepsAndAnEmptyCloset` covers the Release path.
+
 ## The debug flag
 
 Debug builds take `-onboarding`:

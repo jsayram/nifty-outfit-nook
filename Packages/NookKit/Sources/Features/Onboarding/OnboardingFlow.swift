@@ -15,9 +15,12 @@ struct OnboardingFlow: View {
     @State private var model: OnboardingModel
     @State private var toast: NookToastMessage?
 
-    init(notice: String?, finish: @escaping @MainActor (OnboardingAnswers) async -> Bool) {
+    init(
+        notice: String?, offersSampleCloset: Bool = true,
+        finish: @escaping @MainActor (OnboardingAnswers) async -> Bool
+    ) {
         self.notice = notice
-        _model = State(initialValue: OnboardingModel(finish: finish))
+        _model = State(initialValue: OnboardingModel(offersSampleCloset: offersSampleCloset, finish: finish))
     }
 
     var body: some View {
@@ -26,7 +29,8 @@ struct OnboardingFlow: View {
                 getStarted: model.start,
                 alreadyUsing: { Task { await model.skipSetup() } },
                 isWorking: model.isFinishing,
-                problem: model.didFail ? OnboardingText.failed : nil
+                problem: model.didFail ? OnboardingText.failed : nil,
+                offersSampleCloset: model.offersSampleCloset
             )
             .toolbar(.hidden, for: .navigationBar)
             .navigationTitle(OnboardingText.welcomeTitle)
@@ -43,6 +47,7 @@ struct OnboardingFlow: View {
                     }
             }
         }
+        .environment(\.onboardingStepCount, model.steps.count)
         .tint(.nook.accent)
         .nookToast($toast)
         .task {

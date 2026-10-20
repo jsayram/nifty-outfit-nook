@@ -33,6 +33,13 @@ nonisolated enum OnboardingText {
             comment: "VoiceOver hint on I already use Nifty Outfit Nook")
     }
 
+    /// The hint in Release builds, which have no sample closet (Phase 20a).
+    static var alreadyUsingEmptyHint: String {
+        String(
+            localized: "Skips the setup and opens your room.", bundle: .module,
+            comment: "VoiceOver hint on I already use Nifty Outfit Nook, in a build with no sample closet")
+    }
+
     static var deleted: String {
         String(
             localized: "Your data is deleted. The app is starting fresh.", bundle: .module,

@@ -27,7 +27,7 @@ scripts/build.sh Release    # Release build
 scripts/test.sh             # package tests, snapshot tests and UI tests on an iPhone simulator
 scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # or any xcodebuild test selection
 NOOK_TEST_PLAN=UITests scripts/test.sh -only-testing:NiftyOutfitNookUITests/HomeTests  # UI tests only, without building the package tests
-scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code or debug flags in the app
+scripts/check-release.sh    # after a Release build: no catalog, snapshot-testing code, sample data or debug flags in the app
 scripts/check-package-pins.sh  # the two Package.resolved files agree
 scripts/format.sh           # swift-format lint (fails on any finding), then check-strings.py and check-ui-taps.sh
 scripts/check-strings.py    # fails on a String Catalog key no Swift file uses any more
@@ -73,7 +73,7 @@ Lily's builds go out through TestFlight as internal-only builds with sample data
 
 ## Sample data
 
-Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch, and (since the Stage A audit) the name on her sign and her Style Me settings (Preferences, Avoid repeating outfits for, Track laundry). See `docs/onboarding.md`. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
+Debug builds run on sample data, in memory. Since Phase 20a, Release builds have none: the sample sets and the `-fixtures` argument are compiled only in Debug, Release starts on an empty closet (onboarding has no closet step there), and `scripts/check-release.sh` checks it. Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch, and (since the Stage A audit) the name on her sign and her Style Me settings (Preferences, Avoid repeating outfits for, Track laundry). See `docs/onboarding.md`. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
 - a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail`, `photo-fails` or `picture-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
@@ -85,7 +85,7 @@ Stage A runs on sample data only, in memory: whatever she adds or changes is gon
 
 For example `-fixtures demo:weather=snow:laundry=full` or `-fixtures demo:wardrobe=full`.
 
-The photos are real-looking sample images (AI-generated, no real people) bundled in `Packages/NookKit/Sources/Fixtures/Resources/SampleWardrobe`: a photo and a cutout for every demo piece except the old gray leggings, the 30 extras, the try-on photo and six try-on previews. They go through the same path real photos will (`Garment.photo`, `Garment.cutout`, `GarmentArtChoice`, the image loader), and the drawings stay as the fallback for a piece with no photo. The large set uses the same photos by kind and colour. The folder adds about 12.7 MB to the app while Release still ships the fixtures (until Phase 20a). Its README says where the images came from and how `scripts/build-sample-wardrobe.swift` rebuilds them. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, no draft and the main closet.
+The photos are real-looking sample images (AI-generated, no real people) bundled in `Packages/NookKit/Sources/Fixtures/Resources/SampleWardrobe`: a photo and a cutout for every demo piece except the old gray leggings, the 30 extras, the try-on photo and six try-on previews. They go through the same path real photos will (`Garment.photo`, `Garment.cutout`, `GarmentArtChoice`, the image loader), and the drawings stay as the fallback for a piece with no photo. The large set uses the same photos by kind and colour. The folder adds about 12.7 MB to the app. Release builds still carry it, unused, because SwiftPM copies a package's resources in every configuration (see `docs/decisions/0003-persistence-spike.md`). Its README says where the images came from and how `scripts/build-sample-wardrobe.swift` rebuilds them. Missing or unknown values fall back to `demo`, `normal`, the set's own weather (rain) and laundry, no draft and the main closet.
 
 The models, the store protocols and the fixture sets are described in `docs/models.md`.
 
@@ -105,6 +105,7 @@ Packages/NookKit/            Almost all of the code.
   Sources/Features/          Screens and view models, one folder per feature.
     Resources/               Localizable.xcstrings, the String Catalog for user-facing text.
   Tests/                     One Swift Testing target per module.
+    PersistenceSpikeTests/   Phase 20a's persistence spike: SwiftData, migrations, files, export and sync. Never shipped.
 Configs/                     Build settings as xcconfig files.
   Base.xcconfig              Shared settings (iOS 26.0, Swift 6, strict concurrency).
   Debug.xcconfig             Debug configuration, Dev environment.
@@ -121,7 +122,7 @@ scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-r
 art/                         Sources for the room drawings (room/) and the app icon (app-icon/).
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
-docs/decisions/              Technical decision notes.
+docs/decisions/              Technical decision notes. 0003 is the Phase 20a persistence spike.
 docs/models.md               The models, rules, store protocols and fixture sets.
 docs/home-room.md            The Home room, its layouts and states.
 docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
