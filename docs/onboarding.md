@@ -125,7 +125,7 @@ Nothing loads but the onboarding state, which is local and quick, so the root sh
 3. **The sample closet loads without the name "Lily"** after onboarding, so the sign shows what she typed this session and Hello after a relaunch.
 4. **Four steps after the welcome.** The mockup's note says the welcome is the only step; the PRD asks for a name, the privacy explanation and optional fit, and Jose's brief for the starting closet. Every step but the privacy one can be skipped, and I already use skips them all.
 5. **No measurements in onboarding**, only usual fit.
-6. **I already use Nifty Outfit Nook is kept** from the mockup. In Stage A there's nothing to bring back, so it opens the sample closet without asking anything.
+6. **I already use Nifty Outfit Nook is kept** from the mockup. In Stage A there's nothing to bring back, so it opens the sample closet without asking anything. From Phase 21b it offers **Get my closet from iCloud** and **Restore from a backup file** (`docs/decisions/0004-backup-and-recovery.md`, New phone and lost phone).
 7. **No Welcome tour.** The mockup has one; it would point at the only two buttons on a screen that already explains them, and its first card says "Hello, Lily" before she has typed a name.
 8. **Delete my data goes to the welcome**, not to an empty Home, so she can choose a starting closet again.
 9. **The welcome's sky is a warm evening in dark**, two new tokens.

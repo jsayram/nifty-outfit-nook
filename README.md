@@ -122,7 +122,7 @@ scripts/                     build.sh, test.sh, format.sh, simulator.sh, check-r
 art/                         Sources for the room drawings (room/) and the app icon (app-icon/).
 .githooks/                   The gitleaks pre-commit hook.
 .github/                     CI workflow, Dependabot, CODEOWNERS and the PR template.
-docs/decisions/              Technical decision notes. 0003 is the Phase 20a persistence spike.
+docs/decisions/              Technical decision notes. 0003 is the Phase 20a persistence spike, 0004 the backup and recovery design.
 docs/models.md               The models, rules, store protocols and fixture sets.
 docs/home-room.md            The Home room, its layouts and states.
 docs/closet.md               Closet browsing: search, filters, the grid and garment pictures.
