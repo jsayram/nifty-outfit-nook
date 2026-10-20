@@ -205,7 +205,7 @@ Performance, measured on an Apple-silicon Mac running the iOS 26.5 simulator in 
 
 ## Left out on purpose
 
-- **Persistence, revisions and sync.** Stage A keeps only the onboarding and tour flags across launches (Phase 17). The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork.
+- **Persistence, revisions and sync.** Stage A keeps only the onboarding and tour flags across launches (Phase 17). The PRD's revision numbers, deletion markers and sync conflicts arrive with real storage (Phases 20a to 21b). Adding them to in-memory fixtures now would be guesswork. Phase 20b's design (`docs/decisions/0004-backup-and-recovery.md`) keeps sync bookkeeping (change tags, the ancestor payload for three-way merges, the `CKSyncEngine` state) in the store beside the records, never in these value types, and exports and syncs the value types themselves as versioned JSON.
 - **Favourites and collections** (PRD §8.2) have no Stage A screen (RD-08), so no type yet.
 - **Find One, shopping and the fit check** (Phase 34). Wishlist pieces exist as an ownership state only.
 - **More than one colour.** Since 10a the request has one colour wish, preferred or required, with its place (PRD §8.3). Several colours at once, or explicit monochrome, can come later if Lily asks.
