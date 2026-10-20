@@ -169,16 +169,21 @@ struct MigrationTests {
         let before = try SpikeSQLite.manifest(of: location.storeURL, images: location.imagesDirectory)
         let coordinator = SpikeMigrationCoordinator(location: location)
         let images = SpikeImageFiles(directory: location.imagesDirectory)
-        let outcome = try SpikeCheckpoint.$handler.withValue({ name in
-            if name == "journal.migrating" { try images.delete(SpikeImageFiles.fileName(forPhoto: "photo-g-00000")) }
-        }) { try coordinator.open() }
+        let outcome = try SpikeCheckpoint.$handler.withValue(
+            { name in
+                if name == "journal.migrating" {
+                    try images.delete(SpikeImageFiles.fileName(forPhoto: "photo-g-00000"))
+                }
+            }, operation: { try coordinator.open() })
         guard case .recovery(.verificationFailed(let problems)) = outcome else {
             Issue.record("Expected a failed verification")
             return
         }
         #expect(problems == ["g-00000 image hash differs"])
         #expect(try coordinator.storedVersion() == .v1)
-        #expect(try SpikeSQLite.manifest(of: location.storeURL, images: location.imagesDirectory).garmentIDs == before.garmentIDs)
+        #expect(
+            try SpikeSQLite.manifest(of: location.storeURL, images: location.imagesDirectory).garmentIDs
+                == before.garmentIDs)
     }
 
     /// A migration that crashes on every launch stops after three tries, on the snapshot.
@@ -220,9 +225,10 @@ struct MigrationTests {
     /// Runs `body`, stopping it at `checkpoint` as if the process died there. True if it stopped.
     static func run(killedAt checkpoint: String, _ body: () throws -> Void) -> Bool {
         do {
-            try SpikeCheckpoint.$handler.withValue({ name in
-                if name == checkpoint { throw SimulatedKill(checkpoint: name) }
-            }) { try body() }
+            try SpikeCheckpoint.$handler.withValue(
+                { name in
+                    if name == checkpoint { throw SimulatedKill(checkpoint: name) }
+                }, operation: { try body() })
             return false
         } catch {
             return true

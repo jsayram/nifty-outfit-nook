@@ -56,7 +56,8 @@ enum SpikeMergeRules {
             merged[keyPath: path] = kept
             conflicts.append(
                 SpikeConflict(
-                    recordName: name, field: key, kept: describe(kept), competing: describe(kept == mine ? theirs : mine)))
+                    recordName: name, field: key, kept: describe(kept),
+                    competing: describe(kept == mine ? theirs : mine)))
         }
 
         field("name", \.name)

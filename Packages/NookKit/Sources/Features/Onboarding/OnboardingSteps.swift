@@ -112,8 +112,12 @@ struct OnboardingFitStep: View {
     let model: OnboardingModel
 
     var body: some View {
+        // Without the closet step (Release, Phase 20a) this is the last step, so it finishes.
+        let isLast = model.steps.last == .fit
         OnboardingPage(
-            step: .fit, primaryTitle: OnboardingText.next,
+            step: .fit, primaryTitle: isLast ? OnboardingText.finish : OnboardingText.next,
+            primaryImage: isLast ? "house" : "arrow.right", isWorking: isLast && model.isFinishing,
+            problem: isLast && model.didFail ? OnboardingText.failed : nil,
             actions: OnboardingPageActions(
                 onContinue: { Task { await model.advance(from: .fit) } },
                 onSkip: { Task { await model.skip(.fit) } })

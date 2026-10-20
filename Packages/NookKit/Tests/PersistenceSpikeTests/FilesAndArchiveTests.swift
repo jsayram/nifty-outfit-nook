@@ -16,14 +16,17 @@ struct FilesAndArchiveTests {
         let photo = SpikeSampleImages.jpeg(seed: 99, byteCount: 4_000)
 
         await #expect(throws: SimulatedKill.self) {
-            try await SpikeCheckpoint.$handler.withValue({ name in
-                if name == checkpoint { throw SimulatedKill(checkpoint: name) }
-            }) {
-                try await library.addPhoto(photo, photoID: "new", to: "g-00001")
-            }
+            try await SpikeCheckpoint.$handler.withValue(
+                { name in
+                    if name == checkpoint { throw SimulatedKill(checkpoint: name) }
+                },
+                operation: {
+                    try await library.addPhoto(photo, photoID: "new", to: "g-00001")
+                })
         }
         // The next launch.
-        let relaunched = SpikePhotoLibrary(modelContainer: try SpikeMigrationCoordinator(location: location).container())
+        let relaunched = SpikePhotoLibrary(
+            modelContainer: try SpikeMigrationCoordinator(location: location).container())
         let report = try await relaunched.reconcile()
         let state = try await relaunched.photoState(of: "g-00001")
         if checkpoint == "photo.fileWritten" {
@@ -42,11 +45,13 @@ struct FilesAndArchiveTests {
         defer { location.remove() }
         let library = SpikePhotoLibrary(modelContainer: try SpikeSeed.makeCurrentStore(at: location, counts: .small))
         await #expect(throws: SimulatedKill.self) {
-            try await SpikeCheckpoint.$handler.withValue({ name in
-                if name == "photo.recordRemoved" { throw SimulatedKill(checkpoint: name) }
-            }) {
-                try await library.removePhoto(from: "g-00000")
-            }
+            try await SpikeCheckpoint.$handler.withValue(
+                { name in
+                    if name == "photo.recordRemoved" { throw SimulatedKill(checkpoint: name) }
+                },
+                operation: {
+                    try await library.removePhoto(from: "g-00000")
+                })
         }
         let report = try await library.reconcile()
         #expect(report.orphanFilesRemoved == ["photo-g-00000.jpg"])
@@ -73,7 +78,7 @@ struct FilesAndArchiveTests {
         let source = try SpikeStoreLocation.temporary("export")
         let archive = try SpikeStoreLocation.temporary("archive")
         let wiped = try SpikeStoreLocation.temporary("wiped")
-        defer { [source, archive, wiped].forEach { $0.remove() } }
+        defer { for location in [source, archive, wiped] { location.remove() } }
         _ = try SpikeSeed.makeCurrentStore(at: source, counts: MigrationTests.counts)
         let exported = try SpikeArchive.export(from: source, to: archive.directory)
         #expect(exported.schemaVersion == 3)
@@ -97,7 +102,7 @@ struct FilesAndArchiveTests {
         let source = try SpikeStoreLocation.temporary("old-export")
         let archive = try SpikeStoreLocation.temporary("old-archive")
         let wiped = try SpikeStoreLocation.temporary("old-wiped")
-        defer { [source, archive, wiped].forEach { $0.remove() } }
+        defer { for location in [source, archive, wiped] { location.remove() } }
         try SpikeSeed.makeV1Store(at: source, counts: .small, imageBytes: 4_000)
         let exported = try SpikeArchive.export(from: source, to: archive.directory)
         #expect(exported.schemaVersion == 1)
@@ -115,7 +120,7 @@ struct FilesAndArchiveTests {
         let source = try SpikeStoreLocation.temporary("bad-export")
         let archive = try SpikeStoreLocation.temporary("bad-archive")
         let wiped = try SpikeStoreLocation.temporary("bad-wiped")
-        defer { [source, archive, wiped].forEach { $0.remove() } }
+        defer { for location in [source, archive, wiped] { location.remove() } }
         _ = try SpikeSeed.makeCurrentStore(at: source, counts: .small)
         _ = try SpikeArchive.export(from: source, to: archive.directory)
         let archived = SpikeImageFiles(directory: archive.directory.appending(path: "Images"))

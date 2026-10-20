@@ -11,15 +11,17 @@ public enum FixtureSet: String, CaseIterable, Sendable {
     /// A generated closet with more than 2,000 garments, many looks and suitcases.
     case large
 
-    /// The launch argument that names a fixture set.
-    public static let launchArgument = "-fixtures"
+    #if DEBUG
+        /// The launch argument that names a fixture set.
+        public static let launchArgument = "-fixtures"
 
-    /// Reads the set from `-fixtures <name>[:<option>]...` in the launch arguments.
-    ///
-    /// A missing flag, a missing value or an unknown name all give `.demo`.
-    public init(launchArguments: [String]) {
-        self = FixtureConfiguration(launchArguments: launchArguments).set
-    }
+        /// Reads the set from `-fixtures <name>[:<option>]...` in the launch arguments.
+        ///
+        /// A missing flag, a missing value or an unknown name all give `.demo`.
+        public init(launchArguments: [String]) {
+            self = FixtureConfiguration(launchArguments: launchArguments).set
+        }
+    #endif
 }
 
 /// How the fixture services behave, for loading, error and offline states.
@@ -171,34 +173,37 @@ public struct FixtureConfiguration: Hashable, Sendable {
         self.source = source
     }
 
-    /// Unknown or missing parts fall back to `demo`, `normal`, the set's own weather and laundry,
-    /// and no draft.
-    public init(launchArguments: [String]) {
-        guard
-            let flagIndex = launchArguments.firstIndex(of: FixtureSet.launchArgument),
-            launchArguments.indices.contains(flagIndex + 1)
-        else {
-            self.init()
-            return
-        }
-        let parts = launchArguments[flagIndex + 1].split(separator: ":").map(String.init)
-        self.init(set: parts.first.flatMap(FixtureSet.init(rawValue:)) ?? .demo)
-        for option in parts.dropFirst() {
-            if let behavior = FixtureBehavior(rawValue: option) {
-                self.behavior = behavior
-                continue
+    /// Debug builds only: Release ships no sample data and no `-fixtures` argument (Phase 20a).
+    #if DEBUG
+        /// Unknown or missing parts fall back to `demo`, `normal`, the set's own weather and laundry,
+        /// and no draft.
+        public init(launchArguments: [String]) {
+            guard
+                let flagIndex = launchArguments.firstIndex(of: FixtureSet.launchArgument),
+                launchArguments.indices.contains(flagIndex + 1)
+            else {
+                self.init()
+                return
             }
-            let pair = option.split(separator: "=", maxSplits: 1).map(String.init)
-            guard pair.count == 2 else { continue }
-            switch pair[0] {
-            case "weather": weather = FixtureWeatherState(rawValue: pair[1]) ?? weather
-            case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
-            case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
-            case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
-            case "wardrobe": wardrobe = FixtureWardrobeState(rawValue: pair[1]) ?? wardrobe
-            case "source": source = FixtureSourceState(rawValue: pair[1]) ?? source
-            default: continue
+            let parts = launchArguments[flagIndex + 1].split(separator: ":").map(String.init)
+            self.init(set: parts.first.flatMap(FixtureSet.init(rawValue:)) ?? .demo)
+            for option in parts.dropFirst() {
+                if let behavior = FixtureBehavior(rawValue: option) {
+                    self.behavior = behavior
+                    continue
+                }
+                let pair = option.split(separator: "=", maxSplits: 1).map(String.init)
+                guard pair.count == 2 else { continue }
+                switch pair[0] {
+                case "weather": weather = FixtureWeatherState(rawValue: pair[1]) ?? weather
+                case "laundry": laundry = FixtureLaundryState(rawValue: pair[1]) ?? laundry
+                case "draft": draft = FixtureDraftState(rawValue: pair[1]) ?? draft
+                case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
+                case "wardrobe": wardrobe = FixtureWardrobeState(rawValue: pair[1]) ?? wardrobe
+                case "source": source = FixtureSourceState(rawValue: pair[1]) ?? source
+                default: continue
+                }
             }
         }
-    }
+    #endif
 }

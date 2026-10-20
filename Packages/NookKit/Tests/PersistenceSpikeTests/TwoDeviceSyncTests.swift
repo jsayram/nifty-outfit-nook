@@ -55,8 +55,10 @@ struct TwoDeviceSyncTests {
 
         /// Both devices and the server hold the same pieces.
         func expectConverged() async throws {
-            let one = try await first.garments()
-            let two = try await second.garments()
+            // Sorted here: SwiftData sorts strings with a localized, number-aware comparison
+            // ("70fb" before "561b"), not in code-point order.
+            let one = try await first.garments().sorted { $0.id < $1.id }
+            let two = try await second.garments().sorted { $0.id < $1.id }
             let server = try await zone.garments()
             #expect(one == two)
             #expect(one == server)
@@ -64,7 +66,7 @@ struct TwoDeviceSyncTests {
         }
 
         func remove() {
-            locations.forEach { $0.remove() }
+            for location in locations { location.remove() }
         }
     }
 
@@ -203,11 +205,13 @@ struct TwoDeviceSyncTests {
 
         let tokenBefore = try await pair.second.state().token
         await #expect(throws: SimulatedKill.self) {
-            try await SpikeCheckpoint.$handler.withValue({ name in
-                if name == "sync.beforeStateUpdate" { throw SimulatedKill(checkpoint: name) }
-            }) {
-                try await pair.second.fetchChanges(from: pair.zone)
-            }
+            try await SpikeCheckpoint.$handler.withValue(
+                { name in
+                    if name == "sync.beforeStateUpdate" { throw SimulatedKill(checkpoint: name) }
+                },
+                operation: {
+                    try await pair.second.fetchChanges(from: pair.zone)
+                })
         }
         // The records were saved, but the state wasn't: it's behind, never ahead.
         #expect(try await pair.second.state().token == tokenBefore)

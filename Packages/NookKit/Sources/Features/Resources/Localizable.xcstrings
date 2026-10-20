@@ -5201,6 +5201,9 @@
         }
       }
     },
+    "Skips the setup and opens your room." : {
+      "comment" : "VoiceOver hint on I already use Nifty Outfit Nook, in a build with no sample closet"
+    },
     "Skips the setup and opens your room with the sample closet." : {
       "comment" : "VoiceOver hint on I already use Nifty Outfit Nook"
     },

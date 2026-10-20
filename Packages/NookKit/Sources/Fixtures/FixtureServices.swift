@@ -78,9 +78,11 @@ public enum FixtureServices {
         if unnamed {
             data.profile.signName = ""
         }
-        if photos == .samples {
-            data.garments = SamplePhotoGarments.garments(now: now) + data.garments
-        }
+        #if DEBUG
+            if photos == .samples {
+                data.garments = SamplePhotoGarments.garments(now: now) + data.garments
+            }
+        #endif
         if let laundry {
             data = data.applying(laundry: laundry)
         }
@@ -114,8 +116,13 @@ public enum FixtureServices {
             case .stylistWaits: .seconds(3600)
             default: .zero
             }
-        let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
-        let lookDraft = draft == .look ? FixtureDrafts.lookDraft(in: data, now: now) : nil
+        #if DEBUG
+            let drafts = draft.flatMap { FixtureDrafts.draft($0, in: data, now: now) }.map { [$0] } ?? []
+            let lookDraft = draft == .look ? FixtureDrafts.lookDraft(in: data, now: now) : nil
+        #else
+            let drafts: [GarmentDraft] = []
+            let lookDraft: LookDraft? = nil
+        #endif
 
         let profile = profileStore(data.profile, settings: profileSettings, options: stores)
 
@@ -149,12 +156,17 @@ public enum FixtureServices {
     }
 
     /// Garment pictures: the sample wardrobe's, plus the drawn sample photos for `samples`, or none.
+    /// Release builds have no sample photos (Phase 20a), so every piece shows its drawing.
     private static func imageProvider(for photos: FixturePhotoState) -> any ImageProvider {
-        switch photos {
-        case .real: SampleWardrobeProvider()
-        case .samples: SampleWardrobeProvider(drawnSamples: true)
-        case .drawn: PlaceholderImageProvider()
-        }
+        #if DEBUG
+            switch photos {
+            case .real: SampleWardrobeProvider()
+            case .samples: SampleWardrobeProvider(drawnSamples: true)
+            case .drawn: PlaceholderImageProvider()
+            }
+        #else
+            PlaceholderImageProvider()
+        #endif
     }
 
     private static func profileStore(

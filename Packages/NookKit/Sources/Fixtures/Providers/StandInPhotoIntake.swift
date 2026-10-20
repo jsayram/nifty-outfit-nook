@@ -9,7 +9,13 @@ public struct StandInPhotoIntake: PhotoIntake {
     /// The example photo every source returns: the navy striped tee from the sample wardrobe,
     /// so a piece added in the demo shows a real photo like the rest of the closet. It has no
     /// cutout, so it shows in a tile.
-    public static let samplePhoto = SampleWardrobe.photo("x-striped-tee")
+    /// Release builds have no sample photos (Phase 20a), so there the stand-in gives no photo and
+    /// the piece shows its drawing.
+    #if DEBUG
+        public static let samplePhoto = SampleWardrobe.photo("x-striped-tee")
+    #else
+        public static let samplePhoto = PhotoReference.noPhoto
+    #endif
 
     public var fails: Bool
     public var latency: Duration

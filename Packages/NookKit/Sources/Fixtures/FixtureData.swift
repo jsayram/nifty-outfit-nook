@@ -35,12 +35,18 @@ public struct FixtureData: Sendable {
 
 extension FixtureSet {
     /// The records for this set.
+    ///
+    /// Release builds ship no sample data (Phase 20a): every set is the empty one there.
     public func data(now: Date, calendar: Calendar) -> FixtureData {
-        switch self {
-        case .demo: DemoCloset.make(now: now, calendar: calendar)
-        case .empty: EmptyCloset.make(now: now)
-        case .large: LargeCloset.make(now: now, calendar: calendar)
-        }
+        #if DEBUG
+            switch self {
+            case .demo: DemoCloset.make(now: now, calendar: calendar)
+            case .empty: EmptyCloset.make(now: now)
+            case .large: LargeCloset.make(now: now, calendar: calendar)
+            }
+        #else
+            EmptyCloset.make(now: now)
+        #endif
     }
 }
 
@@ -117,16 +123,20 @@ extension FixtureData {
     func applying(wardrobe state: FixtureWardrobeState, to set: FixtureSet, now: Date, calendar: Calendar)
         -> FixtureData
     {
-        guard state == .full, set == .demo else { return self }
-        var data = self
-        let day = { (offset: Int) in calendar.day(offset, from: now) }
-        data.garments += SampleWardrobe.extraGarments(day: day)
-        let looks = SampleWardrobe.previewLooks(full: true, day: day).filter { look in
-            !self.looks.contains { $0.id == look.id }
-        }
-        data.looks += looks
-        data.pictures += SampleWardrobe.previewPictures(looks: looks, day: day)
-        return data
+        #if DEBUG
+            guard state == .full, set == .demo else { return self }
+            var data = self
+            let day = { (offset: Int) in calendar.day(offset, from: now) }
+            data.garments += SampleWardrobe.extraGarments(day: day)
+            let looks = SampleWardrobe.previewLooks(full: true, day: day).filter { look in
+                !self.looks.contains { $0.id == look.id }
+            }
+            data.looks += looks
+            data.pictures += SampleWardrobe.previewPictures(looks: looks, day: day)
+            return data
+        #else
+            return self
+        #endif
     }
 }
 

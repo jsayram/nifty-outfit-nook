@@ -20,6 +20,9 @@ nonisolated public struct AppLaunch: Sendable {
     public var onboardingOptions: OnboardingLaunchOptions
     /// The debug `-tour` flag. Release builds pass `standard`.
     public var tourOptions: TourLaunchOptions
+    /// Whether onboarding offers the sample closet. Release builds ship no sample data
+    /// (Phase 20a), so they pass false and onboarding starts on an empty closet.
+    public var offersSampleCloset: Bool
 
     public init(
         onboarding: any OnboardingStateStore,
@@ -27,7 +30,8 @@ nonisolated public struct AppLaunch: Sendable {
         profileSettings: (any ProfileSettingsKeeper)? = nil,
         services: @escaping @Sendable (StartingCloset?) -> NookServices,
         onboardingOptions: OnboardingLaunchOptions = .standard,
-        tourOptions: TourLaunchOptions = .standard
+        tourOptions: TourLaunchOptions = .standard,
+        offersSampleCloset: Bool = true
     ) {
         self.onboarding = onboarding
         self.tours = tours
@@ -35,6 +39,7 @@ nonisolated public struct AppLaunch: Sendable {
         self.services = services
         self.onboardingOptions = onboardingOptions
         self.tourOptions = tourOptions
+        self.offersSampleCloset = offersSampleCloset
     }
 }
 
@@ -74,6 +79,9 @@ final class AppRootModel {
         self.launch = launch
     }
 
+    /// Whether onboarding offers the sample closet (false in Release, Phase 20a).
+    var offersSampleCloset: Bool { launch.offersSampleCloset }
+
     var screen: Screen {
         switch phase {
         case .loading: .loading
@@ -97,7 +105,7 @@ final class AppRootModel {
             break
         }
         if let state = try? await launch.onboarding.state(), state.isCompleted {
-            open(launch.services(state.startingCloset ?? .sample))
+            open(launch.services(state.startingCloset ?? (offersSampleCloset ? .sample : .empty)))
         } else {
             generation += 1
             phase = .onboarding(notice: nil)

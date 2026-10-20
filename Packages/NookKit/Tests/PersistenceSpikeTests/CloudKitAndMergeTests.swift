@@ -70,7 +70,8 @@ struct CloudKitAndMergeTests {
             let result = SpikeMergeRules.merge(ancestor: ancestor, local: local, server: server)
             #expect(result.garment.name == "Theirs")
             #expect(
-                result.conflicts == [SpikeConflict(recordName: "g-1", field: "name", kept: "Theirs", competing: "Mine")])
+                result.conflicts == [SpikeConflict(recordName: "g-1", field: "name", kept: "Theirs", competing: "Mine")]
+            )
         case .deletedBeatsRestore:
             ancestor.deletedAt = SpikeSeed.epoch
             local.deletedAt = nil

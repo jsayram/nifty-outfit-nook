@@ -46,15 +46,19 @@ enum SpikeKill {
 
             case "open":
                 let killAt = arguments.count > 3 ? arguments[3] : nil
-                let outcome = try SpikeCheckpoint.$handler.withValue({ name in
-                    say("checkpoint \(name)")
-                    if name == killAt { kill(getpid(), SIGKILL) }
-                }) {
-                    try SpikeMigrationCoordinator(location: location).open()
-                }
+                let outcome = try SpikeCheckpoint.$handler.withValue(
+                    { name in
+                        say("checkpoint \(name)")
+                        if name == killAt { kill(getpid(), SIGKILL) }
+                    },
+                    operation: {
+                        try SpikeMigrationCoordinator(location: location).open()
+                    })
                 switch outcome {
                 case .ready(_, let report):
-                    say("ready resumedAfter=\(report.resumedAfter.map(\.rawValue) ?? "-") restored=\(report.snapshotRestored)")
+                    say(
+                        "ready resumedAfter=\(report.resumedAfter.map(\.rawValue) ?? "-") restored=\(report.snapshotRestored)"
+                    )
                 case .recovery(let reason):
                     say("recovery \(reason)")
                     exit(3)
@@ -65,16 +69,21 @@ enum SpikeKill {
                 // the checkpoint if given; then, run again without one, report what's there.
                 let killAt = arguments.count > 3 ? arguments[3] : nil
                 let coordinator = SpikeMigrationCoordinator(location: location)
-                let container = try SpikeCheckpoint.$handler.withValue({ name in
-                    if name == killAt { kill(getpid(), SIGKILL) }
-                }) {
-                    try coordinator.container()
-                }
+                let container = try SpikeCheckpoint.$handler.withValue(
+                    { name in
+                        if name == killAt { kill(getpid(), SIGKILL) }
+                    },
+                    operation: {
+                        try coordinator.container()
+                    })
                 let images = try ModelContext(container).fetchCount(FetchDescriptor<SpikeSchemaV3.ImageAssetRecord>())
-                say("raw version=\(try coordinator.storedVersion().map { "\($0.rawValue)" } ?? "unknown") images=\(images)")
+                say(
+                    "raw version=\(try coordinator.storedVersion().map { "\($0.rawValue)" } ?? "unknown") images=\(images)"
+                )
 
             case "verify":
-                let manifest = try JSONDecoder().decode(SpikeManifest.self, from: Data(contentsOf: URL(filePath: arguments[3])))
+                let manifest = try JSONDecoder().decode(
+                    SpikeManifest.self, from: Data(contentsOf: URL(filePath: arguments[3])))
                 let coordinator = SpikeMigrationCoordinator(location: location)
                 guard try coordinator.storedVersion() == .current else {
                     say("FAIL store is not at the current version")

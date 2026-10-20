@@ -40,7 +40,6 @@ struct OnboardingModelTests {
     @Test func stepNumbersAndSkips() {
         #expect(OnboardingStep.allCases.map(\.number) == [1, 2, 3, 4])
         #expect(OnboardingStep.allCases.filter(\.isOptional) == [.name, .fit])
-        #expect(OnboardingStep.closet.next == nil)
         #expect(OnboardingText.step(2, of: 4) == "Step 2 of 4")
     }
 
@@ -115,6 +114,28 @@ struct OnboardingModelTests {
         await model.advance(from: .closet)
         #expect(!model.didFail)
         #expect(finished.answers.count == 2)
+    }
+
+    /// Release builds have no sample closet (Phase 20a): three steps, the fit step finishes, and
+    /// she starts with an empty closet, also from "I already use".
+    @Test func withoutTheSampleClosetThereAreThreeStepsAndAnEmptyCloset() async {
+        let finished = Finished()
+        let model = OnboardingModel(offersSampleCloset: false) { answers in
+            finished.answers.append(answers)
+            return true
+        }
+        #expect(model.steps == [.name, .privacy, .fit])
+        #expect(model.startingCloset == .empty)
+        model.start()
+        await model.advance(from: .name)
+        await model.advance(from: .privacy)
+        #expect(model.path == [.name, .privacy, .fit])
+        await model.advance(from: .fit)
+        #expect(model.path == [.name, .privacy, .fit])
+        #expect(finished.answers == [OnboardingAnswers(startingCloset: .empty)])
+        await model.skipSetup()
+        #expect(finished.answers.last == OnboardingAnswers(startingCloset: .empty))
+        #expect(self.model(Finished()).steps == OnboardingStep.allCases)
     }
 
     @Test func alreadyUsingGoesStraightToHome() async {

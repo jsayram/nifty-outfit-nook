@@ -33,7 +33,7 @@ public struct AppRootView: View {
             Color.nook.background
                 .ignoresSafeArea()
         case .onboarding(let notice):
-            OnboardingFlow(notice: notice) { await model.finish($0) }
+            OnboardingFlow(notice: notice, offersSampleCloset: model.offersSampleCloset) { await model.finish($0) }
                 .id(model.generation)
                 .transition(.opacity)
         case .ready(let services):

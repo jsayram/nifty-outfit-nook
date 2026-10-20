@@ -170,7 +170,8 @@ actor SwiftDataClosetStore: ClosetStore {
 
     func purgeExpired(asOf date: Date) async throws(StoreError) -> [Garment.ID] {
         try storeCall {
-            let deleted = try modelContext.fetch(FetchDescriptor<GarmentRecord>(predicate: #Predicate { $0.deletedAt != nil }))
+            let deleted = try modelContext.fetch(
+                FetchDescriptor<GarmentRecord>(predicate: #Predicate { $0.deletedAt != nil }))
             let expired = deleted.filter { record in
                 record.deletedAt.map { $0.addingTimeInterval(Garment.recentlyDeletedDays * 86_400) <= date } ?? false
             }
@@ -179,6 +180,11 @@ actor SwiftDataClosetStore: ClosetStore {
             try modelContext.save()
             return ids
         }
+    }
+
+    /// Whether this actor's work runs on the main thread. Spike only.
+    func runsOnTheMainThread() -> Bool {
+        pthread_main_np() != 0
     }
 
     /// Inserts many garments in one save. Spike only, to build the large store quickly.
@@ -238,7 +244,9 @@ actor SwiftDataLookStore: LookStore {
     func looks() async throws(StoreError) -> [Look] {
         try storeCall {
             try modelContext.fetch(
-                FetchDescriptor<LookRecord>(sortBy: [SortDescriptor(\.createdAt, order: .reverse), SortDescriptor(\.lookID)])
+                FetchDescriptor<LookRecord>(sortBy: [
+                    SortDescriptor(\.createdAt, order: .reverse), SortDescriptor(\.lookID),
+                ])
             )
             .map { try JSONDecoder().decode(Look.self, from: $0.payload) }
         }
@@ -408,7 +416,8 @@ actor SwiftDataSuitcaseStore: SuitcaseStore {
             record.payload = payload
         } else {
             modelContext.insert(
-                SuitcaseRecord(suitcaseID: suitcase.id.rawValue, name: suitcase.name, garmentIDs: pieces, payload: payload))
+                SuitcaseRecord(
+                    suitcaseID: suitcase.id.rawValue, name: suitcase.name, garmentIDs: pieces, payload: payload))
         }
     }
 

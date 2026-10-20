@@ -165,37 +165,41 @@ struct SpikeMigrationCoordinator: Sendable {
     private func migrate(from version: SpikeStoreVersion, report: SpikeOpenReport) throws -> SpikeOpenOutcome {
         var report = report
         report.migratedFrom = version
-        var journal = try readJournal()
-        if journal?.step != .snapshotTaken {
+        var resumed = try readJournal()
+        if resumed?.step != .snapshotTaken {
             let needed = try storeSize() * 2 + 20_000_000
             let available = availableSpace?() ?? volumeSpace()
             guard available >= needed else { return .recovery(.notEnoughSpace(needed: needed, available: available)) }
 
-            journal = SpikeMigrationJournal(
+            var fresh = SpikeMigrationJournal(
                 from: version.rawValue, to: SpikeStoreVersion.current.rawValue, step: .snapshotting, attempts: 0)
-            try writeJournal(journal!)
+            try writeJournal(fresh)
             try SpikeCheckpoint.hit("journal.snapshotting")
             try takeSnapshot()
             try SpikeCheckpoint.hit("snapshot.copied")
-            journal!.manifest = try SpikeSQLite.manifest(of: location.snapshotURL, images: location.imagesDirectory)
-            journal!.step = .snapshotTaken
-            try writeJournal(journal!)
+            fresh.manifest = try SpikeSQLite.manifest(of: location.snapshotURL, images: location.imagesDirectory)
+            fresh.step = .snapshotTaken
+            try writeJournal(fresh)
             try SpikeCheckpoint.hit("journal.snapshotTaken")
+            resumed = fresh
         }
-        guard var journal, let manifest = journal.manifest else { return .recovery(.migrationKeepsFailing) }
+        guard var journal = resumed, let manifest = journal.manifest else {
+            return .recovery(.migrationKeepsFailing)
+        }
 
         journal.step = .migrating
         try writeJournal(journal)
         try SpikeCheckpoint.hit("journal.migrating")
-        var migrated: ModelContainer? = try container()
+        let migrated = try container()
         try SpikeCheckpoint.hit("migration.finished")
         journal.step = .migrated
         try writeJournal(journal)
         try SpikeCheckpoint.hit("journal.migrated")
 
-        let problems = try Self.verify(migrated!, against: manifest)
+        let problems = try Self.verify(migrated, against: manifest)
         guard problems.isEmpty else {
-            migrated = nil
+            // The container is released when this returns. Core Data's store replacement copes
+            // with a store that's still open in this process.
             try restoreSnapshot()
             return .recovery(.verificationFailed(problems))
         }
@@ -204,7 +208,7 @@ struct SpikeMigrationCoordinator: Sendable {
         journal.verifiedAt = now()
         try writeJournal(journal)
         try SpikeCheckpoint.hit("journal.verified")
-        return .ready(migrated!, report)
+        return .ready(migrated, report)
     }
 
     /// Everything that differs between a migrated store and the manifest taken before it.
@@ -270,7 +274,8 @@ struct SpikeMigrationCoordinator: Sendable {
 
     private func writeJournal(_ journal: SpikeMigrationJournal) throws {
         #if os(iOS)
-            try JSONEncoder().encode(journal).write(to: location.journalURL, options: [.atomic, .completeFileProtection])
+            try JSONEncoder().encode(journal).write(
+                to: location.journalURL, options: [.atomic, .completeFileProtection])
         #else
             try JSONEncoder().encode(journal).write(to: location.journalURL, options: [.atomic])
         #endif
@@ -320,7 +325,8 @@ enum SpikeSQLite {
         return SpikeManifest(
             garmentIDs: garments.compactMap { $0[0] }.sorted(),
             lookIDs: try rows(in: storeURL, "SELECT ZLOOKID FROM ZLOOKRECORD").compactMap { $0[0] }.sorted(),
-            suitcaseIDs: try rows(in: storeURL, "SELECT ZSUITCASEID FROM ZSUITCASERECORD").compactMap { $0[0] }.sorted(),
+            suitcaseIDs: try rows(in: storeURL, "SELECT ZSUITCASEID FROM ZSUITCASERECORD").compactMap { $0[0] }
+                .sorted(),
             photoHashes: hashes)
     }
 

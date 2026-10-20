@@ -22,7 +22,8 @@ actor SpikePhotoLibrary {
 
     private var images: SpikeImageFiles {
         SpikeImageFiles(
-            directory: SpikeStoreLocation.imagesDirectory(forStore: modelContainer.configurations.first?.url ?? .temporaryDirectory))
+            directory: SpikeStoreLocation.imagesDirectory(
+                forStore: modelContainer.configurations.first?.url ?? .temporaryDirectory))
     }
 
     /// Gives a garment a new original photo, replacing any old one.
