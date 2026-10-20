@@ -293,6 +293,13 @@ jobs:
             # ui-test-products is the UI test plan's build, all-test-products the full plan's.
             if [[ "$PRODUCTS" == "ui-test-products" ]]; then export NOOK_TEST_PLAN=UITests; fi
             NOOK_BUILD_ONLY=1 scripts/test.sh
+            # build-for-testing writes an .xctestrun for each of the scheme's test plans, and the test
+            # steps expect exactly one. Keep this plan's.
+            if [[ "$PRODUCTS" == "ui-test-products" ]]; then
+              rm -f build/DerivedData/Build/Products/NiftyOutfitNook_NiftyOutfitNook_*.xctestrun
+            else
+              rm -f build/DerivedData/Build/Products/NiftyOutfitNook_UITests_*.xctestrun
+            fi
             echo "PRODUCTS_DIR=build/DerivedData/Build/Products" >> "$GITHUB_ENV"
           fi
       - name: Test (${{ matrix.part }})
