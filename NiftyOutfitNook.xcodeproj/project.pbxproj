@@ -11,6 +11,7 @@
 		4E4F4F4B0000000000000018 /* Fixtures in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000016 /* Fixtures */; };
 		4E4F4F4B000000000000002D /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B000000000000002C /* DesignSystem */; };
 		4E4F4F4B000000000000002F /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B000000000000002E /* Services */; };
+		4E4F4F4B0000000000000031 /* SampleWardrobe in Resources */ = {isa = PBXBuildFile; fileRef = 4E4F4F4B0000000000000030 /* SampleWardrobe */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		4E4F4F4B0000000000000020 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B0000000000000021 /* Signing.local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Signing.local.xcconfig.example; sourceTree = "<group>"; };
 		4E4F4F4B000000000000002B /* NookKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = NookKit; path = Packages/NookKit; sourceTree = "<group>"; };
+		4E4F4F4B0000000000000030 /* SampleWardrobe */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SampleWardrobe; path = Packages/NookKit/Tests/NookTestSupport/SampleWardrobe; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +81,7 @@
 				4E4F4F4B0000000000000006 /* NiftyOutfitNook */,
 				4E4F4F4B0000000000000007 /* NiftyOutfitNookUITests */,
 				4E4F4F4B000000000000002B /* NookKit */,
+				4E4F4F4B0000000000000030 /* SampleWardrobe */,
 				4E4F4F4B0000000000000004 /* Configs */,
 				4E4F4F4B0000000000000003 /* Products */,
 			);
@@ -213,6 +216,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E4F4F4B0000000000000031 /* SampleWardrobe in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -42,13 +42,11 @@ let package = Package(
             swiftSettings: uiSettings
         ),
         .target(name: "Models", swiftSettings: strictSettings),
-        // The sample wardrobe's photos ship in the target (Resources/SampleWardrobe, copied as they
-        // are). Phase 20a takes the fixtures out of Release.
-        .target(
-            name: "Fixtures", dependencies: ["Models"],
-            resources: [.copy("Resources/SampleWardrobe")],
-            swiftSettings: strictSettings
-        ),
+        // The sample wardrobe's code. Its photos are not a resource of this target, because SwiftPM
+        // copies a package's resources into every configuration, Release included. They live once in
+        // Tests/NookTestSupport/SampleWardrobe: the package tests get them from that target, and the
+        // app copies the same folder into Debug builds only (Configs/Release.xcconfig excludes it).
+        .target(name: "Fixtures", dependencies: ["Models"], swiftSettings: strictSettings),
         // Real services built on Apple frameworks only (decision 0001, item 4). Phase 8a adds
         // on-device subject lifting with Vision.
         .target(name: "Services", dependencies: ["Models"], swiftSettings: strictSettings),
@@ -59,10 +57,12 @@ let package = Package(
             swiftSettings: uiSettings
         ),
         // Test-only helpers every test target shares: the fixed test time, the speed checks and the
-        // store contracts that every store, in-memory or real, has to pass. Only test targets
-        // depend on it, so none of it reaches the app.
+        // store contracts that every store, in-memory or real, has to pass, and the sample
+        // wardrobe's photos (the single copy in the repo). Only test targets depend on it, so none
+        // of it reaches the app.
         .target(
             name: "NookTestSupport", dependencies: ["Models"], path: "Tests/NookTestSupport",
+            resources: [.copy("SampleWardrobe")],
             swiftSettings: strictSettings
         ),
         .testTarget(

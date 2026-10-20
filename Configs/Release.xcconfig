@@ -9,3 +9,8 @@ SWIFT_OPTIMIZATION_LEVEL = -O
 SWIFT_COMPILATION_MODE = wholemodule
 VALIDATE_PRODUCT = YES
 MTL_ENABLE_DEBUG_INFO = NO
+
+// The sample wardrobe's photos are for Debug builds, tests and the demo. A Release, TestFlight or
+// App Store build never carries them: the app target's Resources phase lists the folder, and this
+// leaves it out. scripts/check-release.sh fails if any sample photo is in the built app.
+EXCLUDED_SOURCE_FILE_NAMES = SampleWardrobe

@@ -138,7 +138,7 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 
 ## Sample previews
 
-The fixtures carry six AI-generated pictures of the sample woman wearing a look (`Fixtures/Resources/SampleWardrobe/tryon`, no real person). They are `.generated` pictures with a `PhotoReference.sample`, shown through the image loader.
+The fixtures carry six AI-generated pictures of the sample woman wearing a look (`Tests/NookTestSupport/SampleWardrobe/tryon`, no real person). They are `.generated` pictures with a `PhotoReference.sample`, shown through the image loader.
 
 - `TryOnPictureView` draws the photo whole on the backdrop (the previews are 9:16, the frame stays 4:5) with the Simulated badge. Until the photo has loaded, or if the provider has none, it draws the look's bundle as for any simulated picture. A still image uses only a photo that is already cached.
 - The demo set has four of the looks and previews (office, casual, date night, weekend), so the Pictures tab has seven pictures. `wardrobe=full` adds the sundress and cool-weather looks, which use pieces only the full wardrobe has (a straw bag, black jeans, ankle boots).

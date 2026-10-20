@@ -1,12 +1,12 @@
 #!/usr/bin/env swift
-// Builds the bundled sample wardrobe images (Fixtures/Resources/SampleWardrobe) from the folder of
+// Builds the bundled sample wardrobe images (Tests/NookTestSupport/SampleWardrobe) from the folder of
 // generated originals, and measures each cutout's quality signals into manifest.json.
 //
 //   swift scripts/build-sample-wardrobe.swift <originals folder>
 //
 // The originals folder holds nook_b1 and nook_b2 (garment photos), nook_b2_cutouts (transparent
 // PNGs), nook_b3 (person-c.jpg) and nook_b4_tryon (look-*.jpg). The images are AI-generated test
-// data; see Fixtures/Resources/SampleWardrobe/README.md. Run it again only when the originals
+// data; see Tests/NookTestSupport/SampleWardrobe/README.md. Run it again only when the originals
 // change: it rewrites every file in photos/, cutouts/, people/ and tryon/.
 //
 // - Photos: JPEG, 1024 px on the long side at most, quality 0.65.
@@ -28,7 +28,7 @@ guard CommandLine.arguments.count == 2 else {
 }
 let source = URL(fileURLWithPath: CommandLine.arguments[1])
 let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-    .appendingPathComponent("Packages/NookKit/Sources/Fixtures/Resources/SampleWardrobe")
+    .appendingPathComponent("Packages/NookKit/Tests/NookTestSupport/SampleWardrobe")
 let fileManager = FileManager.default
 
 func load(_ url: URL) -> CGImage {
