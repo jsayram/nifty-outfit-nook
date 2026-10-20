@@ -18,7 +18,11 @@ struct StillAdaptiveGrid: Layout {
     /// Items at the top of their cells instead of centred.
     var alignsTop = false
 
+    /// The columns for a width. A width that isn't a finite number (a stack asking how wide the
+    /// grid could be, with an infinite proposal) gets one column at the minimum width: turning
+    /// it into a column count would trap (Phase 21a, seen on CI).
     private func columns(for width: CGFloat) -> (count: Int, width: CGFloat) {
+        guard width.isFinite, width > 0 else { return (1, minimum) }
         let count = max(1, Int(((width + spacing) / (minimum + spacing)).rounded(.down)))
         return (count, (width - CGFloat(count - 1) * spacing) / CGFloat(count))
     }
@@ -32,7 +36,7 @@ struct StillAdaptiveGrid: Layout {
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? minimum
+        let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? minimum
         let heights = rowHeights(subviews, columns: columns(for: width))
         let height = heights.reduce(0, +) + CGFloat(max(0, heights.count - 1)) * rowSpacing
         return CGSize(width: width, height: height)
