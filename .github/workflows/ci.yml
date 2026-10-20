@@ -178,17 +178,18 @@ jobs:
   # own time again plus a few minutes for xcodebuild to collect the failure's logs.
   # A test job spends 6 to 7 minutes outside its tests (waiting for the build, downloading it,
   # booting the simulator), and build-and-archive about 13 (two builds, the archive, then a cold
-  # boot while the others boot too). So the three iPhone parts below get about 1000 to 1050
+  # boot while the others boot too). So the three iPhone parts below get about 930 to 1150
   # seconds of tests each, which is 23 to 25 minutes a job, and build-and-archive keeps about
   # 500. The free plan runs five macOS jobs at once, so more parts would only queue.
   #   (build-and-archive)     CatalogTests 274, ProfileTests 175, CutoutBenchTests 57
   #   ui-home-and-settings    AccessibilityAuditTests 479, SettingsTests 276, HomeTests 132,
   #                           StyleMeTests 119
   #   ui-add-and-tours        AccessibilityAuditLargeTextTests 464, AddPieceTests 237,
-  #                           ScreenToursTests 230, OnboardingTests 76, MakeYourOwnLookTests 49
+  #                           ScreenToursTests 230
   #   ui-rest                 SavedLooksTests 192, HomeTourTests 178, SuitcasesAndLaundryTests 121,
   #                           YourLooksTests 111, LaunchTests 110, GarmentDetailTests 101,
-  #                           HomeVariantTests 91, SwapTests 64, ClosetTests 58, and any new class
+  #                           HomeVariantTests 91, OnboardingTests 76, SwapTests 64, ClosetTests 58,
+  #                           MakeYourOwnLookTests 49, and any new class
   #   ui-ipad                 IPadTests 174, IPadKeyboardTests 118, IPadStyleMeAndSavedTests 98,
   #                           package tests about 90 to 360
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
@@ -222,8 +223,6 @@ jobs:
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
               -only-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -only-testing:NiftyOutfitNookUITests/OnboardingTests
-              -only-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
           # Every other UI test class, so a new one is never left out.
           - part: ui-rest
@@ -240,8 +239,6 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/StyleMeTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
               -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -skip-testing:NiftyOutfitNookUITests/OnboardingTests
-              -skip-testing:NiftyOutfitNookUITests/MakeYourOwnLookTests
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
