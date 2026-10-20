@@ -6,10 +6,10 @@
 # debug-only launch arguments (-catalog, -cutout-bench, Phase 16a's -tour, Phase 17's -onboarding,
 # -toasts-stay and -animations, and Phase 20a's -fixtures) aren't in it.
 #
-# The sample photos themselves still ship: SwiftPM copies the Fixtures resource bundle in every
-# configuration, and the build-script sandbox stops a script removing it (Phase 20a, see
-# docs/decisions/0003-persistence-spike.md). Nothing in Release reads them; this script says how big
-# the bundle is so it isn't forgotten.
+# It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
+# or test-support resource bundle, or any file with the name of one of the repo's sample photos
+# (Packages/NookKit/Tests/NookTestSupport/SampleWardrobe, the one copy). The photos are for Debug
+# builds and tests only, and Configs/Release.xcconfig leaves them out of Release.
 # Run after scripts/build.sh Release. scripts/check-archive.sh runs it on an archive's app
 # binary instead: scripts/check-release.sh <path to the app's executable>.
 set -euo pipefail
@@ -45,11 +45,30 @@ if [[ -d "$(dirname "$binary")/Frameworks" ]] && ls "$(dirname "$binary")/Framew
     failed=1
 fi
 
+# Sample photos: look at the built app itself, not at the build settings that should keep them out.
+app="$(dirname "$binary")"
+photos="Packages/NookKit/Tests/NookTestSupport/SampleWardrobe"
+if [[ ! -d "$photos" ]]; then
+    echo "The sample photos aren't at $photos, so this check can't tell if they shipped." >&2
+    exit 1
+fi
+found="$(find "$app" \( -name SampleWardrobe -o -name NookKit_Fixtures.bundle -o -name NookKit_NookTestSupport.bundle \) 2>/dev/null)"
+if [[ -n "$found" ]]; then
+    echo "Release app contains sample photo folders or bundles:" >&2
+    echo "$found" >&2
+    failed=1
+fi
+# The same photos under another folder name still count: compare file names (not the README or
+# manifest, whose names are too common to mean anything).
+sample_names="$(find "$photos" -type f \( -name '*.jpg' -o -name '*.jp2' \) -exec basename {} \; | sort -u)"
+app_names="$(find "$app" -type f -exec basename {} \; | sort -u)"
+copies="$(comm -12 <(echo "$sample_names") <(echo "$app_names"))"
+if [[ -n "$copies" ]]; then
+    echo "Release app contains $(echo "$copies" | wc -l | tr -d " ") file(s) named like sample photos, for example $(echo "$copies" | head -1)" >&2
+    failed=1
+fi
+
 if [[ $failed -ne 0 ]]; then
     exit 1
 fi
-echo "Release binary has no catalog, benchmark, snapshot-testing code or sample data code"
-samples="$(dirname "$binary")/NookKit_Fixtures.bundle/SampleWardrobe"
-if [[ -d "$samples" ]]; then
-    echo "Note: the unused sample photos still ship ($(du -sh "$samples" | cut -f1 | tr -d " ")), see docs/decisions/0003-persistence-spike.md"
-fi
+echo "Release app has no catalog, benchmark, snapshot-testing code, sample data code or sample photos"
