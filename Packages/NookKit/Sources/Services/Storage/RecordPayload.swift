@@ -44,3 +44,19 @@ struct StoredTours: Codable, Equatable, Sendable {
 struct StoredDefaultsImport: Codable, Equatable, Sendable {
     var importedAt: Date
 }
+
+/// A piece deleted for good (Phase 21b). The key is the piece's ID. No content: PRD 15.2's
+/// deletion markers, which an export carries and a restore obeys.
+struct StoredDeletion: Codable, Equatable, Sendable {
+    var deletedAt: Date
+}
+
+/// The copy's version of a record that Add what's missing found different (Phase 21b). The key
+/// is `kind/key`. Kept until she reviews it (conflicts to review come with sync).
+struct StoredConflict: Codable, Equatable, Sendable {
+    var kind: String
+    var key: String
+    var payloadVersion: Int
+    var payload: Data
+    var foundAt: Date
+}

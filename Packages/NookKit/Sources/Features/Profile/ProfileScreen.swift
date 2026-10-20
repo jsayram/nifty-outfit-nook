@@ -11,10 +11,17 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     case help
     case feedback
     case privacy
+    /// Export a copy and Restore (Phase 21b). Only where there's a store to back up.
+    case backups
     case deleteData
 
     /// The Help and privacy group, in order.
     static let helpAndPrivacy: [ProfileDestination] = [.accessibility, .help, .feedback, .privacy, .deleteData]
+
+    /// The group with Backups before Delete my data, when her closet is in the store.
+    static func helpAndPrivacy(showsBackups: Bool) -> [ProfileDestination] {
+        showsBackups ? [.accessibility, .help, .feedback, .privacy, .backups, .deleteData] : helpAndPrivacy
+    }
 
     var id: Self { self }
 
@@ -25,6 +32,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: ProfileText.helpRow
         case .feedback: ProfileText.feedbackRow
         case .privacy: ProfileText.privacyRow
+        case .backups: BackupsText.title
         case .deleteData: ProfileText.deleteDataRow
         }
     }
@@ -36,6 +44,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
         case .privacy: "hand.raised"
+        case .backups: "externaldrive"
         case .deleteData: "trash"
         }
     }
@@ -48,6 +57,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: "help"
         case .feedback: "feedback"
         case .privacy: "privacy"
+        case .backups: "backups"
         case .deleteData: "deleteData"
         }
     }
@@ -113,6 +123,7 @@ struct ProfileScreen: View {
     var body: some View {
         ProfilePage(
             model: model,
+            showsBackups: services.backups != nil,
             actions: ProfileActions(
                 retry: { Task { await model.load(from: services, locale: locale) } },
                 editName: { sheet = .name },
@@ -140,6 +151,7 @@ struct ProfileScreen: View {
             case .help: HelpScreen()
             case .feedback: FeedbackScreen()
             case .privacy: PrivacyScreen()
+            case .backups: BackupsScreen()
             case .deleteData: DeleteDataScreen()
             }
         }

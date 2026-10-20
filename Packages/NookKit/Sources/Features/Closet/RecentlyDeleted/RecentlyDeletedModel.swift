@@ -6,8 +6,9 @@ import Observation
 /// with Restore, and since Phase 21a Delete now, which deletes one for good after showing what
 /// goes with it (`PermanentDeletion`).
 ///
-/// Loading first removes any piece whose 30 days are up (`purgeExpired`), as the PRD asks when
-/// the app next runs, so the list never shows a piece past its deadline.
+/// Loading first removes any piece whose 30 days are up, with the try-on pictures that show it
+/// (`PermanentDeletion.purgeExpired`), as the PRD asks when the app next runs, so the list never
+/// shows a piece past its deadline.
 @Observable
 final class RecentlyDeletedModel {
     enum Phase: Equatable {
@@ -33,7 +34,7 @@ final class RecentlyDeletedModel {
         let load = loads.begin()
         if pieces.isEmpty { phase = .loading }
         do {
-            _ = try await services.closet.purgeExpired(asOf: now)
+            try await PermanentDeletion.purgeExpired(asOf: now, in: services)
             let garments = try await services.closet.garments()
             guard loads.isCurrent(load) else { return }
             show(garments, now: now)

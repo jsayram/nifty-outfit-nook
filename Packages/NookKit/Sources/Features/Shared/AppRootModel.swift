@@ -33,6 +33,13 @@ nonisolated public struct AppLaunch: Sendable {
     /// settings: her data in the store, as on a fresh install (Phase 21a). The tours have their
     /// own flag.
     public var erasedOnReset: [any ErasableStore]
+    /// Restore from a backup file on onboarding's welcome (Phase 21b). `nil` hides it.
+    public var backups: (any BackupService)?
+    /// Export a copy on the recovery screen, when the store couldn't be opened (Phase 21b).
+    public var storeCopy: (any StoreCopyExporter)?
+    /// Called after a restore or Undo restore, before the screens are built again: the app gives
+    /// `services` fresh stores, since the old ones remember what the store held before.
+    public var reload: @Sendable () -> Void
 
     public init(
         onboarding: any OnboardingStateStore,
@@ -44,7 +51,10 @@ nonisolated public struct AppLaunch: Sendable {
         offersSampleCloset: Bool = true,
         storeProblem: StoreOpenProblem? = nil,
         prepare: @escaping @Sendable () async -> Void = {},
-        erasedOnReset: [any ErasableStore] = []
+        erasedOnReset: [any ErasableStore] = [],
+        backups: (any BackupService)? = nil,
+        storeCopy: (any StoreCopyExporter)? = nil,
+        reload: @escaping @Sendable () -> Void = {}
     ) {
         self.onboarding = onboarding
         self.tours = tours
@@ -56,6 +66,9 @@ nonisolated public struct AppLaunch: Sendable {
         self.storeProblem = storeProblem
         self.prepare = prepare
         self.erasedOnReset = erasedOnReset
+        self.backups = backups
+        self.storeCopy = storeCopy
+        self.reload = reload
     }
 }
 
@@ -166,6 +179,19 @@ final class AppRootModel {
         }
         open(services)
         return true
+    }
+
+    /// Restore from a backup file on the welcome. `nil` in builds and launches without backups.
+    var backups: (any BackupService)? { launch.backups }
+
+    /// Export a copy on the recovery screen.
+    var storeCopy: (any StoreCopyExporter)? { launch.storeCopy }
+
+    /// A restore or Undo restore finished: every screen is built again on fresh stores, on her
+    /// own closet, where the restore finished onboarding.
+    func restored() {
+        launch.reload()
+        open(launch.services(.empty))
     }
 
     /// Delete my data finished: back to the welcome, as on a fresh install, with a note.

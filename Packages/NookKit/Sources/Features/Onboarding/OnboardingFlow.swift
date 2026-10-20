@@ -14,13 +14,17 @@ struct OnboardingFlow: View {
 
     @State private var model: OnboardingModel
     @State private var toast: NookToastMessage?
+    /// Restore from a backup file (Phase 21b), when the app has backups.
+    @State private var backups: BackupsModel?
+    @Environment(\.backupRestored) private var backupRestored
 
     init(
-        notice: String?, offersSampleCloset: Bool = true,
+        notice: String?, offersSampleCloset: Bool = true, backups: (any BackupService)? = nil,
         finish: @escaping @MainActor (OnboardingAnswers) async -> Bool
     ) {
         self.notice = notice
         _model = State(initialValue: OnboardingModel(offersSampleCloset: offersSampleCloset, finish: finish))
+        _backups = State(initialValue: backups.map { BackupsModel(service: $0) })
     }
 
     var body: some View {
@@ -30,7 +34,8 @@ struct OnboardingFlow: View {
                 alreadyUsing: { Task { await model.skipSetup() } },
                 isWorking: model.isFinishing,
                 problem: model.didFail ? OnboardingText.failed : nil,
-                offersSampleCloset: model.offersSampleCloset
+                offersSampleCloset: model.offersSampleCloset,
+                restore: backups.map { backups in { backups.pick(for: .restore) } }
             )
             .toolbar(.hidden, for: .navigationBar)
             .navigationTitle(OnboardingText.welcomeTitle)
@@ -47,6 +52,7 @@ struct OnboardingFlow: View {
                     }
             }
         }
+        .modifier(OnboardingRestore(model: backups, restored: backupRestored))
         .environment(\.onboardingStepCount, model.steps.count)
         .tint(.nook.accent)
         .nookToast($toast)
@@ -54,6 +60,35 @@ struct OnboardingFlow: View {
             if let notice {
                 toast = NookToastMessage(notice, systemImage: "checkmark")
             }
+        }
+    }
+}
+
+/// Restore from a backup file on the welcome (Phase 21b, 0004 section 8): the Files picker, then
+/// the restore sheet. When the restore is done, the root opens Home on the restored closet.
+private struct OnboardingRestore: ViewModifier {
+    let model: BackupsModel?
+    let restored: BackupRestoredAction
+
+    func body(content: Content) -> some View {
+        if let model {
+            @Bindable var model = model
+            content
+                .fileImporter(isPresented: $model.isPicking, allowedContentTypes: [.nookBackup]) { result in
+                    model.picked(try? result.get())
+                }
+                .nookSheet(
+                    item: $model.flow, title: { BackupFlowSheet.title($0) }, detents: [.large],
+                    onDismiss: {
+                        Task {
+                            let reload = model.needsReload
+                            await model.closed()
+                            if reload { restored() }
+                        }
+                    }, content: { flow in BackupFlowSheet(model: model, flow: flow) }
+                )
+        } else {
+            content
         }
     }
 }

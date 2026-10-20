@@ -69,6 +69,7 @@ let package = Package(
             name: "DesignSystemTests",
             dependencies: [
                 "DesignSystem",
+                "NookTestSupport",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
             exclude: ["__Snapshots__"],
@@ -79,9 +80,10 @@ let package = Package(
             name: "FixturesTests", dependencies: ["Fixtures", "Models", "NookTestSupport"],
             swiftSettings: strictSettings
         ),
+        // Backup/Fixtures holds an export from every shipped backup format version (Phase 21b).
         .testTarget(
             name: "ServicesTests", dependencies: ["Services", "Models", "Fixtures", "NookTestSupport"],
-            swiftSettings: strictSettings),
+            resources: [.copy("Backup/Fixtures")], swiftSettings: strictSettings),
         // Phase 20a persistence spike: SwiftData, migrations, recovery and sync, tested here and
         // never shipped (docs/decisions/0003-persistence-spike.md). KillHarness builds the files
         // in Spike/ as a macOS tool that kills itself mid-migration.

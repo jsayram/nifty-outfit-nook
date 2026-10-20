@@ -82,6 +82,12 @@ public enum RecordKind: String, CaseIterable, Sendable {
     case tours
     /// That the Stage A `UserDefaults` suite was moved in. One record, no content.
     case defaultsImport
+    /// A piece deleted for good (Phase 21b): its ID and when, no content. A restore never brings
+    /// it back (PRD 11.7, 15.2).
+    case deletion
+    /// A record that differed in a copy restored with Add what's missing (Phase 21b): the copy's
+    /// version, kept for review while this iPhone's stays in place.
+    case restoreConflict
 
     /// The key of a kind that has one record.
     public static let singleKey = "only"

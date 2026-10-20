@@ -273,12 +273,46 @@ struct RecentlyDeletedModelTests {
         #expect(message.contains("Your unsaved changes to it go too."))
         #expect(message.contains("Saved looks that use it keep their other pieces: Office navy."))
         #expect(message.contains("It comes out of Weekend."))
-        #expect(message.contains("Try-on pictures with it in stay until you delete them."))
+        #expect(message.contains("Try-on pictures with it in are deleted too."))
 
         let bare = RecentlyDeletedText.confirmMessage(
             PermanentDeletionPreview(
                 piece: Garment(id: "g2", name: "Socks", category: .accessory, addedAt: TestTime.now)))
         #expect(bare == "Its details are deleted from this iPhone. This can’t be undone.")
+    }
+
+    /// Jose's decision (20 October 2026): the try-on pictures that show a piece go when it's
+    /// deleted for good, by Delete now or by the 30-day purge. Pictures of other looks stay.
+    @Test func deletingForGoodTakesThePicturesThatShowIt() async throws {
+        let services = garmentTestServices()
+        let looks = try await services.looks.looks()
+        let withTrousers = try #require(looks.first { $0.garmentIDs.contains("g-navy-trousers") })
+        let withLeggings = Look(
+            id: "l-leggings", pieces: [LookPiece(id: "lp-leggings", content: .garment("g-gray-leggings"))],
+            isSaved: false, createdAt: TestTime.now)
+        let without = try #require(
+            looks.first { !$0.garmentIDs.contains("g-navy-trousers") && !$0.garmentIDs.contains("g-gray-leggings") })
+        for (id, look) in [("t-trousers", withTrousers), ("t-leggings", withLeggings), ("t-other", without)] {
+            try await services.pictures.save(
+                TryOnPicture(id: TryOnPicture.ID(id), of: look, image: .simulated, createdAt: TestTime.now))
+        }
+
+        // Delete now.
+        try await services.closet.delete("g-navy-trousers", at: TestTime.now)
+        let model = RecentlyDeletedModel()
+        await model.load(from: services, now: TestTime.now)
+        try await model.askToDeletePermanently("g-navy-trousers", in: services)
+        let preview = try #require(model.confirming)
+        #expect(preview.pictureCount >= 1)
+        _ = try await model.deletePermanently(preview, in: services)
+        var ids = Set(try await services.pictures.pictures().map(\.id))
+        #expect(!ids.contains("t-trousers") && ids.contains("t-other"))
+
+        // The 30-day purge: g-gray-leggings has been in Recently deleted since the demo began.
+        await model.load(from: services, now: TestTime.day(40))
+        await #expect(throws: StoreError.notFound) { try await services.closet.garment("g-gray-leggings") }
+        ids = Set(try await services.pictures.pictures().map(\.id))
+        #expect(!ids.contains("t-leggings") && ids.contains("t-other"))
     }
 
     @Test func aFailedDeleteNowKeepsThePiece() async throws {

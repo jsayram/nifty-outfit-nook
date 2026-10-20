@@ -1,12 +1,12 @@
 import Foundation
 
-// "Delete permanently now" in Recently deleted (PRD §7.4, Phase 21a).
+// "Delete permanently now" in Recently deleted (PRD §7.4, Phase 21a), and the 30-day purge.
 //
-// She sees what goes before she confirms: the piece with its photo and details, and an unsaved
-// Edit of it. Saved looks that use it keep the rest of the look and say a piece was deleted for
-// good, as they do after the 30-day purge. Suitcases skip it. Try-on pictures stay until she
-// deletes them (PRD §7.5, §9.2.4, as everywhere in Stage A); the PRD's purge of generated images
-// that show the piece is a decision for Jose. Deletion markers for sync come with Phase 21b.
+// She sees what goes before she confirms: the piece with its photo and details, an unsaved Edit of
+// it, and the try-on pictures that show it. Saved looks that use it keep the rest of the look and
+// say a piece was deleted for good. Suitcases skip it. Since Phase 21b the try-on pictures that
+// show a piece go when the piece is deleted for good, as the PRD says (Jose, 20 October 2026), and
+// the piece leaves a content-free deletion marker, so a restore never brings either back.
 
 /// What deleting a piece for good takes with it, worked out before she confirms.
 public struct PermanentDeletionPreview: Hashable, Sendable {
@@ -17,7 +17,7 @@ public struct PermanentDeletionPreview: Hashable, Sendable {
     public var suitcases: [Suitcase]
     /// She started an Edit of it and didn't save it. The draft goes too.
     public var hasUnsavedEdit: Bool
-    /// Try-on pictures with it in. They stay.
+    /// Try-on pictures with it in. They're deleted with it.
     public var pictureCount: Int
 
     public init(
@@ -47,9 +47,14 @@ public enum PermanentDeletion {
                 .sorted { $0.createdAt != $1.createdAt ? $0.createdAt > $1.createdAt : $0.id < $1.id },
             suitcases: suitcases.filter { $0.garmentIDs.contains(piece.id) }.sorted { $0.name < $1.name },
             hasUnsavedEdit: drafts.contains { $0.target == .garment(piece.id) },
-            pictureCount: pictures.count { picture in
-                picture.captured.pieces.contains { $0.garmentID == piece.id }
-            })
+            pictureCount: showing([piece.id], in: pictures).count)
+    }
+
+    /// The try-on pictures that show any of these pieces.
+    public static func showing(_ ids: some Collection<Garment.ID>, in pictures: [TryOnPicture]) -> [TryOnPicture] {
+        let ids = Set(ids)
+        return pictures.filter { picture in picture.captured.pieces.contains { $0.garmentID.map(ids.contains) ?? false }
+        }
     }
 
     /// The preview for a piece in Recently deleted, read from the services' stores.
@@ -61,12 +66,33 @@ public enum PermanentDeletion {
             drafts: try await services.drafts.drafts(), pictures: try await services.pictures.pictures())
     }
 
-    /// Deletes the piece for good: its unsaved Edit first, then the piece itself, so a failure
-    /// part way leaves the piece in Recently deleted, where she can try again. Only a piece in
-    /// Recently deleted can go (`ClosetStore.deletePermanently`).
+    /// Deletes the piece for good: its unsaved Edit and the try-on pictures that show it first,
+    /// then the piece itself, so a failure part way leaves the piece in Recently deleted, where she
+    /// can try again. Only a piece in Recently deleted can go (`ClosetStore.deletePermanently`).
     public static func delete(_ id: Garment.ID, in services: NookServices) async throws(StoreError) {
         guard try await services.closet.garment(id).isDeleted else { throw .notFound }
         try await services.drafts.discard(.garment(id))
+        try await deletePictures(showing: [id], in: services)
         try await services.closet.deletePermanently(id)
+    }
+
+    /// The 30-day purge: the pictures that show each piece whose time is up go first, then the
+    /// pieces (`ClosetStore.purgeExpired`). If the pictures can't be deleted, nothing is purged
+    /// and the next try does both.
+    @discardableResult
+    public static func purgeExpired(asOf date: Date, in services: NookServices) async throws(StoreError)
+        -> [Garment.ID]
+    {
+        let expiring = try await services.closet.garments().filter { $0.purgeDate.map { $0 <= date } ?? false }
+        if !expiring.isEmpty {
+            try await deletePictures(showing: expiring.map(\.id), in: services)
+        }
+        return try await services.closet.purgeExpired(asOf: date)
+    }
+
+    private static func deletePictures(showing ids: [Garment.ID], in services: NookServices) async throws(StoreError) {
+        for picture in showing(ids, in: try await services.pictures.pictures()) {
+            try await services.pictures.delete(picture.id)
+        }
     }
 }

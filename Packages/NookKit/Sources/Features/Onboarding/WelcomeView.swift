@@ -25,6 +25,8 @@ struct WelcomeView: View {
     var problem: String?
     /// False in Release, which ships no sample closet (Phase 20a).
     var offersSampleCloset = true
+    /// Restore from a backup file (Phase 21b), on a new iPhone. `nil` hides it.
+    var restore: (() -> Void)?
 
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -117,6 +119,11 @@ struct WelcomeView: View {
                 )
                 .accessibilityIdentifier("welcome.alreadyUsing")
                 .disabled(isWorking)
+            if let restore {
+                NookButton(BackupsText.restoreFromFile, kind: .text, fillsWidth: true, action: restore)
+                    .accessibilityIdentifier("welcome.restore")
+                    .disabled(isWorking)
+            }
             if let problem {
                 FieldProblemNote(message: problem)
             }
