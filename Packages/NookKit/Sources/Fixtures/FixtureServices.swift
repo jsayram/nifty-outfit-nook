@@ -15,12 +15,19 @@ public enum FixtureServices {
     ///     start fresh.
     ///   - profileSettings: where the name on the sign and the Style Me settings are kept across
     ///     launches (Stage A audit). `nil` keeps the whole profile in memory.
+    ///   - feedbackDrafts: where the unsent Send feedback note is kept. `nil` keeps it in memory.
+    ///   - stores: the real stores on the iPhone (Phase 21a). When given, her data lives there
+    ///     instead of in memory: the set's garments, looks, suitcases, pictures, profile and
+    ///     drafts aren't loaded, and the store options (`slow`, `stores-fail`) and `draft=` don't
+    ///     apply. The providers (stylist, weather, pictures, try-on) still follow the configuration.
     public static func make(
         _ configuration: FixtureConfiguration,
         startingCloset: StartingCloset? = nil,
         tours: (any TourProgressStore)? = nil,
         onboarding: (any OnboardingStateStore)? = nil,
         profileSettings: (any ProfileSettingsKeeper)? = nil,
+        feedbackDrafts: (any FeedbackDraftStore)? = nil,
+        stores: NookStoreSet? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -43,6 +50,8 @@ public enum FixtureServices {
             tours: tours,
             onboarding: onboarding,
             profileSettings: profileSettings,
+            feedbackDrafts: feedbackDrafts,
+            stores: stores,
             now: now,
             calendar: calendar
         )
@@ -56,7 +65,7 @@ public enum FixtureServices {
     /// remembered source. `unnamed` leaves the sign without a name, for a closet started from
     /// onboarding. `tours` and `onboarding` are the stores to use; `nil` gives fresh in-memory ones.
     /// `profileSettings` keeps the name on the sign and the Style Me settings; with `nil` the
-    /// whole profile is in memory.
+    /// whole profile is in memory. `feedbackDrafts` and `stores` are as above.
     public static func make(
         set: FixtureSet,
         behavior: FixtureBehavior = .normal,
@@ -70,6 +79,8 @@ public enum FixtureServices {
         tours: (any TourProgressStore)? = nil,
         onboarding: (any OnboardingStateStore)? = nil,
         profileSettings: (any ProfileSettingsKeeper)? = nil,
+        feedbackDrafts: (any FeedbackDraftStore)? = nil,
+        stores: NookStoreSet? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> NookServices {
@@ -92,7 +103,7 @@ public enum FixtureServices {
         // `unavailable` has no snapshot: the provider throws instead, so any snapshot will do.
         let snapshot = weather.flatMap { FixtureWeather.snapshot($0, at: now) } ?? data.weather
         let slow = behavior == .slow
-        let stores = StoreOptions(latency: slow ? .milliseconds(600) : .zero, fails: behavior == .storesFail)
+        let options = StoreOptions(latency: slow ? .milliseconds(600) : .zero, fails: behavior == .storesFail)
 
         let stylistMode: MockStylist.Mode
         switch behavior {
@@ -124,12 +135,23 @@ public enum FixtureServices {
             let lookDraft: LookDraft? = nil
         #endif
 
-        let profile = profileStore(data.profile, settings: profileSettings, options: stores)
+        let held =
+            stores
+            ?? NookStoreSet(
+                closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: options),
+                looks: InMemoryLookStore(looks: data.looks, calendar: calendar, options: options),
+                suitcases: InMemorySuitcaseStore(suitcases: data.suitcases, options: options),
+                profile: profileStore(data.profile, settings: profileSettings, options: options),
+                drafts: InMemoryDraftStore(drafts: drafts, options: options),
+                lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: options),
+                pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: options),
+                feedbackDrafts: feedbackDrafts ?? InMemoryFeedbackDraftStore(options: options))
+        let profile = held.profile
 
-        return NookServices(
-            closet: InMemoryClosetStore(garments: data.garments, calendar: calendar, options: stores),
-            looks: InMemoryLookStore(looks: data.looks, calendar: calendar, options: stores),
-            suitcases: InMemorySuitcaseStore(suitcases: data.suitcases, options: stores),
+        var services = NookServices(
+            closet: held.closet,
+            looks: held.looks,
+            suitcases: held.suitcases,
             profile: profile,
             stylist: MockStylist(mode: stylistMode, latency: stylistLatency),
             weather: FixtureWeatherProvider(
@@ -138,21 +160,25 @@ public enum FixtureServices {
                 latency: slow ? .seconds(1) : .zero
             ),
             images: imageProvider(for: photos),
-            drafts: InMemoryDraftStore(drafts: drafts, options: stores),
+            drafts: held.drafts,
             photos: StandInPhotoIntake(fails: behavior == .photoFails, latency: slow ? .seconds(1) : .zero),
             descriptions: WordMatchDescriptionReader(latency: slow ? .seconds(1) : .zero),
             cutouts: StandInCutoutService(latency: slow ? .seconds(1) : .zero),
-            lookDrafts: InMemoryLookDraftStore(draft: lookDraft, options: stores),
-            pictures: InMemoryTryOnPictureStore(pictures: data.pictures, options: stores),
+            lookDrafts: held.lookDrafts,
+            pictures: held.pictures,
             // A moment, so the making state shows; a real picture takes much longer (Phase 33).
             tryOn: SimulatedTryOn(
                 mode: tryOnMode, latency: slow ? .seconds(3) : .milliseconds(800), usesSamplePreviews: photos != .drawn,
                 hasTryOnPhoto: { (try? await profile.profile().tryOnPhoto) != nil }),
             // Every set starts as a fresh install: no tour seen, tips on (Phase 16a), unless the
             // app passes the stores it keeps across launches (Phase 17).
-            tours: tours ?? InMemoryTourProgressStore(options: stores),
-            onboarding: onboarding ?? InMemoryOnboardingStore(options: stores)
+            tours: tours ?? InMemoryTourProgressStore(options: options),
+            onboarding: onboarding ?? InMemoryOnboardingStore(options: options),
+            feedbackDrafts: held.feedbackDrafts
         )
+        // Sample data in memory comes back as it ships; the real stores keep her changes.
+        services.keepsChanges = stores != nil
+        return services
     }
 
     /// Garment pictures: the sample wardrobe's, plus the drawn sample photos for `samples`, or none.

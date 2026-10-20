@@ -1,4 +1,5 @@
 import DesignSystem
+import Models
 import SwiftUI
 
 /// Privacy and terms (RD-10, `privacy.html`): the bottom desk drawer, also on Profile.
@@ -12,11 +13,13 @@ import SwiftUI
 /// arrive with the features that need them (19b, 24a, 27a, 29, 31, 33). Export a copy waits for
 /// 20b/21b.
 struct PrivacyScreen: View {
+    @Environment(\.services) private var services
     @State private var showsDeleteData = false
     @State private var page: WebsiteLink?
 
     var body: some View {
         PrivacyPage(
+            keepsChanges: services.keepsChanges,
             deleteData: { showsDeleteData = true },
             open: { page = $0 }
         )
@@ -42,6 +45,9 @@ struct PrivacyScreen: View {
 
 /// Privacy and terms, top to bottom. Separate from `PrivacyScreen` so snapshot tests can draw it.
 struct PrivacyPage: View {
+    /// Whether her changes are kept when the app closes (`NookServices.keepsChanges`). The debug
+    /// sample closet, which snapshot tests show, comes back as it ships.
+    var keepsChanges = false
     var deleteData: () -> Void = {}
     var open: (WebsiteLink) -> Void = { _ in }
 
@@ -57,7 +63,7 @@ struct PrivacyPage: View {
                 ForEach(PrivacyText.stays, id: \.title) { item in
                     SettingsInfoRow(title: item.title, systemImage: item.systemImage)
                 }
-                SettingsNote(PrivacyText.staysNote)
+                SettingsNote(keepsChanges ? PrivacyText.staysNoteKept : PrivacyText.staysNote)
             }
 
             SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
@@ -153,6 +159,14 @@ nonisolated enum PrivacyText {
             localized:
                 "Fit and measurements and your try-on pictures are hidden when you switch apps. When this test build closes, it keeps the name on your sign, Preferences, Avoid repeating outfits for and Track laundry, that you’ve set it up, which closet you chose and which tips you’ve seen. Everything else goes back to how it started: the closet you chose comes back as it was, with its own fit details and try-on photo, and anything you changed in them is cleared.",
             bundle: .module, comment: "Privacy and terms: under what stays on the iPhone")
+    }
+
+    /// Since Phase 21a, for her own closet in the store on the iPhone.
+    static var staysNoteKept: String {
+        String(
+            localized:
+                "Fit and measurements and your try-on pictures are hidden when you switch apps. Everything you add or change is kept on this iPhone when the app closes, until you delete it. Delete my data removes all of it.",
+            bundle: .module, comment: "Privacy and terms: under what stays on the iPhone, when her data is kept")
     }
 
     static var laterHeader: String {

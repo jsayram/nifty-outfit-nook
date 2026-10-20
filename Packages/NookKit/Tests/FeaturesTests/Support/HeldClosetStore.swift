@@ -74,5 +74,7 @@ actor HeldClosetStore: ClosetStore {
         try await base.purgeExpired(asOf: date)
     }
 
+    func deletePermanently(_ id: Garment.ID) async throws(StoreError) { try await base.deletePermanently(id) }
+
     func eraseAll() async throws(StoreError) { try await base.eraseAll() }
 }

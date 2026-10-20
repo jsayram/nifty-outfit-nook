@@ -46,6 +46,7 @@ final class DeleteDataModel {
             counts.suitcases = try await services.suitcases.suitcases().count
             counts.drafts = try await services.drafts.drafts().count
             if try await services.lookDrafts.draft() != nil { counts.drafts += 1 }
+            if try await services.feedbackDrafts.draft() != nil { counts.drafts += 1 }
             guard loads.isCurrent(load) else { return }
             self.counts = counts
         } catch {

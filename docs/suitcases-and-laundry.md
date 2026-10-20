@@ -106,7 +106,7 @@ Cleaning only changes pieces still in her closet and still in the wash; the rest
 
 `Profile.remembered` holds the source and occasion she chose last (FR-67). Style Me starts from them; choosing a source or an occasion there, or tapping Style me, saves them. Other isn't remembered, since its words are for one request. Comfort, colour and weather still reset each time (RD-02.4). Home's suitcase shows the source and the calendar shows the occasion ("Occasion · Office"), on the room, the large-text rows and the sideways tiles. A suitcase chosen anywhere counts as used, so it joins the favourites.
 
-In Stage A the profile lives in memory, so "across launches" waits for real storage (Phase 21a). `-fixtures demo:source=suitcase` starts with her most recently used suitcase (Jose's house) as the source.
+Since Phase 21a they're kept across launches with the rest of the profile, in the real store (her own closet; the debug sample closet still comes back as it ships). `-fixtures demo:source=suitcase` starts the sample closet with her most recently used suitcase (Jose's house) as the source.
 
 ## States
 
@@ -151,4 +151,4 @@ Everything here is local, so offline doesn't apply.
 
 - **14b (done):** the Track laundry switch in Profile, including turning tracking off. The source stays the remembered one from Style Me rather than a separate Settings default.
 - **15b (done):** on iPad the wall runs the full width and the title, the hall and the rows keep to one readable column in the middle. The mockups' hall beside the list wasn't built; `docs/ipad.md` says why.
-- **21a:** the remembered source and occasion kept across launches.
+- **21a (done):** the remembered source and occasion kept across launches.

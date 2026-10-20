@@ -15,7 +15,7 @@ The Stage A audit (17 October 2026) added tours for the six screens that had non
 | `Models/Tours/TourProgress.swift` | `TourID`, `TourOutcome`, `TourRecord`, `TourProgress`, `TourRules` and the `TourProgressStore` protocol |
 | `Models/Tours/TourRun.swift` | One tour while it shows: the step, Next, Back, and the record when it ends |
 | `Fixtures/Stores/InMemoryTourProgressStore.swift` | The store in memory, for tests and previews |
-| `Services/AppState/AppStateDefaults.swift` | `DefaultsTourProgressStore`, the app's store since Phase 17: seen versions and the switch in `UserDefaults`, records in memory |
+| `Services/Storage/StoredSmallStores.swift` | `StoredTourProgressStore`, the app's store since Phase 21a: seen versions and the switch in the real store, records in memory. Phase 17's `DefaultsTourProgressStore` (`UserDefaults`) is now only read once, to move them in |
 | `DesignSystem/Components/Tour/` | `NookTourOverlay` (the dim, the spotlight, the tail and the card), `NookTourCard`, and `NookTourPlacement`, which decides where the card goes |
 | `Features/Tours/TourCenter.swift` | Runs the tours: starting, the buttons, anchors, recording |
 | `Features/Tours/TourAnchor.swift` | `.tourAnchor(_:label:hint:action:)`, `.tourFocusTarget(_:)` and `TourScrollReader` |
@@ -43,7 +43,7 @@ By itself, once a session, when tips are on and she hasn't seen this version (`T
 
 Home's starts the first time Home shows, after its model has loaded, and never over a pushed screen, a sheet or a toast. Each other screen's rules are in the table below. After Delete my data the app goes back to onboarding (Phase 17), and the tour starts when she reaches Home again, as on a fresh install: Delete my data erases the tour progress with the profile and turns tips back on.
 
-Since Phase 17 the versions seen and the switch are kept across launches, so a tour seen once doesn't come back after a relaunch (AC-103). Phase 21a moves them into the real preferences store.
+Since Phase 17 the versions seen and the switch are kept across launches, so a tour seen once doesn't come back after a relaunch (AC-103). Since Phase 21a they're in the real store.
 
 ## The tour on screen
 
@@ -216,7 +216,7 @@ App tours' short descriptions are new: the mockup lists only the tip count, and 
 
 16b noted that Lily's TestFlight build would show every tour again after each relaunch. Phase 17 splits `TourProgress`:
 
-- **`seenVersions`**, the latest content version seen of each tour, and **`showsTipsOnNewScreens`** are app state in the lowest tier of `closet/DATA_MAP.md`: they name only the app's own screens. `DefaultsTourProgressStore` keeps them in the app's `UserDefaults` suite (`docs/onboarding.md`). `TourRules.startsAutomatically` reads `seenVersions`, so a version seen in an earlier session counts.
+- **`seenVersions`**, the latest content version seen of each tour, and **`showsTipsOnNewScreens`** are app state in the lowest tier of `closet/DATA_MAP.md`: they name only the app's own screens. `StoredTourProgressStore` keeps them in the real store (Phase 17 to 21a: the app's `UserDefaults` suite, `docs/onboarding.md`). `TourRules.startsAutomatically` reads `seenVersions`, so a version seen in an earlier session counts.
 - **`records`**, how each tour ended and when, are Personal in the data map and stay in memory for the session.
 
 Reset all tips clears both and keeps the switch; Delete my data and `-tour reset` clear everything. A value that can't be read counts as not seen, so a tour can show again but never gets stuck hidden.

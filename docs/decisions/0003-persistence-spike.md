@@ -102,7 +102,15 @@ The plan's other 20a item, done in the same PR:
 - In Release, onboarding has three steps with no closet choice, "I already use Nifty Outfit Nook" opens an empty closet, Add a piece's photo stand-in gives no photo, and every piece shows its drawing. Debug is unchanged.
 - **The sample photos still ship in Release (12 MB, unused).** SwiftPM copies the Fixtures resource bundle in every configuration, an override of `EMBED_PACKAGE_RESOURCE_BUNDLE_NAMES` didn't take, and Xcode's script sandbox (`ENABLE_USER_SCRIPT_SANDBOXING`) stops a build script deleting it. Options for Jose: turn the sandbox off for the app target only, so a three-line script removes the bundle in Release, or move the photos out of the Fixtures package.
 
-## For Jose
+## Built in Phase 21a (20 October 2026)
+
+The store, the stores and the coordinator are now app code in `Services/Storage` (`docs/models.md`, Real storage). What changed on the way from the spike:
+
+- **One entity with a JSON payload per record** instead of the spike's garment columns. The spike already kept looks and suitcases as payloads; 0004 puts one encrypted payload in each CloudKit record and JSON records in the export, so the store keeps the same JSON. Value types change through payload versions (`RecordPayload`, with a fixture of every version 1 payload in the tests); the SwiftData schema stays small and changes only through `NookMigrationPlan` and the coordinator.
+- **The coordinator's check is a manifest of every record's kind, key and payload hash**, so a migration that loses or changes a record fails, not only one that loses an ID. A failed check now leaves the journal short of `verified` and the next launch puts the snapshot back before opening anything, as this note recommended. Each app build gets three tries.
+- **Image files and their hashes wait for Phase 22a**, when real photos arrive. The stores hold no files yet.
+- The spike target stays for 21b (export, restore and sync build on it).
+
 
 1. **GO or NO-GO on SwiftData**, with the three conditions above.
 2. **TestFlight before Phase 21a.** A Release archive now starts with an empty closet and keeps nothing Lily adds, until real storage lands in 21a. Some wording still assumes sample data: the Help version line ("test build with sample data"), Help's "uses sample photos" line, and the What to Test text in `docs/testflight.md`. Choose between holding uploads until 21a and keeping the sample closet in TestFlight builds until then (reverting the Release part of this PR).

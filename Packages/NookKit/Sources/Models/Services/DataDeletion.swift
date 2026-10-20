@@ -12,7 +12,8 @@ import Foundation
 /// A store that can forget everything it holds, for Delete my data.
 public protocol ErasableStore: Sendable {
     /// Removes everything the store holds, so it reads as on a fresh install. Erasing an empty
-    /// store is fine. Stage B's stores also remove the files behind the records (Phase 21a).
+    /// store is fine. The real stores (Phase 21a) delete their records from the store on the
+    /// iPhone; Phase 22a adds the image files behind them.
     func eraseAll() async throws(StoreError)
 }
 
@@ -41,7 +42,8 @@ public enum DataPart: String, CaseIterable, Hashable, Sendable {
     /// started from (Phase 17). Erased back to a fresh profile, with tips on, and the app opens on
     /// onboarding again.
     case profile
-    /// Unsaved Add a piece, Edit and Make your own look work.
+    /// Unsaved Add a piece, Edit and Make your own look work, and the unsent Send feedback note
+    /// (Phase 21a).
     case drafts
     // Tour progress is a preference, so it goes with the profile (PRD §7.8: Delete My Data
     // resets it), and so does the onboarding state. Phase 24c: `account` and `serverData`.
@@ -106,12 +108,35 @@ public struct LocalDataDeletion: DataDeletionService {
     /// counts as new once everything else has gone.
     public init(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
-        drafts: any DraftStore, lookDrafts: any LookDraftStore, pictures: any TryOnPictureStore,
-        tours: any TourProgressStore, onboarding: any OnboardingStateStore
+        drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
+        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore
     ) {
-        self.init(stores: [
+        self.init(
+            stores: Self.stores(
+                closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
+                lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
+                onboarding: onboarding))
+    }
+
+    /// The stores of `services` in the order `NookServices` erases them, for a deletion that
+    /// erases more stores as well (Phase 21a: the store on the iPhone, when a debug launch keeps
+    /// the sample closet in memory).
+    public static func stores(of services: NookServices) -> [(DataPart, any ErasableStore)] {
+        stores(
+            closet: services.closet, looks: services.looks, suitcases: services.suitcases, profile: services.profile,
+            drafts: services.drafts, lookDrafts: services.lookDrafts, feedbackDrafts: services.feedbackDrafts,
+            pictures: services.pictures, tours: services.tours, onboarding: services.onboarding)
+    }
+
+    private static func stores(
+        closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
+        drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
+        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore
+    ) -> [(DataPart, any ErasableStore)] {
+        [
             (.drafts, drafts),
             (.drafts, lookDrafts),
+            (.drafts, feedbackDrafts),
             (.pictures, pictures),
             (.looks, looks),
             (.suitcases, suitcases),
@@ -119,7 +144,7 @@ public struct LocalDataDeletion: DataDeletionService {
             (.profile, profile),
             (.profile, tours),
             (.profile, onboarding),
-        ])
+        ]
     }
 
     public var scopes: [DeletionScope] { [.thisDevice] }

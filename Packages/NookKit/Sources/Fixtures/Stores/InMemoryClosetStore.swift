@@ -79,6 +79,12 @@ public actor InMemoryClosetStore: ClosetStore {
         return expired
     }
 
+    public func deletePermanently(_ id: Garment.ID) async throws(StoreError) {
+        try await options.begin()
+        guard garmentsByID[id]?.isDeleted == true else { throw .notFound }
+        garmentsByID[id] = nil
+    }
+
     // MARK: Helpers
 
     private func existing(_ id: Garment.ID) throws(StoreError) -> Garment {

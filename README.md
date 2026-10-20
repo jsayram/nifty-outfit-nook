@@ -73,7 +73,9 @@ Lily's builds go out through TestFlight as internal-only builds with sample data
 
 ## Sample data
 
-Debug builds run on sample data, in memory. Since Phase 20a, Release builds have none: the sample sets and the `-fixtures` argument are compiled only in Debug, Release starts on an empty closet (onboarding has no closet step there), and `scripts/check-release.sh` checks it. Stage A runs on sample data only, in memory: whatever she adds or changes is gone when the app closes. The only things kept across launches are in the app's own `UserDefaults` suite: that onboarding is done, which starting closet she chose, the tours seen and the tips switch, and (since the Stage A audit) the name on her sign and her Style Me settings (Preferences, Avoid repeating outfits for, Track laundry). See `docs/onboarding.md`. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
+Debug builds run on sample data, in memory. Since Phase 20a, Release builds have none: the sample sets and the `-fixtures` argument are compiled only in Debug, Release starts on an empty closet (onboarding has no closet step there), and `scripts/check-release.sh` checks it.
+
+Since Phase 21a her own closet is kept in a SwiftData store on the iPhone (`Application Support/Store`, Data Protection `complete`): everything she adds or changes, her profile, drafts and the unsent feedback note, with the onboarding state and the tours seen. That's every Release build, and a Debug build on the empty closet. The debug sample closet stays in memory and comes back as it ships at each launch, keeping only the name on her sign and her Style Me settings, so `-fixtures` and its options work as before. `-onboarding skip` keeps nothing, and `-onboarding reset` also erases her data in the store. The first launch of a 21a build moves Stage A's `UserDefaults` suite into the store. See `docs/models.md` (Real storage) and `docs/onboarding.md`. Launch with `-fixtures demo`, `-fixtures empty` or `-fixtures large` to pick a set (the scheme passes `-fixtures demo`). Add options after colons, in any order:
 
 - a behaviour for loading, error and offline states: `slow`, `offline`, `offline-once`, `stylist-fails`, `stylist-partial`, `stylist-insufficient`, `stylist-waits`, `stores-fail`, `photo-fails` or `picture-fails`, for example `-fixtures demo:offline`. Your looks' states use the stylist ones (`docs/your-looks.md`);
 - `weather=` with `sun`, `cloudy`, `rain`, `snow`, `night` or `unavailable`, to force the weather (and the Home window);
@@ -100,12 +102,14 @@ Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
   Sources/Models/            Domain types, rules as pure functions, and service protocols (Phase 3).
   Sources/Fixtures/          In-memory stores, the mock stylist, sample data sets and the -fixtures argument.
-  Sources/Services/          Real services on Apple frameworks only. Phase 8a: subject lifting with Vision. Phase 17: the app
-                             state kept in UserDefaults.
+  Sources/Services/          Real services on Apple frameworks only. Phase 8a: subject lifting with Vision. Phase 21a: the
+                             real store (Storage/: SwiftData, the migration coordinator, every store), and the
+                             one-time move of Stage A's UserDefaults suite (AppState/).
   Sources/Features/          Screens and view models, one folder per feature.
     Resources/               Localizable.xcstrings, the String Catalog for user-facing text.
   Tests/                     One Swift Testing target per module.
     PersistenceSpikeTests/   Phase 20a's persistence spike: SwiftData, migrations, files, export and sync. Never shipped.
+                             Phase 21a promoted the store, the stores and the migration coordinator into Services.
 Configs/                     Build settings as xcconfig files.
   Base.xcconfig              Shared settings (iOS 26.0, Swift 6, strict concurrency).
   Debug.xcconfig             Debug configuration, Dev environment.
@@ -147,7 +151,7 @@ docs/ipad.md                 iPad: the tab bar at the bottom, the rooms, Closet'
 website/                     The app's static website.
 ```
 
-Features depend on DesignSystem and Models. Fixtures and Services depend on Models. The app target links Features, Fixtures, DesignSystem (for the debug catalog) and Services (the app state kept in `UserDefaults`, and the debug cutout benchmark) and only wires them together.
+Features depend on DesignSystem and Models. Fixtures and Services depend on Models. The app target links Features, Fixtures, DesignSystem (for the debug catalog) and Services (the real store since Phase 21a, and the debug cutout benchmark) and only wires them together.
 
 The local package is added to the project as a folder reference rather than a package reference. That keeps it editable in Xcode, lets the test plan run its test targets, and stops Xcode building it with warnings suppressed.
 
@@ -155,7 +159,7 @@ The local package is added to the project as a folder reference rather than a pa
 
 - No App Transport Security exceptions. The generated Info.plist has no `NSAppTransportSecurity` keys.
 - Data Protection is `NSFileProtectionComplete` through the `com.apple.developer.default-data-protection` entitlement.
-- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains and no collected data. Its one required-reason API is `UserDefaults` (reason `CA92.1`, data only this app reads), since Phase 17 keeps the onboarding and tour flags there, and the Stage A audit the sign name and Style Me settings. It's updated whenever that changes.
+- `PrivacyInfo.xcprivacy` declares no tracking, no tracking domains and no collected data. Its required-reason APIs are `UserDefaults` (reason `CA92.1`, data only this app reads: Phase 17 kept the onboarding and tour flags there, and since 21a the app reads them once to move them into the store) and, since Phase 21a, disk space (reason `E174.1`: the migration checks there's room for its safety copy before it starts). It's updated whenever that changes. `scripts/check-archive.sh` checks it.
 - No secrets anywhere. `Secrets.xcconfig` and `*.local.xcconfig` are ignored by git and only ever hold non-secret identifiers such as a team ID.
 
 ## Branches

@@ -50,6 +50,37 @@ public struct FeedbackNote: Hashable, Sendable {
     }
 }
 
+/// A note she started and hasn't sent: what it's about, her words as typed (not trimmed), and
+/// whether she turned on the app details (Phase 21a). Kept so it's still there after the app
+/// closes, until she sends it, clears it or deletes her data.
+///
+/// Data tier: **Personal** (free text, so it can hold anything she types).
+public struct FeedbackDraft: Hashable, Sendable, Codable {
+    public var kind: FeedbackKind
+    public var message: String
+    public var includesDetails: Bool
+
+    public init(kind: FeedbackKind = .somethingWrong, message: String = "", includesDetails: Bool = false) {
+        self.kind = kind
+        self.message = message
+        self.includesDetails = includesDetails
+    }
+
+    /// Nothing worth keeping: no words, and everything else as a new note starts.
+    public var isBlank: Bool {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+/// Where the unsent Send feedback note is kept. One note at a time.
+public protocol FeedbackDraftStore: ErasableStore {
+    func draft() async throws(StoreError) -> FeedbackDraft?
+    /// Replaces the note.
+    func save(_ draft: FeedbackDraft) async throws(StoreError)
+    /// Removes the note. Removing when there's none is fine.
+    func discard() async throws(StoreError)
+}
+
 /// Why a note can't be sent yet.
 public enum FeedbackProblem: Hashable, Sendable, Error {
     case empty

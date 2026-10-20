@@ -20,7 +20,7 @@ Nothing here was uploaded, created or sent by an agent. Every step in App Store 
 ## What this build is
 
 - Version **0.1.0**. The build number is the UTC date and time it was archived, such as `20261016.1420` (see "Versioning" below).
-- **Sample data only.** Everything Lily adds or changes is in memory and gone when the app closes, except her name on the sign and her Style Me settings in Profile (Preferences, Avoid repeating outfits for, Track laundry), which are kept since the Stage A audit, and a few app-state flags (onboarding done, the starting closet, the tips seen). The app says so in onboarding (step 2 and step 4), on Privacy and terms, and at the end of Help, where the version line reads "Nifty Outfit Nook · 0.1.0 (20261016.1420) · test build with sample data".
+- **Her data is kept (since Phase 21a).** A Release build has no sample data (Phase 20a) and keeps everything Lily adds or changes in the real store on the iPhone, so it's there after the app closes, until she uses Delete my data. The first launch of a 21a build moves what earlier builds kept (her name on the sign, her Style Me settings, onboarding done, the tips seen) into it. Onboarding (step 2), Privacy and terms and Help say so. The Help version line still reads "Nifty Outfit Nook · 0.1.0 (20261016.1420) · test build with sample data", which 20a listed for Jose.
 - No network, no account, no permissions, no analytics. The one web address in the app is the website, for Privacy and terms, and it opens only when she taps it. Those pages are still the "Coming soon" page (Phase 19b writes them).
 - **Internal only.** The upload is marked TestFlight Internal Only, so this build can never go to external testers or the App Store, even by mistake.
 
@@ -167,7 +167,7 @@ Run on 16 October 2026 against an unsigned Release archive (`scripts/check-archi
 | Orientations | iPhone: portrait and both landscapes. iPad: all four. Home and Closet have sideways layouts (Phases 5b, 15a) |
 | Launch screen | The wall colour (`LaunchBackground`, light `#F4EEE6`, dark `#211B16`) instead of white or black |
 | App icon | `AppIcon` from `AppIcon.icon`, with the 60 and 76 pt fallback PNGs the build makes |
-| Privacy manifest | In the app. No tracking, no tracking domains, no collected data. One required-reason API, `UserDefaults`, reason `CA92.1`; the binary imports no other required-reason API (file timestamps, boot time, disk space, keyboards) |
+| Privacy manifest | In the app. No tracking, no tracking domains, no collected data. Two required-reason APIs: `UserDefaults`, reason `CA92.1` (since 21a only read once, to move Stage A's suite into the store), and disk space, reason `E174.1` (since 21a: the migration checks there's room for its safety copy before it starts). No file timestamps, boot time or keyboards (the store's sizes are read with `fileSizeKey`) |
 | Entitlements | Only Data Protection, `NSFileProtectionComplete`. Signing adds the usual team, app ID and `beta-reports-active` |
 | Test code | No `.xctest`, no `Frameworks` or `PlugIns` folder. The binary doesn't link XCTest, Swift Testing or swift-snapshot-testing. `scripts/check-release.sh` on the device binary: no catalog, cutout benchmark or debug launch flags |
 | Debug symbols | The binary is stripped (only imported symbols left). The dSYM is separate, with the same UUID, for crash reports. No path from the build Mac in the binary |

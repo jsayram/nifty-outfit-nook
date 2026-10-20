@@ -19,6 +19,7 @@ public struct ClosetStoreContract: Sendable {
         case setsLaundry
         case deleteAndRestore
         case purgesOnlyExpiredPieces
+        case deletesPermanentlyOnlyFromRecentlyDeleted
         case eraseAllEmptiesIt
     }
 
@@ -127,6 +128,18 @@ public struct ClosetStoreContract: Sendable {
             #expect(await storeError { try await store.garment("g-older") } == .notFound)
             #expect(try await store.garment("g-newer").isDeleted)
             #expect(try await store.purgeExpired(asOf: TestTime.now).isEmpty)
+
+        case .deletesPermanentlyOnlyFromRecentlyDeleted:
+            // A piece in her closet can't be deleted for good, and nor can one that isn't there.
+            #expect(await storeError { try await store.deletePermanently("g-older") } == .notFound)
+            #expect(await storeError { try await store.deletePermanently("nope") } == .notFound)
+            #expect(try await store.garments().count == 2)
+            try await store.delete("g-older", at: TestTime.now)
+            try await store.deletePermanently("g-older")
+            #expect(await storeError { try await store.garment("g-older") } == .notFound)
+            #expect(try await store.garments().map(\.id) == ["g-newer"])
+            #expect(await storeError { try await store.restore("g-older") } == .notFound)
+            #expect(await storeError { try await store.deletePermanently("g-older") } == .notFound)
 
         case .eraseAllEmptiesIt:
             try await store.delete("g-older", at: TestTime.now)

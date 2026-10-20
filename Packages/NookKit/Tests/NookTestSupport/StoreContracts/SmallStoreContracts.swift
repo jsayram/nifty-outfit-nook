@@ -271,3 +271,52 @@ public struct OnboardingStateStoreContract: Sendable {
         }
     }
 }
+
+/// What every `FeedbackDraftStore` does (Phase 21a). See `StoreContract.swift` for how to run it.
+public struct FeedbackDraftStoreContract: Sendable {
+    /// Makes a store holding this note, or none.
+    public typealias Factory = @Sendable (FeedbackDraft?) async throws -> any FeedbackDraftStore
+
+    public enum Check: String, CaseIterable, Sendable {
+        case startsWithWhatItWasGiven
+        case saveReplacesTheNote
+        case discardRemovesIt
+        case eraseAllRemovesIt
+    }
+
+    private let make: Factory
+
+    public init(make: @escaping Factory) {
+        self.make = make
+    }
+
+    public func run(_ check: Check) async throws {
+        let note = FeedbackDraft(kind: .idea, message: "The hamper is lovely ", includesDetails: true)
+
+        switch check {
+        case .startsWithWhatItWasGiven:
+            #expect(try await make(nil).draft() == nil)
+            #expect(try await make(note).draft() == note)
+
+        case .saveReplacesTheNote:
+            let store = try await make(nil)
+            try await store.save(note)
+            #expect(try await store.draft() == note)
+            let later = FeedbackDraft(kind: .somethingWrong, message: "Never mind")
+            try await store.save(later)
+            #expect(try await store.draft() == later)
+
+        case .discardRemovesIt:
+            let store = try await make(note)
+            try await store.discard()
+            #expect(try await store.draft() == nil)
+            try await store.discard()
+
+        case .eraseAllRemovesIt:
+            let store = try await make(note)
+            try await store.eraseAll()
+            #expect(try await store.draft() == nil)
+            try await store.eraseAll()
+        }
+    }
+}

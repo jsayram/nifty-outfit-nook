@@ -47,6 +47,9 @@ public struct AppRootView: View {
                         tours.forgetSession()
                         model.dataDeleted()
                     })
+        case .storeProblem(let problem):
+            StoreProblemView(problem: problem)
+                .transition(.opacity)
         }
     }
 }

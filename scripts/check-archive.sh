@@ -10,7 +10,8 @@
 # - Info.plist: bundle ID, version and a whole-number build number, ITSAppUsesNonExemptEncryption
 #   is NO, the icon and launch screen are set, and there's no App Transport Security key, no
 #   usage-description (permission) key and no background mode;
-# - the privacy manifest is in the app and declares only UserDefaults, reason CA92.1;
+# - the privacy manifest is in the app and declares only UserDefaults, reason CA92.1, and (since
+#   Phase 21a, for the migration's free-space check) disk space, reason E174.1;
 # - the entitlements file asks for Data Protection (complete) and nothing else;
 # - no test bundle, framework or plug-in is in the app, the binary doesn't link XCTest, Swift
 #   Testing or swift-snapshot-testing, and it holds no path from the Mac it was built on;
@@ -89,7 +90,10 @@ apis = {
     item["NSPrivacyAccessedAPIType"]: item["NSPrivacyAccessedAPITypeReasons"]
     for item in privacy.get("NSPrivacyAccessedAPITypes", [])
 }
-if apis != {"NSPrivacyAccessedAPICategoryUserDefaults": ["CA92.1"]}:
+if apis != {
+    "NSPrivacyAccessedAPICategoryUserDefaults": ["CA92.1"],
+    "NSPrivacyAccessedAPICategoryDiskSpace": ["E174.1"],
+}:
     problems.append(f"privacy manifest APIs changed: {apis}")
 
 with open(entitlements_path, "rb") as f:

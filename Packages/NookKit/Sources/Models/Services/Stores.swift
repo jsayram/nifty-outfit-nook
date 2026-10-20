@@ -2,8 +2,8 @@ import Foundation
 
 // The store protocols. Features talk to these and never to a concrete store.
 //
-// Stage A has in-memory stores (Fixtures). Stage B puts real storage behind the same protocols
-// (Phase 21a). Each store is `Sendable` and every call is `async`, so an actor, a database or a
+// Stage A has in-memory stores (Fixtures). Since Phase 21a the real stores (Services/Storage) keep
+// everything in a SwiftData store on the iPhone, behind the same protocols. Each store is `Sendable` and every call is `async`, so an actor, a database or a
 // sync engine can sit behind it. Stores keep data, not rules: the rules are the pure functions in
 // Models/Rules, which screens and stores both call, and every store checks a record on save with
 // `StoreValidation`. The store contracts in NookTestSupport say what each store must do.
@@ -50,6 +50,11 @@ public protocol ClosetStore: ErasableStore {
     func restore(_ id: Garment.ID) async throws(StoreError)
     /// Removes pieces whose 30 days are up, and returns their IDs.
     func purgeExpired(asOf date: Date) async throws(StoreError) -> [Garment.ID]
+    /// "Delete permanently now" in Recently deleted (PRD §7.4, Phase 21a): removes a piece that's
+    /// in Recently deleted for good, before its 30 days are up. A piece that isn't in Recently
+    /// deleted, or isn't there at all, is `notFound`, so this can never remove a piece in her
+    /// closet. `PermanentDeletion` says what else goes with it.
+    func deletePermanently(_ id: Garment.ID) async throws(StoreError)
 }
 
 /// Saved looks, looks she made herself, and unsaved results kept as background history (LR-06).
@@ -100,6 +105,34 @@ public protocol SuitcaseStore: ErasableStore {
     /// Undo after a delete: puts back exactly this suitcase, with its ID, name and pieces
     /// (Phase 13). Fails with `invalidName` if another suitcase took the name meanwhile.
     func restore(_ suitcase: Suitcase) async throws(StoreError)
+}
+
+/// Every store that holds her data, as one value. The app hands a set to `FixtureServices` when
+/// the data lives in the real store on the iPhone (Phase 21a), instead of the in-memory stores.
+public struct NookStoreSet: Sendable {
+    public var closet: any ClosetStore
+    public var looks: any LookStore
+    public var suitcases: any SuitcaseStore
+    public var profile: any ProfileStore
+    public var drafts: any DraftStore
+    public var lookDrafts: any LookDraftStore
+    public var pictures: any TryOnPictureStore
+    public var feedbackDrafts: any FeedbackDraftStore
+
+    public init(
+        closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
+        drafts: any DraftStore, lookDrafts: any LookDraftStore, pictures: any TryOnPictureStore,
+        feedbackDrafts: any FeedbackDraftStore
+    ) {
+        self.closet = closet
+        self.looks = looks
+        self.suitcases = suitcases
+        self.profile = profile
+        self.drafts = drafts
+        self.lookDrafts = lookDrafts
+        self.pictures = pictures
+        self.feedbackDrafts = feedbackDrafts
+    }
 }
 
 /// Her one profile. Erasing it leaves a fresh profile: no name, the default Preferences, no

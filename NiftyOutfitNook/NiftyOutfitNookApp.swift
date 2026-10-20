@@ -1,5 +1,6 @@
 import Features
 import Fixtures
+import Models
 import Services
 import SwiftUI
 
@@ -59,48 +60,91 @@ struct NiftyOutfitNookApp: App {
         }
     }
 
-    /// Debug builds run on sample data. `-fixtures <set>[:<behavior>]` picks it, for example
-    /// `-fixtures large` or `-fixtures demo:offline`; the default is the demo closet, which is
-    /// also the sample closet onboarding offers. Release builds have no sample data (Phase 20a).
+    /// Her data lives in the store on the iPhone (Phase 21a, `NookStorage`), opened once here,
+    /// before anything reads it. If it can't be opened, the app shows why and changes nothing.
     ///
-    /// The onboarding state, the tours seen, the name on the sign and the Style Me settings are
-    /// kept in the app's own `UserDefaults` suite (`AppStateDefaults`); everything else is in
-    /// memory. See `docs/onboarding.md`.
+    /// Release builds keep everything in the store, and have no sample data (Phase 20a). Debug
+    /// builds run on sample data: `-fixtures <set>[:<behavior>]` picks it, for example
+    /// `-fixtures large` or `-fixtures demo:offline`, and the default is the demo closet, which is
+    /// also the sample closet onboarding offers. There the sample closet stays in memory and comes
+    /// back as it ships at each launch, keeping only the name on the sign and the Style Me
+    /// settings; the empty closet keeps everything in the store, as Release does. The onboarding
+    /// state and the tours seen are in the store in every build. See `docs/onboarding.md`.
     private static func makeLaunch(arguments: [String]) -> AppLaunch {
         #if DEBUG
             let configuration = FixtureConfiguration(launchArguments: arguments)
-        #else
-            // Release builds ship no sample data and read no `-fixtures` argument (Phase 20a):
-            // an empty closet, in memory, until real storage arrives (Phase 21a).
-            let configuration = FixtureConfiguration(set: .empty)
-        #endif
-        let onboarding = DefaultsOnboardingStore()
-        let tours = DefaultsTourProgressStore()
-        let profileSettings = DefaultsProfileSettingsKeeper()
-        #if DEBUG
             // `-onboarding reset|skip` (Phase 17) and `-tour home|reset|off` (Phase 16a), debug
             // builds only.
             let onboardingOptions = OnboardingLaunchOptions(launchArguments: arguments)
             let tourOptions = TourLaunchOptions(launchArguments: arguments)
             let offersSampleCloset = true
         #else
+            // Release builds ship no sample data and read no `-fixtures` argument (Phase 20a).
+            let configuration = FixtureConfiguration(set: .empty)
             let onboardingOptions = OnboardingLaunchOptions.standard
             let tourOptions = TourLaunchOptions.standard
             let offersSampleCloset = false
         #endif
+
+        let storage: NookStorage
+        switch NookStorage.open() {
+        case .ready(let opened):
+            storage = opened
+        case .problem(let problem):
+            return AppLaunch(
+                onboarding: InMemoryOnboardingStore(), tours: InMemoryTourProgressStore(),
+                services: { _ in FixtureServices.make(FixtureConfiguration(set: .empty)) },
+                tourOptions: .standard, offersSampleCloset: offersSampleCloset,
+                storeProblem: StoreOpenProblem(problem))
+        }
+        let onboarding = storage.onboarding
+        let tours = storage.tours
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
-            profileSettings: profileSettings,
+            profileSettings: storage.profileSettings,
             services: { closet in
-                // `-onboarding skip` (`closet` is nil) opens the sample data as it is and writes
-                // nothing, so the UI tests start from the same profile every time.
-                FixtureServices.make(
-                    configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
-                    profileSettings: closet == nil ? nil : profileSettings)
+                switch offersSampleCloset ? closet : .empty {
+                case .empty:
+                    // Her own closet, kept in the store. Delete my data also deletes the
+                    // migration's safety copy.
+                    var services = FixtureServices.make(
+                        configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
+                        stores: storage.stores)
+                    services.deletion = LocalDataDeletion(
+                        stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
+                    return services
+                case .sample, nil:
+                    // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
+                    // opens it as it is and keeps nothing else, so the UI tests start from the
+                    // same profile every time. Delete my data also clears the store, so nothing
+                    // from an earlier closet comes back.
+                    var services = FixtureServices.make(
+                        configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
+                        profileSettings: closet == nil ? nil : storage.profileSettings,
+                        feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
+                    services.deletion = LocalDataDeletion(
+                        stores: storage.erasableData + LocalDataDeletion.stores(of: services))
+                    return services
+                }
             },
             onboardingOptions: onboardingOptions,
             tourOptions: tourOptions,
-            offersSampleCloset: offersSampleCloset)
+            offersSampleCloset: offersSampleCloset,
+            // The Stage A `UserDefaults` suite moves into the store once.
+            prepare: { AppStateDefaultsImport.run(into: storage.container) },
+            erasedOnReset: storage.erasableData.map(\.1))
+    }
+}
+
+extension StoreOpenProblem {
+    /// The store's problem, for the recovery screen.
+    init(_ problem: StoreProblem) {
+        switch problem {
+        case .newerVersion: self = .newerVersion
+        case .notEnoughSpace: self = .notEnoughSpace
+        case .updateFailed: self = .updateFailed
+        case .couldNotOpen: self = .couldNotOpen
+        }
     }
 }

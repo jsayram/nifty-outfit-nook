@@ -29,6 +29,12 @@ public struct NookServices: Sendable {
     public var tours: any TourProgressStore
     /// Whether she has finished onboarding, and the closet she started with (Phase 17).
     public var onboarding: any OnboardingStateStore
+    /// The Send feedback note she hasn't sent yet (Phase 21a).
+    public var feedbackDrafts: any FeedbackDraftStore
+    /// Whether what she adds and changes is kept when the app closes. True for her own closet in
+    /// the store on the iPhone (Phase 21a); false for the debug sample closet, which comes back as
+    /// it ships at each launch. Help and Privacy and terms say which.
+    public var keepsChanges = true
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
@@ -37,7 +43,8 @@ public struct NookServices: Sendable {
             customDeletion
                 ?? LocalDataDeletion(
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
-                    lookDrafts: lookDrafts, pictures: pictures, tours: tours, onboarding: onboarding)
+                    lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
+                    onboarding: onboarding)
         }
         set { customDeletion = newValue }
     }
@@ -64,6 +71,7 @@ public struct NookServices: Sendable {
         tryOn: any TryOnService,
         tours: any TourProgressStore,
         onboarding: any OnboardingStateStore,
+        feedbackDrafts: any FeedbackDraftStore,
         deletion: (any DataDeletionService)? = nil
     ) {
         self.closet = closet
@@ -82,6 +90,7 @@ public struct NookServices: Sendable {
         self.tryOn = tryOn
         self.tours = tours
         self.onboarding = onboarding
+        self.feedbackDrafts = feedbackDrafts
         self.customDeletion = deletion
     }
 }

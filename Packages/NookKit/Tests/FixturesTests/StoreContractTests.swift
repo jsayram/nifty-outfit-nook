@@ -4,8 +4,8 @@ import Models
 import NookTestSupport
 import Testing
 
-/// The store contracts (`NookTestSupport`) run against every in-memory store. Stage B's real
-/// stores run the same checks.
+/// The store contracts (`NookTestSupport`) run against every in-memory store. The real stores
+/// run the same checks in ServicesTests (`StoredStoreContractTests`, Phase 21a).
 struct InMemoryStoreContractTests {
     @Test(arguments: ClosetStoreContract.Check.allCases)
     func closet(_ check: ClosetStoreContract.Check) async throws {
@@ -51,6 +51,11 @@ struct InMemoryStoreContractTests {
     @Test(arguments: LookDraftStoreContract.Check.allCases)
     func lookDrafts(_ check: LookDraftStoreContract.Check) async throws {
         try await LookDraftStoreContract { InMemoryLookDraftStore(draft: $0) }.run(check)
+    }
+
+    @Test(arguments: FeedbackDraftStoreContract.Check.allCases)
+    func feedbackDrafts(_ check: FeedbackDraftStoreContract.Check) async throws {
+        try await FeedbackDraftStoreContract { InMemoryFeedbackDraftStore(draft: $0) }.run(check)
     }
 
     @Test(arguments: TourProgressStoreContract.Check.allCases)

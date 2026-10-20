@@ -229,6 +229,70 @@ struct RecentlyDeletedModelTests {
         await model.load(from: garmentTestServices(behavior: .storesFail), now: TestTime.now)
         #expect(model.phase == .failed)
     }
+    /// Delete now (PRD §7.4, Phase 21a): the preview says what goes, then the piece is gone for
+    /// good with its unsaved Edit, and saved looks and suitcases keep their other pieces.
+    @Test func deleteNowShowsWhatGoesThenDeletesForGood() async throws {
+        let services = garmentTestServices()
+        try await services.closet.delete("g-navy-trousers", at: TestTime.now)
+        let edit = GarmentDraft(
+            target: .garment("g-navy-trousers"), step: .details, details: GarmentDetails(name: "Navy work trousers"),
+            base: GarmentDetails(name: "Navy dress pants"), savedAt: TestTime.now)
+        try await services.drafts.save(edit)
+        let model = RecentlyDeletedModel()
+        await model.load(from: services, now: TestTime.now)
+
+        try await model.askToDeletePermanently("g-navy-trousers", in: services)
+        let preview = try #require(model.confirming)
+        #expect(preview.piece.id == "g-navy-trousers")
+        #expect(preview.hasUnsavedEdit)
+        #expect(!preview.savedLooks.isEmpty)
+        #expect(preview.suitcases.map(\.id).contains(DemoClosetIDs.josesHouse))
+        let looksBefore = try await services.looks.looks()
+
+        let name = try await model.deletePermanently(preview, in: services)
+        #expect(name == "Navy dress pants")
+        #expect(model.confirming == nil)
+        #expect(model.pieces.map(\.id) == ["g-gray-leggings"])
+        await #expect(throws: StoreError.notFound) { try await services.closet.garment("g-navy-trousers") }
+        #expect(try await services.drafts.draft(for: .garment("g-navy-trousers")) == nil)
+        #expect(try await services.looks.looks() == looksBefore)
+    }
+
+    /// The words of the question name everything that goes, and what stays.
+    @Test func theQuestionSaysWhatGoesAndWhatStays() throws {
+        let piece = Garment(
+            id: "g1", name: "Navy dress pants", category: .bottom, photo: .sample("navy"), addedAt: TestTime.now)
+        let look = Look(
+            id: "l1", pieces: [LookPiece(id: "p1", content: .garment("g1"))], name: "Office navy", isSaved: true,
+            createdAt: TestTime.now)
+        let suitcase = Suitcase(id: "s1", name: "Weekend", garmentIDs: ["g1"], createdAt: TestTime.now)
+        let preview = PermanentDeletionPreview(
+            piece: piece, savedLooks: [look], suitcases: [suitcase], hasUnsavedEdit: true, pictureCount: 1)
+        let message = RecentlyDeletedText.confirmMessage(preview)
+        #expect(message.contains("Its photo and details are deleted from this iPhone. This can’t be undone."))
+        #expect(message.contains("Your unsaved changes to it go too."))
+        #expect(message.contains("Saved looks that use it keep their other pieces: Office navy."))
+        #expect(message.contains("It comes out of Weekend."))
+        #expect(message.contains("Try-on pictures with it in stay until you delete them."))
+
+        let bare = RecentlyDeletedText.confirmMessage(
+            PermanentDeletionPreview(
+                piece: Garment(id: "g2", name: "Socks", category: .accessory, addedAt: TestTime.now)))
+        #expect(bare == "Its details are deleted from this iPhone. This can’t be undone.")
+    }
+
+    @Test func aFailedDeleteNowKeepsThePiece() async throws {
+        let services = garmentTestServices()
+        let model = RecentlyDeletedModel()
+        await model.load(from: services, now: TestTime.now)
+        try await model.askToDeletePermanently("g-gray-leggings", in: services)
+        let preview = try #require(model.confirming)
+        let failing = garmentTestServices(behavior: .storesFail)
+        await #expect(throws: StoreError.unavailable) { try await model.deletePermanently(preview, in: failing) }
+        #expect(model.pieces.map(\.id) == ["g-gray-leggings"])
+        #expect(model.deleting == nil)
+        #expect(try await services.closet.garment("g-gray-leggings").isDeleted)
+    }
 }
 
 /// The demo's suitcase IDs, as the fixtures name them.

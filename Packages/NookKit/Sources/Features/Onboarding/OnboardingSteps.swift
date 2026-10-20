@@ -97,8 +97,11 @@ struct OnboardingPrivacyStep: View {
                     title: OnboardingText.asksFirstTitle, detail: OnboardingText.asksFirstDetail,
                     systemImage: "hand.raised")
             }
-            NookBanner(OnboardingText.whatsKept, systemImage: "info.circle", tone: .neutral)
-                .accessibilityIdentifier("onboarding.kept")
+            NookBanner(
+                model.offersSampleCloset ? OnboardingText.whatsKept : OnboardingText.whatsKeptOnDevice,
+                systemImage: "info.circle", tone: .neutral
+            )
+            .accessibilityIdentifier("onboarding.kept")
         }
     }
 }

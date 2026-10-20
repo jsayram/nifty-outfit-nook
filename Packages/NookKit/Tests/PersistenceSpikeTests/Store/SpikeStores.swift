@@ -182,6 +182,16 @@ actor SwiftDataClosetStore: ClosetStore {
         }
     }
 
+    /// Phase 21a's addition to the protocol, so the spike still builds.
+    func deletePermanently(_ id: Garment.ID) async throws(StoreError) {
+        let record = try existing(id)
+        guard record.deletedAt != nil else { throw .notFound }
+        try storeCall {
+            modelContext.delete(record)
+            try modelContext.save()
+        }
+    }
+
     /// Whether this actor's work runs on the main thread. Spike only.
     func runsOnTheMainThread() -> Bool {
         pthread_main_np() != 0
