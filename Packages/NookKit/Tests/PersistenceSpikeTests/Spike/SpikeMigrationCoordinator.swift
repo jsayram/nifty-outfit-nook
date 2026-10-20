@@ -250,8 +250,21 @@ struct SpikeMigrationCoordinator: Sendable {
         guard integrity == "ok" else { throw SpikeStoreFailure.snapshotDamaged(integrity) }
     }
 
+    /// Puts the snapshot back over the live store. A container this process opened on the store
+    /// may still hold its SQLite connection for a moment after it's released, and the replace
+    /// then fails with SQLITE_BUSY (seen on CI), so it's tried a few times. The app should
+    /// restore before it opens any container, at launch, as `open()` does.
     func restoreSnapshot() throws {
-        try Self.copyStore(from: location.snapshotURL, to: location.storeURL)
+        var attempt = 0
+        while true {
+            do {
+                try Self.copyStore(from: location.snapshotURL, to: location.storeURL)
+                return
+            } catch let error as NSError where error.domain == NSSQLiteErrorDomain && error.code == 5 && attempt < 10 {
+                attempt += 1
+                Thread.sleep(forTimeInterval: 0.2)
+            }
+        }
     }
 
     private func discardSnapshot() throws {

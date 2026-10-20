@@ -224,6 +224,12 @@ struct MigrationTests {
 
     /// Runs `body`, stopping it at `checkpoint` as if the process died there. True if it stopped.
     static func run(killedAt checkpoint: String, _ body: () throws -> Void) -> Bool {
+        // The pool drains what the stopped run left behind, so its store connection closes as it
+        // would when a real process dies.
+        autoreleasepool { runInPool(killedAt: checkpoint, body) }
+    }
+
+    private static func runInPool(killedAt checkpoint: String, _ body: () throws -> Void) -> Bool {
         do {
             try SpikeCheckpoint.$handler.withValue(
                 { name in
