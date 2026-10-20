@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Prints the UDID of an available iPhone simulator, or an iPad one with NOOK_SIM_FAMILY=iPad.
 #
-# Picks the newest iOS runtime whose version starts with NOOK_SIM_OS (default 26.5),
+# Picks the newest iOS runtime whose version starts with NOOK_SIM_OS (default 27.0),
 # preferring NOOK_SIM_NAME (default "iPhone 17", or "iPad Pro 11-inch (M5)" for an iPad) and
 # falling back to any device of the family.
 # The default runtime is pinned because the snapshot test references were recorded on it
@@ -17,7 +17,7 @@ fi
 xcrun simctl list devices available --json | python3 -c '
 import json, os, sys
 
-wanted_os = os.environ.get("NOOK_SIM_OS", "26.5")
+wanted_os = os.environ.get("NOOK_SIM_OS", "27.0")
 family = os.environ.get("NOOK_SIM_FAMILY", "iPhone")
 if family not in ("iPhone", "iPad"):
     sys.exit("NOOK_SIM_FAMILY must be iPhone or iPad")

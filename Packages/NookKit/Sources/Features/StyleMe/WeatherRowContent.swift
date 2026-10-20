@@ -88,7 +88,7 @@ nonisolated struct WeatherRowContent: Hashable, Sendable {
     }
 }
 
-extension WeatherChoice {
+nonisolated extension WeatherChoice {
     /// The option's name in the Weather sheet (LR-04).
     nonisolated var title: String {
         switch self {

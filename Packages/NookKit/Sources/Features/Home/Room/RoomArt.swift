@@ -86,7 +86,7 @@ nonisolated enum RoomArt: String, CaseIterable, Sendable {
     case porchSneakers = "chat-sneakers"
 }
 
-extension SuitcaseIcon {
+nonisolated extension SuitcaseIcon {
     /// The drawing that stands for a suitcase in the hall, on its rows and on Home.
     nonisolated var art: RoomArt {
         switch self {

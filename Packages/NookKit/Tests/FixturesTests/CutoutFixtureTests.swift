@@ -45,7 +45,13 @@ struct CutoutFixtureTests {
             try await StandInCutoutService(latency: .seconds(10)).cutout(from: Data())
         }
         task.cancel()
-        await #expect(throws: CutoutError.cancelled) { try await task.value }
+        // Not `#expect(throws:)`: Swift Testing in Xcode 27.1 sometimes crashed
+        // the whole test process while describing this task's result.
+        guard case .failure(let error) = await task.result else {
+            Issue.record("The cancelled stand-in should have failed.")
+            return
+        }
+        #expect(error as? CutoutError == .cancelled)
     }
 
     @Test func fixtureServicesHaveTheStandIn() async throws {

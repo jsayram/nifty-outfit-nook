@@ -53,7 +53,7 @@ nonisolated public struct ContrastRequirement: Hashable, Sendable, CustomStringC
     }
 }
 
-extension ContrastRequirement {
+nonisolated extension ContrastRequirement {
     /// Every pairing the design relies on. Add a line here whenever a new pairing appears.
     public static let all: [ContrastRequirement] = textPairs + statusPairs + graphicPairs
 

@@ -27,7 +27,7 @@ nonisolated enum HomeLayout: String, CaseIterable, Hashable, Sendable {
     }
 }
 
-extension RoomControl {
+nonisolated extension RoomControl {
     /// What VoiceOver and Voice Control use for a control drawn as a row or tile, where the words
     /// are on screen: the same words, so she can say what she sees. The room's objects keep
     /// `accessibilityLabel(for:)`, which names the object.

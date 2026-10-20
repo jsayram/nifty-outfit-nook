@@ -227,7 +227,7 @@ nonisolated enum ProfileText {
     }
 }
 
-extension RepeatWindow {
+nonisolated extension RepeatWindow {
     /// "1 week", "2 weeks", "I don't mind" (LR-10).
     nonisolated var title: String {
         switch self {

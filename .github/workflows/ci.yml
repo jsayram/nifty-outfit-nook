@@ -18,13 +18,17 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  # Keep in step with the Xcode version in README.md.
-  XCODE_APP: /Applications/Xcode_26.6.app
+  # Keep in step with the Xcode version in README.md. Every job runs on GitHub's `xcode-27`
+  # image, the only hosted image with Xcode 27 (`macos-26` stops at 26.6). It installs 27.1 as
+  # Xcode_27.1_Release_Candidate.app and links Xcode_27.1.app to it (runner-images,
+  # images/macos/xcode-27-arm64-Readme.md, October 2026). Its default Xcode is 27.0, so each job
+  # selects this one.
+  XCODE_APP: /Applications/Xcode_27.1.app
 
 jobs:
   swift-format:
     name: swift-format
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -100,7 +104,7 @@ jobs:
     name: build-and-archive
     needs: changes
     if: needs.changes.outputs.code == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -187,7 +191,7 @@ jobs:
     name: ui-tests (${{ matrix.part }})
     needs: changes
     if: needs.changes.outputs.code == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 40
     permissions:
       contents: read

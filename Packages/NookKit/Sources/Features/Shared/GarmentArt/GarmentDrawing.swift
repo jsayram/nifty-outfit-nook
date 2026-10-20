@@ -78,7 +78,7 @@ nonisolated enum GarmentDrawing {
     }
 }
 
-extension GarmentColor {
+nonisolated extension GarmentColor {
     /// The colour in an appearance, for Core Graphics: real colours in light, dimmed to 92% in dark,
     /// as `color(in:)` does for SwiftUI.
     nonisolated func cgColor(in appearance: Appearance) -> CGColor {

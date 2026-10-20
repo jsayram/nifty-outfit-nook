@@ -226,7 +226,7 @@ nonisolated enum PrivacyText {
     }
 }
 
-extension WebsiteLink {
+nonisolated extension WebsiteLink {
     var title: String {
         switch self {
         case .privacyPolicy:

@@ -16,7 +16,7 @@ nonisolated public enum OnboardingLaunchOptions: Hashable, Sendable {
 }
 
 #if DEBUG
-    extension OnboardingLaunchOptions {
+    nonisolated extension OnboardingLaunchOptions {
         /// The launch argument.
         public static let launchArgument = "-onboarding"
 

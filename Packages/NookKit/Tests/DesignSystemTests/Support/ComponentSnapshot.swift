@@ -20,7 +20,7 @@ enum SnapshotCanvas {
     }
 
     /// The iOS simulator runtime the reference images were recorded on, locally and on CI.
-    static let recordedSystemVersion = "26.5"
+    static let recordedSystemVersion = "27.0"
 }
 
 /// Light, dark, and the largest accessibility text size (in light).

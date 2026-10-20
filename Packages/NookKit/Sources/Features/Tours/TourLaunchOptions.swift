@@ -30,7 +30,7 @@ nonisolated public struct TourLaunchOptions: Hashable, Sendable {
 }
 
 #if DEBUG
-    extension TourLaunchOptions {
+    nonisolated extension TourLaunchOptions {
         /// The launch argument.
         public static let launchArgument = "-tour"
 

@@ -160,7 +160,7 @@ nonisolated enum FeedbackText {
     }
 }
 
-extension FeedbackKind {
+nonisolated extension FeedbackKind {
     /// "Something’s wrong", "An idea", "Other" (`feedback.html`).
     nonisolated var title: String {
         switch self {

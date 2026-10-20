@@ -176,7 +176,7 @@ struct LuggageTag: View {
 }
 
 /// The tag's outline: square at the bottom, the top corners clipped (`M8 0H80L88 8V42…`).
-private struct TagShape: Shape {
+private nonisolated struct TagShape: Shape {
     func path(in rect: CGRect) -> Path {
         let cut = rect.width * 8 / 88
         let round = rect.height * 4 / 46
