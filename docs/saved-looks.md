@@ -24,10 +24,12 @@ Top to bottom, as in `saved.html`:
 
 - **Saved Looks** in the serif title on the wall, and "5 looks". The bar carries "+ Make your own" (words and icon) and Profile.
 - **Looks · Pictures**, the same switch as Your looks' tabs.
-- **Search your looks.** Typed words match the look's name, its pieces' names, and the occasion, kinds and colours ("office", "skirt", "navy"). Every word has to match. Search waits until she pauses, as Closet's does.
+- **Search your looks.** Typed words match the look's name, its pieces' names and other names, and the occasion, kinds, types and colours ("office", "skirt", "loafers", "navy"). Every word has to match. Search waits until she pauses, as Closet's does.
 - **The filters** (LR-09): Tops, Bottoms, Dresses, Layers, Shoes, Bags (and Accessories if a look has one), then a named swatch for each colour in her saved looks. A chip and a swatch match one piece together, so Bottoms and Black finds black bottoms, not a look with a bottom and black shoes. Ideas count as pieces.
 - **"2 of 5 looks"** with **Clear**, while anything is set. Clear sits on this line rather than at the end of a chip row, so it never scrolls out of sight.
 - **The grid.** Each look is its bundle on a soft cream mat, with its name and "Office · Last worn 5 days ago" under it. Two or more columns of at least 150 points; one look per row with the bundle beside its name at the accessibility sizes. A piece that has left her closet is faded in the bundle (LR-16.4).
+
+**Earlier results (LR-06.4, Phase 21c).** Style Me keeps every result she didn't save as background history. They're never listed with her saved looks, but typed search finds them: under the matching saved looks, "Earlier results, not saved" with a line on what they are ("Looks Style Me made for you that you didn’t save. Open one to save it.") and the same grid. Chips and swatches narrow them too, but chips alone never bring them up. One opens on look detail with its occasion, version, "Made Oct 11" and "Not saved", the note "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on.", **Save look** and its pieces, and none of the buttons that change a saved look. Save look names it as Your looks would ("Pink & navy", "Casual look"), puts it in Saved Looks with today's date, shows "Saved to Saved Looks" with Undo, and the page turns into the saved look's. Opened any other way, an unsaved look is still "no longer saved".
 
 Nothing matches: "No saved looks match", the filters in words ("Bottoms · Black · “navy”") and Clear filters (LR-09.3). Nothing saved yet: "Nothing saved yet", three steps (Style Me from the laptop, Save look on Your looks, or Make your own) and "+ Make your own" (RD-08.4). Loading and a store failure have their own states, with Try again.
 
@@ -83,6 +85,7 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 ## Tests
 
 - `LookFilterTests`: chips and swatches alone and together, one piece matching both, search on names, pieces and extra words, everything combined, a purged piece.
+- `EarlierResultsTests` (21c): earlier results found only by typed search and never listed, narrowed by chips, counted as matches, opened with Save look, saved with a name and undone.
 - `SavedLooksModelTests`: saved looks only and newest saved first, the empty set, a store failure, search by name, piece and occasion, the search delay, filters with Clear and the summary, no matches, the choices, removed pieces, Delete look and the lasting Undo, the large set's speed.
 - `LookDetailModelTests`: the facts, a suitcase look, missing and failed, rename checks, Wear today and Undo (the look and its pieces), Worn today taken off, a removed piece skipped by Wear today, Delete look and Undo for a result and for her own look, removed and purged pieces, Swap in place and Undo, Swap's setup from the look's source.
 - `HomeFramedLooksTests`: the three newest saved looks, none, fewer than three, the pieces a frame shows.

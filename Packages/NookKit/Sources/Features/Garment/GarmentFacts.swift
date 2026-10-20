@@ -2,7 +2,8 @@ import DesignSystem
 import Models
 import SwiftUI
 
-/// The facts about a piece (`.facts` in `garment.html`): what it is, its colours, fit, seasons,
+/// The facts about a piece (`.facts` in `garment.html`): what it is and its type, its other
+/// names, its colours, fit, seasons,
 /// occasions, brand and size, whether she can wear it now, the saved looks that use it, and her
 /// notes. Rows have no boxes and no lines between them (RD-05); unknown facts are left out.
 struct GarmentFacts: View {
@@ -16,7 +17,15 @@ struct GarmentFacts: View {
         NookSection(String(localized: "Details", bundle: .module, comment: "Garment detail: heading over the facts")) {
             GarmentFactRow(
                 systemImage: "tag", label: String(localized: "Kind", bundle: .module, comment: "Garment fact label"),
-                value: text.kind, identifier: "kind")
+                value: text.kind, detail: text.subKind, identifier: "kind")
+            if let otherNames = text.otherNames {
+                GarmentFactRow(
+                    systemImage: "character.cursor.ibeam",
+                    label: String(
+                        localized: "Other names", bundle: .module,
+                        comment: "Garment fact label: more names search finds the piece by"),
+                    value: otherNames, identifier: "otherNames")
+            }
             if text.colors != nil || text.colorNote != nil {
                 GarmentFactRow(
                     systemImage: "paintpalette",

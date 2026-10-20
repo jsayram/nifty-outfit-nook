@@ -19,6 +19,11 @@ public enum StoreValidation {
         }
         let problems = GarmentRules.problems(in: garment)
         if !problems.isEmpty { throw .invalidDetails(problems) }
+        // Other names are kept trimmed and without repeats, and a type from another kind goes
+        // (Phase 21c). Nothing else changes here.
+        let details = (try? GarmentRules.checked(GarmentDetails(garment))) ?? GarmentDetails(garment)
+        garment.otherNames = details.otherNames
+        garment.subKind = details.subKind
         return garment
     }
 

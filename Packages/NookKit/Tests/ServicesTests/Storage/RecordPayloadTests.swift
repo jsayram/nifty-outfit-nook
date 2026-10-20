@@ -27,6 +27,12 @@ struct RecordPayloadTests {
     static let onboardingV1 = #"{"isCompleted":true,"startingCloset":"empty"}"#
     static let toursV1 = #"{"seenVersions":{"home":2},"showsTipsOnNewScreens":false}"#
 
+    // Payload version 2 (Phase 21c): garments and garment drafts gain `otherNames` and `subKind`.
+    static let garmentV2 =
+        #"{"addedAt":813672000,"availability":{"available":{}},"category":"layer","colors":["green"],"colorNote":"Sage","dressiness":0,"id":"g-sage","isArchived":false,"laundry":"clean","name":"Sage cardigan","notes":"","occasions":[],"otherNames":["Green cardigan","Cozy one"],"ownership":{"owned":{}},"photo":{"noPhoto":{}},"seasons":["fall","winter"],"subKind":"cardigan","warmth":2,"wornOn":[]}"#
+    static let garmentDraftV2 =
+        #"{"base":{"brand":"","colorNote":"","colors":[],"dressiness":1,"name":"","notes":"","occasions":[],"otherNames":[],"photo":{"noPhoto":{}},"seasons":["spring","summer","winter","fall"],"sizeLabel":"","warmth":1},"description":"","details":{"brand":"","category":"layer","colorNote":"","colors":[],"dressiness":1,"name":"Sage cardigan","notes":"","occasions":[],"otherNames":["Cozy one"],"photo":{"noPhoto":{}},"seasons":["spring","winter","summer","fall"],"sizeLabel":"","subKind":"cardigan","warmth":1},"savedAt":813672000,"step":"details","target":{"newPiece":{}}}"#
+
     private func decoded<Value: Codable & Equatable>(_ type: Value.Type, _ json: String) throws -> Value {
         let value = try RecordPayload.decode(type, from: Data(json.utf8), version: 1)
         // And it writes back to something that reads as the same value.
@@ -53,10 +59,30 @@ struct RecordPayloadTests {
         #expect(try decoded(StoredTours.self, Self.toursV1).seenVersions == ["home": 2])
     }
 
+    /// Version 1 garments and garment drafts read with no other names and no type.
+    @Test func version1GarmentsHaveNoOtherNamesOrType() throws {
+        let garment = try decoded(Garment.self, Self.garmentV1)
+        #expect(garment.otherNames.isEmpty && garment.subKind == nil)
+        let draft = try decoded(GarmentDraft.self, Self.garmentDraftV1)
+        #expect(draft.details.otherNames.isEmpty && draft.details.subKind == nil)
+        #expect(draft.base.otherNames.isEmpty && draft.base.subKind == nil)
+    }
+
+    @Test func version2PayloadsDecode() throws {
+        #expect(RecordPayload.currentVersion == 2)
+        let garment = try RecordPayload.decode(Garment.self, from: Data(Self.garmentV2.utf8), version: 2)
+        #expect(garment.otherNames == ["Green cardigan", "Cozy one"])
+        #expect(garment.subKind == .cardigan)
+        #expect(try RecordPayload.decode(Garment.self, from: try RecordPayload.encode(garment), version: 2) == garment)
+        let draft = try RecordPayload.decode(GarmentDraft.self, from: Data(Self.garmentDraftV2.utf8), version: 2)
+        #expect(draft.details.otherNames == ["Cozy one"] && draft.details.subKind == .cardigan)
+        #expect(draft.base.otherNames.isEmpty && draft.base.subKind == nil)
+    }
+
     /// A payload from a newer build is refused, never misread.
     @Test func aNewerPayloadVersionIsRefused() {
-        #expect(throws: RecordPayload.PayloadError.unknownVersion(2)) {
-            try RecordPayload.decode(FeedbackDraft.self, from: Data(Self.feedbackDraftV1.utf8), version: 2)
+        #expect(throws: RecordPayload.PayloadError.unknownVersion(3)) {
+            try RecordPayload.decode(FeedbackDraft.self, from: Data(Self.feedbackDraftV1.utf8), version: 3)
         }
         #expect(throws: RecordPayload.PayloadError.unknownVersion(0)) {
             try RecordPayload.decode(FeedbackDraft.self, from: Data(Self.feedbackDraftV1.utf8), version: 0)

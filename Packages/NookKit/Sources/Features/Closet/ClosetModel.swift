@@ -245,13 +245,14 @@ final class ClosetModel {
         let categoryWords = Self.categoryWords
         let colorWords = Self.colorWords
         let matching = filter.apply(to: garments, suitcases: allSuitcases) { garment in
-            (categoryWords[garment.category] ?? []) + garment.colors.compactMap { colorWords[$0] }
+            (categoryWords[garment.category] ?? []) + [garment.subKind?.title].compactMap { $0 }
+                + garment.colors.compactMap { colorWords[$0] }
         }
         shown = matching.compactMap { itemsByID[$0.id] }
     }
 
     /// The localized words a piece answers to in search besides its own text: its kind
-    /// ("Shoes", "Shoe") and its colours ("Black").
+    /// ("Shoes", "Shoe"), its type ("Loafers") and its colours ("Black").
     private static let categoryWords: [GarmentCategory: [String]] = Dictionary(
         uniqueKeysWithValues: GarmentCategory.allCases.map { ($0, [$0.chipTitle, $0.singularTitle]) })
     private static let colorWords: [ColorName: String] = Dictionary(

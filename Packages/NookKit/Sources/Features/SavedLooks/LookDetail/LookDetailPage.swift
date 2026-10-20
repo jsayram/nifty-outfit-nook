@@ -16,6 +16,8 @@ struct LookDetailActions {
     var retry: () -> Void = {}
     /// One of the look's try-on pictures (RD-08.2).
     var openPicture: (TryOnPicture.ID) -> Void = { _ in }
+    /// Save look, on an earlier result she didn't save (LR-06.4).
+    var saveLook: () -> Void = {}
 }
 
 /// Look detail's content, top to bottom (`look.html`): the name and its facts, the look large,
@@ -72,6 +74,38 @@ struct LookDetailPage: View {
 
     @ViewBuilder
     private func loaded(_ content: LookBundleContent) -> some View {
+        if model.isEarlierResult {
+            earlierResult(content)
+        } else {
+            saved(content)
+        }
+    }
+
+    /// An earlier result she didn't save (LR-06.4, opened from search): the look, what it is,
+    /// Save look, and its pieces. Nothing else changes it until it's saved.
+    @ViewBuilder
+    private func earlierResult(_ content: LookBundleContent) -> some View {
+        header
+        LookBundle(content, size: .large, title: model.name)
+        VStack(spacing: NookSpacing.small) {
+            Text(LookDetailText.earlierResultNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("lookDetail.earlierNote")
+            NookButton(LookDetailText.saveLook, systemImage: "heart", fillsWidth: true, action: actions.saveLook)
+                .accessibilityIdentifier("lookDetail.saveLook")
+        }
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            NookSectionHeader(LookDetailText.piecesHeading)
+            LookPieceList(
+                content: content, onFindOne: actions.findOne, onOpen: actions.openPiece, onSwapIt: actions.swapIt)
+        }
+    }
+
+    @ViewBuilder
+    private func saved(_ content: LookBundleContent) -> some View {
         header
         LookBundle(content, size: .large, title: model.name)
         if !content.removed.isEmpty {
