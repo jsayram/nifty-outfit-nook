@@ -97,7 +97,7 @@ nonisolated struct SleepyZ: Identifiable, Sendable {
     var shape: SleepyZShape { SleepyZShape(letter: self) }
 }
 
-struct SleepyZShape: Shape {
+nonisolated struct SleepyZShape: Shape {
     let letter: SleepyZ
 
     func path(in rect: CGRect) -> Path {

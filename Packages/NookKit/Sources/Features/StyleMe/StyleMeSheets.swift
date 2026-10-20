@@ -6,7 +6,7 @@ import SwiftUI
 // straight away, so closing a sheet keeps every other choice. Single choices close the sheet;
 // the Colour sheet and Other's words stay open until Close.
 
-extension StyleMeSheet {
+nonisolated extension StyleMeSheet {
     var title: String {
         switch self {
         case .source: String(localized: "Source", bundle: .module, comment: "Style Me sheet title")

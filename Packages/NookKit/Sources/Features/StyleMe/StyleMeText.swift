@@ -364,7 +364,7 @@ nonisolated enum StyleMeNoticeAction: String, Hashable, Sendable {
 
 // MARK: - Words for the request's values
 
-extension Comfort {
+nonisolated extension Comfort {
     /// Today's comfort, as on the Comfort sheet: "Fitted", "Comfortable", "Relaxed".
     var title: String {
         switch self {
@@ -375,7 +375,7 @@ extension Comfort {
     }
 }
 
-extension PieceMode {
+nonisolated extension PieceMode {
     /// Preferences' two values (LR-03).
     var title: String {
         switch self {
@@ -413,7 +413,7 @@ extension PieceMode {
     }
 }
 
-extension ColorStrength {
+nonisolated extension ColorStrength {
     var title: String {
         switch self {
         case .preferred: String(localized: "Preferred", bundle: .module, comment: "Colour sheet: how strongly")
@@ -422,7 +422,7 @@ extension ColorStrength {
     }
 }
 
-extension ColorScope {
+nonisolated extension ColorScope {
     /// The Applies to chips.
     var title: String {
         switch self {

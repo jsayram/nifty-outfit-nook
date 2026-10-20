@@ -68,10 +68,12 @@ public struct NookTourOverlay: View {
 
     private var stage: some View {
         NookTourLayout(target: target, safeArea: safeArea, cardWidth: Self.cardWidth(for: dynamicTypeSize)) {
-            // 0: the card, drawn over the dim. VoiceOver follows drawing order, so the card
-            // comes before the control's own button, which is drawn last (they never overlap).
+            // 0: the card, drawn over the dim. VoiceOver followed drawing order until iOS 27, which
+            // reads the control's own button first when it sits above the card, so the card also
+            // has the higher sort priority. They never overlap.
             NookTourCard(step: step, onNext: onNext, onBack: onBack, onSkip: onSkip)
                 .zIndex(1)
+                .accessibilitySortPriority(1)
             // 1: the dim, which takes every tap outside the spotlight.
             Color.nook.tourScrim
                 .contentShape(Rectangle())

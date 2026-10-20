@@ -39,9 +39,10 @@ Every issue fails the test unless `AuditExclusions` (in `NiftyOutfitNookUITests/
 | Dynamic Type | "Partially unsupported" only | Every font is a Dynamic Type text style (`NookTextStyle`); the audit flags the same chip on one screen and not another, and flags titles the AX5 walk shows at full size. System bar buttons do stop growing, by design, with the Large Content Viewer. A font that doesn't scale at all still fails |
 | Clipped text | Named screen and label, looked at in the screenshots | Fit and measurements' title (tight letter spacing, every letter visible), Add or remove on a suitcase, the Layers chip at AX5, and an element-less report on the welcome |
 | Clipped text | No element, while a quick tour shows | The screen under the dim is hidden from VoiceOver, so its words have no element; the card's words do, and still fail if clipped |
+| Clipped text | No element, at AX5 on Saved Looks, Pictures, Your looks and Your looks: Saved | New with the iOS 27.0 runtime (19 October 2026): the same code passed on iOS 26.5 with Xcode 27.1. Screenshots attached to each excused issue (iPhone 12, AX5) show the words whole; Pictures was checked on the Looks and Pictures switch it shares with Saved Looks |
 | Text VoiceOver can't reach | A tour is showing, Suitcases' hall, or words half under the tab bar | The tour is modal by design; the hall's luggage tags repeat the rows under them and are hidden on purpose; the half-covered words are an element, whole once scrolled |
 
-Found on the iOS 26.5 simulators (iPhone 12 and iPhone 17) with Xcode 26.6. A new Xcode can report different issues, so expect to look at this list again then.
+Found on the iOS 26.5 simulators (iPhone 12 and iPhone 17) with Xcode 26.6. Xcode 27.1 on iOS 27.0 reported the four element-less clipped-text issues in the table and nothing else new. A new Xcode can report different issues, so expect to look at this list again then.
 
 ## The iPhone 12 simulator
 

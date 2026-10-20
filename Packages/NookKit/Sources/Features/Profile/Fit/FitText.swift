@@ -324,7 +324,7 @@ nonisolated enum FitText {
     }
 }
 
-extension FitResult {
+nonisolated extension FitResult {
     /// "Fits well", "Too long" (PRD §10.1).
     nonisolated var title: String {
         switch self {

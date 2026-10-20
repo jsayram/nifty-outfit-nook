@@ -289,7 +289,7 @@ about 4 MB at 2x.
   placeholder instead, so components check `nookStaticRendering` and draw plain SwiftUI that looks the same. The
   real text field and scroll views are checked by the UI tests and on the simulator.
 - **Determinism.** Colour scheme, text size, locale and scale (2x) are set on the view, not taken from the device.
-  The references were recorded on the iOS 26.5 simulator, which `scripts/simulator.sh` picks by default locally and
+  The references were recorded on the iOS 27.0 simulator (Xcode 27.1; 13 images were re-recorded from iOS 26.5 on 19 October 2026), which `scripts/simulator.sh` picks by default locally and
   on CI, and a test fails with a clear message on any other runtime. The comparison allows 0.5% of pixels to differ
   and each pixel to be 98% alike, which absorbs anti-aliasing differences between Macs but still catches a changed
   colour, shadow or line of text.

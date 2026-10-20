@@ -42,7 +42,7 @@ struct SavedPictureItem: Identifiable, Hashable {
     }
 }
 
-extension TryOnLinks.Status {
+nonisolated extension TryOnLinks.Status {
     /// The look, when it's still in Saved Looks.
     var look: Look? {
         switch self {

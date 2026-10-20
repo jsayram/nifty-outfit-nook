@@ -41,11 +41,20 @@ struct CutoutFixtureTests {
     }
 
     @Test func theStandInStopsWhenCancelledWhileWaiting() async {
-        let task = Task { () async throws(CutoutError) -> CutoutResult in
-            try await StandInCutoutService(latency: .seconds(10)).cutout(from: Data())
+        // The task returns the error instead of throwing it. With Xcode 27.1 a typed-throws closure
+        // passed to `Task` sometimes handed back the wrong error (the first case, "unreadable
+        // image", about one run in twenty), and `#expect(throws:)` crashed the test process
+        // describing it.
+        let task = Task { () async -> CutoutError? in
+            do throws(CutoutError) {
+                _ = try await StandInCutoutService(latency: .seconds(10)).cutout(from: Data())
+                return nil
+            } catch {
+                return error
+            }
         }
         task.cancel()
-        await #expect(throws: CutoutError.cancelled) { try await task.value }
+        #expect(await task.value == .cancelled)
     }
 
     @Test func fixtureServicesHaveTheStandIn() async throws {

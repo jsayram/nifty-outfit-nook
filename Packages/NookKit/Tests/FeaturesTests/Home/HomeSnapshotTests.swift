@@ -123,7 +123,7 @@ struct HomeSnapshotTests {
 
     @Test func runsOnTheRecordedRuntime() {
         #expect(
-            UIDevice.current.systemVersion == "26.5", "Snapshots were recorded on iOS 26.5. Run them on that simulator."
+            UIDevice.current.systemVersion == "27.0", "Snapshots were recorded on iOS 27.0. Run them on that simulator."
         )
     }
 

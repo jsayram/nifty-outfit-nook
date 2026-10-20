@@ -75,7 +75,7 @@ nonisolated struct AppVersion: Hashable, Sendable {
     }
 }
 
-extension FeedbackDiagnostics {
+nonisolated extension FeedbackDiagnostics {
     /// The details Send feedback can add, read from this app and this device: the version,
     /// the build, the iOS version and the model identifier (such as "iPhone13,2"). Nothing else.
     @MainActor static var current: FeedbackDiagnostics {

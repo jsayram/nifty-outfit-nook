@@ -3,7 +3,7 @@ import Models
 // The words screens use for the fixed garment vocabulary. Models keeps cases as plain words with
 // no display text, so the labels live here, localized.
 
-extension GarmentCategory {
+nonisolated extension GarmentCategory {
     /// The piece chip's label (LR-09): "Tops", "Bottoms" and so on.
     var chipTitle: String {
         switch self {
@@ -32,7 +32,7 @@ extension GarmentCategory {
     }
 }
 
-extension ColorName {
+nonisolated extension ColorName {
     /// The colour swatch's name (LR-09.2), so a swatch is never told apart by colour alone.
     var title: String {
         switch self {
@@ -60,7 +60,7 @@ extension ColorName {
     }
 }
 
-extension GarmentFit {
+nonisolated extension GarmentFit {
     /// How a piece is cut, on garment detail: "Fitted", "Regular", "Relaxed".
     var title: String {
         switch self {
@@ -71,7 +71,7 @@ extension GarmentFit {
     }
 }
 
-extension Season {
+nonisolated extension Season {
     var title: String {
         switch self {
         case .spring: String(localized: "Spring", bundle: .module, comment: "Season")
@@ -82,7 +82,7 @@ extension Season {
     }
 }
 
-extension Occasion {
+nonisolated extension Occasion {
     nonisolated var title: String {
         switch self {
         case .office: String(localized: "Office", bundle: .module, comment: "Occasion")
@@ -96,7 +96,7 @@ extension Occasion {
     }
 }
 
-extension Dressiness {
+nonisolated extension Dressiness {
     /// How dressy a piece is, on Add a piece: "Casual", "Smart", "Dressy".
     var title: String {
         switch self {
@@ -107,7 +107,7 @@ extension Dressiness {
     }
 }
 
-extension Warmth {
+nonisolated extension Warmth {
     /// How warm a piece is to wear, on Add a piece: "Light", "Medium", "Warm".
     var title: String {
         switch self {

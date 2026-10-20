@@ -94,7 +94,7 @@ nonisolated struct SourcePlate: Hashable, Sendable {
     }
 }
 
-extension HamperState {
+nonisolated extension HamperState {
     /// The hamper plate's second line: "Off", "All clean" or "2 to wash" (RD-11).
     nonisolated var plateText: String {
         switch self {

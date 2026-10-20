@@ -10,7 +10,7 @@ This repo holds the shipping app (the Xcode project, Swift packages, tests and C
 
 ## Requirements
 
-- Xcode 26.6 or later (Swift 6.3), with an iOS 26 simulator installed.
+- Xcode 27.1 or later (Swift 6.4), with the iOS 27.0 simulator runtime installed (the app still targets iOS 26.0). Tests run on iOS 27.0 because it's the only runtime on GitHub's `xcode-27` runners.
 - Nothing else to install. The app has no third-party dependencies, and swift-format ships with Xcode. The tests use one test-only package, `swift-snapshot-testing`, which Xcode fetches on first build (see `docs/decisions/0002-snapshot-testing.md`).
 
 ## Open, build and run
@@ -43,7 +43,7 @@ The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commi
 
 On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet speed checks allow three times their local bound. Each speed check also takes the fastest of three runs, so a stall from tests running in parallel doesn't fail it.
 
-`scripts/test.sh` uses the iOS 26.5 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests`, `IPadStyleMeAndSavedTests` and `IPadKeyboardTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=27`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
+`scripts/test.sh` uses the iOS 27.0 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests`, `IPadStyleMeAndSavedTests` and `IPadKeyboardTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=26.5`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator. The scheme has a second plan, `UITests.xctestplan`, with only the UI tests, so a UI-only run doesn't build the package test targets.
 
@@ -167,14 +167,14 @@ Rulesets on `main` and `develop` enforce this for everyone, administrators inclu
 
 GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`. Its three checks are all required:
 
-- `swift-format`: `scripts/format.sh` on a `macos-26` runner.
-- `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 26.6:
+- `swift-format`: `scripts/format.sh` on an `xcode-27` runner.
+- `build-and-test`: passes only when these parallel jobs all pass, all with Xcode 27.1:
   - `build-and-archive` checks the two `Package.resolved` files agree, builds for testing (the UI test plan, then the full plan) and uploads what it built as artifacts of the run, makes an unsigned Release archive for a real iPhone and checks what would ship (`scripts/check-archive.sh`, which also runs `scripts/check-release.sh` on the device binary), then runs `CatalogTests`, `ProfileTests` and `CutoutBenchTests`;
   - `ui-tests (ui-home-and-settings)`, `(ui-add-and-tours)` and `(ui-rest)` run the other phone UI tests in three parts, by test class, and `ui-tests (ui-ipad)` runs the iPad UI tests on an iPad simulator, then every package test target. These start with `build-and-archive`, boot their simulator while it builds, then download its build (`scripts/wait-for-artifact.sh`, this run's artifacts only) and test without building. `ui-rest` is every UI test class the others don't name, so a new class is never skipped (a new iPad class goes in `ui-ipad`). The workflow lists each part's classes with their CI times; move a class when one part grows well past the others. The free plan runs five macOS jobs at once, so there are five, balanced to about the same length.
 
   A pull request that only changes docs (Markdown files outside the source folders, `docs/`, `website/`) skips those jobs, and `build-and-test` passes without them. The small `changes` job decides, from the files the pull request changes. Pushes to `develop` and `main` always run everything.
 
-  Tests run through `scripts/test.sh` on the iOS 26.5 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
+  Tests run through `scripts/test.sh` on the iOS 27.0 simulator. A failed UI test runs once more on CI only (`-retry-tests-on-failure -test-iterations 2`), because the hosted simulator sometimes fails to launch the app; a test that fails twice still fails the job. The UI tests' shared waits are in `NiftyOutfitNookUITests/UITestSupport.swift`. Builds only use the versions in `Package.resolved`. A failed test job uploads its test results and any failed snapshots. Nothing is cached between runs, so a pull request can't leave build output for a later run to pick up.
 
 - `gitleaks`: a scan of the full git history, using a pinned gitleaks release checked against its SHA-256.
 
