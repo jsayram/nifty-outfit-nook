@@ -180,10 +180,12 @@ final class AuditExclusions {
             // the screenshot; the porch drawing (hidden from VoiceOver) runs off both edges by
             // design, roof tiles and all.
             if screen == "Welcome" { return "no element; the welcome's words are whole" }
-            // Xcode 27.1's audit, at AX5, also reports clipped text with no element on these
-            // screens (19 October 2026). The screenshot of Saved Looks at AX5 shows its title,
-            // the Looks and Pictures switch and the rest whole; the others are the same kinds
-            // of words (titles, the Saved switch). The audit gives no element to check them by.
+            // Xcode 27.1's audit on the iOS 27.0 runtime, at AX5, also reports clipped text with no
+            // element on these screens (19 October 2026). The same app code passed this audit on
+            // the iOS 26.5 runtime with Xcode 27.1, so it's the new runtime's audit and not a
+            // change in our screens. Each time an issue is excused here the test attaches a
+            // screenshot ("Excused clipped text: <screen>"); the ones from iPhone 12 runs show
+            // every word whole, with system hyphenation ("Inter-view") at AX5.
             return Self.elementlessClippedScreens.contains(screen)
                 ? "no element; Xcode 27.1 reports this at AX5 and the words are whole" : nil
         }

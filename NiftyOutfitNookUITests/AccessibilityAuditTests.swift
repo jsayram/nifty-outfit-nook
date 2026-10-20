@@ -157,6 +157,13 @@ class AccessibilityAuditTests: XCTestCase {
         try app.performAccessibilityAudit(for: .all) { issue in
             if exclusions.reason(for: issue) == nil {
                 failures.append(exclusions.describe(issue))
+            } else if issue.auditType == .textClipped, issue.element == nil {
+                // Evidence for the exclusion: what the screen looked like when the audit said
+                // its text was clipped.
+                let evidence = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+                evidence.name = "Excused clipped text: \(screen)"
+                evidence.lifetime = .keepAlways
+                self.add(evidence)
             }
             // Handled here either way: the failures are reported below with what they're about,
             // which the audit's own message ("Contrast failed") leaves out.
