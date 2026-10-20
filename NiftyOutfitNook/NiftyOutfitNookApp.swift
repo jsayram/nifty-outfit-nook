@@ -99,6 +99,9 @@ struct NiftyOutfitNookApp: App {
         }
         let onboarding = storage.onboarding
         let tours = storage.tours
+        // Her photos (Phase 22a): `Application Support/Photos`, the folder backups carry.
+        let photos = PhotoFileStore.app
+        let photoEraser = PhotoFilesEraser(files: photos)
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
@@ -106,13 +109,18 @@ struct NiftyOutfitNookApp: App {
             services: { closet in
                 switch offersSampleCloset ? closet : .empty {
                 case .empty:
-                    // Her own closet, kept in the store. Delete my data also deletes the
-                    // migration's safety copy.
+                    // Her own closet, kept in the store, with her own photos from the camera and
+                    // the system picker, kept without their metadata (Phase 22a). Delete my data
+                    // also deletes the migration's safety copy and the photo files.
                     var services = FixtureServices.make(
                         configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
                         stores: storage.stores)
+                    services.photos = LocalPhotoIntake(files: photos)
+                    services.images = StoredPhotoProvider(files: photos, fallback: services.images)
                     services.deletion = LocalDataDeletion(
-                        stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
+                        stores: storage.erasableData + [
+                            (.closet, photoEraser), (.profile, tours), (.profile, onboarding),
+                        ])
                     return services
                 case .sample, nil:
                     // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
@@ -124,7 +132,8 @@ struct NiftyOutfitNookApp: App {
                         profileSettings: closet == nil ? nil : storage.profileSettings,
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
                     services.deletion = LocalDataDeletion(
-                        stores: storage.erasableData + LocalDataDeletion.stores(of: services))
+                        stores: storage.erasableData + [(.closet, photoEraser)] + LocalDataDeletion.stores(of: services)
+                    )
                     return services
                 }
             },
@@ -133,7 +142,7 @@ struct NiftyOutfitNookApp: App {
             offersSampleCloset: offersSampleCloset,
             // The Stage A `UserDefaults` suite moves into the store once.
             prepare: { AppStateDefaultsImport.run(into: storage.container) },
-            erasedOnReset: storage.erasableData.map(\.1))
+            erasedOnReset: storage.erasableData.map(\.1) + [photoEraser])
     }
 }
 

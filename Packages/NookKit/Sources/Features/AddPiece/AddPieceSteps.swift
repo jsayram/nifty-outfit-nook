@@ -3,8 +3,9 @@ import Models
 import SwiftUI
 
 /// "How would you like to add it?" (`garment-edit.html`): Take photo, Choose from Photos, Paste
-/// and Describe in words. The photo choices go through the stand-in until Phase 22a, which the
-/// line under them says, and its loading and "couldn't be read" states.
+/// and Describe in words. With Stage A's stand-in the line under them says photos aren't built;
+/// with real photos (Phase 22a) Paste isn't offered and the line says how photos are kept. Then
+/// the loading, "couldn't be read" and "couldn't be saved" states.
 struct AddPieceChoices: View {
     let model: GarmentEditorModel
     let actions: GarmentEditorActions
@@ -35,6 +36,24 @@ struct AddPieceChoices: View {
                 .accessibilityIdentifier("addPiece.error.describe")
             }
             .padding(.top, NookSpacing.large)
+        case .notSaved:
+            NookErrorState(
+                String(
+                    localized: "That photo couldn’t be saved", bundle: .module,
+                    comment: "Add a piece: the photo was read but couldn't be written"),
+                message: String(
+                    localized: "Your iPhone may be out of space. Nothing was saved.", bundle: .module,
+                    comment: "Add a piece: after a photo couldn't be saved"),
+                retryTitle: String(
+                    localized: "Try another photo", bundle: .module, comment: "Button: back to the photo choices"),
+                retry: actions.tryAnotherPhoto
+            ) {
+                NookButton(
+                    String(localized: "Describe in words", bundle: .module, comment: "Button: adds a piece by words"),
+                    systemImage: "pencil", kind: .soft, fillsWidth: true, action: actions.describeInWords
+                )
+            }
+            .padding(.top, NookSpacing.large)
         case .idle:
             choices
         }
@@ -45,9 +64,13 @@ struct AddPieceChoices: View {
             photoChoices
                 .tourAnchor(
                     AddPieceTour.Anchor.photo,
-                    label: String(
-                        localized: "Take photo, Choose from Photos or Paste", bundle: .module,
-                        comment: "VoiceOver name of Add a piece's three photo choices, in its tour"))
+                    label: model.photoSources.contains(.paste)
+                        ? String(
+                            localized: "Take photo, Choose from Photos or Paste", bundle: .module,
+                            comment: "VoiceOver name of Add a piece's three photo choices, in its tour")
+                        : String(
+                            localized: "Take photo or Choose from Photos", bundle: .module,
+                            comment: "VoiceOver name of Add a piece's two photo choices, in its tour"))
             Button(action: actions.describeInWords) {
                 NookRow(
                     String(localized: "Describe in words", bundle: .module, comment: "Add a piece choice"),
@@ -63,10 +86,17 @@ struct AddPieceChoices: View {
                 label: String(localized: "Describe in words", bundle: .module, comment: "Add a piece choice"),
                 action: actions.describeInWords)
             Label {
-                Text(
-                    "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos.",
-                    bundle: .module, comment: "Add a piece: under the choices, while photos are a stand-in"
-                )
+                Group {
+                    if model.usesSystemPicker {
+                        Text(
+                            "The app only sees the photos you pick or take, and keeps its own copy on this iPhone without the location.",
+                            bundle: .module, comment: "Add a piece: under the choices, with real photos (Phase 22a)")
+                    } else {
+                        Text(
+                            "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos.",
+                            bundle: .module, comment: "Add a piece: under the choices, while photos are a stand-in")
+                    }
+                }
                 .fixedSize(horizontal: false, vertical: true)
             } icon: {
                 Image(systemName: "info.circle")
@@ -77,7 +107,7 @@ struct AddPieceChoices: View {
             .padding(.horizontal, NookSpacing.small)
             .padding(.top, NookSpacing.small)
             .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("addPiece.standInNote")
+            .accessibilityIdentifier(model.usesSystemPicker ? "addPiece.photoNote" : "addPiece.standInNote")
         }
     }
 
@@ -97,12 +127,14 @@ struct AddPieceChoices: View {
                     localized: "Only the picture you pick is shared with the app", bundle: .module,
                     comment: "Add a piece choice: under Choose from Photos"),
                 systemImage: "photo")
-            choice(
-                .paste, title: String(localized: "Paste", bundle: .module, comment: "Add a piece choice"),
-                subtitle: String(
-                    localized: "A photo you copied from somewhere else", bundle: .module,
-                    comment: "Add a piece choice: under Paste"),
-                systemImage: "doc.on.clipboard")
+            if model.photoSources.contains(.paste) {
+                choice(
+                    .paste, title: String(localized: "Paste", bundle: .module, comment: "Add a piece choice"),
+                    subtitle: String(
+                        localized: "A photo you copied from somewhere else", bundle: .module,
+                        comment: "Add a piece choice: under Paste"),
+                    systemImage: "doc.on.clipboard")
+            }
         }
     }
 

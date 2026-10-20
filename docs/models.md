@@ -19,7 +19,7 @@ Every type is a `Sendable`, `Codable`, `Hashable` value. Records that have an id
 
 ## The types
 
-**Garment** (Personal; `notes` is Sensitive). Her name for it, category (top, bottom, dress, layer, shoes, bag, accessory), colours (named families, main first, with her own words for the shade in `colorNote`), fit (fitted, regular, relaxed), dressiness (casual, smart, dressy), warmth, seasons, occasions, brand, size label, notes and a photo reference (none, sample art, or a stored photo later). Then the states, each separate because each changes for its own reason:
+**Garment** (Personal; `notes` is Sensitive). Her name for it, category (top, bottom, dress, layer, shoes, bag, accessory), colours (named families, main first, with her own words for the shade in `colorNote`), fit (fitted, regular, relaxed), dressiness (casual, smart, dressy), warmth, seasons, occasions, brand, size label, notes and a photo reference (none, sample art, or a stored photo: since Phase 22a, her own photo in `Application Support/Photos`, kept without its metadata). Then the states, each separate because each changes for its own reason:
 
 - `ownership`: owned, purchased (with arrival: not arrived, arrived, unknown), wishlisted, or no longer owned ("I don't have it any more", LR-16).
 - `laundry`: clean or dirty. Only matters while Track laundry is on, and kept while it's off (RD-11).
@@ -126,7 +126,7 @@ protocol ImageProvider: Sendable { func imageData(for: PhotoReference, maxPixelS
 
 // Phase 7b, Add a piece
 protocol DraftStore: Sendable { drafts, draft(for:), save, discard }      // unsaved adds and edits
-protocol PhotoIntake: Sendable { func photo(from: PhotoSource) async throws(PhotoIntakeError) -> PhotoReference }
+protocol PhotoIntake: Sendable { var sources: [PhotoSource] { get }; var usesSystemPicker: Bool { get }; func photo(from: PhotoSource) async throws(PhotoIntakeError) -> PhotoReference; func keep(_: Data, from: PhotoSource) async throws(PhotoIntakeError) -> PhotoReference; func discard(_: PhotoReference) async }
 protocol GarmentDescriptionReader: Sendable { func suggestions(for: String) async throws(DescriptionError) -> [GarmentSuggestion] }
 
 // Phase 8a, cutouts
@@ -231,7 +231,7 @@ Pick a set with `-fixtures <set>`, and optionally options after colons: a behavi
 
 `draft=add` or `draft=edit` puts an unsaved draft in the draft store at launch, as if the app had been closed in the middle of Add a piece (the sage cardigan) or Edit (the navy dress pants renamed). `draft=look` puts a half-built Make your own look in the look draft store ("Pink for Friday": the pink shirt and the navy dress pants, Phase 11). The sample closet's drafts live in memory, so UI tests use it after a relaunch. It doesn't apply to her own closet in the real store, where drafts are kept anyway.
 
-Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample picture for every source, no permission asked) and `WordMatchDescriptionReader` (Describe in words, a deterministic word matcher on the phone with no style rules).
+Add a piece's stand-ins: `InMemoryDraftStore`, `StandInPhotoIntake` (a sample picture for every source, no permission asked; the debug sample closet and the tests still use it, while her own closet and Release builds use `LocalPhotoIntake` from Phase 22a, `docs/add-a-piece.md`) and `WordMatchDescriptionReader` (Describe in words, a deterministic word matcher on the phone with no style rules).
 
 Dates in the demo and large sets are relative to launch time, so "Last worn" reads naturally; tests pass a fixed date.
 

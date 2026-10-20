@@ -257,6 +257,11 @@ private struct PhotoRow: View {
                     message: String(
                         localized: "That photo couldn’t be read. Nothing changed.", bundle: .module,
                         comment: "Add a piece form: the photo stand-in failed"))
+            } else if model.photoState == .notSaved {
+                FieldProblemNote(
+                    message: String(
+                        localized: "That photo couldn’t be saved. Your iPhone may be out of space. Nothing changed.",
+                        bundle: .module, comment: "Add a piece form: the photo was read but couldn't be written"))
             }
         }
     }

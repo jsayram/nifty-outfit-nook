@@ -31,6 +31,8 @@ final class GarmentEditorModel {
         case loading
         /// The photo couldn't be read. Nothing changed.
         case failed
+        /// The photo was read but couldn't be saved, for example on a full iPhone. Nothing changed.
+        case notSaved
     }
 
     /// Describe in words: the suggestions' state.
@@ -95,6 +97,12 @@ final class GarmentEditorModel {
     private(set) var suggestions: [SuggestionRow] = []
     private(set) var suggestionState: SuggestionState = .idle
     private(set) var photoState: PhotoState = .idle
+    /// The photo choices to offer: the stand-in's three, or Take photo and Choose from Photos
+    /// when real photos are on (Phase 22a).
+    private(set) var photoSources: [PhotoSource] = PhotoSource.allCases
+    /// True when the choices open the system camera and photo picker (Phase 22a). False for
+    /// Stage A's stand-in, which the line under the choices explains.
+    private(set) var usesSystemPicker = false
     /// The form's problems. Shown after the first Save, then kept up to date as she types.
     private(set) var problems = GarmentProblems()
     private(set) var showsProblems = false
@@ -111,6 +119,7 @@ final class GarmentEditorModel {
     /// True once she went through Describe in words, so Back from the form returns there.
     private var cameFromWords: Bool
     private var drafts: (any DraftStore)?
+    private var photos: (any PhotoIntake)?
     private var draftTask: Task<Void, Never>?
     /// Set while the model fills itself in, so loading isn't saved as her change.
     private var isRestoring = false
@@ -146,6 +155,9 @@ final class GarmentEditorModel {
 
     func load(from services: NookServices) async {
         drafts = services.drafts
+        photos = services.photos
+        photoSources = services.photos.sources
+        usesSystemPicker = services.photos.usesSystemPicker
         let load = loads.begin()
         phase = .loading
         do {
@@ -203,6 +215,7 @@ final class GarmentEditorModel {
 
     /// Discard on "Continue where you left off?": the draft goes, and the form starts fresh.
     func discardPendingDraft() async {
+        if let pendingDraft { await discardUnsavedPhoto(pendingDraft.details.photo, base: pendingDraft.base.photo) }
         pendingDraft = nil
         await removeDraft()
         phase = .editing
@@ -233,24 +246,64 @@ final class GarmentEditorModel {
         step = .words
     }
 
-    /// The photo step. On the first step a photo moves on to the form; on the form it only
-    /// changes the picture.
+    /// The photo step with Stage A's stand-in, which hands back a photo by itself. On the first
+    /// step a photo moves on to the form; on the form it only changes the picture.
     func choosePhoto(from source: PhotoSource, using intake: any PhotoIntake) async {
         guard photoState != .loading else { return }
         photoState = .loading
         do {
-            let photo = try await intake.photo(from: source)
-            details.photo = photo
-            photoState = .idle
-            if step == .choose {
-                cameFromWords = false
-                step = .details
-            }
-        } catch .cancelled {
-            photoState = .idle
+            await use(try await intake.photo(from: source), using: intake)
+        } catch {
+            fail(error)
+        }
+    }
+
+    /// The photo step with real photos (Phase 22a): the photo she picked or took is read, then
+    /// `intake` keeps a copy without its metadata. What she picked is never kept as it came.
+    func keepPhoto(_ picked: PickedPhoto, using intake: any PhotoIntake) async {
+        guard photoState != .loading else { return }
+        photoState = .loading
+        let data: Data
+        do {
+            data = try await picked.load()
         } catch {
             photoState = .failed
+            return
         }
+        do {
+            await use(try await intake.keep(data, from: picked.source), using: intake)
+        } catch {
+            fail(error)
+        }
+    }
+
+    private func use(_ photo: PhotoReference, using intake: any PhotoIntake) async {
+        let replaced = details.photo
+        details.photo = photo
+        photoState = .idle
+        if step == .choose {
+            cameFromWords = false
+            step = .details
+        }
+        // A photo picked earlier in this form, and never saved, has nothing left pointing to it.
+        if replaced != photo { await discardUnsavedPhoto(replaced, base: base.photo, using: intake) }
+    }
+
+    private func fail(_ error: PhotoIntakeError) {
+        switch error {
+        case .cancelled: photoState = .idle
+        case .notSaved: photoState = .notSaved
+        case .unreadable: photoState = .failed
+        }
+    }
+
+    /// Removes a photo this form added and won't save. The piece's saved photo is never touched
+    /// here; removing replaced or deleted pieces' photos is Phase 22b's.
+    private func discardUnsavedPhoto(
+        _ photo: PhotoReference, base: PhotoReference, using intake: (any PhotoIntake)? = nil
+    ) async {
+        guard photo != base, let intake = intake ?? photos else { return }
+        await intake.discard(photo)
     }
 
     /// Try another photo, after one couldn't be read.
@@ -364,6 +417,7 @@ final class GarmentEditorModel {
     /// Cancel, after she confirmed: the work and its draft go.
     func discardChanges() async {
         draftTask?.cancel()
+        await discardUnsavedPhoto(details.photo, base: base.photo)
         await removeDraft()
     }
 

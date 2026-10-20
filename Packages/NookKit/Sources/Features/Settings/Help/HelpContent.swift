@@ -62,10 +62,15 @@ nonisolated enum HelpContent {
                     localized:
                         "In Closet, tap Add a piece. Choose a photo, or describe the piece in words. Only a name and a kind are needed.",
                     bundle: .module, comment: "Help: Add a piece"),
-                note: String(
-                    localized:
-                        "Details you don’t know can stay empty. This test build uses sample photos instead of your camera.",
-                    bundle: .module, comment: "Help: Add a piece, the quieter line")),
+                note: keepsChanges
+                    ? String(
+                        localized:
+                            "Details you don’t know can stay empty. The app only sees the photos you pick or take, and keeps its own copy without the location.",
+                        bundle: .module, comment: "Help: Add a piece, the quieter line, with real photos (Phase 22a)")
+                    : String(
+                        localized:
+                            "Details you don’t know can stay empty. This test build uses sample photos instead of your camera.",
+                        bundle: .module, comment: "Help: Add a piece, the quieter line")),
             HelpTopic(
                 id: "suitcases", section: .everyday,
                 title: String(localized: "Suitcases", bundle: .module, comment: "Help topic"),

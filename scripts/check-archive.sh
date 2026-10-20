@@ -9,7 +9,8 @@
 # settings, plus his team. It checks:
 # - Info.plist: bundle ID, version and a whole-number build number, ITSAppUsesNonExemptEncryption
 #   is NO, the icon and launch screen are set, and there's no App Transport Security key, no
-#   usage-description (permission) key and no background mode;
+#   background mode, and no usage-description (permission) key but the camera's (Phase 22a), with
+#   the words in closet/compliance/PERMISSIONS.md;
 # - the privacy manifest is in the app and declares only UserDefaults, reason CA92.1, and (since
 #   Phase 21a, for the migration's free-space check) disk space, reason E174.1;
 # - the entitlements file asks for Data Protection (complete) and nothing else;
@@ -72,10 +73,18 @@ if info.get("CFBundleIcons", {}).get("CFBundlePrimaryIcon", {}).get("CFBundleIco
     problems.append("no AppIcon in CFBundleIcons")
 if info.get("UILaunchScreen", {}).get("UIColorName") != "LaunchBackground":
     problems.append("the launch screen isn't the LaunchBackground colour")
+# The only permission the app asks for, with its words (Phase 22a). Picking photos uses the
+# system picker, which needs no key.
+allowed_permissions = {
+    "NSCameraUsageDescription": "Take photos of your clothes to add them to your closet.",
+}
+for key, words in allowed_permissions.items():
+    if info.get(key) != words:
+        problems.append(f"Info.plist {key} is {info.get(key)!r}, expected {words!r}")
 for key in info:
     if key == "NSAppTransportSecurity":
         problems.append("Info.plist has an App Transport Security key")
-    if key.endswith("UsageDescription"):
+    if key.endswith("UsageDescription") and key not in allowed_permissions:
         problems.append(f"Info.plist asks for a permission: {key}")
     if key == "UIBackgroundModes":
         problems.append("Info.plist has background modes")

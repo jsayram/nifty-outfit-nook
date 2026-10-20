@@ -14,7 +14,7 @@ Spec: amendment RD-03 (Name on your sign), RD-06 (the try-on photo lives in Prof
 | `Features/Profile/ProfileScreen.swift`, `ProfilePage.swift`, `ProfileHeader.swift` | Profile: the wall with her sign, the rows, where each row goes |
 | `Features/Profile/ProfileModel.swift` | The one model for Profile and Fit: loading, and every change as a read-change-save |
 | `Features/Profile/ProfileSheets.swift` | Name on your sign, and the Preferences and repeat sheets |
-| `Features/Profile/TryOnPhotoSheet.swift` | Your try-on photo, Stage A |
+| `Features/Profile/TryOnPhotoSheet.swift` | Your try-on photo: her own from the system picker (Phase 22a), or Stage A's example |
 | `Features/Profile/Fit/` | Fit and measurements: page, screen, the measurement sheet, the fitting piece sheet, formatting and words |
 | `Features/Shared/HiddenWhenInactive.swift` | `.hiddenWhenInactive()`, the cover the app switcher sees |
 
@@ -73,6 +73,18 @@ A full-height sheet. It says what the photo is for (try-on pictures, once they'r
 
 Choose shows what she'd pick in the finished app (a clear, full-length photo, standing naturally in fitted clothes, in good light) and an example, with **Use example photo**. Remove asks first: "Remove your try-on photo? Try-on pictures you saved will stay." No camera, no photo library, no Info.plist keys and no permission prompt. The example is a sample photo of a woman standing (AI-generated, not a real person and not her) from the sample wardrobe, 9:16 on the try-on backdrop with the Simulated badge and "Example photo · Simulated" under it. Without a photo to show (`-fixtures demo:photos=drawn`) it is the backdrop with a photo symbol, as in 12b.
 
+## Your try-on photo, her own (Phase 22a)
+
+Where real photos are on (her own closet and every Release build, `NookServices.photos.usesSystemPicker`), the sheet has **Choose from Photos** (Change photo once she has one) instead of the example. It opens the system photo picker straight away: no permission, no Info.plist key, and the app sees only the photo she picks. A line above the points says what a good photo is ("Pick a clear, full-length photo of you standing naturally in fitted clothes, in good light."), and the note at the bottom says "The app only sees the photo you pick. It keeps its own copy on this iPhone, without the location, and nothing is uploaded." The camera for the try-on photo, with its outline and pose hints, is Phase 33b.
+
+The photo goes through the same `PhotoIntake.keep` as a garment photo (`docs/add-a-piece.md`): `PhotoCleaner` makes an upright copy with no location or other metadata, and only that is written, to `Application Support/Photos` with Data Protection `complete`. `Profile.tryOnPhoto` points to it. Her photo shows 9:16 on the sheet, covered in the app switcher like the example ("Your try-on photo" to VoiceOver).
+
+- **Change photo** keeps the new copy, saves the profile, then deletes the old photo's file. If the profile can't be saved, the new copy is deleted and the old photo stays.
+- **Remove photo** asks first, as before, then deletes the file. Saved try-on pictures stay.
+- **Delete my data** deletes the whole photo folder.
+
+`ProfileModelTests` cover keeping, replacing and removing (the old file deleted each time), a photo that can't be kept, and a profile that can't be saved.
+
 ## Sensitive data
 
 - **App switcher.** The Fit page, the measurement and fitting piece sheets and the example photo are covered while the scene isn't active (`hiddenWhenInactive`). Checked on the iOS 26.5 simulator by reading the app's own snapshots in `Library/SplashBoard/Snapshots` after pressing Home: the cover is what iOS keeps, in light and dark. The first try left the measurements header visible through the navigation bar's blur, so the cover now runs under the bars.
@@ -119,5 +131,6 @@ A setting that doesn't save shows "Couldn't save that. Try again." in its sheet,
 - **14b (done):** Track laundry, Accessibility, Help, Send feedback, Privacy and terms, Delete my data (`docs/settings.md`). The default wardrobe view stays with Style Me's remembered source (Phase 13).
 - **16b (done):** App tours, under Help (`docs/tours.md`).
 - **21a (done):** the whole profile kept across launches in the real store, with Data Protection `complete`. A device still has to confirm the protection class on the store files.
-- **22a, 33:** a real try-on photo through the system picker, its metadata stripped, then the image service behind its gate.
+- **22a (done):** a real try-on photo through the system picker, its metadata stripped (above).
+- **33:** the image service behind its gate, and the in-app camera with its outline (33b).
 - **34:** fit checks that use the pieces that fit her well (LR-12).
