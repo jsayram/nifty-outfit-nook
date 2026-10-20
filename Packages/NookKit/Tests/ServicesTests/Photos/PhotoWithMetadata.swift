@@ -2,6 +2,7 @@ import CoreGraphics
 import Fixtures
 import Foundation
 import ImageIO
+import Testing
 import UniformTypeIdentifiers
 
 /// Test photos that carry what a phone photo can: a GPS position, the camera and lens, the time,
@@ -109,5 +110,22 @@ enum PhotoWithMetadata {
     /// The planted strings found anywhere in the file's bytes.
     static func plantedTextFound(in data: Data) -> [String] {
         plantedText.filter { data.range(of: Data($0.utf8)) != nil }
+    }
+}
+
+/// Whether HEIC photos can be decoded in the tests. On a device they can. The simulator's HEVC
+/// decoder can't be trusted: on CI's iOS 27.0 simulator the HEIC cases never finished, holding
+/// threads until the whole test run stalled, as the HEIC cutouts did in the sample wardrobe
+/// (IOS_APP_PLAYBOOK, images). So the HEIC cases run on a device, with the cutout tests
+/// (`docs/cutout-feasibility.md`), and JPEG and PNG cover the cleaning everywhere.
+enum HEICSupport {
+    static let skipReason: Comment = "HEIC decoding isn't reliable on the simulator. Run on a device."
+
+    static var isReliable: Bool {
+        #if targetEnvironment(simulator)
+            false
+        #else
+            true
+        #endif
     }
 }

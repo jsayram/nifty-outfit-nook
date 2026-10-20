@@ -27,7 +27,7 @@ struct LocalPhotoIntakeTests {
     @Test func aPickedPhotoIsKeptWithoutItsLocation() async throws {
         let folder = Folder()
         let intake = LocalPhotoIntake(files: folder.files)
-        let photo = try #require(PhotoWithMetadata.make(.heic))
+        let photo = try #require(PhotoWithMetadata.make(HEICSupport.isReliable ? .heic : .jpeg))
 
         let reference = try await intake.keep(photo, from: .library)
 

@@ -12,8 +12,8 @@ import UniformTypeIdentifiers
 struct PhotoCleanerTests {
     /// The formats the picker hands over with `preferredItemEncoding: .current`: HEIC from the
     /// camera, JPEG from older photos and other apps, PNG from screenshots. The HEIC is a fixed
-    /// file, since the simulator can't write HEIC.
-    static let formats: [UTType] = [.heic, .jpeg, .png]
+    /// file, since the simulator can't write HEIC, and its cases run on a device only (`HEICSupport`).
+    static let formats: [UTType] = HEICSupport.isReliable ? [.heic, .jpeg, .png] : [.jpeg, .png]
 
     @Test(arguments: formats)
     func theTestPhotoReallyCarriesALocation(_ type: UTType) throws {
@@ -69,7 +69,8 @@ struct PhotoCleanerTests {
         #expect(properties[kCGImagePropertyPixelWidth] as? Int == stored.height)
     }
 
-    @Test func theCopyIsAJPEG() throws {
+    @Test(.enabled(if: HEICSupport.isReliable, HEICSupport.skipReason))
+    func aHEICPhotoBecomesAJPEG() throws {
         let clean = try PhotoCleaner.clean(try #require(PhotoWithMetadata.make(.heic)))
         let source = try #require(CGImageSourceCreateWithData(clean.data as CFData, nil))
         #expect(CGImageSourceGetType(source) as String? == UTType.jpeg.identifier)
