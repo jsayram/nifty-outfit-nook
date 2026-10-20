@@ -28,13 +28,31 @@ struct GarmentGrid: View {
     let open: (ClosetItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.closetIsStillImage) private var isStillImage
 
     var body: some View {
         switch GarmentGridLayout(dynamicTypeSize) {
         case .rows:
-            LazyVStack(alignment: .leading, spacing: NookSpacing.large) {
+            if isStillImage {
+                // A still image measures lazy stacks from estimates (Phases 6, 12a).
+                VStack(alignment: .leading, spacing: NookSpacing.large) {
+                    ForEach(items) { item in
+                        cell(item, style: .row)
+                    }
+                }
+            } else {
+                LazyVStack(alignment: .leading, spacing: NookSpacing.large) {
+                    ForEach(items) { item in
+                        cell(item, style: .row)
+                    }
+                }
+            }
+        case .grid(let minimum) where isStillImage:
+            // A still image measures a lazy grid from estimates, so its height varied between runs
+            // (Phase 21a; `StillAdaptiveGrid`).
+            StillAdaptiveGrid(minimum: minimum, spacing: NookSpacing.small, rowSpacing: 14, alignsTop: true) {
                 ForEach(items) { item in
-                    cell(item, style: .row)
+                    cell(item, style: .tile)
                 }
             }
         case .grid(let minimum):
