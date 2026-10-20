@@ -157,10 +157,10 @@ struct LookBundleSnapshotTests {
             .environment(\.horizontalSizeClass, sizeClass)
             .environment(\.displayScale, Self.scale)
             .environment(\.locale, TestTime.locale)
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = Self.scale
-        renderer.proposedSize = ProposedViewSize(width: width, height: nil)
-        guard let image = stillImage(from: renderer, scale: Self.scale) else {
+        guard
+            let image = stillImage(
+                of: content, scale: Self.scale, proposedSize: ProposedViewSize(width: width, height: nil))
+        else {
             Issue.record("ImageRenderer produced no image for \(name)")
             return
         }

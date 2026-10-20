@@ -296,6 +296,11 @@ about 4 MB at 2x.
 - **Recording.** A missing reference is recorded and the test fails once. To re-record everything after a deliberate
   change, run `TEST_RUNNER_SNAPSHOT_TESTING_RECORD=all scripts/test.sh`, look at every changed PNG in the diff, then
   run `scripts/test.sh` again. On CI a failure uploads the new images and diffs with the test results.
+- **Blank renders on CI** (PR #65, October 2026). On a cold CI runner `ImageRenderer` sometimes returns a picture with
+  nothing drawn (`segmented-ipad` was fully transparent at the right size, with "image provider timed out" in the
+  log), or one that won't encode to PNG (`piecesIPad`). Draw through `stillImage(of:scale:proposedSize:)`
+  (`Tests/NookTestSupport/StillImage.swift`): it copies the picture into a plain bitmap and, if no pixel is visible,
+  draws again with a new renderer, since a renderer keeps its first picture. A new snapshot helper should use it too.
 - **iPad screens** (Phases 15a and 15b, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
   2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.
 - **Snapshot policy** (after the Stage A audit). The PNGs live in git, so every one costs every clone, and every
