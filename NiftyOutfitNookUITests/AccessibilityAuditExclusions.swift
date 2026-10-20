@@ -164,6 +164,11 @@ final class AuditExclusions {
         "Add a piece: the form": ("Layers", "chip as wide as its word at AX5, whole on screen"),
     ]
 
+    /// Screens where Xcode 27.1's audit reports clipped text with no element.
+    private static let elementlessClippedScreens: Set<String> = [
+        "Saved Looks", "Pictures", "Your looks", "Your looks: Saved",
+    ]
+
     private func clippedTextReason(for issue: XCUIAccessibilityAuditIssue) -> String? {
         guard let element = issue.element else {
             // Under a quick tour the screen is hidden from VoiceOver, so its words have no
@@ -174,7 +179,13 @@ final class AuditExclusions {
             // Its only words are the title, the line under it and the two buttons, all whole in
             // the screenshot; the porch drawing (hidden from VoiceOver) runs off both edges by
             // design, roof tiles and all.
-            return screen == "Welcome" ? "no element; the welcome's words are whole" : nil
+            if screen == "Welcome" { return "no element; the welcome's words are whole" }
+            // Xcode 27.1's audit, at AX5, also reports clipped text with no element on these
+            // screens (19 October 2026). The screenshot of Saved Looks at AX5 shows its title,
+            // the Looks and Pictures switch and the rest whole; the others are the same kinds
+            // of words (titles, the Saved switch). The audit gives no element to check them by.
+            return Self.elementlessClippedScreens.contains(screen)
+                ? "no element; Xcode 27.1 reports this at AX5 and the words are whole" : nil
         }
         guard let known = Self.wholeTexts[screen], known.label == element.label else { return nil }
         return known.why
