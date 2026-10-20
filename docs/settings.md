@@ -95,18 +95,19 @@ Send with nothing written shows "Write a few words to send the note." under the 
 1. A butter note: a test build with no account, nothing sent by the app, and no tracking or analytics.
 2. **Stays on this iPhone**: pieces with their pictures and details; suitcases and laundry marks; saved looks and try-on pictures; her name, measurements, weight and fit; Preferences and what Style Me remembers. Then: Fit and measurements and try-on pictures are hidden in the app switcher, and what's kept when the app closes. For her own closet (Phase 21a): "Everything you add or change is kept on this iPhone when the app closes, until you delete it. Delete my data removes all of it." For the debug sample closet, as before: the name on her sign, Preferences, Avoid repeating outfits for and Track laundry, that she set it up, which closet she chose and which tips she has seen, with everything else back to how it started (Phase 17, Stage A audit). The screen picks from `NookServices.keepsChanges`; Help's "Your data" does the same.
 3. **Later, sent only if you allow it**: Style Me and swaps, Try-on pictures, Weather, each with what it would send and what it never sends, from DATA_MAP. "None of these is in this test build. Each will ask first, and allowing one never allows another."
-4. **Your data**: Delete my data. Phase 21b adds Backups (Export a copy, Check a copy, Restore from a copy) and the iCloud row here, as designed in `docs/decisions/0004-backup-and-recovery.md`.
+4. **Your data**: Backups (Phase 21b, only where her closet is in the store: her own closet and every Release build, not the debug sample closet), then Delete my data. The iCloud row joins them once sync is allowed (`docs/decisions/0004-backup-and-recovery.md`).
 5. **Policies**: Privacy policy and Terms of use, "On the website", opened in the system's in-app Safari view at `https://niftyoutfitnook.pages.dev/privacy` and `/terms`, with "The full privacy policy and terms are still being written." Those pages don't exist yet, and the site currently answers both addresses with its coming-soon page. Phase 19b writes them.
 
-**Not built from the mockup:** the six permission switches (nothing is sent, so a switch would control nothing; each comes with its feature in 19b, 24a, 27a, 29, 31 and 33), and Export a copy (designed in Phase 20b, `docs/decisions/0004-backup-and-recovery.md`; built in 21b).
+**Not built from the mockup:** the six permission switches (nothing is sent, so a switch would control nothing; each comes with its feature in 19b, 24a, 27a, 29, 31 and 33). Export a copy is on its own Backups screen (21b).
 
-## Backups and iCloud (designed in 20b, built in 21b)
+## Backups and iCloud (designed in 20b, Backups built in 21b)
 
-Not in the app yet. The full design is `docs/decisions/0004-backup-and-recovery.md`; this is where each piece will sit.
+The full design is `docs/decisions/0004-backup-and-recovery.md`; its "Built in Phase 21b" section says what was built and what waits.
 
-- **Backups**, under Privacy and terms (Your data) and on Profile: **Export a copy** (a preview of what goes with counts and size, a passphrase she makes or the app makes for her, then the Files sheet to save it wherever she picks), **Check a copy** (opens a file with its passphrase and runs every restore check, changing nothing), **Restore from a copy** (checks, a preview against her closet now, then Replace my closet or Add what's missing), and **Undo restore** for 7 days. The file is a `.nookbackup` Apple Encrypted Archive; the app never stores the passphrase and can't recover it.
-- **iCloud**, on Profile and in Privacy and terms: off by default, and not shown at all until 21b's restore and two-device tests pass. The on sheet is the 19b wording with the Advanced Data Protection line; the status shows Saved on this iPhone, Waiting to upload (with counts), Couldn't upload and Last confirmed by iCloud. Turning it off keeps everything on the phone and asks whether to keep or delete the iCloud copy. Measurements, weight, fit notes and the try-on photo stay on the phone until Jose decides how App Review 5.1.3(ii) applies.
-- **Onboarding:** "I already use Nifty Outfit Nook" offers Get my closet from iCloud and Restore from a backup file. Whether onboarding also gets an iCloud step is a Jose decision in 0004.
+- **Backups** (built), under Privacy and terms (Your data) and on Profile (`Settings/Backups`): **Export a copy** (what goes in it with counts, measurements and the try-on photo on their own lines, and the estimated size; a passphrase the app makes, 24 letters and digits in groups of four with Copy passphrase, which copies it to this iPhone only for 2 minutes, or her own of at least 12 characters typed twice; then the Files sheet saves it wherever she picks, and Check this copy), **Check a copy** (the Files picker, her passphrase, every restore check, "This copy works", changing nothing), **Restore from a copy** (the same checks, then the copy's date and counts against her closet now, then Replace my closet with this copy, asked once more when the phone isn't empty, or Add what's missing), and **Undo restore** for 7 days. After a restore or an undo the app builds every screen again on the restored closet. The file is a `.nookbackup` Apple Encrypted Archive; the app never stores the passphrase and can't recover it. A wrong passphrase says "That passphrase doesn't open this copy." with no attempt limit.
+- **Recovery screen** (built): when the store can't be opened, Export a copy saves the raw store and photos, encrypted the same way, for a later version to restore. Try again and Send feedback aren't there yet (the coordinator already retries at each launch, and feedback needs services the screen can't open).
+- **iCloud** (not built), on Profile and in Privacy and terms: off by default, and not shown at all until the restore and two-device tests pass. The iCloud container and test accounts are Jose's setup, still to do. The on sheet is the 19b wording with the Advanced Data Protection line; the status shows Saved on this iPhone, Waiting to upload (with counts), Couldn't upload and Last confirmed by iCloud. Turning it off keeps everything on the phone and asks whether to keep or delete the iCloud copy. Measurements, weight, fit notes and the try-on photo stay on the phone until Jose decides how App Review 5.1.3(ii) applies.
+- **Onboarding:** the welcome has **Restore from a backup file** under "I already use Nifty Outfit Nook" (built in 21b; the restore finishes onboarding on her own closet). Get my closet from iCloud comes with sync. Whether onboarding also gets an iCloud step is a Jose decision in 0004.
 
 ## Delete my data
 
@@ -136,9 +137,9 @@ protocol DataDeletionService: Sendable {
 - Sign in with Apple token revocation, and the note that deleting doesn't cancel a subscription (30a);
 - the same screen, which already lists parts from the service and reports pending ones.
 
-Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again when she's back on Home (`docs/tours.md`). Since 16b the words under Your profile name them. Phase 20b designed the iCloud part (below and `docs/decisions/0004-backup-and-recovery.md` §6); 21b builds it.
+Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again when she's back on Home (`docs/tours.md`). Since 16b the words under Your profile name them. Since 21b it also deletes what Backups keeps on the phone: her photo files, a checked copy waiting in staging, unsaved exports, the restore's safety copy and journal, deletion markers and the copies' versions kept for review. Exports she saved elsewhere stay where she put them. Phase 20b designed the iCloud part (below and `docs/decisions/0004-backup-and-recovery.md` §6); it comes with sync.
 
-### Her iCloud copy (designed in 20b, built in 21b)
+### Her iCloud copy (designed in 20b, not built yet)
 
 Once iCloud sync exists, Delete my data also deletes her private iCloud copy. In order: stop sync, save a content-free pending deletion, delete the `Closet` and `Me` zones and wait for iCloud to confirm, erase everything on the phone (stores, images, safety copies, restore and export staging, the sync state), then clear the pending deletion. A third zone, `Control`, keeps one record with a generation number, a reason and a date, so a device that was offline learns not to upload its old closet.
 
@@ -182,7 +183,7 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 1. **App tours was hidden until 16b**, not shown as "coming soon". It's on Profile now.
 2. **Accessibility has no in-app options**, only the system's settings with what the app does and Open Settings, since nothing in the spec lists any.
 3. **Send feedback goes through the share sheet**, with no reply email field, until a support queue exists. The app details are three lines, off by default.
-4. **Privacy and terms has no permission switches** and no Export, since nothing is sent and export isn't built. Export comes in 21b (designed in 0004).
+4. **Privacy and terms has no permission switches**, since nothing is sent. Export is on Backups (21b).
 5. **Delete my data is two steps** (the explaining screen, then one question), not type-to-confirm, which is a lot of typing for something already explained and asked.
 6. **Delete my data is on Profile as well as Privacy and terms.** The mockup has it only under Privacy and terms; 14a put the row on Profile, and Apple wants deletion easy to find.
 7. **Deleting resets to a fresh Home**, the same as `-fixtures empty`. Since Phase 17 it goes back to onboarding instead.
@@ -193,7 +194,7 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 - **16a (done):** tour progress erased by Delete my data, with the profile (`docs/tours.md`).
 - **16b (done):** App tours on Profile, and Delete my data naming the tours.
 - **19b:** the privacy policy and terms pages on the website, and the real wording of Privacy and terms.
-- **20b (designed), 21b (built):** Backups (Export a copy, Check a copy, Restore from a copy, Undo restore), the iCloud switch and status, and the iCloud copy in Delete my data. The design, flows and test plan are in `docs/decisions/0004-backup-and-recovery.md`. Export is encrypted with a passphrase (an Apple Encrypted Archive); PRD 15.4's unencrypted archive is superseded (decision D10).
+- **20b (designed), 21b (built):** Backups (Export a copy, Check a copy, Restore from a copy, Undo restore). Still to come: the iCloud switch and status, and the iCloud copy in Delete my data. The design, flows and test plan are in `docs/decisions/0004-backup-and-recovery.md`. Export is encrypted with a passphrase (an Apple Encrypted Archive); PRD 15.4's unencrypted archive is superseded (decision D10).
 - **21a (done):** stores on disk, so deletion lasts across launches, and the feedback note is kept.
 - **24c:** account and server deletion, with pending parts and token revocation.
 - **A backend phase not yet placed:** the private support queue Send feedback should reach.

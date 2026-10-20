@@ -294,8 +294,8 @@ enum RecentlyDeletedText {
         if preview.pictureCount > 0 {
             lines.append(
                 String(
-                    localized: "Try-on pictures with it in stay until you delete them.", bundle: .module,
-                    comment: "Delete for good: try-on pictures showing the piece are kept"))
+                    localized: "Try-on pictures with it in are deleted too.", bundle: .module,
+                    comment: "Delete for good: try-on pictures showing the piece go with it"))
         }
         return lines.joined(separator: "\n\n")
     }

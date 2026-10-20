@@ -22,6 +22,8 @@ struct ProfileActions {
 /// Separate from `ProfileScreen` so snapshot tests can draw it from a model.
 struct ProfilePage: View {
     let model: ProfileModel
+    /// Backups shows when her closet is in the store (Phase 21b).
+    var showsBackups = false
     var actions = ProfileActions()
 
     @Environment(\.closetIsStillImage) private var isStillImage
@@ -125,7 +127,7 @@ struct ProfilePage: View {
 
     private var help: some View {
         group(ProfileText.helpSection) {
-            ForEach(ProfileDestination.helpAndPrivacy, id: \.self) { destination in
+            ForEach(ProfileDestination.helpAndPrivacy(showsBackups: showsBackups), id: \.self) { destination in
                 row(
                     destination.title, systemImage: destination.systemImage,
                     identifier: "profile.\(destination.identifier)"

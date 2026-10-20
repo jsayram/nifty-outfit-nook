@@ -81,7 +81,7 @@ The photo goes through the same `PhotoIntake.keep` as a garment photo (`docs/add
 
 - **Change photo** keeps the new copy, saves the profile, then deletes the old photo's file. If the profile can't be saved, the new copy is deleted and the old photo stays.
 - **Remove photo** asks first, as before, then deletes the file. Saved try-on pictures stay.
-- **Delete my data** deletes the whole photo folder.
+- **Delete my data** deletes the whole photo folder, and an export carries the photo (Phase 21b).
 
 `ProfileModelTests` cover keeping, replacing and removing (the old file deleted each time), a photo that can't be kept, and a profile that can't be saved.
 

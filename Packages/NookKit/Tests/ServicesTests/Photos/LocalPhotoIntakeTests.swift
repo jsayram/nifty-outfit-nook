@@ -121,16 +121,18 @@ struct LocalPhotoIntakeTests {
         #expect(files.url(for: "0f8fad5b-d9cb-469f-a165-70867728950e") != nil)
     }
 
-    @Test func deleteMyDataRemovesEveryPhoto() async throws {
+    /// Her photos go where backups look for them, so exports carry them and Delete my data
+    /// (`BackupDataEraser`) removes them.
+    @Test func photosLiveInTheFolderBackupsCarry() async throws {
+        #expect(PhotoFileStore.app.directory == BackupLocation.app.photos)
         let folder = Folder()
         let intake = LocalPhotoIntake(files: folder.files)
-        let photo = try #require(PhotoWithMetadata.make(.jpeg))
-        _ = try await intake.keep(photo, from: .library)
-        _ = try await intake.keep(photo, from: .library)
-        try await PhotoFilesEraser(files: folder.files).eraseAll()
-        #expect(!FileManager.default.fileExists(atPath: folder.files.directory.path))
-        // Erasing again, with nothing there, is fine.
-        try await PhotoFilesEraser(files: folder.files).eraseAll()
+        let reference = try await intake.keep(try #require(PhotoWithMetadata.make(.jpeg)), from: .library)
+        guard case .stored(let id) = reference else {
+            Issue.record("Expected a stored photo")
+            return
+        }
+        #expect(PhotoFiles(directory: folder.files.directory).exists(id.rawValue))
     }
 
     private struct Fallback: ImageProvider {

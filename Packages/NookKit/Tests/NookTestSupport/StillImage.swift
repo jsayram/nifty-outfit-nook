@@ -8,8 +8,10 @@ import UIKit
 /// snapshot's data could not be loaded": swift-snapshot-testing turns the new image into PNG
 /// data before comparing it pixel by pixel, and that step failed for the renderer's own image
 /// (PR #59, Phase 20a). A bitmap made here always encodes, and its pixels are the renderer's.
+/// Shared here since Phase 21b, when `ComponentSnapshotTests.iPad` hit the same failure: every
+/// snapshot helper should draw through it.
 @MainActor
-func stillImage<Content: View>(from renderer: ImageRenderer<Content>, scale: CGFloat) -> UIImage? {
+public func stillImage<Content: View>(from renderer: ImageRenderer<Content>, scale: CGFloat) -> UIImage? {
     guard let image = renderer.cgImage, let space = CGColorSpace(name: CGColorSpace.sRGB),
         let context = CGContext(
             data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: 0, space: space,

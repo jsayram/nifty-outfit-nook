@@ -397,6 +397,29 @@
         }
       }
     },
+    "%lld pieces in it were deleted for good, so they stay deleted." : {
+      "comment" : "Restore preview: pieces that won't come back",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld piece in it was deleted for good, so it stays deleted."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pieces in it were deleted for good, so they stay deleted."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld pieces in the wash" : {
       "comment" : "Laundry: under the title, how many pieces are dirty",
       "localizations" : {
@@ -535,6 +558,52 @@
         }
       }
     },
+    "%lld things in it point to a piece or photo it doesn’t have. They show as missing." : {
+      "comment" : "Restore preview: references that don't resolve",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld thing in it points to a piece or photo it doesn’t have. It shows as missing."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld things in it point to a piece or photo it doesn’t have. They show as missing."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld things were different in the copy. This iPhone’s versions stayed." : {
+      "comment" : "Restore: done, conflicts kept for review",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld thing was different in the copy. This iPhone’s version stayed."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld things were different in the copy. This iPhone’s versions stayed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld to wash" : {
       "comment" : "Hamper plate: how many pieces are dirty",
       "localizations" : {
@@ -566,6 +635,17 @@
     },
     "A closer look" : {
       "comment" : "Closet tour on iPad, step 3 title: the piece beside the grid"
+    },
+    "A copy of your closet in one file, locked with a passphrase. Keep it somewhere safe." : {
+      "comment" : "Backups: the line under the title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A copy of your closet in one file, locked with a passphrase. Keep it somewhere safe."
+          }
+        }
+      }
     },
     "A different outfit didn’t come through. Nothing was charged." : {
       "comment" : "Banner over results when Try a different outfit fails"
@@ -674,6 +754,17 @@
     },
     "A top" : {
       "comment" : "What a look needs"
+    },
+    "About %@" : {
+      "comment" : "Export a copy: the file's estimated size",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About %@"
+          }
+        }
+      }
     },
     "About this piece" : {
       "comment" : "Add a piece: details step title",
@@ -823,6 +914,17 @@
     "Add to a suitcase" : {
       "comment" : "Button on garment detail (Phase 13)"
     },
+    "Add what’s missing" : {
+      "comment" : "Restore preview: the Add what's missing button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add what’s missing"
+          }
+        }
+      }
+    },
     "Add your clothes" : {
       "comment" : "Closet tour, step 1 title"
     },
@@ -854,6 +956,17 @@
     },
     "Adds it to the look." : {
       "comment" : "Make your own look: hint on a piece"
+    },
+    "Adds pieces, looks and suitcases you don’t have here. Nothing here is removed or changed; where a piece differs, this iPhone’s version stays." : {
+      "comment" : "Restore preview: under Add what's missing",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds pieces, looks and suitcases you don’t have here. Nothing here is removed or changed; where a piece differs, this iPhone’s version stays."
+          }
+        }
+      }
     },
     "Afterwards" : {
       "comment" : "Delete my data: section header"
@@ -900,6 +1013,17 @@
     },
     "An idea" : {
       "comment" : "Send feedback: kind chip"
+    },
+    "And %lld in Recently deleted" : {
+      "comment" : "Backups: pieces in Recently deleted, under the piece count",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And %lld in Recently deleted"
+          }
+        }
+      }
     },
     "Answers, and where to ask" : {
       "comment" : "App tours: what Help's tour covers"
@@ -1030,6 +1154,17 @@
     "Backpack" : {
       "comment" : "A suitcase picture"
     },
+    "Backups" : {
+      "comment" : "Backups: screen title and its row",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups"
+          }
+        }
+      }
+    },
     "Bag" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -1159,6 +1294,17 @@
     },
     "Bringing a piece back" : {
       "comment" : "App tours: what Recently deleted's tour covers"
+    },
+    "Brings back a closet from a copy you exported. You see what’s in it first." : {
+      "comment" : "Backups: what Restore from a copy does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brings back a closet from a copy you exported. You see what’s in it first."
+          }
+        }
+      }
     },
     "Brown" : {
       "comment" : "Colour name",
@@ -1347,8 +1493,41 @@
     "Check %@ ready to wear" : {
       "comment" : "Styling step 1: how many pieces can be used"
     },
+    "Check a copy" : {
+      "comment" : "Backups: check row and sheet title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check a copy"
+          }
+        }
+      }
+    },
     "Check the pieces ready to wear" : {
       "comment" : "Styling step 1, before the count is known"
+    },
+    "Check this copy" : {
+      "comment" : "Export a copy: done, check the file opens",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check this copy"
+          }
+        }
+      }
+    },
+    "Checking every file in the copy…" : {
+      "comment" : "Check or Restore: working",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking every file in the copy…"
+          }
+        }
+      }
     },
     "Checking the weather…" : {
       "comment" : "Weather sheet, while it loads",
@@ -1579,6 +1758,28 @@
     },
     "Continue your look?" : {
       "comment" : "Make your own look: draft card title"
+    },
+    "Copied for 2 minutes, on this iPhone only" : {
+      "comment" : "Toast after copying the passphrase",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied for 2 minutes, on this iPhone only"
+          }
+        }
+      }
+    },
+    "Copy passphrase" : {
+      "comment" : "Export a copy: copies the generated passphrase",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy passphrase"
+          }
+        }
+      }
     },
     "Couldn’t save that. Try again." : {
       "comment" : "Profile toast: a setting didn't save"
@@ -2119,8 +2320,30 @@
     "Everything here is optional. It stays private, on this iPhone." : {
       "comment" : "Fit and measurements: under the title"
     },
+    "Everything in the app, in one file, locked with a passphrase you choose. It doesn’t update itself: export again to keep it current." : {
+      "comment" : "Backups: what Export a copy does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything in the app, in one file, locked with a passphrase you choose. It doesn’t update itself: export again to keep it current."
+          }
+        }
+      }
+    },
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
+    },
+    "Everything on this iPhone now is replaced by the copy. You can undo it from Backups for 7 days." : {
+      "comment" : "Restore: confirm Replace, message",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything on this iPhone now is replaced by the copy. You can undo it from Backups for 7 days."
+          }
+        }
+      }
     },
     "Everything you add is kept on this iPhone when the app closes, until you delete it. Delete my data in Profile removes all of it." : {
       "comment" : "Onboarding privacy: what's kept across launches, in a build with no sample closet",
@@ -2172,6 +2395,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Explains laundry tracking."
+          }
+        }
+      }
+    },
+    "Export" : {
+      "comment" : "Export a copy: the button that makes the file",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export"
+          }
+        }
+      }
+    },
+    "Export a copy" : {
+      "comment" : "Backups: export row and sheet title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export a copy"
+          }
+        }
+      }
+    },
+    "Export a copy, or restore one" : {
+      "comment" : "Privacy and terms and Profile: the line under Backups",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export a copy, or restore one"
           }
         }
       }
@@ -2313,6 +2569,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For a day inside, whatever it’s like out."
+          }
+        }
+      }
+    },
+    "For a new iPhone, or to go back. What’s here now is kept for 7 days, so you can undo." : {
+      "comment" : "Restore preview: under Replace",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For a new iPhone, or to go back. What’s here now is kept for 7 days, so you can undo."
           }
         }
       }
@@ -2707,6 +2974,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In suitcases:"
+          }
+        }
+      }
+    },
+    "In the copy" : {
+      "comment" : "Restore preview: header over the copy's counts",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the copy"
           }
         }
       }
@@ -3440,6 +3718,17 @@
         }
       }
     },
+    "Make one for me" : {
+      "comment" : "Export a copy: generated passphrase choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make one for me"
+          }
+        }
+      }
+    },
     "Make the name yours" : {
       "comment" : "Suitcase tour, step 1 title"
     },
@@ -3463,6 +3752,17 @@
     "Makes it the source for Style Me." : {
       "comment" : "Hint on a source in Suitcases"
     },
+    "Makes sure a copy opens with its passphrase. Changes nothing." : {
+      "comment" : "Backups: what Check a copy does",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Makes sure a copy opens with its passphrase. Changes nothing."
+          }
+        }
+      }
+    },
     "Making a picture" : {
       "comment" : "Try it on sheet, while making"
     },
@@ -3471,6 +3771,17 @@
     },
     "Making a suitcase and choosing one" : {
       "comment" : "App tours: what Suitcases' tour covers"
+    },
+    "Making your copy…" : {
+      "comment" : "Export a copy: while the file is written",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Making your copy…"
+          }
+        }
+      }
     },
     "Mark %@ clean" : {
       "comment" : "Laundry: marks one piece clean"
@@ -4174,6 +4485,17 @@
     "On" : {
       "comment" : "A switch's value on a row"
     },
+    "On this iPhone now" : {
+      "comment" : "Restore preview: header over the phone's counts",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On this iPhone now"
+          }
+        }
+      }
+    },
     "On Your looks, tap Save look." : {
       "comment" : "Saved Looks empty state: step 2"
     },
@@ -4602,6 +4924,17 @@
         }
       }
     },
+    "Passphrase" : {
+      "comment" : "Export a copy: her own passphrase field",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passphrase"
+          }
+        }
+      }
+    },
     "Paste" : {
       "comment" : "Add a piece choice",
       "localizations" : {
@@ -4807,6 +5140,17 @@
     "Puts back the look as it was before your last change." : {
       "comment" : "VoiceOver hint on Undo under a changed look"
     },
+    "Puts back your closet as it was before the restore on %@. Possible until %@." : {
+      "comment" : "Backups: what Undo restore does, with dates",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puts back your closet as it was before the restore on %@. Possible until %@."
+          }
+        }
+      }
+    },
     "Ready for outfit ideas?" : {
       "comment" : "Style Me tour, step 3 title"
     },
@@ -4921,6 +5265,28 @@
     "Rename look" : {
       "comment" : "Sheet title"
     },
+    "Replace my closet with this copy" : {
+      "comment" : "Restore preview: the Replace button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace my closet with this copy"
+          }
+        }
+      }
+    },
+    "Replace your closet?" : {
+      "comment" : "Restore: confirm Replace, title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace your closet?"
+          }
+        }
+      }
+    },
     "Replay the tips for any screen" : {
       "comment" : "Profile row: under App tours"
     },
@@ -4951,6 +5317,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restore %@"
+          }
+        }
+      }
+    },
+    "Restore from a backup file" : {
+      "comment" : "Onboarding: the welcome's button to restore a copy on a new iPhone",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from a backup file"
+          }
+        }
+      }
+    },
+    "Restore from a copy" : {
+      "comment" : "Backups: restore row and sheet title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from a copy"
+          }
+        }
+      }
+    },
+    "Restoring your closet…" : {
+      "comment" : "Restore: working",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring your closet…"
           }
         }
       }
@@ -5955,6 +6354,17 @@
     "Thank you" : {
       "comment" : "Send feedback: after sending"
     },
+    "That copy isn’t open any more. Pick it again." : {
+      "comment" : "Backups: the checked copy was cleared",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That copy isn’t open any more. Pick it again."
+          }
+        }
+      }
+    },
     "That didn’t save. Nothing changed." : {
       "comment" : "Toast when a change to a piece couldn't be saved",
       "localizations" : {
@@ -5980,8 +6390,30 @@
         }
       }
     },
+    "That didn’t work, and nothing changed. Try again." : {
+      "comment" : "Backups: something else went wrong",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That didn’t work, and nothing changed. Try again."
+          }
+        }
+      }
+    },
     "That didn’t work. Try again." : {
       "comment" : "Onboarding: finishing failed, under the button"
+    },
+    "That file isn’t a Nifty Outfit Nook copy." : {
+      "comment" : "Backups: the picked file isn't a backup",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That file isn’t a Nifty Outfit Nook copy."
+          }
+        }
+      }
     },
     "That is you" : {
       "comment" : "Home tour, step 4 title on the iPad, at large text sizes and sideways"
@@ -5991,6 +6423,17 @@
     },
     "That look’s piece photos and your try-on photo, only when you tap Try it on, with its own permission." : {
       "comment" : "Privacy and terms: what Try it on would send"
+    },
+    "That passphrase doesn’t open this copy." : {
+      "comment" : "Check or Restore: the passphrase is wrong",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That passphrase doesn’t open this copy."
+          }
+        }
+      }
     },
     "That photo couldn’t be read" : {
       "comment" : "Add a piece: the photo stand-in failed",
@@ -6043,6 +6486,17 @@
     },
     "The app only sees the photos you pick or take, and keeps its own copy on this iPhone without the location." : {
       "comment" : "Add a piece: under the choices, with real photos (Phase 22a)"
+    },
+    "The app sends your copy nowhere. You choose where it’s saved, and only you have the passphrase." : {
+      "comment" : "Backups: note at the bottom",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app sends your copy nowhere. You choose where it’s saved, and only you have the passphrase."
+          }
+        }
+      }
     },
     "The app starts fresh, as if it were just installed. It opens on the welcome, and you choose a starting closet again." : {
       "comment" : "Delete my data: what happens after"
@@ -6138,6 +6592,17 @@
     "The three versions, saving, trying on and swapping" : {
       "comment" : "App tours: what Your looks' tour covers"
     },
+    "The two don’t match yet." : {
+      "comment" : "Export a copy: the passphrase and its confirmation differ",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The two don’t match yet."
+          }
+        }
+      }
+    },
     "The version, iOS and device model. Never anything about you." : {
       "comment" : "Send feedback: under the Include app details switch while it's on"
     },
@@ -6154,6 +6619,17 @@
     },
     "The weather couldn’t be read, so these looks don’t use it." : {
       "comment" : "Note on Your looks (LR-04.3)"
+    },
+    "There isn’t enough space on this iPhone. It needs %@ free." : {
+      "comment" : "Backups: not enough free space, with the amount needed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There isn’t enough space on this iPhone. It needs %@ free."
+          }
+        }
+      }
     },
     "These are your iPhone’s settings right now, and what the app does with each one." : {
       "comment" : "Accessibility tour, step 1"
@@ -6196,6 +6672,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This closet was saved by a newer version"
+          }
+        }
+      }
+    },
+    "This copy is damaged or incomplete, so nothing was restored." : {
+      "comment" : "Backups: the copy failed a check",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This copy is damaged or incomplete, so nothing was restored."
+          }
+        }
+      }
+    },
+    "This copy is from %@. Anything you added or changed after that isn’t in it." : {
+      "comment" : "Restore preview: the copy's date",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This copy is from %@. Anything you added or changed after that isn’t in it."
+          }
+        }
+      }
+    },
+    "This copy is from a newer version of Nifty Outfit Nook. Update the app, then try again." : {
+      "comment" : "Backups: the copy is from a newer app",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This copy is from a newer version of Nifty Outfit Nook. Update the app, then try again."
+          }
+        }
+      }
+    },
+    "This copy works. Every file in it opened and matched." : {
+      "comment" : "Check a copy: it passed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This copy works. Every file in it opened and matched."
           }
         }
       }
@@ -6420,13 +6940,13 @@
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons and on a saved look (RD-06)"
     },
-    "Try-on pictures with it in stay until you delete them." : {
-      "comment" : "Delete for good: try-on pictures showing the piece are kept",
+    "Try-on pictures with it in are deleted too." : {
+      "comment" : "Delete for good: try-on pictures showing the piece go with it",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try-on pictures with it in stay until you delete them."
+            "value" : "Try-on pictures with it in are deleted too."
           }
         }
       }
@@ -6474,6 +6994,28 @@
     "Type a word, like navy, to find a saved outfit or picture." : {
       "comment" : "Saved Looks tour, step 3"
     },
+    "Type it again" : {
+      "comment" : "Export a copy: confirm passphrase field",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type it again"
+          }
+        }
+      }
+    },
+    "Type the passphrase you chose when you exported it." : {
+      "comment" : "Check or Restore: asking for the copy's passphrase",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type the passphrase you chose when you exported it."
+          }
+        }
+      }
+    },
     "Undo" : {
       "comment" : "Toast action",
       "localizations" : {
@@ -6481,6 +7023,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Undo"
+          }
+        }
+      }
+    },
+    "Undo restore" : {
+      "comment" : "Backups: undo row and question",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo restore"
           }
         }
       }
@@ -6508,6 +7061,17 @@
     "Use %lld characters or fewer." : {
       "comment" : "Make your own look: the name is too long"
     },
+    "Use at least %lld characters." : {
+      "comment" : "Export a copy: her passphrase is too short",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use at least %lld characters."
+          }
+        }
+      }
+    },
     "Use Main closet" : {
       "comment" : "Partial result banner action: style from the whole closet"
     },
@@ -6516,6 +7080,17 @@
     },
     "Use for Style Me" : {
       "comment" : "Button: makes this suitcase the source"
+    },
+    "Use my own" : {
+      "comment" : "Export a copy: her own passphrase choice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use my own"
+          }
+        }
+      }
     },
     "Use one line of letters, numbers and spaces." : {
       "comment" : "Make your own look: the name has line breaks or tabs"
@@ -6604,6 +7179,17 @@
         }
       }
     },
+    "We can’t recover this passphrase. Without it, nobody can open the file, including you. Write it down or save it in Passwords." : {
+      "comment" : "Export a copy: the warning about the passphrase",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We can’t recover this passphrase. Without it, nobody can open the file, including you. Write it down or save it in Passwords."
+          }
+        }
+      }
+    },
     "Wear this one" : {
       "comment" : "Saved look tour, step 1 title"
     },
@@ -6632,6 +7218,17 @@
     },
     "Welcome home" : {
       "comment" : "Onboarding: the welcome title"
+    },
+    "What goes in it" : {
+      "comment" : "Export a copy: header over the counts",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What goes in it"
+          }
+        }
+      }
     },
     "What Style Me starts with" : {
       "comment" : "Under the Preferences row in Profile"
@@ -6909,6 +7506,17 @@
     "You can leave this empty and add it later." : {
       "comment" : "Try-on photo sheet with no photo"
     },
+    "You can undo this from Backups until %@." : {
+      "comment" : "Restore: done, how long Undo restore lasts",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can undo this from Backups until %@."
+          }
+        }
+      }
+    },
     "You changed this look. Undo goes back one change." : {
       "comment" : "Your looks: under the pieces after a swap or removal (LR-08.2)"
     },
@@ -7023,6 +7631,17 @@
         }
       }
     },
+    "Your closet goes back to how it was before the restore. Pieces deleted for good since stay deleted." : {
+      "comment" : "Backups: confirm Undo restore",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet goes back to how it was before the restore. Pieces deleted for good since stay deleted."
+          }
+        }
+      }
+    },
     "Your closet is empty" : {
       "comment" : "Empty closet title",
       "localizations" : {
@@ -7030,6 +7649,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your closet is empty"
+          }
+        }
+      }
+    },
+    "Your closet is restored" : {
+      "comment" : "Restore: done, title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your closet is restored"
           }
         }
       }
@@ -7050,6 +7680,17 @@
     },
     "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
       "comment" : "Delete my data: the question"
+    },
+    "Your copy is saved as “%@”. It holds your measurements and photos; keep the passphrase somewhere safe." : {
+      "comment" : "Export a copy: done, with the file name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your copy is saved as “%@”. It holds your measurements and photos; keep the passphrase somewhere safe."
+          }
+        }
+      }
     },
     "Your data" : {
       "comment" : "Help topic"
@@ -7136,6 +7777,17 @@
     },
     "Your looks, your pictures and search" : {
       "comment" : "App tours: what Saved Looks' tour covers"
+    },
+    "Your measurements and weight" : {
+      "comment" : "Export a copy: named on its own line, as the most sensitive part",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your measurements and weight"
+          }
+        }
+      }
     },
     "Your name" : {
       "comment" : "Onboarding: the name step's title"
