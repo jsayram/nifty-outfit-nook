@@ -160,7 +160,7 @@ struct LookBundleSnapshotTests {
         let renderer = ImageRenderer(content: content)
         renderer.scale = Self.scale
         renderer.proposedSize = ProposedViewSize(width: width, height: nil)
-        guard let image = renderer.uiImage else {
+        guard let image = stillImage(from: renderer, scale: Self.scale) else {
             Issue.record("ImageRenderer produced no image for \(name)")
             return
         }

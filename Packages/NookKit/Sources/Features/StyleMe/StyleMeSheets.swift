@@ -235,6 +235,7 @@ struct StartingPieceChoices: View {
 
     @State private var query = ""
     @ScaledMetric(relativeTo: .footnote) private var tileWidth: CGFloat = 96
+    @Environment(\.closetIsStillImage) private var isStillImage
 
     private var shown: [Garment] {
         let words = query.split(separator: " ").map(String.init)
@@ -274,6 +275,13 @@ struct StartingPieceChoices: View {
                         String(
                             localized: "Nothing in \(sourceName) matches “\(query)”.", bundle: .module,
                             comment: "Starting piece search with no match"))
+                } else if isStillImage {
+                    // A still image measures a lazy grid from estimates (Phase 20a).
+                    StillAdaptiveGrid(minimum: tileWidth, spacing: NookSpacing.small, rowSpacing: NookSpacing.medium) {
+                        ForEach(pieces) { piece in
+                            tile(piece)
+                        }
+                    }
                 } else {
                     LazyVGrid(
                         columns: [GridItem(.adaptive(minimum: tileWidth), spacing: NookSpacing.small)],
