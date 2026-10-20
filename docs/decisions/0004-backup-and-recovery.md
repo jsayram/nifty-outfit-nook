@@ -1,6 +1,6 @@
 # 0004. Backup and recovery: safety copies, encrypted export, private iCloud sync
 
-Status: **proposed, waiting for Jose** (Phase 20b checkpoint)
+Status: **proposed, waiting for Jose** (Phase 20b checkpoint). Backups built in Phase 21b; see "Built in Phase 21b" below
 Date: 20 October 2026
 Plan: `closet/SWIFT_BUILD_PLAN.md`, Phase 20b. Builds on `0003-persistence-spike.md` (SwiftData with a migration journal, `CKSyncEngine`, value types only). Rules: PRD 11.7, 15.1, 15.2, 15.3 and 15.4; `closet/SECURITY_STANDARD.md` §1, §4, §9 and §10; `closet/THREAT_MODEL.md` R7, R15, F2 to F4, F12, D8 and D10; `closet/DATA_MAP.md`; `closet/compliance/` (P12 and R8 in the App Review checklist).
 
@@ -306,6 +306,38 @@ A store from a newer app version (a TestFlight build rolled back, or a device ba
 - **DATA_MAP:** the iCloud row gets the zones, the field table and the ADP table; the `CKSyncEngine` state becomes a row in the store (20a, D8(d)); the export row gets AEA and the contents; safety copies get a row; Delete my data reaches the iCloud zones.
 - **THREAT_MODEL:** R7 adds the safety copies, the restore journal, newer-version records never overwritten, and the restored-device marker. F2's line about a `completeUntilFirstUserAuthentication` state file goes, since D8(d) needs no exception. D7 is about server backups (R2) and doesn't change; a note says on-device backups are designed here.
 - **Privacy manifest:** the migration coordinator's free-space check needs `NSPrivacyAccessedAPICategoryDiskSpace` with `E174.1` in 21a, earlier than the 21b the manifest plan says. `85F4.1` too if a screen shows free space ("You need 1.4 GB free").
+
+## Built in Phase 21b (20 October 2026)
+
+Export, Check a copy, Restore, Undo restore and the recovery screen's export are app code (`Services/Backup`, `Features/Settings/Backups`). iCloud sync isn't built: the iCloud container and the two test Apple Accounts (decision 8) don't exist yet, so sync stays off and hidden and no entitlement was added. The open decisions use the defaults suggested above; each is noted where it applies.
+
+**As designed:**
+
+- An Apple Encrypted Archive, profile `hkdf_sha256_aesctr_hmac__scrypt__none`, LZFSE, clear prologue `NOOK-BACKUP 1` and nothing else. `manifest.json` goes first, with the size and SHA-256 of every other file; records are readable JSON in the app's value types; photos go in as stored. The archive is encrypted as it's written, so no unencrypted copy is ever on disk. Every photo is hashed before the manifest is written and again as it's added.
+- Every restore check runs before anything is written: the prologue (a newer format is refused before the passphrase is tried), the passphrase, AEA's authentication, the manifest first and bounded, at most 200,000 entries, only regular files and folders, safe relative paths only, every size and hash against the manifest, no file missing or extra, free space, then each record decoded and checked as a save checks it (`StoreValidation`) with its key matching its ID, and the counts against the manifest.
+- Replace and Add what's missing both ship (decision 7's default). Deletion markers from both sides apply. A safety copy is taken first, and Undo restore works for 7 days. A journal (`staged`, `safetyCopyTaken`, `writing`, `verified`, `undoing`) lets the next launch finish or tidy up.
+- Passphrases: generated (24 symbols from a 32-letter alphabet, `SecRandomCopyBytes`, groups of four, about 120 bits) or her own of at least 12 characters typed twice (decision 9's default). Copy passphrase is local only and expires after 2 minutes. No consent receipts are in the export, so each feature asks again after a restore (decision 6's default).
+- The recovery screen's Export a copy makes a `storeCopy`; a restore opens it through the migration coordinator in staging.
+
+**Changed from the design, and why:**
+
+- **One records file per kind of record** (`records/garment.json`, `records/profile.json`...), not `garments.json` and a separate `body.json`. Measurements live in the profile record, so splitting them would mean a second shape to keep in step; the manifest's `includesBodyData` and the preview name them instead.
+- **The restore writes in the running app, in one save,** rather than at the next launch. A SwiftData save is one SQLite transaction, so the store holds the old closet or the whole new one; a kill at any step (tested at each one) ends as one or the other. Afterwards the app makes fresh store actors (`NookStorage.reload()`), since the old ones remember what they read. Changed records are deleted and inserted again rather than edited, so no other context keeps a stale value.
+- **The restore's safety copy sits in `Store/RestoreSafetyCopy`,** not `Recovery/<kind>-<date>`: the migration coordinator clears `Recovery` before each snapshot. Undo reads the copy's rows with SQLite and writes them back in one save, so it doesn't need the store closed either.
+- **Deletion markers are a record kind** (`deletion`, key the piece's ID, content its date only), written in the same save as the purge. Pieces only so far; Jose's 20 October decision also deletes the try-on pictures that show a purged piece, and a restore leaves those out.
+- **Add what's missing keeps the copy's differing version as a `restoreConflict` record.** There's no review screen yet; conflicts to review come with sync (decision 7's "where conflicts show").
+- **Photos** are read from `Application Support/Photos/<image id>` and only those the records point to go in. Nothing writes there until Phases 22a and 22b; the round trip is tested with real files.
+
+**Found on the way:**
+
+- AEA ignores bytes after its end, so the reader checks the file size against `containerSize` after decrypting. A changed byte anywhere, a cut file and swapped blocks all fail AEA's authentication. A wrong passphrase fails when the decryption stream is made; one under AEA's own minimum length fails at `setPassword`. The key derivation took about 50 ms on a Mac.
+- `NSPersistentStoreCoordinator.replacePersistentStore` copies a live store's data into the copy's own `-wal`, so a single-file store copy lost most of its records until the copy was checkpointed (`PRAGMA wal_checkpoint(TRUNCATE)`, then `journal_mode=DELETE`).
+- A Mac opens an export: `aea decrypt -i "<file>.nookbackup" -o copy.aar -password <file holding the passphrase>`, then `aa extract -i copy.aar -d <folder>` (macOS 27.0.1). `aea` has no prompt; `-password-value` puts the passphrase in the shell's history, so the file is better.
+- Export compliance (R8): Apple's "Complying with Encryption Export Regulations" (checked 20 October 2026) says encryption built into the operating system is typically exempt from the documentation upload, but that exempt encryption may still need a year-end self-classification report. `ITSAppUsesNonExemptEncryption` stays NO; the report is a question for Jose.
+
+**Not built yet:** iCloud sync and everything in section 5 (no container); the iCloud copy in Delete my data (section 6); export carrying on in the background (`BGContinuedProcessingTask`) and progress counts, since closets have no photos until 22a; removing a purged piece's photos from safety copies, since nothing deletes photo files until 22b; Try again and Send feedback on the recovery screen.
+
+**The test plan, where it stands.** Automated and passing: round trips of the demo (every kind of record, three photos), the 2,400-piece closet and an empty closet; a wrong passphrase; one changed byte in five places, a cut file, an extra byte and swapped blocks; a file that isn't a copy, a newer prologue, manifest and payload version; crafted archives with `..`, an absolute path, a link, too many entries, a file bigger than the manifest says, an unlisted file, a missing file, a changed file, too little space, and records that fail their checks; the format 1 fixture file; nothing about her in the clear; what's left out; the passphrase never written; Replace into a full closet with Undo bringing back every record and photo; Add what's missing; deletion markers both ways; a kill at each of six restore steps for both modes, and during Undo; the safety copy left out of backups, expired after 7 days and removed by Delete my data; too little space for the safety copy or the export. Parked, waiting on Jose: every **[device]** and **[iCloud]** item above, the sync tests, and a store copy from an older schema (it can only run once the app has a real second schema, since a test-only version 2 in the same process makes SwiftData map the shared model to it, as 20a found).
 
 ## Decisions for Jose
 

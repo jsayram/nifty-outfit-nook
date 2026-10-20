@@ -16,6 +16,8 @@ public actor StoredClosetStore: ClosetStore {
     private var calendar = Calendar.current
     private var cache: [Garment.ID: Garment]?
     private let table = RecordTable<Garment>(kind: .garment)
+    /// When a piece was deleted for good, for its marker.
+    private var now: @Sendable () -> Date = { .now }
 
     public init(container: ModelContainer, calendar: Calendar) {
         modelExecutor = DefaultSerialModelExecutor(modelContext: ModelContext(container))
@@ -82,9 +84,10 @@ public actor StoredClosetStore: ClosetStore {
         try remove([id])
     }
 
-    /// Delete my data: every piece, Recently deleted included.
+    /// Delete my data: every piece, Recently deleted included, and the deletion markers.
     public func eraseAll() async throws(StoreError) {
         try table.removeAll(in: modelContext)
+        try RecordTable<StoredDeletion>(kind: .deletion).removeAll(in: modelContext)
         cache = [:]
     }
 
@@ -111,9 +114,16 @@ public actor StoredClosetStore: ClosetStore {
         cache = byID
     }
 
+    /// Removes pieces for good, leaving a deletion marker for each in the same save, so a
+    /// restore never brings one back (Phase 21b).
     private func remove(_ ids: [Garment.ID]) throws(StoreError) {
         var byID = try loaded()
-        try table.write([:], removing: ids.map(\.rawValue), in: modelContext)
+        let date = now()
+        let markers = Dictionary(
+            ids.map { ($0.rawValue, StoredDeletion(deletedAt: date)) }, uniquingKeysWith: { _, last in last })
+        try table.write([:], removing: ids.map(\.rawValue), in: modelContext) { context in
+            try RecordTable<StoredDeletion>(kind: .deletion).stage(markers, in: context)
+        }
         for id in ids { byID[id] = nil }
         cache = byID
     }

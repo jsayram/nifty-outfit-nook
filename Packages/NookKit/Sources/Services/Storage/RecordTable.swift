@@ -35,35 +35,43 @@ struct RecordTable<Value: Codable & Sendable> {
         }
     }
 
-    /// Writes these values and removes these keys, in one save.
-    func write(_ values: [String: Value], removing removed: [String] = [], in context: ModelContext)
-        throws(StoreError)
-    {
-        try saving(context) {
-            let date = now()
-            for (key, value) in values {
-                let payload = try RecordPayload.encode(value)
-                if let record = try fetch(key, in: context) {
-                    record.payload = payload
-                    record.payloadVersion = RecordPayload.currentVersion
-                    record.savedAt = date
-                } else {
-                    context.insert(
-                        StoredRecord(
-                            kind: kind.rawValue, key: key, payloadVersion: RecordPayload.currentVersion,
-                            payload: payload, savedAt: date))
-                }
+    /// Writes these values and removes these keys, in one save. `alongside` makes more changes
+    /// in the same save (a purge's deletion markers, Phase 21b).
+    func write(
+        _ values: [String: Value], removing removed: [String] = [], in context: ModelContext,
+        alongside: ((ModelContext) throws -> Void)? = nil
+    ) throws(StoreError) {
+        try saveChanges(in: context) {
+            try stage(values, removing: removed, in: context)
+            try alongside?(context)
+        }
+    }
+
+    /// Writes these values and removes these keys in the context, without saving it.
+    func stage(_ values: [String: Value], removing removed: [String] = [], in context: ModelContext) throws {
+        let date = now()
+        for (key, value) in values {
+            let payload = try RecordPayload.encode(value)
+            if let record = try fetch(key, in: context) {
+                record.payload = payload
+                record.payloadVersion = RecordPayload.currentVersion
+                record.savedAt = date
+            } else {
+                context.insert(
+                    StoredRecord(
+                        kind: kind.rawValue, key: key, payloadVersion: RecordPayload.currentVersion,
+                        payload: payload, savedAt: date))
             }
-            for key in removed {
-                if let record = try fetch(key, in: context) { context.delete(record) }
-            }
+        }
+        for key in removed {
+            if let record = try fetch(key, in: context) { context.delete(record) }
         }
     }
 
     /// Removes every record of this kind.
     func removeAll(in context: ModelContext) throws(StoreError) {
         let kind = kind.rawValue
-        try saving(context) {
+        try saveChanges(in: context) {
             try context.delete(model: StoredRecord.self, where: #Predicate { $0.kind == kind })
         }
     }
@@ -75,15 +83,17 @@ struct RecordTable<Value: Codable & Sendable> {
         return try storeCall { try context.fetch(descriptor).first }
     }
 
-    /// Makes the changes and saves them, or rolls them all back.
-    private func saving(_ context: ModelContext, _ changes: () throws -> Void) throws(StoreError) {
-        do {
-            try changes()
-            try context.save()
-        } catch {
-            context.rollback()
-            throw (error as? StoreError) ?? .unavailable
-        }
+}
+
+/// Makes the changes in the context and saves them, or rolls them all back. A save is one SQLite
+/// transaction, so either every change reaches the store file or none does.
+func saveChanges(in context: ModelContext, _ changes: () throws -> Void) throws(StoreError) {
+    do {
+        try changes()
+        try context.save()
+    } catch {
+        context.rollback()
+        throw (error as? StoreError) ?? .unavailable
     }
 }
 
