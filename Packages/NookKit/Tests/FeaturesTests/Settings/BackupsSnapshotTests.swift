@@ -99,7 +99,7 @@ struct BackupsSnapshotTests {
         let renderer = ImageRenderer(content: content)
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
-        guard let image = renderer.uiImage else {
+        guard let image = stillImage(from: renderer, scale: 1) else {
             Issue.record("ImageRenderer produced no image for \(name)")
             return
         }

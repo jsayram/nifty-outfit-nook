@@ -69,6 +69,7 @@ let package = Package(
             name: "DesignSystemTests",
             dependencies: [
                 "DesignSystem",
+                "NookTestSupport",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
             exclude: ["__Snapshots__"],
