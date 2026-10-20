@@ -35,11 +35,17 @@ struct VisionCutoutServiceTests {
 
     @Test func aCancelledTaskStopsBeforeVision() async {
         let data = SyntheticGarmentPhotos.jpeg(.flatLayTee)
-        let task = Task { () async throws(CutoutError) -> CutoutResult in
+        // Returns the error instead of throwing it: see CutoutFixtureTests.theStandInStopsWhenCancelledWhileWaiting.
+        let task = Task { () async -> CutoutError? in
             withUnsafeCurrentTask { $0?.cancel() }
-            return try await service.cutout(from: data)
+            do throws(CutoutError) {
+                _ = try await service.cutout(from: data)
+                return nil
+            } catch {
+                return error
+            }
         }
-        await #expect(throws: CutoutError.cancelled) { try await task.value }
+        #expect(await task.value == .cancelled)
     }
 
     /// On the simulator the service must say "unsupported", not "failed" or "no subject", so a
