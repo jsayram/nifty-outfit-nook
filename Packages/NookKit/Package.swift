@@ -82,6 +82,13 @@ let package = Package(
         .testTarget(
             name: "ServicesTests", dependencies: ["Services", "Models", "Fixtures", "NookTestSupport"],
             swiftSettings: strictSettings),
+        // Phase 20a persistence spike: SwiftData, migrations, recovery and sync, tested here and
+        // never shipped (docs/decisions/0003-persistence-spike.md). KillHarness builds the files
+        // in Spike/ as a macOS tool that kills itself mid-migration.
+        .testTarget(
+            name: "PersistenceSpikeTests", dependencies: ["Models", "Fixtures", "NookTestSupport"],
+            exclude: ["KillHarness"], swiftSettings: strictSettings
+        ),
         .testTarget(
             name: "FeaturesTests",
             dependencies: [
