@@ -18,6 +18,8 @@ public final class NookStorage: Sendable {
     let location: StoreLocation?
     /// Where backups keep their files. `nil` when this storage has no backups (tests).
     public let backupLocation: BackupLocation?
+    /// Her image files and their thumbnails (Phase 22b). `nil` without a backup location.
+    public let imageFiles: StoredImageFiles?
     private let calendar: Calendar
     private let current: Mutex<Stores>
 
@@ -29,6 +31,9 @@ public final class NookStorage: Sendable {
         self.container = container
         self.location = location
         backupLocation = backups
+        imageFiles = backups.map {
+            StoredImageFiles(container: container, location: $0, thumbnails: ThumbnailCache(directory: $0.thumbnails))
+        }
         self.calendar = calendar
         current = Mutex(Stores(container: container, calendar: calendar, backups: backups))
     }

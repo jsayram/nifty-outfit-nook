@@ -38,6 +38,9 @@ public struct NookServices: Sendable {
     /// Export a copy, Check a copy and Restore (Phase 21b). `nil` where there's nothing to back
     /// up: the debug sample closet in memory, previews and most tests.
     public var backups: (any BackupService)?
+    /// Her image files (Phase 22b): removes the ones nothing points to any more. Nothing to do
+    /// where photos aren't files: the debug sample closet in memory, previews and most tests.
+    public var imageFiles: any ImageFiles = NoImageFiles()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.

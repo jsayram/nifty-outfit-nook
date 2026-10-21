@@ -119,7 +119,7 @@ struct SavedLooksScreen: View {
         .task { await model.load(from: services) }
         .onDisappear {
             model.lastRemoval = nil
-            model.lastPictureRemoval = nil
+            endPictureRemoval()
         }
         .onChange(of: path) { old, new in
             // Back from a pushed screen: it may have saved or changed a look or a picture.
@@ -324,10 +324,19 @@ struct SavedLooksScreen: View {
         if besidePicture == removal.picture.id {
             besidePicture = nil
         }
+        endPictureRemoval()
         model.lastPictureRemoval = removal
         reload()
         toast = NookToastMessage(
             TryOnText.deleted, systemImage: "trash", actionTitle: YourLooksText.undo, action: undoPictureDelete)
+    }
+
+    /// The earlier Delete picture can't be undone any more, so its file can go.
+    private func endPictureRemoval() {
+        guard let removal = model.lastPictureRemoval else { return }
+        model.lastPictureRemoval = nil
+        let services = services
+        Task { await SavedLooksModel.release(removal, using: services) }
     }
 
     private func undoPictureDelete() {

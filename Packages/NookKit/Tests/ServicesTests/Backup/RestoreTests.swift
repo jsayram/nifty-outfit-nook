@@ -21,6 +21,10 @@ struct RestoreTests {
         try await phone.storage.closet.save(
             Garment(id: "g-new", name: "New coat", category: .layer, addedAt: TestTime.now))
         try await phone.storage.closet.delete(garments[6].id, at: TestTime.day(-1))
+        // As the app does it (`PermanentDeletion`): the pictures that show the piece go first.
+        for picture in PermanentDeletion.showing([garments[6].id], in: try await phone.storage.pictures.pictures()) {
+            try await phone.storage.pictures.delete(picture.id)
+        }
         try await phone.storage.closet.deletePermanently(garments[6].id)
         return (phone, file, try phone.rows())
     }

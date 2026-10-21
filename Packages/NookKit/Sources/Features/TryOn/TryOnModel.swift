@@ -106,7 +106,10 @@ final class TryOnModel {
             }
             return
         }
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled else {
+            await letGo(of: picture)
+            return
+        }
         do {
             if let saveLook {
                 // Saving names the look, and the picture keeps that name with its pieces.
@@ -117,6 +120,14 @@ final class TryOnModel {
             step = .made(picture)
         } catch {
             step = .failed(.notSaved)
+            await letGo(of: picture)
+        }
+    }
+
+    /// A picture that was made but isn't kept leaves no file behind (Phase 22b).
+    private func letGo(of picture: TryOnPicture) async {
+        if let photo = picture.storedImage {
+            await services.imageFiles.release([photo], deletedForGood: false)
         }
     }
 }

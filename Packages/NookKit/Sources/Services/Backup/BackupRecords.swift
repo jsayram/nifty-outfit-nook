@@ -163,8 +163,29 @@ struct BackupContents: Sendable {
             case .lookDraft, .feedbackDraft: counts.drafts += 1
             case .profile: if let profile = decode(Profile.self, row) { add(profile) }
             case .deletion: deletedForGood.insert(row.key)
+            case .restoreConflict:
+                // A copy's version kept for review points to its photos too (Phase 22b), so they
+                // stay and travel with an export.
+                if let conflict = decode(StoredConflict.self, row) { addPhotos(of: conflict) }
             default: break
             }
+        }
+    }
+
+    private mutating func addPhotos(of conflict: StoredConflict) {
+        let row = StoreRow(
+            kind: conflict.kind, key: conflict.key, payloadVersion: conflict.payloadVersion, payload: conflict.payload)
+        switch RecordKind(rawValue: conflict.kind) {
+        case .garment:
+            for photo in decode(Garment.self, row)?.imageReferences ?? [] { addPhoto(photo) }
+        case .picture: decode(TryOnPicture.self, row)?.storedImage.map { addPhoto($0) }
+        case .garmentDraft:
+            if let draft = decode(GarmentDraft.self, row) {
+                addPhoto(draft.details.photo)
+                addPhoto(draft.base.photo)
+            }
+        case .profile: decode(Profile.self, row)?.tryOnPhoto.map { addPhoto($0) }
+        default: break
         }
     }
 
