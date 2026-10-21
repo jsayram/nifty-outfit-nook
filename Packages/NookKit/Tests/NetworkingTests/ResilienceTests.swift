@@ -62,7 +62,8 @@ struct ResilienceTests {
         return GatewayPaidActionService(client: client, attestation: session)
     }
 
-    static let swap = PaidActionRequest.style(mode: .swap, contextRevision: "rev_1")
+    /// A new quick request on every use, so the stylist's result cache never answers it (27a).
+    static var swap: PaidActionRequest { .style(.sample(.ask, note: String(UUID().uuidString.prefix(8)))) }
 
     // MARK: Timeouts
 
@@ -249,6 +250,9 @@ struct ResilienceTests {
             if forceRefresh { throw .failed }
             return try await inner.token(forceRefresh: false)
         }
+        func reauthenticateForDeletion() async throws(AuthError) -> String {
+            try await inner.reauthenticateForDeletion()
+        }
     }
 
     @Test func aRefreshThatFailsEndsTheSessionGracefully() async throws {
@@ -269,6 +273,9 @@ struct ResilienceTests {
             func signInWithApple() async throws(AuthError) { try await inner.signInWithApple() }
             func signOut() async { await inner.signOut() }
             func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken { throw .failed }
+            func reauthenticateForDeletion() async throws(AuthError) -> String {
+                try await inner.reauthenticateForDeletion()
+            }
         }
         let hiccup = Hiccup()
         try await hiccup.signInWithApple()
