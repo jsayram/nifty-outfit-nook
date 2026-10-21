@@ -56,8 +56,8 @@ nonisolated enum SavedLooksSelection: Hashable, Sendable {
 /// what pictures are and that they need a look; a search with no matches names the filters, with
 /// Clear filters (LR-09.3). Each state names its scope, so it's never unclear which she's in.
 ///
-/// On Saved, when the search and filters match looks she didn't save too, a line at the end says
-/// how many ("3 more in All") and switches to All, keeping them.
+/// On Saved, when the search and filters match looks she didn't save too, a line pinned above
+/// the tab bar says how many ("3 more in All") and switches to All, keeping them.
 ///
 /// On a wide iPad window (Phase 15b, `ipad-saved.html`) the page splits like Closet's: the
 /// sidebar holds the title, the switch, search and filters, and the grid column holds the looks
@@ -84,7 +84,14 @@ struct SavedLooksPage: View {
     var body: some View {
         Group {
             if isStillImage {
-                page
+                // Snapshots draw the page whole, so the line that's pinned on screen sits at the
+                // end here, as it would on a list that fits.
+                VStack(alignment: .leading, spacing: 0) {
+                    page
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .clipped()
+                    pinnedLine
+                }
             } else {
                 TourScrollReader {
                     ScrollView(.vertical) {
@@ -98,6 +105,11 @@ struct SavedLooksPage: View {
                     }
                     .scrollDismissesKeyboard(.immediately)
                 }
+                // The line sits in the bottom safe area, which stops above the floating tab bar
+                // and shrinks the scrolling area to match. Left at the end of the list it hid
+                // under the bar until she scrolled whenever the page was only a little taller
+                // than the screen, as it is on a short list (#70).
+                .safeAreaInset(edge: .bottom, spacing: 0) { pinnedLine }
             }
         }
         .background(Color.nook.wallGradient.ignoresSafeArea())
@@ -268,8 +280,16 @@ struct SavedLooksPage: View {
             .padding(.horizontal, NookSpacing.screenMargin)
             .padding(.top, NookSpacing.medium)
         }
-        if model.moreInAll > 0 {
+    }
+
+    /// "3 more in All", pinned above the tab bar (Saved looks only, and not in the filters'
+    /// sidebar on iPad).
+    @ViewBuilder private var pinnedLine: some View {
+        if model.moreInAll > 0, model.tab == .looks, part != .sidebar {
             moreInAllLine
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, NookSpacing.xSmall)
+                .background(Color.nook.background.opacity(0.94))
         }
     }
 

@@ -38,6 +38,24 @@ struct GarmentEditorSnapshotTests {
         assertSnapshot(GarmentEditorPage(model: model), named: "choose")
     }
 
+    @Test func choicesWithPaste() async {
+        var services = editorServices()
+        services.photos = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services)
+        assertSnapshot(GarmentEditorPage(model: model), named: "choose-paste")
+    }
+
+    @Test func choicesWithPasteAX5() async {
+        var services = editorServices()
+        services.photos = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services)
+        // Checked for fit, not as a picture: at AX5 the wrapped text's height differs by a point
+        // between the iOS 26.5 and 27.0 runtimes, which fails an image comparison.
+        expectFitsWidth(
+            GarmentEditorPage(model: model), width: Self.width, dynamicTypeSize: .accessibility5,
+            named: "choose-paste-ax5")
+    }
+
     @Test func describeInWords() async {
         let services = editorServices()
         let model = await loadedEditor(firstStep: .words, services: services)

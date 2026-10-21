@@ -4,6 +4,8 @@ import Models
 import NookTestSupport
 import Synchronization
 import Testing
+import UIKit
+import UniformTypeIdentifiers
 
 @testable import Features
 
@@ -22,7 +24,7 @@ final class RecordingPhotoIntake: PhotoIntake {
         self.outcome = outcome
     }
 
-    var sources: [PhotoSource] { [.camera, .library] }
+    var sources: [PhotoSource] { [.camera, .library, .paste] }
     var usesSystemPicker: Bool { true }
     var kept: [Data] { state.withLock { $0.kept } }
     var discarded: [PhotoReference] { state.withLock { $0.discarded } }
@@ -60,10 +62,10 @@ struct RealPhotoIntakeTests {
         return services
     }
 
-    @Test func realPhotosOfferTheCameraAndPhotosOnly() async {
+    @Test func realPhotosOfferTheCameraPhotosAndPaste() async {
         let model = await loadedEditor(services: services(RecordingPhotoIntake()))
         #expect(model.usesSystemPicker)
-        #expect(model.photoSources == [.camera, .library])
+        #expect(model.photoSources == [.camera, .library, .paste])
     }
 
     @Test func theStandInKeepsItsThreeChoices() async {
@@ -161,5 +163,56 @@ struct RealPhotoIntakeTests {
         await model.keepPhoto(.bytes(), using: intake)
         #expect(model.photoState == .idle)
         #expect(model.step == .choose)
+    }
+
+    // MARK: Paste (Phase 22c)
+
+    private static func imageProvider(_ type: UTType = .png) -> NSItemProvider {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 40, height: 30))
+        let image = renderer.image { $0.fill(CGRect(x: 0, y: 0, width: 40, height: 30)) }
+        let data = (type == .png ? image.pngData() : image.jpegData(compressionQuality: 0.9)) ?? Data()
+        return NSItemProvider(item: data as NSData, typeIdentifier: type.identifier)
+    }
+
+    @Test func aPastedImageGoesThroughTheSameKeepAsAPickedOne() async throws {
+        let intake = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services(intake))
+        let picked = try #require(PickedPhoto.pasted([Self.imageProvider()]))
+        #expect(picked.source == .paste)
+        await model.keepPhoto(picked, using: intake)
+        #expect(model.details.photo == .stored(EntityID("photo-1")))
+        #expect(model.step == .details)
+        #expect(intake.kept.count == 1)
+        #expect(!(intake.kept.first ?? Data()).isEmpty)
+    }
+
+    @Test func aPastedJPEGIsReadToo() async throws {
+        let picked = try #require(PickedPhoto.pasted([Self.imageProvider(.jpeg)]))
+        #expect(try await picked.load().count > 0)
+    }
+
+    @Test func pastedTextOrNothingIsNotAPhoto() {
+        let text = NSItemProvider(item: "hello" as NSString, typeIdentifier: UTType.plainText.identifier)
+        #expect(PickedPhoto.pasted([text]) == nil)
+        #expect(PickedPhoto.pasted([]) == nil)
+    }
+
+    @Test func anEmptyOrOversizedPasteIsUnreadable() async {
+        let empty = NSItemProvider(item: Data() as NSData, typeIdentifier: UTType.png.identifier)
+        await #expect(throws: PhotoIntakeError.unreadable) {
+            try await PickedPhoto.pastedData(from: PastedItem(provider: empty))
+        }
+        await #expect(throws: PhotoIntakeError.unreadable) {
+            try await PickedPhoto.pastedData(from: PastedItem(provider: Self.imageProvider()), maximumBytes: 10)
+        }
+    }
+
+    @Test func anUnreadablePasteChangesNothing() async {
+        let intake = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services(intake))
+        await model.keepPhoto(PickedPhoto(source: .paste) { throw PhotoIntakeError.unreadable }, using: intake)
+        #expect(model.photoState == .failed)
+        #expect(model.details.photo == .noPhoto)
+        #expect(intake.kept.isEmpty)
     }
 }

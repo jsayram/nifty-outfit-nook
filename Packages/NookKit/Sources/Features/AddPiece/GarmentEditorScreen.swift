@@ -82,7 +82,7 @@ struct GarmentEditorScreen: View {
                 String(localized: "Add a photo", bundle: .module, comment: "Photo source question"),
                 isPresented: $choosesPhotoSource, titleVisibility: .visible
             ) {
-                ForEach(model.photoSources, id: \.self) { source in
+                ForEach(model.photoSources.filter { !(model.usesSystemPicker && $0 == .paste) }, id: \.self) { source in
                     Button(Self.title(for: source)) { choosePhoto(source) }
                 }
             } message: {
@@ -146,6 +146,10 @@ struct GarmentEditorScreen: View {
             resume: { model.resume() },
             discardDraft: { Task { await model.discardPendingDraft() } },
             choosePhoto: choosePhoto,
+            pastePhoto: { picked in
+                let intake = services.photos
+                Task { await model.keepPhoto(picked, using: intake) }
+            },
             tryAnotherPhoto: { model.clearPhotoProblem() },
             describeInWords: { model.describeInWords() },
             suggest: {

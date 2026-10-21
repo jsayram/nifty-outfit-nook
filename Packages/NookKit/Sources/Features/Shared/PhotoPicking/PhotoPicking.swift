@@ -3,6 +3,7 @@ import Models
 import PhotosUI
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 /// A photo she picked or took, still to be read. The picker hands over a reference and the
 /// camera an image; `load` turns either into bytes, away from the button tap, so the screen can
@@ -10,6 +11,41 @@ import UIKit
 struct PickedPhoto: Sendable {
     let source: PhotoSource
     let load: @Sendable () async throws -> Data
+}
+
+/// The provider the Paste button handed over, carried to the loading task. It is used once, to
+/// read the image, and nothing else touches it meanwhile.
+struct PastedItem: @unchecked Sendable {
+    let provider: NSItemProvider
+}
+
+extension PickedPhoto {
+    /// The largest pasted file the app will read, in bytes. A phone photo is a few megabytes; a
+    /// file far beyond this is not one, and reading it all into memory would only hurt.
+    static let maximumPastedBytes = 100_000_000
+
+    /// A picture she pasted with the system Paste button (Phase 22c). The button hands over item
+    /// providers only for what she tapped; nothing here reads the pasteboard on its own. `nil`
+    /// when the paste held no image. The bytes go through the same intake as any other photo.
+    static func pasted(_ providers: [NSItemProvider]) -> PickedPhoto? {
+        guard let provider = providers.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.image.identifier) })
+        else { return nil }
+        let item = PastedItem(provider: provider)
+        return PickedPhoto(source: .paste) { try await pastedData(from: item) }
+    }
+
+    /// The image's bytes in whatever image format the app it came from copied (JPEG, PNG, HEIC,
+    /// TIFF, WebP and so on); `PhotoCleaner` decides if it can read them.
+    static func pastedData(from item: PastedItem, maximumBytes: Int = maximumPastedBytes) async throws -> Data {
+        let data: Data? = await withCheckedContinuation { continuation in
+            _ = item.provider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { data, _ in
+                continuation.resume(returning: data)
+            }
+        }
+        guard let data else { throw PhotoIntakeError.unreadable }
+        guard !data.isEmpty, data.count <= maximumBytes else { throw PhotoIntakeError.unreadable }
+        return data
+    }
 }
 
 extension View {
