@@ -44,6 +44,45 @@ struct FakeBackendContractTests {
         #expect(backend.accountCount == 0)
     }
 
+    /// 24c: the deletion examples the contract says are invalid are refused, and nothing is deleted.
+    @Test(arguments: [
+        ("deletion.request.no_confirm.json", "/v1/account/deletion"),
+        ("deletion.request.wrong_confirm.json", "/v1/account/deletion"),
+        ("deletion.request.user_id.json", "/v1/account/deletion"),
+        ("deletion-status.request.bad_id.json", "/v1/account/deletion/status"),
+    ])
+    func rejectsTheContractsInvalidDeletionExamples(file: String, path: String) async throws {
+        _ = try await send(
+            "POST", "/v1/session", token: token(), body: ContractTests.data("v1/examples/session.request.json"))
+        let body = try ContractTests.data("v1/examples/invalid/\(file)")
+        let reply = try await send("POST", path, token: token(), body: body)
+        #expect(reply.status == 400)
+        #expect(try errorCode(reply.body) == "invalid_request")
+        #expect(backend.accountCount == 1)
+    }
+
+    @Test func theDeletionGoldenRequestGetsTheContractsShape() async throws {
+        _ = try await send(
+            "POST", "/v1/session", token: token(), body: ContractTests.data("v1/examples/session.request.json"))
+        let reply = try await send(
+            "POST", "/v1/account/deletion", token: token(),
+            body: ContractTests.data("v1/examples/deletion.request.json"))
+        #expect(reply.status == 202)
+        let status = try JSONDecoder().decode(APIV1.DeletionStatus.self, from: reply.body)
+        #expect(status.deletion.state == "completed")
+        // Without a token, by ID; an unknown ID is not_found.
+        let read = try await send(
+            "POST", "/v1/account/deletion/status",
+            body: try APIV1.encoder().encode(APIV1.DeletionStatusRequest(deletionId: status.deletion.id)))
+        #expect(read.status == 200)
+        let unknown = try await send(
+            "POST", "/v1/account/deletion/status", body: ContractTests.data("v1/examples/deletion-status.request.json"))
+        #expect(unknown.status == 404)
+        // The deleted sign-in's token no longer works.
+        let after = try await send("GET", "/v1/me", token: token())
+        #expect(after.status == 401)
+    }
+
     @Test func acceptsTheGoldenRequestAndAnswersWithTheContractsShapes() async throws {
         let body = try ContractTests.data("v1/examples/session.request.json")
         let created = try await send("POST", "/v1/session", token: token(), body: body)

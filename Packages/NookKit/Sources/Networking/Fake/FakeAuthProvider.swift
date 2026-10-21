@@ -49,6 +49,17 @@ public actor FakeAuthProvider: AuthProvider {
         current = nil
     }
 
+    /// The pretend Apple sheet once more. `failNextSignIn` makes it fail too (`cancelled` for a
+    /// closed sheet). The code is random and means nothing outside the fake backend.
+    public func reauthenticateForDeletion() async throws(AuthError) -> String {
+        if let error = nextSignInError {
+            nextSignInError = nil
+            throw error
+        }
+        guard subject != nil else { throw .signedOut }
+        return "fake-apple-code-" + FakeToken.randomHex(8)
+    }
+
     public func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken {
         guard let subject else { throw .signedOut }
         // Like Clerk's SDK: reuse a token with more than 10 seconds left, unless told not to.

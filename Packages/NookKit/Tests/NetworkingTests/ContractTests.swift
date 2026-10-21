@@ -85,6 +85,10 @@ struct ContractTests {
         ("v1/examples/try-on.request.json", "tryOnRequest"),
         ("v1/examples/style.response.json", "paidActionResponse"),
         ("v1/examples/try-on.response.json", "paidActionResponse"),
+        ("v1/examples/deletion.request.json", "deletionRequest"),
+        ("v1/examples/deletion-status.request.json", "deletionStatusRequest"),
+        ("v1/examples/deletion.response.json", "deletionStatus"),
+        ("v1/examples/deletion-status.response.json", "deletionStatus"),
     ])
     func goldenExamplesRoundTrip(path: String, type: String) throws {
         // Decoding then encoding gives the same JSON: the Swift types neither drop nor add a field.
@@ -104,6 +108,10 @@ struct ContractTests {
             case "styleRequest": try encoder.encode(decoder.decode(APIV1.StyleRequest.self, from: original))
             case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
             case "paidActionResponse": try encoder.encode(decoder.decode(APIV1.PaidActionResponse.self, from: original))
+            case "deletionRequest": try encoder.encode(decoder.decode(APIV1.DeletionRequest.self, from: original))
+            case "deletionStatusRequest":
+                try encoder.encode(decoder.decode(APIV1.DeletionStatusRequest.self, from: original))
+            case "deletionStatus": try encoder.encode(decoder.decode(APIV1.DeletionStatus.self, from: original))
             default: try encoder.encode(decoder.decode(APIV1.ErrorEnvelope.self, from: original))
             }
         #expect(try Self.sameJSON(original, reencoded), "\(path)")

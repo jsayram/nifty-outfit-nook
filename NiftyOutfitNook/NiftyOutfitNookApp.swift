@@ -152,10 +152,13 @@ struct NiftyOutfitNookApp: App {
                     if let imageFiles { services.imageFiles = imageFiles }
                     // Her weather choices (Phase 29) are erased with the profile, before onboarding.
                     AppWeather.install(into: &services, arguments: arguments)
-                    services.deletion = LocalDataDeletion(
-                        stores: storage.erasableData + [
-                            (.profile, tours), (.profile, services.weatherSettings), (.profile, onboarding),
-                        ])
+                    // Delete my data, and Delete my account (Phase 24c) when she's signed in.
+                    services.deletion = AccountDataDeletion(
+                        local: LocalDataDeletion(
+                            stores: storage.erasableData + [
+                                (.profile, tours), (.profile, services.weatherSettings), (.profile, onboarding),
+                            ]),
+                        account: account)
                     services.backups = storage.backups
                     services.account = account
                     services.paid = paid
@@ -170,8 +173,9 @@ struct NiftyOutfitNookApp: App {
                         profileSettings: closet == nil ? nil : storage.profileSettings,
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
                     AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
-                    services.deletion = LocalDataDeletion(
-                        stores: storage.erasableData + LocalDataDeletion.stores(of: services))
+                    services.deletion = AccountDataDeletion(
+                        local: LocalDataDeletion(stores: storage.erasableData + LocalDataDeletion.stores(of: services)),
+                        account: account)
                     services.account = account
                     services.paid = paid
                     return services
@@ -186,6 +190,7 @@ struct NiftyOutfitNookApp: App {
                 AppStateDefaultsImport.run(into: storage.container)
                 #if DEBUG
                     await DebugPhotoCloset.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
+                    await AppGateway.signInIfAsked(arguments: arguments)
                 #endif
                 if let imageFiles {
                     Task.detached(priority: .utility) { await imageFiles.removeUnused() }

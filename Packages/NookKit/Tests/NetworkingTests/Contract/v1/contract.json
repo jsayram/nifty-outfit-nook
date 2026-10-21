@@ -2,13 +2,15 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "24b: limits and cost protection (paid endpoints are placeholders until 27a and 33a)",
+  "status": "24c: authorization and account deletion (paid endpoints are placeholders until 27a and 33a)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
     "Every JSON body is UTF-8, at most limits.maxBodyBytes. Unknown fields in a request are rejected. Clients ignore unknown fields in a response and treat an unknown error code by its HTTP status.",
     "Paid endpoints (cost \"paid\") need an Idempotency-Key header and an App Attest assertion. A retry with the same key and the same body never runs or counts twice: it gets the first answer back. The same key with a different body is idempotency_conflict.",
-    "Limits live on the server and the app can't change them: a per-user rate limit (rate_limited), daily and 30-day allowances per category (quota_exceeded, with resetAt), and per-feature and per-provider switches and spending ceilings (feature_paused). GET /v1/usage shows what is left without naming amounts of money."
+    "Limits live on the server and the app can't change them: a per-user rate limit (rate_limited), daily and 30-day allowances per category (quota_exceeded, with resetAt), and per-feature and per-provider switches and spending ceilings (feature_paused). GET /v1/usage shows what is left without naming amounts of money.",
+    "Authorization: every endpoint acts only on the caller's own account, taken from the verified token. No request names an account, a row or another user's ID, so there is nothing to point at someone else's data. An account being deleted gets forbidden on every endpoint except the deletion ones.",
+    "Account deletion (24c): POST /v1/account/deletion needs a fresh Sign in with Apple authorization code (re-authentication, and what the backend needs to revoke the Apple sign-in link). It answers 202 with the deletion's ID and steps; repeating it returns the same deletion and carries on. Once the account is gone the token stops working, so the status endpoint takes the deletion ID instead of a token. The ID is random and the status names no person."
   ],
   "limits": {
     "maxBodyBytes": 65536
@@ -247,6 +249,60 @@
         "unavailable",
         "internal"
       ]
+    },
+    {
+      "id": "deleteAccount",
+      "summary": "Deletes the caller's account: every record the backend keeps for it, the Apple sign-in link and the sign-in account itself, and cancels pending paid work. Needs a fresh Sign in with Apple authorization code. Safe to repeat: the same deletion comes back and carries on from where it stopped. Steps the backend couldn't finish are retried on its own.",
+      "method": "POST",
+      "path": "/v1/account/deletion",
+      "auth": "required",
+      "cost": "free",
+      "request": {
+        "schema": "DeletionRequest",
+        "example": "examples/deletion.request.json"
+      },
+      "response": {
+        "status": 202,
+        "schema": "DeletionStatus",
+        "example": "examples/deletion.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "not_registered",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "deletionStatus",
+      "summary": "How a deletion is going, by its ID. Needs no token, because the account and its token may already be gone. Unknown IDs are not_found.",
+      "method": "POST",
+      "path": "/v1/account/deletion/status",
+      "auth": "none",
+      "cost": "free",
+      "request": {
+        "schema": "DeletionStatusRequest",
+        "example": "examples/deletion-status.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "DeletionStatus",
+        "example": "examples/deletion-status.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "not_found",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
     }
   ],
   "errors": [
@@ -268,7 +324,7 @@
     {
       "code": "forbidden",
       "status": 403,
-      "meaning": "Signed in, but not allowed. Don't retry."
+      "meaning": "Signed in, but not allowed, for example because the account is being deleted. Don't retry."
     },
     {
       "code": "attestation_required",
@@ -278,7 +334,7 @@
     {
       "code": "not_found",
       "status": 404,
-      "meaning": "No such endpoint in this version."
+      "meaning": "No such endpoint in this version, or no deletion with that ID."
     },
     {
       "code": "not_registered",
@@ -751,10 +807,118 @@
           "$ref": "UsageCategory"
         }
       }
+    },
+    "DeletionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "confirm",
+        "appleAuthorizationCode"
+      ],
+      "properties": {
+        "confirm": {
+          "type": "string",
+          "enum": [
+            "delete-my-account"
+          ]
+        },
+        "appleAuthorizationCode": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{8,512}$",
+          "maxLength": 512
+        }
+      }
+    },
+    "DeletionStatusRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deletionId"
+      ],
+      "properties": {
+        "deletionId": {
+          "type": "string",
+          "pattern": "^del_[0-9a-f]{32}$"
+        }
+      }
+    },
+    "DeletionStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step",
+        "state"
+      ],
+      "properties": {
+        "step": {
+          "type": "string",
+          "enum": [
+            "signInWithApple",
+            "serverData",
+            "account"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "done",
+            "pending",
+            "failed"
+          ]
+        }
+      }
+    },
+    "DeletionStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deletion"
+      ],
+      "properties": {
+        "deletion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "state",
+            "requestedAt",
+            "steps"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^del_[0-9a-f]{32}$"
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "in_progress",
+                "completed"
+              ]
+            },
+            "requestedAt": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 30
+            },
+            "completedAt": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 30
+            },
+            "steps": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "$ref": "DeletionStep"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "planned": {
-    "24c": "Authorization and deletion: DELETE /v1/account (202 with a deletion ID, then GET /v1/account/deletion/{id} until done); cross-user access returns not_found, never another user's data; forbidden for a disabled account.",
     "24d": "Support: POST /v1/feedback with the note (at most 2,000 characters), an optional reply address and a diagnostics opt-in; 202 with a ticket reference.",
     "27a": "Stylist: POST /v1/style keeps its path, Idempotency-Key, assertion and errors; its request gains closet descriptors and preferences (never a provider or model name) and its result becomes the typed stylist answer.",
     "33a": "Try-on: POST /v1/try-on keeps its admission path; its request gains the faceless body photo and garment photos, and it becomes a job with up to three child pictures (PRD 9.2.4)."
@@ -765,5 +929,10 @@
     "challengeHash": "POST /v1/attest/key: DCAppAttestService.attestKey is called with clientDataHash = SHA-256 of the challenge string's UTF-8 bytes. The backend's mock mode (local and dev only) takes a stand-in attestation instead: base64 of JSON {fmt: \"nook-mock-v1\", publicKey: base64 of the raw P-256 key, clientDataHash: base64, appId}.",
     "counter": "Each assertion's counter must be higher than the last one the backend accepted for that key. A replayed assertion fails.",
     "onFailure": "attestation_required (403): register a new key with a fresh challenge, then retry once. Simulators and devices that can't attest get no paid access."
+  },
+  "deletion": {
+    "steps": "signInWithApple: the Apple sign-in link is revoked with the authorization code sent in the request (it works once, for a few minutes, so a failed revocation needs a new request with a new code, or she removes the app in Settings > Apple Account > Sign in with Apple). serverData: every record the backend keeps for the account is deleted, and paid work still running is cancelled (its result is thrown away). account: the sign-in account is deleted, which ends every session.",
+    "states": "done; pending (the backend is still working on it, or retrying on its own); failed (it can't finish without her: only signInWithApple, see above). The deletion is completed when serverData and account are done.",
+    "retained": "After deletion the backend keeps no personal data. It keeps: the deletion record (the deletion ID, the pseudonymous user ID and the dates, for 35 days, so a backup restored in that time can't bring the account back), counts of recent paid use under a keyed hash for 31 days (so deleting can't reset an allowance), and an audit line with the event and time only. Spending totals per day and month never named an account."
   }
 }

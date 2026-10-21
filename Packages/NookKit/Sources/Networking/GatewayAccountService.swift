@@ -8,11 +8,14 @@ public struct GatewayAccountService: AccountService {
     private let auth: any AuthProvider
     private let client: APIClient
     private let appVersion: String
+    /// This install's App Attest key (24b), forgotten after the account is deleted.
+    private let attestation: AttestationSession?
 
-    public init(auth: any AuthProvider, client: APIClient, appVersion: String) {
+    public init(auth: any AuthProvider, client: APIClient, appVersion: String, attestation: AttestationSession? = nil) {
         self.auth = auth
         self.client = client
         self.appVersion = appVersion
+        self.attestation = attestation
     }
 
     public var providerKind: AuthProviderKind { auth.kind }
@@ -49,6 +52,54 @@ public struct GatewayAccountService: AccountService {
 
     public func signOut() async {
         await auth.signOut()
+    }
+
+    // MARK: Deleting the account (24c)
+
+    public func deleteAccount() async throws(AccountProblem) -> AccountDeletion {
+        let code: String
+        do {
+            code = try await auth.reauthenticateForDeletion()
+        } catch {
+            switch error {
+            case .cancelled: throw .cancelled
+            case .offline: throw .offline
+            case .signedOut, .failed: throw .signedOut
+            }
+        }
+        do {
+            let status = try await client.send(
+                APIV1.deleteAccount, body: APIV1.DeletionRequest(appleAuthorizationCode: code),
+                as: APIV1.DeletionStatus.self)
+            return Self.deletion(status.deletion)
+        } catch {
+            throw Self.problem(for: error)
+        }
+    }
+
+    public func accountDeletion(id: String) async throws(AccountProblem) -> AccountDeletion {
+        do {
+            let status = try await client.send(
+                APIV1.deletionStatus, body: APIV1.DeletionStatusRequest(deletionId: id), as: APIV1.DeletionStatus.self)
+            return Self.deletion(status.deletion)
+        } catch {
+            throw Self.problem(for: error)
+        }
+    }
+
+    public func forgetAccountOnThisDevice() async {
+        await auth.signOut()
+        await attestation?.reset()
+    }
+
+    static func deletion(_ d: APIV1.Deletion) -> AccountDeletion {
+        var steps: [AccountDeletion.Step: AccountDeletion.State] = [:]
+        for step in d.steps {
+            // A step or state this app doesn't know is shown as still pending, never as done.
+            guard let key = AccountDeletion.Step(rawValue: step.step) else { continue }
+            steps[key] = AccountDeletion.State(rawValue: step.state) ?? .pending
+        }
+        return AccountDeletion(id: d.id, isComplete: d.state == "completed", steps: steps)
     }
 
     private func registerSession() async throws(AccountProblem) -> AccountUser {

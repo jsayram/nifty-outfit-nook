@@ -15,20 +15,27 @@ import SwiftUI
 struct PrivacyScreen: View {
     @Environment(\.services) private var services
     @State private var showsDeleteData = false
+    @State private var showsDeleteAccount = false
     @State private var showsBackups = false
     @State private var page: WebsiteLink?
     @State private var weather = WeatherSettingsModel()
     @Environment(\.openURL) private var openURL
+    /// Delete my account is offered only while she's signed in (24c).
+    @State private var isSignedIn = false
 
     var body: some View {
         PrivacyPage(
             keepsChanges: services.keepsChanges,
             backups: services.backups == nil ? nil : { showsBackups = true },
             deleteData: { showsDeleteData = true },
+            deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
             open: { page = $0 },
             weather: weatherContent
         )
-        .task { await weather.load(from: services) }
+        .task {
+            await weather.load(from: services)
+            isSignedIn = await services.account.isSignedIn()
+        }
         .alert(
             WeatherText.explainerTitle, isPresented: $weather.showsLocationExplainer,
             actions: {
@@ -55,6 +62,9 @@ struct PrivacyScreen: View {
         }
         .navigationDestination(isPresented: $showsDeleteData) {
             DeleteDataScreen()
+        }
+        .navigationDestination(isPresented: $showsDeleteAccount) {
+            DeleteDataScreen(scope: .account)
         }
         .navigationDestination(isPresented: $showsBackups) {
             BackupsScreen()
@@ -88,6 +98,8 @@ struct PrivacyPage: View {
     /// Opens Backups (Phase 21b). `nil` hides the row: the debug sample closet has nothing to back up.
     var backups: (() -> Void)?
     var deleteData: () -> Void = {}
+    /// Opens Delete my account (24c). `nil` hides the row: she isn't signed in.
+    var deleteAccount: (() -> Void)?
     var open: (WebsiteLink) -> Void = { _ in }
     /// The weather rows (Phase 29). `nil` leaves them out, as the first Stage B screens drew it.
     var weather: WeatherPrivacy?
@@ -140,6 +152,15 @@ struct PrivacyPage: View {
                 .buttonStyle(.nookRow)
                 .accessibilityIdentifier("privacy.deleteData")
                 .tourAnchor(PrivacyTour.Anchor.deleteData, label: SettingsText.deleteTitle, action: deleteData)
+                if let deleteAccount {
+                    Button(action: deleteAccount) {
+                        NookRow(
+                            DeleteDataText.accountTitle, subtitle: PrivacyText.deleteAccountDetail,
+                            systemImage: "person.crop.circle.badge.xmark", accessory: .chevron)
+                    }
+                    .buttonStyle(.nookRow)
+                    .accessibilityIdentifier("privacy.deleteAccount")
+                }
             }
 
             SettingsGroup(header: PrivacyText.policiesHeader) {
@@ -281,6 +302,12 @@ nonisolated enum PrivacyText {
 
     static var yourDataHeader: String {
         String(localized: "Your data", bundle: .module, comment: "Privacy and terms: section header")
+    }
+
+    static var deleteAccountDetail: String {
+        String(
+            localized: "Your account and what the app’s server keeps, then everything on this iPhone",
+            bundle: .module, comment: "Privacy and terms: under the Delete my account row")
     }
 
     static var deleteDetail: String {

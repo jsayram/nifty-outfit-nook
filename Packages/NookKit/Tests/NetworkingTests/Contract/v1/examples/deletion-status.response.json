@@ -1,0 +1,1 @@
+{"deletion":{"id":"del_0123456789abcdef0123456789abcdef","state":"completed","requestedAt":"2026-10-21T19:04:05.123Z","completedAt":"2026-10-21T19:04:35.500Z","steps":[{"step":"signInWithApple","state":"done"},{"step":"serverData","state":"done"},{"step":"account","state":"done"}]}}

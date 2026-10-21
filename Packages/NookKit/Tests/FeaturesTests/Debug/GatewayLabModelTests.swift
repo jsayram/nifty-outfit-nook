@@ -24,6 +24,9 @@ struct GatewayLabModelTests {
             return user
         }
         func signOut() async { signedIn.withLock { $0 = false } }
+        func deleteAccount() async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+        func accountDeletion(id: String) async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+        func forgetAccountOnThisDevice() async {}
     }
 
     @Test func signInThenWhoAmIShowsTheAccount() async {

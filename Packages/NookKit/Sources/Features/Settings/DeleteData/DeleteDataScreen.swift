@@ -8,12 +8,17 @@ import SwiftUI
 struct DeleteDataScreen: View {
     @Environment(\.services) private var services
     @Environment(\.dataDeleted) private var dataDeleted
-    @State private var model = DeleteDataModel()
+    @State private var model: DeleteDataModel
     @State private var isAsking = false
 
+    /// - Parameter scope: `thisDevice` for Delete my data, `account` for Delete my account (24c).
+    init(scope: DeletionScope = .thisDevice) {
+        _model = State(initialValue: DeleteDataModel(scope: scope))
+    }
+
     var body: some View {
-        DeleteDataPage(model: model, delete: { isAsking = true })
-            .navigationTitle(SettingsText.deleteTitle)
+        DeleteDataPage(model: model, delete: { isAsking = true }, done: { dataDeleted() })
+            .navigationTitle(DeleteDataText.screenTitle(model.scope))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // The title is on the wall, as on Profile.
@@ -21,13 +26,13 @@ struct DeleteDataScreen: View {
                     Text(verbatim: "").accessibilityHidden(true)
                 }
             }
-            .alert(DeleteDataText.askTitle, isPresented: $isAsking) {
-                Button(DeleteDataText.askDelete, role: .destructive) {
+            .alert(DeleteDataText.askTitle(model.scope), isPresented: $isAsking) {
+                Button(DeleteDataText.askDelete(model.scope), role: .destructive) {
                     Task { await delete() }
                 }
                 Button(DeleteDataText.askCancel, role: .cancel) {}
             } message: {
-                Text(DeleteDataText.askMessage)
+                Text(DeleteDataText.askMessage(model.scope))
             }
             .task { await model.load(from: services) }
             // Delete my data's quick tour (Stage A audit), once the counts are read. Not while it
@@ -48,14 +53,28 @@ struct DeleteDataScreen: View {
 struct DeleteDataPage: View {
     let model: DeleteDataModel
     var delete: () -> Void = {}
+    /// Delete my account, after a deletion the backend is still finishing: starts the app fresh.
+    var done: () -> Void = {}
 
     var body: some View {
-        SettingsPage(header: SettingsHeader(title: SettingsText.deleteTitle, lede: SettingsText.deleteLede)) {
-            if case .incomplete(let report) = model.phase {
+        SettingsPage(
+            header: SettingsHeader(
+                title: DeleteDataText.screenTitle(model.scope), lede: DeleteDataText.lede(model.scope))
+        ) {
+            switch model.phase {
+            case .incomplete(let report):
                 NookBanner(
                     DeleteDataText.incomplete(report), systemImage: "exclamationmark.triangle", tone: .warning
                 )
                 .accessibilityIdentifier("deleteData.incomplete")
+            case .notStarted(let reason):
+                NookBanner(DeleteDataText.notStarted(reason), systemImage: "exclamationmark.triangle", tone: .warning)
+                    .accessibilityIdentifier("deleteData.notStarted")
+            case .finished(let report):
+                NookBanner(DeleteDataText.finished(report), systemImage: "checkmark.circle", tone: .warning)
+                    .accessibilityIdentifier("deleteData.finished")
+            case .ready, .deleting:
+                EmptyView()
             }
 
             SettingsGroup(header: DeleteDataText.whatGoesHeader, identifier: "deleteData.parts") {
@@ -69,25 +88,38 @@ struct DeleteDataPage: View {
             .tourAnchor(DeleteDataTour.Anchor.parts, label: DeleteDataText.whatGoesHeader)
 
             SettingsGroup(header: DeleteDataText.afterHeader) {
-                SettingsNote(DeleteDataText.after)
-                SettingsNote(DeleteDataText.nowhereElse)
+                if model.scope == .account {
+                    SettingsNote(DeleteDataText.afterAccount)
+                    SettingsNote(DeleteDataText.subscriptionNote)
+                    SettingsNote(DeleteDataText.providersNote)
+                } else {
+                    SettingsNote(DeleteDataText.after)
+                    SettingsNote(DeleteDataText.nowhereElse)
+                }
             }
 
             VStack(spacing: NookSpacing.small) {
-                DeleteButton(
-                    title: model.phase.isIncomplete ? DeleteDataText.tryAgain : SettingsText.deleteTitle,
-                    isDeleting: model.phase == .deleting, action: delete
-                )
-                // From the tour it asks once more, as the button does.
-                .tourAnchor(DeleteDataTour.Anchor.delete, label: SettingsText.deleteTitle, action: delete)
-                Text(DeleteDataText.cantUndo)
-                    .nookTextStyle(.note)
-                    .foregroundStyle(.nook.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, NookSpacing.xSmall)
-                    .floorCard()
+                if model.phase.isFinished {
+                    DoneButton(action: done)
+                } else {
+                    DeleteButton(
+                        title: model.phase.isIncomplete
+                            ? DeleteDataText.tryAgain : DeleteDataText.screenTitle(model.scope),
+                        isDeleting: model.phase == .deleting, action: delete
+                    )
+                    // From the tour it asks once more, as the button does.
+                    .tourAnchor(DeleteDataTour.Anchor.delete, label: SettingsText.deleteTitle, action: delete)
+                }
+                if !model.phase.isFinished {
+                    Text(model.scope == .account ? DeleteDataText.cantUndoAccount : DeleteDataText.cantUndo)
+                        .nookTextStyle(.note)
+                        .foregroundStyle(.nook.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, NookSpacing.xSmall)
+                        .floorCard()
+                }
             }
         }
     }
@@ -97,6 +129,26 @@ extension DeleteDataModel.Phase {
     fileprivate var isIncomplete: Bool {
         if case .incomplete = self { return true }
         return false
+    }
+
+    fileprivate var isFinished: Bool {
+        if case .finished = self { return true }
+        return false
+    }
+}
+
+/// After Delete my account, when only the backend is still finishing: leaves for a fresh start.
+private struct DoneButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(DeleteDataText.done)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, minHeight: NookSpacing.minimumTapTarget)
+        }
+        .buttonStyle(.nook(.primary))
+        .accessibilityIdentifier("deleteData.done")
     }
 }
 
@@ -155,6 +207,13 @@ nonisolated enum DeleteDataText {
         case .suitcases: String(localized: "Suitcases", bundle: .module, comment: "Delete my data: a part")
         case .profile: String(localized: "Your profile", bundle: .module, comment: "Delete my data: a part")
         case .drafts: String(localized: "Unsaved work", bundle: .module, comment: "Delete my data: a part")
+        case .serverData:
+            String(localized: "What the app’s server keeps", bundle: .module, comment: "Delete my account: a part")
+        case .account: String(localized: "Your account", bundle: .module, comment: "Delete my account: a part")
+        case .signInWithApple:
+            String(localized: "Sign in with Apple", bundle: .module, comment: "Delete my account: a part")
+        case .iCloudCopy:
+            String(localized: "Your iCloud copy", bundle: .module, comment: "Delete my account: a part")
         }
     }
 
@@ -179,6 +238,23 @@ nonisolated enum DeleteDataText {
             String(
                 localized: "Pieces and looks you started but didn’t save", bundle: .module,
                 comment: "Delete my data: under Unsaved work")
+        case .serverData:
+            String(
+                localized:
+                    "How much you’ve used the stylist and try-on, and sign-in records. Anything still running is stopped.",
+                bundle: .module, comment: "Delete my account: under What the app’s server keeps")
+        case .account:
+            String(
+                localized: "Your sign-in to the app, on every device", bundle: .module,
+                comment: "Delete my account: under Your account")
+        case .signInWithApple:
+            String(
+                localized: "The link between your Apple Account and this app", bundle: .module,
+                comment: "Delete my account: under Sign in with Apple")
+        case .iCloudCopy:
+            String(
+                localized: "The copy of your closet kept in your iCloud", bundle: .module,
+                comment: "Delete my account: under Your iCloud copy")
         }
     }
 
@@ -198,7 +274,7 @@ nonisolated enum DeleteDataText {
             String(
                 localized: "\(counts.suitcases) suitcases", bundle: .module,
                 comment: "Closet tile: how many suitcases she has")
-        case .profile: nil
+        case .profile, .serverData, .account, .signInWithApple, .iCloudCopy: nil
         case .drafts:
             counts.drafts == 0
                 ? String(localized: "None", bundle: .module, comment: "Delete my data: no unsaved work")
@@ -216,6 +292,10 @@ nonisolated enum DeleteDataText {
         case .suitcases: "suitcase"
         case .profile: "person.crop.circle"
         case .drafts: "square.and.pencil"
+        case .serverData: "server.rack"
+        case .account: "person.crop.circle.badge.xmark"
+        case .signInWithApple: "apple.logo"
+        case .iCloudCopy: "icloud"
         }
     }
 
@@ -253,19 +333,152 @@ nonisolated enum DeleteDataText {
 
     // MARK: The question
 
-    static var askTitle: String {
-        String(localized: "Delete everything?", bundle: .module, comment: "Delete my data: the question's title")
+    static func askTitle(_ scope: DeletionScope) -> String {
+        switch scope {
+        case .thisDevice:
+            String(localized: "Delete everything?", bundle: .module, comment: "Delete my data: the question's title")
+        case .account:
+            String(
+                localized: "Delete your account?", bundle: .module, comment: "Delete my account: the question's title")
+        }
     }
 
-    static var askMessage: String {
+    static func askMessage(_ scope: DeletionScope) -> String {
+        switch scope {
+        case .thisDevice:
+            String(
+                localized:
+                    "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone.",
+                bundle: .module, comment: "Delete my data: the question")
+        case .account:
+            String(
+                localized:
+                    "Your account, everything the app’s server keeps for it, and everything in the app on this iPhone will be deleted. Apple will ask you to confirm it’s you. This can’t be undone.",
+                bundle: .module, comment: "Delete my account: the question")
+        }
+    }
+
+    static func askDelete(_ scope: DeletionScope) -> String {
+        switch scope {
+        case .thisDevice:
+            String(localized: "Delete everything", bundle: .module, comment: "Delete my data: the question's button")
+        case .account:
+            String(localized: "Delete my account", bundle: .module, comment: "Delete my account: the question's button")
+        }
+    }
+
+    // MARK: Delete my account (24c)
+
+    static func screenTitle(_ scope: DeletionScope) -> String {
+        switch scope {
+        case .thisDevice: SettingsText.deleteTitle
+        case .account: accountTitle
+        }
+    }
+
+    static var accountTitle: String {
+        String(
+            localized: "Delete my account", bundle: .module, comment: "Delete my account: the screen's title and row")
+    }
+
+    static func lede(_ scope: DeletionScope) -> String {
+        switch scope {
+        case .thisDevice: SettingsText.deleteLede
+        case .account:
+            String(
+                localized:
+                    "Deletes your account and everything the app keeps for you, on the server and on this iPhone.",
+                bundle: .module, comment: "Delete my account: under the title")
+        }
+    }
+
+    static var afterAccount: String {
         String(
             localized:
-                "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone.",
-            bundle: .module, comment: "Delete my data: the question")
+                "You’re signed out and the app starts fresh, as if it were just installed. Signing in again later makes a new, empty account.",
+            bundle: .module, comment: "Delete my account: what happens after")
     }
 
-    static var askDelete: String {
-        String(localized: "Delete everything", bundle: .module, comment: "Delete my data: the question's button")
+    /// App Store rules: deleting an account doesn't cancel an App Store subscription. Payments
+    /// arrive in Phase 30, which also checks for an active subscription and links to it.
+    static var subscriptionNote: String {
+        String(
+            localized:
+                "Deleting your account doesn’t cancel a subscription. If you have one, cancel it in the Settings app: tap your name, then Subscriptions.",
+            bundle: .module, comment: "Delete my account: the subscription note")
+    }
+
+    static var providersNote: String {
+        String(
+            localized:
+                "Copies you exported stay where you saved them. Requests the stylist and try-on already sent are kept by those services for the time the privacy policy says, and then deleted.",
+            bundle: .module, comment: "Delete my account: what deletion can't reach")
+    }
+
+    static var cantUndoAccount: String {
+        String(
+            localized: "You’ll be asked once more, then Apple asks you to confirm it’s you. Deleting can’t be undone.",
+            bundle: .module, comment: "Delete my account: under the button")
+    }
+
+    static var done: String {
+        String(
+            localized: "Done", bundle: .module,
+            comment: "Delete my account: leaves after a deletion the server is finishing")
+    }
+
+    static func notStarted(_ reason: DeletionNotStarted) -> String {
+        switch reason {
+        case .cancelled, .unavailable(nil):
+            String(
+                localized: "Nothing was deleted. The app’s server couldn’t take the request. Try again in a moment.",
+                bundle: .module, comment: "Delete my account: didn't start, server problem")
+        case .offline:
+            String(
+                localized: "Nothing was deleted. You’re offline: connect to the internet and try again.",
+                bundle: .module, comment: "Delete my account: didn't start, offline")
+        case .signedOut:
+            String(
+                localized: "Nothing was deleted. Sign in again, then try again.", bundle: .module,
+                comment: "Delete my account: didn't start, signed out")
+        case .unavailable(let seconds?):
+            String(
+                localized: "Nothing was deleted. The app’s server is busy. Try again in \(seconds) seconds.",
+                bundle: .module, comment: "Delete my account: didn't start, try again after a wait")
+        }
+    }
+
+    /// Everything on this iPhone is gone; says what the server is still doing, and what she can do
+    /// about the Apple link if it couldn't be removed.
+    static func finished(_ report: DeletionReport) -> String {
+        var lines = [
+            String(
+                localized: "Everything on this iPhone is deleted and you’re signed out.", bundle: .module,
+                comment: "Delete my account: finished on the iPhone")
+        ]
+        let pending = report.pendingParts
+        if !pending.isEmpty {
+            let names = pending.map(title).formatted(.list(type: .and))
+            lines.append(
+                String(
+                    localized:
+                        "Still being deleted on the server: \(names). It finishes on its own; you don’t need to do anything.",
+                    bundle: .module, comment: "Delete my account: server parts still pending"))
+        }
+        if report.outcomes[.signInWithApple] == .failed {
+            lines.append(
+                String(
+                    localized:
+                        "The app couldn’t remove its Sign in with Apple link. To remove it, open the Settings app, tap your name, then Sign in with Apple.",
+                    bundle: .module, comment: "Delete my account: the Apple link needs her"))
+        }
+        if report.outcomes[.iCloudCopy] == .pending {
+            lines.append(
+                String(
+                    localized: "Your iCloud copy is deleted the next time this iPhone is online.", bundle: .module,
+                    comment: "Delete my account: iCloud copy pending"))
+        }
+        return lines.joined(separator: " ")
     }
 
     static var askCancel: String {

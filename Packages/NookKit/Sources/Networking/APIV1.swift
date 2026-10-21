@@ -45,7 +45,9 @@ public enum APIV1 {
     public static let tryOn = Endpoint(
         id: "tryOn", method: "POST", path: "/v1/try-on", requiresAuth: true, idempotent: true, paid: true)
 
-    public static let endpoints = [health, createSession, me, usage, attestChallenge, attestKey, style, tryOn]
+    public static let endpoints = [
+        health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
+    ]
 
     // MARK: Bodies
 

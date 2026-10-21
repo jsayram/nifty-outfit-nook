@@ -31,6 +31,10 @@ The paid endpoints need App Attest, which the simulator can't do, so on the real
 
 The backend needs its switches and ceilings set before any paid work runs (backend README, "Switches and ceilings"); a fresh deployment pauses every paid feature.
 
+## Account deletion (Phase 24c)
+
+Delete my account works on the fakes. On the real backend it needs, in the backend repo's README ("Switching on the real calls"): Clerk's secret key and `NOOK_CLERK_DELETE_MODE=clerk`, a pepper (`NOOK_SUBJECT_PEPPER`), and the Sign in with Apple revocation, which isn't built (first check whether deleting the Clerk user already revokes Apple's link). The app's side is ready: `ClerkAuthProvider.reauthenticateForDeletion` asks Apple directly for a fresh authorization code. It hasn't run on a device; check it there with a test account: the Apple sheet, the deletion finishing, the Clerk user gone from the dashboard, and the app no longer listed in Settings > your name > Sign in with Apple.
+
 ## Before production
 
 - Decision 0005's open points: the Clerk Keychain accessibility class needs Jose's written exception first.

@@ -142,6 +142,19 @@ struct SettingsSnapshotTests {
         assertSnapshot(deleteData(.incomplete(report)), colorScheme: .dark, named: "delete-data-incomplete-dark")
     }
 
+    /// Delete my account (24c), before and after a deletion the server is still finishing.
+    @Test func deleteAccountScreen() {
+        let model = DeleteDataModel(scope: .account)
+        model.show(DeleteDataModel.Counts(pieces: 21, looks: 6, pictures: 3, suitcases: 6, drafts: 1))
+        assertSnapshot(DeleteDataPage(model: model), named: "delete-account")
+        let report = DeletionReport(
+            scope: .account,
+            results: [(.serverData, .deleted), (.account, .pending), (.signInWithApple, .deleted), (.closet, .deleted)])
+        let finished = DeleteDataModel(scope: .account)
+        finished.show(nil, phase: .finished(report))
+        assertSnapshot(DeleteDataPage(model: finished), colorScheme: .dark, named: "delete-account-finished-dark")
+    }
+
     @Test func deleteDataAX5() {
         assertSnapshot(deleteData(), dynamicTypeSize: .accessibility5, named: "delete-data-ax5")
     }

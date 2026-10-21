@@ -67,11 +67,11 @@ public struct FakeGateway: Sendable {
             auth: auth, policy: policy, onEvent: onEvent)
         self.auth = auth
         self.backend = backend
-        self.account = GatewayAccountService(auth: auth, client: client, appVersion: appVersion)
         let attester = FakeDeviceAttester()
         self.attester = attester
-        self.paid = GatewayPaidActionService(
-            client: client,
-            attestation: AttestationSession(attester: attester, store: MemoryAttestKeyStore(), client: client))
+        let attestation = AttestationSession(attester: attester, store: MemoryAttestKeyStore(), client: client)
+        self.account = GatewayAccountService(
+            auth: auth, client: client, appVersion: appVersion, attestation: attestation)
+        self.paid = GatewayPaidActionService(client: client, attestation: attestation)
     }
 }

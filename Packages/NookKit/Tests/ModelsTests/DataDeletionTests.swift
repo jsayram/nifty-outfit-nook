@@ -88,8 +88,10 @@ struct DataDeletionTests {
 
     @Test func theServicesBundleCoversEveryPart() {
         // Every part of her data has a store behind it; nothing is left out of Delete my data.
-        let parts = Set(DataPart.allCases)
+        // The parts held elsewhere (24c) belong to Delete my account only.
+        let parts = Set(DataPart.allCases.filter { !$0.isRemote })
         #expect(parts == [.closet, .looks, .pictures, .suitcases, .profile, .drafts])
+        #expect(Set(DataPart.allCases.filter(\.isRemote)) == [.serverData, .account, .signInWithApple, .iCloudCopy])
     }
 }
 
