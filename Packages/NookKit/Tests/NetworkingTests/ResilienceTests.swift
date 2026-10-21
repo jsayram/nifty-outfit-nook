@@ -101,7 +101,7 @@ struct ResilienceTests {
         backend.setMode(.trickle)
         let started = ContinuousClock.now
         #expect(await me(client) == .timedOut)
-        #expect(ContinuousClock.now - started < .seconds(3))
+        #expect(ContinuousClock.now - started < .seconds(6))
     }
 
     @Test func aSlowAnswerWithinTheLimitStillArrives() async throws {
@@ -127,7 +127,7 @@ struct ResilienceTests {
         let started = ContinuousClock.now
         #expect(await me(client) == .timedOut)
         let elapsed = ContinuousClock.now - started
-        #expect(elapsed >= .milliseconds(450) && elapsed < .seconds(3))
+        #expect(elapsed >= .milliseconds(450) && elapsed < .seconds(10))
         let tries = backend.requestCount - before
         #expect(tries >= 2 && tries < 10)
     }

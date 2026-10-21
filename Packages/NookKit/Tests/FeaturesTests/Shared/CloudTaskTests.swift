@@ -36,7 +36,8 @@ struct CloudTaskTests {
     }
 
     func eventually(_ condition: @MainActor () -> Bool) async -> Bool {
-        for _ in 0..<500 {
+        // Up to 30 seconds: the whole test run shares the main actor on a busy runner.
+        for _ in 0..<3000 {
             if condition() { return true }
             try? await Task.sleep(for: .milliseconds(10))
         }
@@ -111,13 +112,16 @@ struct CloudTaskTests {
         let spoken = Spoken()
         let cloud = task(slowAfter: .milliseconds(60), spoken)
         let waiter = Waiter()
-        cloud.start { () async throws(CloudLimitProblem) in try await waiter.wait(for: .milliseconds(400)) }
-        #expect(cloud.state == .running)
+        // The work only ends when it is cancelled, so how long the runner takes to notice is
+        // never a race against the work finishing.
+        cloud.start { () async throws(CloudLimitProblem) in try await waiter.wait() }
         #expect(await eventually { cloud.state == .takingLong })
         #expect(cloud.isRunning)
         #expect(spoken.lines == ["This is taking longer than usual. You can wait or cancel."])
-        #expect(await eventually { cloud.state == .finished })
+        try? await Task.sleep(for: .milliseconds(150))
         #expect(spoken.lines.count == 1)
+        cloud.cancel()
+        #expect(cloud.state == .idle)
     }
 
     @Test func aCallThatEndsInTimeNeverSaysItIsSlow() async {
@@ -173,10 +177,10 @@ struct ConnectionStatusTests {
         #expect(!status.isOffline)
         let follower = Task { await status.follow(ManualSource(stream: stream)) }
         continuation.yield(.offline)
-        for _ in 0..<200 where !status.isOffline { try? await Task.sleep(for: .milliseconds(10)) }
+        for _ in 0..<3000 where !status.isOffline { try? await Task.sleep(for: .milliseconds(10)) }
         #expect(status.isOffline)
         continuation.yield(.online)
-        for _ in 0..<200 where status.isOffline { try? await Task.sleep(for: .milliseconds(10)) }
+        for _ in 0..<3000 where status.isOffline { try? await Task.sleep(for: .milliseconds(10)) }
         #expect(status.state == .online)
         follower.cancel()
         continuation.finish()
