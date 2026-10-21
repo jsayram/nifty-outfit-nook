@@ -18,7 +18,23 @@ func loadedSavedLooks(
     return model
 }
 
-/// Saved Looks (Phase 12a, RD-08, LR-09) on the demo closet: five saved looks and one unsaved
+/// The demo closet loaded into Saved Looks with some of its saved looks turned into unsaved
+/// results, so All lists more than Saved does. The demo's own unsaved result, `o-history-casual`
+/// (cream sweater, wide jeans, white sneakers), is there too.
+@MainActor
+func savedLooks(unsaving ids: Set<Look.ID>, searchDelay: Duration = .zero) -> SavedLooksModel {
+    let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
+    var looks = data.looks
+    for index in looks.indices where ids.contains(looks[index].id) {
+        looks[index].isSaved = false
+        looks[index].savedAt = nil
+    }
+    let model = SavedLooksModel(searchDelay: searchDelay)
+    model.show(looks, garments: data.garments, now: TestTime.now)
+    return model
+}
+
+/// Saved Looks (Phase 12a, RD-08, LR-09) on the demo closet: nine saved looks and one unsaved
 /// result kept as history.
 @MainActor
 struct SavedLooksModelTests {

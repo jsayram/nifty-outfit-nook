@@ -1,6 +1,6 @@
 # Saved Looks
 
-Phase 12a, 15 October 2026. Saved Looks is the third tab: every look she saved, as its sticker bundle, with search, piece and colour filters, and a detail screen for each look. It works offline and uses no picture allowance (RD-08.1). The Pictures tab, picture detail and Try it on came in Phase 12b and are described in `docs/try-on-pictures.md`.
+Phase 12a, 15 October 2026. Saved Looks is the third tab: every look she saved, as its sticker bundle, with search, piece and colour filters, and a detail screen for each look. It works offline and uses no picture allowance (RD-08.1). Since 21 October 2026 a Saved | All switch also lets her list the Style Me results she didn't save (below). The Pictures tab, picture detail and Try it on came in Phase 12b and are described in `docs/try-on-pictures.md`.
 
 Spec: amendment RD-08 (Looks and Pictures tabs, search, "+ Make your own", no Favorites or collections in Stage A), LR-09 (piece and colour filters), LR-10 (Wear today, Last worn), LR-16.4 (a removed piece faded with Swap it) and LR-08 (Swap for every piece change, no path to the editor from a saved look). The visual references are `saved.html` and `look.html` in `closet/prototypes/RoomDirectionMockups/screens`; their Favorites, collections, star and "Add to collection" are a proposal with no Stage A screen, and their Edit button is replaced by Swap a piece (LR-08.1).
 
@@ -9,10 +9,10 @@ Spec: amendment RD-08 (Looks and Pictures tabs, search, "+ Make your own", no Fa
 | File | Holds |
 |---|---|
 | `Models/Rules/LookFilter.swift` | The pure search and filter rule |
-| `Features/SavedLooks/SavedLooksModel.swift` | Loads the saved looks, newest saved first, and filters them; the lasting Undo after Delete look |
+| `Features/SavedLooks/SavedLooksModel.swift` | Loads every look, lists the saved ones newest saved first (Saved) or all of them newest made first (All), and filters them; the "N more in All" count; Save look from the grid; the lasting Undo after Delete look |
 | `Features/SavedLooks/SavedLookItem.swift` | One look's bundle, name, occasion and search words, worked out once when the looks load |
-| `Features/SavedLooks/SavedLooksPage.swift` | The title, Looks and Pictures, search, filters, the grid and the states |
-| `Features/SavedLooks/SavedLooksGrid.swift` | The lazy grid of looks, and rows at the accessibility sizes |
+| `Features/SavedLooks/SavedLooksPage.swift` | The title, Looks and Pictures, the Saved and All switch, search, filters, the grid, the "N more in All" line and the states |
+| `Features/SavedLooks/SavedLooksGrid.swift` | The lazy grid of looks, and rows at the accessibility sizes; the Not saved tag and Save look on a look she didn't save |
 | `Features/SavedLooks/SavedLooksFilters.swift` | The piece chips and colour swatches, folding behind Show filters at the accessibility sizes |
 | `Features/SavedLooks/SavedLooksScreen.swift` | Navigation (look detail, garment detail and what it opens, Make your own look), the toasts |
 | `Features/SavedLooks/LookDetail/` | `LookDetailModel`, `LookDetailPage`, `LookDetailScreen`, `RenameLookSheet` and `LookDetailText` |
@@ -24,14 +24,24 @@ Top to bottom, as in `saved.html`:
 
 - **Saved Looks** in the serif title on the wall, and "5 looks". The bar carries "+ Make your own" (words and icon) and Profile.
 - **Looks · Pictures**, the same switch as Your looks' tabs.
+- **Saved | All** (Looks tab only), a second switch under it. Saved is the default.
 - **Search your looks.** Typed words match the look's name, its pieces' names and other names, and the occasion, kinds, types and colours ("office", "skirt", "loafers", "navy"). Every word has to match. Search waits until she pauses, as Closet's does.
 - **The filters** (LR-09): Tops, Bottoms, Dresses, Layers, Shoes, Bags (and Accessories if a look has one), then a named swatch for each colour in her saved looks. A chip and a swatch match one piece together, so Bottoms and Black finds black bottoms, not a look with a bottom and black shoes. Ideas count as pieces.
-- **"2 of 5 looks"** with **Clear**, while anything is set. Clear sits on this line rather than at the end of a chip row, so it never scrolls out of sight.
+- **"2 of 5 looks"** (out of the looks in the scope) with **Clear**, while anything is set. Clear sits on this line rather than at the end of a chip row, so it never scrolls out of sight.
 - **The grid.** Each look is its bundle on a soft cream mat, with its name and "Office · Last worn 5 days ago" under it. Two or more columns of at least 150 points; one look per row with the bundle beside its name at the accessibility sizes. A piece that has left her closet is faded in the bundle (LR-16.4).
 
-**Earlier results (LR-06.4, Phase 21c).** Style Me keeps every result she didn't save as background history. They're never listed with her saved looks, but typed search finds them: under the matching saved looks, "Earlier results, not saved" with a line on what they are ("Looks Style Me made for you that you didn’t save. Open one to save it.") and the same grid. Chips and swatches narrow them too, but chips alone never bring them up. One opens on look detail with its occasion, version, "Made Oct 11" and "Not saved", the note "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on.", **Save look** and its pieces, and none of the buttons that change a saved look. Save look names it as Your looks would ("Pink & navy", "Casual look"), puts it in Saved Looks with today's date, shows "Saved to Saved Looks" with Undo, and the page turns into the saved look's. Opened any other way, an unsaved look is still "no longer saved".
+**Saved and All (LR-06.4, decided 21 October 2026).** Style Me keeps every result she didn't save as background history. Phase 21c first let typed search pull those up in a separate group on Saved, which Jose found unclear. The two scopes are now explicit, with a switch at the top of the Looks tab (`SavedLooksModel.Scope`):
 
-Nothing matches: "No saved looks match", the filters in words ("Bottoms · Black · “navy”") and Clear filters (LR-09.3). Nothing saved yet: "Nothing saved yet", three steps (Style Me from the laptop, Save look on Your looks, or Make your own) and "+ Make your own" (RD-08.4). Loading and a store failure have their own states, with Try again.
+- **Saved** lists her saved looks, newest saved first. Search and every filter narrow within them.
+- **All** lists her saved looks and every Style Me result she kept but didn't save, in one list, newest made first. Search and the filters apply exactly as on Saved. A look she didn't save has a small "Not saved" tag, a made date ("Casual · Made Oct 11", since several can share a name) and a **Save look** button under it. Save look names it as Your looks would ("Pink & navy", "Casual look"), saves it with today's date, and shows "Saved to Saved Looks" with Undo. The look changes where it is: the tag and button go and nothing else moves, because All's order is by when a look was made, which saving doesn't change. It then also sits at the top of Saved.
+- **The nudge.** On Saved, when the search and filters match looks she didn't save too, one line ends the results: "3 more in All" with an arrow. It is a button: tapping it switches to All and keeps the search and filters, and the list scrolls to its top. It stays away when N is 0, and when nothing is typed or chosen (every unsaved look would "match", and the line would only be noise). It also shows under "No saved looks match", which is the case it matters most in.
+- **No special cases.** The same search and filters work the same way in both scopes. The old rule that only typed words found earlier results is gone, and so is the "Earlier results, not saved" group.
+- **Swatches follow the scope.** On All a colour that only an unsaved look has gets a swatch; on Saved it doesn't, so a swatch there always finds something. A chip or swatch that's on stays on show when she switches, so she can turn it off.
+- **The scope goes back to Saved each time she leaves the screen**, like the line about a deleted look. The app keeps no screen state across launches, so there is nothing to restore. The search and filters aren't reset by that.
+- An unsaved look opens on look detail from All with its facts ("Casual · Simple · Made Oct 11 · Not saved"), the note "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on.", **Save look** and its pieces, and none of the buttons that change a saved look. Opened any other way, an unsaved look is still "no longer saved".
+- The tour runs on Saved only, since its first look has to be one she saved.
+
+Each state names its scope. Nothing matches on Saved: "No saved looks match", the filters in words ("Bottoms · Black · “navy”") and Clear filters (LR-09.3), then "N more in All" if All has them. Nothing matches on All: "No looks match in All" with the same words. Nothing saved yet: "Nothing saved yet", three steps (Style Me from the laptop, Save look on Your looks, or Make your own) and "+ Make your own" (RD-08.4); when she has results she didn't save it adds "Results you didn’t save are in All." No looks at all on All: "No looks yet" and "Looks Style Me makes for you show up here, saved or not." The search and chips only show when the scope has looks. Loading and a store failure have their own states, with Try again.
 
 The looks reload each time the tab appears and each time a pushed screen closes, so a look saved on Your looks, built in Make your own look or changed on its detail shows at once.
 
@@ -77,6 +87,9 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 ## Accessibility
 
 - A look in the grid is one button: its name and pieces, then the occasion, Last worn and how many pieces left her closet, with "Opens this look."
+- The Saved | All switch is named "Which looks to show". Each option is a button that says Selected when on, with a hint that says what it lists: "Only the looks you saved." and "Your saved looks and the Style Me results you didn’t save."
+- "3 more in All" is a button, with the hint "Shows all your looks, including ones you didn’t save. Your search and filters stay on."
+- A look she didn't save reads "Casual, Made Oct 11, Not saved" after its pieces. The visible tag is hidden from VoiceOver so it isn't read twice. Save look is its own button, named for the look ("Save look: Casual look"), so a list of them is told apart.
 - Chips and swatches have the Selected trait, and swatches are named, so colour is never the only signal (LR-09.2). Show filters folds them away at the accessibility sizes.
 - The bundle reads as one element naming its pieces, with "(No longer in your closet)" on a removed one (RD-07.3). Each piece is also a button in the list.
 - Worn today has the Selected trait. Delete look and Wear today say what they do as hints.
@@ -85,12 +98,12 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 ## Tests
 
 - `LookFilterTests`: chips and swatches alone and together, one piece matching both, search on names, pieces and extra words, everything combined, a purged piece.
-- `EarlierResultsTests` (21c): earlier results found only by typed search and never listed, narrowed by chips, counted as matches, opened with Save look, saved with a name and undone.
+- `SavedLooksScopeTests` (21 October 2026, replacing 21c's `EarlierResultsTests`): the two lists and their order, search, chips and swatches across both scopes (fifteen cases, saved and all, with the expected looks), the scope keeping the search and filters, the nudge count and when it hides ("3 more in All", 1 and many), the empty and no-match states of both scopes, swatches following the scope, Save look in place with Undo and double taps, what VoiceOver reads, and look detail for an unsaved look.
 - `SavedLooksModelTests`: saved looks only and newest saved first, the empty set, a store failure, search by name, piece and occasion, the search delay, filters with Clear and the summary, no matches, the choices, removed pieces, Delete look and the lasting Undo, the large set's speed.
 - `LookDetailModelTests`: the facts, a suitcase look, missing and failed, rename checks, Wear today and Undo (the look and its pieces), Worn today taken off, a removed piece skipped by Wear today, Delete look and Undo for a result and for her own look, removed and purged pieces, Swap in place and Undo, Swap's setup from the look's source.
 - `HomeFramedLooksTests`: the three newest saved looks, none, fewer than three, the pieces a frame shows.
-- `SavedLooksSnapshotTests` (11 images): the grid in light, dark and AX5, filtered, no matches, empty, Pictures, and detail in light, dark, AX5 and with a removed piece. `HomeSnapshotTests` adds the room with framed looks in light and dark. Your looks' Saved tab images changed: the given-away blazer is now faded there too.
-- UI, `SavedLooksTests`: Style me, Save look, then find the look by search on Saved Looks and open it; Delete look and Undo; a shelf frame opens its look, and Swap it opens Swap a piece on the faded blazer.
+- `SavedLooksSnapshotTests`: the grid in light, dark and AX5, filtered, no matches, empty, Pictures, and detail in light, dark, AX5 and with a removed piece; since the scope switch, Saved with "1 more in All", All in light, dark and AX5, no matches with the line, All with no matches, and the empty state of both scopes (and Saved with nothing saved but unsaved results around). `SavedLooksIPadSnapshotTests` adds All beside its sidebar. `HomeSnapshotTests` adds the room with framed looks in light and dark. Your looks' Saved tab images changed: the given-away blazer is now faded there too.
+- UI, `SavedLooksTests`: a search and Bottoms on Saved find "1 more in All", which switches to All with both kept, shows the tag and Save look, and saving changes the look in place; the scope goes back to Saved after leaving the tab; an unsaved look opens from All and saves on its detail. `AccessibilityAuditTests` audits All, at the default size and at AX5. Also: Style me, Save look, then find the look by search on Saved Looks and open it; Delete look and Undo; a shelf frame opens its look, and Swap it opens Swap a piece on the faded blazer.
 
 ## Decisions for Jose
 
@@ -103,6 +116,8 @@ The large set has about 480 saved looks. Each look's bundle content, name and se
 7. **Looks are ordered by when she saved them** (`Look.savedAt`, new in this phase). Looks saved before it existed use when they were made.
 8. **The shelf frames' tap areas are about 36 points wide**, not 44 (`docs/home-room.md`).
 9. **No "pictures" link on a look yet.** Done in 12b: a look lists its pictures, and each picture links back (RD-08.2).
+
+10. **Saved | All replaces 21c's separate "Earlier results" group** (Jose, 21 October 2026: "it should be unambiguous"). The nudge needs a typed search or a chip, so an unfiltered Saved never says "34 more in All". All is ordered by when a look was made, so saving one doesn't move it. All's header reads "10 looks, 1 not saved".
 
 ## Left for later phases
 

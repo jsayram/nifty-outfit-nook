@@ -17,7 +17,7 @@ import UIKit
 /// out for that width (`BrowseColumns`), drawn at 1x from the top:
 /// - the Interview look beside the grid: sideways with the sidebar, upright beside the page,
 ///   a narrow window (the phone page), sideways in dark, and at AX3 upright (the phone page);
-/// - nothing picked yet;
+/// - nothing picked yet, and on All (Phase 21c) with the Not saved tags;
 /// - the Pictures tab with the Lace date night picture beside it, sideways and upright;
 /// - Make your own look sideways, upright and in a narrow window.
 @MainActor
@@ -41,6 +41,11 @@ struct SavedLooksIPadSnapshotTests {
 
     @Test func nothingPicked() async {
         await assertColumns(nil, in: .landscape, named: "landscape")
+    }
+
+    /// The Saved and All switch in the sidebar, and All's unsaved look tagged in the grid.
+    @Test func allScope() async {
+        await assertColumns(nil, scope: .all, in: .landscape, named: "all-landscape")
     }
 
     // MARK: Pictures
@@ -67,6 +72,7 @@ struct SavedLooksIPadSnapshotTests {
     private func assertColumns(
         _ selection: SavedLooksSelection?,
         tab: SavedLooksModel.Tab = .looks,
+        scope: SavedLooksModel.Scope = .saved,
         in window: SnapshotWindow,
         colorScheme: ColorScheme = .light,
         dynamicTypeSize: DynamicTypeSize = .large,
@@ -81,6 +87,7 @@ struct SavedLooksIPadSnapshotTests {
             width: window.size.width, horizontalSizeClass: window.sizeClass, dynamicTypeSize: dynamicTypeSize)
         let model = await loadedSavedLooks()
         model.tab = tab
+        model.scope = scope
         let beside = layout.showsDetailBeside ? selection : nil
         let services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
         var look: LookDetailModel?
