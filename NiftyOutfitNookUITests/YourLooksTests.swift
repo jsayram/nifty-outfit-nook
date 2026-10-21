@@ -73,7 +73,7 @@ final class YourLooksTests: XCTestCase {
 
     /// `stylist-waits`: Your looks shows its styling state, and Cancel goes back to Style Me.
     ///
-    /// The three forced-state tests below run on merges and nightly only. The states, Retry and
+    /// The three forced-state tests below run in the full suite only. The states, Retry and
     /// Cancel are `YourLooksModelTests` and `YourLooksSnapshotTests`, and `testAFullStylingRun`
     /// walks the real screen, its navigation and its buttons on every pull request.
     @MainActor

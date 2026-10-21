@@ -21,7 +21,7 @@ final class LaunchTests: XCTestCase {
 
     /// Each fixture set reaches the screens: Closet's header shows its piece count.
     ///
-    /// Merges and nightly only. This checks the test harness's own fixture sets (`FixtureSetTests`,
+    /// Full-suite runs only. This checks the test harness's own fixture sets (`FixtureSetTests`,
     /// `FixtureDataTests`), and every other UI test launches with `-fixtures demo`.
     @MainActor
     func testFixtureSetsReachTheScreens() throws {
@@ -42,7 +42,7 @@ final class LaunchTests: XCTestCase {
 
     /// The large closet loads, and a failing store shows Closet's error state with no count.
     ///
-    /// Merges and nightly only: `LargeClosetBrowsingTests` has the large closet, and
+    /// Full-suite runs only: `LargeClosetBrowsingTests` has the large closet, and
     /// `ClosetModelTests` and `ClosetSnapshotTests` the error state.
     @MainActor
     func testLargeAndFailingFixturesLaunch() throws {

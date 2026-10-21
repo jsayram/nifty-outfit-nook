@@ -140,7 +140,7 @@ final class HomeTourTests: XCTestCase {
     /// At the largest text size Home is the banner and large rows, and the tour walks them in
     /// the same order, in their own words, scrolling each into view.
     ///
-    /// Merges and nightly only, with the other AX5 checks: `TourCenterTests` has the large-text
+    /// Full-suite runs only, with the other AX5 checks: `TourCenterTests` has the large-text
     /// tour's steps and words, and the AX5 audit sweep checks Home.
     @MainActor
     func testTheTourAtTheLargestTextSize() throws {

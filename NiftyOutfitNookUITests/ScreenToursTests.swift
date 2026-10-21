@@ -10,7 +10,7 @@ import XCTest
 /// buttons and the overlay being modal are covered by `HomeTourTests`; these check which tour
 /// shows where, and when.
 ///
-/// Merges to develop and main and nightly only (October 2026). Together the two walks took 257
+/// Full-suite runs only (October 2026). Together the two walks took 257
 /// seconds, the slowest tests in the suite after the accessibility audits. Which tour a screen
 /// has, how many steps, when it starts, tips off, replay, Reset all tips and one tour at a time
 /// are all package tests (`ScreenToursTests` and `TourCenterTests` in FeaturesTests,

@@ -143,7 +143,7 @@ final class SuitcasesAndLaundryTests: XCTestCase {
     /// 435 points wide in a 402 point window, the names had no width at all, and Mark clean was
     /// cut off (QA, October 2026).
     ///
-    /// Merges and nightly only, with the other AX5 checks. The AX5 audit sweep opens Laundry and
+    /// Full-suite runs only, with the other AX5 checks. The AX5 audit sweep opens Laundry and
     /// reports clipped text and hit regions there, and the default-size walk covers Laundry on
     /// every pull request.
     @MainActor

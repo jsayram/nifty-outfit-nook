@@ -52,7 +52,7 @@ final class SettingsTests: XCTestCase {
     /// feedback shows exactly what goes and opens the share sheet; Privacy and terms leads to
     /// Delete my data.
     ///
-    /// Merges and nightly only. What goes in the note is covered by `SettingsModelTests` (the note
+    /// Full-suite runs only. What goes in the note is covered by `SettingsModelTests` (the note
     /// holds her words only, details only when on, send shares exactly the preview, a cancelled
     /// share keeps the note), the drawers by `HomeTests`, and this test's own part is the keyboard
     /// and the system share sheet, which are slow and the most likely to stall on a hosted runner.

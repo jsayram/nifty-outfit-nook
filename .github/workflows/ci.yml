@@ -4,13 +4,12 @@ name: CI
 
 on:
   pull_request:
+    # `labeled` and `unlabeled` so adding the run-ui label starts the UI tests.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [develop, main]
-  # Nightly, on develop. GitHub runs a schedule from the workflow file on the default branch
-  # (main), so this starts once a promotion brings this file to main; until then, every merge to
-  # develop runs the same full set.
-  schedule:
-    - cron: "30 9 * * *"
+  # Run the whole UI suite by hand: Actions tab, CI, Run workflow.
+  workflow_dispatch:
 
 # Read-only token for every job. No job needs to write.
 permissions:
@@ -29,12 +28,11 @@ env:
   # images/macos/xcode-27-arm64-Readme.md, October 2026). Its default Xcode is 27.0, so each job
   # selects this one.
   XCODE_APP: /Applications/Xcode_27.1.app
-  # Set on a pull request's run only. A few UI tests skip themselves then, because package tests
-  # cover what they check or another test walks the same screens, and run on merges to develop and
-  # main and nightly (UITestTier in NiftyOutfitNookUITests/UITestSupport.swift, and each test's
-  # comment, say why). A pull request's run is the real user flows once, plus one accessibility
-  # audit per screen. The full set runs on every push to develop or main and on the schedule.
-  NOOK_PR_RUN: ${{ github.event_name == 'pull_request' && '1' || '' }}
+  # '1' except on a manual run. A few UI tests skip themselves when it is set, because package
+  # tests cover what they check or another test walks the same screens (UITestTier in
+  # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
+  # (workflow_dispatch) leaves it empty and runs every UI test.
+  NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
 
 jobs:
   swift-format:
@@ -45,52 +43,75 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
       - name: Select Xcode
         run: sudo xcode-select --switch "$XCODE_APP"
       - name: Lint
         run: scripts/format.sh
 
-  # Which kind of change a pull request is. A pull request that only touches docs (Markdown
-  # outside the source folders, docs/, website/) skips the build and test jobs below, and
-  # `build-and-test` still reports and passes. Anything else, and every push to develop or main,
-  # runs everything. The changed files come from git, between the pull request's base and head.
+  # Which kind of change this is, from git (a pull request's base and head, or a push's before and
+  # after). Two answers:
+  #   code  Anything but docs (Markdown outside the source folders, docs/, website/). A docs-only
+  #         change skips the build and test jobs below, and `build-and-test` still passes.
+  #   ui    A UI path changed (see the list in the step), or the pull request has the run-ui
+  #         label, or this is a manual run. Only then do the UI test jobs run. Every change that
+  #         isn't docs-only still builds, makes the archive check and runs every package test
+  #         (snapshot tests included).
   changes:
     name: changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       code: ${{ steps.filter.outputs.code }}
+      ui: ${{ steps.filter.outputs.ui }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
-      - name: Docs only?
+      - name: What changed?
         id: filter
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
           code=true
+          ui=true
+          files=""
           if [[ "$EVENT" == "pull_request" ]]; then
             files="$(git diff --name-only "$BASE...$HEAD")"
+          elif [[ "$EVENT" == "push" && ! "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE" 2>/dev/null; then
+            files="$(git diff --name-only "$BEFORE" "$AFTER")"
+          fi
+          if [[ -n "$files" ]]; then
             echo "$files"
             code=false
-            [[ -n "$files" ]] || code=true
+            ui=false
             while IFS= read -r file; do
               case "$file" in
-                # A Markdown file in a source folder can end up in the app bundle.
-                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | Packages/*) code=true ;;
+                # UI paths: the UI tests run only when one of these changes (or the run-ui label is
+                # on the pull request, or the workflow is run by hand). Views and screens in
+                # Features (its model files are not UI), strings, the design system, the app
+                # target (assets, entitlements, app file), its Info.plist, the Xcode project,
+                # and the UI tests themselves.
+                Packages/NookKit/Sources/Features/*Model.swift | Packages/NookKit/Sources/Features/*/*Model.swift | Packages/NookKit/Sources/Features/*/*/*Model.swift) code=true ;;
+                Packages/NookKit/Sources/Features/* | Packages/NookKit/Sources/DesignSystem/*) code=true; ui=true ;;
+                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | NiftyOutfitNook.xcodeproj/* | Configs/AppInfo.plist | *.xcstrings | *.xcassets/*) code=true; ui=true ;;
+                # Models, services, fixtures, backup, storage and the package tests build and test
+                # without UI tests. A Markdown file in a source folder can end up in the app bundle.
+                Packages/*) code=true ;;
                 *.md | docs/* | website/*) ;;
                 *) code=true ;;
               esac
             done <<< "$files"
           fi
-          echo "Build and test: $code"
+          if [[ ",$LABELS," == *",run-ui,"* && "$code" == "true" ]]; then ui=true; fi
+          echo "Build and package tests: $code, UI tests: $ui"
           echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "ui=$ui" >> "$GITHUB_OUTPUT"
 
   # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
   # only when every one of them passed.
@@ -126,7 +147,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
       - name: Select Xcode
         run: |
           sudo xcode-select --switch "$XCODE_APP"
@@ -135,6 +155,7 @@ jobs:
       - name: Check the two Package.resolved files agree
         run: scripts/check-package-pins.sh
       - name: Build for testing (UI test plan)
+        if: needs.changes.outputs.ui == 'true'
         env:
           NOOK_BUILD_ONLY: 1
           NOOK_TEST_PLAN: UITests
@@ -144,7 +165,8 @@ jobs:
           tar -czf "$RUNNER_TEMP/ui-test-products.tgz" -C build/DerivedData/Build/Products \
             Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
             $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - if: needs.changes.outputs.ui == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-test-products
           path: ${{ runner.temp }}/ui-test-products.tgz
@@ -159,6 +181,7 @@ jobs:
       - name: Archive (Release, unsigned) and check what would ship
         run: scripts/check-archive.sh
       - name: Test (ui-catalog-and-profile)
+        if: needs.changes.outputs.ui == 'true'
         # The UI tests' retry is explained in the ui-tests job below.
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_UITests_*.xctestrun)"
@@ -192,16 +215,16 @@ jobs:
   # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
   # iPad layouts, on an iPad simulator.
   #
-  # What runs where. A pull request runs the real user flows once; a test that package tests
-  # already cover, or that repeats another test's screens at the largest text size, skips itself
-  # on a pull request (NOOK_PR_RUN above) and runs on merges to develop and main and nightly. So
-  # the sizes below are the pull request's, then the full set's, in seconds of tests (the
-  # classes' mean times from the test log, "Test Case ... passed (N seconds)", 6 runs on Xcode
-  # 27.1, 20 and 21 October 2026). A class can take 1.5 to 2 times as long from one run to the
-  # next, and a failed test that retries adds its own time again.
+  # What runs where. These parts run only when the change touches UI paths (see `changes`). They
+  # cover the real user flows once; a test that package tests already cover, or that repeats
+  # another test's screens at the largest text size, skips itself (NOOK_PR_RUN above) and runs
+  # only in a manual full-suite run. The sizes below are the normal run's, then the full suite's,
+  # in seconds of tests (the classes' mean times from the test log, 6 runs on Xcode 27.1, 20 and
+  # 21 October 2026). A class can take 1.5 to 2 times as long from one run to the next, and a
+  # failed test that retries adds its own time again.
   # A test part spends 4 to 5 minutes outside its tests (waiting for the build, downloading it,
   # booting the simulator), and build-and-archive about 8 (two builds, the archive, then a cold
-  # boot), so a pull request's run is about 15 minutes.
+  # boot), so a run with UI tests is about 15 minutes.
   #   (build-and-archive)     CatalogTests 103, ProfileTests 58 / 137, CutoutBenchTests 0 / 53,
   #                           package tests about 200 to 250
   #   ui-audit-and-settings   AccessibilityAuditTests 418, SettingsTests 112 / 217,
@@ -217,12 +240,11 @@ jobs:
   #   ui-ipad                 IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone. Every part, the iPad one too, tests what
-  # the UI test plan's build made, so only build-and-archive downloads nothing and the others
-  # download 28 MB.
+  # the UI test plan's build made and downloads only that (28 MB).
   ui-tests:
     name: ui-tests (${{ matrix.part }})
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.ui == 'true'
     runs-on: xcode-27
     timeout-minutes: 40
     permissions:
@@ -296,7 +318,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
       - name: Select Xcode and start booting the simulator
         env:
           NOOK_SIM_FAMILY: ${{ matrix.family }}
@@ -372,6 +393,7 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           CODE: ${{ needs.changes.outputs.code }}
+          UI: ${{ needs.changes.outputs.ui }}
           BUILD_AND_ARCHIVE: ${{ needs.build-and-archive.result }}
           UI_TESTS: ${{ needs.ui-tests.result }}
         run: |
@@ -383,7 +405,13 @@ jobs:
             echo "Docs only: nothing to build or test."
             exit 0
           fi
-          [[ "$BUILD_AND_ARCHIVE" == "success" && "$UI_TESTS" == "success" ]]
+          [[ "$BUILD_AND_ARCHIVE" == "success" ]] || exit 1
+          if [[ "$UI" == "false" ]]; then
+            echo "No UI path changed: the UI tests were skipped on purpose."
+            [[ "$UI_TESTS" == "skipped" ]]
+          else
+            [[ "$UI_TESTS" == "success" ]]
+          fi
 
   gitleaks:
     name: gitleaks
@@ -398,7 +426,6 @@ jobs:
         with:
           fetch-depth: 0 # full history, so every commit is scanned
           persist-credentials: false
-          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
       - name: Install gitleaks
         run: |
           archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"

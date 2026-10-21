@@ -2,7 +2,7 @@ import XCTest
 
 /// Xcode's accessibility audit (`performAccessibilityAudit`) on every main screen, at the default
 /// text size: one audit per screen on every pull request. `AccessibilityAuditLargeTextTests` runs
-/// the same walk at the largest size (AX5), on merges to develop and main and nightly only.
+/// the same walk at the largest size (AX5), in the full suite only.
 ///
 /// The audit is the closest thing to a VoiceOver pass a UI test can run: it checks contrast,
 /// elements VoiceOver can't find, hit regions under 44 points, missing or poor labels, Dynamic
@@ -221,7 +221,7 @@ class AccessibilityAuditTests: XCTestCase {
 }
 
 /// The same walk at the largest text size, AX5. It audits the screens the default-size walk
-/// already audits on every pull request, so it runs on merges to develop and main and nightly.
+/// already audits on every pull request, so it runs in the full suite only.
 final class AccessibilityAuditLargeTextTests: AccessibilityAuditTests {
     override class var textSize: String? { "UICTContentSizeCategoryAccessibilityXXXL" }
 

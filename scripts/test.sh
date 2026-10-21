@@ -20,9 +20,9 @@
 #   NOOK_XCTESTRUN=<file>.xctestrun scripts/test.sh ... tests what that build made, without building
 # (see .github/workflows/ci.yml).
 #
-# NOOK_PR_RUN=1 marks a pull request's CI run. The UI tests that a pull request doesn't need
-# (their behaviour is covered by package tests, or they repeat another test's screens at another
-# text size) skip themselves then, and run on merges to develop and main, nightly, and locally.
+# NOOK_PR_RUN=1 marks a normal CI run. The UI tests that it doesn't need (their behaviour is
+# covered by package tests, or they repeat another test's screens at another text size) skip
+# themselves then, and run in a manual full-suite workflow run and locally.
 # See UITestTier in NiftyOutfitNookUITests/UITestSupport.swift.
 #
 # NOOK_PARALLEL_WORKERS=<n> runs the tests on <n> cloned simulators at once. Off by default.
