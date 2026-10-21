@@ -112,7 +112,7 @@ final class AddPieceTests: XCTestCase {
         // Text isn't a photo: iOS dims the button, and a tap on it does nothing.
         UIPasteboard.general.string = "not a photo"
         RunLoop.current.run(until: Date().addingTimeInterval(1))
-        paste.tap()
+        paste.tap()  // tap-unconfirmed: with text copied the button is dimmed and nothing should happen
         XCTAssertFalse(element("field.name", in: app).waitUntilExists(timeout: 2), "Pasted text opened the form")
         XCTAssertTrue(app.buttons["addPiece.camera"].exists)
 
@@ -122,7 +122,7 @@ final class AddPieceTests: XCTestCase {
             context.fill(CGRect(origin: .zero, size: size))
         }
         RunLoop.current.run(until: Date().addingTimeInterval(1))
-        paste.tap()
+        paste.tap()  // tap-unconfirmed: the next line waits for the form it opens
         XCTAssertFalse(app.alerts.firstMatch.waitUntilExists(timeout: 2), "iOS asked to allow paste")
         XCTAssertTrue(element("field.name", in: app).waitUntilExists(timeout: Self.wait), "The form didn't open")
         XCTAssertTrue(element("editor.photoCaption", in: app).exists)
