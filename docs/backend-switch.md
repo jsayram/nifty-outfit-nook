@@ -25,6 +25,12 @@ In `nifty-outfit-nook-backend`, following its README: Jose runs `npx convex logi
 
 With either value missing or malformed the app stays on the fakes, so a fresh clone or CI never needs these.
 
+## Paid actions and App Attest (Phase 24b)
+
+The paid endpoints need App Attest, which the simulator can't do, so on the real backend they work only on a device, and only after the steps in [decision 0006](decisions/0006-limits-and-cost-protection.md), "Device checklist": the App Attest capability and entitlement, then the backend's Apple attestation check. Until then the real backend refuses every key registration (it fails closed), and `-limits-lab` shows "This iPhone couldn't be checked". On the fakes everything works on the simulator.
+
+The backend needs its switches and ceilings set before any paid work runs (backend README, "Switches and ceilings"); a fresh deployment pauses every paid feature.
+
 ## Before production
 
 - Decision 0005's open points: the Clerk Keychain accessibility class needs Jose's written exception first.

@@ -55,6 +55,10 @@ struct NiftyOutfitNookApp: App {
                             }
                         }
                     )
+                } else if ProcessInfo.processInfo.arguments.contains("-limits-lab") {
+                    // `-limits-lab` opens the Phase 24b limits screen (debug builds only).
+                    LimitsLabScreen(
+                        account: AppGateway.account, paid: AppGateway.paid, controls: AppGateway.limitsControls)
                 } else if ProcessInfo.processInfo.arguments.contains("-gateway-lab") {
                     // `-gateway-lab` opens the Phase 24a gateway screen (debug builds only).
                     GatewayLabScreen(
@@ -124,6 +128,7 @@ struct NiftyOutfitNookApp: App {
         // Sign-in and the backend (Phase 24a): the fakes until Clerk and Convex are configured.
         // Nothing on the local closet depends on it.
         let account = AppGateway.account
+        let paid = AppGateway.paid
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
@@ -149,6 +154,7 @@ struct NiftyOutfitNookApp: App {
                         stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
                     services.backups = storage.backups
                     services.account = account
+                    services.paid = paid
                     return services
                 case .sample, nil:
                     // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
@@ -162,6 +168,7 @@ struct NiftyOutfitNookApp: App {
                     services.deletion = LocalDataDeletion(
                         stores: storage.erasableData + LocalDataDeletion.stores(of: services))
                     services.account = account
+                    services.paid = paid
                     return services
                 }
             },

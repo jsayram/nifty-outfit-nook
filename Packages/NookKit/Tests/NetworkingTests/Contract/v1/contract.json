@@ -2,11 +2,13 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "24a: gateway and identity",
+  "status": "24b: limits and cost protection (paid endpoints are placeholders until 27a and 33a)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
-    "Every JSON body is UTF-8, at most limits.maxBodyBytes. Unknown fields in a request are rejected. Clients ignore unknown fields in a response and treat an unknown error code by its HTTP status."
+    "Every JSON body is UTF-8, at most limits.maxBodyBytes. Unknown fields in a request are rejected. Clients ignore unknown fields in a response and treat an unknown error code by its HTTP status.",
+    "Paid endpoints (cost \"paid\") need an Idempotency-Key header and an App Attest assertion. A retry with the same key and the same body never runs or counts twice: it gets the first answer back. The same key with a different body is idempotency_conflict.",
+    "Limits live on the server and the app can't change them: a per-user rate limit (rate_limited), daily and 30-day allowances per category (quota_exceeded, with resetAt), and per-feature and per-provider switches and spending ceilings (feature_paused). GET /v1/usage shows what is left without naming amounts of money."
   ],
   "limits": {
     "maxBodyBytes": 65536
@@ -21,7 +23,10 @@
     "request": {
       "Authorization": "Bearer <token>, on every endpoint whose auth is \"required\".",
       "Content-Type": "application/json, on every request that has a body.",
-      "Accept": "application/json"
+      "Accept": "application/json",
+      "Idempotency-Key": "On every paid endpoint: 16 to 64 characters from A-Z a-z 0-9 _ -, new for each new action and reused for every retry of it. Kept at least 24 hours.",
+      "X-Nook-Attest-Key": "On every paid endpoint: the App Attest key ID (base64) registered with POST /v1/attest/key.",
+      "X-Nook-Assertion": "On every paid endpoint: base64 of the App Attest assertion (CBOR, as DCAppAttestService.generateAssertion returns it) over SHA-256 of the client data in attestation.clientData."
     },
     "response": {
       "Content-Type": "application/json on every response, errors included.",
@@ -36,8 +41,17 @@
       "path": "/v1/health",
       "auth": "none",
       "request": null,
-      "response": { "status": 200, "schema": "Health", "example": "examples/health.response.json" },
-      "errors": ["rate_limited", "unavailable", "internal"]
+      "response": {
+        "status": 200,
+        "schema": "Health",
+        "example": "examples/health.response.json"
+      },
+      "errors": [
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ],
+      "cost": "free"
     },
     {
       "id": "createSession",
@@ -45,9 +59,27 @@
       "method": "POST",
       "path": "/v1/session",
       "auth": "required",
-      "request": { "schema": "SessionRequest", "example": "examples/session.request.json" },
-      "response": { "status": 200, "schema": "SessionResponse", "example": "examples/session.response.json" },
-      "errors": ["invalid_request", "payload_too_large", "unsupported_media_type", "unauthenticated", "token_expired", "forbidden", "rate_limited", "unavailable", "internal"]
+      "request": {
+        "schema": "SessionRequest",
+        "example": "examples/session.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "SessionResponse",
+        "example": "examples/session.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ],
+      "cost": "free"
     },
     {
       "id": "me",
@@ -56,96 +88,682 @@
       "path": "/v1/me",
       "auth": "required",
       "request": null,
-      "response": { "status": 200, "schema": "Me", "example": "examples/me.response.json" },
-      "errors": ["unauthenticated", "token_expired", "forbidden", "not_registered", "rate_limited", "unavailable", "internal"]
+      "response": {
+        "status": 200,
+        "schema": "Me",
+        "example": "examples/me.response.json"
+      },
+      "errors": [
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ],
+      "cost": "free"
+    },
+    {
+      "id": "usage",
+      "summary": "What is left of each allowance, when it next frees up, and whether each paid feature is on. Names no amounts of money and no provider.",
+      "method": "GET",
+      "path": "/v1/usage",
+      "auth": "required",
+      "cost": "free",
+      "request": null,
+      "response": {
+        "status": 200,
+        "schema": "Usage",
+        "example": "examples/usage.response.json"
+      },
+      "errors": [
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "attestChallenge",
+      "summary": "A one-time challenge for registering an App Attest key. Expires after 5 minutes.",
+      "method": "POST",
+      "path": "/v1/attest/challenge",
+      "auth": "required",
+      "cost": "free",
+      "request": null,
+      "response": {
+        "status": 200,
+        "schema": "AttestChallenge",
+        "example": "examples/attest-challenge.response.json"
+      },
+      "errors": [
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "attestKey",
+      "summary": "Registers this install's App Attest key with its attestation over a challenge from POST /v1/attest/challenge.",
+      "method": "POST",
+      "path": "/v1/attest/key",
+      "auth": "required",
+      "cost": "free",
+      "request": {
+        "schema": "AttestKeyRequest",
+        "example": "examples/attest-key.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "AttestKeyResponse",
+        "example": "examples/attest-key.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "attestation_required",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "style",
+      "summary": "PLACEHOLDER until Phase 27a: runs the full admission path (attestation, idempotency, rate limit, allowance, switches, cost reservation) and a stand-in job, and returns a placeholder result. 27a replaces the request and result with the stylist's.",
+      "method": "POST",
+      "path": "/v1/style",
+      "auth": "required",
+      "cost": "paid",
+      "request": {
+        "schema": "StyleRequest",
+        "example": "examples/style.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "PaidActionResponse",
+        "example": "examples/style.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "attestation_required",
+        "idempotency_conflict",
+        "action_in_progress",
+        "rate_limited",
+        "quota_exceeded",
+        "feature_paused",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "tryOn",
+      "summary": "PLACEHOLDER until Phase 33a: one try-on picture through the same admission path, with a stand-in job and a placeholder result.",
+      "method": "POST",
+      "path": "/v1/try-on",
+      "auth": "required",
+      "cost": "paid",
+      "request": {
+        "schema": "TryOnRequest",
+        "example": "examples/try-on.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "PaidActionResponse",
+        "example": "examples/try-on.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
+        "attestation_required",
+        "idempotency_conflict",
+        "action_in_progress",
+        "rate_limited",
+        "quota_exceeded",
+        "feature_paused",
+        "unavailable",
+        "internal"
+      ]
     }
   ],
   "errors": [
-    { "code": "invalid_request", "status": 400, "meaning": "The body isn't valid JSON, doesn't match the schema, or has an unknown field." },
-    { "code": "unauthenticated", "status": 401, "meaning": "No token, or a token that doesn't verify (wrong issuer, audience or signature)." },
-    { "code": "token_expired", "status": 401, "meaning": "The token was valid but has expired. Refresh and retry once." },
-    { "code": "forbidden", "status": 403, "meaning": "Signed in, but not allowed. Don't retry." },
-    { "code": "not_found", "status": 404, "meaning": "No such endpoint in this version." },
-    { "code": "not_registered", "status": 404, "meaning": "The token is valid but POST /v1/session hasn't run for it yet." },
-    { "code": "method_not_allowed", "status": 405, "meaning": "The endpoint exists but not with this method." },
-    { "code": "api_version_retired", "status": 410, "meaning": "This API version is no longer served. The app must be updated." },
-    { "code": "payload_too_large", "status": 413, "meaning": "The body is larger than limits.maxBodyBytes." },
-    { "code": "unsupported_media_type", "status": 415, "meaning": "A body was sent without Content-Type: application/json." },
-    { "code": "rate_limited", "status": 429, "meaning": "Too many requests. Wait Retry-After seconds." },
-    { "code": "internal", "status": 500, "meaning": "The backend failed. Safe to retry a read with backoff." },
-    { "code": "unavailable", "status": 503, "meaning": "Switched off or overloaded. Retry later, after Retry-After when present." }
+    {
+      "code": "invalid_request",
+      "status": 400,
+      "meaning": "The body isn't valid JSON, doesn't match the schema, or has an unknown field."
+    },
+    {
+      "code": "unauthenticated",
+      "status": 401,
+      "meaning": "No token, or a token that doesn't verify (wrong issuer, audience or signature)."
+    },
+    {
+      "code": "token_expired",
+      "status": 401,
+      "meaning": "The token was valid but has expired. Refresh and retry once."
+    },
+    {
+      "code": "forbidden",
+      "status": 403,
+      "meaning": "Signed in, but not allowed. Don't retry."
+    },
+    {
+      "code": "attestation_required",
+      "status": 403,
+      "meaning": "The App Attest assertion is missing, from an unknown key, or doesn't verify. Register a key again (attestation section), then retry once."
+    },
+    {
+      "code": "not_found",
+      "status": 404,
+      "meaning": "No such endpoint in this version."
+    },
+    {
+      "code": "not_registered",
+      "status": 404,
+      "meaning": "The token is valid but POST /v1/session hasn't run for it yet."
+    },
+    {
+      "code": "method_not_allowed",
+      "status": 405,
+      "meaning": "The endpoint exists but not with this method."
+    },
+    {
+      "code": "idempotency_conflict",
+      "status": 409,
+      "meaning": "This Idempotency-Key was already used for a different request. Make a new key for a new action."
+    },
+    {
+      "code": "action_in_progress",
+      "status": 409,
+      "meaning": "This action, or another paid action of this account, is still running, or its outcome is being checked. Wait Retry-After seconds; never send it again with a new key."
+    },
+    {
+      "code": "api_version_retired",
+      "status": 410,
+      "meaning": "This API version is no longer served. The app must be updated."
+    },
+    {
+      "code": "payload_too_large",
+      "status": 413,
+      "meaning": "The body is larger than limits.maxBodyBytes."
+    },
+    {
+      "code": "unsupported_media_type",
+      "status": 415,
+      "meaning": "A body was sent without Content-Type: application/json."
+    },
+    {
+      "code": "rate_limited",
+      "status": 429,
+      "meaning": "Too many requests. Wait Retry-After seconds."
+    },
+    {
+      "code": "quota_exceeded",
+      "status": 429,
+      "meaning": "An allowance is used up. category says which; resetAt says when the next one frees up, and Retry-After the seconds until then. Don't retry before."
+    },
+    {
+      "code": "internal",
+      "status": 500,
+      "meaning": "The backend failed. Safe to retry a read with backoff."
+    },
+    {
+      "code": "unavailable",
+      "status": 503,
+      "meaning": "Switched off or overloaded. Retry later, after Retry-After when present."
+    },
+    {
+      "code": "feature_paused",
+      "status": 503,
+      "meaning": "This paid feature is switched off on the server, or its spending ceiling is reached. feature says which. Everything else keeps working. Retry-After when the backend knows."
+    }
   ],
   "schemas": {
     "Health": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "apiVersion"],
+      "required": [
+        "status",
+        "apiVersion"
+      ],
       "properties": {
-        "status": { "type": "string", "enum": ["ok"] },
-        "apiVersion": { "type": "integer", "minimum": 1 }
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "apiVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "SessionRequest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["platform", "appVersion"],
+      "required": [
+        "platform",
+        "appVersion"
+      ],
       "properties": {
-        "platform": { "type": "string", "enum": ["ios"] },
-        "appVersion": { "type": "string", "pattern": "^[0-9]{1,4}(\\.[0-9]{1,4}){1,2}$", "maxLength": 14 }
+        "platform": {
+          "type": "string",
+          "enum": [
+            "ios"
+          ]
+        },
+        "appVersion": {
+          "type": "string",
+          "pattern": "^[0-9]{1,4}(\\.[0-9]{1,4}){1,2}$",
+          "maxLength": 14
+        }
       }
     },
     "User": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "createdAt"],
+      "required": [
+        "id",
+        "createdAt"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^usr_[0-9a-f]{32}$" },
-        "createdAt": { "type": "string", "format": "date-time", "maxLength": 30 }
+        "id": {
+          "type": "string",
+          "pattern": "^usr_[0-9a-f]{32}$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        }
       }
     },
     "SessionResponse": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["user", "newAccount"],
+      "required": [
+        "user",
+        "newAccount"
+      ],
       "properties": {
-        "user": { "$ref": "User" },
-        "newAccount": { "type": "boolean" }
+        "user": {
+          "$ref": "User"
+        },
+        "newAccount": {
+          "type": "boolean"
+        }
       }
     },
     "Me": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["user"],
+      "required": [
+        "user"
+      ],
       "properties": {
-        "user": { "$ref": "User" }
+        "user": {
+          "$ref": "User"
+        }
       }
     },
     "Error": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["error"],
+      "required": [
+        "error"
+      ],
       "properties": {
         "error": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["code", "message", "requestId"],
+          "required": [
+            "code",
+            "message",
+            "requestId"
+          ],
           "properties": {
-            "code": { "type": "string", "pattern": "^[a-z_]{1,40}$" },
-            "message": { "type": "string", "maxLength": 200 },
-            "requestId": { "type": "string", "maxLength": 64 },
-            "retryAfterSeconds": { "type": "integer", "minimum": 0 }
+            "code": {
+              "type": "string",
+              "pattern": "^[a-z_]{1,40}$"
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "requestId": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "retryAfterSeconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "styleFull",
+                "styleQuick",
+                "tryOn",
+                "monthlySpend"
+              ]
+            },
+            "resetAt": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 30
+            },
+            "feature": {
+              "type": "string",
+              "enum": [
+                "style",
+                "tryOn"
+              ]
+            }
           }
+        }
+      }
+    },
+    "UsageCategory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "usedToday",
+        "limitToday",
+        "usedThisMonth",
+        "limitThisMonth"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "styleFull",
+            "styleQuick",
+            "tryOn"
+          ]
+        },
+        "usedToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limitToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "usedThisMonth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limitThisMonth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resetsAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        }
+      }
+    },
+    "FeatureState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "feature",
+        "state"
+      ],
+      "properties": {
+        "feature": {
+          "type": "string",
+          "enum": [
+            "style",
+            "tryOn"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "on",
+            "paused"
+          ]
+        }
+      }
+    },
+    "Usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "categories",
+        "features",
+        "policyVersion"
+      ],
+      "properties": {
+        "categories": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "UsageCategory"
+          }
+        },
+        "features": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "FeatureState"
+          }
+        },
+        "policyVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "AttestChallenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "challenge",
+        "expiresAt"
+      ],
+      "properties": {
+        "challenge": {
+          "type": "string",
+          "pattern": "^chl_[0-9a-f]{32}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        }
+      }
+    },
+    "AttestKeyRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keyId",
+        "attestation",
+        "challenge"
+      ],
+      "properties": {
+        "keyId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "attestation": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+          "maxLength": 16000
+        },
+        "challenge": {
+          "type": "string",
+          "pattern": "^chl_[0-9a-f]{32}$"
+        }
+      }
+    },
+    "AttestKeyResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keyId",
+        "registeredAt"
+      ],
+      "properties": {
+        "keyId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        }
+      }
+    },
+    "StyleRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "contextRevision"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "full",
+            "swap",
+            "ask"
+          ]
+        },
+        "contextRevision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "TryOnRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contextRevision"
+      ],
+      "properties": {
+        "contextRevision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "PaidAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "status",
+        "replayed",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^act_[0-9a-f]{32}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "style",
+            "tryOn"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "succeeded"
+          ]
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        }
+      }
+    },
+    "PlaceholderResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "placeholder"
+      ],
+      "properties": {
+        "placeholder": {
+          "type": "boolean",
+          "enum": [
+            true
+          ]
+        }
+      }
+    },
+    "PaidActionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "result",
+        "usage"
+      ],
+      "properties": {
+        "action": {
+          "$ref": "PaidAction"
+        },
+        "result": {
+          "$ref": "PlaceholderResult"
+        },
+        "usage": {
+          "$ref": "UsageCategory"
         }
       }
     }
   },
   "planned": {
-    "24b": "Limits and cost protection: per-user, per-device and global rate limits returning rate_limited (429) with Retry-After; a new quota_exhausted error (402 or 429, to decide) with the reset time; a server kill switch per paid feature returning unavailable (503) with a feature field.",
     "24c": "Authorization and deletion: DELETE /v1/account (202 with a deletion ID, then GET /v1/account/deletion/{id} until done); cross-user access returns not_found, never another user's data; forbidden for a disabled account.",
     "24d": "Support: POST /v1/feedback with the note (at most 2,000 characters), an optional reply address and a diagnostics opt-in; 202 with a ticket reference.",
-    "27a": "Stylist: POST /v1/style with closet descriptors and preferences, never a provider or model name; the backend picks the provider and validates its answer against a typed schema before replying. Needs App Attest assertions (X-Nook-Assertion, reserved now) and the 24b ledger."
+    "27a": "Stylist: POST /v1/style keeps its path, Idempotency-Key, assertion and errors; its request gains closet descriptors and preferences (never a provider or model name) and its result becomes the typed stylist answer.",
+    "33a": "Try-on: POST /v1/try-on keeps its admission path; its request gains the faceless body photo and garment photos, and it becomes a job with up to three child pictures (PRD 9.2.4)."
   },
-  "reservedHeaders": {
-    "X-Nook-Assertion": "App Attest assertion over the request. Reserved for paid and account endpoints; not sent or checked in 24a."
+  "attestation": {
+    "clientData": "nook-assert-v1\\n<METHOD>\\n<PATH>\\n<Idempotency-Key>\\n<lowercase hex SHA-256 of the exact body bytes>",
+    "clientDataExample": "examples/attest.client-data.json",
+    "challengeHash": "POST /v1/attest/key: DCAppAttestService.attestKey is called with clientDataHash = SHA-256 of the challenge string's UTF-8 bytes. The backend's mock mode (local and dev only) takes a stand-in attestation instead: base64 of JSON {fmt: \"nook-mock-v1\", publicKey: base64 of the raw P-256 key, clientDataHash: base64, appId}.",
+    "counter": "Each assertion's counter must be higher than the last one the backend accepted for that key. A replayed assertion fails.",
+    "onFailure": "attestation_required (403): register a new key with a fresh challenge, then retry once. Simulators and devices that can't attest get no paid access."
   }
 }

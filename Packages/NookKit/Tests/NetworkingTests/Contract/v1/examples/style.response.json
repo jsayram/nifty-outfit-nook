@@ -1,0 +1,20 @@
+{
+  "action": {
+    "id": "act_0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "kind": "style",
+    "status": "succeeded",
+    "replayed": false,
+    "createdAt": "2026-10-21T11:01:30.000Z"
+  },
+  "result": {
+    "placeholder": true
+  },
+  "usage": {
+    "category": "styleFull",
+    "usedToday": 4,
+    "limitToday": 10,
+    "usedThisMonth": 13,
+    "limitThisMonth": 150,
+    "resetsAt": "2026-10-22T09:15:00.000Z"
+  }
+}

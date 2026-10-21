@@ -24,6 +24,11 @@ public enum FakeBackendMode: Sendable, Hashable {
     case malformedJSON
     /// No connection at all.
     case offline
+    /// Does the work, then the answer never arrives (a timeout), like a dropped connection after
+    /// the server finished. The client's retry with the same Idempotency-Key gets it back (24b).
+    case answerLost
+    /// Paid endpoints refuse every App Attest assertion with 403 attestation_required (24b).
+    case attestationRejected
 }
 
 /// What the fake answers one request with.
@@ -42,17 +47,20 @@ public final class FakeBackend: Sendable {
     public let host: String
     public var baseURL: URL { URL(string: "https://\(host)") ?? URL(filePath: "/") }
 
-    private struct State {
+    struct State {
         var mode = FakeBackendMode.normal
         /// Requests left before the mode goes back to normal; nil keeps it.
         var remaining: Int?
         var principals: [String: (id: String, createdAt: Date)] = [:]
         var refusedTokens: Set<String> = []
         var requestCount = 0
+        /// 24b: allowances, switches, keys and paid actions (FakeBackend+Limits.swift).
+        var limits = FakeLimits()
+        var ledger = FakeLedger()
     }
 
-    private let state = Mutex(State())
-    private let now: @Sendable () -> Date
+    let state = Mutex(State())
+    let now: @Sendable () -> Date
 
     public init(now: @escaping @Sendable () -> Date = { Date() }) {
         self.host = "fake-\(FakeToken.randomHex(6)).backend.invalid"
@@ -103,10 +111,12 @@ public final class FakeBackend: Sendable {
         case .rateLimited(let seconds): return error(.rateLimited, id, retryAfter: seconds)
         case .unavailable(let seconds): return error(.unavailable, id, retryAfter: seconds)
         case .forbidden where endpoint?.requiresAuth == true: return error(.forbidden, id)
-        case .normal, .slow, .expiredToken, .forbidden: break
+        case .attestationRejected where endpoint?.paid == true: return error(.attestationRequired, id)
+        case .normal, .slow, .expiredToken, .forbidden, .answerLost, .attestationRejected: break
         }
 
         let answer = route(request, body: body, endpoint: endpoint, id: id, refuseNextToken: mode == .expiredToken)
+        if mode == .answerLost { return .fail(.timedOut, delay: .milliseconds(80)) }
         if case .slow(let seconds) = mode, case .respond(let status, let headers, let body, _) = answer {
             return .respond(status: status, headers: headers, body: body, delay: .seconds(seconds))
         }
@@ -158,7 +168,8 @@ public final class FakeBackend: Sendable {
             }
             return encode(200, APIV1.Me(user: APIV1.User(id: existing.id, createdAt: existing.createdAt)), id)
         default:
-            return error(.notFound, id)
+            guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
+            return routeLimits(request, body: body, endpoint: endpoint, subject: parsed.subject, id: id)
         }
     }
 
@@ -182,11 +193,11 @@ public final class FakeBackend: Sendable {
 
     // MARK: Building answers
 
-    private func encode(_ status: Int, _ value: some Encodable, _ id: String) -> FakeReply {
+    func encode(_ status: Int, _ value: some Encodable, _ id: String) -> FakeReply {
         json(status, (try? APIV1.encoder().encode(value)) ?? Data(), id)
     }
 
-    private func json(_ status: Int, _ body: Data, _ id: String, headers: [String: String] = [:]) -> FakeReply {
+    func json(_ status: Int, _ body: Data, _ id: String, headers: [String: String] = [:]) -> FakeReply {
         var all = headers
         all["Content-Type"] = "application/json"
         all["X-Request-Id"] = id
@@ -194,9 +205,9 @@ public final class FakeBackend: Sendable {
         return .respond(status: status, headers: all, body: body, delay: .milliseconds(80))
     }
 
-    private func error(
+    func error(
         _ code: APIV1.ErrorCode, _ id: String, message: String? = nil, retryAfter: Int? = nil,
-        headers: [String: String] = [:]
+        headers: [String: String] = [:], category: String? = nil, resetAt: Date? = nil, feature: String? = nil
     ) -> FakeReply {
         var headers = headers
         if let retryAfter { headers["Retry-After"] = String(retryAfter) }
@@ -204,7 +215,8 @@ public final class FakeBackend: Sendable {
         let body = APIV1.ErrorEnvelope(
             error: .init(
                 code: code.rawValue, message: message ?? "Fake backend: \(code.rawValue).", requestId: id,
-                retryAfterSeconds: retryAfter))
+                retryAfterSeconds: retryAfter, category: category, resetAt: resetAt.map(APIV1.formatDate),
+                feature: feature))
         return json(code.status, (try? APIV1.encoder().encode(body)) ?? Data(), id, headers: headers)
     }
 

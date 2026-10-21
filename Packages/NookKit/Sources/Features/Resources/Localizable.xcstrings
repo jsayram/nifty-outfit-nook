@@ -348,6 +348,9 @@
         }
       }
     },
+    "%lld of %lld left today" : {
+      "comment" : "Cloud allowance meter: how many are left today, out of today's limit"
+    },
     "%lld of %lld words" : {
       "comment" : "Under a possible match in Closet: how many of the typed words the piece has, as in 2 of 3 words",
       "localizations" : {
@@ -1200,6 +1203,9 @@
     "Asked first" : {
       "comment" : "Try-on photo sheet point"
     },
+    "at %@" : {
+      "comment" : "When a cloud allowance comes back, later today"
+    },
     "Available" : {
       "comment" : "Garment status: nothing in the way",
       "localizations" : {
@@ -1882,6 +1888,9 @@
           }
         }
       }
+    },
+    "Cloud styling this month" : {
+      "comment" : "Cloud allowance: the monthly limit"
     },
     "Clutch" : {
       "comment" : "Type of piece, within its kind",
@@ -4292,6 +4301,9 @@
     "More" : {
       "comment" : "Button: opens a suitcase's menu"
     },
+    "More %@" : {
+      "comment" : "Cloud allowance meter: used up; when more comes back"
+    },
     "More screen tours" : {
       "comment" : "App tours: shows the rest of the list"
     },
@@ -4577,6 +4589,9 @@
     },
     "None of your other %@ in %@ go with this look." : {
       "comment" : "Swap: no good matches, with the kind of piece and the source's name"
+    },
+    "None used today" : {
+      "comment" : "Cloud allowance meter: nothing used in the last day"
     },
     "Not added" : {
       "comment" : "Your try-on photo row value: no photo"
@@ -4926,6 +4941,9 @@
     "On" : {
       "comment" : "A switch's value on a row"
     },
+    "on %@" : {
+      "comment" : "When a cloud allowance comes back, a later day"
+    },
     "On this iPhone now" : {
       "comment" : "Restore preview: header over the phone's counts",
       "localizations" : {
@@ -4956,6 +4974,9 @@
           }
         }
       }
+    },
+    "One more comes back %@" : {
+      "comment" : "Cloud allowance meter: when the oldest use stops counting"
     },
     "One of each kind. A piece of a kind the look already has takes its place." : {
       "comment" : "Make your own look: under the picker's title"
@@ -5364,6 +5385,9 @@
     },
     "Other: %@" : {
       "comment" : "Style Me occasion: Other, with her own words"
+    },
+    "Outfit ideas" : {
+      "comment" : "Cloud allowance: full outfit generations"
     },
     "Outfits can come back any time." : {
       "comment" : "Repeat setting: I don't mind"
@@ -6325,6 +6349,9 @@
     "Shows when you next tap Swap a piece." : {
       "comment" : "App tours: Swap a piece's tour starts when she opens it"
     },
+    "Sign in to use cloud styling." : {
+      "comment" : "Cloud action: signed out"
+    },
     "Simple" : {
       "comment" : "Look version (LR-05a)"
     },
@@ -6464,6 +6491,9 @@
     "Something new may add one idea" : {
       "comment" : "Style Me Preferences line for Mine + one idea"
     },
+    "Something went wrong. Try again later." : {
+      "comment" : "Cloud action: any other failure"
+    },
     "Something’s wrong" : {
       "comment" : "Send feedback: kind chip"
     },
@@ -6557,6 +6587,9 @@
     },
     "Still stuck? opens Send feedback, where you can write a private note about the app." : {
       "comment" : "Help tour, step 2"
+    },
+    "Still working on your last request. Try again in a moment." : {
+      "comment" : "Cloud limit: another cloud request is still running"
     },
     "Style Me" : {
       "comment" : "Words on the laptop screen; opens Style Me",
@@ -6848,6 +6881,9 @@
     "Swapped in %@" : {
       "comment" : "Toast after a swap, with the new piece"
     },
+    "Swaps and questions" : {
+      "comment" : "Cloud allowance: swaps and Ask the stylist"
+    },
     "Sweater" : {
       "comment" : "Type of piece, within its kind",
       "localizations" : {
@@ -6901,6 +6937,9 @@
     },
     "Takes today off this look and its pieces." : {
       "comment" : "Hint on Worn today"
+    },
+    "Taking a break right now" : {
+      "comment" : "Cloud allowance meter: switched off on the server"
     },
     "Tan" : {
       "comment" : "Colour name",
@@ -7047,6 +7086,9 @@
           }
         }
       }
+    },
+    "That didn't finish. Try again in a minute. It won't be counted twice." : {
+      "comment" : "Cloud limit: the cloud job failed or its result is still being checked"
     },
     "That didn’t save. Nothing changed." : {
       "comment" : "Toast when a change to a piece couldn't be saved",
@@ -7269,6 +7311,9 @@
     "The stylist didn’t answer. Nothing was charged, and your request is kept as you left it." : {
       "comment" : "Your looks failed state"
     },
+    "The stylist is taking a break. Your closet and looks work as usual." : {
+      "comment" : "Cloud limit: the stylist is switched off on the server"
+    },
     "The suitcase you were styling from isn’t there any more, so Style Me uses Main closet." : {
       "comment" : "Suitcases: the remembered suitcase was deleted or archived"
     },
@@ -7414,8 +7459,14 @@
         }
       }
     },
+    "This iPhone couldn't be checked, so cloud styling isn't available on it. Your closet works as usual." : {
+      "comment" : "Cloud limit: App Attest isn't available or failed on this device"
+    },
     "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics." : {
       "comment" : "Privacy and terms: the banner at the top"
+    },
+    "This is taking a break. Everything else works as usual." : {
+      "comment" : "Cloud limit: a cloud feature is switched off on the server"
     },
     "This is the photo of you that try-on pictures start from. It’s optional: styling never needs it." : {
       "comment" : "Try-on photo sheet: what the photo is for"
@@ -7518,6 +7569,9 @@
     },
     "Today’s comfort" : {
       "comment" : "Style Me sheet title"
+    },
+    "tomorrow at %@" : {
+      "comment" : "When a cloud allowance comes back, tomorrow"
     },
     "Too long" : {
       "comment" : "How a piece fits"
@@ -7656,6 +7710,9 @@
     "Try-on pictures are simulated." : {
       "comment" : "Fine print under the results buttons and on a saved look (RD-06)"
     },
+    "Try-on pictures are taking a break. Everything else works as usual." : {
+      "comment" : "Cloud limit: try-on is switched off on the server"
+    },
     "Try-on pictures with it in are deleted too." : {
       "comment" : "Delete for good: try-on pictures showing the piece go with it",
       "localizations" : {
@@ -7792,6 +7849,9 @@
           }
         }
       }
+    },
+    "Update the app to keep using cloud styling." : {
+      "comment" : "Cloud action: this app version is too old for the server"
     },
     "Use %@" : {
       "comment" : "Swap: commits the swap, as in Use this top"
@@ -8322,6 +8382,24 @@
     },
     "You wore this yesterday" : {
       "comment" : "Recent-wear note on Your looks (LR-10)"
+    },
+    "You're offline. Your closet still works on this iPhone." : {
+      "comment" : "Cloud action: no connection"
+    },
+    "You've asked a lot in the last minute. Try again in %@." : {
+      "comment" : "Cloud limit: too many requests in a short time. The argument is a wait, like '12 seconds'."
+    },
+    "You've reached this month's limit for cloud styling. It frees up %@." : {
+      "comment" : "Cloud limit: the account's monthly limit is reached. The argument is like 'on Nov 3'."
+    },
+    "You've used your outfit ideas for now. More %@." : {
+      "comment" : "Cloud limit: the full-outfit allowance is used up. The argument is like 'tomorrow at 9:15 AM'."
+    },
+    "You've used your swaps and questions for now. More %@." : {
+      "comment" : "Cloud limit: the swap and Ask the stylist allowance is used up. The argument is like 'at 9:15 AM'."
+    },
+    "You've used your try-on pictures for now. More %@." : {
+      "comment" : "Cloud limit: the try-on allowance is used up. The argument is like 'tomorrow at 9:15 AM'."
     },
     "Your %@ that go with this look" : {
       "comment" : "Swap: the line above the options (LR-07), with the kind of piece"

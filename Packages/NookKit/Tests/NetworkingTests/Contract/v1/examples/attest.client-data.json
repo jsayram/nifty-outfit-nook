@@ -1,0 +1,8 @@
+{
+  "method": "POST",
+  "path": "/v1/style",
+  "idempotencyKey": "idem_00000000000000000001",
+  "body": "{\"contextRevision\":\"rev_7f3a9c\",\"mode\":\"full\"}",
+  "clientData": "nook-assert-v1\nPOST\n/v1/style\nidem_00000000000000000001\nadb047247954ed9d56ff271c4e91819b1ff3dadcf6a505bfb95c49d2d20ad953",
+  "clientDataHashBase64": "Lgkada5QPfqTt9Wqbu7FQuHXWoc8xD7sQxf6I6Iif80="
+}

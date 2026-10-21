@@ -72,6 +72,19 @@ struct ContractTests {
         ("v1/examples/error.token_expired.json", "error"),
         ("v1/examples/error.rate_limited.json", "error"),
         ("v1/examples/error.invalid_request.json", "error"),
+        ("v1/examples/error.quota_exceeded.json", "error"),
+        ("v1/examples/error.feature_paused.json", "error"),
+        ("v1/examples/error.idempotency_conflict.json", "error"),
+        ("v1/examples/error.action_in_progress.json", "error"),
+        ("v1/examples/error.attestation_required.json", "error"),
+        ("v1/examples/usage.response.json", "usage"),
+        ("v1/examples/attest-challenge.response.json", "attestChallenge"),
+        ("v1/examples/attest-key.request.json", "attestKeyRequest"),
+        ("v1/examples/attest-key.response.json", "attestKeyResponse"),
+        ("v1/examples/style.request.json", "styleRequest"),
+        ("v1/examples/try-on.request.json", "tryOnRequest"),
+        ("v1/examples/style.response.json", "paidActionResponse"),
+        ("v1/examples/try-on.response.json", "paidActionResponse"),
     ])
     func goldenExamplesRoundTrip(path: String, type: String) throws {
         // Decoding then encoding gives the same JSON: the Swift types neither drop nor add a field.
@@ -84,17 +97,44 @@ struct ContractTests {
             case "sessionRequest": try encoder.encode(decoder.decode(APIV1.SessionRequest.self, from: original))
             case "sessionResponse": try encoder.encode(decoder.decode(APIV1.SessionResponse.self, from: original))
             case "me": try encoder.encode(decoder.decode(APIV1.Me.self, from: original))
+            case "usage": try encoder.encode(decoder.decode(APIV1.Usage.self, from: original))
+            case "attestChallenge": try encoder.encode(decoder.decode(APIV1.AttestChallenge.self, from: original))
+            case "attestKeyRequest": try encoder.encode(decoder.decode(APIV1.AttestKeyRequest.self, from: original))
+            case "attestKeyResponse": try encoder.encode(decoder.decode(APIV1.AttestKeyResponse.self, from: original))
+            case "styleRequest": try encoder.encode(decoder.decode(APIV1.StyleRequest.self, from: original))
+            case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
+            case "paidActionResponse": try encoder.encode(decoder.decode(APIV1.PaidActionResponse.self, from: original))
             default: try encoder.encode(decoder.decode(APIV1.ErrorEnvelope.self, from: original))
             }
         #expect(try Self.sameJSON(original, reencoded), "\(path)")
     }
 
     @Test func everyErrorExampleUsesAKnownCode() throws {
-        for name in ["token_expired", "rate_limited", "invalid_request"] {
+        for name in [
+            "token_expired", "rate_limited", "invalid_request", "quota_exceeded", "feature_paused",
+            "idempotency_conflict", "action_in_progress", "attestation_required",
+        ] {
             let envelope = try JSONDecoder().decode(
                 APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/error.\(name).json"))
             #expect(APIV1.ErrorCode(rawValue: envelope.error.code) != nil)
         }
+    }
+
+    @Test func paidEndpointsMatchTheContract() throws {
+        let listed = try #require(Self.contract()["endpoints"] as? [[String: Any]])
+        let paid = Set(listed.filter { $0["cost"] as? String == "paid" }.compactMap { $0["id"] as? String })
+        #expect(paid == Set(APIV1.endpoints.filter(\.paid).map(\.id)))
+        #expect(paid == ["style", "tryOn"])
+    }
+
+    @Test func limitErrorsCarryWhatTheAppExplains() throws {
+        let quota = try JSONDecoder().decode(
+            APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/error.quota_exceeded.json"))
+        #expect(quota.error.category == "tryOn")
+        #expect(quota.error.resetAt.flatMap(APIV1.parseDate) != nil)
+        let paused = try JSONDecoder().decode(
+            APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/error.feature_paused.json"))
+        #expect(paused.error.feature == "tryOn")
     }
 
     @Test func datesKeepMilliseconds() throws {

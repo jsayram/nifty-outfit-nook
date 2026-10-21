@@ -18,6 +18,8 @@ public enum APIV1 {
         public var path: String
         public var requiresAuth: Bool
         public var idempotent: Bool
+        /// Paid endpoints need an Idempotency-Key and an App Attest assertion (24b).
+        public var paid = false
     }
 
     public static let health = Endpoint(
@@ -27,7 +29,23 @@ public enum APIV1 {
         id: "createSession", method: "POST", path: "/v1/session", requiresAuth: true, idempotent: true)
     public static let me = Endpoint(id: "me", method: "GET", path: "/v1/me", requiresAuth: true, idempotent: true)
 
-    public static let endpoints = [health, createSession, me]
+    // 24b
+    public static let usage = Endpoint(
+        id: "usage", method: "GET", path: "/v1/usage", requiresAuth: true, idempotent: true)
+    /// Not repeated on its own: each call makes a new one-time challenge.
+    public static let attestChallenge = Endpoint(
+        id: "attestChallenge", method: "POST", path: "/v1/attest/challenge", requiresAuth: true, idempotent: false)
+    /// Not repeated on its own: a challenge works once.
+    public static let attestKey = Endpoint(
+        id: "attestKey", method: "POST", path: "/v1/attest/key", requiresAuth: true, idempotent: false)
+    /// Safe to repeat because every try carries the same Idempotency-Key: the server answers a
+    /// repeat with the first result, without running or counting it again.
+    public static let style = Endpoint(
+        id: "style", method: "POST", path: "/v1/style", requiresAuth: true, idempotent: true, paid: true)
+    public static let tryOn = Endpoint(
+        id: "tryOn", method: "POST", path: "/v1/try-on", requiresAuth: true, idempotent: true, paid: true)
+
+    public static let endpoints = [health, createSession, me, usage, attestChallenge, attestKey, style, tryOn]
 
     // MARK: Bodies
 
@@ -91,6 +109,12 @@ public enum APIV1 {
             public var message: String
             public var requestId: String
             public var retryAfterSeconds: Int?
+            /// quota_exceeded: which allowance.
+            public var category: String?
+            /// quota_exceeded: when the next one frees up, as the contract's date-time text.
+            public var resetAt: String?
+            /// feature_paused: which feature.
+            public var feature: String?
         }
         public var error: Body
     }
@@ -111,21 +135,28 @@ public enum APIV1 {
         case rateLimited = "rate_limited"
         case `internal`
         case unavailable
+        // 24b
+        case attestationRequired = "attestation_required"
+        case idempotencyConflict = "idempotency_conflict"
+        case actionInProgress = "action_in_progress"
+        case quotaExceeded = "quota_exceeded"
+        case featurePaused = "feature_paused"
 
         /// The HTTP status the contract gives each code.
         public var status: Int {
             switch self {
             case .invalidRequest: 400
             case .unauthenticated, .tokenExpired: 401
-            case .forbidden: 403
+            case .forbidden, .attestationRequired: 403
             case .notFound, .notRegistered: 404
             case .methodNotAllowed: 405
+            case .idempotencyConflict, .actionInProgress: 409
             case .apiVersionRetired: 410
             case .payloadTooLarge: 413
             case .unsupportedMediaType: 415
-            case .rateLimited: 429
+            case .rateLimited, .quotaExceeded: 429
             case .internal: 500
-            case .unavailable: 503
+            case .unavailable, .featurePaused: 503
             }
         }
     }

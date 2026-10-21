@@ -29,9 +29,13 @@ enum AppGateway {
         settings.usesRealServices
         ? nil : FakeGateway(appVersion: appVersion, policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent)
 
-    static let account: any AccountService =
-        RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
-        ?? fake?.account ?? UnavailableAccountService()
+    static let real = RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
+
+    static let account: any AccountService = real?.account ?? fake?.account ?? UnavailableAccountService()
+
+    /// Paid cloud work (Phase 24b): App Attest on a device with the real backend; the stand-in
+    /// attester with the fake backend.
+    static let paid: any PaidActionService = real?.paid ?? fake?.paid ?? UnavailablePaidActionService()
 
     #if DEBUG
         /// The fake backend's behaviours, for the gateway screen. Nil on the real services.
@@ -58,6 +62,17 @@ enum AppGateway {
                     guard let (mode, times) = byID[id] else { return }
                     backend.setMode(mode, times: times)
                 })
+        }
+
+        /// The fake backend's limits, for the limits screen (Phase 24b). Nil on the real services,
+        /// where the switches are Jose's (`npx convex run controls:setSwitch`).
+        static var limitsControls: LimitsLabControls? {
+            guard let backend = fake?.backend else { return nil }
+            return LimitsLabControls(
+                setPaused: { feature, paused in backend.setPaused(feature.rawValue, paused) },
+                loseNextAnswer: { backend.setMode(.answerLost, times: 1) },
+                jobsRun: { backend.paidJobsRun },
+                resetUsage: { backend.resetUsage() })
         }
     #endif
 }

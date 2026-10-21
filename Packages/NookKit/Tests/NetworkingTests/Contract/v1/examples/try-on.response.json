@@ -1,0 +1,20 @@
+{
+  "action": {
+    "id": "act_8796a5b4c3d2e1f00f1e2d3c4b5a6978",
+    "kind": "tryOn",
+    "status": "succeeded",
+    "replayed": true,
+    "createdAt": "2026-10-21T11:02:00.000Z"
+  },
+  "result": {
+    "placeholder": true
+  },
+  "usage": {
+    "category": "tryOn",
+    "usedToday": 3,
+    "limitToday": 3,
+    "usedThisMonth": 10,
+    "limitThisMonth": 30,
+    "resetsAt": "2026-10-22T08:02:11.000Z"
+  }
+}
