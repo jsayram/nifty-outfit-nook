@@ -38,6 +38,9 @@ public struct NookServices: Sendable {
     /// Export a copy, Check a copy and Restore (Phase 21b). `nil` where there's nothing to back
     /// up: the debug sample closet in memory, previews and most tests.
     public var backups: (any BackupService)?
+    /// Her image files (Phase 22b): removes the ones nothing points to any more. Nothing to do
+    /// where photos aren't files: the debug sample closet in memory, previews and most tests.
+    public var imageFiles: any ImageFiles = NoImageFiles()
     /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
     /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
     public var account: any AccountService = UnavailableAccountService()

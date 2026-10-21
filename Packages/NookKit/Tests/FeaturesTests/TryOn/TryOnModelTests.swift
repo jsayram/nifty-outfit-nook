@@ -99,6 +99,34 @@ struct TryOnModelTests {
         #expect(model.step == .failed(.notSaved))
     }
 
+    /// A made picture whose record can't be kept leaves no file behind (Phase 22b).
+    @Test func aPictureThatCantBeKeptLetsGoOfItsFile() async throws {
+        var services = services()
+        let blazer = try await look("o-blazer-office", in: services)
+        let files = RecordingImageFiles()
+        services.imageFiles = files
+        services.tryOn = StoredImageTryOn(photo: .stored("made"))
+        services.pictures = InMemoryTryOnPictureStore(pictures: [], options: StoreOptions(fails: true))
+        let failing = model(for: blazer)
+        await failing.start(with: services)
+        failing.make()
+        await failing.settle()
+        #expect(failing.step == .failed(.notSaved))
+        #expect(files.released == [.stored("made")])
+
+        // Kept: nothing is let go of.
+        var working = self.services()
+        let keeper = RecordingImageFiles()
+        working.imageFiles = keeper
+        working.tryOn = StoredImageTryOn(photo: .stored("kept"))
+        let kept = model(for: blazer)
+        await kept.start(with: working)
+        kept.make()
+        await kept.settle()
+        #expect(keeper.released.isEmpty)
+        #expect(try await working.pictures.pictures().contains { $0.id == "p-stored" })
+    }
+
     /// Cancel while making: back to the start, nothing kept.
     @Test func cancelKeepsNothing() async throws {
         let services = services(latency: .seconds(30))

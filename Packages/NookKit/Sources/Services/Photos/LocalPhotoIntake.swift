@@ -60,13 +60,17 @@ public struct LocalPhotoIntake: PhotoIntake {
 
 /// Garment pictures that include her own photos: a `.stored` reference is read from the photo
 /// files, and anything else goes to `fallback` (the sample wardrobe in Debug, nothing in
-/// Release). The bytes are read as they are; `GarmentImageLoader` shrinks them to the size shown.
+/// Release). Sizes a thumbnail can serve come from `thumbnails` (Phase 22b), made from the photo
+/// the first time; larger ones read the photo itself. `GarmentImageLoader` shrinks the bytes to
+/// the size shown.
 public struct StoredPhotoProvider: ImageProvider {
     public let files: PhotoFileStore
+    public let thumbnails: ThumbnailCache?
     public let fallback: any ImageProvider
 
-    public init(files: PhotoFileStore = .app, fallback: any ImageProvider) {
+    public init(files: PhotoFileStore = .app, thumbnails: ThumbnailCache? = nil, fallback: any ImageProvider) {
         self.files = files
+        self.thumbnails = thumbnails
         self.fallback = fallback
     }
 
@@ -74,11 +78,18 @@ public struct StoredPhotoProvider: ImageProvider {
         guard case .stored(let id) = reference else {
             return try await fallback.imageData(for: reference, maxPixelSize: maxPixelSize)
         }
-        return await Self.read(id.rawValue, from: files)
+        return await Self.read(id.rawValue, maxPixelSize: maxPixelSize, from: files, thumbnails: thumbnails)
     }
 
     @concurrent
-    private static func read(_ id: String, from files: PhotoFileStore) async -> Data? {
-        files.data(for: id)
+    private static func read(
+        _ id: String, maxPixelSize: Int, from files: PhotoFileStore, thumbnails: ThumbnailCache?
+    ) async -> Data? {
+        if let thumbnails, ThumbnailCache.size(for: maxPixelSize) != nil,
+            let thumbnail = thumbnails.data(for: id, maxPixelSize: maxPixelSize, original: { files.data(for: id) })
+        {
+            return thumbnail
+        }
+        return files.data(for: id)
     }
 }

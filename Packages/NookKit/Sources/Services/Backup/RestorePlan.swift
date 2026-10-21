@@ -71,10 +71,15 @@ struct RestorePlan: Equatable, Sendable {
 
     /// A try-on picture that shows a piece deleted for good.
     private static func showsDeletedPiece(_ row: StoreRow, deleted markers: [String: StoreRow]) -> Bool {
+        showsDeletedPiece(row, deleted: Set(markers.keys))
+    }
+
+    /// A try-on picture that shows one of the pieces `deleted` for good.
+    static func showsDeletedPiece(_ row: StoreRow, deleted: Set<String>) -> Bool {
         guard row.kind == RecordKind.picture.rawValue,
             let picture = try? RecordPayload.decode(TryOnPicture.self, from: row.payload, version: row.payloadVersion)
         else { return false }
-        return picture.captured.pieces.contains { $0.garmentID.map { markers[$0.rawValue] != nil } ?? false }
+        return picture.captured.pieces.contains { $0.garmentID.map { deleted.contains($0.rawValue) } ?? false }
     }
 
     /// The copy's version of a record, kept for review.

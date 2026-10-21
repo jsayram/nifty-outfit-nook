@@ -70,10 +70,16 @@ public enum PermanentDeletion {
     /// then the piece itself, so a failure part way leaves the piece in Recently deleted, where she
     /// can try again. Only a piece in Recently deleted can go (`ClosetStore.deletePermanently`).
     public static func delete(_ id: Garment.ID, in services: NookServices) async throws(StoreError) {
-        guard try await services.closet.garment(id).isDeleted else { throw .notFound }
+        let piece = try await services.closet.garment(id)
+        guard piece.isDeleted else { throw .notFound }
+        let draft = try await services.drafts.draft(for: .garment(id))
         try await services.drafts.discard(.garment(id))
-        try await deletePictures(showing: [id], in: services)
+        let pictures = try await deletePictures(showing: [id], in: services)
         try await services.closet.deletePermanently(id)
+        // Its photo, cutout and pictures' files go once nothing points to them (Phase 22b).
+        await services.imageFiles.release(
+            piece.imageReferences + (draft.map(Self.photos) ?? []) + pictures.compactMap(\.storedImage),
+            deletedForGood: true)
     }
 
     /// The 30-day purge: the pictures that show each piece whose time is up go first, then the
@@ -84,15 +90,33 @@ public enum PermanentDeletion {
         -> [Garment.ID]
     {
         let expiring = try await services.closet.garments().filter { $0.purgeDate.map { $0 <= date } ?? false }
+        var pictures: [TryOnPicture] = []
         if !expiring.isEmpty {
-            try await deletePictures(showing: expiring.map(\.id), in: services)
+            pictures = try await deletePictures(showing: expiring.map(\.id), in: services)
         }
-        return try await services.closet.purgeExpired(asOf: date)
+        let purged = try await services.closet.purgeExpired(asOf: date)
+        let gone = Set(purged)
+        let photos = expiring.filter { gone.contains($0.id) }.flatMap(\.imageReferences)
+        if !photos.isEmpty || !pictures.isEmpty {
+            await services.imageFiles.release(photos + pictures.compactMap(\.storedImage), deletedForGood: true)
+        }
+        return purged
     }
 
-    private static func deletePictures(showing ids: [Garment.ID], in services: NookServices) async throws(StoreError) {
-        for picture in showing(ids, in: try await services.pictures.pictures()) {
+    /// Deletes the pictures that show any of these pieces, and returns them.
+    @discardableResult
+    private static func deletePictures(showing ids: [Garment.ID], in services: NookServices) async throws(StoreError)
+        -> [TryOnPicture]
+    {
+        let pictures = showing(ids, in: try await services.pictures.pictures())
+        for picture in pictures {
             try await services.pictures.delete(picture.id)
         }
+        return pictures
+    }
+
+    /// The photos an unsaved Add a piece or Edit points to.
+    private static func photos(of draft: GarmentDraft) -> [PhotoReference] {
+        [draft.details.photo, draft.base.photo]
     }
 }

@@ -12,22 +12,29 @@ public struct BackupLocation: Hashable, Sendable {
     public let staging: URL
     /// Finished exports, until the Files sheet has saved them. Cleared at every launch.
     public let exports: URL
+    /// Thumbnails of her photos (Phase 22b), made again whenever they're missing. Left out of
+    /// backups of every kind, and removed with their photo.
+    public let thumbnails: URL
 
-    public init(store: StoreLocation, photos: URL, staging: URL, exports: URL) {
+    /// - Parameter thumbnails: `nil` puts them in a `Thumbnails` folder next to `photos`.
+    public init(store: StoreLocation, photos: URL, staging: URL, exports: URL, thumbnails: URL? = nil) {
         self.store = store
         self.photos = photos
         self.staging = staging
         self.exports = exports
+        self.thumbnails =
+            thumbnails ?? photos.deletingLastPathComponent().appending(path: "Thumbnails", directoryHint: .isDirectory)
     }
 
-    /// The app's folders: `Application Support/Photos` and `Application Support/Restore`, and
-    /// `tmp/Export`.
+    /// The app's folders: `Application Support/Photos` and `Application Support/Restore`,
+    /// `tmp/Export` and `Library/Caches/Thumbnails`.
     public static var app: BackupLocation {
         BackupLocation(
             store: .app,
             photos: URL.applicationSupportDirectory.appending(path: "Photos", directoryHint: .isDirectory),
             staging: URL.applicationSupportDirectory.appending(path: "Restore", directoryHint: .isDirectory),
-            exports: URL.temporaryDirectory.appending(path: "Export", directoryHint: .isDirectory))
+            exports: URL.temporaryDirectory.appending(path: "Export", directoryHint: .isDirectory),
+            thumbnails: URL.cachesDirectory.appending(path: "Thumbnails", directoryHint: .isDirectory))
     }
 
     /// Everything in one folder, for tests.

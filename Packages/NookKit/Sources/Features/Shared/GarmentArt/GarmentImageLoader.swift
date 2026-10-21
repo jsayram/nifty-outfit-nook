@@ -21,8 +21,10 @@ import UIKit
 /// asked for before then decodes cheaply from the file's lower resolution levels. Other formats
 /// decode quickly to a thumbnail and don't keep a full-size copy.
 ///
-/// Garment photos are Personal data (DATA_MAP.md). The cache is in memory only: nothing is
-/// written to disk, and it empties under memory pressure.
+/// Garment photos are Personal data (DATA_MAP.md). This cache is in memory only and empties under
+/// memory pressure. It holds at most `countLimit` pictures and about `byteLimit` of decoded pixels
+/// (Phase 22b), so scrolling a closet of thousands of photos keeps a steady footprint. The disk
+/// side is `ThumbnailCache` in Services, behind the provider.
 final class GarmentImageLoader {
     private let provider: any ImageProvider
     private let cache = NSCache<NSString, UIImage>()
@@ -57,15 +59,19 @@ final class GarmentImageLoader {
         case failed
     }
 
-    /// - Parameter originalsByteLimit: the memory the full-size decodes may hold. 48 MB keeps
-    ///   about 30 of the sample cutouts, a Saved Looks page's worth.
+    /// - Parameters:
+    ///   - byteLimit: the memory the shown sizes may hold. 64 MB keeps about 85 grid pictures
+    ///     (500 by 375 pixels), several screens' worth.
+    ///   - originalsByteLimit: the memory the full-size decodes may hold. 48 MB keeps about 30 of
+    ///     the sample cutouts, a Saved Looks page's worth.
     init(
-        provider: any ImageProvider, countLimit: Int = 300, missingLimit: Int = 1_000,
+        provider: any ImageProvider, countLimit: Int = 300, byteLimit: Int = 64 << 20, missingLimit: Int = 1_000,
         originalsByteLimit: Int = 48 << 20
     ) {
         self.provider = provider
         self.missingLimit = missingLimit
         cache.countLimit = countLimit
+        cache.totalCostLimit = byteLimit
         originals.totalCostLimit = originalsByteLimit
     }
 
@@ -105,7 +111,7 @@ final class GarmentImageLoader {
         loading[key] = nil
         switch outcome {
         case .image(let image):
-            cache.setObject(image, forKey: key.cacheName)
+            cache.setObject(image, forKey: key.cacheName, cost: Self.cost(of: image))
         case .notThere:
             if missing.count >= missingLimit { missing.removeAll() }
             missing.insert(key)
@@ -193,8 +199,13 @@ final class GarmentImageLoader {
         guard let data = synchronousData?(reference),
             let image = Self.thumbnail(data, maxPixelSize: maxPixelSize)
         else { return nil }
-        cache.setObject(image, forKey: name)
+        cache.setObject(image, forKey: name, cost: Self.cost(of: image))
         return image
+    }
+
+    /// The bytes a decoded picture holds.
+    nonisolated static func cost(of image: UIImage) -> Int {
+        image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
     }
 
     /// True when the provider had no picture for `reference` at this size.
