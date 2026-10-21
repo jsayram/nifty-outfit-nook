@@ -2,6 +2,7 @@ import Foundation
 import ImageIO
 import Models
 import Testing
+import UniformTypeIdentifiers
 
 @testable import Services
 
@@ -56,6 +57,25 @@ struct LocalPhotoIntakeTests {
         #expect(PhotoWithMetadata.properties(of: kept)?[kCGImagePropertyGPSDictionary] == nil)
     }
 
+    @Test(arguments: [UTType.jpeg, .png, .tiff])
+    func aPastedImageIsCleanedLikeAnyOther(type: UTType) async throws {
+        let folder = Folder()
+        let intake = LocalPhotoIntake(files: folder.files)
+        let photo = try #require(PhotoWithMetadata.make(type))
+        let reference = try await intake.keep(photo, from: .paste)
+        guard case .stored(let id) = reference else {
+            Issue.record("Expected a stored photo")
+            return
+        }
+        let kept = try #require(folder.files.data(for: id.rawValue))
+        let properties = try #require(PhotoWithMetadata.properties(of: kept))
+        #expect(properties[kCGImagePropertyGPSDictionary] == nil)
+        #expect(PhotoWithMetadata.plantedTextFound(in: kept).isEmpty)
+        #expect(
+            CGImageSourceGetType(try #require(CGImageSourceCreateWithData(kept as CFData, nil))) as String?
+                == UTType.jpeg.identifier)
+    }
+
     @Test func somethingUnreadableWritesNothing() async {
         let folder = Folder()
         let intake = LocalPhotoIntake(files: folder.files)
@@ -97,7 +117,7 @@ struct LocalPhotoIntakeTests {
     @Test func itOffersTheCameraAndPhotosThroughTheSystemScreens() {
         let intake = LocalPhotoIntake(files: Folder().files)
         #expect(intake.usesSystemPicker)
-        #expect(intake.sources == [.camera, .library])
+        #expect(intake.sources == [.camera, .library, .paste])
     }
 
     @Test func theProviderReadsHerPhotosAndPassesTheRestOn() async throws {

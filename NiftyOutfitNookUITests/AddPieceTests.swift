@@ -65,7 +65,7 @@ final class AddPieceTests: XCTestCase {
     }
 
     /// Phase 22a: her own closet has real photos. Add a piece offers Take photo and Choose from
-    /// Photos (no Paste) with the line about how photos are kept, and Take photo explains, in
+    /// Photos and (Phase 22c) the system Paste button, with the line about how photos are kept, and Take photo explains, in
     /// the app's words, before iOS asks; Not now asks nothing. The system camera and picker run
     /// outside the app and aren't driven here. On a simulator where camera access was already
     /// decided the explainer doesn't come, so the test only checks it when iOS hasn't asked yet.
@@ -79,7 +79,7 @@ final class AddPieceTests: XCTestCase {
 
         tap("closet.addPiece", in: app, showing: app.buttons["addPiece.camera"])
         XCTAssertTrue(app.buttons["addPiece.library"].exists)
-        XCTAssertFalse(app.buttons["addPiece.paste"].exists, "Paste isn't offered with real photos")
+        XCTAssertTrue(element("addPiece.paste", in: app).exists, "No Paste button")
         XCTAssertTrue(element("addPiece.photoNote", in: app).exists)
 
         let notNow = app.buttons["camera.explainer.notNow"]
@@ -90,6 +90,45 @@ final class AddPieceTests: XCTestCase {
             notNow.tapUntilGone(timeout: Self.wait)
             XCTAssertTrue(app.buttons["addPiece.camera"].waitUntilExists(timeout: Self.wait))
         }
+    }
+
+    /// Phase 22c: the system Paste button. With text on the pasteboard it is dimmed; with a picture
+    /// there (put by the test runner, which needs no hook in the app) tapping it takes the picture
+    /// through the same intake as a picked photo and opens the form with "Your photo". Tapping
+    /// the system button shows no "Allow Paste?" question.
+    @MainActor
+    func testPasteAPictureFromTheSystemButton() {
+        let app = XCUIApplication()
+        app.launchArguments =
+            ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+        app.launch()
+        openHerOwnEmptyCloset(in: app)
+        tap("closet.addPiece", in: app, showing: app.buttons["addPiece.camera"])
+        let paste = element("addPiece.paste", in: app)
+        XCTAssertTrue(paste.waitUntilExists(timeout: Self.wait))
+        XCTAssertEqual(paste.label, "Paste a copied photo")
+        Screenshots.save(app, as: "add-a-piece-paste")
+
+        // Text isn't a photo: iOS dims the button, and a tap on it does nothing.
+        UIPasteboard.general.string = "not a photo"
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        paste.tap()
+        XCTAssertFalse(element("field.name", in: app).waitUntilExists(timeout: 2), "Pasted text opened the form")
+        XCTAssertTrue(app.buttons["addPiece.camera"].exists)
+
+        let size = CGSize(width: 240, height: 320)
+        UIPasteboard.general.image = UIGraphicsImageRenderer(size: size).image { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        paste.tap()
+        XCTAssertFalse(app.alerts.firstMatch.waitUntilExists(timeout: 2), "iOS asked to allow paste")
+        XCTAssertTrue(element("field.name", in: app).waitUntilExists(timeout: Self.wait), "The form didn't open")
+        XCTAssertTrue(element("editor.photoCaption", in: app).exists)
+        XCTAssertTrue(
+            app.staticTexts["Your photo"].exists || element("editor.photoCaption", in: app).label.contains("Your photo")
+        )
     }
 
     /// Edit from garment detail: Cancel asks first when something changed, and Save changes

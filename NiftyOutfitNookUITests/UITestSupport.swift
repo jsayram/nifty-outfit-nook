@@ -340,3 +340,16 @@ extension XCUIApplication {
         return effect()
     }
 }
+
+/// Saves a screenshot to the folder named by `NOOK_SCREENSHOT_DIR` when it's set (the simulator
+/// shares the Mac's files), and always attaches it to the test result.
+enum Screenshots {
+    @MainActor
+    static func save(_ app: XCUIApplication, as name: String) {
+        let screenshot = app.screenshot()
+        if let directory = ProcessInfo.processInfo.environment["NOOK_SCREENSHOT_DIR"] {
+            try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+            try? screenshot.pngRepresentation.write(to: URL(fileURLWithPath: directory).appending(path: "\(name).png"))
+        }
+    }
+}

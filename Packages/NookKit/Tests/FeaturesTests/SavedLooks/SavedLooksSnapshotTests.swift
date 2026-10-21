@@ -77,6 +77,39 @@ struct SavedLooksSnapshotTests {
         assertSnapshot(SavedLooksPage(model: model), named: "saved-more-in-all")
     }
 
+    /// The whole screen on an iPhone 17 (402 x 874) with the floating tab bar drawn over the bottom
+    /// 83 points, as on screen. On a short list the page is taller than the screen, so a line at
+    /// the end of the page fell under the bar (#70); pinned above the bar it shows.
+    @Test func savedWithMoreInAllAboveTheTabBar() async {
+        let model = await loadedSavedLooks(searchDelay: .zero)
+        model.searchText = "denim"
+        model.applySearchNow()
+        model.toggle(.bottom)
+        let screen = VStack(spacing: 0) {
+            SavedLooksPage(model: model)
+                .frame(maxHeight: .infinity, alignment: .top)
+            Capsule().fill(Color.gray.opacity(0.35))
+                .overlay { Text(verbatim: "Tab bar").font(.footnote) }
+                .padding(.horizontal, 16)
+                .frame(height: 83)
+        }
+        .frame(width: Self.width, height: 874)
+        .environment(\.closetIsStillImage, true)
+        .environment(\.nookStaticRendering, true)
+        .environment(\.locale, TestTime.locale)
+        .environment(\.calendar, TestTime.calendar)
+        let renderer = ImageRenderer(content: screen.snapshotPhotos())
+        renderer.scale = 1
+        renderer.proposedSize = ProposedViewSize(width: Self.width, height: 874)
+        guard let image = renderer.uiImage else {
+            Issue.record("ImageRenderer produced no image")
+            return
+        }
+        SnapshotTesting.assertSnapshot(
+            of: image, as: .image(precision: 0.995, perceptualPrecision: 0.98, scale: 1),
+            named: "saved-more-in-all-on-screen")
+    }
+
     /// All: her saved looks and the unsaved result in one list, the unsaved one tagged.
     @Test func allScope() async {
         let model = await loadedSavedLooks()

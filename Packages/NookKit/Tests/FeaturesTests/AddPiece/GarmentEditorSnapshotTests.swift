@@ -38,6 +38,20 @@ struct GarmentEditorSnapshotTests {
         assertSnapshot(GarmentEditorPage(model: model), named: "choose")
     }
 
+    @Test func choicesWithPaste() async {
+        var services = editorServices()
+        services.photos = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services)
+        assertSnapshot(GarmentEditorPage(model: model), named: "choose-paste")
+    }
+
+    @Test func choicesWithPasteAX5() async {
+        var services = editorServices()
+        services.photos = RecordingPhotoIntake()
+        let model = await loadedEditor(services: services)
+        assertSnapshot(GarmentEditorPage(model: model), dynamicTypeSize: .accessibility5, named: "choose-paste-ax5")
+    }
+
     @Test func describeInWords() async {
         let services = editorServices()
         let model = await loadedEditor(firstStep: .words, services: services)
