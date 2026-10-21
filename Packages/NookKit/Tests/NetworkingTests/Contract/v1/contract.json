@@ -1,0 +1,151 @@
+{
+  "name": "Nifty Outfit Nook API",
+  "version": 1,
+  "basePath": "/v1",
+  "status": "24a: gateway and identity",
+  "notes": [
+    "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
+    "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
+    "Every JSON body is UTF-8, at most limits.maxBodyBytes. Unknown fields in a request are rejected. Clients ignore unknown fields in a response and treat an unknown error code by its HTTP status."
+  ],
+  "limits": {
+    "maxBodyBytes": 65536
+  },
+  "auth": {
+    "scheme": "Bearer",
+    "header": "Authorization",
+    "token": "A Clerk session token minted from the JWT template named \"convex\" (aud \"convex\"). The backend takes the user only from the verified token, never from a body or query field.",
+    "onUnauthorized": "On any 401 the client gets a fresh token once and retries the request once. A second 401 means signed out."
+  },
+  "headers": {
+    "request": {
+      "Authorization": "Bearer <token>, on every endpoint whose auth is \"required\".",
+      "Content-Type": "application/json, on every request that has a body.",
+      "Accept": "application/json"
+    },
+    "response": {
+      "Content-Type": "application/json on every response, errors included.",
+      "X-Request-Id": "An opaque ID on every response, for support. Also in error bodies as requestId.",
+      "Retry-After": "Whole seconds. Always on 429; on 503 when the backend knows how long."
+    }
+  },
+  "endpoints": [
+    {
+      "id": "health",
+      "method": "GET",
+      "path": "/v1/health",
+      "auth": "none",
+      "request": null,
+      "response": { "status": 200, "schema": "Health", "example": "examples/health.response.json" },
+      "errors": ["rate_limited", "unavailable", "internal"]
+    },
+    {
+      "id": "createSession",
+      "summary": "Called after every sign-in. Creates the account's pseudonymous user ID the first time, records a sign-in audit event, and returns who the token belongs to.",
+      "method": "POST",
+      "path": "/v1/session",
+      "auth": "required",
+      "request": { "schema": "SessionRequest", "example": "examples/session.request.json" },
+      "response": { "status": 200, "schema": "SessionResponse", "example": "examples/session.response.json" },
+      "errors": ["invalid_request", "payload_too_large", "unsupported_media_type", "unauthenticated", "token_expired", "forbidden", "rate_limited", "unavailable", "internal"]
+    },
+    {
+      "id": "me",
+      "summary": "Who am I. Reads only; never creates the account.",
+      "method": "GET",
+      "path": "/v1/me",
+      "auth": "required",
+      "request": null,
+      "response": { "status": 200, "schema": "Me", "example": "examples/me.response.json" },
+      "errors": ["unauthenticated", "token_expired", "forbidden", "not_registered", "rate_limited", "unavailable", "internal"]
+    }
+  ],
+  "errors": [
+    { "code": "invalid_request", "status": 400, "meaning": "The body isn't valid JSON, doesn't match the schema, or has an unknown field." },
+    { "code": "unauthenticated", "status": 401, "meaning": "No token, or a token that doesn't verify (wrong issuer, audience or signature)." },
+    { "code": "token_expired", "status": 401, "meaning": "The token was valid but has expired. Refresh and retry once." },
+    { "code": "forbidden", "status": 403, "meaning": "Signed in, but not allowed. Don't retry." },
+    { "code": "not_found", "status": 404, "meaning": "No such endpoint in this version." },
+    { "code": "not_registered", "status": 404, "meaning": "The token is valid but POST /v1/session hasn't run for it yet." },
+    { "code": "method_not_allowed", "status": 405, "meaning": "The endpoint exists but not with this method." },
+    { "code": "api_version_retired", "status": 410, "meaning": "This API version is no longer served. The app must be updated." },
+    { "code": "payload_too_large", "status": 413, "meaning": "The body is larger than limits.maxBodyBytes." },
+    { "code": "unsupported_media_type", "status": 415, "meaning": "A body was sent without Content-Type: application/json." },
+    { "code": "rate_limited", "status": 429, "meaning": "Too many requests. Wait Retry-After seconds." },
+    { "code": "internal", "status": 500, "meaning": "The backend failed. Safe to retry a read with backoff." },
+    { "code": "unavailable", "status": 503, "meaning": "Switched off or overloaded. Retry later, after Retry-After when present." }
+  ],
+  "schemas": {
+    "Health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "apiVersion"],
+      "properties": {
+        "status": { "type": "string", "enum": ["ok"] },
+        "apiVersion": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "SessionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "appVersion"],
+      "properties": {
+        "platform": { "type": "string", "enum": ["ios"] },
+        "appVersion": { "type": "string", "pattern": "^[0-9]{1,4}(\\.[0-9]{1,4}){1,2}$", "maxLength": 14 }
+      }
+    },
+    "User": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "createdAt"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^usr_[0-9a-f]{32}$" },
+        "createdAt": { "type": "string", "format": "date-time", "maxLength": 30 }
+      }
+    },
+    "SessionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user", "newAccount"],
+      "properties": {
+        "user": { "$ref": "User" },
+        "newAccount": { "type": "boolean" }
+      }
+    },
+    "Me": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user"],
+      "properties": {
+        "user": { "$ref": "User" }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["error"],
+      "properties": {
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "requestId"],
+          "properties": {
+            "code": { "type": "string", "pattern": "^[a-z_]{1,40}$" },
+            "message": { "type": "string", "maxLength": 200 },
+            "requestId": { "type": "string", "maxLength": 64 },
+            "retryAfterSeconds": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  },
+  "planned": {
+    "24b": "Limits and cost protection: per-user, per-device and global rate limits returning rate_limited (429) with Retry-After; a new quota_exhausted error (402 or 429, to decide) with the reset time; a server kill switch per paid feature returning unavailable (503) with a feature field.",
+    "24c": "Authorization and deletion: DELETE /v1/account (202 with a deletion ID, then GET /v1/account/deletion/{id} until done); cross-user access returns not_found, never another user's data; forbidden for a disabled account.",
+    "24d": "Support: POST /v1/feedback with the note (at most 2,000 characters), an optional reply address and a diagnostics opt-in; 202 with a ticket reference.",
+    "27a": "Stylist: POST /v1/style with closet descriptors and preferences, never a provider or model name; the backend picks the provider and validates its answer against a typed schema before replying. Needs App Attest assertions (X-Nook-Assertion, reserved now) and the 24b ledger."
+  },
+  "reservedHeaders": {
+    "X-Nook-Assertion": "App Attest assertion over the request. Reserved for paid and account endpoints; not sent or checked in 24a."
+  }
+}
