@@ -131,10 +131,10 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 
 - **14a (done):** the try-on photo sheet in Profile (`docs/profile.md`).
 - **15b (done):** on iPad a picture opens beside the Pictures grid (`docs/ipad.md`).
-- **22b:** stored image files for generated pictures, and removing them on Delete picture.
+- **22b (done):** a generated picture's image is a stored file, removed once Delete picture's Undo has gone, or when a piece it shows is deleted for good (`docs/image-storage.md`).
 - **30a:** the picture allowance and purchases.
 - **33:** real pictures from the gated image service, its permission and cost check, behind `TryOnService`.
-- **Stage B:** deleting a garment for good should remove the pictures that depend on it where the purge rules say so (PRD §9.2.4). Today a purged piece is only left out of the drawing.
+- **21b and 22b (done):** deleting a piece for good deletes the pictures that show it, with their files.
 
 ## Sample previews
 

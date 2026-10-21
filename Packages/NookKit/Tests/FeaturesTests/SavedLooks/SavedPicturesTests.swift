@@ -144,6 +144,34 @@ struct SavedPicturesTests {
         #expect(lace.pictures.map(\.id) == ["p-lace"])
     }
 
+    /// A deleted picture's stored image is let go of once its Undo has gone, not before, and
+    /// Undo keeps it (Phase 22b).
+    @Test func aDeletedPicturesFileGoesWhenItsUndoDoes() async throws {
+        var services = services()
+        let files = RecordingImageFiles()
+        services.imageFiles = files
+        let look = try await services.looks.look("o-lace-date")
+        let photo = PhotoReference.stored("picture-file")
+        let stored = TryOnPicture(id: "p-stored", of: look, image: .generated(photo), createdAt: TestTime.now)
+        try await services.pictures.save(stored)
+        let grid = await loadedSavedLooks()
+
+        grid.lastPictureRemoval = try await picture("p-stored", services: services).delete()
+        await grid.undoLastPictureRemoval(using: services, now: TestTime.now)
+        #expect(files.released.isEmpty)
+
+        grid.lastPictureRemoval = try await picture("p-stored", services: services).delete()
+        await grid.endPictureRemoval(using: services)
+        #expect(grid.lastPictureRemoval == nil)
+        #expect(files.released == [photo])
+        #expect(files.releasedForGood == [false])
+
+        // A simulated picture has no file to let go of.
+        grid.lastPictureRemoval = try await picture("p-lace", services: services).delete()
+        await grid.endPictureRemoval(using: services)
+        #expect(files.released == [photo])
+    }
+
     // MARK: Look detail and link integrity
 
     /// RD-08.2: the look shows its pictures, newest first, and which show an earlier version.

@@ -65,10 +65,10 @@ func assertComponentSnapshot(
         .environment(\.locale, Locale(identifier: "en_US"))
         .environment(\.nookStaticRendering, true)
 
-    let renderer = ImageRenderer(content: content)
-    renderer.scale = 2
-    renderer.proposedSize = ProposedViewSize(width: canvas.width, height: nil)
-    guard let image = stillImage(from: renderer, scale: 2) else {
+    guard
+        let image = stillImage(
+            of: content, scale: 2, proposedSize: ProposedViewSize(width: canvas.width, height: nil))
+    else {
         Issue.record("ImageRenderer produced no image for \(name)")
         return
     }

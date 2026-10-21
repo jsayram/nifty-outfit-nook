@@ -49,6 +49,23 @@ struct GarmentImageLoaderTests {
         #expect(cgImage.width == 180 && cgImage.height == 135)
     }
 
+    /// The memory cache holds about `byteLimit` of pixels (Phase 22b): past it, earlier
+    /// pictures go and are asked for again.
+    @Test(.heavyMainActorWork) func theMemoryCacheKeepsToItsByteLimit() async throws {
+        let provider = PhotoProvider(width: 400, height: 400)
+        let probe = GarmentImageLoader(provider: provider)
+        let one = try #require(await probe.image(for: .stored("probe"), maxPixelSize: 200))
+        let cost = GarmentImageLoader.cost(of: one)
+        #expect(cost >= 200 * 200 * 4)
+        let loader = GarmentImageLoader(provider: provider, byteLimit: cost * 3)
+        for index in 0..<10 { _ = await loader.image(for: .stored(EntityID("p-\(index)")), maxPixelSize: 200) }
+        let before = await provider.calls
+        _ = await loader.image(for: .stored("p-0"), maxPixelSize: 200)
+        #expect(await provider.calls == before + 1, "the first picture should have been let go")
+        _ = await loader.image(for: .stored("p-9"), maxPixelSize: 200)
+        #expect(await provider.calls == before + 1, "the last picture should still be held")
+    }
+
     @Test(.heavyMainActorWork) func aLoadedPhotoIsCached() async {
         let provider = PhotoProvider(width: 400, height: 400)
         let loader = GarmentImageLoader(provider: provider)

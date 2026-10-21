@@ -261,6 +261,21 @@ final class SavedLooksModel {
         await load(from: services, now: now)
     }
 
+    /// Delete picture's Undo has gone (she left the tab, or deleted another): a stored image
+    /// goes once nothing points to it (Phase 22b).
+    func endPictureRemoval(using services: NookServices) async {
+        guard let removal = lastPictureRemoval else { return }
+        lastPictureRemoval = nil
+        await Self.release(removal, using: services)
+    }
+
+    /// Lets go of a deleted picture's stored image.
+    nonisolated static func release(_ removal: PictureRemoval, using services: NookServices) async {
+        if let photo = removal.picture.storedImage {
+            await services.imageFiles.release([photo], deletedForGood: false)
+        }
+    }
+
     /// Undo for Delete picture: the same picture back, linked to its look as before.
     func undoLastPictureRemoval(using services: NookServices, now: Date = .now) async {
         guard let removal = lastPictureRemoval else { return }

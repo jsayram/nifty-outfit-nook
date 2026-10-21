@@ -40,7 +40,7 @@ struct RestoreCommitter {
 
     func restore(_ copy: StagedCopy, as mode: RestoreMode) throws(BackupError) -> RestoreOutcome {
         do {
-            return try restoreThrowing(copy, as: mode)
+            return try PhotoFolderLock.run { try restoreThrowing(copy, as: mode) }
         } catch {
             // Nothing was written, or the save rolled back: the old closet is in place.
             if (try? readJournal())?.step != .verified { discard() }
@@ -89,6 +89,10 @@ struct RestoreCommitter {
     /// that was stopped, finishes an interrupted Undo, and drops the safety copy after 7 days.
     /// Staging and unsaved exports from an earlier launch are always cleared.
     func resume() {
+        PhotoFolderLock.run { resumeNow() }
+    }
+
+    private func resumeNow() {
         BackupLocation.remove(location.staging)
         BackupLocation.remove(location.exports)
         guard var journal = try? readJournal() else {
@@ -126,7 +130,7 @@ struct RestoreCommitter {
         do {
             journal.step = .undoing
             try writeJournal(journal)
-            try undoThrowing()
+            try PhotoFolderLock.run { try undoThrowing() }
         } catch {
             throw (error as? BackupError) ?? .failed
         }
@@ -140,6 +144,8 @@ struct RestoreCommitter {
             .map { StoreRow(kind: $0.kind, key: $0.key, payloadVersion: $0.payloadVersion, payload: $0.payload) }
             .filter { restored.contains($0.kind) && $0.kind != RecordKind.deletion.rawValue }
             .filter { !($0.kind == RecordKind.garment.rawValue && deleted.contains($0.key)) }
+            // The pictures that show a piece deleted for good since stay deleted too (Phase 22b).
+            .filter { !RestorePlan.showsDeletedPiece($0, deleted: deleted) }
         try commit(before + markers, replacesEverything: true)
         try StoreCheckpoint.hit("undo.saved")
         BackupLocation.remove(location.photos)

@@ -130,7 +130,7 @@ public struct BackupDataEraser: ErasableStore {
     }
 
     public func eraseAll() async throws(StoreError) {
-        for folder in [location.photos, location.staging, location.exports, location.safetyCopy] {
+        for folder in [location.photos, location.thumbnails, location.staging, location.exports, location.safetyCopy] {
             BackupLocation.remove(folder)
         }
         BackupLocation.remove(location.restoreJournal)

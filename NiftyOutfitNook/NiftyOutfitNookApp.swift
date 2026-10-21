@@ -25,6 +25,10 @@ struct NiftyOutfitNookApp: App {
             {
                 UIView.setAnimationsEnabled(false)
             }
+            // `-frame-stats` (debug builds only) measures frames, hitches and memory (Phase 22b).
+            if arguments.contains("-frame-stats") {
+                FrameStats.shared.start(autoScroll: arguments.contains("-auto-scroll"))
+            }
         }
     #endif
 
@@ -105,8 +109,18 @@ struct NiftyOutfitNookApp: App {
         let onboarding = storage.onboarding
         let tours = storage.tours
         // Her photos (Phase 22a), in the folder backups carry. Delete my data removes it with
-        // the backups' files (`BackupDataEraser`, in `storage.erasableData`).
+        // the backups' files (`BackupDataEraser`, in `storage.erasableData`). Their thumbnails
+        // and the sweep for files nothing points to came in Phase 22b.
         let photos = PhotoFileStore(directory: (storage.backupLocation ?? .app).photos)
+        let imageFiles = storage.imageFiles
+        #if DEBUG
+            // `-thumbnails off` (debug builds only) reads every photo whole, to measure what the
+            // thumbnails save.
+            let thumbnails =
+                DebugLaunchArgument.value(after: "-thumbnails", in: arguments) == "off" ? nil : imageFiles?.thumbnails
+        #else
+            let thumbnails = imageFiles?.thumbnails
+        #endif
         // Sign-in and the backend (Phase 24a): the fakes until Clerk and Convex are configured.
         // Nothing on the local closet depends on it.
         let account = AppGateway.account
@@ -128,7 +142,9 @@ struct NiftyOutfitNookApp: App {
                         configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
                         stores: storage.stores)
                     services.photos = LocalPhotoIntake(files: photos)
-                    services.images = StoredPhotoProvider(files: photos, fallback: services.images)
+                    services.images = StoredPhotoProvider(
+                        files: photos, thumbnails: thumbnails, fallback: services.images)
+                    if let imageFiles { services.imageFiles = imageFiles }
                     services.deletion = LocalDataDeletion(
                         stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
                     services.backups = storage.backups
@@ -152,8 +168,17 @@ struct NiftyOutfitNookApp: App {
             onboardingOptions: onboardingOptions,
             tourOptions: tourOptions,
             offersSampleCloset: offersSampleCloset,
-            // The Stage A `UserDefaults` suite moves into the store once.
-            prepare: { AppStateDefaultsImport.run(into: storage.container) },
+            // The Stage A `UserDefaults` suite moves into the store once. Then, away from the
+            // screens, files nothing points to any more are removed (Phase 22b).
+            prepare: {
+                AppStateDefaultsImport.run(into: storage.container)
+                #if DEBUG
+                    await DebugPhotoCloset.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
+                #endif
+                if let imageFiles {
+                    Task.detached(priority: .utility) { await imageFiles.removeUnused() }
+                }
+            },
             erasedOnReset: storage.erasableData.map(\.1),
             backups: storage.backups,
             reload: { storage.reload() })

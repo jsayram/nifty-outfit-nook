@@ -96,10 +96,10 @@ struct BackupsSnapshotTests {
             .environment(\.calendar, TestTime.calendar)
             .environment(\.timeZone, TestTime.calendar.timeZone)
             .environment(\.scenePhase, .active)
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = 1
-        renderer.proposedSize = ProposedViewSize(width: Self.width, height: nil)
-        guard let image = stillImage(from: renderer, scale: 1) else {
+        guard
+            let image = stillImage(
+                of: content, scale: 1, proposedSize: ProposedViewSize(width: Self.width, height: nil))
+        else {
             Issue.record("ImageRenderer produced no image for \(name)")
             return
         }
