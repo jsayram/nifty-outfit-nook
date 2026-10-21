@@ -242,6 +242,9 @@ struct ResilienceTests {
         var kind: AuthProviderKind { .fake }
         func isSignedIn() async -> Bool { await inner.isSignedIn() }
         func signInWithApple() async throws(AuthError) { try await inner.signInWithApple() }
+        func reauthenticateForDeletion() async throws(AuthError) -> String {
+            try await inner.reauthenticateForDeletion()
+        }
         func signOut() async {
             signOuts.withLock { $0 += 1 }
             await inner.signOut()
@@ -271,6 +274,9 @@ struct ResilienceTests {
             var kind: AuthProviderKind { .fake }
             func isSignedIn() async -> Bool { await inner.isSignedIn() }
             func signInWithApple() async throws(AuthError) { try await inner.signInWithApple() }
+            func reauthenticateForDeletion() async throws(AuthError) -> String {
+                try await inner.reauthenticateForDeletion()
+            }
             func signOut() async { await inner.signOut() }
             func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken { throw .failed }
             func reauthenticateForDeletion() async throws(AuthError) -> String {
