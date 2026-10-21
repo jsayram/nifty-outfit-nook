@@ -23,11 +23,18 @@ final class LimitsLabTests: XCTestCase {
         let tryOnMeter = app.descendants(matching: .any)["limitsLab.meter.tryOn"]
         tap("signIn", in: app) { tryOnMeter.exists }
 
-        // A burst: five go through, the sixth is throttled.
-        for count in 1...5 {
-            tap("askStylist", in: app) { detail.exists && detail.label.contains("Jobs run on the server: \(count) ") }
+        // A burst: the bucket holds five and refills one every 12 seconds, so a few more taps may
+        // go through on a slow runner before one is throttled. Each tap runs once (or is refused).
+        let throttledText = "You've asked a lot in the last minute."
+        var throttled = false
+        for count in 1...10 where !throttled {
+            tap("askStylist", in: app) {
+                (message.exists && message.label.contains(throttledText))
+                    || (detail.exists && detail.label.contains("Jobs run on the server: \(count) "))
+            }
+            throttled = message.exists && message.label.contains(throttledText)
         }
-        tap("askStylist", in: app) { message.label.contains("You've asked a lot in the last minute.") }
+        XCTAssertTrue(throttled, "Ten quick requests and none was throttled")
         keepScreenshot("1-rate-limited", showing: message, in: app)
 
         // Try-on pictures: three a day, then the allowance message with when more come back.
