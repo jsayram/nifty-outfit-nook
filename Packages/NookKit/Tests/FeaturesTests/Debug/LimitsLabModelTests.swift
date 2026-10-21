@@ -42,6 +42,9 @@ struct LimitsLabModelTests {
         func signIn() async throws(AccountProblem) -> AccountUser { AccountUser(id: "usr_x", createdAt: Date()) }
         func whoAmI() async throws(AccountProblem) -> AccountUser { AccountUser(id: "usr_x", createdAt: Date()) }
         func signOut() async {}
+        func deleteAccount() async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+        func accountDeletion(id: String) async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+        func forgetAccountOnThisDevice() async {}
     }
 
     @Test func sendingAgainUsesTheSameKeyAndSaysItWasntCountedTwice() async {

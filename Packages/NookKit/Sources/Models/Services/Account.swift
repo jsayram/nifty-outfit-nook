@@ -41,6 +41,10 @@ public protocol AuthProvider: Sendable {
     func signInWithApple() async throws(AuthError)
     /// Ends the session on this device. Never fails from her point of view.
     func signOut() async
+    /// Phase 24c: Sign in with Apple once more, before her account is deleted. Returns Apple's
+    /// one-time authorization code, which the backend uses to revoke the app's Apple sign-in link.
+    /// Throws `cancelled` if she closes the sheet.
+    func reauthenticateForDeletion() async throws(AuthError) -> String
     /// A token for the backend. A cached one while it has time left; a new one when it's about to
     /// expire, or when `forceRefresh` is set because the backend refused the last one.
     func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken
@@ -83,8 +87,30 @@ public enum AccountProblem: Error, Sendable, Equatable {
     case rejected
 }
 
-/// Sign in, the session, and who am I (Phase 24a). Later phases add deletion (24c), feedback (24d)
-/// and styling (27a) as their own services.
+/// How an account deletion is going (Phase 24c), step by step, as the backend reports it.
+public struct AccountDeletion: Sendable, Equatable {
+    public enum Step: String, Sendable, CaseIterable {
+        case signInWithApple, serverData, account
+    }
+
+    public enum State: String, Sendable {
+        case done, pending, failed
+    }
+
+    /// The deletion's random ID. Needs no sign-in to ask about, because the account may be gone.
+    public var id: String
+    public var isComplete: Bool
+    public var steps: [Step: State]
+
+    public init(id: String, isComplete: Bool, steps: [Step: State]) {
+        self.id = id
+        self.isComplete = isComplete
+        self.steps = steps
+    }
+}
+
+/// Sign in, the session, and who am I (Phase 24a), and deleting the account (24c). Later phases
+/// add feedback (24d) and styling (27a) as their own services.
 public protocol AccountService: Sendable {
     var providerKind: AuthProviderKind { get }
     func isSignedIn() async -> Bool
@@ -93,6 +119,14 @@ public protocol AccountService: Sendable {
     /// Asks the backend who the current token belongs to.
     func whoAmI() async throws(AccountProblem) -> AccountUser
     func signOut() async
+    /// Phase 24c: asks Apple to confirm it's her, then asks the backend to delete her account.
+    /// Safe to repeat while the session lasts: the backend carries on with the same deletion.
+    func deleteAccount() async throws(AccountProblem) -> AccountDeletion
+    /// How a deletion is going. Works after the account and its session are gone.
+    func accountDeletion(id: String) async throws(AccountProblem) -> AccountDeletion
+    /// After a deletion: ends the session and forgets this iPhone's App Attest key, which the
+    /// backend no longer knows.
+    func forgetAccountOnThisDevice() async
 }
 
 /// No account service: every call says signed out. What screens get when nothing configured one.
@@ -103,4 +137,7 @@ public struct UnavailableAccountService: AccountService {
     public func signIn() async throws(AccountProblem) -> AccountUser { throw .signedOut }
     public func whoAmI() async throws(AccountProblem) -> AccountUser { throw .signedOut }
     public func signOut() async {}
+    public func deleteAccount() async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+    public func accountDeletion(id: String) async throws(AccountProblem) -> AccountDeletion { throw .signedOut }
+    public func forgetAccountOnThisDevice() async {}
 }

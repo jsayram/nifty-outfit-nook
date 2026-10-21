@@ -131,11 +131,15 @@ protocol DataDeletionService: Sendable {
 }
 ```
 
-`LocalDataDeletion` erases unsaved work, pictures, looks, suitcases, the closet and then the profile, keeps going past a failure, and reports each part. `NookServices` builds it from its own stores unless it's given another. Phase 24c adds:
+`LocalDataDeletion` erases unsaved work, pictures, looks, suitcases, the closet and then the profile, keeps going past a failure, and reports each part. `NookServices` builds it from its own stores unless it's given another.
 
-- scopes for what the developer holds and for everything (PRD §15.4 asks for plainly labelled scopes), and parts for the account and server data, whose outcome can be `pending` until the server confirms;
-- Sign in with Apple token revocation, and the note that deleting doesn't cancel a subscription (30a);
-- the same screen, which already lists parts from the service and reports pending ones.
+### Delete my account (Phase 24c, built against the fakes)
+
+App Review Guideline 5.1.1(v) needs account deletion inside the app. **Delete my account** is a row in Privacy and terms, under Delete my data, shown only while she's signed in. It opens the same screen with the `account` scope: the parts held elsewhere first (what the server keeps, the account, the Sign in with Apple link, her iCloud copy when sync was ever on), then the six on this iPhone; the subscription note ("Deleting your account doesn't cancel a subscription..."); then one question, then Apple's sign-in sheet again.
+
+`AccountDataDeletion` (Models) runs it: Apple's sheet and the backend's `POST /v1/account/deletion` first, so nothing is deleted anywhere if either says no; then it reads the backend's steps (a few times while they're pending); deletes the iCloud copy through `ICloudCopyDeletion` (a hook: `NoICloudCopy` until sync exists); erases this iPhone as Delete my data does; and signs out and forgets the App Attest key ID. Trying again after a local failure doesn't ask the backend again. The screen ends one of four ways: nothing deleted, with why; a fresh app; "Everything on this iPhone is deleted... Still being deleted on the server" with Done; or Try again for a local part. Payments (30) add the Manage subscription link and the active-subscription check.
+
+Debug builds: `-fake-signed-in` signs in with the fake at launch and runs one paid action, so the row shows; the fake backend's counts go to `tmp/fake-backend-deletions.json` after each deletion request. Decision 0007 has the rest.
 
 Since Phase 16a the tours she has seen and the "Show tips on new screens" switch are erased with her profile (PRD §7.8: Delete My Data resets them), so Home's tour starts again when she's back on Home (`docs/tours.md`). Since 16b the words under Your profile name them. Since 21b it also deletes what Backups keeps on the phone: her photo files, a checked copy waiting in staging, unsaved exports, the restore's safety copy and journal, deletion markers and the copies' versions kept for review. Exports she saved elsewhere stay where she put them. Phase 20b designed the iCloud part (below and `docs/decisions/0004-backup-and-recovery.md` §6); it comes with sync.
 
@@ -196,6 +200,6 @@ Nothing here needs a connection, so offline doesn't apply. The policy pages open
 - **19b:** the privacy policy and terms pages on the website, and the real wording of Privacy and terms.
 - **20b (designed), 21b (built):** Backups (Export a copy, Check a copy, Restore from a copy, Undo restore). Still to come: the iCloud switch and status, and the iCloud copy in Delete my data. The design, flows and test plan are in `docs/decisions/0004-backup-and-recovery.md`. Export is encrypted with a passphrase (an Apple Encrypted Archive); PRD 15.4's unencrypted archive is superseded (decision D10).
 - **21a (done):** stores on disk, so deletion lasts across launches, and the feedback note is kept.
-- **24c:** account and server deletion, with pending parts and token revocation.
+- **24c (built against the fakes):** Delete my account, with pending parts and the Apple link. The real Clerk and Apple calls wait on Jose (`docs/backend-switch.md`).
 - **A backend phase not yet placed:** the private support queue Send feedback should reach.
 - **19b, 24a, 27a, 29, 31, 33:** the permission switches on Privacy and terms, each with its feature.

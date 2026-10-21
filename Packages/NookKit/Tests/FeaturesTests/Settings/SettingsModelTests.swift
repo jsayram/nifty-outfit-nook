@@ -212,7 +212,7 @@ struct DeleteDataModelTests {
         #expect(counts.pictures == (try await services.pictures.pictures().count))
         #expect(counts.suitcases == (try await services.suitcases.suitcases().count))
         #expect(counts.drafts == 1)
-        #expect(Set(model.parts) == Set(DataPart.allCases))
+        #expect(Set(model.parts) == Set(DataPart.allCases.filter { !$0.isRemote }))
         #expect(DeleteDataText.count(.drafts, in: counts) == "1 draft")
         #expect(DeleteDataText.count(.closet, in: counts) == "\(counts.pieces) pieces")
         #expect(DeleteDataText.count(.profile, in: counts) == nil)
@@ -258,6 +258,91 @@ struct DeleteDataModelTests {
         #expect(
             DeleteDataText.incomplete(partial)
                 == "Most of your data is deleted, but not: Looks and Try-on pictures. Try again to finish.")
+    }
+}
+
+/// Delete my account (Phase 24c): what the screen shows for each way a deletion can end.
+@MainActor
+struct DeleteAccountModelTests {
+    /// Answers every deletion with the same report.
+    struct Scripted: DataDeletionService {
+        let report: DeletionReport
+        var scopes: [DeletionScope] { [.thisDevice, .account] }
+        func parts(in scope: DeletionScope) -> [DataPart] {
+            scope == .account
+                ? [.serverData, .account, .signInWithApple, .drafts, .pictures, .looks, .suitcases, .closet, .profile]
+                : [.drafts, .pictures, .looks, .suitcases, .closet, .profile]
+        }
+        func delete(_ scope: DeletionScope) async -> DeletionReport { report }
+    }
+
+    private func services(_ report: DeletionReport) -> NookServices {
+        var services = FixtureServices.make(set: .demo, now: TestTime.now, calendar: TestTime.calendar)
+        services.deletion = Scripted(report: report)
+        return services
+    }
+
+    private static let local: [(DataPart, DeletionOutcome)] = [
+        (.drafts, .deleted), (.closet, .deleted), (.profile, .deleted),
+    ]
+
+    @Test func listsWhatTheServerHoldsFirstThenThisIPhone() async {
+        let model = DeleteDataModel(scope: .account)
+        await model.load(from: services(DeletionReport(scope: .account, results: [])))
+        #expect(
+            model.parts == [
+                .serverData, .account, .signInWithApple, .closet, .looks, .pictures, .suitcases, .profile, .drafts,
+            ])
+        #expect(DeleteDataText.screenTitle(.account) == "Delete my account")
+    }
+
+    @Test func aFinishedDeletionStartsTheAppFresh() async {
+        let report = DeletionReport(
+            scope: .account,
+            results: [(.serverData, .deleted), (.account, .deleted), (.signInWithApple, .deleted)] + Self.local)
+        let model = DeleteDataModel(scope: .account)
+        #expect(await model.delete(in: services(report)))
+        #expect(model.phase == .ready)
+    }
+
+    @Test func aServerStillFinishingIsSaidPlainlyAndDoneLeaves() async {
+        let report = DeletionReport(
+            scope: .account,
+            results: [(.serverData, .deleted), (.account, .pending), (.signInWithApple, .failed)] + Self.local)
+        let model = DeleteDataModel(scope: .account)
+        #expect(await !model.delete(in: services(report)))
+        #expect(model.phase == .finished(report))
+        let text = DeleteDataText.finished(report)
+        #expect(text.contains("Everything on this iPhone is deleted and you’re signed out."))
+        #expect(text.contains("Still being deleted on the server: Your account."))
+        #expect(text.contains("Sign in with Apple"))
+    }
+
+    @Test func aLocalFailureOffersTryAgain() async {
+        let report = DeletionReport(
+            scope: .account,
+            results: [(.serverData, .deleted), (.account, .deleted), (.signInWithApple, .deleted), (.closet, .failed)])
+        let model = DeleteDataModel(scope: .account)
+        #expect(await !model.delete(in: services(report)))
+        #expect(model.phase == .incomplete(report))
+    }
+
+    @Test func nothingDeletedSaysWhyAndClosingApplesSheetChangesNothing() async {
+        let offline = DeletionReport(scope: .account, results: [], notStarted: .offline)
+        let model = DeleteDataModel(scope: .account)
+        #expect(await !model.delete(in: services(offline)))
+        #expect(model.phase == .notStarted(.offline))
+        #expect(DeleteDataText.notStarted(.offline).hasPrefix("Nothing was deleted."))
+        #expect(DeleteDataText.notStarted(.unavailable(retryAfterSeconds: 30)).contains("30 seconds"))
+
+        let cancelled = DeletionReport(scope: .account, results: [], notStarted: .cancelled)
+        #expect(await !model.delete(in: services(cancelled)))
+        #expect(model.phase == .ready)
+    }
+
+    @Test func theSubscriptionNoteSaysDeletingDoesntCancelIt() {
+        #expect(DeleteDataText.subscriptionNote.contains("doesn’t cancel a subscription"))
+        #expect(DeleteDataText.subscriptionNote.contains("Subscriptions"))
     }
 }
 

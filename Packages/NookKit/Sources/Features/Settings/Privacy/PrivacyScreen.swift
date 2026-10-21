@@ -15,16 +15,21 @@ import SwiftUI
 struct PrivacyScreen: View {
     @Environment(\.services) private var services
     @State private var showsDeleteData = false
+    @State private var showsDeleteAccount = false
     @State private var showsBackups = false
     @State private var page: WebsiteLink?
+    /// Delete my account is offered only while she's signed in (24c).
+    @State private var isSignedIn = false
 
     var body: some View {
         PrivacyPage(
             keepsChanges: services.keepsChanges,
             backups: services.backups == nil ? nil : { showsBackups = true },
             deleteData: { showsDeleteData = true },
+            deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
             open: { page = $0 }
         )
+        .task { isSignedIn = await services.account.isSignedIn() }
         .navigationTitle(SettingsText.privacyTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -35,6 +40,9 @@ struct PrivacyScreen: View {
         }
         .navigationDestination(isPresented: $showsDeleteData) {
             DeleteDataScreen()
+        }
+        .navigationDestination(isPresented: $showsDeleteAccount) {
+            DeleteDataScreen(scope: .account)
         }
         .navigationDestination(isPresented: $showsBackups) {
             BackupsScreen()
@@ -56,6 +64,8 @@ struct PrivacyPage: View {
     /// Opens Backups (Phase 21b). `nil` hides the row: the debug sample closet has nothing to back up.
     var backups: (() -> Void)?
     var deleteData: () -> Void = {}
+    /// Opens Delete my account (24c). `nil` hides the row: she isn't signed in.
+    var deleteAccount: (() -> Void)?
     var open: (WebsiteLink) -> Void = { _ in }
 
     var body: some View {
@@ -99,6 +109,15 @@ struct PrivacyPage: View {
                 .buttonStyle(.nookRow)
                 .accessibilityIdentifier("privacy.deleteData")
                 .tourAnchor(PrivacyTour.Anchor.deleteData, label: SettingsText.deleteTitle, action: deleteData)
+                if let deleteAccount {
+                    Button(action: deleteAccount) {
+                        NookRow(
+                            DeleteDataText.accountTitle, subtitle: PrivacyText.deleteAccountDetail,
+                            systemImage: "person.crop.circle.badge.xmark", accessory: .chevron)
+                    }
+                    .buttonStyle(.nookRow)
+                    .accessibilityIdentifier("privacy.deleteAccount")
+                }
             }
 
             SettingsGroup(header: PrivacyText.policiesHeader) {
@@ -227,6 +246,12 @@ nonisolated enum PrivacyText {
 
     static var yourDataHeader: String {
         String(localized: "Your data", bundle: .module, comment: "Privacy and terms: section header")
+    }
+
+    static var deleteAccountDetail: String {
+        String(
+            localized: "Your account and what the app’s server keeps, then everything on this iPhone",
+            bundle: .module, comment: "Privacy and terms: under the Delete my account row")
     }
 
     static var deleteDetail: String {

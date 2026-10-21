@@ -57,6 +57,8 @@ public final class FakeBackend: Sendable {
         /// 24b: allowances, switches, keys and paid actions (FakeBackend+Limits.swift).
         var limits = FakeLimits()
         var ledger = FakeLedger()
+        /// 24c: account deletions (FakeBackend+Deletion.swift).
+        var deletions = FakeDeletions()
     }
 
     let state = Mutex(State())
@@ -139,6 +141,9 @@ public final class FakeBackend: Sendable {
         if endpoint == APIV1.health {
             return encode(200, APIV1.Health(status: "ok", apiVersion: APIV1.version), id)
         }
+        if endpoint == APIV1.deletionStatus {
+            return routeDeletionStatus(request, body: body, id: id)
+        }
 
         // The token.
         guard let header = request.value(forHTTPHeaderField: "Authorization"), header.hasPrefix("Bearer "),
@@ -149,6 +154,12 @@ public final class FakeBackend: Sendable {
             return state.refusedTokens.contains(token)
         }
         if refused || parsed.expiresAt <= now() { return error(.tokenExpired, id) }
+        // 24c: a deleted sign-in account's tokens stop working, as Clerk's do.
+        if isDeletedSubject(parsed.subject) { return error(.unauthenticated, id) }
+        if endpoint == APIV1.deleteAccount {
+            return routeDeleteAccount(request, body: body, subject: parsed.subject, id: id)
+        }
+        if isDeleting(parsed.subject) { return error(.forbidden, id, message: "This account is being deleted.") }
 
         switch endpoint {
         case APIV1.createSession:

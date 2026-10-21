@@ -46,6 +46,19 @@ public final class ClerkAuthProvider: AuthProvider {
         try? await Self.clerkSignOut()
     }
 
+    /// Sign in with Apple once more, directly with Apple (not through Clerk, which keeps the
+    /// credential to itself), for the authorization code the backend needs to revoke the link.
+    /// Not run on a device yet: there's no Clerk instance (docs/backend-switch.md).
+    public func reauthenticateForDeletion() async throws(AuthError) -> String {
+        do {
+            return try await AppleReauthentication.authorizationCode()
+        } catch let error as ASAuthorizationError where error.code == .canceled {
+            throw .cancelled
+        } catch {
+            throw .failed
+        }
+    }
+
     public func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken {
         let jwt: String?
         do {
@@ -99,7 +112,8 @@ public enum RealGateway {
         let attestation = AttestationSession(
             attester: AppAttestDeviceAttester(), store: KeychainAttestKeyStore(), client: client)
         return Services(
-            account: GatewayAccountService(auth: auth, client: client, appVersion: appVersion),
+            account: GatewayAccountService(
+                auth: auth, client: client, appVersion: appVersion, attestation: attestation),
             paid: GatewayPaidActionService(client: client, attestation: attestation))
     }
 }

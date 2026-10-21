@@ -21,9 +21,12 @@ public protocol ErasableStore: Sendable {
 public enum DeletionScope: String, CaseIterable, Hashable, Sendable {
     /// Everything she made in the app, on this iPhone. Stage A's only scope.
     ///
-    /// Phase 20b adds her private iCloud copy to it. Phase 24c adds `developerHeld` (feedback,
-    /// consent and usage records on the backend, and the account) and `everything`.
+    /// Phase 20b adds her private iCloud copy to it.
     case thisDevice
+    /// Delete my account (Phase 24c, App Review Guideline 5.1.1(v)): her account and everything
+    /// the backend keeps for it, the Apple sign-in link, her iCloud copy, and everything on this
+    /// iPhone. Offered only while she's signed in.
+    case account
 }
 
 /// One part of her data, deleted as a unit and reported on its own, so a screen can say exactly
@@ -46,7 +49,38 @@ public enum DataPart: String, CaseIterable, Hashable, Sendable {
     /// (Phase 21a).
     case drafts
     // Tour progress is a preference, so it goes with the profile (PRD §7.8: Delete My Data
-    // resets it), and so does the onboarding state. Phase 24c: `account` and `serverData`.
+    // resets it), and so does the onboarding state.
+
+    // Phase 24c, Delete my account only. Each can be `pending` until the backend confirms it.
+    /// Everything the backend keeps for her account: usage records, App Attest keys, sign-in
+    /// records. Paid work still running is cancelled.
+    case serverData
+    /// The sign-in account itself, which ends every session.
+    case account
+    /// The link between her Apple Account and the app (Sign in with Apple). If the backend can't
+    /// revoke it, she can remove it in Settings.
+    case signInWithApple
+    /// Her private iCloud copy (decision 0004 §6). Listed only when sync was ever on.
+    case iCloudCopy
+
+    /// The parts held off the iPhone.
+    public var isRemote: Bool {
+        switch self {
+        case .serverData, .account, .signInWithApple, .iCloudCopy: true
+        case .closet, .looks, .pictures, .suitcases, .profile, .drafts: false
+        }
+    }
+}
+
+/// Why a deletion didn't start: nothing was deleted.
+public enum DeletionNotStarted: Hashable, Sendable {
+    /// She closed Apple's sign-in sheet.
+    case cancelled
+    case offline
+    /// Signed out, or the backend refused her sign-in: she needs to sign in again first.
+    case signedOut
+    /// The backend couldn't take the request now. Try again later, after this many seconds when known.
+    case unavailable(retryAfterSeconds: Int?)
 }
 
 /// How one part's deletion went.
@@ -65,14 +99,23 @@ public struct DeletionReport: Hashable, Sendable {
     /// The parts in the order they were deleted.
     public var order: [DataPart]
 
-    public init(scope: DeletionScope, results: [(DataPart, DeletionOutcome)]) {
+    /// Set when nothing was deleted because the deletion couldn't start (Phase 24c).
+    public var notStarted: DeletionNotStarted?
+
+    public init(scope: DeletionScope, results: [(DataPart, DeletionOutcome)], notStarted: DeletionNotStarted? = nil) {
         self.scope = scope
         order = results.map(\.0)
         outcomes = Dictionary(results, uniquingKeysWith: { _, last in last })
+        self.notStarted = notStarted
     }
 
     /// Every part was deleted.
-    public var isComplete: Bool { order.allSatisfy { outcomes[$0] == .deleted } }
+    public var isComplete: Bool { notStarted == nil && order.allSatisfy { outcomes[$0] == .deleted } }
+
+    /// Everything on this iPhone is gone; only parts held elsewhere may still be pending or failed.
+    public var isLocalComplete: Bool {
+        notStarted == nil && order.filter { !$0.isRemote }.allSatisfy { outcomes[$0] == .deleted }
+    }
 
     /// The parts that weren't deleted, in order. Deleting again tries them again.
     public var failedParts: [DataPart] { order.filter { outcomes[$0] == .failed } }

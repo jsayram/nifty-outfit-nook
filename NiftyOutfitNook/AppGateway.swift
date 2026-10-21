@@ -64,6 +64,20 @@ enum AppGateway {
                 })
         }
 
+        /// `-fake-signed-in` (debug builds, fake backend only): signs in with the fake Apple
+        /// sign-in at launch and runs one paid action, so the fake backend holds an account, a key
+        /// and a paid action. Delete my account then shows in Privacy and terms. After each
+        /// deletion request the fake backend's counts go to `tmp/fake-backend-deletions.json` in
+        /// the app's container, so a check from outside can see the server side ran (24c).
+        static func signInIfAsked(arguments: [String]) async {
+            guard arguments.contains("-fake-signed-in"), let fake else { return }
+            let report = FileManager.default.temporaryDirectory.appending(path: "fake-backend-deletions.json")
+            fake.backend.observeDeletions { data in try? data.write(to: report, options: .atomic) }
+            _ = try? await fake.account.signIn()
+            _ = try? await fake.paid.run(
+                .style(mode: .full, contextRevision: "rev_debug"), idempotencyKey: IdempotencyKey.make())
+        }
+
         /// The fake backend's limits, for the limits screen (Phase 24b). Nil on the real services,
         /// where the switches are Jose's (`npx convex run controls:setSwitch`).
         static var limitsControls: LimitsLabControls? {

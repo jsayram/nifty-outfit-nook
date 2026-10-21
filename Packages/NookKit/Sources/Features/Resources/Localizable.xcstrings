@@ -1978,6 +1978,9 @@
         }
       }
     },
+    "Copies you exported stay where you saved them. Requests the stylist and try-on already sent are kept by those services for the time the privacy policy says, and then deleted." : {
+      "comment" : "Delete my account: what deletion can't reach"
+    },
     "Copy passphrase" : {
       "comment" : "Export a copy: copies the generated passphrase",
       "localizations" : {
@@ -2106,6 +2109,9 @@
     "Delete look" : {
       "comment" : "Look detail button: takes it out of Saved Looks"
     },
+    "Delete my account" : {
+      "comment" : "Delete my account: the question's button"
+    },
     "Delete my data" : {
       "comment" : "Profile row and screen title"
     },
@@ -2128,6 +2134,9 @@
     },
     "Delete suitcase" : {
       "comment" : "Button: deletes a suitcase, not its pieces"
+    },
+    "Delete your account?" : {
+      "comment" : "Delete my account: the question's title"
     },
     "Deleted %@" : {
       "comment" : "Toast after Delete look, with the look's name"
@@ -2177,8 +2186,14 @@
         }
       }
     },
+    "Deletes your account and everything the app keeps for you, on the server and on this iPhone." : {
+      "comment" : "Delete my account: under the title"
+    },
     "Deleting" : {
       "comment" : "VoiceOver value while data is being deleted"
+    },
+    "Deleting your account doesn’t cancel a subscription. If you have one, cancel it in the Settings app: tap your name, then Subscriptions." : {
+      "comment" : "Delete my account: the subscription note"
     },
     "Denim" : {
       "comment" : "Colour name",
@@ -2552,6 +2567,9 @@
     },
     "Everything in the wash in %@" : {
       "comment" : "Laundry confirmation: cleaning all, with where"
+    },
+    "Everything on this iPhone is deleted and you’re signed out." : {
+      "comment" : "Delete my account: finished on the iPhone"
     },
     "Everything on this iPhone now is replaced by the copy. You can undo it from Backups for 7 days." : {
       "comment" : "Restore: confirm Replace, message",
@@ -3099,6 +3117,9 @@
     },
     "How it fits" : {
       "comment" : "Field label on the fitting piece sheet"
+    },
+    "How much you’ve used the stylist and try-on, and sign-in records. Anything still running is stopped." : {
+      "comment" : "Delete my account: under What the app’s server keeps"
     },
     "How strongly" : {
       "comment" : "Colour sheet group"
@@ -4829,8 +4850,20 @@
         }
       }
     },
+    "Nothing was deleted. Sign in again, then try again." : {
+      "comment" : "Delete my account: didn't start, signed out"
+    },
+    "Nothing was deleted. The app’s server couldn’t take the request. Try again in a moment." : {
+      "comment" : "Delete my account: didn't start, server problem"
+    },
+    "Nothing was deleted. The app’s server is busy. Try again in %lld seconds." : {
+      "comment" : "Delete my account: didn't start, try again after a wait"
+    },
     "Nothing was deleted. Try again in a moment." : {
       "comment" : "Delete my data: every part failed"
+    },
+    "Nothing was deleted. You’re offline: connect to the internet and try again." : {
+      "comment" : "Delete my account: didn't start, offline"
     },
     "Nothing was lost. Try again in a moment." : {
       "comment" : "Closet error message",
@@ -6352,6 +6385,9 @@
     "Sign in to use cloud styling." : {
       "comment" : "Cloud action: signed out"
     },
+    "Sign in with Apple" : {
+      "comment" : "Delete my account: a part"
+    },
     "Simple" : {
       "comment" : "Look version (LR-05a)"
     },
@@ -6578,6 +6614,9 @@
     },
     "Step %lld of 3" : {
       "comment" : "VoiceOver value of the styling progress bar"
+    },
+    "Still being deleted on the server: %@. It finishes on its own; you don’t need to do anything." : {
+      "comment" : "Delete my account: server parts still pending"
     },
     "Still need a hand?" : {
       "comment" : "Help tour, step 2 title"
@@ -7197,6 +7236,9 @@
     "That’s you" : {
       "comment" : "Home tour, step 4 title on the phone's room"
     },
+    "The app couldn’t remove its Sign in with Apple link. To remove it, open the Settings app, tap your name, then Sign in with Apple." : {
+      "comment" : "Delete my account: the Apple link needs her"
+    },
     "The app doesn’t send anything itself. Send opens the share sheet, and you choose where the note goes, like Messages or Mail." : {
       "comment" : "Send feedback: under the button, in this test build"
     },
@@ -7232,6 +7274,9 @@
     "The camera isn’t available" : {
       "comment" : "Alert title when there's no camera to use (the simulator, or a restriction)"
     },
+    "The copy of your closet kept in your iCloud" : {
+      "comment" : "Delete my account: under Your iCloud copy"
+    },
     "The first one you picked is the main colour." : {
       "comment" : "Add a piece: under the colours when several are picked",
       "localizations" : {
@@ -7251,6 +7296,9 @@
     },
     "The laptop, the wardrobe, the suitcase and your sign" : {
       "comment" : "App tours: what Home's tour covers"
+    },
+    "The link between your Apple Account and this app" : {
+      "comment" : "Delete my account: under Sign in with Apple"
     },
     "The look" : {
       "comment" : "Swap: spoken name of the look"
@@ -8066,6 +8114,9 @@
     "What the app does, and where your things are kept." : {
       "comment" : "Onboarding: under the privacy step's title"
     },
+    "What the app’s server keeps" : {
+      "comment" : "Delete my account: a part"
+    },
     "What the picture is, and making it" : {
       "comment" : "App tours: what the Try it on sheet's tour covers"
     },
@@ -8427,6 +8478,15 @@
         }
       }
     },
+    "Your account" : {
+      "comment" : "Delete my account: a part"
+    },
+    "Your account and what the app’s server keeps, then everything on this iPhone" : {
+      "comment" : "Privacy and terms: under the Delete my account row"
+    },
+    "Your account, everything the app’s server keeps for it, and everything in the app on this iPhone will be deleted. Apple will ask you to confirm it’s you. This can’t be undone." : {
+      "comment" : "Delete my account: the question"
+    },
     "Your changes to %@ aren’t saved yet." : {
       "comment" : "Draft card: changes to a piece, with the piece's saved name",
       "localizations" : {
@@ -8552,6 +8612,12 @@
     },
     "Your first name" : {
       "comment" : "Name on your sign: the empty field's prompt"
+    },
+    "Your iCloud copy" : {
+      "comment" : "Delete my account: a part"
+    },
+    "Your iCloud copy is deleted the next time this iPhone is online." : {
+      "comment" : "Delete my account: iCloud copy pending"
     },
     "Your iPhone may be out of space. Nothing was saved." : {
       "comment" : "Add a piece: after a photo couldn't be saved"
@@ -8718,6 +8784,9 @@
     "Your sign, your fit and these tours" : {
       "comment" : "App tours: what Profile's tour covers"
     },
+    "Your sign-in to the app, on every device" : {
+      "comment" : "Delete my account: under Your account"
+    },
     "Your suitcase" : {
       "comment" : "Home tour, step 3 title on the iPad, at large text sizes and sideways"
     },
@@ -8755,6 +8824,9 @@
     },
     "You’ll be able to ask about this look in your own words." : {
       "comment" : "Ask stylist stand-in"
+    },
+    "You’ll be asked once more, then Apple asks you to confirm it’s you. Deleting can’t be undone." : {
+      "comment" : "Delete my account: under the button"
     },
     "You’ll be asked once more. Deleting can’t be undone." : {
       "comment" : "Delete my data: under the button"
@@ -8969,6 +9041,9 @@
           }
         }
       }
+    },
+    "You’re signed out and the app starts fresh, as if it were just installed. Signing in again later makes a new, empty account." : {
+      "comment" : "Delete my account: what happens after"
     },
     "“%@”" : {
       "comment" : "Typed search, in quotes",

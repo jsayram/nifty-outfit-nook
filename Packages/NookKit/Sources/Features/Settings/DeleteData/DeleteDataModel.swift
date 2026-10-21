@@ -2,7 +2,8 @@ import Foundation
 import Models
 import Observation
 
-/// Delete my data (Phase 14b, PRD §15.4, SECURITY_STANDARD §9).
+/// Delete my data (Phase 14b, PRD §15.4, SECURITY_STANDARD §9), and Delete my account (Phase
+/// 24c, App Review Guideline 5.1.1(v)), which also deletes what the backend keeps for her.
 ///
 /// The screen first says what will go, with live counts, then asks once more, then deletes every
 /// part through `DataDeletionService` and reports part by part. When everything is gone the app
@@ -15,6 +16,12 @@ final class DeleteDataModel {
         case deleting
         /// Something wasn't deleted. A complete deletion doesn't stay here: the app starts fresh.
         case incomplete(DeletionReport)
+        /// Delete my account didn't start, so nothing was deleted (24c). Closing Apple's sheet
+        /// goes back to `ready` instead.
+        case notStarted(DeletionNotStarted)
+        /// Delete my account: everything on this iPhone is gone, but the backend is still
+        /// finishing, or the Apple link needs her (24c). Done starts the app fresh.
+        case finished(DeletionReport)
     }
 
     /// How much there is, for the list. Read before she decides.
@@ -30,13 +37,22 @@ final class DeleteDataModel {
     /// `nil` until read, or when a store couldn't be read: the list then shows without numbers.
     private(set) var counts: Counts?
     /// What the deletion covers, from the service, in reading order (closet first).
-    private(set) var parts: [DataPart] = DataPart.allCases
+    private(set) var parts: [DataPart]
     @ObservationIgnored private var loads = LoadGeneration()
-    let scope = DeletionScope.thisDevice
+    let scope: DeletionScope
+
+    init(scope: DeletionScope = .thisDevice) {
+        self.scope = scope
+        // Until `load` asks the service: what's held elsewhere first, then this iPhone. The iCloud
+        // copy is listed only when the service says sync was on.
+        let local = DataPart.allCases.filter { !$0.isRemote }
+        parts = scope == .account ? [.serverData, .account, .signInWithApple] + local : local
+    }
 
     func load(from services: NookServices) async {
         let covered = services.deletion.parts(in: scope)
-        parts = DataPart.allCases.filter(covered.contains)
+        // What's held elsewhere first, in the service's order, then this iPhone, closet first.
+        parts = covered.filter(\.isRemote) + DataPart.allCases.filter { !$0.isRemote && covered.contains($0) }
         let load = loads.begin()
         do {
             var counts = Counts()
@@ -66,11 +82,15 @@ final class DeleteDataModel {
         guard phase != .deleting else { return false }
         phase = .deleting
         let report = await services.deletion.delete(scope)
+        if let reason = report.notStarted {
+            phase = reason == .cancelled ? .ready : .notStarted(reason)
+            return false
+        }
         if report.isComplete {
             phase = .ready
             return true
         }
-        phase = .incomplete(report)
+        phase = report.isLocalComplete ? .finished(report) : .incomplete(report)
         return false
     }
 }
