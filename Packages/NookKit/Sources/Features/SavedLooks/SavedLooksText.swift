@@ -28,18 +28,90 @@ enum SavedLooksText {
             comment: "Name of a saved look with no main colours: the occasion")
     }
 
-    // MARK: Earlier results (LR-06.4)
-
-    static var earlierHeading: String {
+    /// "10 looks, 3 not saved", the count under the title on All.
+    static func withUnsaved(_ total: String, unsaved: Int) -> String {
         String(
-            localized: "Earlier results, not saved", bundle: .module,
-            comment: "Saved Looks: heading over earlier Style Me results that match the search")
+            localized: "\(total), \(unsaved) not saved", bundle: .module,
+            comment: "Saved Looks, All: the count under the title, as in 10 looks, 3 not saved")
     }
 
-    static var earlierNote: String {
+    // MARK: Saved and All (Phase 21c)
+
+    static var scopeTitle: String {
         String(
-            localized: "Looks Style Me made for you that you didn’t save. Open one to save it.", bundle: .module,
-            comment: "Saved Looks: under the earlier results heading")
+            localized: "Which looks to show", bundle: .module,
+            comment: "Spoken name of the Saved and All switch on Saved Looks")
+    }
+
+    static var savedScope: String {
+        String(localized: "Saved", bundle: .module, comment: "Saved Looks switch: only the looks she saved")
+    }
+
+    static var allScope: String {
+        String(
+            localized: "All", bundle: .module,
+            comment: "Saved Looks switch: saved looks and the Style Me results she didn’t save")
+    }
+
+    static var savedScopeHint: String {
+        String(
+            localized: "Only the looks you saved.", bundle: .module, comment: "Hint on the Saved option of the switch")
+    }
+
+    static var allScopeHint: String {
+        String(
+            localized: "Your saved looks and the Style Me results you didn’t save.", bundle: .module,
+            comment: "Hint on the All option of the switch")
+    }
+
+    /// The line at the end of Saved's results: "3 more in All".
+    static func moreInAll(_ count: Int) -> String {
+        String(
+            localized: "\(count) more in All", bundle: .module,
+            comment: "Saved Looks, Saved: how many more looks the search and filters find in All, as in 3 more in All")
+    }
+
+    static var moreInAllHint: String {
+        String(
+            localized: "Shows all your looks, including ones you didn’t save. Your search and filters stay on.",
+            bundle: .module, comment: "Hint on the 3 more in All button")
+    }
+
+    /// The tag on a look she hasn't saved, in All.
+    static var notSaved: String { LookDetailText.notSaved }
+
+    /// What VoiceOver says for Save look on one look in the grid: "Save look: Casual look".
+    static func saveLookSpoken(_ name: String) -> String {
+        String(
+            localized: "Save look: \(name)", bundle: .module,
+            comment: "Spoken label of Save look on a look in Saved Looks, All")
+    }
+
+    static var saveLookHint: String {
+        String(
+            localized: "Adds this look to your saved looks.", bundle: .module,
+            comment: "Hint on Save look on a look in Saved Looks, All")
+    }
+
+    /// Under the empty Saved list when she has results she didn't save.
+    static var emptyUnsavedHint: String {
+        String(
+            localized: "Results you didn’t save are in All.", bundle: .module,
+            comment: "Saved Looks, Saved with nothing saved: where her unsaved results are")
+    }
+
+    static var emptyAllTitle: String {
+        String(localized: "No looks yet", bundle: .module, comment: "Saved Looks, All: nothing at all")
+    }
+
+    static var emptyAllMessage: String {
+        String(
+            localized: "Looks Style Me makes for you show up here, saved or not.", bundle: .module,
+            comment: "Saved Looks, All: nothing at all")
+    }
+
+    static var noMatchesAllTitle: String {
+        String(localized: "No looks match in All", bundle: .module, comment: "Saved Looks, All: nothing matches")
     }
 
     static var looksTab: String {
@@ -119,12 +191,13 @@ enum SavedLooksText {
     // MARK: Grid
 
     /// What VoiceOver says after a look's name and pieces: "Office, Last worn 5 days ago, 1 piece
-    /// no longer in your closet".
-    static func spokenDetail(of item: SavedLookItem, lastWorn: String?) -> String {
-        var parts = [item.occasion, lastWorn].compactMap(\.self)
+    /// no longer in your closet". A look she hasn't saved says when it was made and "Not saved".
+    static func spokenDetail(of item: SavedLookItem, lastWorn: String?, made: String? = nil) -> String {
+        var parts = [item.occasion, lastWorn, item.isSaved ? nil : made].compactMap(\.self)
         if item.removedCount > 0 {
             parts.append(removedCount(item.removedCount))
         }
+        if !item.isSaved { parts.append(notSaved) }
         return parts.joined(separator: ", ")
     }
 

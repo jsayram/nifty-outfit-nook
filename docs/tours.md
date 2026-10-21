@@ -131,7 +131,7 @@ Every screen that has a tour page in the mockups and exists in the app has a tou
 | Your looks (`yourLooks`) | The versions, Save look, Try it on, Swap a piece | The looks are ready on Today with no problem, sheet or toast. One version only: three steps |
 | Swap a piece (`swap`) | Which piece, the options, Use this, Remove this piece | No See all or Find one sheet |
 | Make your own look (`lookBuilder`) | Add a piece, the name, Save look | Her closet has loaded, no picker or toast |
-| Saved Looks (`savedLooks`) | Her first look, Looks and Pictures, search | Looks tab with saved looks, no toast |
+| Saved Looks (`savedLooks`) | Her first look, Looks and Pictures, search | Looks tab on Saved (not All) with saved looks, no toast |
 | A saved look (`look`) | Wear today, Swap a piece, Rename | Loaded, nothing open over it |
 | Try-on picture (`picture`) | See the look, Delete picture | Loaded and its look still saved |
 | Suitcases (`suitcases`) | + Add a suitcase, her first favourite | She has a favourite, no sheet or toast |
