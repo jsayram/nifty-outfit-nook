@@ -215,6 +215,17 @@
         }
       }
     },
+    "%@, %lld not saved" : {
+      "comment" : "Saved Looks, All: the count under the title, as in 10 looks, 3 not saved",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %lld not saved"
+          }
+        }
+      }
+    },
     "%@, dressed up" : {
       "comment" : "Name of a saved Dressed up look"
     },
@@ -296,6 +307,29 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld looks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld more in All" : {
+      "comment" : "Saved Looks, Saved: how many more looks the search and filters find in All, as in 3 more in All",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld more in All"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld more in All"
                 }
               }
             }
@@ -998,8 +1032,30 @@
         }
       }
     },
+    "Adds this look to your saved looks." : {
+      "comment" : "Hint on Save look on a look in Saved Looks, All",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds this look to your saved looks."
+          }
+        }
+      }
+    },
     "Afterwards" : {
       "comment" : "Delete my data: section header"
+    },
+    "All" : {
+      "comment" : "Saved Looks switch: saved looks and the Style Me results she didn’t save",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
     },
     "All %@" : {
       "comment" : "Name of a saved look whose top and bottom are one colour"
@@ -2272,17 +2328,6 @@
     },
     "Each tour shows once. Skip ends it." : {
       "comment" : "App tours: under the switch"
-    },
-    "Earlier results, not saved" : {
-      "comment" : "Saved Looks: heading over earlier Style Me results that match the search",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Earlier results, not saved"
-          }
-        }
-      }
     },
     "Earlier version" : {
       "comment" : "A picture of an earlier version of its look"
@@ -3918,13 +3963,13 @@
     "Looks keeps the outfits you saved. Tap an outfit to open it." : {
       "comment" : "Saved Looks tour, step 1"
     },
-    "Looks Style Me made for you that you didn’t save. Open one to save it." : {
-      "comment" : "Saved Looks: under the earlier results heading",
+    "Looks Style Me makes for you show up here, saved or not." : {
+      "comment" : "Saved Looks, All: nothing at all",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Looks Style Me made for you that you didn’t save. Open one to save it."
+            "value" : "Looks Style Me makes for you show up here, saved or not."
           }
         }
       }
@@ -4332,6 +4377,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No longer in your closet"
+          }
+        }
+      }
+    },
+    "No looks match in All" : {
+      "comment" : "Saved Looks, All: nothing matches",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No looks match in All"
+          }
+        }
+      }
+    },
+    "No looks yet" : {
+      "comment" : "Saved Looks, All: nothing at all",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No looks yet"
           }
         }
       }
@@ -4866,6 +4933,17 @@
     },
     "Only the layer changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only the looks you saved." : {
+      "comment" : "Hint on the Saved option of the switch",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the looks you saved."
+          }
+        }
+      }
     },
     "Only the picture you pick is shared with the app" : {
       "comment" : "Add a piece choice: under Choose from Photos",
@@ -5658,6 +5736,17 @@
         }
       }
     },
+    "Results you didn’t save are in All." : {
+      "comment" : "Saved Looks, Saved with nothing saved: where her unsaved results are",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Results you didn’t save are in All."
+          }
+        }
+      }
+    },
     "Resume" : {
       "comment" : "Button: carries on with a draft",
       "localizations" : {
@@ -5724,6 +5813,17 @@
     },
     "Save look" : {
       "comment" : "Results button (RD-06)"
+    },
+    "Save look: %@" : {
+      "comment" : "Spoken label of Save look on a look in Saved Looks, All",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save look: %@"
+          }
+        }
+      }
     },
     "Save to closet" : {
       "comment" : "Button: saves a new piece",
@@ -6034,6 +6134,17 @@
     },
     "Shown in your room" : {
       "comment" : "Under the Name on your sign row"
+    },
+    "Shows all your looks, including ones you didn’t save. Your search and filters stay on." : {
+      "comment" : "Hint on the 3 more in All button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows all your looks, including ones you didn’t save. Your search and filters stay on."
+          }
+        }
+      }
     },
     "Shows it in the look." : {
       "comment" : "Swap: hint on an option"
@@ -7766,6 +7877,17 @@
     "Which looks" : {
       "comment" : "VoiceOver name of the Today and Saved switch"
     },
+    "Which looks to show" : {
+      "comment" : "Spoken name of the Saved and All switch on Saved Looks",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which looks to show"
+          }
+        }
+      }
+    },
     "Which piece?" : {
       "comment" : "Swap tour, step 1 title"
     },
@@ -8548,6 +8670,17 @@
     },
     "tops" : {
       "comment" : "As in: No navy tops in Weekend"
+    },
+    "Your saved looks and the Style Me results you didn’t save." : {
+      "comment" : "Hint on the All option of the switch",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your saved looks and the Style Me results you didn’t save."
+          }
+        }
+      }
     },
     "“%@”" : {
       "comment" : "Typed search, in quotes",

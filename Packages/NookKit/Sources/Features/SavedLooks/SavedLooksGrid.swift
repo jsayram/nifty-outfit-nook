@@ -12,6 +12,9 @@ import SwiftUI
 ///
 /// In a wide window (Phase 15b) a look opens beside the grid, and that look stands on a soft
 /// tint and reads as selected.
+///
+/// On All (Phase 21c) a look she hasn't saved has a "Not saved" tag and a Save look button under
+/// it; saving one changes it where it is.
 struct SavedLooksGrid: View {
     let items: [SavedLookItem]
     /// When the looks loaded, for "Last worn 3 days ago".
@@ -19,9 +22,12 @@ struct SavedLooksGrid: View {
     /// The look showing beside the grid.
     var current: Look.ID?
     var opensBeside = false
-    /// Whether the first look is the one Saved Looks' tour points at. Off for earlier results.
+    /// Whether the first look is the one Saved Looks' tour points at. Off on All, where it may
+    /// be a look she hasn't saved.
     var anchorsTour = true
     let open: (SavedLookItem) -> Void
+    /// Save look on a look she hasn't saved.
+    var save: (SavedLookItem) -> Void = { _ in }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.closetIsStillImage) private var isStillImage
@@ -29,7 +35,8 @@ struct SavedLooksGrid: View {
     private var rows: some View {
         ForEach(items) { item in
             SavedLookCell(
-                item: item, now: now, style: .row, isCurrent: item.id == current, opensBeside: opensBeside
+                item: item, now: now, style: .row, isCurrent: item.id == current, opensBeside: opensBeside,
+                save: { save(item) }
             ) { open(item) }
             .firstLookTourAnchor(item, in: items, isEnabled: anchorsTour) { open(item) }
         }
@@ -53,7 +60,8 @@ struct SavedLooksGrid: View {
             ) {
                 ForEach(items) { item in
                     SavedLookCell(
-                        item: item, now: now, style: .tile, isCurrent: item.id == current, opensBeside: opensBeside
+                        item: item, now: now, style: .tile, isCurrent: item.id == current, opensBeside: opensBeside,
+                        save: { save(item) }
                     ) { open(item) }
                     .firstLookTourAnchor(item, in: items, isEnabled: anchorsTour) { open(item) }
                 }
@@ -75,6 +83,10 @@ extension View {
 
 /// One saved look: one VoiceOver button that names the look and its pieces, then the occasion,
 /// when it was last worn and any piece that left her closet.
+///
+/// A look she hasn't saved (All, Phase 21c) shows when it was made instead of when it was worn,
+/// a "Not saved" tag, and a Save look button of its own under the look. The button is a separate
+/// VoiceOver element named for the look; the tag is read as part of the look's own button.
 struct SavedLookCell: View {
     enum Style {
         case tile
@@ -87,6 +99,8 @@ struct SavedLookCell: View {
     /// Its detail is showing beside the grid (iPad, Phase 15b).
     var isCurrent = false
     var opensBeside = false
+    /// Save look, for a look she hasn't saved.
+    var save: () -> Void = {}
     let action: () -> Void
 
     @Environment(\.locale) private var locale
@@ -96,6 +110,19 @@ struct SavedLookCell: View {
     static let rowBundleWidth: CGFloat = 96
 
     var body: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            lookButton
+            if !item.isSaved {
+                NookButton(LookDetailText.saveLook, systemImage: "heart", kind: .pill, size: .small, action: save)
+                    .accessibilityLabel(Text(SavedLooksText.saveLookSpoken(item.name)))
+                    .accessibilityHint(Text(SavedLooksText.saveLookHint))
+                    .accessibilityIdentifier("savedLooks.save.\(item.id)")
+            }
+        }
+        .background { CurrentItemTint(isCurrent: isCurrent) }
+    }
+
+    private var lookButton: some View {
         Button(action: action) {
             switch style {
             case .tile:
@@ -127,10 +154,9 @@ struct SavedLookCell: View {
         .buttonStyle(SavedLookPressStyle())
         // A pointer on iPad shows which look it's over (PRD §7.2).
         .hoverEffect(.highlight)
-        .background { CurrentItemTint(isCurrent: isCurrent) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(LookBundleText.summary(of: item.content, title: item.name, locale: locale)))
-        .accessibilityValue(Text(SavedLooksText.spokenDetail(of: item, lastWorn: lastWorn)))
+        .accessibilityValue(Text(SavedLooksText.spokenDetail(of: item, lastWorn: lastWorn, made: made)))
         .accessibilityHint(Text(opensBeside ? SavedLooksText.showBesideHint : SavedLooksText.openHint))
         .accessibilityAddTraits(isCurrent ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("savedLooks.look.\(item.id)")
@@ -138,6 +164,11 @@ struct SavedLookCell: View {
 
     private var lastWorn: String? {
         item.look.lastWorn.map { LastWornText.describe($0, now: now, calendar: calendar, locale: locale) }
+    }
+
+    /// "Made 11 Oct", for a look she hasn't saved. Several can have the same name.
+    private var made: String? {
+        item.isSaved ? nil : TryOnText.made(item.look.createdAt, now: now, calendar: calendar, locale: locale)
     }
 
     private func mat(@ViewBuilder _ content: () -> some View) -> some View {
@@ -164,14 +195,20 @@ struct SavedLookCell: View {
                     .lineLimit(style == .tile ? 2 : nil)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if !item.isSaved {
+                // The button's own words say "Not saved", so the tag isn't read twice.
+                NookBadge(SavedLooksText.notSaved, tone: .neutral)
+                    .accessibilityHidden(true)
+                    .padding(.top, NookSpacing.xxSmall)
+            }
         }
         .multilineTextAlignment(.leading)
         .padding(.horizontal, NookSpacing.xxSmall)
     }
 
-    /// "Office · Last worn 5 days ago".
+    /// "Office · Last worn 5 days ago", or "Casual · Made 11 Oct" for a look she hasn't saved.
     private var detail: String? {
-        let parts = [item.occasion, lastWorn].compactMap(\.self)
+        let parts = [item.occasion, item.isSaved ? lastWorn : made].compactMap(\.self)
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

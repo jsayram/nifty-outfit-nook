@@ -8,6 +8,8 @@ struct SavedLooksActions {
     /// Undo on the line about a look she just deleted.
     var undoDelete: () -> Void = {}
     var makeYourOwn: () -> Void = {}
+    /// Save look on a look she hasn't saved, from the grid on All (Phase 21c).
+    var save: (SavedLookItem) -> Void = { _ in }
     var retry: () -> Void = {}
     /// The Pictures tab (Phase 12b): a picture, and the look a picture came from.
     var openPicture: (SavedPictureItem) -> Void = { _ in }
@@ -48,10 +50,14 @@ nonisolated enum SavedLooksSelection: Hashable, Sendable {
 }
 
 /// Saved Looks' content, top to bottom (`saved.html`, RD-08): the title and count, the Looks and
-/// Pictures switch, then the search field, the piece and colour filters (LR-09), the count line
-/// with Clear, and the grid of looks or of pictures. An empty Saved Looks explains how to save a
-/// look (RD-08.4), and an empty Pictures tab what pictures are and that they need a look; a
-/// search with no matches names the filters, with Clear filters (LR-09.3).
+/// Pictures switch, on Looks the Saved and All switch (Phase 21c), then the search field, the
+/// piece and colour filters (LR-09), the count line with Clear, and the grid of looks or of
+/// pictures. An empty Saved Looks explains how to save a look (RD-08.4), and an empty Pictures tab
+/// what pictures are and that they need a look; a search with no matches names the filters, with
+/// Clear filters (LR-09.3). Each state names its scope, so it's never unclear which she's in.
+///
+/// On Saved, when the search and filters match looks she didn't save too, a line at the end says
+/// how many ("3 more in All") and switches to All, keeping them.
 ///
 /// On a wide iPad window (Phase 15b, `ipad-saved.html`) the page splits like Closet's: the
 /// sidebar holds the title, the switch, search and filters, and the grid column holds the looks
@@ -73,6 +79,7 @@ struct SavedLooksPage: View {
 
     /// Past this the controls read badly; the grid keeps the full width.
     static let controlsMaximumWidth: CGFloat = 640
+    private static let topID = "savedLooks.top"
 
     var body: some View {
         Group {
@@ -80,8 +87,16 @@ struct SavedLooksPage: View {
                 page
             } else {
                 TourScrollReader {
-                    ScrollView(.vertical) { page }
-                        .scrollDismissesKeyboard(.immediately)
+                    ScrollView(.vertical) {
+                        // Changing scope, as the "3 more in All" line does from the bottom of the
+                        // list, starts the new list at its top.
+                        ScrollViewReader { proxy in
+                            page
+                                .id(Self.topID)
+                                .onChange(of: model.scope) { proxy.scrollTo(Self.topID, anchor: .top) }
+                        }
+                    }
+                    .scrollDismissesKeyboard(.immediately)
                 }
             }
         }
@@ -171,16 +186,18 @@ struct SavedLooksPage: View {
     /// "5 looks", or on Pictures "3 pictures".
     private var headerCount: String? {
         switch model.tab {
-        case .looks: model.items.isEmpty ? nil : SavedLooksText.looks(model.items.count)
+        case .looks: model.headerCountText.isEmpty ? nil : model.headerCountText
         case .pictures: model.pictureItems.isEmpty ? nil : TryOnText.pictures(model.pictureItems.count)
         }
     }
 
     // MARK: Looks
 
-    /// The line about a look she just deleted, then search and the filters.
+    /// The Saved and All switch, the line about a look she just deleted, then search and the
+    /// filters.
     @ViewBuilder private func looksControls(chipLayout: NookChipBarLayout) -> some View {
         if model.phase == .loaded {
+            scopeSwitch
             if let removal = model.lastRemoval {
                 NookBanner(
                     LookDetailText.deleted(removal), systemImage: "trash", tone: .neutral,
@@ -210,45 +227,73 @@ struct SavedLooksPage: View {
                 .stateCard()
                 .padding(.top, NookSpacing.large)
         case .loaded:
-            if model.isEmpty {
-                empty
-            } else if model.hasNoMatches {
-                noMatches(SavedLooksText.noMatchesTitle)
-            } else {
-                if !model.shown.isEmpty {
-                    SavedLooksGrid(
-                        items: model.shown, now: model.loadedAt, current: current.flatMap(\.lookID),
-                        opensBeside: opensBeside, open: actions.open
-                    )
-                    .padding(.horizontal, NookSpacing.screenMargin)
-                    .padding(.top, NookSpacing.medium)
-                }
-                if !model.shownEarlier.isEmpty {
-                    earlierResults
-                }
-            }
+            loadedLooks
         }
     }
 
-    /// Earlier results she didn't save that match the typed search (LR-06.4), under the saved
-    /// looks: a heading, what they are, and the same grid. Each opens with Save look.
-    private var earlierResults: some View {
-        VStack(alignment: .leading, spacing: NookSpacing.small) {
-            NookSectionHeader(SavedLooksText.earlierHeading)
-            Text(SavedLooksText.earlierNote)
-                .nookTextStyle(.note)
-                .foregroundStyle(.nook.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-            SavedLooksGrid(
-                items: model.shownEarlier, now: model.loadedAt, current: current.flatMap(\.lookID),
-                opensBeside: opensBeside, anchorsTour: false, open: actions.open
-            )
-            .padding(.top, NookSpacing.xSmall)
-        }
+    /// Saved or All, over the search field (Phase 21c). Search and the filters work the same in
+    /// both; the words of each state say which she's in.
+    private var scopeSwitch: some View {
+        NookSegmentedPicker(
+            SavedLooksText.scopeTitle,
+            selection: $model.scope,
+            options: [
+                .init(
+                    .saved, title: SavedLooksText.savedScope, hint: SavedLooksText.savedScopeHint,
+                    identifier: "savedLooks.scope.saved"),
+                .init(
+                    .all, title: SavedLooksText.allScope, hint: SavedLooksText.allScopeHint,
+                    identifier: "savedLooks.scope.all"),
+            ]
+        )
+        .frame(maxWidth: 300)
         .padding(.horizontal, NookSpacing.screenMargin)
-        .padding(.top, NookSpacing.large)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("savedLooks.earlier")
+        .padding(.top, NookSpacing.small)
+        .frame(maxWidth: Self.controlsMaximumWidth, alignment: .leading)
+    }
+
+    /// The looks in the scope, or what stands in for them, then on Saved the line that says how
+    /// many more All has for the same search and filters.
+    @ViewBuilder private var loadedLooks: some View {
+        if model.isEmpty {
+            if model.scope == .all { emptyAll } else { empty }
+        } else if model.hasNoMatches {
+            noMatches(model.scope == .all ? SavedLooksText.noMatchesAllTitle : SavedLooksText.noMatchesTitle)
+        } else {
+            SavedLooksGrid(
+                items: model.shown, now: model.loadedAt, current: current.flatMap(\.lookID),
+                opensBeside: opensBeside, anchorsTour: model.scope == .saved, open: actions.open,
+                save: actions.save
+            )
+            .padding(.horizontal, NookSpacing.screenMargin)
+            .padding(.top, NookSpacing.medium)
+        }
+        if model.moreInAll > 0 {
+            moreInAllLine
+        }
+    }
+
+    /// "3 more in All": a button at the end of Saved's results, which switches to All with the
+    /// search and filters still on.
+    private var moreInAllLine: some View {
+        Button {
+            model.scope = .all
+        } label: {
+            HStack(spacing: NookSpacing.xSmall) {
+                Text(SavedLooksText.moreInAll(model.moreInAll))
+                    .multilineTextAlignment(.leading)
+                // A button, not a heading: the arrow says it goes somewhere.
+                Image(systemName: "chevron.right")
+                    .imageScale(.small)
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.nook(.text, size: .small))
+        .accessibilityHint(Text(SavedLooksText.moreInAllHint))
+        .accessibilityIdentifier("savedLooks.moreInAll")
+        .padding(.horizontal, NookSpacing.small)
+        .padding(.top, NookSpacing.small)
     }
 
     /// The search field, the filters and, while filtering, the count line. One search and one
@@ -308,9 +353,15 @@ struct SavedLooksPage: View {
         .accessibilityIdentifier("savedLooks.noMatches")
     }
 
+    /// Nothing saved yet; with unsaved results, it says where they are.
+    private var emptyMessage: String {
+        model.hasUnsaved
+            ? SavedLooksText.emptyMessage + " " + SavedLooksText.emptyUnsavedHint : SavedLooksText.emptyMessage
+    }
+
     /// RD-08.4: nothing saved yet says how to save a look, and offers Make your own.
     private var empty: some View {
-        NookEmptyState(SavedLooksText.emptyTitle, message: SavedLooksText.emptyMessage, systemImage: "bookmark") {
+        NookEmptyState(SavedLooksText.emptyTitle, message: emptyMessage, systemImage: "bookmark") {
             VStack(alignment: .leading, spacing: NookSpacing.small) {
                 ForEach(Array(SavedLooksText.emptySteps.enumerated()), id: \.offset) { index, step in
                     HStack(alignment: .firstTextBaseline, spacing: NookSpacing.small) {
@@ -333,6 +384,14 @@ struct SavedLooksPage: View {
         .stateCard()
         .padding(.top, NookSpacing.large)
         .accessibilityIdentifier("savedLooks.empty")
+    }
+
+    /// All with no looks at all: Style Me results show here, saved or not.
+    private var emptyAll: some View {
+        NookEmptyState(SavedLooksText.emptyAllTitle, message: SavedLooksText.emptyAllMessage, systemImage: "bookmark")
+            .stateCard()
+            .padding(.top, NookSpacing.large)
+            .accessibilityIdentifier("savedLooks.emptyAll")
     }
 
     // MARK: Pictures (12b)

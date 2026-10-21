@@ -21,6 +21,9 @@ struct SavedLookItem: Identifiable, Hashable {
 
     var id: Look.ID { look.id }
 
+    /// False for a Style Me result she kept but didn't save, which only the All scope lists.
+    var isSaved: Bool { look.isSaved }
+
     init(_ look: Look, garments: [Garment.ID: Garment]) {
         self.look = look
         content = LookBundleContent(look: look, garments: garments)
