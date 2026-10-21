@@ -44,6 +44,9 @@ public struct NookServices: Sendable {
     /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
     /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
     public var account: any AccountService = UnavailableAccountService()
+    /// Paid cloud work and her allowances (Phase 24b), for the stylist (27a) and try-on (33a).
+    /// Signed out until the app sets one, like `account`.
+    public var paid: any PaidActionService = UnavailablePaidActionService()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.

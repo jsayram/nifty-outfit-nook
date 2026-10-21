@@ -1,0 +1,38 @@
+{
+  "categories": [
+    {
+      "category": "styleFull",
+      "usedToday": 3,
+      "limitToday": 10,
+      "usedThisMonth": 12,
+      "limitThisMonth": 150,
+      "resetsAt": "2026-10-22T09:15:00.000Z"
+    },
+    {
+      "category": "styleQuick",
+      "usedToday": 0,
+      "limitToday": 40,
+      "usedThisMonth": 4,
+      "limitThisMonth": 600
+    },
+    {
+      "category": "tryOn",
+      "usedToday": 2,
+      "limitToday": 3,
+      "usedThisMonth": 9,
+      "limitThisMonth": 30,
+      "resetsAt": "2026-10-22T08:02:11.000Z"
+    }
+  ],
+  "features": [
+    {
+      "feature": "style",
+      "state": "on"
+    },
+    {
+      "feature": "tryOn",
+      "state": "paused"
+    }
+  ],
+  "policyVersion": 1
+}

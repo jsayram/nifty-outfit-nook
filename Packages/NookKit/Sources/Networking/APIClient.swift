@@ -20,6 +20,26 @@ public enum APIFailure: Error, Sendable, Equatable {
     case invalidResponse
     /// Any other 4xx: the request itself was wrong.
     case rejected(code: String)
+    // 24b
+    /// 403 attestation_required: register a new App Attest key, then retry once.
+    case attestationRequired
+    /// This device can't make an App Attest assertion (a simulator or an unsupported device).
+    case attestationUnavailable
+    /// 409 idempotency_conflict: the key was used for a different request. An app bug.
+    case idempotencyConflict
+    /// 409 action_in_progress: still running or being checked.
+    case actionInProgress(retryAfterSeconds: Int)
+    /// 429 quota_exceeded: an allowance is used up until `resetAt`.
+    case quotaExceeded(category: String, resetAt: Date?, retryAfterSeconds: Int)
+    /// 503 feature_paused: switched off on the server, or its spending ceiling is reached.
+    case featurePaused(feature: String?, retryAfterSeconds: Int?)
+}
+
+/// Signs a paid request (24b): the App Attest headers for one try. Called again for every try,
+/// because each assertion's counter must be higher than the last.
+public protocol RequestSigner: Sendable {
+    func headers(for endpoint: APIV1.Endpoint, idempotencyKey: String, body: Data) async throws(APIFailure)
+        -> [String: String]
 }
 
 /// One step of a call, for the debug gateway screen and tests. Never holds a token or a body.
@@ -110,6 +130,15 @@ public final class APIClient: Sendable {
     public func send<Body: Encodable, Response: Decodable>(
         _ endpoint: APIV1.Endpoint, body: Body?, as type: Response.Type
     ) async throws(APIFailure) -> Response {
+        try await send(endpoint, body: body, idempotencyKey: nil, signer: nil, as: type)
+    }
+
+    /// A paid request: every try carries the same `idempotencyKey`, so the server never runs or
+    /// counts a retry twice, and its own App Attest assertion from `signer`.
+    public func send<Body: Encodable, Response: Decodable>(
+        _ endpoint: APIV1.Endpoint, body: Body?, idempotencyKey: String?, signer: (any RequestSigner)?,
+        as type: Response.Type
+    ) async throws(APIFailure) -> Response {
         let payload: Data?
         if let body {
             guard let data = try? APIV1.encoder().encode(body), data.count <= APIV1.maxBodyBytes else {
@@ -142,6 +171,19 @@ public final class APIClient: Sendable {
                     throw fail(endpoint, error == .offline ? .offline : .signedOut)
                 }
                 forceRefresh = false
+            }
+            if let idempotencyKey {
+                request.setValue(idempotencyKey, forHTTPHeaderField: "Idempotency-Key")
+                if let signer {
+                    let headers: [String: String]
+                    do {
+                        headers = try await signer.headers(
+                            for: endpoint, idempotencyKey: idempotencyKey, body: payload ?? Data())
+                    } catch {
+                        throw fail(endpoint, error)
+                    }
+                    for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
+                }
             }
 
             onEvent(.sent(endpoint: endpoint.id, attempt: attempt))
@@ -180,8 +222,33 @@ public final class APIClient: Sendable {
                 attempt -= 1
                 onEvent(.refreshedToken(endpoint: endpoint.id))
                 continue
+            case 403 where envelope?.error.code == APIV1.ErrorCode.attestationRequired.rawValue:
+                throw fail(endpoint, .attestationRequired)
             case 403:
                 throw fail(endpoint, .forbidden)
+            case 409 where envelope?.error.code == APIV1.ErrorCode.idempotencyConflict.rawValue:
+                throw fail(endpoint, .idempotencyConflict)
+            case 409:
+                // action_in_progress: the same key is safe to send again once it has finished.
+                let retryAfter = Self.retryAfter(http, envelope) ?? 2
+                if Duration.seconds(retryAfter) <= policy.longestRetryAfterToWait, attempt < policy.maxAttempts {
+                    try await wait(.seconds(retryAfter), endpoint, reason: "still running, Retry-After \(retryAfter)s")
+                    continue
+                }
+                throw fail(endpoint, .actionInProgress(retryAfterSeconds: retryAfter))
+            case 429 where envelope?.error.code == APIV1.ErrorCode.quotaExceeded.rawValue:
+                // Never waited out: the allowance comes back hours or days later.
+                let resetAt = envelope?.error.resetAt.flatMap(APIV1.parseDate)
+                throw fail(
+                    endpoint,
+                    .quotaExceeded(
+                        category: envelope?.error.category ?? "", resetAt: resetAt,
+                        retryAfterSeconds: Self.retryAfter(http, envelope) ?? 3600))
+            case 503 where envelope?.error.code == APIV1.ErrorCode.featurePaused.rawValue:
+                throw fail(
+                    endpoint,
+                    .featurePaused(feature: envelope?.error.feature, retryAfterSeconds: Self.retryAfter(http, envelope))
+                )
             case 404 where envelope?.error.code == APIV1.ErrorCode.notRegistered.rawValue:
                 throw fail(endpoint, .notRegistered)
             case 410:

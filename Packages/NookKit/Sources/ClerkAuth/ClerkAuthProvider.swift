@@ -82,14 +82,24 @@ public final class ClerkAuthProvider: AuthProvider {
 
 /// The real gateway: Clerk for sign-in and the Convex deployment's HTTP actions as the backend.
 public enum RealGateway {
+    /// The account and the paid actions (24b, signed with Apple's App Attest) on the real backend.
+    public struct Services: Sendable {
+        public let account: GatewayAccountService
+        public let paid: GatewayPaidActionService
+    }
+
     @MainActor
     public static func make(
         settings: GatewaySettings, appVersion: String, onEvent: @escaping @Sendable (APIEvent) -> Void = { _ in }
-    ) -> (any AccountService)? {
+    ) -> Services? {
         guard settings.usesRealServices, let key = settings.clerkPublishableKey, let baseURL = settings.apiBaseURL
         else { return nil }
         let auth = ClerkAuthProvider.configure(publishableKey: key)
         let client = APIClient(baseURL: baseURL, session: APIClient.makeSession(), auth: auth, onEvent: onEvent)
-        return GatewayAccountService(auth: auth, client: client, appVersion: appVersion)
+        let attestation = AttestationSession(
+            attester: AppAttestDeviceAttester(), store: KeychainAttestKeyStore(), client: client)
+        return Services(
+            account: GatewayAccountService(auth: auth, client: client, appVersion: appVersion),
+            paid: GatewayPaidActionService(client: client, attestation: attestation))
     }
 }
