@@ -675,6 +675,60 @@
     "2 weeks" : {
       "comment" : "Repeat setting value (LR-10)"
     },
+    "Allow" : {
+      "comment" : "Stylist consent: agree"
+    },
+    "Anthropic makes Claude, the AI that suggests your outfits." : {
+      "comment" : "Stylist consent: who the recipient is"
+    },
+    "From your history: it still fits today’s request, so nothing was used." : {
+      "comment" : "Note on Your looks: an earlier result reused before asking the stylist (FR-58)"
+    },
+    "Never sent: your photos, your name, your measurements or weight, your location." : {
+      "comment" : "Stylist consent: what is never sent"
+    },
+    "New ideas" : {
+      "comment" : "Your looks button over a look from her history"
+    },
+    "Piece descriptions, the occasion and the weather go to Anthropic when you ask. Never your photos, name, measurements or location." : {
+      "comment" : "Privacy and terms: under the stylist switch"
+    },
+    "Review" : {
+      "comment" : "Opens the stylist consent sheet"
+    },
+    "Style Me is off. Your closet, saved looks and making your own looks still work." : {
+      "comment" : "Privacy and terms: the stylist switch is off"
+    },
+    "Style Me needs your OK" : {
+      "comment" : "Your looks without stylist consent"
+    },
+    "Style Me needs your OK to send your request to Anthropic. You can still make your own looks." : {
+      "comment" : "Your looks without stylist consent"
+    },
+    "Style Me sends your request to Anthropic" : {
+      "comment" : "Stylist consent sheet title (27a)"
+    },
+    "Style Me, swaps and Ask stylist" : {
+      "comment" : "Privacy and terms: the stylist consent switch"
+    },
+    "Styling is resting for now" : {
+      "comment" : "Your looks when a cloud limit stops styling"
+    },
+    "What Anthropic does with it: doesn’t use it to train its models, and deletes it within 30 days. If its safety checks flag a request, it can keep it for up to 2 years. It may be processed outside the US." : {
+      "comment" : "Stylist consent: what the recipient does with it"
+    },
+    "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat." : {
+      "comment" : "Stylist consent: what is sent"
+    },
+    "Why: %@" : {
+      "comment" : "VoiceOver: the stylist's reason for this look"
+    },
+    "You asked for the same thing earlier today, so these are the same looks. Nothing was used." : {
+      "comment" : "Note on Your looks: the server answered from its 24-hour result cache"
+    },
+    "You can turn this off any time in Privacy and terms." : {
+      "comment" : "Stylist consent: how to withdraw"
+    },
     "a an the my your her with and or of for in on to that this some" : {
       "comment" : "Filler words that Closet's possible matches ignore, separated by spaces. Translate as a list of common short words in your language, not word for word.",
       "localizations" : {
