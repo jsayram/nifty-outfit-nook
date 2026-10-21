@@ -33,9 +33,10 @@ struct ClosetDestinationScreen: View {
 
     var body: some View {
         switch destination {
-        case .garment(let id, let name):
+        case .garment(let id, let name, let remembering):
             GarmentDetailScreen(
-                garmentID: id, name: name, open: actions.open, back: actions.back, removed: actions.pieceRemoved)
+                garmentID: id, name: name, remembering: remembering, open: actions.open, back: actions.back,
+                removed: actions.pieceRemoved)
         case .addPiece(let start):
             GarmentEditorScreen(
                 target: .newPiece, firstStep: start == .words ? .words : .choose, resumesDraft: start == .resume,

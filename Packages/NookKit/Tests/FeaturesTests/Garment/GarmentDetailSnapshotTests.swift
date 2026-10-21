@@ -26,12 +26,14 @@ import UIKit
 struct GarmentDetailSnapshotTests {
     static let width: CGFloat = 402
 
-    private func model(_ id: Garment.ID, tracksLaundry: Bool = false) throws -> GarmentDetailModel {
+    private func model(
+        _ id: Garment.ID, tracksLaundry: Bool = false, remembering: String? = nil
+    ) throws -> GarmentDetailModel {
         var data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
         data.profile.preferences.tracksLaundry = tracksLaundry
         let garment = try #require(data.garments.first { $0.id == id })
         let looks = data.looks.sorted { $0.createdAt > $1.createdAt }
-        let model = GarmentDetailModel(garmentID: id)
+        let model = GarmentDetailModel(garmentID: id, remembering: remembering)
         model.show(garment, suitcases: data.suitcases, looks: looks, profile: data.profile, now: TestTime.now)
         return model
     }
@@ -43,6 +45,19 @@ struct GarmentDetailSnapshotTests {
     @Test func navyTrousersAX5() throws {
         assertSnapshot(
             GarmentDetailPage(model: try model("g-navy-trousers")), dynamicTypeSize: .accessibility5, named: "ax5")
+    }
+
+    /// Remember this name (PRD §7.6), opened from Closet's Possible matches, and at AX5 where its
+    /// buttons stack.
+    @Test func rememberThisName() throws {
+        assertSnapshot(
+            GarmentDetailPage(model: try model("g-navy-trousers", remembering: "navy party pants")),
+            named: "remember")
+    }
+
+    @Test func rememberThisNameAX5() throws {
+        let model = try model("g-navy-trousers", remembering: "navy party pants")
+        assertSnapshot(GarmentDetailPage(model: model), dynamicTypeSize: .accessibility5, named: "remember-ax5")
     }
 
     @Test func laceTopInTheWashDark() throws {
