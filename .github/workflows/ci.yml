@@ -133,7 +133,7 @@ jobs:
   # the full plan with the package tests), makes an unsigned Release archive for a real iPhone
   # and checks it (scripts/check-archive.sh: Info.plist, privacy manifest, entitlements, no test
   # or debug code, and scripts/check-release.sh on the device binary), then runs a few UI test
-  # classes and every package test target on an iPhone simulator. It runs the package tests
+  # classes on an iPhone simulator and every package test target on an iPad one. It runs the package tests
   # itself because it has their build: until October 2026 the iPad part ran them, which meant
   # uploading the full plan's products (144 MB) for that part to download, and the iPad part
   # started its own tests about 8 minutes in.
@@ -194,6 +194,9 @@ jobs:
         # Also after a UI test failure, so one doesn't hide the other.
         if: ${{ !cancelled() }}
         env:
+          # On an iPad simulator, where these tests ran until now: the snapshot tests failed twice
+          # on the iPhone one (ComponentSnapshotTests buttons-light, 21 October 2026).
+          NOOK_SIM_FAMILY: iPad
           NOOK_RESULT_BUNDLE: build/TestResults-package.xcresult
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
