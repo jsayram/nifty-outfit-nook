@@ -17,6 +17,8 @@ struct GarmentEditorScreen: View {
     @State private var model: GarmentEditorModel
     @State private var confirmsDiscard = false
     @State private var choosesPhotoSource = false
+    /// The system camera and photo picker, when real photos are on (Phase 22a).
+    @State private var picking = PhotoPickingModel()
 
     init(
         target: GarmentDraft.Target,
@@ -80,13 +82,19 @@ struct GarmentEditorScreen: View {
                 String(localized: "Add a photo", bundle: .module, comment: "Photo source question"),
                 isPresented: $choosesPhotoSource, titleVisibility: .visible
             ) {
-                ForEach(PhotoSource.allCases, id: \.self) { source in
+                ForEach(model.photoSources, id: \.self) { source in
                     Button(Self.title(for: source)) { choosePhoto(source) }
                 }
             } message: {
-                Text(
-                    "For now each choice adds a sample picture.", bundle: .module,
-                    comment: "Photo source question while photos are a stand-in")
+                if !model.usesSystemPicker {
+                    Text(
+                        "For now each choice adds a sample picture.", bundle: .module,
+                        comment: "Photo source question while photos are a stand-in")
+                }
+            }
+            .photoPicking(picking) { picked in
+                let intake = services.photos
+                Task { await model.keepPhoto(picked, using: intake) }
             }
             .task { await model.load(from: services) }
             // Add a piece's quick tour (Phase 16b), on its first step only: the photo choices and
@@ -94,14 +102,14 @@ struct GarmentEditorScreen: View {
             .screenTour(
                 AddPieceTour.definition,
                 isReady: model.isNewPiece && model.phase == .editing && model.step == .choose && !confirmsDiscard
-                    && !choosesPhotoSource
+                    && !choosesPhotoSource && picking.step == nil
             )
             // Editing a piece she has has its own tour (Stage A audit): the photo, the details and
             // Save. Not over the card that offers to carry on with a draft.
             .screenTour(
                 EditPieceTour.definition,
                 isReady: !model.isNewPiece && model.phase == .editing && model.step == .details
-                    && model.pendingDraft == nil && !confirmsDiscard && !choosesPhotoSource
+                    && model.pendingDraft == nil && !confirmsDiscard && !choosesPhotoSource && picking.step == nil
             )
             .onChange(of: scenePhase) { _, phase in
                 // Don't wait for the app to be closed: write the draft as soon as it leaves the
@@ -202,6 +210,10 @@ struct GarmentEditorScreen: View {
     }
 
     private func choosePhoto(_ source: PhotoSource) {
+        if model.usesSystemPicker {
+            picking.start(source)
+            return
+        }
         let intake = services.photos
         Task { await model.choosePhoto(from: source, using: intake) }
     }
