@@ -375,7 +375,7 @@ struct SavedLooksScopeTests {
 
     @Test func anUnsavedLookSaysSoToVoiceOver() async throws {
         let model = await loadedSavedLooks()
-        let unsaved = try #require(model.item("o-history-casual"))
+        let unsaved = try #require(model.unsavedItems.first { $0.id == "o-history-casual" })
         let spoken = SavedLooksText.spokenDetail(of: unsaved, lastWorn: nil, made: "Made Oct 11")
         #expect(spoken == "Casual, Made Oct 11, Not saved")
         let saved = try #require(model.item("o-interview"))

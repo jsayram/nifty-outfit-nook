@@ -269,8 +269,9 @@ final class SavedLooksModel {
         await load(from: services, now: now)
     }
 
+    /// A saved look's item. A look she hasn't saved has none: find it in `unsavedItems`.
     func item(_ id: Look.ID) -> SavedLookItem? {
-        allItems.first { $0.id == id }
+        items.first { $0.id == id }
     }
 
     func pictureItem(_ id: TryOnPicture.ID) -> SavedPictureItem? {
