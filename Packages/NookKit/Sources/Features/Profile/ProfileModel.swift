@@ -21,8 +21,8 @@ final class ProfileModel {
         case failed
     }
 
-    /// Stage A's stand-in for the try-on photo: an example, never a real photo of her. Phase 22a
-    /// brings the system photo picker and Phase 33 the image service.
+    /// Stage A's stand-in for the try-on photo: an example, never a real photo of her. Where real
+    /// photos are on (Phase 22a) she picks her own instead; Phase 33 brings the image service.
     nonisolated static let exampleTryOnPhoto = PhotoReference.sample("try-on-example")
 
     private(set) var phase: Phase = .loading
@@ -180,21 +180,48 @@ final class ProfileModel {
         } != nil
     }
 
-    // MARK: Your try-on photo (RD-06, Stage A stand-in)
+    // MARK: Your try-on photo (RD-06)
 
-    /// Uses the example photo. No camera, no photo library, nothing uploaded.
+    /// The photo shown on the sheet: hers, or nothing.
+    var tryOnPhoto: PhotoReference? { profile.tryOnPhoto }
+
+    /// Uses the example photo (Stage A's stand-in). No camera, no photo library, nothing uploaded.
     func useExamplePhoto(in services: NookServices) async -> Bool {
-        await change(in: services) { $0.tryOnPhoto = Self.exampleTryOnPhoto } != nil
+        await replacePhoto(with: Self.exampleTryOnPhoto, in: services)
     }
 
-    /// Removes the photo. Saved try-on pictures stay (PRD §9.2.1 step 1).
+    /// Her own photo from the system picker (Phase 22a): kept without its metadata, then set as
+    /// her try-on photo. The photo it replaces is deleted from the iPhone at once, since it's
+    /// Sensitive and nothing else points to it. If the profile can't be saved, the new copy is
+    /// deleted and the old photo stays.
+    func useTryOnPhoto(_ picked: PickedPhoto, in services: NookServices) async -> Bool {
+        let photo: PhotoReference
+        do {
+            let data = try await picked.load()
+            photo = try await services.photos.keep(data, from: picked.source)
+        } catch {
+            return false
+        }
+        guard await replacePhoto(with: photo, in: services) else {
+            await services.photos.discard(photo)
+            return false
+        }
+        return true
+    }
+
+    /// Removes the photo, and deletes her own photo's file. Saved try-on pictures stay
+    /// (PRD §9.2.1 step 1).
     func removePhoto(in services: NookServices) async -> Bool {
-        await change(in: services) { $0.tryOnPhoto = nil } != nil
+        await replacePhoto(with: nil, in: services)
     }
 
-    // MARK: Saving
+    private func replacePhoto(with photo: PhotoReference?, in services: NookServices) async -> Bool {
+        let replaced = profile.tryOnPhoto
+        guard await change(in: services, { $0.tryOnPhoto = photo }) != nil else { return false }
+        if let replaced, replaced != photo { await services.photos.discard(replaced) }
+        return true
+    }
 
-    /// Reads, changes and saves the profile, then shows what was saved. `nil` when it failed.
     private func change(
         in services: NookServices, _ edit: @escaping @Sendable (inout Profile) -> Void
     ) async -> Profile? {
