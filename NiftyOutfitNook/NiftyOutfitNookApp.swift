@@ -150,10 +150,14 @@ struct NiftyOutfitNookApp: App {
                     services.images = StoredPhotoProvider(
                         files: photos, thumbnails: thumbnails, fallback: services.images)
                     if let imageFiles { services.imageFiles = imageFiles }
+                    // Her weather choices (Phase 29) are erased with the profile, before onboarding.
+                    AppWeather.install(into: &services, arguments: arguments)
                     // Delete my data, and Delete my account (Phase 24c) when she's signed in.
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
-                            stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)]),
+                            stores: storage.erasableData + [
+                                (.profile, tours), (.profile, services.weatherSettings), (.profile, onboarding),
+                            ]),
                         account: account)
                     services.backups = storage.backups
                     services.account = account
@@ -168,6 +172,7 @@ struct NiftyOutfitNookApp: App {
                         configuration, startingCloset: closet, tours: tours, onboarding: onboarding,
                         profileSettings: closet == nil ? nil : storage.profileSettings,
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
+                    AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(stores: storage.erasableData + LocalDataDeletion.stores(of: services)),
                         account: account)

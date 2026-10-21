@@ -34,6 +34,12 @@ CLANG_ENABLE_OBJC_ARC = YES
 CLERK_PUBLISHABLE_KEY =
 NOOK_API_BASE_URL =
 
+// Live weather (Phase 29). NO keeps the stand-in weather and the app's signing as it is. YES turns on
+// Apple WeatherKit and adds its entitlement (Configs/NiftyOutfit-WeatherKit.entitlements), which needs the
+// WeatherKit capability on the App ID first: docs/weather.md has Jose's steps. Set it in
+// Secrets.xcconfig on the Mac that builds, or here once the capability is confirmed.
+NOOK_WEATHERKIT = NO
+
 // Optional, ignored by git. Copy Signing.local.xcconfig.example to Signing.local.xcconfig
 // and set DEVELOPMENT_TEAM there to build for a device. Secrets.xcconfig is reserved for
 // non-secret identifiers that shouldn't be public; it never holds a real secret.

@@ -130,6 +130,10 @@ struct StyleMePage: View {
                 detail: String(localized: "For this request only", bundle: .module, comment: "Style Me section detail")
             )
             WeatherRow(choice: weatherChoice, reading: model.weather)
+            if let credit = model.weatherCredit, weatherChoice.wrappedValue == .useToday {
+                WeatherCreditView(credit: credit)
+                    .padding(.horizontal, NookSpacing.medium)
+            }
             optionRow(
                 .comfort, title: String(localized: "Comfort", bundle: .module, comment: "Style Me row"),
                 line: text.comfortLine, value: text.comfortValue, systemImage: "tshirt",

@@ -50,7 +50,7 @@ struct DataDeletionFixtureTests {
         let report = await services.deletion.delete(.thisDevice)
 
         #expect(report.isComplete)
-        #expect(Set(report.order) == Set(DataPart.allCases))
+        #expect(Set(report.order) == Set(DataPart.allCases.filter { !$0.isRemote }))
         #expect(try await services.closet.garments().isEmpty)
         #expect(try await services.looks.looks().isEmpty)
         #expect(try await services.pictures.pictures().isEmpty)
@@ -92,7 +92,7 @@ struct DataDeletionFixtureTests {
     @Test func failingStoresReportEveryPart() async {
         let report = await services(behavior: .storesFail).deletion.delete(.thisDevice)
         #expect(!report.isComplete)
-        #expect(Set(report.failedParts) == Set(DataPart.allCases))
+        #expect(Set(report.failedParts) == Set(DataPart.allCases.filter { !$0.isRemote }))
     }
 
     @Test func theLargeClosetIsWipedToo() async throws {

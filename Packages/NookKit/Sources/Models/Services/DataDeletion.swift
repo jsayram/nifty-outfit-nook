@@ -152,13 +152,14 @@ public struct LocalDataDeletion: DataDeletionService {
     public init(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
-        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore
+        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
+        weatherSettings: (any WeatherSettingsStore)? = nil
     ) {
         self.init(
             stores: Self.stores(
                 closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                 lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                onboarding: onboarding))
+                onboarding: onboarding, weatherSettings: weatherSettings))
     }
 
     /// The stores of `services` in the order `NookServices` erases them, for a deletion that
@@ -168,15 +169,19 @@ public struct LocalDataDeletion: DataDeletionService {
         stores(
             closet: services.closet, looks: services.looks, suitcases: services.suitcases, profile: services.profile,
             drafts: services.drafts, lookDrafts: services.lookDrafts, feedbackDrafts: services.feedbackDrafts,
-            pictures: services.pictures, tours: services.tours, onboarding: services.onboarding)
+            pictures: services.pictures, tours: services.tours, onboarding: services.onboarding,
+            weatherSettings: services.weatherSettings)
     }
 
     private static func stores(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
-        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore
+        pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
+        weatherSettings: (any WeatherSettingsStore)?
     ) -> [(DataPart, any ErasableStore)] {
-        [
+        // Her live-weather choices (Phase 29) are profile settings, erased before onboarding.
+        let weather: [(DataPart, any ErasableStore)] = weatherSettings.map { [(.profile, $0)] } ?? []
+        return [
             (.drafts, drafts),
             (.drafts, lookDrafts),
             (.drafts, feedbackDrafts),
@@ -186,7 +191,8 @@ public struct LocalDataDeletion: DataDeletionService {
             (.closet, closet),
             (.profile, profile),
             (.profile, tours),
-            (.profile, onboarding),
+        ] + weather + [
+            (.profile, onboarding)
         ]
     }
 

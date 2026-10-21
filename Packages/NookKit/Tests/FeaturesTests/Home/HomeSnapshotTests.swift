@@ -85,6 +85,16 @@ struct HomeSnapshotTests {
         assertRoomSnapshot(Self.demo, on: .iPhone17, colorScheme: .dark, named: "dark")
     }
 
+    /// The whole room with live weather in the window (Phase 29): snow, and sun by day.
+    @Test(arguments: [WeatherCondition.snow, .sun])
+    func liveWeather(condition: WeatherCondition) {
+        var content = Self.demo
+        content.weather = WeatherSnapshot(
+            condition: condition, temperatureCelsius: 8, observedAt: .distantPast, lowCelsius: 3, highCelsius: 10,
+            precipitationChance: 0.6)
+        assertRoomSnapshot(content, on: .iPhone17, named: "weather-\(condition.rawValue)")
+    }
+
     /// Sun, cloudy, rain, snow, night and plain, light above dark (RD-01.4).
     @Test func windows() {
         let row = HStack(spacing: 12) {

@@ -73,11 +73,18 @@ if info.get("CFBundleIcons", {}).get("CFBundlePrimaryIcon", {}).get("CFBundleIco
     problems.append("no AppIcon in CFBundleIcons")
 if info.get("UILaunchScreen", {}).get("UIColorName") != "LaunchBackground":
     problems.append("the launch screen isn't the LaunchBackground colour")
-# The only permission the app asks for, with its words (Phase 22a). Picking photos uses the
-# system picker, which needs no key.
+# The only permissions the app asks for, with their words: the camera (Phase 22a; picking photos
+# uses the system picker, which needs no key) and approximate location while in use, for the
+# weather (Phase 29), which must stay reduced accuracy.
 allowed_permissions = {
     "NSCameraUsageDescription": "Take photos of your clothes to add them to your closet.",
+    "NSLocationWhenInUseUsageDescription": "Your rough location gets the forecast, so outfit ideas suit the weather. It's used only for the forecast and isn't saved.",
 }
+if info.get("NSLocationDefaultAccuracyReduced") is not True:
+    problems.append("Info.plist doesn't ask for reduced location accuracy (NSLocationDefaultAccuracyReduced)")
+for key in ("NSLocationAlwaysAndWhenInUseUsageDescription", "NSLocationAlwaysUsageDescription"):
+    if key in info:
+        problems.append(f"Info.plist asks for always-on location: {key}")
 for key, words in allowed_permissions.items():
     if info.get(key) != words:
         problems.append(f"Info.plist {key} is {info.get(key)!r}, expected {words!r}")

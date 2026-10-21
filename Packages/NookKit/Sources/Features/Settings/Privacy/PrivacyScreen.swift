@@ -18,6 +18,8 @@ struct PrivacyScreen: View {
     @State private var showsDeleteAccount = false
     @State private var showsBackups = false
     @State private var page: WebsiteLink?
+    @State private var weather = WeatherSettingsModel()
+    @Environment(\.openURL) private var openURL
     /// Delete my account is offered only while she's signed in (24c).
     @State private var isSignedIn = false
 
@@ -27,9 +29,29 @@ struct PrivacyScreen: View {
             backups: services.backups == nil ? nil : { showsBackups = true },
             deleteData: { showsDeleteData = true },
             deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
-            open: { page = $0 }
+            open: { page = $0 },
+            weather: weatherContent
         )
-        .task { isSignedIn = await services.account.isSignedIn() }
+        .task {
+            await weather.load(from: services)
+            isSignedIn = await services.account.isSignedIn()
+        }
+        .alert(
+            WeatherText.explainerTitle, isPresented: $weather.showsLocationExplainer,
+            actions: {
+                Button(WeatherText.explainerContinue) { Task { await weather.continueWithLocation() } }
+                    .accessibilityIdentifier("privacy.weather.explainer.continue")
+                Button(WeatherText.explainerCity) { weather.chooseCityInstead() }
+                    .accessibilityIdentifier("privacy.weather.explainer.city")
+            },
+            message: { Text(WeatherText.explainerMessage) }
+        )
+        .nookSheet(
+            isPresented: $weather.showsCityPicker, title: WeatherText.sheetTitle,
+            subtitle: WeatherText.sheetSubtitle, detents: [.large]
+        ) {
+            WeatherCitySheet(model: weather)
+        }
         .navigationTitle(SettingsText.privacyTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -54,6 +76,18 @@ struct PrivacyScreen: View {
         // Privacy and terms' quick tour (Phase 16b).
         .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && !showsBackups && page == nil)
     }
+
+    private var weatherContent: WeatherPrivacy {
+        WeatherPrivacy(
+            isOn: weather.settings.isOn, usesMyLocation: weather.settings.usesMyLocation,
+            cityName: weather.settings.city?.name, locationIsBlocked: weather.locationIsBlocked,
+            isSample: weather.isSample, credit: weather.credit,
+            setOn: { weather.setOn($0) }, setUsesMyLocation: { weather.setUsesMyLocation($0) },
+            chooseCity: { weather.showsCityPicker = true },
+            openSettings: {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            })
+    }
 }
 
 /// Privacy and terms, top to bottom. Separate from `PrivacyScreen` so snapshot tests can draw it.
@@ -67,14 +101,19 @@ struct PrivacyPage: View {
     /// Opens Delete my account (24c). `nil` hides the row: she isn't signed in.
     var deleteAccount: (() -> Void)?
     var open: (WebsiteLink) -> Void = { _ in }
+    /// The weather rows (Phase 29). `nil` leaves them out, as the first Stage B screens drew it.
+    var weather: WeatherPrivacy?
 
     var body: some View {
         SettingsPage(
             header: SettingsHeader(
                 title: SettingsText.privacyTitle, lede: SettingsText.privacyLede, art: .drawersPrivacy)
         ) {
-            NookBanner(PrivacyText.testBuild, systemImage: "info.circle", tone: .warning)
-                .accessibilityIdentifier("privacy.testBuild")
+            NookBanner(
+                weather.map { $0.isOn && !$0.isSample } == true ? PrivacyText.testBuildWeather : PrivacyText.testBuild,
+                systemImage: "info.circle", tone: .warning
+            )
+            .accessibilityIdentifier("privacy.testBuild")
 
             SettingsGroup(header: PrivacyText.staysHeader, identifier: "privacy.stays") {
                 ForEach(PrivacyText.stays, id: \.title) { item in
@@ -83,9 +122,13 @@ struct PrivacyPage: View {
                 SettingsNote(keepsChanges ? PrivacyText.staysNoteKept : PrivacyText.staysNote)
             }
 
+            if let weather {
+                WeatherPrivacyGroup(weather: weather)
+            }
+
             SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
                 SettingsNote(PrivacyText.laterNote)
-                ForEach(PrivacyText.later, id: \.title) { item in
+                ForEach(PrivacyText.later(includingWeather: weather == nil), id: \.title) { item in
                     SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
                 }
             }
@@ -215,6 +258,19 @@ nonisolated enum PrivacyText {
             localized:
                 "None of these is in this test build. Each will ask first, and allowing one never allows another.",
             bundle: .module, comment: "Privacy and terms: above what later features would send")
+    }
+
+    /// What a test build says while Live weather is on, since "sends nothing" would no longer be true.
+    static var testBuildWeather: String {
+        String(
+            localized:
+                "This is a test build. It has no account and no tracking or analytics. Live weather is on, so a rough location goes to Apple Weather. Nothing else is sent.",
+            bundle: .module, comment: "Privacy and terms: the banner at the top while Live weather is on")
+    }
+
+    /// Weather leaves the list once the Weather group above it is real (Phase 29).
+    static func later(includingWeather: Bool) -> [PrivacyItem] {
+        includingWeather ? later : later.filter { $0.systemImage != "cloud.sun" }
     }
 
     static var later: [PrivacyItem] {

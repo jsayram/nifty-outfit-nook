@@ -14,7 +14,7 @@ struct ServicesEnvironmentTests {
         await #expect(throws: StoreError.unavailable) { try await services.profile.update { $0.signName = "Lily" } }
         await #expect(throws: StoreError.unavailable) { try await services.tours.progress() }
         await #expect(throws: WeatherError.unavailable) { try await services.weather.currentWeather() }
-        #expect(Set(services.deletion.parts(in: .thisDevice)) == Set(DataPart.allCases))
+        #expect(Set(services.deletion.parts(in: .thisDevice)) == Set(DataPart.allCases.filter { !$0.isRemote }))
         #expect(await services.deletion.delete(.thisDevice).isComplete == false)
     }
 }
