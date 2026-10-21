@@ -10,6 +10,7 @@ struct GarmentEditorActions {
     var resume: () -> Void = {}
     var discardDraft: () -> Void = {}
     var choosePhoto: (PhotoSource) -> Void = { _ in }
+    var pastePhoto: (PickedPhoto) -> Void = { _ in }
     var tryAnotherPhoto: () -> Void = {}
     var describeInWords: () -> Void = {}
     var suggest: () -> Void = {}
