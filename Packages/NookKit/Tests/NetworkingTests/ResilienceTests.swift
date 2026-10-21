@@ -91,6 +91,19 @@ struct ResilienceTests {
         #expect(ContinuousClock.now - started < .seconds(5))
     }
 
+    @Test(.timeLimit(.minutes(1)))
+    func aTryIsCutOffAtItsLimitEvenWhenTheServerKeepsTrickling() async throws {
+        // One byte every 100 ms is never silent for 300 ms, so only a hard limit ends it. The
+        // answer is about 150 bytes, so it would take about 15 seconds on its own.
+        let policy = RetryPolicy(maxAttempts: 1, requestTimeout: .milliseconds(300))
+        let client = client(policy)
+        try await signedIn(client)
+        backend.setMode(.trickle)
+        let started = ContinuousClock.now
+        #expect(await me(client) == .timedOut)
+        #expect(ContinuousClock.now - started < .seconds(3))
+    }
+
     @Test func aSlowAnswerWithinTheLimitStillArrives() async throws {
         let client = client()
         try await signedIn(client)

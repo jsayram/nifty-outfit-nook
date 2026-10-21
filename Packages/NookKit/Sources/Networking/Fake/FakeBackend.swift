@@ -9,6 +9,9 @@ public enum FakeBackendMode: Sendable, Hashable {
     case slow(seconds: Double)
     /// Never answers, so the request times out.
     case timeout
+    /// Answers, but one byte every 100 ms: never silent for long, and never done. Only a hard
+    /// limit on the whole try ends it (26).
+    case trickle
     /// Refuses the next token it sees as expired (and keeps refusing that one), like a token that
     /// expired on the way. A fresh token works.
     case expiredToken
@@ -40,6 +43,7 @@ public enum FakeBackendMode: Sendable, Hashable {
 /// What the fake answers one request with.
 enum FakeReply: Sendable {
     case respond(status: Int, headers: [String: String], body: Data, delay: Duration)
+    case trickle(status: Int, headers: [String: String], body: Data)
     case fail(URLError.Code, delay: Duration)
     case hang
 }
@@ -120,7 +124,7 @@ public final class FakeBackend: Sendable {
         case .attestationRejected where endpoint?.paid == true: return error(.attestationRequired, id)
         case .actionInProgress(let seconds) where endpoint?.paid == true:
             return error(.actionInProgress, id, retryAfter: seconds)
-        case .normal, .slow, .expiredToken, .forbidden, .answerLost, .connectionLost, .attestationRejected,
+        case .normal, .slow, .trickle, .expiredToken, .forbidden, .answerLost, .connectionLost, .attestationRejected,
             .actionInProgress:
             break
         }
@@ -128,6 +132,9 @@ public final class FakeBackend: Sendable {
         let answer = route(request, body: body, endpoint: endpoint, id: id, refuseNextToken: mode == .expiredToken)
         if mode == .answerLost { return .fail(.timedOut, delay: .milliseconds(80)) }
         if mode == .connectionLost { return .fail(.networkConnectionLost, delay: .milliseconds(80)) }
+        if mode == .trickle, case .respond(let status, let headers, let body, _) = answer {
+            return .trickle(status: status, headers: headers, body: body)
+        }
         if case .slow(let seconds) = mode, case .respond(let status, let headers, let body, _) = answer {
             return .respond(status: status, headers: headers, body: body, delay: .seconds(seconds))
         }
