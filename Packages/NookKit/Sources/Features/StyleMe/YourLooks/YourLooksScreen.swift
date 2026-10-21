@@ -30,6 +30,8 @@ struct YourLooksScreen: View {
     @State private var tryingOn: TryOnRoute?
     @State private var toast: NookToastMessage?
     @State private var swapping: SwapRoute?
+    /// 27a: the stylist's consent sheet, from Review.
+    @State private var showsConsent = false
 
     init(request: StyleRequest, routes: YourLooksRoutes = YourLooksRoutes()) {
         self.routes = routes
@@ -53,9 +55,18 @@ struct YourLooksScreen: View {
                 useMainCloset: routes.useMainCloset,
                 addPieces: { routes.addPieces(model.request.source) },
                 openSaved: { stub = .saved($0.id) },
-                reloadSaved: { Task { await model.reloadLooks() } }
+                reloadSaved: { Task { await model.reloadLooks() } },
+                reviewConsent: { showsConsent = true }
             )
         )
+        .nookSheet(isPresented: $showsConsent, title: StylistConsentText.title, detents: [.large]) {
+            StylistConsentSheet(
+                allow: {
+                    showsConsent = false
+                    model.agreeToStylist()
+                },
+                notNow: { showsConsent = false })
+        }
         .navigationTitle(Text("Your looks", bundle: .module, comment: "Screen title"))
         .navigationBarTitleDisplayMode(.inline)
         .nookSheet(item: $stub, title: { sheetTitle($0) }, subtitle: { $0.subtitle }) { stub in

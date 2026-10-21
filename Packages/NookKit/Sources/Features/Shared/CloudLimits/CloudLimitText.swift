@@ -80,6 +80,8 @@ nonisolated public enum CloudLimitText {
             return String(
                 localized: "Something went wrong. Try again later.", bundle: .module,
                 comment: "Cloud action: any other failure")
+        case .needsConsent:
+            return StylistConsentText.needsConsent
         }
     }
 

@@ -153,13 +153,13 @@ public struct LocalDataDeletion: DataDeletionService {
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
-        weatherSettings: (any WeatherSettingsStore)? = nil
+        weatherSettings: (any WeatherSettingsStore)? = nil, stylistConsent: (any StylistConsentStore)? = nil
     ) {
         self.init(
             stores: Self.stores(
                 closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                 lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                onboarding: onboarding, weatherSettings: weatherSettings))
+                onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent))
     }
 
     /// The stores of `services` in the order `NookServices` erases them, for a deletion that
@@ -170,17 +170,19 @@ public struct LocalDataDeletion: DataDeletionService {
             closet: services.closet, looks: services.looks, suitcases: services.suitcases, profile: services.profile,
             drafts: services.drafts, lookDrafts: services.lookDrafts, feedbackDrafts: services.feedbackDrafts,
             pictures: services.pictures, tours: services.tours, onboarding: services.onboarding,
-            weatherSettings: services.weatherSettings)
+            weatherSettings: services.weatherSettings, stylistConsent: services.stylistConsent)
     }
 
     private static func stores(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
-        weatherSettings: (any WeatherSettingsStore)?
+        weatherSettings: (any WeatherSettingsStore)?, stylistConsent: (any StylistConsentStore)?
     ) -> [(DataPart, any ErasableStore)] {
-        // Her live-weather choices (Phase 29) are profile settings, erased before onboarding.
-        let weather: [(DataPart, any ErasableStore)] = weatherSettings.map { [(.profile, $0)] } ?? []
+        // Her live-weather choices (Phase 29) and her stylist consent (27a) are profile settings,
+        // erased before onboarding.
+        let weather: [(DataPart, any ErasableStore)] =
+            (weatherSettings.map { [(.profile, $0)] } ?? []) + (stylistConsent.map { [(.profile, $0)] } ?? [])
         return [
             (.drafts, drafts),
             (.drafts, lookDrafts),

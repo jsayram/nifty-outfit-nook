@@ -84,6 +84,12 @@ public enum ResultNote: Hashable, Sendable, Codable {
     /// She asked for a colour as required, and no usable piece could bring it into the look, so
     /// the look goes without it rather than inventing a piece (PRD §8.3).
     case requiredColorNotMet(ColorName)
+    /// 27a, FR-58: an earlier result from her own history that still fits today's request, shown
+    /// before asking the stylist again. New ideas asks afresh.
+    case fromHistory
+    /// 27a: the same request was asked in the last day, so the stylist's earlier answer came back
+    /// from the server without asking again or using an allowance.
+    case answeredAgain
 }
 
 /// A version the stylist couldn't make, and why. Shown with a partial result.
@@ -117,7 +123,7 @@ public struct InsufficientWardrobe: Hashable, Sendable, Codable {
 }
 
 /// Why the stylist couldn't finish. Never a claim about her closet (LR-05a).
-public enum StylistError: Error, Hashable, Sendable, Codable {
+public enum StylistError: Error, Hashable, Sendable {
     /// The stylist ran but didn't produce a valid result (GenerationNotCompleted).
     case notCompleted
     /// No connection.
@@ -128,4 +134,10 @@ public enum StylistError: Error, Hashable, Sendable, Codable {
     case cancelled
     /// The request couldn't be built, for example because the starting piece isn't eligible.
     case invalidRequest(StylingContextError)
+    /// 27a: she hasn't agreed to send styling requests to the stylist's provider, or withdrew it.
+    /// Nothing was sent.
+    case needsConsent
+    /// 27a: a server limit stopped it (too many at once, an allowance used up, paused, this
+    /// device not verified, signed out). Nothing was counted.
+    case limited(CloudLimitProblem)
 }

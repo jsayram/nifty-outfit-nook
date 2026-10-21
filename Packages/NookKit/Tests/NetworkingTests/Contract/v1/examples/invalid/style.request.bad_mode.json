@@ -1,4 +1,6 @@
 {
-  "mode": "everything",
-  "contextRevision": "rev_1"
+  "mode": "swap",
+  "contextRevision": "rev_1",
+  "consentVersion": "stylist-1",
+  "closet": []
 }

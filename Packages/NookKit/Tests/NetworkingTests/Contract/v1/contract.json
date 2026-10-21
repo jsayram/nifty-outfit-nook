@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "24c: authorization and account deletion (paid endpoints are placeholders until 27a and 33a)",
+  "status": "27a: the cloud stylist on POST /v1/style (try-on stays a placeholder until 33a)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -10,7 +10,9 @@
     "Paid endpoints (cost \"paid\") need an Idempotency-Key header and an App Attest assertion. A retry with the same key and the same body never runs or counts twice: it gets the first answer back. The same key with a different body is idempotency_conflict.",
     "Limits live on the server and the app can't change them: a per-user rate limit (rate_limited), daily and 30-day allowances per category (quota_exceeded, with resetAt), and per-feature and per-provider switches and spending ceilings (feature_paused). GET /v1/usage shows what is left without naming amounts of money.",
     "Authorization: every endpoint acts only on the caller's own account, taken from the verified token. No request names an account, a row or another user's ID, so there is nothing to point at someone else's data. An account being deleted gets forbidden on every endpoint except the deletion ones.",
-    "Account deletion (24c): POST /v1/account/deletion needs a fresh Sign in with Apple authorization code (re-authentication, and what the backend needs to revoke the Apple sign-in link). It answers 202 with the deletion's ID and steps; repeating it returns the same deletion and carries on. Once the account is gone the token stops working, so the status endpoint takes the deletion ID instead of a token. The ID is random and the status names no person."
+    "Account deletion (24c): POST /v1/account/deletion needs a fresh Sign in with Apple authorization code (re-authentication, and what the backend needs to revoke the Apple sign-in link). It answers 202 with the deletion's ID and steps; repeating it returns the same deletion and carries on. Once the account is gone the token stops working, so the status endpoint takes the deletion ID instead of a token. The ID is random and the status names no person.",
+    "Stylist (27a): POST /v1/style sends a bounded snapshot of the pieces she can use (IDs and plain descriptors, never photos, notes, brands, sizes or her name) and returns looks that reference only those IDs. The backend chooses the provider and model from its own configuration and checks every answer before it is returned. consentVersion names the consent text she agreed to; when it doesn't cover the backend's current provider the answer is consent_required and nothing is sent.",
+    "Stylist results: kind complete (three versions), partial (fewer, with each missing version and why), insufficient (no outfit can be made from these pieces; nothing counted), or answer (mode ask). fromCache is true when an identical request from the same account in the last 24 hours was answered again without asking the provider; such an answer doesn't count against an allowance."
   ],
   "limits": {
     "maxBodyBytes": 65536
@@ -184,7 +186,7 @@
     },
     {
       "id": "style",
-      "summary": "PLACEHOLDER until Phase 27a: runs the full admission path (attestation, idempotency, rate limit, allowance, switches, cost reservation) and a stand-in job, and returns a placeholder result. 27a replaces the request and result with the stylist's.",
+      "summary": "The cloud stylist (27a). Runs the full admission path (attestation, idempotency, rate limit, allowance, switches, cost reservation), then the server's stylist. mode full makes one outfit in up to three versions; mode ask answers a question about a look, with the earlier turns of that conversation.",
       "method": "POST",
       "path": "/v1/style",
       "auth": "required",
@@ -195,7 +197,7 @@
       },
       "response": {
         "status": 200,
-        "schema": "PaidActionResponse",
+        "schema": "StyleResponse",
         "example": "examples/style.response.json"
       },
       "errors": [
@@ -207,6 +209,7 @@
         "forbidden",
         "not_registered",
         "attestation_required",
+        "consent_required",
         "idempotency_conflict",
         "action_in_progress",
         "rate_limited",
@@ -330,6 +333,11 @@
       "code": "attestation_required",
       "status": 403,
       "meaning": "The App Attest assertion is missing, from an unknown key, or doesn't verify. Register a key again (attestation section), then retry once."
+    },
+    {
+      "code": "consent_required",
+      "status": 403,
+      "meaning": "Her consent (consentVersion) doesn't cover where the backend would send this request. Nothing was sent or counted. Ask her again with the current consent text."
     },
     {
       "code": "not_found",
@@ -705,20 +713,38 @@
       "additionalProperties": false,
       "required": [
         "mode",
-        "contextRevision"
+        "contextRevision",
+        "consentVersion",
+        "closet"
       ],
       "properties": {
         "mode": {
           "type": "string",
           "enum": [
             "full",
-            "swap",
             "ask"
           ]
         },
         "contextRevision": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "consentVersion": {
+          "type": "string",
+          "pattern": "^[a-z0-9.-]{1,32}$"
+        },
+        "closet": {
+          "type": "array",
+          "maxItems": 150,
+          "items": {
+            "$ref": "StylistPiece"
+          }
+        },
+        "outfit": {
+          "$ref": "OutfitRequest"
+        },
+        "question": {
+          "$ref": "StylistQuestion"
         }
       }
     },
@@ -916,11 +942,552 @@
           }
         }
       }
+    },
+    "StylistPiece": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "colors",
+        "dressiness",
+        "warmth"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom",
+            "dress",
+            "layer",
+            "shoes",
+            "bag",
+            "accessory"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{1,24}$"
+        },
+        "colors": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "enum": [
+              "black",
+              "white",
+              "cream",
+              "beige",
+              "tan",
+              "brown",
+              "gray",
+              "navy",
+              "blue",
+              "denim",
+              "green",
+              "olive",
+              "red",
+              "brick",
+              "burgundy",
+              "pink",
+              "purple",
+              "yellow",
+              "orange",
+              "multicolor"
+            ]
+          }
+        },
+        "colorNote": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "fit": {
+          "type": "string",
+          "enum": [
+            "fitted",
+            "regular",
+            "relaxed"
+          ]
+        },
+        "dressiness": {
+          "type": "string",
+          "enum": [
+            "casual",
+            "smart",
+            "dressy"
+          ]
+        },
+        "warmth": {
+          "type": "string",
+          "enum": [
+            "light",
+            "medium",
+            "warm"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "otherNames": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    "WeatherSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "condition",
+        "temperatureCelsius",
+        "isNight"
+      ],
+      "properties": {
+        "condition": {
+          "type": "string",
+          "enum": [
+            "sun",
+            "cloudy",
+            "rain",
+            "snow"
+          ]
+        },
+        "temperatureCelsius": {
+          "type": "integer",
+          "minimum": -60
+        },
+        "lowCelsius": {
+          "type": "integer",
+          "minimum": -60
+        },
+        "highCelsius": {
+          "type": "integer",
+          "minimum": -60
+        },
+        "precipitationPercent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "isNight": {
+          "type": "boolean"
+        }
+      }
+    },
+    "OutfitRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "occasion",
+        "ideaAllowed"
+      ],
+      "properties": {
+        "occasion": {
+          "type": "string",
+          "enum": [
+            "office",
+            "casual",
+            "brunch",
+            "dateNight",
+            "event",
+            "concert",
+            "other"
+          ]
+        },
+        "occasionNote": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "setting": {
+          "type": "string",
+          "enum": [
+            "outdoors",
+            "indoors"
+          ]
+        },
+        "weather": {
+          "$ref": "WeatherSummary"
+        },
+        "comfort": {
+          "type": "string",
+          "enum": [
+            "fitted",
+            "comfortable",
+            "relaxed"
+          ]
+        },
+        "color": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "family",
+            "strength",
+            "scope"
+          ],
+          "properties": {
+            "family": {
+              "type": "string",
+              "enum": [
+                "black",
+                "white",
+                "cream",
+                "beige",
+                "tan",
+                "brown",
+                "gray",
+                "navy",
+                "blue",
+                "denim",
+                "green",
+                "olive",
+                "red",
+                "brick",
+                "burgundy",
+                "pink",
+                "purple",
+                "yellow",
+                "orange",
+                "multicolor"
+              ]
+            },
+            "strength": {
+              "type": "string",
+              "enum": [
+                "preferred",
+                "required"
+              ]
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "anyPiece",
+                "top",
+                "bottom",
+                "dress",
+                "layer",
+                "shoes",
+                "wholePalette"
+              ]
+            }
+          }
+        },
+        "ideaAllowed": {
+          "type": "boolean"
+        },
+        "startingPieceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "avoid": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            }
+          }
+        }
+      }
+    },
+    "StylistQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "look",
+        "text"
+      ],
+      "properties": {
+        "look": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$"
+          }
+        },
+        "occasion": {
+          "type": "string",
+          "enum": [
+            "office",
+            "casual",
+            "brunch",
+            "dateNight",
+            "event",
+            "concert",
+            "other"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "earlier": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "$ref": "StylistTurn"
+          }
+        }
+      }
+    },
+    "StylistTurn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "text"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "enum": [
+            "her",
+            "stylist"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 600
+        }
+      }
+    },
+    "StylistLook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "pieces",
+        "why"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "dressedUp",
+            "somethingNew"
+          ]
+        },
+        "pieces": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$"
+          }
+        },
+        "idea": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "category",
+            "colors"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "top",
+                "bottom",
+                "dress",
+                "layer",
+                "shoes",
+                "bag",
+                "accessory"
+              ]
+            },
+            "colors": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "black",
+                  "white",
+                  "cream",
+                  "beige",
+                  "tan",
+                  "brown",
+                  "gray",
+                  "navy",
+                  "blue",
+                  "denim",
+                  "green",
+                  "olive",
+                  "red",
+                  "brick",
+                  "burgundy",
+                  "pink",
+                  "purple",
+                  "yellow",
+                  "orange",
+                  "multicolor"
+                ]
+              }
+            }
+          }
+        },
+        "why": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "StylistResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "looks",
+        "missing",
+        "fromCache"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "insufficient",
+            "answer"
+          ]
+        },
+        "looks": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "StylistLook"
+          }
+        },
+        "missing": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "version",
+              "reason"
+            ],
+            "properties": {
+              "version": {
+                "type": "string",
+                "enum": [
+                  "dressedUp",
+                  "somethingNew"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "noDressierPiece",
+                  "noOtherOwnedPiece"
+                ]
+              }
+            }
+          }
+        },
+        "insufficient": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "missing"
+          ],
+          "properties": {
+            "missing": {
+              "type": "array",
+              "maxItems": 7,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "top",
+                  "bottom",
+                  "dress",
+                  "layer",
+                  "shoes",
+                  "bag",
+                  "accessory"
+                ]
+              }
+            }
+          }
+        },
+        "answer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text",
+            "pieces"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 600
+            },
+            "pieces": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$"
+              }
+            }
+          }
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "fromCache": {
+          "type": "boolean"
+        }
+      }
+    },
+    "StyleResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "result",
+        "usage"
+      ],
+      "properties": {
+        "action": {
+          "$ref": "PaidAction"
+        },
+        "result": {
+          "$ref": "StylistResult"
+        },
+        "usage": {
+          "$ref": "UsageCategory"
+        }
+      }
     }
   },
   "planned": {
     "24d": "Support: POST /v1/feedback with the note (at most 2,000 characters), an optional reply address and a diagnostics opt-in; 202 with a ticket reference.",
-    "27a": "Stylist: POST /v1/style keeps its path, Idempotency-Key, assertion and errors; its request gains closet descriptors and preferences (never a provider or model name) and its result becomes the typed stylist answer.",
     "33a": "Try-on: POST /v1/try-on keeps its admission path; its request gains the faceless body photo and garment photos, and it becomes a job with up to three child pictures (PRD 9.2.4)."
   },
   "attestation": {

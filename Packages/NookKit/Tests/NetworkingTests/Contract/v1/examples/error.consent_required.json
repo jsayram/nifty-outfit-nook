@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "consent_required",
+    "message": "Ask for consent to the current stylist first. Nothing was sent.",
+    "requestId": "req_4e8c1d7f2a3b4c5d6e7f8a9b0c1d2e3f"
+  }
+}

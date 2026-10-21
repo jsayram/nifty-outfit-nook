@@ -83,7 +83,9 @@ struct ContractTests {
         ("v1/examples/attest-key.response.json", "attestKeyResponse"),
         ("v1/examples/style.request.json", "styleRequest"),
         ("v1/examples/try-on.request.json", "tryOnRequest"),
-        ("v1/examples/style.response.json", "paidActionResponse"),
+        ("v1/examples/style.response.json", "styleResponse"),
+        ("v1/examples/style-ask.request.json", "styleRequest"),
+        ("v1/examples/style-ask.response.json", "styleResponse"),
         ("v1/examples/try-on.response.json", "paidActionResponse"),
         ("v1/examples/deletion.request.json", "deletionRequest"),
         ("v1/examples/deletion-status.request.json", "deletionStatusRequest"),
@@ -108,6 +110,7 @@ struct ContractTests {
             case "styleRequest": try encoder.encode(decoder.decode(APIV1.StyleRequest.self, from: original))
             case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
             case "paidActionResponse": try encoder.encode(decoder.decode(APIV1.PaidActionResponse.self, from: original))
+            case "styleResponse": try encoder.encode(decoder.decode(APIV1.StyleResponse.self, from: original))
             case "deletionRequest": try encoder.encode(decoder.decode(APIV1.DeletionRequest.self, from: original))
             case "deletionStatusRequest":
                 try encoder.encode(decoder.decode(APIV1.DeletionStatusRequest.self, from: original))
@@ -120,7 +123,7 @@ struct ContractTests {
     @Test func everyErrorExampleUsesAKnownCode() throws {
         for name in [
             "token_expired", "rate_limited", "invalid_request", "quota_exceeded", "feature_paused",
-            "idempotency_conflict", "action_in_progress", "attestation_required",
+            "idempotency_conflict", "action_in_progress", "attestation_required", "consent_required",
         ] {
             let envelope = try JSONDecoder().decode(
                 APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/error.\(name).json"))

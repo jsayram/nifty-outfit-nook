@@ -75,7 +75,7 @@ enum AppGateway {
             fake.backend.observeDeletions { data in try? data.write(to: report, options: .atomic) }
             _ = try? await fake.account.signIn()
             _ = try? await fake.paid.run(
-                .style(mode: .full, contextRevision: "rev_debug"), idempotencyKey: IdempotencyKey.make())
+                .style(.sample(.full, note: "debug")), idempotencyKey: IdempotencyKey.make())
         }
 
         /// The fake backend's limits, for the limits screen (Phase 24b). Nil on the real services,

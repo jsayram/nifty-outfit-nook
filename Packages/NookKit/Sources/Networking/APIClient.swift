@@ -33,6 +33,9 @@ public enum APIFailure: Error, Sendable, Equatable {
     case quotaExceeded(category: String, resetAt: Date?, retryAfterSeconds: Int)
     /// 503 feature_paused: switched off on the server, or its spending ceiling is reached.
     case featurePaused(feature: String?, retryAfterSeconds: Int?)
+    // 27a
+    /// 403 consent_required: her consent doesn't cover where the backend would send this.
+    case consentRequired
 }
 
 /// Signs a paid request (24b): the App Attest headers for one try. Called again for every try,
@@ -224,6 +227,8 @@ public final class APIClient: Sendable {
                 continue
             case 403 where envelope?.error.code == APIV1.ErrorCode.attestationRequired.rawValue:
                 throw fail(endpoint, .attestationRequired)
+            case 403 where envelope?.error.code == APIV1.ErrorCode.consentRequired.rawValue:
+                throw fail(endpoint, .consentRequired)
             case 403:
                 throw fail(endpoint, .forbidden)
             case 409 where envelope?.error.code == APIV1.ErrorCode.idempotencyConflict.rawValue:
