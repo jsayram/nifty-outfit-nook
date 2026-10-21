@@ -57,6 +57,18 @@ Every typed word has to match somewhere: the name, the brand, her colour note, t
 
 Search waits for a 250 ms pause in typing before it runs, so the large closet isn't filtered on every letter. Pressing Search, or emptying the field, applies at once.
 
+### Possible matches (PRD §7.6)
+
+When no piece has every word, Closet still says "No pieces match" with Clear filters, and then lists **Possible matches**: pieces that have some of her words. It's a separate, labelled section, never mixed with real results. The line under the heading says "These have some of your words, not all, so they might not be what you meant." and names any word none of them has ("None of them has “party”."). Each piece carries a small "2 of 3 words" mark, and VoiceOver reads which words it has and which aren't recorded on it ("Has “navy” and “pants”. Not recorded: “party”").
+
+- The rule is `GarmentFilter.possibleMatches` in Models. The chips, swatches, Suitcase filter and Dirty chip still apply in full; only the typed words are loosened.
+- Filler words ("my", "the", "with" and a few more, a translatable list in `ClosetModel.fillerWords`) don't count. With fewer than two other words there's nothing to loosen, so nothing is listed.
+- More words first, then newest first, and at most eight.
+- Closet only. Swap's See all and the piece picker share this model but don't show possible matches, since picking a piece there doesn't open its detail.
+- Nothing is stored and nothing leaves the phone. There's no spelling or synonym help yet ("baggie" for "baggy").
+
+Opening a possible match opens its detail with **Remember this name** (`docs/garment-detail.md`). Once she remembers the words, the same search finds the piece as a real result.
+
 ## The grid
 
 `LazyVGrid`, so only the cells on screen exist. Columns follow the width and the text size:
@@ -106,11 +118,12 @@ Measured on an Apple-silicon Mac, iOS 26.5 simulator, Debug, tests run one at a 
 
 ## Tests
 
+- `PossibleMatchesTests` (Models) and `ClosetPossibleMatchesTests`: which pieces are possible matches, their order and limit, filler words, chips still applying, none with real results or in a picker, and the words for each piece.
 - `ClosetModelTests`: what each fixture set loads, the suitcase names, laundry tracking on and off, each filter alone and together, search words, Clear, the search delay, and what VoiceOver reads.
 - `LargeClosetBrowsingTests`: timing with the large closet.
 - `GarmentImageLoaderTests`: downsampling, the cache, remembered misses, retrying a failed load, and the placeholder drawings.
-- `ClosetSnapshotTests`: the demo closet with tracking on, the same in dark, AX5, no matches, empty, and the error state, 402 pt wide; and the tiles alone on a 375 pt iPhone SE, stacked.
-- `ClosetTests` (UI): a piece chip and its selected state, Clear, search by name, VoiceOver's value on a piece, opening a piece and coming back, and the empty closet's Add a piece.
+- `ClosetSnapshotTests`: the demo closet with tracking on, the same in dark, AX5, no matches, possible matches, empty, and the error state, 402 pt wide; and the tiles alone on a 375 pt iPhone SE, stacked.
+- `ClosetTests` (UI): a piece chip and its selected state, Clear, search by name, VoiceOver's value on a piece, opening a piece and coming back, and the empty closet's Add a piece. `testPossibleMatchesAndRememberThisName` searches "navy party pants", opens the possible match, remembers the words, and finds the piece by them back on Closet.
 - `LaunchTests` (UI) now reads the piece count from Closet's header for the demo, offline, empty and large sets, and the error state for `stores-fail`.
 
 ## Decisions for Jose

@@ -12,6 +12,11 @@ import Observation
 ///
 /// The search and the chips are shared by both tabs, so "navy" stays set when she switches to
 /// Pictures. On Pictures they match the look each picture came from (RD-08.3).
+///
+/// The Looks tab has a scope (Phase 21c, decided 21 October 2026): Saved is her saved looks, All
+/// is those plus every Style Me result she kept but didn't save (LR-06.4), in one list. Search and
+/// the chips work the same in both; on Saved, a line at the end says how many more looks the same
+/// search and chips find in All (`moreInAll`).
 @Observable
 final class SavedLooksModel {
     enum Phase: Equatable {
@@ -26,17 +31,43 @@ final class SavedLooksModel {
         case pictures
     }
 
-    var tab: Tab = .looks
+    /// Which looks the Looks tab lists. It starts on Saved, and the screen puts it back there each
+    /// time she leaves the tab.
+    enum Scope: String, Hashable, CaseIterable {
+        /// Only her saved looks.
+        case saved
+        /// Her saved looks and every Style Me result she kept but didn't save (LR-06.4).
+        case all
+    }
+
+    var tab: Tab = .looks {
+        didSet {
+            guard tab != oldValue else { return }
+            updateChoices()
+        }
+    }
+
+    /// Saved or All. Search and the chips stay as they are; the swatches follow the scope.
+    var scope: Scope = .saved {
+        didSet {
+            guard scope != oldValue else { return }
+            updateChoices()
+        }
+    }
+
     private(set) var phase: Phase = .loading
     /// Every saved look, newest saved first.
     private(set) var items: [SavedLookItem] = []
-    /// The looks that match the search and filters, in the same order.
+    /// Every Style Me result she kept but didn't save, newest first (LR-06.4, Phase 21c).
+    private(set) var unsavedItems: [SavedLookItem] = []
+    /// Saved and unsaved looks in one list, newest made first. Saving a look doesn't move it
+    /// here, so it changes where it is.
+    private(set) var allItems: [SavedLookItem] = []
+    /// The looks the scope lists that match the search and filters, in the list's order.
     private(set) var shown: [SavedLookItem] = []
-    /// Earlier Style Me results she didn't save, newest first (LR-06.4, Phase 21c). Never listed
-    /// on their own: only typed search finds them.
-    private(set) var earlierItems: [SavedLookItem] = []
-    /// The earlier results that match a typed search and the filters. Empty without typed words.
-    private(set) var shownEarlier: [SavedLookItem] = []
+    /// On Saved: how many unsaved looks the search and chips match too. Zero when none is set,
+    /// and on All.
+    private(set) var moreInAll = 0
     /// The Pictures tab: loading, loaded or failed, apart from the looks, so the Looks tab still
     /// works when pictures can't be read.
     private(set) var picturesPhase: Phase = .loading
@@ -61,6 +92,8 @@ final class SavedLooksModel {
     private var looksByID: [Look.ID: Look] = [:]
     private var garmentsByID: [Garment.ID: Garment] = [:]
     private var pictures: [TryOnPicture] = []
+    /// Looks being saved from the grid, so a second tap on the same one does nothing.
+    @ObservationIgnored private var saving: Set<Look.ID> = []
 
     /// What's typed in the search field. Applied once typing pauses (`SearchDebouncer`).
     var searchText = "" {
@@ -119,18 +152,13 @@ final class SavedLooksModel {
         let byID = Dictionary(garments.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         garmentsByID = byID
         looksByID = Dictionary(looks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        items =
+        allItems =
             looks
-            .filter(\.isSaved)
+            .map { SavedLookItem($0, garments: byID) }
             .sorted { lhs, rhs in
-                lhs.savedDate != rhs.savedDate ? lhs.savedDate > rhs.savedDate : lhs.id < rhs.id
+                lhs.look.createdAt != rhs.look.createdAt ? lhs.look.createdAt > rhs.look.createdAt : lhs.id < rhs.id
             }
-            .map { SavedLookItem($0, garments: byID) }
-        earlierItems =
-            looks
-            .filter { !$0.isSaved }
-            .sorted { lhs, rhs in lhs.createdAt != rhs.createdAt ? lhs.createdAt > rhs.createdAt : lhs.id < rhs.id }
-            .map { SavedLookItem($0, garments: byID) }
+        deriveLists()
         phase = .loaded
         if picturesPhase == .loaded {
             // The looks changed, so where each picture's look is may have too.
@@ -151,16 +179,77 @@ final class SavedLooksModel {
         pictureItems = pictures.map { SavedPictureItem($0, looks: looksByID, garments: garmentsByID) }
     }
 
-    /// The chips and swatches for what both tabs hold, so a chip never disappears when she
-    /// switches tab.
+    /// The saved list (newest saved first) and the unsaved list (newest made first), from `allItems`.
+    private func deriveLists() {
+        items =
+            allItems
+            .filter { $0.isSaved }
+            .sorted { lhs, rhs in
+                lhs.look.savedDate != rhs.look.savedDate ? lhs.look.savedDate > rhs.look.savedDate : lhs.id < rhs.id
+            }
+        unsavedItems = allItems.filter { !$0.isSaved }
+    }
+
+    /// Puts a look that just changed (saved from the grid, or put back by Undo) where it belongs.
+    /// Its place in `allItems` doesn't change, so the list doesn't move under her.
+    private func place(_ look: Look) {
+        looksByID[look.id] = look
+        let item = SavedLookItem(look, garments: garmentsByID)
+        if let index = allItems.firstIndex(where: { $0.id == look.id }) {
+            allItems[index] = item
+        } else {
+            allItems.append(item)
+            allItems.sort { lhs, rhs in
+                lhs.look.createdAt != rhs.look.createdAt ? lhs.look.createdAt > rhs.look.createdAt : lhs.id < rhs.id
+            }
+        }
+        deriveLists()
+        if picturesPhase == .loaded { buildPictureItems() }
+        updateChoices()
+    }
+
+    // MARK: Save look, from the grid
+
+    /// Save look on a look that isn't saved, from the grid on All: it joins Saved Looks, named as
+    /// Your looks names a saved result (LR-08), and changes where it is. Returns the look before,
+    /// for Undo, or `nil` when it's already saved or being saved.
+    func save(
+        _ id: Look.ID, locale: Locale, using services: NookServices, now: Date = .now
+    ) async throws(StoreError) -> Look? {
+        guard let before = looksByID[id], !before.isSaved, saving.insert(id).inserted else { return nil }
+        defer { saving.remove(id) }
+        var saved = before
+        saved.isSaved = true
+        saved.savedAt = now
+        saved.name = YourLooksText.name(for: before, occasion: before.occasion, garments: garmentsByID, locale: locale)
+        try await services.looks.save(saved)
+        place(saved)
+        return before
+    }
+
+    /// Undo for Save look: the exact look before, unsaved again.
+    func undoSave(_ before: Look, using services: NookServices) async throws(StoreError) {
+        try await services.looks.save(before)
+        place(before)
+    }
+
+    /// The chips and swatches for what the tabs hold, so a chip never disappears when she switches
+    /// tab. The Looks tab on All adds what her unsaved looks have; Saved and Pictures don't, so
+    /// a swatch there always finds something. A chip or swatch that's on stays on show, so she
+    /// can always turn it off.
     private func updateChoices() {
-        let pieces = items.flatMap(\.filterPieces) + pictureItems.flatMap(\.filterLook.filterPieces)
+        let shownLooks = tab == .looks && scope == .all ? allItems : items
+        let pictures = pictureItems.flatMap(\.filterLook.filterPieces)
+        let pieces = shownLooks.flatMap(\.filterPieces) + pictures
         let kinds = Set(pieces.map(\.category))
-        pieceKinds = Self.standardKinds + (kinds.contains(.accessory) ? [.accessory] : [])
+        pieceKinds =
+            Self.standardKinds
+            + (kinds.contains(.accessory) || filter.categories.contains(.accessory) ? [.accessory] : [])
         let colours = Set(pieces.flatMap(\.colors))
-        colorChoices = ColorName.allCases.filter(colours.contains)
         // A swatch whose colour is gone from every look can't be turned off any more, so drop it.
-        filter.colors.formIntersection(colours)
+        let everyColour = Set(allItems.flatMap(\.filterPieces).flatMap(\.colors) + pictures.flatMap(\.colors))
+        filter.colors.formIntersection(everyColour)
+        colorChoices = ColorName.allCases.filter { colours.contains($0) || filter.colors.contains($0) }
         refresh()
     }
 
@@ -195,6 +284,7 @@ final class SavedLooksModel {
         await load(from: services, now: now)
     }
 
+    /// A saved look's item. A look she hasn't saved has none: find it in `unsavedItems`.
     func item(_ id: Look.ID) -> SavedLookItem? {
         items.first { $0.id == id }
     }
@@ -207,12 +297,13 @@ final class SavedLooksModel {
 
     func toggle(_ kind: GarmentCategory) {
         filter.categories.formSymmetricDifference([kind])
-        refresh()
+        updateChoices()
     }
 
     func toggle(_ color: ColorName) {
         filter.colors.formSymmetricDifference([color])
-        refresh()
+        // A swatch that was only on show because it was on goes when it's turned off.
+        updateChoices()
     }
 
     /// Clear: every chip and the search (LR-09.3).
@@ -220,7 +311,7 @@ final class SavedLooksModel {
         search.cancel()
         filter = LookFilter()
         searchText = ""
-        refresh()
+        updateChoices()
     }
 
     /// Runs the typed search now, as when she presses Search.
@@ -247,23 +338,33 @@ final class SavedLooksModel {
 
     private func refresh() {
         let filter = filter
-        shown = filter.isActive ? items.filter { $0.matches(filter) } : items
-        // LR-06.4: an earlier result is findable in search, so only typed words bring them up.
-        shownEarlier = filter.words.isEmpty ? [] : earlierItems.filter { $0.matches(filter) }
+        let listed = scopeItems
+        shown = filter.isActive ? listed.filter { $0.matches(filter) } : listed
+        // The nudge on Saved needs a search or a chip: with neither, every unsaved look "matches".
+        moreInAll = scope == .saved && filter.isActive ? unsavedItems.count { $0.matches(filter) } : 0
         shownPictures = filter.isActive ? pictureItems.filter { $0.matches(filter) } : pictureItems
     }
 
     // MARK: What the screen says
 
-    /// True when the looks have loaded and none is saved.
-    var isEmpty: Bool { phase == .loaded && items.isEmpty }
+    /// The looks the scope lists, before the search and filters.
+    private var scopeItems: [SavedLookItem] {
+        scope == .all ? allItems : items
+    }
 
-    /// True when the search and filters leave no looks, saved or earlier.
-    var hasNoMatches: Bool { phase == .loaded && !items.isEmpty && shown.isEmpty && shownEarlier.isEmpty }
+    /// True when the looks have loaded and the scope lists none: nothing saved yet on Saved,
+    /// no looks at all on All.
+    var isEmpty: Bool { phase == .loaded && scopeItems.isEmpty }
 
-    /// True when an earlier result she didn't save opens from here (LR-06.4).
-    func isEarlierResult(_ id: Look.ID) -> Bool {
-        earlierItems.contains { $0.id == id }
+    /// True when the search and filters leave no looks in the scope.
+    var hasNoMatches: Bool { phase == .loaded && !scopeItems.isEmpty && shown.isEmpty }
+
+    /// True when she has Style Me results she didn't save, which only All lists.
+    var hasUnsaved: Bool { !unsavedItems.isEmpty }
+
+    /// True for a look she hasn't saved, which opens from All with Save look (LR-06.4).
+    func isNotSaved(_ id: Look.ID) -> Bool {
+        unsavedItems.contains { $0.id == id }
     }
 
     /// True when the pictures have loaded and there are none.
@@ -274,10 +375,18 @@ final class SavedLooksModel {
         picturesPhase == .loaded && !pictureItems.isEmpty && shownPictures.isEmpty
     }
 
-    /// Under the title: "5 looks", or "2 of 5 looks" while filtering.
+    /// Under the title: "5 looks" on Saved, "8 looks, 3 not saved" on All.
+    var headerCountText: String {
+        guard phase == .loaded, !scopeItems.isEmpty else { return "" }
+        let total = SavedLooksText.looks(scopeItems.count)
+        guard scope == .all, !unsavedItems.isEmpty else { return total }
+        return SavedLooksText.withUnsaved(total, unsaved: unsavedItems.count)
+    }
+
+    /// On the count line: "5 looks", or "2 of 5 looks" while filtering, out of the scope's looks.
     var countText: String {
-        guard phase == .loaded, !items.isEmpty else { return "" }
-        let total = SavedLooksText.looks(items.count)
+        guard phase == .loaded, !scopeItems.isEmpty else { return "" }
+        let total = SavedLooksText.looks(scopeItems.count)
         return filter.isActive ? SavedLooksText.shown(shown.count, of: total) : total
     }
 

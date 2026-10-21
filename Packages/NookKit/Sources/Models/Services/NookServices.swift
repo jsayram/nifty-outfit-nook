@@ -41,6 +41,9 @@ public struct NookServices: Sendable {
     /// Her image files (Phase 22b): removes the ones nothing points to any more. Nothing to do
     /// where photos aren't files: the debug sample closet in memory, previews and most tests.
     public var imageFiles: any ImageFiles = NoImageFiles()
+    /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
+    /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
+    public var account: any AccountService = UnavailableAccountService()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.

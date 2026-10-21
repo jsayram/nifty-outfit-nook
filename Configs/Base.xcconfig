@@ -27,6 +27,13 @@ ALWAYS_SEARCH_USER_PATHS = NO
 CLANG_ENABLE_MODULES = YES
 CLANG_ENABLE_OBJC_ARC = YES
 
+// The real backend and sign-in (Phase 24a). Empty here, so the app runs on the fake sign-in and
+// the in-process fake backend. Configs/Secrets.xcconfig (ignored by git) sets them when Jose
+// switches to Clerk and Convex: see Secrets.xcconfig.example and docs/backend-switch.md. Neither
+// is a secret (both ship inside the app), but they stay out of this public repo.
+CLERK_PUBLISHABLE_KEY =
+NOOK_API_BASE_URL =
+
 // Optional, ignored by git. Copy Signing.local.xcconfig.example to Signing.local.xcconfig
 // and set DEVELOPMENT_TEAM there to build for a device. Secrets.xcconfig is reserved for
 // non-secret identifiers that shouldn't be public; it never holds a real secret.

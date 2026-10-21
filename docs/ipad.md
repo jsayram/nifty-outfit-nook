@@ -98,7 +98,7 @@ VoiceOver reads the left pane, then the right, which is the phone's order except
 
 Laid out like Closet, from the same widths (`WindowLayout.browse`):
 
-- **Sideways (from 1,080 points):** the sidebar has the title and count, Looks and Pictures, search, the chips and swatches wrapped onto as many lines as they need, and the line about a deleted look or picture with Undo. The grid fills the middle. The look or picture she picks shows on the right.
+- **Sideways (from 1,080 points):** the sidebar has the title and count, Looks and Pictures, the Saved | All switch, search, the chips and swatches wrapped onto as many lines as they need, and the line about a deleted look or picture with Undo. The grid fills the middle, with "N more in All" under it on Saved and the Not saved tags and Save look on All. The look or picture she picks shows on the right.
 - **Upright (from 760 points):** the phone page on the left, with the look or picture beside it.
 - Narrower windows and the accessibility sizes keep the phone page.
 

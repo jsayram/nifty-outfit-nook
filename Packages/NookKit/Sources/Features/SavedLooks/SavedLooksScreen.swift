@@ -21,6 +21,11 @@ nonisolated enum SavedLooksDestination: Hashable, Sendable {
 /// back goes back rather than piling up copies: See the look on a picture opened from that look
 /// is Back.
 ///
+/// The Looks tab is Saved or All (Phase 21c): All adds the Style Me results she didn't save, each
+/// with a Save look button that saves it where it is, with Undo in a toast. The scope goes back to
+/// Saved each time she leaves the tab, as the line about a deleted look goes; the app keeps no
+/// screen state across launches, so there's nothing to restore.
+///
 /// The path is the root view's, so a frame on the Home shelf can open a look here. The looks
 /// reload each time the tab appears and each time a pushed screen closes, so a look saved on Your
 /// looks, built in Make your own look or changed on its detail shows up. Delete look comes back
@@ -37,6 +42,7 @@ struct SavedLooksScreen: View {
     @Binding var path: [SavedLooksDestination]
 
     @Environment(\.services) private var services
+    @Environment(\.locale) private var locale
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model = SavedLooksModel()
@@ -71,8 +77,8 @@ struct SavedLooksScreen: View {
                 // Saved Looks' quick tour (Phase 16b), on the Looks tab once she has saved looks.
                 .screenTour(
                     SavedLooksTour.definition,
-                    isReady: model.phase == .loaded && model.tab == .looks && !model.isEmpty && !model.hasNoMatches
-                        && toast == nil
+                    isReady: model.phase == .loaded && model.tab == .looks && model.scope == .saved
+                        && !model.isEmpty && !model.hasNoMatches && toast == nil
                 )
                 .navigationTitle(SavedLooksText.title)
                 .navigationBarTitleDisplayMode(.inline)
@@ -120,6 +126,7 @@ struct SavedLooksScreen: View {
         .onDisappear {
             model.lastRemoval = nil
             endPictureRemoval()
+            model.scope = .saved
         }
         .onChange(of: path) { old, new in
             // Back from a pushed screen: it may have saved or changed a look or a picture.
@@ -144,6 +151,7 @@ struct SavedLooksScreen: View {
                 open: { openLook($0.id) },
                 undoDelete: undoDelete,
                 makeYourOwn: { path.append(.makeYourOwnLook) },
+                save: saveLook,
                 retry: reload,
                 openPicture: { openPicture($0.id) },
                 openLook: { openLook($0.id) },
@@ -182,7 +190,7 @@ struct SavedLooksScreen: View {
         LookDetailScreen(
             lookID: id,
             changes: changes,
-            allowsEarlierResult: model.isEarlierResult(id),
+            allowsEarlierResult: model.isNotSaved(id),
             openGarment: { garmentID, name in path.append(.closet(.garment(garmentID, name: name))) },
             openPicture: openPicture,
             deleted: lookDeleted,
@@ -271,6 +279,22 @@ struct SavedLooksScreen: View {
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    /// Save look on a look she hasn't saved, from the grid on All: it saves where it is, with Undo.
+    private func saveLook(_ item: SavedLookItem) {
+        Task {
+            do {
+                guard let before = try await model.save(item.id, locale: locale, using: services) else { return }
+                toast = NookToastMessage(
+                    LookDetailText.savedToast, systemImage: "heart.fill", actionTitle: YourLooksText.undo
+                ) {
+                    Task { try? await model.undoSave(before, using: services) }
+                }
+            } catch {
+                toast = NookToastMessage(LookDetailText.failedToast, systemImage: "exclamationmark.circle")
+            }
+        }
     }
 
     /// Delete suitcase, from a suitcase opened on a piece's detail: back to the piece, with Undo.
@@ -371,7 +395,7 @@ struct SavedLooksScreen: View {
     /// Remove from closet on a look's piece: back to the look, with Undo (LR-16.1). The look now
     /// shows the piece faded with Swap it.
     private func pieceRemoved(_ removal: GarmentRemoval) {
-        if case .closet(.garment(let id, _)) = path.last, id == removal.garmentID {
+        if case .closet(.garment(let id, _, _)) = path.last, id == removal.garmentID {
             path.removeLast()
         }
         let closet = services.closet
