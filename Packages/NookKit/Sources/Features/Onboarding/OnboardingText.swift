@@ -135,8 +135,9 @@ nonisolated enum OnboardingText {
     static var nothingSentDetail: String {
         String(
             localized:
-                "This test build sends nothing. It doesn’t ask for your camera, photos, location or notifications.",
-            bundle: .module, comment: "Onboarding privacy: nothing leaves the phone in Stage A")
+                "This test build sends nothing. It asks for the camera only when you take a photo, and never for your location or notifications.",
+            bundle: .module,
+            comment: "Onboarding privacy: nothing leaves the phone; the camera is asked for when used (Phase 22a)")
     }
 
     static var asksFirstTitle: String {
@@ -221,8 +222,8 @@ nonisolated enum OnboardingText {
     static var emptyDetail: String {
         String(
             localized:
-                "Add your own pieces, with sample pictures for now. They’re kept when the app closes.",
-            bundle: .module, comment: "Onboarding: what the empty closet is")
+                "Add your own pieces, with your own photos. They’re kept when the app closes.",
+            bundle: .module, comment: "Onboarding: what the empty closet is (real photos since Phase 22a)")
     }
 
     static var closetNote: String {

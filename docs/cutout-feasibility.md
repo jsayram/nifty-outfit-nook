@@ -6,6 +6,8 @@ The real answer needs her iPhone 12 and real photos of her clothes. Everything e
 
 **When it happens (17 October 2026).** No simulator can run the cutout (see below), and Jose doesn't have her phone during Stage A. So the go/no-go moves to Phase 22a, run on her iPhone 12 with her own photos, as described under [Running the benchmark](#running-the-benchmark-on-lilys-iphone-12). Before that, any real iPhone Jose owns can run the same benchmark as a quality-only check: whether the drawn samples and a few real garment photos come out clean enough for stickers. Its times and memory say nothing about an A14 and don't count toward the go/no-go.
 
+**Status after Phase 22a (20 October 2026): waiting on Jose, with a real iPhone.** Real photos now come in from the camera and the photo picker (`docs/add-a-piece.md`), so there are real photos to cut out, but the go/no-go still needs an A14. Checked for 22a on an iPhone 12 simulator (iOS 26.5, Xcode 27.1): `-cutout-bench` opens on the Cutout benchmark, Choose photos opens the system picker with no permission prompt, and Use drawn samples runs all nine and reports "iPhone13,2 simulator, iOS 26.5" with no times, as Vision can't lift there. Nothing about the bench changed in 22a, and the steps below still apply. Until the go/no-go, real photos aren't cut out at all: a piece with a photo and no cutout shows its photo in a tile (`GarmentArtChoice`), which is the fallback for a failed lift too. Running the cutout when she adds a piece, and keeping the cutout next to the original, comes after the decision (22b keeps originals and cutouts side by side).
+
 ## What's where
 
 | File | Holds |
@@ -78,7 +80,7 @@ This shows the pipeline works and gives a floor for speed. It says little about 
 ### Photos picker facts (iOS 26.5 simulator)
 
 - `PhotosPicker` runs outside the app. It opened with no permission prompt, and the app has no `NSPhotoLibraryUsageDescription` or any other privacy key (checked in the built Info.plist). The picker itself shows "Private Access to Photos: … can only access the items you select."
-- The picker says **"Location Is Included"** by default, so a picked photo's bytes can carry its GPS position unless she turns that off in the picker's options. The cutout PNG has no metadata whatever the input, and Phase 22a must strip metadata from the stored original too (SECURITY_STANDARD.md §4).
+- The picker says **"Location Is Included"** by default, so a picked photo's bytes can carry its GPS position unless she turns that off in the picker's options. The cutout PNG has no metadata whatever the input. Since Phase 22a the stored original has none either: `PhotoCleaner` keeps an upright copy made from the pixels alone (`docs/add-a-piece.md`).
 - The benchmark asks for `preferredItemEncoding: .current`, so it gets the photo as stored (usually HEIC) without the picker converting it.
 
 ## Running the benchmark on Lily's iPhone 12

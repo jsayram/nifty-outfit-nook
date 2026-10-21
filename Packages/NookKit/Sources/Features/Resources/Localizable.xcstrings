@@ -984,16 +984,8 @@
     "Add your clothes" : {
       "comment" : "Closet tour, step 1 title"
     },
-    "Add your own pieces, with sample pictures for now. They’re kept when the app closes." : {
-      "comment" : "Onboarding: what the empty closet is",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add your own pieces, with sample pictures for now. They’re kept when the app closes."
-          }
-        }
-      }
+    "Add your own pieces, with your own photos. They’re kept when the app closes." : {
+      "comment" : "Onboarding: what the empty closet is (real photos since Phase 22a)"
     },
     "Add your pieces, then tap the laptop in your room. You’ll get one outfit in three versions." : {
       "comment" : "Onboarding privacy: what the app does, the line under it"
@@ -1520,6 +1512,9 @@
     "Calendar: Occasion, %@" : {
       "comment" : "VoiceOver label for the calendar, with her last occasion, as in Calendar: Occasion, Office"
     },
+    "Camera access is off for Nifty Outfit Nook. You can turn it on in Settings, or choose a photo instead." : {
+      "comment" : "Alert when the camera permission is off (PERMISSIONS.md)"
+    },
     "Cancel" : {
       "comment" : "Button: closes Add a piece or Edit",
       "localizations" : {
@@ -1691,6 +1686,9 @@
     },
     "Choose a colour for this look." : {
       "comment" : "VoiceOver hint for Colour"
+    },
+    "Choose a photo" : {
+      "comment" : "Button: opens the photo picker instead of the camera"
     },
     "Choose a photo, or take one, to add your piece. For now each one adds a sample picture." : {
       "comment" : "Add a piece tour, step 1"
@@ -2194,6 +2192,9 @@
           }
         }
       }
+    },
+    "Details you don’t know can stay empty. The app only sees the photos you pick or take, and keeps its own copy without the location." : {
+      "comment" : "Help: Add a piece, the quieter line, with real photos (Phase 22a)"
     },
     "Details you don’t know can stay empty. This test build uses sample photos instead of your camera." : {
       "comment" : "Help: Add a piece, the quieter line"
@@ -5334,6 +5335,9 @@
     "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos." : {
       "comment" : "Add a piece: under the choices, while photos are a stand-in"
     },
+    "Pick a clear, full-length photo of you standing naturally in fitted clothes, in good light." : {
+      "comment" : "Try-on photo sheet: what makes a good photo, with real photos"
+    },
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
@@ -6701,6 +6705,9 @@
         }
       }
     },
+    "Take a photo of a piece" : {
+      "comment" : "Before the camera permission prompt: title"
+    },
     "Take it out of your closet?" : {
       "comment" : "Remove from closet: asks before I don't have it any more",
       "localizations" : {
@@ -6722,6 +6729,9 @@
           }
         }
       }
+    },
+    "Take photo or Choose from Photos" : {
+      "comment" : "VoiceOver name of Add a piece's two photo choices, in its tour"
     },
     "Take photo, Choose from Photos or Paste" : {
       "comment" : "VoiceOver name of Add a piece's three photo choices, in its tour"
@@ -6976,6 +6986,12 @@
         }
       }
     },
+    "That photo couldn’t be saved" : {
+      "comment" : "Add a piece: the photo was read but couldn't be written"
+    },
+    "That photo couldn’t be saved. Your iPhone may be out of space. Nothing changed." : {
+      "comment" : "Add a piece form: the photo was read but couldn't be written"
+    },
     "That’s %@ in %@" : {
       "comment" : "Swap: the end of the options (LR-07.3): every top, then the source's name"
     },
@@ -6991,6 +7007,15 @@
     "The app follows your iPhone’s settings." : {
       "comment" : "Accessibility, under the title"
     },
+    "The app needs your camera to take the picture. The photo is saved in the app on this iPhone, without its location." : {
+      "comment" : "Before the camera permission prompt (PERMISSIONS.md)"
+    },
+    "The app only sees the photo you pick. It keeps its own copy on this iPhone, without the location, and nothing is uploaded." : {
+      "comment" : "Try-on photo sheet: note with real photos (Phase 22a)"
+    },
+    "The app only sees the photos you pick or take, and keeps its own copy on this iPhone without the location." : {
+      "comment" : "Add a piece: under the choices, with real photos (Phase 22a)"
+    },
     "The app sends your copy nowhere. You choose where it’s saved, and only you have the passphrase." : {
       "comment" : "Backups: note at the bottom",
       "localizations" : {
@@ -7004,6 +7029,12 @@
     },
     "The app starts fresh, as if it were just installed. It opens on the welcome, and you choose a starting closet again." : {
       "comment" : "Delete my data: what happens after"
+    },
+    "The camera can’t be used here. You can choose a photo instead." : {
+      "comment" : "Alert when there's no camera to use"
+    },
+    "The camera isn’t available" : {
+      "comment" : "Alert title when there's no camera to use (the simulator, or a restriction)"
     },
     "The first one you picked is the main colour." : {
       "comment" : "Add a piece: under the colours when several are picked",
@@ -7279,8 +7310,8 @@
     "This test build can start with sample clothes, or with nothing." : {
       "comment" : "Onboarding: under the starting closet title"
     },
-    "This test build sends nothing. It doesn’t ask for your camera, photos, location or notifications." : {
-      "comment" : "Onboarding privacy: nothing leaves the phone in Stage A"
+    "This test build sends nothing. It asks for the camera only when you take a photo, and never for your location or notifications." : {
+      "comment" : "Onboarding privacy: nothing leaves the phone; the camera is asked for when used (Phase 22a)"
     },
     "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded." : {
       "comment" : "Try-on photo sheet: Stage A note"
@@ -8267,6 +8298,9 @@
     },
     "Your first name" : {
       "comment" : "Name on your sign: the empty field's prompt"
+    },
+    "Your iPhone may be out of space. Nothing was saved." : {
+      "comment" : "Add a piece: after a photo couldn't be saved"
     },
     "Your iPhone’s settings now" : {
       "comment" : "Accessibility: section header"
