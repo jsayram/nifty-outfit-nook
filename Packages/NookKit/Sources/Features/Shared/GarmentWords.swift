@@ -32,6 +32,45 @@ nonisolated extension GarmentCategory {
     }
 }
 
+nonisolated extension GarmentSubKind {
+    /// The type's name on the form's chips, garment detail and in search: "Cardigan", "Loafers".
+    var title: String {
+        switch self {
+        case .blouse: String(localized: "Blouse", bundle: .module, comment: "Type of piece, within its kind")
+        case .tee: String(localized: "Tee", bundle: .module, comment: "Type of piece, within its kind")
+        case .shirt: String(localized: "Shirt", bundle: .module, comment: "Type of piece, within its kind")
+        case .sweater: String(localized: "Sweater", bundle: .module, comment: "Type of piece, within its kind")
+        case .knitTop: String(localized: "Knit top", bundle: .module, comment: "Type of piece, within its kind")
+        case .tank: String(localized: "Tank top", bundle: .module, comment: "Type of piece, within its kind")
+        case .cardigan: String(localized: "Cardigan", bundle: .module, comment: "Type of piece, within its kind")
+        case .jacket: String(localized: "Jacket", bundle: .module, comment: "Type of piece, within its kind")
+        case .blazer: String(localized: "Blazer", bundle: .module, comment: "Type of piece, within its kind")
+        case .coat: String(localized: "Coat", bundle: .module, comment: "Type of piece, within its kind")
+        case .vest: String(localized: "Vest", bundle: .module, comment: "Type of piece, within its kind")
+        case .trousers: String(localized: "Trousers", bundle: .module, comment: "Type of piece, within its kind")
+        case .jeans: String(localized: "Jeans", bundle: .module, comment: "Type of piece, within its kind")
+        case .skirt: String(localized: "Skirt", bundle: .module, comment: "Type of piece, within its kind")
+        case .shorts: String(localized: "Shorts", bundle: .module, comment: "Type of piece, within its kind")
+        case .leggings: String(localized: "Leggings", bundle: .module, comment: "Type of piece, within its kind")
+        case .flats: String(localized: "Flats", bundle: .module, comment: "Type of piece, within its kind")
+        case .heels: String(localized: "Heels", bundle: .module, comment: "Type of piece, within its kind")
+        case .sneakers: String(localized: "Sneakers", bundle: .module, comment: "Type of piece, within its kind")
+        case .loafers: String(localized: "Loafers", bundle: .module, comment: "Type of piece, within its kind")
+        case .boots: String(localized: "Boots", bundle: .module, comment: "Type of piece, within its kind")
+        case .sandals: String(localized: "Sandals", bundle: .module, comment: "Type of piece, within its kind")
+        case .handbag: String(localized: "Handbag", bundle: .module, comment: "Type of piece, within its kind")
+        case .tote: String(localized: "Tote", bundle: .module, comment: "Type of piece, within its kind")
+        case .crossbody: String(localized: "Crossbody bag", bundle: .module, comment: "Type of piece, within its kind")
+        case .clutch: String(localized: "Clutch", bundle: .module, comment: "Type of piece, within its kind")
+        case .backpack: String(localized: "Backpack", bundle: .module, comment: "Type of piece, within its kind")
+        case .scarf: String(localized: "Scarf", bundle: .module, comment: "Type of piece, within its kind")
+        case .belt: String(localized: "Belt", bundle: .module, comment: "Type of piece, within its kind")
+        case .hat: String(localized: "Hat", bundle: .module, comment: "Type of piece, within its kind")
+        case .jewelry: String(localized: "Jewellery", bundle: .module, comment: "Type of piece, within its kind")
+        }
+    }
+}
+
 nonisolated extension ColorName {
     /// The colour swatch's name (LR-09.2), so a swatch is never told apart by colour alone.
     var title: String {

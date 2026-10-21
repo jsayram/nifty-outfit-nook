@@ -32,6 +32,11 @@ final class SavedLooksModel {
     private(set) var items: [SavedLookItem] = []
     /// The looks that match the search and filters, in the same order.
     private(set) var shown: [SavedLookItem] = []
+    /// Earlier Style Me results she didn't save, newest first (LR-06.4, Phase 21c). Never listed
+    /// on their own: only typed search finds them.
+    private(set) var earlierItems: [SavedLookItem] = []
+    /// The earlier results that match a typed search and the filters. Empty without typed words.
+    private(set) var shownEarlier: [SavedLookItem] = []
     /// The Pictures tab: loading, loaded or failed, apart from the looks, so the Looks tab still
     /// works when pictures can't be read.
     private(set) var picturesPhase: Phase = .loading
@@ -120,6 +125,11 @@ final class SavedLooksModel {
             .sorted { lhs, rhs in
                 lhs.savedDate != rhs.savedDate ? lhs.savedDate > rhs.savedDate : lhs.id < rhs.id
             }
+            .map { SavedLookItem($0, garments: byID) }
+        earlierItems =
+            looks
+            .filter { !$0.isSaved }
+            .sorted { lhs, rhs in lhs.createdAt != rhs.createdAt ? lhs.createdAt > rhs.createdAt : lhs.id < rhs.id }
             .map { SavedLookItem($0, garments: byID) }
         phase = .loaded
         if picturesPhase == .loaded {
@@ -223,6 +233,8 @@ final class SavedLooksModel {
     private func refresh() {
         let filter = filter
         shown = filter.isActive ? items.filter { $0.matches(filter) } : items
+        // LR-06.4: an earlier result is findable in search, so only typed words bring them up.
+        shownEarlier = filter.words.isEmpty ? [] : earlierItems.filter { $0.matches(filter) }
         shownPictures = filter.isActive ? pictureItems.filter { $0.matches(filter) } : pictureItems
     }
 
@@ -231,8 +243,13 @@ final class SavedLooksModel {
     /// True when the looks have loaded and none is saved.
     var isEmpty: Bool { phase == .loaded && items.isEmpty }
 
-    /// True when the search and filters leave no looks.
-    var hasNoMatches: Bool { phase == .loaded && !items.isEmpty && shown.isEmpty }
+    /// True when the search and filters leave no looks, saved or earlier.
+    var hasNoMatches: Bool { phase == .loaded && !items.isEmpty && shown.isEmpty && shownEarlier.isEmpty }
+
+    /// True when an earlier result she didn't save opens from here (LR-06.4).
+    func isEarlierResult(_ id: Look.ID) -> Bool {
+        earlierItems.contains { $0.id == id }
+    }
 
     /// True when the pictures have loaded and there are none.
     var hasNoPictures: Bool { picturesPhase == .loaded && pictureItems.isEmpty }

@@ -59,6 +59,15 @@ struct GarmentDetailText {
     /// The kind of piece, as the Closet chip that finds it says it: "Bottoms".
     var kind: String { garment.category.chipTitle }
 
+    /// Its type, under the kind: "Cardigan". `nil` when she didn't pick one.
+    var subKind: String? { garment.subKind?.title }
+
+    /// Her other names for it, in her order: "Date-night top, The bow one". `nil` when there are
+    /// none (Phase 21c).
+    var otherNames: String? {
+        garment.otherNames.isEmpty ? nil : garment.otherNames.joined(separator: ", ")
+    }
+
     /// "Navy", or "Blue, White". `nil` when no colour is recorded.
     var colors: String? {
         garment.colors.isEmpty ? nil : garment.colors.map(\.title).joined(separator: ", ")

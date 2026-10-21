@@ -2,8 +2,8 @@ import DesignSystem
 import Models
 import SwiftUI
 
-/// The details form (`garment-edit.html?step=details`): the picture, then name, kind, colours
-/// and the shade, fit, how dressy and how warm, seasons, occasions, brand, size and notes, and
+/// The details form (`garment-edit.html?step=details`): the picture, then name, other names,
+/// kind and type, colours and the shade, fit, how dressy and how warm, seasons, occasions, brand, size and notes, and
 /// Save. Only the name and kind are required; everything else has a sensible default or can be
 /// left empty.
 struct GarmentDetailsForm: View {
@@ -25,8 +25,13 @@ struct GarmentDetailsForm: View {
             )
             .id(GarmentField.name)
             .tourAnchor(EditPieceTour.Anchor.name, label: GarmentEditorText.label(for: .name))
+            otherNames
+                .id(GarmentField.otherNames)
             kind
                 .id(GarmentField.category)
+            if !model.subKindChoices.isEmpty {
+                subKind
+            }
             colours
             single(
                 String(localized: "Fit", bundle: .module, comment: "Add a piece: field label, how it's cut"),
@@ -85,9 +90,71 @@ struct GarmentDetailsForm: View {
         ) {
             ForEach(GarmentCategory.allCases, id: \.self) { category in
                 NookChip(category.chipTitle, isSelected: model.details.category == category) {
-                    model.details.category = category
+                    model.chooseCategory(category)
                 }
                 .accessibilityIdentifier("kind.\(category.rawValue)")
+            }
+        }
+    }
+
+    /// Other names (Phase 21c, PRD §7.6): a field and Add name for one more, then the names she
+    /// added, each a chip that removes it. Return ends editing, as in every one-line field; Save
+    /// adds a name left in the field.
+    private var otherNames: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            EditorTextField(
+                label: GarmentEditorText.label(for: .otherNames), isOptional: true,
+                prompt: String(
+                    localized: "Like “Date-night top”", bundle: .module, comment: "Add a piece: other name prompt"),
+                text: $model.newOtherName, problem: otherNamesProblem, identifier: "otherName", focus: focus,
+                focusValue: .otherNames
+            )
+            if !model.details.otherNames.isEmpty {
+                NookFlowLayout(spacing: NookSpacing.chipGap, lineSpacing: NookSpacing.xxSmall) {
+                    ForEach(model.details.otherNames, id: \.self) { name in
+                        NookChip(name, trailingSystemImage: "xmark", isSelected: false) {
+                            model.removeOtherName(name)
+                        }
+                        .accessibilityLabel(Text(GarmentEditorText.removeOtherName(name)))
+                        .accessibilityIdentifier("otherName.remove")
+                    }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text(GarmentEditorText.label(for: .otherNames)))
+            }
+            NookButton(
+                String(localized: "Add name", bundle: .module, comment: "Add a piece: adds the typed other name"),
+                systemImage: "plus", kind: .soft, size: .small
+            ) {
+                model.addOtherName()
+            }
+            .accessibilityIdentifier("otherName.add")
+            Text(GarmentEditorText.otherNamesNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// The typed name's problem as she adds it, or the list's after Save.
+    private var otherNamesProblem: String? {
+        if let problem = model.otherNameProblem { return GarmentEditorText.problem(problem, in: .otherNames) }
+        return problem(.otherNames)
+    }
+
+    /// Type, under Kind: the kind's types, and None of these.
+    private var subKind: some View {
+        let choices = model.subKindChoices.map { Optional($0) } + [nil]
+        return EditorChoiceGroup(
+            label: GarmentEditorText.subKindLabel, isOptional: true, identifier: "subKind", focus: focus
+        ) {
+            ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
+                NookChip(
+                    choice?.title ?? GarmentEditorText.noSubKind, isSelected: model.details.subKind == choice
+                ) {
+                    model.chooseSubKind(choice)
+                }
+                .accessibilityIdentifier("subKind.\(choice?.rawValue ?? "none")")
             }
         }
     }

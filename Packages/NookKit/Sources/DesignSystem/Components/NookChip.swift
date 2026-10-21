@@ -10,6 +10,7 @@ public struct NookChip: View {
     private let title: String
     private let systemImage: String?
     private let swatch: Color?
+    private let trailingSystemImage: String?
     private let isSelected: Bool
     private let action: () -> Void
 
@@ -17,23 +18,29 @@ public struct NookChip: View {
     ///   - title: The label, already localized.
     ///   - swatch: A colour dot before the title, for colour filters (LR-09). The title still
     ///     names the colour, so it's never told apart by colour alone.
+    ///   - trailingSystemImage: A small symbol after the title, such as the cross on a chip that
+    ///     removes itself. Decoration only: give the chip a spoken label that says what it does.
     public init(
         _ title: String,
         systemImage: String? = nil,
         swatch: Color? = nil,
+        trailingSystemImage: String? = nil,
         isSelected: Bool,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.systemImage = systemImage
         self.swatch = swatch
+        self.trailingSystemImage = trailingSystemImage
         self.isSelected = isSelected
         self.action = action
     }
 
     public var body: some View {
         Button(action: action) {
-            NookChipLabel(title: title, systemImage: systemImage, swatch: swatch, isSelected: isSelected)
+            NookChipLabel(
+                title: title, systemImage: systemImage, swatch: swatch, isSelected: isSelected,
+                trailingSystemImage: trailingSystemImage)
         }
         .buttonStyle(NookChipButtonStyle())
         .accessibilityAddTraits(isSelected ? .isSelected : [])

@@ -717,6 +717,17 @@
     "A picture shows one of your looks. Pictures are made one look at a time, only when you ask." : {
       "comment" : "Saved Looks Pictures tab, empty"
     },
+    "A piece can have up to %lld other names. Remove one to add another." : {
+      "comment" : "Add a piece: the piece has as many other names as it can keep, with the limit",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A piece can have up to %lld other names. Remove one to add another."
+          }
+        }
+      }
+    },
     "A piece of clothing" : {
       "comment" : "App tours: a screen"
     },
@@ -878,6 +889,17 @@
     "Add and pack" : {
       "comment" : "Button: makes the suitcase, then packs it"
     },
+    "Add name" : {
+      "comment" : "Add a piece: adds the typed other name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add name"
+          }
+        }
+      }
+    },
     "Add or change the photo here. For now it adds a sample picture." : {
       "comment" : "Edit a piece tour, step 1"
     },
@@ -1010,6 +1032,17 @@
     },
     "An approximate number is fine. It never decides a size on its own." : {
       "comment" : "Measurement help for weight (PRD §10)"
+    },
+    "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on." : {
+      "comment" : "Look detail: note on an earlier result she didn't save (LR-06.4)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on."
+          }
+        }
+      }
     },
     "An idea" : {
       "comment" : "Send feedback: kind chip"
@@ -1201,6 +1234,17 @@
         }
       }
     },
+    "Belt" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belt"
+          }
+        }
+      }
+    },
     "Black" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1212,6 +1256,28 @@
         }
       }
     },
+    "Blazer" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blazer"
+          }
+        }
+      }
+    },
+    "Blouse" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blouse"
+          }
+        }
+      }
+    },
     "Blue" : {
       "comment" : "Colour name",
       "localizations" : {
@@ -1219,6 +1285,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blue"
+          }
+        }
+      }
+    },
+    "Boots" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boots"
           }
         }
       }
@@ -1400,6 +1477,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can’t be read right now"
+          }
+        }
+      }
+    },
+    "Cardigan" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cardigan"
           }
         }
       }
@@ -1706,6 +1794,28 @@
         }
       }
     },
+    "Clutch" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clutch"
+          }
+        }
+      }
+    },
+    "Coat" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coat"
+          }
+        }
+      }
+    },
     "Colour" : {
       "comment" : "Name of the colour swatches row",
       "localizations" : {
@@ -1802,6 +1912,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cream"
+          }
+        }
+      }
+    },
+    "Crossbody bag" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crossbody bag"
           }
         }
       }
@@ -2152,6 +2273,17 @@
     },
     "Each tour shows once. Skip ends it." : {
       "comment" : "App tours: under the switch"
+    },
+    "Earlier results, not saved" : {
+      "comment" : "Saved Looks: heading over earlier Style Me results that match the search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earlier results, not saved"
+          }
+        }
+      }
     },
     "Earlier version" : {
       "comment" : "A picture of an earlier version of its look"
@@ -2562,6 +2694,17 @@
     "Fix any detail" : {
       "comment" : "Edit a piece tour, step 2 title"
     },
+    "Flats" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flats"
+          }
+        }
+      }
+    },
     "For a day inside, whatever it’s like out." : {
       "comment" : "Weather sheet",
       "localizations" : {
@@ -2741,8 +2884,41 @@
         }
       }
     },
+    "Handbag" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handbag"
+          }
+        }
+      }
+    },
     "Hasn’t arrived yet" : {
       "comment" : "Style Me: bought, not arrived"
+    },
+    "Hat" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hat"
+          }
+        }
+      }
+    },
+    "Heels" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heels"
+          }
+        }
+      }
     },
     "Height" : {
       "comment" : "Measurement"
@@ -3077,6 +3253,17 @@
     "It all stays on this iPhone" : {
       "comment" : "Onboarding privacy: row title"
     },
+    "It already has that name." : {
+      "comment" : "Add a piece: the other name is the same as its name or another of its names",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It already has that name."
+          }
+        }
+      }
+    },
     "It asks once more" : {
       "comment" : "Delete my data tour, step 2 title"
     },
@@ -3207,6 +3394,39 @@
         }
       }
     },
+    "Jacket" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jacket"
+          }
+        }
+      }
+    },
+    "Jeans" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeans"
+          }
+        }
+      }
+    },
+    "Jewellery" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jewellery"
+          }
+        }
+      }
+    },
     "Just for this outfit." : {
       "comment" : "Style Me Comfort line (LR-18)"
     },
@@ -3314,6 +3534,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kind of piece"
+          }
+        }
+      }
+    },
+    "Knit top" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knit top"
           }
         }
       }
@@ -3549,6 +3780,17 @@
     "Leaving this screen stops it, and nothing is used." : {
       "comment" : "Your looks while styling: leaving cancels the request"
     },
+    "Leggings" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leggings"
+          }
+        }
+      }
+    },
     "Light" : {
       "comment" : "How warm a piece is to wear",
       "localizations" : {
@@ -3581,6 +3823,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Like “Cute pink shirt”"
+          }
+        }
+      }
+    },
+    "Like “Date-night top”" : {
+      "comment" : "Add a piece: other name prompt",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like “Date-night top”"
           }
         }
       }
@@ -3629,6 +3882,17 @@
         }
       }
     },
+    "Loafers" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loafers"
+          }
+        }
+      }
+    },
     "Look" : {
       "comment" : "Spoken before a look's pieces when it has no name",
       "localizations" : {
@@ -3654,6 +3918,17 @@
     },
     "Looks keeps the outfits you saved. Tap an outfit to open it." : {
       "comment" : "Saved Looks tour, step 1"
+    },
+    "Looks Style Me made for you that you didn’t save. Open one to save it." : {
+      "comment" : "Saved Looks: under the earlier results heading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Looks Style Me made for you that you didn’t save. Open one to save it."
+          }
+        }
+      }
     },
     "Looks you keep show up here, ready to wear again." : {
       "comment" : "Saved Looks with no looks (RD-08.4)"
@@ -4153,6 +4428,17 @@
     "None" : {
       "comment" : "Style Me: no starting piece"
     },
+    "None of these" : {
+      "comment" : "Add a piece: type chip when none of the listed types fits, or she'd rather not say",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of these"
+          }
+        }
+      }
+    },
     "None of these is in this test build. Each will ask first, and allowing one never allows another." : {
       "comment" : "Privacy and terms: above what later features would send"
     },
@@ -4242,6 +4528,17 @@
     },
     "Not ready for Style Me" : {
       "comment" : "Suitcase: it's empty"
+    },
+    "Not saved" : {
+      "comment" : "Look detail: an earlier result she didn't save",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not saved"
+          }
+        }
+      }
     },
     "Not saved yet. Check %@." : {
       "comment" : "VoiceOver, after Save found problems, with the fields to check, like Name and Kind",
@@ -4874,6 +5171,17 @@
         }
       }
     },
+    "Other names" : {
+      "comment" : "Add a piece: field label, more names search finds the piece by",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other names"
+          }
+        }
+      }
+    },
     "Other suitcases" : {
       "comment" : "All suitcases: heading after the favourites"
     },
@@ -5382,6 +5690,17 @@
     "Sample closet" : {
       "comment" : "Onboarding: starting closet choice"
     },
+    "Sandals" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sandals"
+          }
+        }
+      }
+    },
     "Save" : {
       "comment" : "Toolbar button: saves the piece",
       "localizations" : {
@@ -5504,11 +5823,33 @@
         }
       }
     },
+    "Scarf" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarf"
+          }
+        }
+      }
+    },
     "Search" : {
       "comment" : "Keyboard shortcut (Command-F) that goes to search"
     },
     "Search %@" : {
       "comment" : "Starting piece sheet search; the source's name"
+    },
+    "Search finds the piece by any of its names." : {
+      "comment" : "Add a piece: under Other names",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search finds the piece by any of its names."
+          }
+        }
+      }
     },
     "Search suitcases" : {
       "comment" : "All suitcases search prompt"
@@ -5625,6 +5966,17 @@
         }
       }
     },
+    "Shirt" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shirt"
+          }
+        }
+      }
+    },
     "Shoe" : {
       "comment" : "One piece of this kind, used in search",
       "localizations" : {
@@ -5652,6 +6004,17 @@
     },
     "Short answers that work offline. Opening help never changes what you’re doing." : {
       "comment" : "Help, under the title"
+    },
+    "Shorts" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shorts"
+          }
+        }
+      }
     },
     "Show" : {
       "comment" : "Spoken name of the Looks and Pictures switch"
@@ -5794,6 +6157,17 @@
     "Skips the setup and opens your room with the sample closet." : {
       "comment" : "VoiceOver hint on I already use Nifty Outfit Nook"
     },
+    "Skirt" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skirt"
+          }
+        }
+      }
+    },
     "Smaller" : {
       "comment" : "Accessibility: text size value"
     },
@@ -5804,6 +6178,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Smart"
+          }
+        }
+      }
+    },
+    "Sneakers" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sneakers"
           }
         }
       }
@@ -6198,6 +6583,17 @@
     "Swapped in %@" : {
       "comment" : "Toast after a swap, with the new piece"
     },
+    "Sweater" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sweater"
+          }
+        }
+      }
+    },
     "Take a photo of a piece" : {
       "comment" : "Before the camera permission prompt: title"
     },
@@ -6248,6 +6644,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tan"
+          }
+        }
+      }
+    },
+    "Tank top" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tank top"
           }
         }
       }
@@ -6338,6 +6745,17 @@
     },
     "Tap the laptop on your desk. Check the occasion, then tap Style me. You’ll see one outfit in three versions: Simple, Dressed up and Something new." : {
       "comment" : "Help: Get outfit ideas"
+    },
+    "Tee" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tee"
+          }
+        }
+      }
     },
     "Tell me what happened" : {
       "comment" : "Send feedback tour, step 1 title"
@@ -6876,6 +7294,17 @@
         }
       }
     },
+    "Tote" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tote"
+          }
+        }
+      }
+    },
     "Tote bag" : {
       "comment" : "A suitcase picture"
     },
@@ -6884,6 +7313,17 @@
     },
     "Tracking off" : {
       "comment" : "Laundry: under the title while tracking is off"
+    },
+    "Trousers" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trousers"
+          }
+        }
+      }
     },
     "Try a different outfit" : {
       "comment" : "Your looks button (LR-05a)"
@@ -6974,6 +7414,17 @@
     "Turning tracking on, or not" : {
       "comment" : "App tours: what the Laundry is off tour covers"
     },
+    "Type" : {
+      "comment" : "Add a piece: field label, the type within the kind, like Cardigan",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
+    },
     "Type a few words about the piece first." : {
       "comment" : "Describe in words: Suggest details with nothing typed",
       "localizations" : {
@@ -6981,6 +7432,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type a few words about the piece first."
+          }
+        }
+      }
+    },
+    "Type a name first." : {
+      "comment" : "Add a piece: Add under Other names with nothing typed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a name first."
           }
         }
       }
@@ -7150,6 +7612,17 @@
     },
     "Versions of this outfit" : {
       "comment" : "VoiceOver name of the Simple, Dressed up, Something new switch"
+    },
+    "Vest" : {
+      "comment" : "Type of piece, within its kind",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vest"
+          }
+        }
+      }
     },
     "VoiceOver" : {
       "comment" : "Accessibility: a setting"

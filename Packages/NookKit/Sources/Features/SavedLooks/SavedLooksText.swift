@@ -28,6 +28,20 @@ enum SavedLooksText {
             comment: "Name of a saved look with no main colours: the occasion")
     }
 
+    // MARK: Earlier results (LR-06.4)
+
+    static var earlierHeading: String {
+        String(
+            localized: "Earlier results, not saved", bundle: .module,
+            comment: "Saved Looks: heading over earlier Style Me results that match the search")
+    }
+
+    static var earlierNote: String {
+        String(
+            localized: "Looks Style Me made for you that you didn’t save. Open one to save it.", bundle: .module,
+            comment: "Saved Looks: under the earlier results heading")
+    }
+
     static var looksTab: String {
         String(localized: "Looks", bundle: .module, comment: "Saved Looks tab: her saved looks (RD-08)")
     }

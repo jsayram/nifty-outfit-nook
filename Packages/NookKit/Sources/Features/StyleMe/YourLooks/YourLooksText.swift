@@ -186,15 +186,24 @@ struct YourLooksText {
     /// The name a look gets when she saves it (LR-08): its main colours, such as "Pink & navy" or
     /// "Blue dress", with the version when it isn't Simple. She can rename it in Saved Looks.
     func name(for look: Look, garments: [Garment.ID: Garment]) -> String {
+        Self.name(for: look, occasion: request.occasion, garments: garments, locale: locale)
+    }
+
+    /// The same name for a look on its own, such as an earlier result saved from Saved Looks'
+    /// search (Phase 21c): its occasion stands in for the request's.
+    static func name(
+        for look: Look, occasion: Occasion?, garments: [Garment.ID: Garment], locale: Locale
+    ) -> String {
         let pieces = look.garmentIDs.compactMap { garments[$0] }
         let base: String
         if let colours = Self.colourName(of: pieces, locale: locale) {
             base = colours
-        } else {
-            let occasion = request.occasion.title
+        } else if let occasion = occasion?.title {
             base = String(
                 localized: "\(occasion) look", bundle: .module,
                 comment: "Name of a saved look with no main colours: the occasion")
+        } else {
+            base = SavedLooksText.unnamed(occasion: nil)
         }
         switch look.version {
         case .dressedUp:

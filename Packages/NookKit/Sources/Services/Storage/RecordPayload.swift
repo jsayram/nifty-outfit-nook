@@ -9,9 +9,21 @@ import Models
 /// value type's JSON shape changes in a way old payloads can't decode into, bump `currentVersion`
 /// and upgrade the old JSON here, before decoding. `RecordPayloadTests` decodes a payload saved by
 /// every shipped version, so a change that breaks old payloads fails a test.
+///
+/// Bump it too when an older build would misread the new JSON: `JSONDecoder` ignores keys it
+/// doesn't know, so an older build would drop the new fields without a word, and a save would
+/// lose them. A bump makes it refuse instead. Every bump also needs a new store schema version
+/// (`NookMigrationPlan`), so an older build stops at "saved by a newer version" before it reads
+/// a record, and the export's manifest carries the new version, so an older build refuses the
+/// copy too.
+///
+/// - Version 1 (Phases 21a and 21b).
+/// - Version 2 (Phase 21c): garments and garment drafts gain `otherNames` and `subKind`. Version
+///   1 JSON has neither, and `Garment` and `GarmentDetails` read a missing one as none, so it
+///   decodes as it is. Payloads aren't rewritten: a record moves to version 2 when it's next saved.
 enum RecordPayload {
     /// The payload version this build writes.
-    static let currentVersion = 1
+    static let currentVersion = 2
 
     static func encode<Value: Encodable>(_ value: Value) throws -> Data {
         try JSONEncoder().encode(value)

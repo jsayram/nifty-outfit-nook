@@ -19,6 +19,8 @@ struct SavedLooksGrid: View {
     /// The look showing beside the grid.
     var current: Look.ID?
     var opensBeside = false
+    /// Whether the first look is the one Saved Looks' tour points at. Off for earlier results.
+    var anchorsTour = true
     let open: (SavedLookItem) -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -29,7 +31,7 @@ struct SavedLooksGrid: View {
             SavedLookCell(
                 item: item, now: now, style: .row, isCurrent: item.id == current, opensBeside: opensBeside
             ) { open(item) }
-            .firstLookTourAnchor(item, in: items) { open(item) }
+            .firstLookTourAnchor(item, in: items, isEnabled: anchorsTour) { open(item) }
         }
     }
 
@@ -53,7 +55,7 @@ struct SavedLooksGrid: View {
                     SavedLookCell(
                         item: item, now: now, style: .tile, isCurrent: item.id == current, opensBeside: opensBeside
                     ) { open(item) }
-                    .firstLookTourAnchor(item, in: items) { open(item) }
+                    .firstLookTourAnchor(item, in: items, isEnabled: anchorsTour) { open(item) }
                 }
             }
         }
@@ -63,9 +65,11 @@ struct SavedLooksGrid: View {
 extension View {
     /// Saved Looks' tour points at her first look (Phase 16b).
     fileprivate func firstLookTourAnchor(
-        _ item: SavedLookItem, in items: [SavedLookItem], open: @escaping () -> Void
+        _ item: SavedLookItem, in items: [SavedLookItem], isEnabled: Bool, open: @escaping () -> Void
     ) -> some View {
-        tourAnchor(SavedLooksTour.Anchor.firstLook, label: item.name, isEnabled: item.id == items.first?.id) { open() }
+        tourAnchor(
+            SavedLooksTour.Anchor.firstLook, label: item.name, isEnabled: isEnabled && item.id == items.first?.id
+        ) { open() }
     }
 }
 

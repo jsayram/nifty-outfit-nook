@@ -13,7 +13,12 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
     public let id: ID
     /// Her own name for it, such as "Cute pink shirt".
     public var name: String
+    /// More names search finds it by, such as "Date-night top" (PRD §7.6, Phase 21c). Trimmed,
+    /// one line each, no two the same, and never the same as `name` (`GarmentRules`).
+    public var otherNames: [String]
     public var category: GarmentCategory
+    /// A narrower kind within `category`, such as Cardigan. `nil` when she didn't pick one.
+    public var subKind: GarmentSubKind?
     /// Colour families, main colour first. Empty means the colour is unknown.
     public var colors: [ColorName]
     /// Her words for the exact shade, if she gave any ("mid-wash denim").
@@ -50,7 +55,9 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
     public init(
         id: ID,
         name: String,
+        otherNames: [String] = [],
         category: GarmentCategory,
+        subKind: GarmentSubKind? = nil,
         colors: [ColorName] = [],
         colorNote: String? = nil,
         fit: GarmentFit? = nil,
@@ -73,7 +80,9 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
     ) {
         self.id = id
         self.name = name
+        self.otherNames = otherNames
         self.category = category
+        self.subKind = subKind
         self.colors = colors
         self.colorNote = colorNote
         self.fit = fit
@@ -116,6 +125,39 @@ public struct Garment: Identifiable, Hashable, Sendable, Codable {
     /// not archived and not deleted. Wishlist and no-longer-owned pieces are elsewhere.
     public var isInCloset: Bool {
         ownership.isHers && !isArchived && !isDeleted
+    }
+}
+
+extension Garment {
+    /// Reads a garment from its JSON. Payload version 1 (Phases 21a and 21b) has no `otherNames`
+    /// or `subKind`, so a missing one reads as none; everything else is required, as the
+    /// synthesized decoder required it. Writing is synthesized.
+    public init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(ID.self, forKey: .id)
+        name = try values.decode(String.self, forKey: .name)
+        otherNames = try values.decodeIfPresent([String].self, forKey: .otherNames) ?? []
+        category = try values.decode(GarmentCategory.self, forKey: .category)
+        subKind = try values.decodeIfPresent(GarmentSubKind.self, forKey: .subKind)
+        colors = try values.decode([ColorName].self, forKey: .colors)
+        colorNote = try values.decodeIfPresent(String.self, forKey: .colorNote)
+        fit = try values.decodeIfPresent(GarmentFit.self, forKey: .fit)
+        dressiness = try values.decode(Dressiness.self, forKey: .dressiness)
+        warmth = try values.decode(Warmth.self, forKey: .warmth)
+        seasons = try values.decode(Set<Season>.self, forKey: .seasons)
+        occasions = try values.decode(Set<Occasion>.self, forKey: .occasions)
+        brand = try values.decodeIfPresent(String.self, forKey: .brand)
+        sizeLabel = try values.decodeIfPresent(String.self, forKey: .sizeLabel)
+        notes = try values.decode(String.self, forKey: .notes)
+        photo = try values.decode(PhotoReference.self, forKey: .photo)
+        cutout = try values.decodeIfPresent(GarmentCutout.self, forKey: .cutout)
+        ownership = try values.decode(Ownership.self, forKey: .ownership)
+        laundry = try values.decode(LaundryState.self, forKey: .laundry)
+        availability = try values.decode(Availability.self, forKey: .availability)
+        isArchived = try values.decode(Bool.self, forKey: .isArchived)
+        deletedAt = try values.decodeIfPresent(Date.self, forKey: .deletedAt)
+        wornOn = try values.decode([Date].self, forKey: .wornOn)
+        addedAt = try values.decode(Date.self, forKey: .addedAt)
     }
 }
 

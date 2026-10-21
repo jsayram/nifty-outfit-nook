@@ -182,6 +182,7 @@ struct SavedLooksScreen: View {
         LookDetailScreen(
             lookID: id,
             changes: changes,
+            allowsEarlierResult: model.isEarlierResult(id),
             openGarment: { garmentID, name in path.append(.closet(.garment(garmentID, name: name))) },
             openPicture: openPicture,
             deleted: lookDeleted,

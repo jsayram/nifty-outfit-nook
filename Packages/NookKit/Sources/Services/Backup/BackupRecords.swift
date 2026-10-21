@@ -76,8 +76,9 @@ struct RecordCodec: Sendable {
             },
             rows: { data, version in
                 guard (1...RecordPayload.currentVersion).contains(version) else { throw BackupError.newerVersion }
-                // Version 1 is the only shape so far. A later shape upgrades older files here, as
-                // `RecordPayload` upgrades older payloads, before anything is decoded.
+                // Versions 1 and 2 share one file shape: version 2 only adds fields to garments
+                // and garment drafts, which read as none when they're missing (`RecordPayload`).
+                // A later shape that old files can't decode into upgrades them here first.
                 let file = try JSONDecoder().decode(File<Value>.self, from: data)
                 guard file.kind == kind.rawValue else { throw BackupError.damaged }
                 var keys: Set<String> = []
