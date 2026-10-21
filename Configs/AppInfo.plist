@@ -17,6 +17,12 @@
 	<string>$(CLERK_PUBLISHABLE_KEY)</string>
 	<key>NookAPIBaseURL</key>
 	<string>$(NOOK_API_BASE_URL)</string>
+	<!-- Live weather (Phase 29): location is always approximate, never full accuracy. The switch
+	     for WeatherKit comes from NOOK_WEATHERKIT in Configs/Base.xcconfig. -->
+	<key>NSLocationDefaultAccuracyReduced</key>
+	<true/>
+	<key>NookWeatherKitEnabled</key>
+	<string>$(NOOK_WEATHERKIT)</string>
 	<!-- Backups (Phase 21b): the export file's type, so the Files sheet names it and Restore's
 	     picker can ask for it. An encrypted archive; nothing else opens it on iOS. -->
 	<key>UTExportedTypeDeclarations</key>

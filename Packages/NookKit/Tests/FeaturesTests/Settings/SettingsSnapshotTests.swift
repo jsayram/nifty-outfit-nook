@@ -83,6 +83,35 @@ struct SettingsSnapshotTests {
         assertSnapshot(PrivacyPage(), colorScheme: .dark, named: "privacy-dark")
     }
 
+    /// The Weather rows (Phase 29): off in a sample build, a city chosen with Apple's credit, and
+    /// location refused by iOS with the way to Settings.
+    @Test func privacyWeather() {
+        assertSnapshot(PrivacyPage(weather: WeatherPrivacy()), named: "privacy-weather-off")
+        let credit = WeatherCredit()
+        assertSnapshot(
+            PrivacyPage(
+                weather: WeatherPrivacy(isOn: true, cityName: "Seattle, WA", isSample: false, credit: credit)),
+            named: "privacy-weather-city")
+        assertSnapshot(
+            PrivacyPage(
+                weather: WeatherPrivacy(
+                    isOn: true, cityName: "Seattle, WA", locationIsBlocked: true, isSample: false, credit: credit)),
+            colorScheme: .dark, named: "privacy-weather-blocked-dark")
+    }
+
+    @Test func privacyWeatherAX5() {
+        // The group alone: the whole page with it is taller than the renderer can draw at AX5.
+        assertSnapshot(
+            WeatherPrivacyGroup(
+                weather: WeatherPrivacy(
+                    isOn: true, cityName: "Seattle, WA", locationIsBlocked: true, isSample: false,
+                    credit: WeatherCredit())
+            )
+            .padding(NookSpacing.small)
+            .background(Color.nook.floor),
+            dynamicTypeSize: .accessibility5, named: "privacy-weather-ax5")
+    }
+
     @Test func privacyAX5() {
         assertSnapshot(PrivacyPage(), dynamicTypeSize: .accessibility5, named: "privacy-ax5")
     }

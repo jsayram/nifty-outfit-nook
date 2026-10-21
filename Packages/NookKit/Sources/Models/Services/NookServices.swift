@@ -41,6 +41,17 @@ public struct NookServices: Sendable {
     /// Her image files (Phase 22b): removes the ones nothing points to any more. Nothing to do
     /// where photos aren't files: the debug sample closet in memory, previews and most tests.
     public var imageFiles: any ImageFiles = NoImageFiles()
+    /// Her live-weather choices (Phase 29): on or off, her city, and whether to use her
+    /// approximate location. In memory until the app sets a store that keeps them.
+    public var weatherSettings: any WeatherSettingsStore = InMemoryWeatherSettingsStore()
+    /// True while the weather is a stand-in (made-up weather, nothing fetched), which is so until
+    /// WeatherKit is switched on for the build (`docs/weather.md`). Privacy and terms says
+    /// so, and Apple's credit isn't shown for it.
+    public var usesSampleWeather = true
+    /// Her approximate location for the weather, only if she turns it on (Phase 29).
+    public var location: any ApproximateLocationProvider = UnavailableLocationProvider()
+    /// Finds a city by name for the weather, with no location permission (Phase 29).
+    public var cities: any CityFinder = UnavailableCityFinder()
     /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
     /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
     public var account: any AccountService = UnavailableAccountService()
@@ -56,7 +67,7 @@ public struct NookServices: Sendable {
                 ?? LocalDataDeletion(
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                    onboarding: onboarding)
+                    onboarding: onboarding, weatherSettings: weatherSettings)
         }
         set { customDeletion = newValue }
     }

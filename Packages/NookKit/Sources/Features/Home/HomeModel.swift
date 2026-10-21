@@ -23,6 +23,9 @@ final class HomeModel {
     /// Pieces in her closet marked as in the wash, counted even while tracking is off, since
     /// the marks are kept (RD-11). The laundry sheet mentions them.
     private(set) var keptDirtyCount = 0
+    /// Apple Weather's credit, shown while its forecast is in the window (Phase 29). `nil` when
+    /// there's no weather, or when the weather isn't Apple's.
+    private(set) var weatherCredit: WeatherCredit?
     @ObservationIgnored private var loads = LoadGeneration()
 
     /// Reads what the room shows. A load that an overlapping newer one has overtaken shows
@@ -85,6 +88,9 @@ final class HomeModel {
         let reading = await weather
         guard loads.isCurrent(load) else { return }
         content.weather = reading
+        let credit = reading == nil ? nil : await services.weather.attribution()
+        guard loads.isCurrent(load) else { return }
+        weatherCredit = credit
     }
 
     /// "Turn on" in the laundry sheet: saves the setting, then reloads, so the hamper changes

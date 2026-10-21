@@ -104,13 +104,29 @@ public struct WeatherSnapshot: Hashable, Sendable, Codable {
     /// After dark. Home shows the night window (RD-01).
     public var isNight: Bool
     public var observedAt: Date
+    /// Today's low and high, when the weather service gave them (Phase 29).
+    public var lowCelsius: Double?
+    public var highCelsius: Double?
+    /// The chance of rain or snow today, 0 to 1, when the weather service gave it (Phase 29).
+    public var precipitationChance: Double?
 
-    public init(condition: WeatherCondition, temperatureCelsius: Double, isNight: Bool = false, observedAt: Date) {
+    public init(
+        condition: WeatherCondition, temperatureCelsius: Double, isNight: Bool = false, observedAt: Date,
+        lowCelsius: Double? = nil, highCelsius: Double? = nil, precipitationChance: Double? = nil
+    ) {
         self.condition = condition
         self.temperatureCelsius = temperatureCelsius
         self.isNight = isNight
         self.observedAt = observedAt
+        self.lowCelsius = lowCelsius
+        self.highCelsius = highCelsius
+        self.precipitationChance = precipitationChance.map { min(max($0, 0), 1) }
     }
+
+    /// What a styling request may carry about the weather: conditions, temperature and chance of
+    /// rain, and nothing about where she is (Phase 29, DATA_MAP "Weather conditions in a styling
+    /// request").
+    public var summary: WeatherSummary { WeatherSummary(self) }
 
     /// A rough temperature band, used to match a garment's warmth.
     public var band: TemperatureBand {

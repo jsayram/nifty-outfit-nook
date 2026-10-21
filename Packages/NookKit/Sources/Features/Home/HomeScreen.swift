@@ -122,18 +122,38 @@ struct HomeScreen: View {
         case .room:
             HomeRoomView(content: model.content, open: open, openLook: openLook)
                 .overlay(alignment: .bottom) {
-                    errorBanner
-                        .padding(.horizontal, NookSpacing.screenMargin)
-                        .padding(.bottom, NookSpacing.small)
+                    // Over the rug, between the hamper and the bed, clear of every control.
+                    VStack(spacing: NookSpacing.xSmall) {
+                        errorBanner
+                        weatherCredit
+                    }
+                    .padding(.horizontal, NookSpacing.screenMargin)
+                    .padding(.bottom, NookSpacing.small)
                 }
         case .largeText:
             HomeLargeTextView(content: model.content, open: open) {
-                errorBanner.padding(.top, 14)
+                VStack(alignment: .leading, spacing: 0) {
+                    errorBanner.padding(.top, 14)
+                    weatherCredit.padding(.top, NookSpacing.xSmall)
+                }
             }
         case .sideways:
             HomeSidewaysView(
                 content: model.content, open: open, openProfile: { path.append(.profile) },
-                notice: { errorBanner })
+                notice: {
+                    errorBanner
+                    weatherCredit
+                })
+        }
+    }
+
+    /// Apple Weather's credit, which has to show wherever its forecast does (PRD 11.5).
+    @ViewBuilder
+    private var weatherCredit: some View {
+        if let credit = model.weatherCredit {
+            WeatherCreditView(credit: credit)
+                .padding(.horizontal, NookSpacing.small)
+                .background(.ultraThinMaterial, in: Capsule())
         }
     }
 
