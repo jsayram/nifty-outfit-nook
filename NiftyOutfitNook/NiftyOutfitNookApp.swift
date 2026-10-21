@@ -1,6 +1,7 @@
 import Features
 import Fixtures
 import Models
+import Networking
 import Services
 import SwiftUI
 
@@ -32,44 +33,66 @@ struct NiftyOutfitNookApp: App {
         }
     #endif
 
+    /// Whether the phone is online (Phase 26), for the offline banner where cloud features need it.
+    /// Debug builds take `-connection offline` or `-connection online`, which fix the state for UI
+    /// tests; otherwise it follows the system's path monitor.
+    @State private var connection = ConnectionStatus()
+
+    private var connectivitySource: any ConnectivitySource {
+        #if DEBUG
+            switch DebugLaunchArgument.value(after: "-connection", in: ProcessInfo.processInfo.arguments) {
+            case "offline": return FixedConnectivitySource(.offline)
+            case "online": return FixedConnectivitySource(.online)
+            default: break
+            }
+        #endif
+        return PathConnectivitySource()
+    }
+
     var body: some Scene {
         WindowGroup {
-            #if DEBUG
-                // `-catalog` opens the component catalog instead of the app (debug builds only), and
-                // `-catalog-page <id>` shows one of its pages alone.
-                if ProcessInfo.processInfo.arguments.contains("-catalog") {
-                    NookCatalogView(
-                        extraPages: [
-                            LookBundleCatalog.page(
-                                sampleGarments: SamplePhotoGarments.garments(now: .now), images: SamplePhotoProvider())
-                        ],
-                        onlyPage: NookCatalogView.onlyPage(in: ProcessInfo.processInfo.arguments))
-                } else if ProcessInfo.processInfo.arguments.contains("-cutout-bench") {
-                    // `-cutout-bench` opens the cutout benchmark (Phase 8a, debug builds only).
-                    CutoutBenchScreen(
-                        makeService: { VisionCutoutService(options: .init(maxPixelSize: $0)) },
-                        samples: {
-                            // Drawn at an iPhone 12 photo's size, 3,024 x 4,032.
-                            SyntheticGarmentPhotos.Scene.allCases.map {
-                                ($0.rawValue, SyntheticGarmentPhotos.jpeg($0, width: 3024, height: 4032))
-                            }
-                        }
-                    )
-                } else if ProcessInfo.processInfo.arguments.contains("-limits-lab") {
-                    // `-limits-lab` opens the Phase 24b limits screen (debug builds only).
-                    LimitsLabScreen(
-                        account: AppGateway.account, paid: AppGateway.paid, controls: AppGateway.limitsControls)
-                } else if ProcessInfo.processInfo.arguments.contains("-gateway-lab") {
-                    // `-gateway-lab` opens the Phase 24a gateway screen (debug builds only).
-                    GatewayLabScreen(
-                        account: AppGateway.account, controls: AppGateway.labControls, log: AppGateway.log)
-                } else {
-                    AppRootView(launch: launch)
-                }
-            #else
-                AppRootView(launch: launch)
-            #endif
+            root
+                .environment(\.connection, connection)
+                .task { await connection.follow(connectivitySource) }
         }
+    }
+
+    @ViewBuilder private var root: some View {
+        #if DEBUG
+            // `-catalog` opens the component catalog instead of the app (debug builds only), and
+            // `-catalog-page <id>` shows one of its pages alone.
+            if ProcessInfo.processInfo.arguments.contains("-catalog") {
+                NookCatalogView(
+                    extraPages: [
+                        LookBundleCatalog.page(
+                            sampleGarments: SamplePhotoGarments.garments(now: .now), images: SamplePhotoProvider())
+                    ],
+                    onlyPage: NookCatalogView.onlyPage(in: ProcessInfo.processInfo.arguments))
+            } else if ProcessInfo.processInfo.arguments.contains("-cutout-bench") {
+                // `-cutout-bench` opens the cutout benchmark (Phase 8a, debug builds only).
+                CutoutBenchScreen(
+                    makeService: { VisionCutoutService(options: .init(maxPixelSize: $0)) },
+                    samples: {
+                        // Drawn at an iPhone 12 photo's size, 3,024 x 4,032.
+                        SyntheticGarmentPhotos.Scene.allCases.map {
+                            ($0.rawValue, SyntheticGarmentPhotos.jpeg($0, width: 3024, height: 4032))
+                        }
+                    }
+                )
+            } else if ProcessInfo.processInfo.arguments.contains("-limits-lab") {
+                // `-limits-lab` opens the Phase 24b limits screen (debug builds only).
+                LimitsLabScreen(
+                    account: AppGateway.account, paid: AppGateway.paid, controls: AppGateway.limitsControls)
+            } else if ProcessInfo.processInfo.arguments.contains("-gateway-lab") {
+                // `-gateway-lab` opens the Phase 24a gateway screen (debug builds only).
+                GatewayLabScreen(
+                    account: AppGateway.account, controls: AppGateway.labControls, log: AppGateway.log)
+            } else {
+                AppRootView(launch: launch)
+            }
+        #else
+            AppRootView(launch: launch)
+        #endif
     }
 
     /// Her data lives in the store on the iPhone (Phase 21a, `NookStorage`), opened once here,

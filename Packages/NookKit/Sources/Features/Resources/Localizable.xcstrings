@@ -6491,6 +6491,9 @@
     "Something new may add one idea" : {
       "comment" : "Style Me Preferences line for Mine + one idea"
     },
+    "Something went wrong on our side. Try again later." : {
+      "comment" : "Cloud action: the server failed, even after retrying"
+    },
     "Something went wrong. Try again later." : {
       "comment" : "Cloud action: any other failure"
     },
@@ -7188,6 +7191,9 @@
     "That photo couldn’t be saved. Your iPhone may be out of space. Nothing changed." : {
       "comment" : "Add a piece form: the photo was read but couldn't be written"
     },
+    "That's taking longer than it should. Try again in a moment." : {
+      "comment" : "Cloud action: the server didn't answer in time"
+    },
     "That’s %@ in %@" : {
       "comment" : "Swap: the end of the options (LR-07.3): every top, then the source's name"
     },
@@ -7393,6 +7399,9 @@
     "Things fade instead of sliding, and Maya’s z’s stay still." : {
       "comment" : "Accessibility: what the app does with Reduce Motion"
     },
+    "This account can't do that." : {
+      "comment" : "Cloud action: not allowed"
+    },
     "This choice is for this request only." : {
       "comment" : "Weather sheet: the choice doesn't stick",
       "localizations" : {
@@ -7468,8 +7477,17 @@
     "This is taking a break. Everything else works as usual." : {
       "comment" : "Cloud limit: a cloud feature is switched off on the server"
     },
+    "This is taking longer than usual. You can wait or cancel." : {
+      "comment" : "Cloud action still running after ten seconds, said aloud and shown"
+    },
     "This is the photo of you that try-on pictures start from. It’s optional: styling never needs it." : {
       "comment" : "Try-on photo sheet: what the photo is for"
+    },
+    "This isn't available right now. Try again in %@." : {
+      "comment" : "Cloud action: the server is busy or paused. The argument is a wait, like '2 minutes'."
+    },
+    "This isn't available right now. Try again later." : {
+      "comment" : "Cloud action: the server is busy or paused, with no time given"
     },
     "This list shows everything that’s deleted, and how much of each." : {
       "comment" : "Delete my data tour, step 1"
@@ -8526,6 +8544,9 @@
     },
     "Your closet stays here" : {
       "comment" : "Onboarding: the privacy step's title"
+    },
+    "Your closet still works on this iPhone." : {
+      "comment" : "Offline banner where cloud styling is needed: what still works"
     },
     "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
       "comment" : "Delete my data: the question"

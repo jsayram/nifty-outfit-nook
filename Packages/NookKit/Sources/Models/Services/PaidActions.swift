@@ -127,6 +127,26 @@ public protocol PaidActionService: Sendable {
     func run(_ request: PaidActionRequest, idempotencyKey: String) async throws(CloudLimitProblem) -> PaidActionReceipt
 }
 
+/// One paid action from her first tap until it works or is refused (Phase 26). It holds the
+/// action's Idempotency-Key, so every retry carries the same one: Try again after a timeout, Ask
+/// again after she left the screen and came back, a retry once she is back online. The server then
+/// answers a request it already ran from its record instead of running and counting it again.
+/// A new action, or a changed request, is a new `PaidActionAttempt` (the server refuses a key
+/// reused for something else).
+public final class PaidActionAttempt: Sendable {
+    public let request: PaidActionRequest
+    public let idempotencyKey: String
+
+    public init(_ request: PaidActionRequest, idempotencyKey: String = IdempotencyKey.make()) {
+        self.request = request
+        self.idempotencyKey = idempotencyKey
+    }
+
+    public func run(using service: any PaidActionService) async throws(CloudLimitProblem) -> PaidActionReceipt {
+        try await service.run(request, idempotencyKey: idempotencyKey)
+    }
+}
+
 public enum IdempotencyKey {
     /// A new key for a new action: "idem_" and 32 random hex digits.
     public static func make() -> String {
