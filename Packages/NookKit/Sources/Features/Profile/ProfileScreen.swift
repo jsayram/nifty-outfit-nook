@@ -98,7 +98,8 @@ nonisolated enum ProfileSheet: String, Identifiable, Hashable, Sendable {
 ///
 /// Name on your sign, Preferences and Avoid repeating outfits for open small sheets and save
 /// when she picks. Fit and measurements is pushed. Your try-on photo is a sheet that explains
-/// the photo and, in Stage A, offers an example instead of the camera or her photos. Track
+/// the photo and opens the system photo picker for her own (Phase 22a), or offers an example
+/// where photos are a stand-in (the debug sample closet and the tests). Track
 /// laundry is a switch (Phase 14b). Accessibility, Help, Send feedback, Privacy and terms and
 /// Delete my data are pushed (14b). Home reloads when Profile closes, so a new name is on the
 /// sign and the hamper follows Track laundry straight away (RD-03.1, RD-11).
@@ -231,7 +232,13 @@ struct ProfileScreen: View {
                 await closing { await model.setRepeatWindow(window, in: services) }
             }
         case .tryOnPhoto:
-            TryOnPhotoSheet(hasPhoto: model.hasTryOnPhoto) {
+            TryOnPhotoSheet(
+                hasPhoto: model.hasTryOnPhoto,
+                ownPhoto: services.photos.usesSystemPicker
+                    ? OwnTryOnPhoto(photo: model.tryOnPhoto) { picked in
+                        await model.useTryOnPhoto(picked, in: services)
+                    } : nil
+            ) {
                 await model.useExamplePhoto(in: services)
             } remove: {
                 await model.removePhoto(in: services)

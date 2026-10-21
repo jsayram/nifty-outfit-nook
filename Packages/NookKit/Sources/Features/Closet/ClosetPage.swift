@@ -233,8 +233,51 @@ struct ClosetPage: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// No pieces match: says which filters are on, with Clear filters (LR-09.3).
+    /// No pieces match: says which filters are on, with Clear filters (LR-09.3). When some pieces
+    /// have part of what she typed, Possible matches follows (PRD §7.6).
     private var noMatches: some View {
+        VStack(spacing: 0) {
+            noMatchesCard
+            if !model.possible.isEmpty {
+                possibleMatches
+                    .padding(.top, NookSpacing.xLarge)
+            }
+        }
+    }
+
+    /// Possible matches (PRD §7.6): a labelled section apart from real results, each piece saying
+    /// which of her words it doesn't have. Opening one offers Remember this name on its detail.
+    private var possibleMatches: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
+            Text(
+                "Possible matches", bundle: .module, comment: "Closet: heading over pieces with some of the typed words"
+            )
+            .nookTextStyle(.title)
+            .foregroundStyle(.nook.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.horizontal, NookSpacing.screenMargin)
+            Text(model.possibleMatchesNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, NookSpacing.screenMargin)
+            GarmentGrid(
+                items: model.possible, now: model.loadedAt,
+                hint: String(
+                    localized: "Possible match. Opens the piece.", bundle: .module,
+                    comment: "Hint on a piece under Possible matches in Closet"),
+                identifierPrefix: "closet.possible",
+                current: current
+            ) { item in
+                open(.garment(item.id, name: item.name, remembering: model.rememberSuggestion))
+            }
+            .padding(.horizontal, NookSpacing.screenMargin)
+            .padding(.top, NookSpacing.small)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var noMatchesCard: some View {
         NookEmptyState(
             String(localized: "No pieces match", bundle: .module, comment: "Closet: nothing matches the filters"),
             message: model.filterSummary,

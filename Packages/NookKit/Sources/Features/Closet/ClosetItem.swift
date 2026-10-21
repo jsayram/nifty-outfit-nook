@@ -18,7 +18,9 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
     let isDirty: Bool
     let lastWorn: Date?
     /// A short mark under the name in a picker, such as "May not match" (Phase 11).
-    let note: String?
+    private(set) var note: String?
+    /// What VoiceOver reads instead of `note`, when the note is a short form.
+    private(set) var spokenNote: String?
 
     init(_ garment: Garment, suitcaseNames: [String], tracksLaundry: Bool, note: String? = nil) {
         id = garment.id
@@ -35,11 +37,20 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
 
     var isPacked: Bool { !suitcaseNames.isEmpty }
 
+    /// The same piece with a different note, such as how many words a possible match has, and
+    /// the longer words VoiceOver reads for it.
+    func noting(_ note: String, spoken: String? = nil) -> ClosetItem {
+        var item = self
+        item.note = note
+        item.spokenNote = spoken
+        return item
+    }
+
     /// What VoiceOver reads after the name: "Dirty, In Weekend and Jose's house, Last worn
     /// 3 days ago". Built when a cell shows, not for every piece up front.
     func spokenDetails(now: Date, calendar: Calendar, locale: Locale) -> String {
         var parts: [String] = []
-        if let note { parts.append(note) }
+        if let note = spokenNote ?? note { parts.append(note) }
         if isDirty {
             parts.append(String(localized: "Dirty", bundle: .module, comment: "Spoken on a closet piece in the wash"))
         }

@@ -23,3 +23,7 @@ INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES
 INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+// Phase 22a: the camera, for garment photos (closet/compliance/PERMISSIONS.md). Picking from
+// Photos uses the system picker and needs no key. English is the only language, so there's no
+// InfoPlist.xcstrings yet; add one, with this string, with the first translation.
+INFOPLIST_KEY_NSCameraUsageDescription = Take photos of your clothes to add them to your closet.

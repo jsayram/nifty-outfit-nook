@@ -100,6 +100,9 @@ struct NiftyOutfitNookApp: App {
         }
         let onboarding = storage.onboarding
         let tours = storage.tours
+        // Her photos (Phase 22a), in the folder backups carry. Delete my data removes it with
+        // the backups' files (`BackupDataEraser`, in `storage.erasableData`).
+        let photos = PhotoFileStore(directory: (storage.backupLocation ?? .app).photos)
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
@@ -107,14 +110,18 @@ struct NiftyOutfitNookApp: App {
             services: { closet in
                 switch offersSampleCloset ? closet : .empty {
                 case .empty:
-                    // Her own closet, kept in the store, with Backups (Phase 21b). Delete my data
-                    // also deletes the migration's safety copy and the backups' files. The stores
-                    // are read here, so after a restore (`reload`) the services get fresh ones.
+                    // Her own closet, kept in the store, with Backups (Phase 21b) and her own
+                    // photos from the camera and the system picker, kept without their metadata
+                    // (Phase 22a). Delete my data also deletes the migration's safety copy, the
+                    // backups' files and the photos. The stores are read here, so after a restore
+                    // (`reload`) the services get fresh ones.
                     let tours = storage.tours
                     let onboarding = storage.onboarding
                     var services = FixtureServices.make(
                         configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
                         stores: storage.stores)
+                    services.photos = LocalPhotoIntake(files: photos)
+                    services.images = StoredPhotoProvider(files: photos, fallback: services.images)
                     services.deletion = LocalDataDeletion(
                         stores: storage.erasableData + [(.profile, tours), (.profile, onboarding)])
                     services.backups = storage.backups

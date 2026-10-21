@@ -255,6 +255,49 @@ struct ProfileModelTests {
         #expect(try await services.pictures.pictures() == pictures)
     }
 
+    /// Phase 22a: her own photo from the picker, kept through the intake (which strips its
+    /// metadata). A photo she replaces or removes is deleted from the iPhone at once.
+    @Test func herOwnPhotoReplacesTheOldOneAndRemovingDeletesIt() async throws {
+        let intake = RecordingPhotoIntake()
+        var services = services()
+        services.photos = intake
+        let model = await loaded(services)
+
+        #expect(await model.useTryOnPhoto(.bytes("me"), in: services))
+        #expect(model.tryOnPhoto == .stored(EntityID("photo-1")))
+        #expect(try await services.profile.profile().tryOnPhoto == .stored(EntityID("photo-1")))
+        #expect(intake.kept == [Data("me".utf8)])
+        // The example it replaced isn't a file, so nothing of hers was deleted yet.
+        #expect(intake.discarded == [ProfileModel.exampleTryOnPhoto])
+
+        #expect(await model.useTryOnPhoto(.bytes("me again"), in: services))
+        #expect(intake.discarded.last == .stored(EntityID("photo-1")))
+
+        #expect(await model.removePhoto(in: services))
+        #expect(intake.discarded.last == .stored(EntityID("photo-2")))
+        #expect(try await services.profile.profile().tryOnPhoto == nil)
+    }
+
+    @Test func aTryOnPhotoThatCantBeKeptChangesNothing() async throws {
+        let intake = RecordingPhotoIntake(.fails(.unreadable))
+        var services = services()
+        services.photos = intake
+        let model = await loaded(services)
+        #expect(!(await model.useTryOnPhoto(.bytes(), in: services)))
+        #expect(model.tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+        #expect(intake.discarded.isEmpty)
+    }
+
+    @Test func aProfileThatCantBeSavedDeletesTheNewCopy() async throws {
+        let intake = RecordingPhotoIntake()
+        var services = services(behavior: .storesFail)
+        services.photos = intake
+        let model = ProfileModel()
+        model.show(Profile(), locale: us)
+        #expect(!(await model.useTryOnPhoto(.bytes(), in: services)))
+        #expect(intake.discarded == [.stored(EntityID("photo-1"))])
+    }
+
     // MARK: States
 
     @Test func aStoreThatFailsShowsTheErrorAndSavesNothing() async {
