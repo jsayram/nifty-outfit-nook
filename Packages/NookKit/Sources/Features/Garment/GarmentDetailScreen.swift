@@ -11,6 +11,9 @@ struct GarmentDetailScreen: View {
     let garmentID: Garment.ID
     /// The name Closet showed, until the piece loads.
     let name: String
+    /// The words she searched for, when she opened it from Closet's Possible matches. The page
+    /// offers to keep them as another name (PRD §7.6).
+    let remembering: String?
     let open: (ClosetDestination) -> Void
     let back: () -> Void
     let removed: (GarmentRemoval) -> Void
@@ -32,6 +35,7 @@ struct GarmentDetailScreen: View {
     init(
         garmentID: Garment.ID,
         name: String,
+        remembering: String? = nil,
         open: @escaping (ClosetDestination) -> Void,
         back: @escaping () -> Void,
         removed: @escaping (GarmentRemoval) -> Void,
@@ -39,11 +43,12 @@ struct GarmentDetailScreen: View {
     ) {
         self.garmentID = garmentID
         self.name = name
+        self.remembering = remembering
         self.open = open
         self.back = back
         self.removed = removed
         self.isBeside = isBeside
-        _model = State(initialValue: GarmentDetailModel(garmentID: garmentID))
+        _model = State(initialValue: GarmentDetailModel(garmentID: garmentID, remembering: remembering))
     }
 
     private var currentName: String { model.garment?.name ?? name }
@@ -59,6 +64,8 @@ struct GarmentDetailScreen: View {
                 toggleLaundry: toggleLaundry,
                 addToSuitcase: { showsSuitcases = true },
                 remove: { showsRemove = true },
+                remember: remember,
+                declineToRemember: model.declineToRemember,
                 edit: pageEdit
             )
         )
@@ -156,6 +163,27 @@ struct GarmentDetailScreen: View {
                     actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
                 ) {
                     Task { try? await model.setLaundry(previous, in: closet) }
+                }
+            } catch {
+                toast = Self.failureToast
+            }
+        }
+    }
+
+    /// Remember on Remember this name: keeps her words as another name, with Undo (PRD §7.6).
+    private func remember() {
+        let closet = services.closet
+        Task {
+            do {
+                guard let kept = try await model.remember(in: closet) else { return }
+                toast = NookToastMessage(
+                    String(
+                        localized: "Remembered “\(kept)”", bundle: .module,
+                        comment: "Toast after Remember this name, with the words kept"),
+                    systemImage: "checkmark",
+                    actionTitle: String(localized: "Undo", bundle: .module, comment: "Toast action")
+                ) {
+                    Task { try? await model.forget(kept, in: closet) }
                 }
             } catch {
                 toast = Self.failureToast

@@ -121,7 +121,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 
 1. **Drafts were in memory in Stage A** (see above). Phase 21a gave `DraftStore` a durable implementation in the real store with complete file protection, and added drafts to the data map.
 2. **A kind is required as well as a name.** The mockup says "Only a name is needed", but every garment has a kind, and guessing one would quietly file her piece in the wrong place. The line now says "Only a name and the kind of piece are needed."
-3. **"Other names" (aliases) and the sub-kind (Cardigan, Blazer) came in Phase 21c,** above. The type is labelled "Type" because "Kind" already names the category here; the mockup calls them Category and Kind. PRD §7.6's possible matches, Remember this name and alias provenance aren't built.
+3. **"Other names" (aliases) and the sub-kind (Cardigan, Blazer) came in Phase 21c,** above. The type is labelled "Type" because "Kind" already names the category here; the mockup calls them Category and Kind. PRD §7.6's possible matches and Remember this name came after 21c (`docs/closet.md`, `docs/garment-detail.md`); a remembered name lands in the same other names. Alias provenance isn't built.
 4. **No cleanup or "Check the photo" step.** The mockup's simulated background cleanup and original-or-cleaned-up choice are cutouts, which Phases 8a and 8b decide.
 5. **"Comfort" isn't a garment field.** Today's comfort belongs to Style Me (LR-18, Phase 10a). The form has the piece's cut (Fit) and How warm.
 6. **LR-13 and LR-12 aren't part of this form.** "Add a piece that fits you well" is Profile's fit section (14a), and "Thinking of buying?" is the wishlist with Find One (34). Pieces added here are always hers.

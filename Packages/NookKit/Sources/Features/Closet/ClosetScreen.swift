@@ -118,7 +118,7 @@ struct ClosetScreen: View {
     @ViewBuilder private var detail: some View {
         if let current {
             GarmentDetailScreen(
-                garmentID: current.id, name: current.name, open: { path.append($0) },
+                garmentID: current.id, name: current.name, remembering: current.remembering, open: { path.append($0) },
                 back: { self.current = nil }, removed: pieceRemoved, isBeside: true
             )
             .id(current.id)
@@ -129,8 +129,8 @@ struct ClosetScreen: View {
 
     /// A piece opens beside the grid in the wide layouts, and over it otherwise.
     private func open(_ destination: ClosetDestination) {
-        if layout.showsDetailBeside, case .garment(let id, let name) = destination {
-            current = CurrentPiece(id: id, name: name)
+        if layout.showsDetailBeside, case .garment(let id, let name, let remembering) = destination {
+            current = CurrentPiece(id: id, name: name, remembering: remembering)
         } else {
             path.append(destination)
         }
@@ -143,12 +143,12 @@ struct ClosetScreen: View {
         switch (old.showsDetailBeside, new.showsDetailBeside) {
         case (true, false):
             if let current, path.isEmpty {
-                path = [.garment(current.id, name: current.name)]
+                path = [.garment(current.id, name: current.name, remembering: current.remembering)]
             }
             current = nil
         case (false, true):
-            if path.count == 1, case .garment(let id, let name) = path[0] {
-                current = CurrentPiece(id: id, name: name)
+            if path.count == 1, case .garment(let id, let name, let remembering) = path[0] {
+                current = CurrentPiece(id: id, name: name, remembering: remembering)
                 path = []
             }
         default:
@@ -217,7 +217,7 @@ struct ClosetScreen: View {
 
     /// Back to the grid, with Undo (LR-16.1). Undo puts the piece back and reloads.
     private func pieceRemoved(_ removal: GarmentRemoval) {
-        if case .garment(let id, _) = path.last, id == removal.garmentID {
+        if case .garment(let id, _, _) = path.last, id == removal.garmentID {
             path.removeLast()
         }
         if current?.id == removal.garmentID {
@@ -249,10 +249,12 @@ struct ClosetDetailPlaceholder: View {
     }
 }
 
-/// The piece showing beside the grid: its ID, and the name to show until it loads.
+/// The piece showing beside the grid: its ID, the name to show until it loads, and the words
+/// Remember this name offers when it came from Possible matches.
 private struct CurrentPiece: Equatable {
     let id: Garment.ID
     let name: String
+    var remembering: String?
 }
 
 #Preview {

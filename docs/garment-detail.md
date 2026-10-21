@@ -19,6 +19,7 @@ Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. On 
 ## The page
 
 1. **Her name for it**, in the display style, read as a heading.
+   - **Remember this name?** (PRD §7.6), only when she opened the piece from Closet's Possible matches. See [Remember this name](#remember-this-name).
 2. **Last worn** (LR-10): "Last worn today", "yesterday", "5 days ago", then a date ("Oct 7", with the year when it isn't this year's). With no wear recorded it says "Not marked as worn yet", since wear is only what she records.
 3. **The recent-wear note**, only for a top, bottom or dress worn inside her repeat window: "Style Me won’t repeat an outfit you wore it in during the last week" (or "last 2 weeks"). Shoes, layers, bags and accessories can repeat freely, and "I don't mind" has no note. This is the same `WearRules.isRecent` the mock stylist uses.
 4. **"In suitcases:"** (LR-11), a chip per active suitcase, by name. Each opens that suitcase (a stand-in until 13). Archived suitcases don't count.
@@ -30,6 +31,15 @@ Closet pushes the detail (`ClosetDestination.garment`) and Recently deleted. On 
 Status reads "Available" when nothing is in the way, as in the mockup. Otherwise it says "Bought, not here yet", "Away until Oct 23" or "Away for now", and "Clean" or "Dirty" while tracking is on.
 
 A piece she no longer has can still be shown (saved looks will link to it in 12a), with no actions.
+
+## Remember this name
+
+When she opens a piece from Closet's Possible matches, a card under the header asks **Remember this name?**: "Keep these words as another name for Navy dress pants, so the same search finds it next time." Her search words, without filler words, are in an **Other name** field she can change. "Only these words are kept, on this piece. Your search isn’t saved." Then **Remember** and **Not now**.
+
+- Remember adds the words to the piece's other names (Phase 21c's `otherNames`, the same list Add a piece and Edit show), checked by the same rule (`GarmentRules.newOtherName`): up to 40 characters on one line, not already one of its names, and at most 10. A problem shows under the field in the form's words, and VoiceOver moves to it. A toast says "Remembered “navy party pants”" with Undo, which takes the name off again.
+- Not now keeps nothing. Neither choice is remembered once she leaves the piece.
+- No card when she came any other way, when the words are already one of its names, when it already has 10 other names, or when it isn't in her closet.
+- Only the words she confirms are saved, on that one piece. Opening a piece records nothing, and the search itself is never kept. There's no history of where an other name came from (PRD §7.6's provenance); that would need a schema change.
 
 ## Style with this
 
@@ -82,7 +92,8 @@ Recently deleted has loading, empty ("Nothing here") and error states too.
 
 - `GarmentDetailTextTests`: Last worn with a fixed clock and calendar (today, yesterday, a late night, days, dates, another year), the recent-wear rule for each window and kind of piece, status in every case, the facts, the saved-look count and the deletion deadline.
 - `GarmentDetailModelTests`: what loads for each kind of piece, gone and failing stores, mark dirty and Undo, "I don't have it any more" and Undo, Delete it then Restore from Recently deleted, a failed save, the 30-day purge, and Delete now: the preview, the piece and its unsaved Edit gone with looks unchanged, the question's words, and a failed delete keeping the piece. `PermanentDeletionTests` (Models): what the preview lists.
-- `GarmentDetailSnapshotTests`: navy trousers (light and AX5), the lace top in the wash in dark, the tan loafers (never worn, no picture), the blue dress (away, two colours), the gone and error states, both sheets and Recently deleted.
+- `RememberThisNameTests`: Remember keeps her edited words and Closet then finds the piece by them, Undo, Not now, when the card isn't offered, and each problem.
+- `GarmentDetailSnapshotTests`: navy trousers (light and AX5), Remember this name (light and AX5), the lace top in the wash in dark, the tan loafers (never worn, no picture), the blue dress (away, two colours), the gone and error states, both sheets and Recently deleted.
 - `GarmentDetailTests` (UI): open a piece from Closet, Delete it, find it in Recently deleted and restore it, then Delete now on the leggings, confirm, and Recently deleted is empty; mark it dirty, Style with this to Style Me, and "I don't have it any more" with Undo.
 
 ## Decisions for Jose

@@ -84,6 +84,14 @@ struct ClosetSnapshotTests {
         assertPageSnapshot(model, named: "no-matches")
     }
 
+    /// PRD §7.6: nothing has every word, so Possible matches follows, each saying what's missing.
+    @Test func possibleMatches() {
+        let model = model(.demo)
+        model.searchText = "navy party pants"
+        model.applySearchNow()
+        assertPageSnapshot(model, named: "possible-matches")
+    }
+
     @Test func emptyCloset() {
         assertPageSnapshot(model(.empty), named: "empty")
     }

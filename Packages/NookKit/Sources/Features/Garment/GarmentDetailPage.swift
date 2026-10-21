@@ -11,6 +11,9 @@ struct GarmentDetailActions {
     var toggleLaundry: () -> Void = {}
     var addToSuitcase: () -> Void = {}
     var remove: () -> Void = {}
+    /// Remember and Not now on Remember this name (PRD §7.6).
+    var remember: () -> Void = {}
+    var declineToRemember: () -> Void = {}
     /// Edit, on the page itself. Set when the detail shows beside Closet's grid on iPad, where
     /// there's no navigation bar of its own to hold it (Phase 15a).
     var edit: (() -> Void)?
@@ -102,6 +105,15 @@ struct GarmentDetailPage: View {
             }
             GarmentDetailHeader(
                 name: garment.name, text: text, suitcases: model.suitcases, openSuitcase: actions.openSuitcase)
+            if model.offersToRemember {
+                RememberNameCard(
+                    pieceName: garment.name,
+                    text: Binding(get: { model.rememberText ?? "" }, set: { model.rememberText = $0 }),
+                    problem: model.rememberProblem, isSaving: model.isSaving,
+                    remember: actions.remember, decline: actions.declineToRemember
+                )
+                .padding(.top, NookSpacing.medium)
+            }
             GarmentStage(garment: garment, isInTheWash: text.isInTheWash)
                 .padding(.top, NookSpacing.small)
             if model.isInCloset {
