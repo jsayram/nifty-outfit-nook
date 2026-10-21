@@ -87,6 +87,9 @@ public struct MigrationJournal: Codable, Hashable, Sendable {
     public var verifiedAt: Date?
 }
 
+/// Held while a `ModelContainer` is made, so two never are at once (see `container()`).
+private let containerCreation = NSLock()
+
 /// Opens the store at a location, migrating it safely through `Plan`'s versions.
 public struct MigrationCoordinator<Plan: SchemaMigrationPlan>: Sendable {
     public let location: StoreLocation
@@ -174,11 +177,19 @@ public struct MigrationCoordinator<Plan: SchemaMigrationPlan>: Sendable {
 
     /// A container on the store at the current version. Never syncs with CloudKit: sync will be
     /// `CKSyncEngine`'s, never SwiftData's own mirroring (20a).
+    ///
+    /// One at a time in the process: Core Data builds the SQL triggers for a new store's tables
+    /// into state its model shares, and two stores doing that on two threads crashed the process
+    /// (SIGSEGV in `_generateTriggerSQL`) or failed with an SQLite prepare error. The app opens one
+    /// store at launch. Tests open many together, and without the lock a migration test failed now
+    /// and then for no reason of its own.
     func container() throws -> ModelContainer {
         guard let current = Plan.schemas.last else { throw CoordinatorFailure.noSchema }
-        let container = try ModelContainer(
-            for: Schema(versionedSchema: current), migrationPlan: Plan.self,
-            configurations: [ModelConfiguration(url: location.storeURL, cloudKitDatabase: .none)])
+        let container = try containerCreation.withLock {
+            try ModelContainer(
+                for: Schema(versionedSchema: current), migrationPlan: Plan.self,
+                configurations: [ModelConfiguration(url: location.storeURL, cloudKitDatabase: .none)])
+        }
         location.protectStoreFiles()
         return container
     }

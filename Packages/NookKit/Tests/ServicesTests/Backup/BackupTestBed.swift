@@ -22,22 +22,24 @@ final class BackupTestBed: Sendable {
             .appending(path: "\(label)-\(UUID().uuidString)", directoryHint: .isDirectory)
         location = .inside(root)
         self.today = today
-        storage = try Self.open(location)
+        storage = try Self.open(location, today: today)
     }
 
     deinit {
         try? FileManager.default.removeItem(at: root)
     }
 
-    static func open(_ location: BackupLocation) throws -> NookStorage {
-        switch NookStorage.open(at: location.store, backups: location, calendar: TestTime.calendar) {
+    /// The clock is `today`, never the real one: the 7-day safety copy a restore leaves is kept
+    /// or dropped at launch by comparing against it, and tests run on dates long after `TestTime.now`.
+    static func open(_ location: BackupLocation, today: Date = TestTime.now) throws -> NookStorage {
+        switch NookStorage.open(at: location.store, backups: location, calendar: TestTime.calendar, now: { today }) {
         case .ready(let storage): return storage
         case .problem(let problem): throw TemporaryStore.OpenFailure(problem: problem)
         }
     }
 
     /// The app opened again on the same folders, as at the next launch.
-    func relaunch() throws -> NookStorage { try Self.open(location) }
+    func relaunch() throws -> NookStorage { try Self.open(location, today: today) }
 
     /// The backup service, at a fixed time and with as much free space as the test says.
     func service(now: Date? = nil, freeSpace: Int64? = nil) -> LocalBackupService {
