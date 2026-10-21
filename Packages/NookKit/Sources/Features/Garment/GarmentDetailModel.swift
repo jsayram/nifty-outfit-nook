@@ -36,8 +36,20 @@ final class GarmentDetailModel {
     private(set) var isSaving = false
     @ObservationIgnored private var loads = LoadGeneration()
 
-    init(garmentID: Garment.ID) {
+    /// Remember this name (PRD §7.6): the words she searched for, editable, while the offer
+    /// stands. `nil` when she didn't come from Possible matches, or once she answers.
+    var rememberText: String? {
+        didSet { rememberProblem = nil }
+    }
+    /// What's wrong with `rememberText` after Remember. Typing clears it.
+    private(set) var rememberProblem: FieldProblem?
+    /// The words she came with, which decide whether the card shows at all.
+    private let remembering: String?
+
+    init(garmentID: Garment.ID, remembering: String? = nil) {
         self.garmentID = garmentID
+        self.remembering = remembering
+        rememberText = remembering
     }
 
     // MARK: Loading
@@ -95,6 +107,17 @@ final class GarmentDetailModel {
     /// still be shown (from an old saved look, later), with no actions.
     var isInCloset: Bool { garment?.isInCloset ?? false }
 
+    /// True when the Remember this name card shows: she came from Possible matches, the piece is
+    /// in her closet, and it has room for another name. Words that are already one of its names
+    /// aren't offered.
+    var offersToRemember: Bool {
+        guard rememberText != nil, let remembering, let garment, garment.isInCloset else { return false }
+        if garment.otherNames.count >= GarmentRules.otherNamesMaximumCount { return false }
+        // Only the words she came with are checked here; her edits are checked on Remember.
+        if case .failure(.duplicate) = Self.check(remembering, for: garment) { return false }
+        return true
+    }
+
     /// True when Mark as dirty or Mark as clean shows: tracking is on (RD-11.1).
     var showsLaundryAction: Bool { tracksLaundry && isInCloset }
 
@@ -107,6 +130,50 @@ final class GarmentDetailModel {
     }
 
     // MARK: Changes
+
+    /// Remember on Remember this name: keeps her words as another name for this piece only. The
+    /// search itself isn't kept. Returns the name kept, for the toast and Undo, or `nil` when the
+    /// words have a problem (`rememberProblem`) or nothing is offered.
+    func remember(in closet: any ClosetStore) async throws(StoreError) -> String? {
+        guard let text = rememberText, let garment, !isSaving else { return nil }
+        let name: String
+        switch Self.check(text, for: garment) {
+        case .success(let checked): name = checked
+        case .failure(let problem):
+            rememberProblem = problem
+            return nil
+        }
+        isSaving = true
+        defer { isSaving = false }
+        self.garment = try await closet.update(garmentID) { stored in
+            // Checked again against what's stored, in case the piece changed since it loaded.
+            guard case .success(let checked) = Self.check(name, for: stored) else { return }
+            stored.otherNames.append(checked)
+        }
+        rememberText = nil
+        return name
+    }
+
+    /// Not now on Remember this name: nothing is kept.
+    func declineToRemember() {
+        rememberText = nil
+    }
+
+    /// Undo after Remember: takes that name off again.
+    func forget(_ name: String, in closet: any ClosetStore) async throws(StoreError) {
+        self.garment = try await closet.update(garmentID) { stored in
+            stored.otherNames.removeAll { $0 == name }
+        }
+    }
+
+    /// Her words checked as one more other name for the piece.
+    nonisolated private static func check(_ text: String, for garment: Garment) -> Result<String, FieldProblem> {
+        do {
+            return .success(try GarmentRules.newOtherName(text, adding: GarmentDetails(garment)))
+        } catch {
+            return .failure(error)
+        }
+    }
 
     /// "Add to a suitcase" (Phase 13, PRD §7.7): packs it in a suitcase, or takes it out. It's the
     /// same piece either way; nothing is copied. Returns true when it's now packed.

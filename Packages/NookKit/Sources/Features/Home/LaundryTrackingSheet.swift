@@ -66,7 +66,11 @@ struct LaundryTrackingSheet: View {
                 }
                 .accessibilityIdentifier("laundryTracking.turnOn")
                 NookButton(
-                    String(localized: "Not now", bundle: .module, comment: "Button: closes the laundry tracking sheet"),
+                    String(
+                        localized: "Not now", bundle: .module,
+                        comment:
+                            "Button: closes a question without doing anything, as on the laundry tracking sheet and Remember this name"
+                    ),
                     kind: .soft, fillsWidth: true
                 ) {
                     dismiss()
