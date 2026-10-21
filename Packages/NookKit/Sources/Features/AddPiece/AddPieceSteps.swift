@@ -4,7 +4,7 @@ import SwiftUI
 
 /// "How would you like to add it?" (`garment-edit.html`): Take photo, Choose from Photos, Paste
 /// and Describe in words. With Stage A's stand-in the line under them says photos aren't built;
-/// with real photos (Phase 22a) Paste isn't offered and the line says how photos are kept. Then
+/// with real photos (Phase 22a) the line says how photos are kept and Paste is Apple's own Paste button (Phase 22c). Then
 /// the loading, "couldn't be read" and "couldn't be saved" states.
 struct AddPieceChoices: View {
     let model: GarmentEditorModel
@@ -127,7 +127,9 @@ struct AddPieceChoices: View {
                     localized: "Only the picture you pick is shared with the app", bundle: .module,
                     comment: "Add a piece choice: under Choose from Photos"),
                 systemImage: "photo")
-            if model.photoSources.contains(.paste) {
+            if model.photoSources.contains(.paste) && model.usesSystemPicker {
+                PasteChoice(paste: actions.pastePhoto)
+            } else if model.photoSources.contains(.paste) {
                 choice(
                     .paste, title: String(localized: "Paste", bundle: .module, comment: "Add a piece choice"),
                     subtitle: String(
@@ -324,5 +326,88 @@ private struct SuggestionRowView: View {
         .padding(.trailing, NookSpacing.small)
         .padding(.vertical, NookSpacing.xSmall)
         .background(Color.nook.tint, in: NookRadius.shape(NookRadius.group))
+    }
+}
+
+/// Paste with real photos (Phase 22c): Apple's `PasteButton`, which shows the system's own Paste
+/// label and is dimmed by iOS while the pasteboard holds no image. Because she taps the system
+/// button, iOS asks no "Allow Paste?" and the app never reads the pasteboard itself.
+struct PasteChoice: View {
+    let paste: (PickedPhoto) -> Void
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.closetIsStillImage) private var isStatic
+    @ScaledMetric(relativeTo: .subheadline) private var iconSize: CGFloat = 32
+
+    var body: some View {
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        let layout =
+            stacked
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: NookSpacing.small))
+            : AnyLayout(HStackLayout(spacing: NookSpacing.medium))
+        layout {
+            HStack(alignment: .top, spacing: NookSpacing.medium) {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: iconSize * 0.56, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.nook.accent)
+                    .frame(width: iconSize, height: iconSize)
+                    .background(Color.nook.tintStrong, in: Circle())
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: NookSpacing.xxSmall) {
+                    Text("Paste", bundle: .module, comment: "Add a piece choice")
+                        .nookTextStyle(.label)
+                        .foregroundStyle(.nook.textPrimary)
+                    Text(
+                        "Copy a photo first, from a shop’s website or another app, then tap Paste.", bundle: .module,
+                        comment: "Add a piece choice: under Paste. The button is dimmed until a photo is copied"
+                    )
+                    .nookTextStyle(.note)
+                    .foregroundStyle(.nook.textSecondary)
+                }
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .accessibilityElement(children: .combine)
+            pasteButton
+                .frame(minHeight: NookSpacing.minimumTapTarget)
+                .accessibilityLabel(
+                    String(
+                        localized: "Paste a copied photo", bundle: .module,
+                        comment: "VoiceOver label of the system Paste button in Add a piece")
+                )
+                .accessibilityHint(
+                    String(
+                        localized: "Dimmed until you copy a photo.", bundle: .module,
+                        comment: "VoiceOver hint of the Paste button in Add a piece")
+                )
+                .accessibilityIdentifier("addPiece.paste")
+        }
+        .padding(.horizontal, NookSpacing.medium)
+        .padding(.vertical, 6)
+        .frame(minHeight: NookSpacing.minimumTapTarget)
+    }
+
+    @ViewBuilder private var pasteButton: some View {
+        if isStatic {
+            // `ImageRenderer` can't draw the system's button, so snapshots get a look-alike.
+            Label("Paste", systemImage: "doc.on.clipboard")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, NookSpacing.large)
+                .frame(minHeight: NookSpacing.minimumTapTarget)
+                .background(Color.nook.accent, in: Capsule())
+        } else {
+            PasteButton(supportedContentTypes: [.image]) { providers in
+                guard let picked = PickedPhoto.pasted(providers) else {
+                    paste(PickedPhoto(source: .paste) { throw PhotoIntakeError.unreadable })
+                    return
+                }
+                paste(picked)
+            }
+            .labelStyle(.titleAndIcon)
+            .buttonBorderShape(.capsule)
+            .tint(Color.nook.accent)
+        }
     }
 }

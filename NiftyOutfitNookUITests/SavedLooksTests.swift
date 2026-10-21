@@ -207,6 +207,32 @@ final class SavedLooksTests: XCTestCase {
         XCTAssertFalse(nudge.exists)
     }
 
+    /// On a short list the "N more in All" line must sit above the floating tab bar, not under it
+    /// until she scrolls (a bug in #70). The screen's frame is checked, since a line under the bar
+    /// still "exists" and the bar is drawn over it.
+    @MainActor
+    func testTheMoreInAllLineClearsTheTabBarOnAShortList() {
+        let app = launch()
+        let tabBar = app.tabBars.firstMatch
+        tabBar.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
+        let nudge = app.buttons["savedLooks.moreInAll"]
+        let search = app.searchFields["Search your looks"]
+        search.tapUntilFocused(timeout: Self.wait)
+        search.typeTextAndWait("denim\n", timeout: Self.wait)
+        tap("savedLooks.filter.kind.bottom", in: app, showing: nudge)
+        XCTAssertEqual(nudge.label, "1 more in All")
+        // Let the keyboard go, as it would when she scrolls or taps away.
+        app.swipeDown()
+        _ = nudge.waitUntilHittable(timeout: Self.wait)
+        let before = nudge.frame
+        app.swipeUp()
+        print("PROBE before \(before) after \(nudge.frame) bar \(tabBar.frame) win \(app.windows.firstMatch.frame)")
+        XCTAssertLessThanOrEqual(
+            nudge.frame.maxY, tabBar.frame.minY, "The line is under the tab bar: \(nudge.frame) vs \(tabBar.frame)")
+        XCTAssertTrue(nudge.isHittable, "The line can't be tapped without scrolling")
+        Screenshots.save(app, as: "saved-looks-nudge")
+    }
+
     /// Phase 21c: the scope goes back to Saved when she leaves the screen. The search and chips
     /// are not part of that.
     @MainActor

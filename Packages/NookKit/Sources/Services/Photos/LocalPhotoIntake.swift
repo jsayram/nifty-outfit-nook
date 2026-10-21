@@ -6,8 +6,9 @@ import Models
 /// (no location, no camera details, upright) and saves only that copy in `PhotoFileStore`.
 /// Nothing leaves the phone and nothing is logged.
 ///
-/// Paste isn't offered: reading the pasteboard makes iOS ask "Allow Paste?" every time, and it's
-/// a question for Jose whether it's worth that (the build plan's 22a log).
+/// Paste (Phase 22c) is the system Paste button's: she taps it, iOS hands the screen the copied
+/// image, and the screen passes the bytes to `keep` like any picked photo. The app never reads
+/// the pasteboard itself, so iOS shows no "Allow Paste?" question.
 public struct LocalPhotoIntake: PhotoIntake {
     public let files: PhotoFileStore
     public let options: PhotoCleaner.Options
@@ -17,7 +18,7 @@ public struct LocalPhotoIntake: PhotoIntake {
         self.options = options
     }
 
-    public var sources: [PhotoSource] { [.camera, .library] }
+    public var sources: [PhotoSource] { [.camera, .library, .paste] }
     public var usesSystemPicker: Bool { true }
 
     /// Not used: the screen picks the photo and calls `keep`.

@@ -59,13 +59,15 @@ public final class NookStorage: Sendable {
     }
 
     /// Opens the store at `location`, migrating it if needed. With `backups`, a restore that was
-    /// stopped is finished or tidied up first, and an expired safety copy goes (Phase 21b).
+    /// stopped is finished or tidied up first, and an expired safety copy goes (Phase 21b). `now`
+    /// is the clock for that check; tests with dates of their own pass theirs.
     public static func open(
-        at location: StoreLocation = .app, backups: BackupLocation? = nil, calendar: Calendar = .current
+        at location: StoreLocation = .app, backups: BackupLocation? = nil, calendar: Calendar = .current,
+        now: @escaping @Sendable () -> Date = { .now }
     ) -> Opening {
         switch MigrationCoordinator<NookMigrationPlan>(location: location).open() {
         case .ready(let container, _):
-            if let backups { RestoreCommitter(container: container, location: backups).resume() }
+            if let backups { RestoreCommitter(container: container, location: backups, now: now).resume() }
             return .ready(NookStorage(container: container, location: location, backups: backups, calendar: calendar))
         case .problem(let problem):
             return .problem(problem)
