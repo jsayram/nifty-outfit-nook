@@ -242,8 +242,8 @@ struct StartingPieceChoices: View {
         guard !words.isEmpty else { return model.startingPieceChoices }
         return model.startingPieceChoices.filter { piece in
             let haystack =
-                [piece.name, piece.category.singularTitle, piece.category.chipTitle]
-                + piece.colors.map(\.title)
+                [piece.name, piece.category.singularTitle, piece.category.chipTitle] + piece.otherNames
+                + [piece.subKind?.title].compactMap { $0 } + piece.colors.map(\.title)
             return words.allSatisfy { word in haystack.contains { $0.localizedStandardContains(word) } }
         }
     }

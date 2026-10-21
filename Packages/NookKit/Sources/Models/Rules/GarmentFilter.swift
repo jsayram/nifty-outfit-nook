@@ -11,8 +11,9 @@ public struct GarmentFilter: Hashable, Sendable {
     public var packing: Packing
     /// The Dirty chip, which only shows while laundry tracking is on (RD-11). `nil` means any.
     public var laundry: LaundryState?
-    /// Typed search. Every word must match the name, brand, colour note or the name of a
-    /// suitcase it's in, or one of the extra words the screen passes to `apply`.
+    /// Typed search. Every word must match the name, one of its other names (Phase 21c), the
+    /// brand, colour note or the name of a suitcase it's in, or one of the extra words the screen
+    /// passes to `apply` (its kind, type and colours).
     public var query: String
 
     public init(
@@ -55,7 +56,7 @@ public struct GarmentFilter: Hashable, Sendable {
     /// The matching garments, in the order given.
     ///
     /// - Parameter extraWords: More words a garment answers to, such as the screen's names for
-    ///   its kind and colours ("Shoes", "Black"). Models has no display text, so the screen
+    ///   its kind, type and colours ("Shoes", "Loafers", "Black"). Models has no display text, so the screen
     ///   supplies them.
     public func apply(
         to garments: [Garment],
@@ -85,7 +86,7 @@ public struct GarmentFilter: Hashable, Sendable {
             }
             guard !words.isEmpty else { return true }
             let fields =
-                [garment.name, garment.brand ?? "", garment.colorNote ?? ""]
+                [garment.name, garment.brand ?? "", garment.colorNote ?? ""] + garment.otherNames
                 + (suitcaseNames[garment.id] ?? []) + extraWords(garment)
             return words.allSatisfy { word in
                 fields.contains { $0.range(of: word, options: [.caseInsensitive, .diacriticInsensitive]) != nil }

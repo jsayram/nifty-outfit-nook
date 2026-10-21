@@ -19,6 +19,29 @@ enum LookDetailText {
         }
     }
 
+    // MARK: An earlier result (LR-06.4)
+
+    /// In the facts of an earlier result she didn't save.
+    static var notSaved: String {
+        String(localized: "Not saved", bundle: .module, comment: "Look detail: an earlier result she didn't save")
+    }
+
+    /// Under an earlier result: what it is and what Save does.
+    static var earlierResultNote: String {
+        String(
+            localized:
+                "An earlier Style Me result. Save it to keep it in Saved Looks, where you can wear it, swap pieces and try it on.",
+            bundle: .module, comment: "Look detail: note on an earlier result she didn't save (LR-06.4)")
+    }
+
+    static var saveLook: String {
+        String(localized: "Save look", bundle: .module, comment: "Look detail: saves an earlier result")
+    }
+
+    static var savedToast: String {
+        String(localized: "Saved to Saved Looks", bundle: .module, comment: "Toast after saving an earlier result")
+    }
+
     /// "From Weekend", for a look made from a suitcase.
     static func from(_ sourceName: String) -> String {
         String(

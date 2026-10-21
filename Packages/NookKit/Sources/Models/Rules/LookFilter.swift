@@ -12,8 +12,9 @@ public struct LookFilter: Hashable, Sendable {
     public var categories: Set<GarmentCategory>
     /// Colour swatches. Empty means any colour.
     public var colors: Set<ColorName>
-    /// Typed search. Every word must match the look's name, a piece's name, or one of the extra
-    /// words the screen passes to `apply` (its names for the occasion, kinds and colours).
+    /// Typed search. Every word must match the look's name, a piece's name or other names, or one
+    /// of the extra words the screen passes to `apply` (its names for the occasion, kinds, types
+    /// and colours).
     public var query: String
 
     public init(categories: Set<GarmentCategory> = [], colors: Set<ColorName> = [], query: String = "") {
@@ -37,21 +38,32 @@ public struct LookFilter: Hashable, Sendable {
         query.split(whereSeparator: \.isWhitespace).map(String.init)
     }
 
-    /// One piece of a look as the filter sees it: what it is, its colours and its name. A piece
+    /// One piece of a look as the filter sees it: what it is, its colours and its names. A piece
     /// whose garment is gone for good has nothing to match and is left out.
     public struct Piece: Hashable, Sendable {
         public var category: GarmentCategory
         public var colors: [ColorName]
         public var name: String
+        /// The garment's other names (Phase 21c). Ideas have none.
+        public var otherNames: [String]
+        /// The garment's type, such as Cardigan. Ideas have none.
+        public var subKind: GarmentSubKind?
 
-        public init(category: GarmentCategory, colors: [ColorName], name: String) {
+        public init(
+            category: GarmentCategory, colors: [ColorName], name: String, otherNames: [String] = [],
+            subKind: GarmentSubKind? = nil
+        ) {
             self.category = category
             self.colors = colors
             self.name = name
+            self.otherNames = otherNames
+            self.subKind = subKind
         }
 
         public init(_ garment: Garment) {
-            self.init(category: garment.category, colors: garment.colors, name: garment.name)
+            self.init(
+                category: garment.category, colors: garment.colors, name: garment.name,
+                otherNames: garment.otherNames, subKind: garment.subKind)
         }
 
         public init(_ idea: PieceIdea) {
@@ -91,7 +103,7 @@ public struct LookFilter: Hashable, Sendable {
         }
         let words = words
         guard !words.isEmpty else { return true }
-        let fields = [name ?? ""] + extraWords + pieces.flatMap { [$0.name] + pieceWords($0) }
+        let fields = [name ?? ""] + extraWords + pieces.flatMap { [$0.name] + $0.otherNames + pieceWords($0) }
         return words.allSatisfy { word in
             fields.contains { $0.range(of: word, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
         }

@@ -19,7 +19,8 @@ import SwiftData
 // relationships: a look can refer to a piece that was deleted for good, and PRD 11.7 wants that
 // shown as a gap, not dropped (the spike's finding).
 
-/// One record of her data. The kind and key together are unique.
+/// One record of her data. The kind and key together are unique. This is the current version's
+/// row (`NookSchemaV2`); `NookSchemaV1.StoredRecord` keeps version 1's as it shipped.
 @Model
 public final class StoredRecord {
     #Unique<StoredRecord>([\.kind, \.key])
@@ -31,6 +32,13 @@ public final class StoredRecord {
     /// `RecordKind.singleKey`.
     public var key: String
     /// The version of `payload`'s JSON shape. `RecordPayload` reads every version it knows.
+    ///
+    /// The hash modifier is the store's version 2 (Phase 21c): the columns are the same as
+    /// version 1's, but a version 2 store may hold version 2 payloads, which a version 1 build
+    /// can't read. The new hash gives the store a new version, so a version 1 build sees a store
+    /// from a newer app and leaves it alone instead of opening it. Change it only together with
+    /// a new schema version.
+    @Attribute(hashModifier: "payload-2")
     public var payloadVersion: Int
     /// The value type as JSON.
     public var payload: Data
@@ -46,20 +54,54 @@ public final class StoredRecord {
     }
 }
 
-/// The first version of the store. A later version adds itself here and in `NookMigrationPlan`,
-/// with the stage between them, and freezes this one's models (copy the class into the enum)
-/// before changing `StoredRecord`.
+/// The first version of the store (Phases 21a and 21b), frozen: its row exactly as it shipped.
+/// Never change it. The app never makes these rows; SwiftData only needs the model to read a
+/// version 1 store's metadata and to migrate it.
 public enum NookSchemaV1: VersionedSchema {
     public static var versionIdentifier: Schema.Version { Schema.Version(1, 0, 0) }
+    public static var models: [any PersistentModel.Type] { [NookSchemaV1.StoredRecord.self] }
+
+    @Model
+    public final class StoredRecord {
+        #Unique<StoredRecord>([\.kind, \.key])
+        #Index<StoredRecord>([\.kind])
+
+        public var kind: String
+        public var key: String
+        public var payloadVersion: Int
+        public var payload: Data
+        public var savedAt: Date
+
+        public init(kind: String, key: String, payloadVersion: Int, payload: Data, savedAt: Date) {
+            self.kind = kind
+            self.key = key
+            self.payloadVersion = payloadVersion
+            self.payload = payload
+            self.savedAt = savedAt
+        }
+    }
+}
+
+/// The second version (Phase 21c): the same columns, marking a store that may hold version 2
+/// payloads (`StoredRecord.payloadVersion`). The next version freezes this one's row into the enum
+/// before changing `StoredRecord`, as version 1's is.
+public enum NookSchemaV2: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(2, 0, 0) }
     public static var models: [any PersistentModel.Type] { [StoredRecord.self] }
 }
 
 /// Every version the app has shipped, oldest first, and the stages between them. The
 /// `MigrationCoordinator` reads a store's version from this list before opening it, so a store
-/// from a newer app is never opened or reset.
+/// from a newer app is never opened or reset, and it journals and checks every stage.
 public enum NookMigrationPlan: SchemaMigrationPlan {
-    public static var schemas: [any VersionedSchema.Type] { [NookSchemaV1.self] }
-    public static var stages: [MigrationStage] { [] }
+    public static var schemas: [any VersionedSchema.Type] { [NookSchemaV1.self, NookSchemaV2.self] }
+
+    /// Version 1 to 2 changes no rows: every payload stays byte for byte, and a version 1 payload
+    /// reads as version 2 (`RecordPayload`). The coordinator's check proves it, since it expects
+    /// every record's payload hash unchanged.
+    public static var stages: [MigrationStage] {
+        [.lightweight(fromVersion: NookSchemaV1.self, toVersion: NookSchemaV2.self)]
+    }
 }
 
 /// The kinds of record in the store.

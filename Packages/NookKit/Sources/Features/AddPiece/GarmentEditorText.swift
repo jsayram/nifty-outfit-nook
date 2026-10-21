@@ -8,6 +8,10 @@ enum GarmentEditorText {
     static func label(for field: GarmentField) -> String {
         switch field {
         case .name: String(localized: "Name", bundle: .module, comment: "Add a piece: field label")
+        case .otherNames:
+            String(
+                localized: "Other names", bundle: .module,
+                comment: "Add a piece: field label, more names search finds the piece by")
         case .category:
             String(localized: "Kind", bundle: .module, comment: "Add a piece: field label, the kind of piece")
         case .colorNote:
@@ -20,6 +24,34 @@ enum GarmentEditorText {
         }
     }
 
+    /// "Type", the field under Kind with Cardigan, Blazer and the like (Phase 21c).
+    static var subKindLabel: String {
+        String(
+            localized: "Type", bundle: .module,
+            comment: "Add a piece: field label, the type within the kind, like Cardigan")
+    }
+
+    /// The type chip for none of the listed types.
+    static var noSubKind: String {
+        String(
+            localized: "None of these", bundle: .module,
+            comment: "Add a piece: type chip when none of the listed types fits, or she'd rather not say")
+    }
+
+    /// Under the other names: what they're for.
+    static var otherNamesNote: String {
+        String(
+            localized: "Search finds the piece by any of its names.", bundle: .module,
+            comment: "Add a piece: under Other names")
+    }
+
+    /// Spoken on an other name's chip, which removes it: "Remove Date-night top".
+    static func removeOtherName(_ name: String) -> String {
+        String(
+            localized: "Remove \(name)", bundle: .module,
+            comment: "VoiceOver label of the chip that removes one of the piece's other names")
+    }
+
     /// What's wrong with a field, in words that say how to fix it.
     static func problem(_ problem: FieldProblem, in field: GarmentField) -> String {
         switch (field, problem) {
@@ -29,6 +61,18 @@ enum GarmentEditorText {
             return String(
                 localized: "Choose what kind of piece it is.", bundle: .module,
                 comment: "Add a piece: no kind of piece chosen")
+        case (.otherNames, .empty):
+            return String(
+                localized: "Type a name first.", bundle: .module,
+                comment: "Add a piece: Add under Other names with nothing typed")
+        case (_, .duplicate):
+            return String(
+                localized: "It already has that name.", bundle: .module,
+                comment: "Add a piece: the other name is the same as its name or another of its names")
+        case (_, .tooMany(let maximum)):
+            return String(
+                localized: "A piece can have up to \(maximum) other names. Remove one to add another.", bundle: .module,
+                comment: "Add a piece: the piece has as many other names as it can keep, with the limit")
         case (_, .tooLong(let maximum)):
             return String(
                 localized: "Keep this to \(maximum) characters.", bundle: .module,

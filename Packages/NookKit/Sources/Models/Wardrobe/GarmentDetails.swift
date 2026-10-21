@@ -9,9 +9,13 @@ import Foundation
 public struct GarmentDetails: Hashable, Sendable, Codable {
     /// Her name for it. Required (`NameRules.garmentName`).
     public var name: String
+    /// More names search finds it by (PRD §7.6). Checked and trimmed by `GarmentRules`.
+    public var otherNames: [String]
     /// The kind of piece. Required, but `nil` until she picks one: a new piece never gets a kind
     /// she didn't choose or accept.
     public var category: GarmentCategory?
+    /// A narrower kind within `category`, such as Cardigan. `nil` when she didn't pick one.
+    public var subKind: GarmentSubKind?
     /// Colour families, main colour first.
     public var colors: [ColorName]
     /// Her words for the shade. Empty means none.
@@ -32,7 +36,9 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
 
     public init(
         name: String = "",
+        otherNames: [String] = [],
         category: GarmentCategory? = nil,
+        subKind: GarmentSubKind? = nil,
         colors: [ColorName] = [],
         colorNote: String = "",
         fit: GarmentFit? = nil,
@@ -46,7 +52,9 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
         photo: PhotoReference = .noPhoto
     ) {
         self.name = name
+        self.otherNames = otherNames
         self.category = category
+        self.subKind = subKind
         self.colors = colors
         self.colorNote = colorNote
         self.fit = fit
@@ -68,7 +76,9 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
     public init(_ garment: Garment) {
         self.init(
             name: garment.name,
+            otherNames: garment.otherNames,
             category: garment.category,
+            subKind: garment.subKind,
             colors: garment.colors,
             colorNote: garment.colorNote ?? "",
             fit: garment.fit,
@@ -89,7 +99,10 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
     /// old photo's cutout, which no longer matches it.
     public func apply(to garment: inout Garment) {
         garment.name = name
+        garment.otherNames = otherNames
         if let category { garment.category = category }
+        // A type from another kind never stays on a piece (`GarmentRules` drops it too).
+        garment.subKind = subKind.flatMap { $0.category == garment.category ? $0 : nil }
         garment.colors = colors
         garment.colorNote = colorNote.isEmpty ? nil : colorNote
         garment.fit = fit
@@ -113,5 +126,28 @@ public struct GarmentDetails: Hashable, Sendable, Codable {
         var garment = Garment(id: id, name: details.name, category: category, addedAt: addedAt)
         details.apply(to: &garment)
         return garment
+    }
+}
+
+extension GarmentDetails {
+    /// Reads details from a draft's JSON. Payload version 1 (Phases 21a and 21b) has no
+    /// `otherNames` or `subKind`, so a missing one reads as none. Writing is synthesized.
+    public init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try values.decode(String.self, forKey: .name)
+        otherNames = try values.decodeIfPresent([String].self, forKey: .otherNames) ?? []
+        category = try values.decodeIfPresent(GarmentCategory.self, forKey: .category)
+        subKind = try values.decodeIfPresent(GarmentSubKind.self, forKey: .subKind)
+        colors = try values.decode([ColorName].self, forKey: .colors)
+        colorNote = try values.decode(String.self, forKey: .colorNote)
+        fit = try values.decodeIfPresent(GarmentFit.self, forKey: .fit)
+        dressiness = try values.decode(Dressiness.self, forKey: .dressiness)
+        warmth = try values.decode(Warmth.self, forKey: .warmth)
+        seasons = try values.decode(Set<Season>.self, forKey: .seasons)
+        occasions = try values.decode(Set<Occasion>.self, forKey: .occasions)
+        brand = try values.decode(String.self, forKey: .brand)
+        sizeLabel = try values.decode(String.self, forKey: .sizeLabel)
+        notes = try values.decode(String.self, forKey: .notes)
+        photo = try values.decode(PhotoReference.self, forKey: .photo)
     }
 }

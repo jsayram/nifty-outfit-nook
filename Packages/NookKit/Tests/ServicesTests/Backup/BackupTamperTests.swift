@@ -108,7 +108,7 @@ struct BackupTamperTests {
         try await Self.expectRefused(
             try CraftedArchive.make(in: phone, manifest: manifest, entries: [CraftedArchive.Entry]()), .newerVersion)
         var records = CraftedArchive.manifest(files: [:])
-        records.payloadVersion = 2
+        records.payloadVersion = RecordPayload.currentVersion + 1
         try await Self.expectRefused(
             try CraftedArchive.make(in: phone, manifest: records, entries: [CraftedArchive.Entry]()), .newerVersion)
     }

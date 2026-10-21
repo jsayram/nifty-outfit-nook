@@ -26,7 +26,7 @@ Closet's Add a piece (and the empty closet's Add a piece) opens **"How would you
 
 - **A photo choice** goes through `PhotoIntake`. Stage A's stand-in asks for nothing and returns a sample picture, so the form opens with "Sample photo". A line under the choices says photos aren't built yet. If the stand-in fails (`-fixtures demo:photo-fails`), the screen says "That photo couldn’t be read", that nothing was saved, and offers Try another photo or Describe in words.
 - **Describe in words** takes her words and Suggest details lists what it found. She accepts or skips each one, and nothing is filled in until she accepts it. Continue fills the accepted fields and opens the form. A suggestion fills its field once, so going back and continuing again doesn't undo what she changed on the form.
-- **The form** has the picture with Add a photo or Change photo, then Name, Kind, Colour with Shade name, Fit, How dressy, How warm, Seasons, Occasions, Brand, Size on the label and Notes, then Save to closet. Save is also in the bar.
+- **The form** has the picture with Add a photo or Change photo, then Name, Other names, Kind, Type (once a kind is chosen), Colour with Shade name, Fit, How dressy, How warm, Seasons, Occasions, Brand, Size on the label and Notes, then Save to closet. Save is also in the bar.
 
 **Edit** on garment detail opens the same form filled in with the piece, titled "Edit piece", with Save changes. Save changes keeps the piece's states (ownership, laundry, wear, suitcases) and only changes the facts. Back on the detail the new values show, since the detail loads again as it appears.
 
@@ -39,7 +39,9 @@ The fields are the model's (`Garment`), and the checks are `GarmentRules` in Mod
 | Field | Required | Default for a new piece | Check |
 |---|---|---|---|
 | Name | Yes | empty | `NameRules.garmentName`: trimmed, 1 to 60 characters, one line |
+| Other names | No | none | Up to 10, each up to 40 characters on one line. Add refuses an empty name, one it already has (ignoring case and accents, its own name included) and an eleventh |
 | Kind | Yes | none chosen | One of the seven kinds |
+| Type | No | None of these | One of the kind's types; changing the kind clears a type that doesn't belong to it. Dresses have none yet |
 | Colour | No | none | Any of the colour families; the first one picked is the main colour |
 | Shade name | No | empty | Up to 40 characters, one line |
 | Fit | No | Not sure | Fitted, Regular, Relaxed or Not sure |
@@ -56,6 +58,12 @@ The defaults are `Garment`'s own, so a piece saved with only a name and a kind c
 Save with problems saves nothing. Each problem shows under its field in words that say how to fix it ("Give it a name.", "Choose what kind of piece it is.", "Keep this to 40 characters."), on the error tint with an icon. VoiceOver says "Not saved yet. Check Name and Kind.", moves to the first field with a problem, and the page scrolls there. After the first Save the problems update as she types.
 
 If the store can't save, a note says "That didn’t save. Your words are still here, so you can try again." and nothing is lost.
+
+### Other names and Type (Phase 21c)
+
+PRD §7.6 and the mockup's "Other names" and second row of kinds. **Other names** sits under Name: a field ("Like “Date-night top”"), **Add name**, and the names she added as chips, each of which removes itself ("Remove Date-night top" to VoiceOver). Return ends editing, as in every one-line field. A name typed but not added is added on Save, so it isn't lost; if it can't be added, Save stops with the reason under the field. The line under them says "Search finds the piece by any of its names." **Type** sits under Kind, with the kind's types and **None of these**: Tops have Blouse, Tee, Shirt, Sweater, Knit top and Tank top; Layers have Cardigan, Jacket, Blazer, Coat and Vest; Bottoms have Trousers, Jeans, Skirt, Shorts and Leggings; Shoes have Flats, Heels, Sneakers, Loafers, Boots and Sandals; Bags have Handbag, Tote, Crossbody bag, Clutch and Backpack; Accessories have Scarf, Belt, Hat and Jewellery.
+
+Both are in the draft, so closing the app keeps them. Garment detail shows the type under the kind and an "Other names" row. Search in Closet, Swap and the piece picker (which share Closet's search), Style Me's starting piece and Saved Looks finds a piece by its other names and its type. Describe in words doesn't suggest a type yet.
 
 ## Cancel
 
@@ -96,6 +104,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 
 - Each field is named by its label ("Brand, optional"), and its problem is read after it. Chip groups are named by their heading, which VoiceOver reads as a heading, and chosen chips say "Selected".
 - Each suggestion reads its field and value, then "Accept name: Sage cardigan" and "Skip name".
+- Other names: the field reads "Other names, optional"; each name's chip reads "Remove Date-night top"; a refused name's reason is read after the field. Type is a chip group named "Type, optional", like the others.
 - At the accessibility sizes every chip group wraps, text fields wrap their text and their prompt, the picture row stacks, the suggestion buttons move under the words, and Resume and Discard stack. Save is in the bar too, so she doesn't need to scroll to the end of a very long form.
 - Dark mode uses the palette tokens; the swatches keep their garment colours as in Closet.
 
@@ -103,6 +112,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 
 - `GarmentDetailsTests`, `GarmentRulesTests`, `GarmentSuggestionTests`, `GarmentDraftTests` (Models): the checks and limits, trimming, defaults, writing details onto a garment without touching its states, each suggestion, and when a draft counts as work.
 - `WordMatchDescriptionReaderTests`, `InMemoryDraftStoreTests`, `AddPieceFixtureTests` (Fixtures): description cases, the draft store, the photo stand-in, the `draft=` and `photo-fails` options, the store's new check, and every fixture garment passing it.
+- `OtherNamesTests` (Models) and `OtherNamesEditorTests` (Features), Phase 21c: the rules and limits, the store's tidying, search in Closet and Saved Looks, adding and removing names, Save adding a typed name, types following the kind, Edit, the draft and garment detail.
 - `GarmentEditorModelTests` (Features): steps, Back, Save's checks and live problems, add by words end to end, accept and skip, a failed save, photos, edit keeping states, dirty detection, the draft's save delay, "closing the app" and resuming, Discard, Cancel, and Closet's draft card.
 - `GarmentEditorSnapshotTests`: the choices, Describe in words with suggestions, the empty form, the form with problems, the filled form in light, AX5 and dark, and "Continue where you left off?". Like every screen snapshot it is drawn at 1x (the snapshot policy in `Packages/NookKit/Sources/DesignSystem/README.md`).
 - `AddPieceTests` (UI): add by words with Save's checks and see it in Closet; edit with Cancel, Keep editing and Discard changes, then save and see the detail change; abandon mid-add, close the app, relaunch and resume from Add a piece, then save.
@@ -111,7 +121,7 @@ A real reader, if one is added later, sits behind the same protocol and follows 
 
 1. **Drafts were in memory in Stage A** (see above). Phase 21a gave `DraftStore` a durable implementation in the real store with complete file protection, and added drafts to the data map.
 2. **A kind is required as well as a name.** The mockup says "Only a name is needed", but every garment has a kind, and guessing one would quietly file her piece in the wrong place. The line now says "Only a name and the kind of piece are needed."
-3. **No "Other names" (aliases) or sub-kind (Cardigan, Blazer) fields.** The mockup shows both, but the model has neither yet. They'd come with search aliases (PRD §7.6) in a later phase.
+3. **"Other names" (aliases) and the sub-kind (Cardigan, Blazer) came in Phase 21c,** above. The type is labelled "Type" because "Kind" already names the category here; the mockup calls them Category and Kind. PRD §7.6's possible matches, Remember this name and alias provenance aren't built.
 4. **No cleanup or "Check the photo" step.** The mockup's simulated background cleanup and original-or-cleaned-up choice are cutouts, which Phases 8a and 8b decide.
 5. **"Comfort" isn't a garment field.** Today's comfort belongs to Style Me (LR-18, Phase 10a). The form has the piece's cut (Fit) and How warm.
 6. **LR-13 and LR-12 aren't part of this form.** "Add a piece that fits you well" is Profile's fit section (14a), and "Thinking of buying?" is the wishlist with Find One (34). Pieces added here are always hers.

@@ -215,14 +215,40 @@ struct SavedLooksPage: View {
             } else if model.hasNoMatches {
                 noMatches(SavedLooksText.noMatchesTitle)
             } else {
-                SavedLooksGrid(
-                    items: model.shown, now: model.loadedAt, current: current.flatMap(\.lookID),
-                    opensBeside: opensBeside, open: actions.open
-                )
-                .padding(.horizontal, NookSpacing.screenMargin)
-                .padding(.top, NookSpacing.medium)
+                if !model.shown.isEmpty {
+                    SavedLooksGrid(
+                        items: model.shown, now: model.loadedAt, current: current.flatMap(\.lookID),
+                        opensBeside: opensBeside, open: actions.open
+                    )
+                    .padding(.horizontal, NookSpacing.screenMargin)
+                    .padding(.top, NookSpacing.medium)
+                }
+                if !model.shownEarlier.isEmpty {
+                    earlierResults
+                }
             }
         }
+    }
+
+    /// Earlier results she didn't save that match the typed search (LR-06.4), under the saved
+    /// looks: a heading, what they are, and the same grid. Each opens with Save look.
+    private var earlierResults: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            NookSectionHeader(SavedLooksText.earlierHeading)
+            Text(SavedLooksText.earlierNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            SavedLooksGrid(
+                items: model.shownEarlier, now: model.loadedAt, current: current.flatMap(\.lookID),
+                opensBeside: opensBeside, anchorsTour: false, open: actions.open
+            )
+            .padding(.top, NookSpacing.xSmall)
+        }
+        .padding(.horizontal, NookSpacing.screenMargin)
+        .padding(.top, NookSpacing.large)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("savedLooks.earlier")
     }
 
     /// The search field, the filters and, while filtering, the count line. One search and one

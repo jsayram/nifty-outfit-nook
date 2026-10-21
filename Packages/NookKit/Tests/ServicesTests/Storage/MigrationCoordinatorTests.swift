@@ -21,7 +21,7 @@ struct MigrationCoordinatorTests {
         "verified", "journal.verified",
     ]
 
-    /// A version 1 store holding the demo closet, made through the app's own stores.
+    /// A store at the app's version (2) holding the demo closet, made through the app's own stores.
     private static func seededStore(_ label: String) async throws -> (TemporaryStore, StoreManifest) {
         let store = try TemporaryStore(label)
         do {
@@ -49,24 +49,24 @@ struct MigrationCoordinatorTests {
         #expect(try await storage.onboarding.state() == OnboardingState(isCompleted: true, startingCloset: .empty))
     }
 
-    @Test func theAppsPlanStartsAtVersionOne() throws {
-        #expect(MigrationCoordinator<NookMigrationPlan>.currentVersion == 1)
+    @Test func theAppsPlanIsAtVersionTwo() throws {
+        #expect(MigrationCoordinator<NookMigrationPlan>.currentVersion == 2)
         let store = try TemporaryStore("version")
         _ = try store.open()
-        #expect(MigrationCoordinator<NookMigrationPlan>(location: store.location).storedVersion() == 1)
+        #expect(MigrationCoordinator<NookMigrationPlan>(location: store.location).storedVersion() == 2)
     }
 
     @Test func aLightweightMigrationKeepsEveryRecord() async throws {
         let (store, before) = try await Self.seededStore("lightweight")
-        let coordinator = MigrationCoordinator<LightweightPlanV2>(location: store.location)
-        #expect(coordinator.storedVersion() == 1)
+        let coordinator = MigrationCoordinator<LightweightPlanV3>(location: store.location)
+        #expect(coordinator.storedVersion() == 2)
         guard case .ready(let container, let report) = coordinator.open() else {
             Issue.record("The store didn't open")
             return
         }
-        #expect(report.migratedFrom == 1)
-        #expect(coordinator.storedVersion() == 2)
-        #expect(MigrationCoordinator<LightweightPlanV2>.verify(container, against: before).isEmpty)
+        #expect(report.migratedFrom == 2)
+        #expect(coordinator.storedVersion() == 3)
+        #expect(MigrationCoordinator<LightweightPlanV3>.verify(container, against: before).isEmpty)
         #expect(try coordinator.readJournal()?.step == .verified)
         try await Self.expectDemoIntact(in: container)
         // The safety copy is left out of device backups.
@@ -76,12 +76,12 @@ struct MigrationCoordinatorTests {
 
     @Test func aCustomMigrationRunsItsStageAndKeepsEveryRecord() async throws {
         let (store, before) = try await Self.seededStore("custom")
-        guard case .ready(let container, _) = MigrationCoordinator<CustomPlanV2>(location: store.location).open() else {
+        guard case .ready(let container, _) = MigrationCoordinator<CustomPlanV3>(location: store.location).open() else {
             Issue.record("The store didn't open")
             return
         }
         #expect(try ModelContext(container).fetchCount(FetchDescriptor<MigrationProbe>()) == Self.demo.garments.count)
-        #expect(MigrationCoordinator<CustomPlanV2>.verify(container, against: before).isEmpty)
+        #expect(MigrationCoordinator<CustomPlanV3>.verify(container, against: before).isEmpty)
         try await Self.expectDemoIntact(in: container)
     }
 
@@ -90,7 +90,7 @@ struct MigrationCoordinatorTests {
     @Test(arguments: Self.checkpoints)
     func recoversFromACrashAt(_ checkpoint: String) async throws {
         let (store, before) = try await Self.seededStore("crash")
-        let coordinator = MigrationCoordinator<CustomPlanV2>(location: store.location)
+        let coordinator = MigrationCoordinator<CustomPlanV3>(location: store.location)
 
         let stopped: Bool
         do {
@@ -110,8 +110,8 @@ struct MigrationCoordinatorTests {
             Issue.record("The store didn't open after a crash at \(checkpoint)")
             return
         }
-        #expect(MigrationCoordinator<CustomPlanV2>.verify(container, against: before).isEmpty)
-        #expect(coordinator.storedVersion() == 2)
+        #expect(MigrationCoordinator<CustomPlanV3>.verify(container, against: before).isEmpty)
+        #expect(coordinator.storedVersion() == 3)
         #expect(try coordinator.readJournal()?.step == .verified)
         #expect(try ModelContext(container).fetchCount(FetchDescriptor<MigrationProbe>()) == Self.demo.garments.count)
         switch checkpoint {
@@ -129,9 +129,9 @@ struct MigrationCoordinatorTests {
     /// A store from a newer app is never opened, migrated or reset: the file stays as it was.
     @Test func aNewerStoreIsLeftAlone() async throws {
         let store = try TemporaryStore("newer")
-        guard case .ready(let container, _) = MigrationCoordinator<LightweightPlanV2>(location: store.location).open()
+        guard case .ready(let container, _) = MigrationCoordinator<LightweightPlanV3>(location: store.location).open()
         else {
-            Issue.record("The version 2 store wasn't made")
+            Issue.record("The version 3 store wasn't made")
             return
         }
         let context = ModelContext(container)
@@ -164,16 +164,16 @@ struct MigrationCoordinatorTests {
         #expect(try Data(contentsOf: store.location.storeURL) == junk)
     }
 
-    /// Short of space for the safety copy: nothing starts, and the store is still version 1.
+    /// Short of space for the safety copy: nothing starts, and the store is still version 2.
     @Test func notEnoughSpaceChangesNothing() async throws {
         let (store, before) = try await Self.seededStore("space")
-        var coordinator = MigrationCoordinator<LightweightPlanV2>(location: store.location)
+        var coordinator = MigrationCoordinator<LightweightPlanV3>(location: store.location)
         coordinator.availableSpace = { 1_000 }
         guard case .problem(.notEnoughSpace) = coordinator.open() else {
             Issue.record("Expected not enough space")
             return
         }
-        #expect(coordinator.storedVersion() == 1)
+        #expect(coordinator.storedVersion() == 2)
         #expect(try coordinator.readJournal() == nil)
         #expect(try StoreSQLite.manifest(of: store.location.storeURL) == before)
     }
@@ -183,7 +183,7 @@ struct MigrationCoordinatorTests {
     /// build of the app gets its own tries.
     @Test func aMigrationThatLosesARecordIsRolledBack() async throws {
         let (store, before) = try await Self.seededStore("losing")
-        let losing = MigrationCoordinator<LosingPlanV2>(location: store.location)
+        let losing = MigrationCoordinator<LosingPlanV3>(location: store.location)
         for launch in 1...4 {
             guard case .problem(.updateFailed) = losing.open() else {
                 Issue.record("Launch \(launch) should have failed the update")
@@ -192,25 +192,25 @@ struct MigrationCoordinatorTests {
         }
         // Three tries after the first, then it stops with the snapshot back in place.
         #expect(try losing.readJournal()?.attempts == 3)
-        #expect(losing.storedVersion() == 1)
+        #expect(losing.storedVersion() == 2)
         #expect(try StoreSQLite.manifest(of: store.location.storeURL) == before)
 
         // A new build, with the bug fixed.
-        var fixed = MigrationCoordinator<LightweightPlanV2>(location: store.location)
+        var fixed = MigrationCoordinator<LightweightPlanV3>(location: store.location)
         fixed.build = "next"
         guard case .ready(let container, let report) = fixed.open() else {
             Issue.record("The fixed build didn't open the store")
             return
         }
         #expect(report.snapshotRestored)
-        #expect(MigrationCoordinator<LightweightPlanV2>.verify(container, against: before).isEmpty)
+        #expect(MigrationCoordinator<LightweightPlanV3>.verify(container, against: before).isEmpty)
         try await Self.expectDemoIntact(in: container)
     }
 
     /// The snapshot and journal go seven days after a verified migration, not before.
     @Test func theSnapshotGoesAfterSevenDays() async throws {
         let (store, _) = try await Self.seededStore("cleanup")
-        var coordinator = MigrationCoordinator<LightweightPlanV2>(location: store.location)
+        var coordinator = MigrationCoordinator<LightweightPlanV3>(location: store.location)
         coordinator.now = { TestTime.now }
         guard case .ready = coordinator.open() else {
             Issue.record("The store didn't open")
@@ -232,19 +232,19 @@ struct MigrationCoordinatorTests {
     /// leaves one the next launch still needs.
     @Test func deleteMyDataDeletesTheSafetyCopy() async throws {
         let (store, _) = try await Self.seededStore("safety")
-        guard case .ready = MigrationCoordinator<LightweightPlanV2>(location: store.location).open() else {
+        guard case .ready = MigrationCoordinator<LightweightPlanV3>(location: store.location).open() else {
             Issue.record("The store didn't open")
             return
         }
         #expect(FileManager.default.fileExists(atPath: store.location.recoveryDirectory.path))
         try await StoreSafetyCopies(location: store.location).eraseAll()
         #expect(!FileManager.default.fileExists(atPath: store.location.recoveryDirectory.path))
-        #expect(try MigrationCoordinator<LightweightPlanV2>(location: store.location).readJournal() == nil)
+        #expect(try MigrationCoordinator<LightweightPlanV3>(location: store.location).readJournal() == nil)
     }
 
     @Test func aSafetyCopyStillNeededIsKept() async throws {
         let (store, _) = try await Self.seededStore("needed")
-        let losing = MigrationCoordinator<LosingPlanV2>(location: store.location)
+        let losing = MigrationCoordinator<LosingPlanV3>(location: store.location)
         guard case .problem(.updateFailed) = losing.open() else {
             Issue.record("The update should have failed")
             return
