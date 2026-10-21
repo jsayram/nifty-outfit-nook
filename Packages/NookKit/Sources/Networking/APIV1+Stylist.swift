@@ -92,7 +92,8 @@ extension APIV1 {
                     weather: o.indoors ? nil : o.weather,
                     comfort: o.comfort?.rawValue,
                     color: o.color.map {
-                        StylistColorWish(family: $0.family.rawValue, strength: $0.strength.rawValue, scope: $0.scope.rawValue)
+                        StylistColorWish(
+                            family: $0.family.rawValue, strength: $0.strength.rawValue, scope: $0.scope.rawValue)
                     },
                     ideaAllowed: o.ideaAllowed,
                     startingPieceId: o.startingPieceID?.rawValue,
@@ -102,7 +103,10 @@ extension APIV1 {
                 StylistQuestion(
                     look: q.look.map(\.rawValue), occasion: q.occasion?.rawValue, text: String(q.text.prefix(500)),
                     earlier: q.earlier.isEmpty
-                        ? nil : q.earlier.suffix(6).map { StylistTurn(from: $0.from.rawValue, text: String($0.text.prefix(600))) })
+                        ? nil
+                        : q.earlier.suffix(6).map {
+                            StylistTurn(from: $0.from.rawValue, text: String($0.text.prefix(600)))
+                        })
             }
         }
     }
@@ -171,14 +175,16 @@ extension APIV1.StylistResult {
                 var idea: PieceIdea?
                 if let i = look.idea {
                     guard let category = GarmentCategory(rawValue: i.category) else { return nil }
-                    idea = PieceIdea(name: i.name, category: category, colors: i.colors.compactMap(ColorName.init(rawValue:)))
+                    idea = PieceIdea(
+                        name: i.name, category: category, colors: i.colors.compactMap(ColorName.init(rawValue:)))
                 }
                 versions.append(
                     .init(version: version, pieces: look.pieces.map { Garment.ID($0) }, idea: idea, why: look.why))
             }
             var missingVersions: [MissingVersion] = []
             for m in missing {
-                guard let version = LookVersion(rawValue: m.version), let reason = MissingVersion.Reason(rawValue: m.reason)
+                guard let version = LookVersion(rawValue: m.version),
+                    let reason = MissingVersion.Reason(rawValue: m.reason)
                 else { return nil }
                 missingVersions.append(MissingVersion(version: version, reason: reason))
             }

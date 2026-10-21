@@ -295,7 +295,8 @@ extension FakeBackend {
             if let style = action.style {
                 return encode(200, APIV1.StyleResponse(action: paidAction, result: style, usage: usage), id)
             }
-            return encode(200, APIV1.PaidActionResponse(action: paidAction, result: .init(placeholder: true), usage: usage), id)
+            return encode(
+                200, APIV1.PaidActionResponse(action: paidAction, result: .init(placeholder: true), usage: usage), id)
         }
     }
 

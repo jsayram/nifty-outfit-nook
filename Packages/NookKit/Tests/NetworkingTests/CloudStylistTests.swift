@@ -53,10 +53,13 @@ struct CloudStylistTests {
                 condition: .rain, temperatureCelsius: 13.6, observedAt: now, lowCelsius: 11.2, highCelsius: 16.4,
                 precipitationChance: 0.68),
             comfort: comfort, createdAt: now)
-        return StylingContext(request: request, eligibleGarments: closet, now: now, calendar: Calendar(identifier: .gregorian))
+        return StylingContext(
+            request: request, eligibleGarments: closet, now: now, calendar: Calendar(identifier: .gregorian))
     }
 
-    func stylist(_ paid: GatewayPaidActionService, consent: StylistConsent? = StylistConsent(agreedAt: now)) -> CloudStylist {
+    func stylist(_ paid: GatewayPaidActionService, consent: StylistConsent? = StylistConsent(agreedAt: now))
+        -> CloudStylist
+    {
         CloudStylist(paid: paid, consent: InMemoryStylistConsentStore(consent))
     }
 
@@ -131,13 +134,20 @@ struct CloudStylistTests {
         let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let pieces = try #require(object["closet"] as? [[String: Any]])
         for piece in pieces {
-            #expect(Set(piece.keys).isSubset(of: ["id", "category", "kind", "colors", "colorNote", "fit", "dressiness", "warmth", "name", "otherNames"]))
+            #expect(
+                Set(piece.keys).isSubset(of: [
+                    "id", "category", "kind", "colors", "colorNote", "fit", "dressiness", "warmth", "name",
+                    "otherNames",
+                ]))
         }
         let text = String(decoding: data, as: UTF8.self)
         for secret in ["Secret Brand", "private note", "\"XS\""] { #expect(!text.contains(secret)) }
         let outfit = try #require(object["outfit"] as? [String: Any])
         let weather = try #require(outfit["weather"] as? [String: Any])
-        #expect(Set(weather.keys) == ["condition", "temperatureCelsius", "lowCelsius", "highCelsius", "precipitationPercent", "isNight"])
+        #expect(
+            Set(weather.keys) == [
+                "condition", "temperatureCelsius", "lowCelsius", "highCelsius", "precipitationPercent", "isNight",
+            ])
         #expect(weather["temperatureCelsius"] as? Int == 14)
         #expect(weather["precipitationPercent"] as? Int == 70)
     }

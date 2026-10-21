@@ -64,11 +64,13 @@ public enum StyleHistory {
         let eligible = Set(context.eligibleGarments.map(\.id))
         let categories = Dictionary(
             context.eligibleGarments.map { ($0.id, $0.category) }, uniquingKeysWith: { first, _ in first })
-        let candidates = Dictionary(
-            grouping: looks.filter { $0.intent == intent && $0.resultID != nil && $0.version != nil },
-            by: { $0.resultID! })
-        let results = candidates.values
-            .compactMap { versions -> StyleResult? in
+        var candidates: [StyleResult.ID: [Look]] = [:]
+        for look in looks where look.intent == intent && look.version != nil {
+            if let resultID = look.resultID { candidates[resultID, default: []].append(look) }
+        }
+        let results =
+            candidates
+            .compactMap { resultID, versions -> StyleResult? in
                 let ordered = LookVersion.allCases.compactMap { v in versions.first { $0.version == v } }
                 guard let simple = ordered.first, simple.version == .simple,
                     ordered.allSatisfy({ $0.garmentIDs.allSatisfy(eligible.contains) }),
@@ -80,7 +82,7 @@ public enum StyleHistory {
                     return nil
                 }
                 return StyleResult(
-                    id: simple.resultID!, requestID: context.request.id, versions: ordered, notes: [.fromHistory],
+                    id: resultID, requestID: context.request.id, versions: ordered, notes: [.fromHistory],
                     createdAt: simple.createdAt)
             }
         return results.max { $0.createdAt < $1.createdAt }

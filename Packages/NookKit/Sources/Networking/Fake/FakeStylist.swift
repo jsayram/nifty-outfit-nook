@@ -30,7 +30,8 @@ enum FakeStylist {
         }
         let target = ["office", "event", "dateNight"].contains(outfit.occasion) ? 1 : 0
         let temperature = outfit.setting == "indoors" ? 20 : (outfit.weather?.temperatureCelsius ?? 18)
-        let wet = outfit.setting != "indoors" && (outfit.weather?.condition == .rain || outfit.weather?.condition == .snow)
+        let wet =
+            outfit.setting != "indoors" && (outfit.weather?.condition == .rain || outfit.weather?.condition == .snow)
         let wantWarmth = temperature < 10 ? 2 : temperature < 18 ? 1 : 0
         let avoid = Set((outfit.avoid ?? []).map { $0.sorted().joined(separator: "+") })
         func score(_ p: APIV1.StylistPiece) -> Int {
@@ -69,7 +70,8 @@ enum FakeStylist {
         }
 
         let occasion =
-            outfit.occasion == "dateNight" ? "date night" : outfit.occasion == "other" ? "the day" : "the \(outfit.occasion)"
+            outfit.occasion == "dateNight"
+            ? "date night" : outfit.occasion == "other" ? "the day" : "the \(outfit.occasion)"
         let weather = outfit.setting == "indoors" ? "indoors" : wet ? "the wet weather" : "today's weather"
         let pair = main.count > 1 ? "\(words(main[0])) and \(words(main[1]))" : words(main[0])
         var looks = [

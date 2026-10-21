@@ -218,7 +218,8 @@ struct TodayResult: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, NookSpacing.medium)
                 .accessibilityLabel(
-                    Text("Why: \(why)", bundle: .module, comment: "VoiceOver: the stylist's reason for this look"))
+                    Text("Why: \(why)", bundle: .module, comment: "VoiceOver: the stylist's reason for this look")
+                )
                 .accessibilityIdentifier("results.why")
         }
     }

@@ -123,7 +123,8 @@ struct YourLooksText {
         case .fromHistory:
             return String(
                 localized: "From your history: it still fits today’s request, so nothing was used.",
-                bundle: .module, comment: "Note on Your looks: an earlier result reused before asking the stylist (FR-58)")
+                bundle: .module,
+                comment: "Note on Your looks: an earlier result reused before asking the stylist (FR-58)")
         case .answeredAgain:
             return String(
                 localized: "You asked for the same thing earlier today, so these are the same looks. Nothing was used.",

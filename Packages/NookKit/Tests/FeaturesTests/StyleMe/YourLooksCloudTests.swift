@@ -138,7 +138,8 @@ struct YourLooksCloudTests {
     @Test func theNotesSayWhereTheLooksCameFrom() {
         let text = YourLooksText(request: lookRequest(), suitcaseName: nil, locale: TestTime.locale)
         #expect(text.line(for: .fromHistory, now: TestTime.now, calendar: TestTime.calendar).contains("history"))
-        #expect(text.line(for: .answeredAgain, now: TestTime.now, calendar: TestTime.calendar).contains("Nothing was used"))
+        #expect(
+            text.line(for: .answeredAgain, now: TestTime.now, calendar: TestTime.calendar).contains("Nothing was used"))
     }
 }
 

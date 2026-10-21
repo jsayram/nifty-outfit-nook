@@ -170,7 +170,8 @@ public struct StyleCall: Sendable, Equatable {
 
     /// A short revision of the pieces sent, so the server can tell snapshots apart. Names no piece.
     static func revision(of pieces: [Garment]) -> String {
-        let text = pieces.map { "\($0.id)|\($0.category)|\($0.colors.map(\.rawValue))|\($0.name)" }.joined(separator: "\n")
+        let text = pieces.map { "\($0.id)|\($0.category)|\($0.colors.map(\.rawValue))|\($0.name)" }.joined(
+            separator: "\n")
         let digest = SHA256.hash(data: Data(text.utf8))
         return "rev_" + digest.prefix(8).map { String(format: "%02x", $0) }.joined()
     }
@@ -235,7 +236,8 @@ public struct CloudStylist: Stylist {
 
     /// The backend's checked answer as the app's outcome. Every piece must be one that was sent;
     /// anything else means the answer can't be trusted, so it didn't finish.
-    static func outcome(_ answer: StyleAnswer, for context: StylingContext, sentIDs: Set<Garment.ID>) throws(StylistError)
+    static func outcome(_ answer: StyleAnswer, for context: StylingContext, sentIDs: Set<Garment.ID>)
+        throws(StylistError)
         -> StyleOutcome
     {
         let request = context.request
@@ -335,7 +337,8 @@ extension StyleCall {
             return StyleCall(
                 mode: .ask, contextRevision: revision(of: pieces), consentVersion: StylistConsent.currentVersion,
                 pieces: pieces, outfit: nil,
-                question: Question(look: pieces.map(\.id), occasion: .office, text: "Is this OK? (\(note))", earlier: []))
+                question: Question(
+                    look: pieces.map(\.id), occasion: .office, text: "Is this OK? (\(note))", earlier: []))
         }
     }
 }

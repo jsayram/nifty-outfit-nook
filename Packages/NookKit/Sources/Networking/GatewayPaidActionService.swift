@@ -52,7 +52,8 @@ public struct GatewayPaidActionService: PaidActionService {
                 throw .invalidResponse
             }
             return PaidActionReceipt(
-                id: response.action.id, feature: .style, replayed: response.action.replayed, usage: usage, style: answer)
+                id: response.action.id, feature: .style, replayed: response.action.replayed, usage: usage, style: answer
+            )
         case .tryOn(let revision):
             let response = try await client.send(
                 APIV1.tryOn, body: APIV1.TryOnRequest(contextRevision: revision),

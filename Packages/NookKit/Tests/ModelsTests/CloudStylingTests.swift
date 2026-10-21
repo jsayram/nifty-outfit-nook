@@ -69,7 +69,8 @@ struct CloudStylingTests {
                 .init(version: .dressedUp, pieces: ["g-top", "g-bottom", "g-shoes", "g-layer"], why: ""),
                 .init(
                     version: .somethingNew, pieces: ["g-top", "g-bottom", "g-shoes"],
-                    idea: PieceIdea(name: "Rust vest", category: .layer, colors: [.orange]), why: "A vest adds texture."),
+                    idea: PieceIdea(name: "Rust vest", category: .layer, colors: [.orange]), why: "A vest adds texture."
+                ),
             ], missing: [], fromCache: true)
         let outcome = try CloudStylist.outcome(
             answer, for: Self.context(request), sentIDs: Set(Self.pieces.map(\.id)))
@@ -101,7 +102,8 @@ struct CloudStylingTests {
         #expect(CloudStylist.error(for: .didNotFinish(retryAfterSeconds: 30)) == .notCompleted)
         #expect(CloudStylist.error(for: .account(.offline)) == .offline)
         #expect(CloudStylist.error(for: .needsConsent) == .needsConsent)
-        #expect(CloudStylist.error(for: .rateLimited(retryAfterSeconds: 4)) == .limited(.rateLimited(retryAfterSeconds: 4)))
+        #expect(
+            CloudStylist.error(for: .rateLimited(retryAfterSeconds: 4)) == .limited(.rateLimited(retryAfterSeconds: 4)))
     }
 
     // MARK: From your history

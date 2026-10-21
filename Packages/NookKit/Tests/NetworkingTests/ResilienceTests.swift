@@ -253,9 +253,6 @@ struct ResilienceTests {
             if forceRefresh { throw .failed }
             return try await inner.token(forceRefresh: false)
         }
-        func reauthenticateForDeletion() async throws(AuthError) -> String {
-            try await inner.reauthenticateForDeletion()
-        }
     }
 
     @Test func aRefreshThatFailsEndsTheSessionGracefully() async throws {
@@ -279,9 +276,6 @@ struct ResilienceTests {
             }
             func signOut() async { await inner.signOut() }
             func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken { throw .failed }
-            func reauthenticateForDeletion() async throws(AuthError) -> String {
-                try await inner.reauthenticateForDeletion()
-            }
         }
         let hiccup = Hiccup()
         try await hiccup.signInWithApple()

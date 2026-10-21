@@ -40,7 +40,9 @@ public final class StylingJobs: Sendable {
     /// Jobs still running, for tests.
     public var runningCount: Int { running.withLock { $0.count } }
 
-    private static func style(_ context: StylingContext, services: NookServices) async -> Result<StyleOutcome, StylistError> {
+    private static func style(_ context: StylingContext, services: NookServices) async -> Result<
+        StyleOutcome, StylistError
+    > {
         let outcome: StyleOutcome
         do {
             outcome = try await services.stylist.style(context)
