@@ -366,7 +366,6 @@ struct FailureState: View {
                 backButton(kind: .soft)
                 savedButton
             }
-            .accessibilityIdentifier("results.needsConsent")
         case .limited(let problem):
             // 27a: a server limit. Its own words say when it can work again; nothing was counted.
             NookErrorState(
@@ -379,7 +378,6 @@ struct FailureState: View {
                 backButton(kind: .soft)
                 savedButton
             }
-            .accessibilityIdentifier("results.limited")
         }
     }
 
