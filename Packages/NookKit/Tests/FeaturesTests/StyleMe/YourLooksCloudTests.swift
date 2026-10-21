@@ -102,9 +102,61 @@ struct YourLooksCloudTests {
         #expect(failed.status == .showing)
     }
 
+    /// Jose, 21 October 2026: leaving Your looks doesn't stop a cloud request. Its looks land in
+    /// her history, the screen shows them if she comes back, and a new Style me finds them.
+    @Test func leavingTheScreenDoesNotStopACloudRequestAndItsLooksAreKept() async throws {
+        let stylist = GatedStylist()
+        let services = cloudServices(ScriptedStylist())
+        var gated = services
+        gated.stylist = stylist
+        let request = lookRequest()
+        let model = yourLooksModel(request)
+        model.start(with: gated)
+        while await stylist.waiting == 0 { await Task.yield() }
+        model.leave()
+        #expect(model.isStyling)
+        let before = try await services.looks.looks().count
+        await stylist.open()
+        await model.settle()
+        #expect(model.status == .showing)
+        #expect(try await services.looks.looks().count == before + 3)
+        #expect(gated.stylingJobs.runningCount == 0)
+    }
+
+    @Test func herCancelStopsACloudRequest() async throws {
+        let stylist = ScriptedStylist([.wait])
+        let services = cloudServices(stylist)
+        let model = yourLooksModel()
+        model.start(with: services)
+        while await stylist.calls == 0 { await Task.yield() }
+        model.cancel()
+        #expect(model.status == .failed(.stopped))
+        await model.settle()
+        #expect(services.stylingJobs.runningCount == 0)
+    }
+
     @Test func theNotesSayWhereTheLooksCameFrom() {
         let text = YourLooksText(request: lookRequest(), suitcaseName: nil, locale: TestTime.locale)
         #expect(text.line(for: .fromHistory, now: TestTime.now, calendar: TestTime.calendar).contains("history"))
         #expect(text.line(for: .answeredAgain, now: TestTime.now, calendar: TestTime.calendar).contains("Nothing was used"))
+    }
+}
+
+/// A stylist that answers (with the mock stylist) only when the test opens it.
+actor GatedStylist: Stylist {
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+    private var isOpen = false
+    private(set) var waiting = 0
+
+    func open() {
+        isOpen = true
+        for waiter in waiters { waiter.resume() }
+        waiters = []
+    }
+
+    func style(_ context: StylingContext) async throws(StylistError) -> StyleOutcome {
+        waiting += 1
+        if !isOpen { await withCheckedContinuation { waiters.append($0) } }
+        return try await MockStylist().style(context)
     }
 }

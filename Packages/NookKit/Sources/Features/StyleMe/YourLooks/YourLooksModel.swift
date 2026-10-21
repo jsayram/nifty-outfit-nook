@@ -171,10 +171,19 @@ final class YourLooksModel {
     /// comes, is dropped. With a result on screen she's back on it; without one, it's stopped.
     func cancel() {
         guard isStyling else { return }
+        // Her Cancel stops a cloud request too; leaving the screen doesn't (`leave()`).
+        if services.cloudStyling { services.stylingJobs.cancel(request.id) }
         run += 1
         styling?.cancel()
         styling = nil
         status = result == nil ? .failed(.stopped) : .showing
+    }
+
+    /// The screen went away. Stage A's stylist on the phone stops, as before; a cloud request
+    /// keeps going in `StylingJobs`, and this model shows its looks if the screen comes back.
+    func leave() {
+        guard !services.cloudStyling else { return }
+        cancel()
     }
 
     /// Waits for the running request, for tests.
@@ -231,6 +240,23 @@ final class YourLooksModel {
             return
         }
         status = .styling(.choosing)
+
+        // 27a: the cloud stylist runs in the app-level owner, not in this screen, so leaving
+        // doesn't stop it and its looks are kept in her history either way.
+        if services.cloudStyling {
+            let result = await services.stylingJobs.run(context, services: services).value
+            guard thisRun == run else { return }
+            switch result {
+            case .success(let outcome):
+                await reloadLooks()
+                guard thisRun == run else { return }
+                show(outcome)
+                styling = nil
+            case .failure(let error):
+                finish(Self.failure(for: error), run: thisRun)
+            }
+            return
+        }
 
         let outcome: StyleOutcome
         do {

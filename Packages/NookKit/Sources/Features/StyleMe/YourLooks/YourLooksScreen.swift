@@ -93,8 +93,9 @@ struct YourLooksScreen: View {
                 && stub == nil && tryingOn == nil && swapping == nil && toast == nil
         )
         .onDisappear {
-            // Leaving stops a request that's still running (Cancel generation on leaving).
-            model.cancel()
+            // Leaving stops Stage A's stylist on the phone. A cloud request keeps running apart
+            // from this screen and lands in her history (27a; AI work isn't tied to a screen).
+            model.leave()
         }
         .onChange(of: model.status) { old, new in
             announce(from: old, to: new)

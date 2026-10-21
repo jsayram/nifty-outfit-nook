@@ -64,6 +64,9 @@ public struct NookServices: Sendable {
     /// (FR-58) and Privacy and terms shows the stylist's consent switch. Stage A's mock stylist
     /// sends nothing, so neither applies.
     public var cloudStyling = false
+    /// 27a: runs cloud styling requests apart from any screen, so leaving Your looks never stops
+    /// one and its looks still land in her history. Copies of these services share it.
+    public var stylingJobs = StylingJobs()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
