@@ -16,6 +16,9 @@ import UIKit
 /// Drawn 402 points wide (iPhone 17) at full height, without the navigation and tab bars, from
 /// the demo closet:
 /// - the grid in light, dark and AX5, filtered to black bottoms, with no matches, and empty;
+/// - Saved and All (Phase 21c): Saved with "1 more in All" under a search and a chip, All in light,
+///   dark and AX5 with the Not saved tags and Save look, each scope with no matches, and the empty
+///   states of both;
 /// - the Pictures tab in light, dark and AX5, and empty;
 /// - look detail for the Interview look, with its two pictures (light, dark, AX5), and for the
 ///   Taupe blazer office look, whose blazer she gave away (faded, with Swap it);
@@ -61,6 +64,73 @@ struct SavedLooksSnapshotTests {
     /// RD-08.4: nothing saved yet.
     @Test func empty() async {
         assertSnapshot(SavedLooksPage(model: await loadedSavedLooks(.empty)), named: "empty")
+    }
+
+    // MARK: Saved and All (Phase 21c)
+
+    /// Saved: "denim" and Bottoms find one saved look, and the line says All has one more.
+    @Test func savedWithMoreInAll() async {
+        let model = await loadedSavedLooks(searchDelay: .zero)
+        model.searchText = "denim"
+        model.applySearchNow()
+        model.toggle(.bottom)
+        assertSnapshot(SavedLooksPage(model: model), named: "saved-more-in-all")
+    }
+
+    /// All: her saved looks and the unsaved result in one list, the unsaved one tagged.
+    @Test func allScope() async {
+        let model = await loadedSavedLooks()
+        model.scope = .all
+        assertSnapshot(SavedLooksPage(model: model), named: "all")
+    }
+
+    @Test func allScopeDark() async {
+        let model = await loadedSavedLooks()
+        model.scope = .all
+        assertSnapshot(SavedLooksPage(model: model), colorScheme: .dark, named: "all-dark")
+    }
+
+    @Test func allScopeAX5() async {
+        let model = await loadedSavedLooks()
+        model.scope = .all
+        assertSnapshot(SavedLooksPage(model: model), dynamicTypeSize: .accessibility5, named: "all-ax5")
+    }
+
+    /// Saved has nothing for a chip, and says All has two: "No saved looks match" and the line.
+    @Test func noMatchesWithMoreInAll() async {
+        let model = savedLooks(unsaving: ["o-casual-jeans", "o-lace-date"])
+        model.toggle(.bag)
+        assertSnapshot(SavedLooksPage(model: model), named: "no-matches-more-in-all")
+    }
+
+    /// All with nothing matching: the title says All.
+    @Test func allScopeNoMatches() async {
+        let model = await loadedSavedLooks(searchDelay: .zero)
+        model.scope = .all
+        model.searchText = "zzz"
+        model.applySearchNow()
+        assertSnapshot(SavedLooksPage(model: model), named: "all-no-matches")
+    }
+
+    /// All with no looks at all.
+    @Test func emptyAll() async {
+        let model = await loadedSavedLooks(.empty)
+        model.scope = .all
+        assertSnapshot(SavedLooksPage(model: model), named: "empty-all")
+    }
+
+    /// Saved with nothing saved but unsaved results around: it says where they are.
+    @Test func emptyWithUnsavedResults() async {
+        let data = FixtureSet.demo.data(now: TestTime.now, calendar: TestTime.calendar)
+        let model = SavedLooksModel()
+        model.show(
+            data.looks.map { look in
+                var look = look
+                look.isSaved = false
+                look.savedAt = nil
+                return look
+            }, garments: data.garments, now: TestTime.now)
+        assertSnapshot(SavedLooksPage(model: model), named: "empty-unsaved")
     }
 
     // MARK: Pictures (12b)

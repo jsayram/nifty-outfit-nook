@@ -96,13 +96,23 @@ class AccessibilityAuditTests: XCTestCase {
         try audit("Your looks: Saved", in: app)
     }
 
-    /// Saved Looks, a look, the Pictures tab and a picture.
+    /// Saved Looks, on All with its Not saved tag and Save look (Phase 21c), a look, the Pictures
+    /// tab and a picture.
     @MainActor
     func testSavedLooksAndPictures() throws {
         let app = launch(UITestLaunch.standard + ["-fixtures", "demo"])
         app.tabBars.firstMatch.buttons["Saved Looks"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(app.searchFields.firstMatch.waitUntilExists(timeout: Self.wait))
         try audit("Saved Looks", in: app)
+        let all = app.buttons["savedLooks.scope.all"]
+        reveal(all, in: app)
+        all.tapUntilSelected(timeout: Self.wait)
+        let unsaved = app.buttons["savedLooks.save.o-history-casual"]
+        reveal(unsaved, in: app)
+        try audit("Saved Looks: All", in: app)
+        let saved = app.buttons["savedLooks.scope.saved"]
+        reveal(saved, in: app)
+        saved.tapUntilSelected(timeout: Self.wait)
         open("savedLooks.look.o-lace-date", showing: element("lookDetail.name", in: app), in: app)
         try audit("A saved look", in: app)
         app.goBack(from: app.navigationBars.element(boundBy: 0).identifier, to: "Saved Looks", timeout: Self.wait)

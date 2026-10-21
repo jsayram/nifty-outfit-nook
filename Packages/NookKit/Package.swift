@@ -28,11 +28,17 @@ let package = Package(
         .library(name: "Fixtures", targets: ["Fixtures"]),
         .library(name: "Features", targets: ["Features"]),
         .library(name: "Services", targets: ["Services"]),
+        .library(name: "Networking", targets: ["Networking"]),
+        .library(name: "ClerkAuth", targets: ["ClerkAuth"]),
     ],
-    // Test-only. Never add a dependency to a non-test target (decision 0001, items 8 and 10;
-    // vetting in docs/decisions/0002-snapshot-testing.md).
+    // swift-snapshot-testing is test-only (decision 0001, items 8 and 10; vetting in
+    // docs/decisions/0002-snapshot-testing.md). clerk-ios is the one shipping dependency, approved
+    // by Jose as decision D2 on 19 October 2026 (closet THREAT_MODEL.md): only its ClerkKit
+    // product, only in the ClerkAuth target, pinned exactly (vetting in
+    // docs/decisions/0005-gateway-and-identity.md). Never add another without written approval.
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6")
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
+        .package(url: "https://github.com/clerk/clerk-ios", exact: "1.6.1"),
     ],
     targets: [
         .target(
@@ -50,6 +56,16 @@ let package = Package(
         // Real services built on Apple frameworks only (decision 0001, item 4). Phase 8a adds
         // on-device subject lifting with Vision.
         .target(name: "Services", dependencies: ["Models"], swiftSettings: strictSettings),
+        // The backend gateway (Phase 24a): the v1 contract types, the URLSession client, the
+        // account service, and the fake sign-in and in-process fake backend the app runs on until
+        // Clerk and Convex are configured. Apple frameworks only.
+        .target(name: "Networking", dependencies: ["Models"], swiftSettings: strictSettings),
+        // Sign-in through Clerk (decision D2), active only when the app has a publishable key.
+        .target(
+            name: "ClerkAuth",
+            dependencies: ["Models", "Networking", .product(name: "ClerkKit", package: "clerk-ios")],
+            swiftSettings: strictSettings
+        ),
         .target(
             name: "Features",
             dependencies: ["DesignSystem", "Models"],
@@ -87,6 +103,11 @@ let package = Package(
         // Phase 20a persistence spike: SwiftData, migrations, recovery and sync, tested here and
         // never shipped (docs/decisions/0003-persistence-spike.md). KillHarness builds the files
         // in Spike/ as a macOS tool that kills itself mid-migration.
+        // Contract/ is a byte-identical copy of the backend repo's contract (its golden examples);
+        // the tests check the Swift types and the fake backend against it.
+        .testTarget(
+            name: "NetworkingTests", dependencies: ["Networking", "Models"],
+            resources: [.copy("Contract")], swiftSettings: strictSettings),
         .testTarget(
             name: "PersistenceSpikeTests", dependencies: ["Models", "Fixtures", "NookTestSupport"],
             exclude: ["KillHarness"], swiftSettings: strictSettings

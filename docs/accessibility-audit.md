@@ -12,7 +12,7 @@ Stage A, 17 October 2026. Jose doesn't have Lily's iPhone 12, so the checks that
 | `testHomeAndItsTour` | Home, and Home with its tour on step 1 |
 | `testClosetAndItsScreens` | Closet, a piece, Suitcases, a suitcase, Laundry, Add a piece and its form |
 | `testStyleMeAndYourLooks` | Style Me, Your looks (Today and Saved), Swap a piece |
-| `testSavedLooksAndPictures` | Saved Looks, a saved look, Pictures, a picture |
+| `testSavedLooksAndPictures` | Saved Looks, Saved Looks on All (the Not saved tag and Save look), a saved look, Pictures, a picture |
 | `testProfileAndSettings` | Profile, Fit and measurements, Accessibility, Help, Send feedback, Privacy and terms, Delete my data |
 
 Before each audit the test waits until two screenshots in a row are the same, because the room art, the name sign and look bundles are drawn a moment after a screen appears. Without the wait the audit checked "Lily" against an empty sign.
