@@ -20,8 +20,12 @@ final class LaunchTests: XCTestCase {
     }
 
     /// Each fixture set reaches the screens: Closet's header shows its piece count.
+    ///
+    /// Full-suite runs only. This checks the test harness's own fixture sets (`FixtureSetTests`,
+    /// `FixtureDataTests`), and every other UI test launches with `-fixtures demo`.
     @MainActor
-    func testFixtureSetsReachTheScreens() {
+    func testFixtureSetsReachTheScreens() throws {
+        try skipOnPullRequests("FixtureSetTests and FixtureDataTests cover the sets.")
         let expected = [
             ("demo", "17 pieces"),
             ("demo:offline", "17 pieces"),
@@ -37,8 +41,12 @@ final class LaunchTests: XCTestCase {
     }
 
     /// The large closet loads, and a failing store shows Closet's error state with no count.
+    ///
+    /// Full-suite runs only: `LargeClosetBrowsingTests` has the large closet, and
+    /// `ClosetModelTests` and `ClosetSnapshotTests` the error state.
     @MainActor
-    func testLargeAndFailingFixturesLaunch() {
+    func testLargeAndFailingFixturesLaunch() throws {
+        try skipOnPullRequests("LargeClosetBrowsingTests, ClosetModelTests and ClosetSnapshotTests cover it.")
         let large = launchOnCloset("large")
         let detail = pieceCount(in: large)
         XCTAssertTrue(detail.waitUntilExists(timeout: uiTestWait))

@@ -12,8 +12,13 @@ final class HomeVariantTests: XCTestCase {
     }
 
     /// The largest size, AX5. Every control is reachable by scrolling and opens its place.
+    ///
+    /// Full-suite runs only (73 seconds). The large-text layout is `HomeLayoutTests` and
+    /// `HomeLayoutSnapshotTests`, the same controls open their screens in `HomeTests` on every pull
+    /// request, and the AX5 audit sweep checks hit regions and clipped text on Home.
     @MainActor
-    func testEveryHomeActionIsReachableAtTheLargestTextSize() {
+    func testEveryHomeActionIsReachableAtTheLargestTextSize() throws {
+        try skipOnPullRequests("HomeLayoutTests, HomeLayoutSnapshotTests and HomeTests cover it.")
         let app = XCUIApplication()
         app.launchArguments =
             UITestLaunch.standard + [

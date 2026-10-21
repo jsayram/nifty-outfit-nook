@@ -300,6 +300,26 @@ extension XCUIApplication {
     }
 }
 
+/// Which CI run a UI test belongs to (October 2026). CI's UI jobs cover every real user flow
+/// once. A test whose behaviour the package tests already cover, or that repeats another test's
+/// screens at another text size, is skipped there and runs in the full suite (a manual workflow
+/// run) and on a developer's machine. `scripts/test.sh` sets `NOOK_PR_RUN` on every CI run but a
+/// manual one, and the UI tests see it as `TEST_RUNNER_NOOK_PR_RUN`.
+enum UITestTier {
+    /// Whether this is a pull request's CI run.
+    static var isPullRequestRun: Bool {
+        ProcessInfo.processInfo.environment["NOOK_PR_RUN"] == "1"
+    }
+}
+
+extension XCTestCase {
+    /// Skips this test on a pull request's CI run, before it launches anything. `why` says what
+    /// covers the behaviour on a pull request.
+    func skipOnPullRequests(_ why: String) throws {
+        try XCTSkipIf(UITestTier.isPullRequestRun, "Full-suite runs only. \(why)")
+    }
+}
+
 /// Launch arguments every UI test shares.
 enum UITestLaunch {
     /// Turns "Show tips on new screens" off, so Home's quick tour (Phase 16a) doesn't cover what

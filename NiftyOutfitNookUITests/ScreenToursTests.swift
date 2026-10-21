@@ -9,10 +9,19 @@ import XCTest
 /// a piece) are on the same walks. The card's words, its
 /// buttons and the overlay being modal are covered by `HomeTourTests`; these check which tour
 /// shows where, and when.
+///
+/// Full-suite runs only (October 2026). Together the two walks took 257
+/// seconds, the slowest tests in the suite after the accessibility audits. Which tour a screen
+/// has, how many steps, when it starts, tips off, replay, Reset all tips and one tour at a time
+/// are all package tests (`ScreenToursTests` and `TourCenterTests` in FeaturesTests,
+/// `TourTests`, `TourStoreTests`), the cards are snapshot tests (`ScreenTourSnapshotTests`), and
+/// `HomeTourTests` keeps the real overlay under test on every pull request. What these two walks
+/// add is that each screen really attaches its tour, which the merge run still checks.
 final class ScreenToursTests: XCTestCase {
     static let wait = uiTestWait
 
-    override func setUp() {
+    override func setUpWithError() throws {
+        try skipOnPullRequests("The tours' rules are package tests and Home's tour is in HomeTourTests.")
         continueAfterFailure = false
     }
 

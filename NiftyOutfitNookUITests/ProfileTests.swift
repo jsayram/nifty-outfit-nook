@@ -29,8 +29,14 @@ final class ProfileTests: XCTestCase {
         XCTAssertTrue(app.buttons["Name sign, no name yet"].waitUntilExists(timeout: Self.wait))
     }
 
+    /// Full-suite runs only (79 seconds). What is refused and why, the units she typed in, feet
+    /// and inches, clearing, and that the store keeps the values are `ProfileModelTests` and
+    /// `MeasurementEntryTests`. Typing into a sheet and saving it is still checked on every pull
+    /// request by `testChangingTheNameUpdatesTheSignOnHome`, and the Fit screen opens in
+    /// `AccessibilityAuditTests.testProfileAndSettings`.
     @MainActor
-    func testAFitValueIsRefusedWhenWrongAndSavedWhenRight() {
+    func testAFitValueIsRefusedWhenWrongAndSavedWhenRight() throws {
+        try skipOnPullRequests("ProfileModelTests and MeasurementEntryTests cover the rules and the saving.")
         let app = launch()
         openProfile(in: app)
         app.buttons["profile.fit"].tapUntil(app.navigationBars["Fit and measurements"], appears: Self.wait)

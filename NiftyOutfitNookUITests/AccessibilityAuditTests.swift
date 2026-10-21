@@ -1,7 +1,8 @@
 import XCTest
 
 /// Xcode's accessibility audit (`performAccessibilityAudit`) on every main screen, at the default
-/// text size. `AccessibilityAuditLargeTextTests` runs the same walk at the largest size (AX5).
+/// text size: one audit per screen on every pull request. `AccessibilityAuditLargeTextTests` runs
+/// the same walk at the largest size (AX5), in the full suite only.
 ///
 /// The audit is the closest thing to a VoiceOver pass a UI test can run: it checks contrast,
 /// elements VoiceOver can't find, hit regions under 44 points, missing or poor labels, Dynamic
@@ -15,7 +16,7 @@ class AccessibilityAuditTests: XCTestCase {
     /// The text size these tests run at, or nil for the simulator's default.
     class var textSize: String? { nil }
 
-    override func setUp() {
+    override func setUpWithError() throws {
         continueAfterFailure = false
     }
 
@@ -124,22 +125,25 @@ class AccessibilityAuditTests: XCTestCase {
         try audit("A picture", in: app)
     }
 
-    /// Profile, Fit and measurements, and the settings screens.
+    /// Profile, Fit and measurements, and the settings screens. Each row opens the real screen:
+    /// its title, and one control only that screen has (this also stands in for a separate
+    /// "every Profile row opens something" test that walked the same rows).
     @MainActor
     func testProfileAndSettings() throws {
         let app = launch(UITestLaunch.standard + ["-fixtures", "demo"])
         open("home.profile", showing: app.navigationBars["Profile"], in: app)
         try audit("Profile", in: app)
         let pushed = [
-            ("profile.fit", "Fit and measurements"),
-            ("profile.accessibility", "Accessibility"),
-            ("profile.help", "Help"),
-            ("profile.feedback", "Send feedback"),
-            ("profile.privacy", "Privacy and terms"),
-            ("profile.deleteData", "Delete my data"),
+            ("profile.fit", "Fit and measurements", "fit.waist"),
+            ("profile.accessibility", "Accessibility", "accessibility.openSettings"),
+            ("profile.help", "Help", "help.outfits"),
+            ("profile.feedback", "Send feedback", "feedback.send"),
+            ("profile.privacy", "Privacy and terms", "privacy.deleteData"),
+            ("profile.deleteData", "Delete my data", "deleteData.delete"),
         ]
-        for (row, title) in pushed {
+        for (row, title, control) in pushed {
             open(row, showing: app.navigationBars[title], in: app)
+            XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(title) has no \(control)")
             try audit(title, in: app)
             app.goBack(from: title, to: "Profile", timeout: Self.wait)
         }
@@ -226,7 +230,13 @@ class AccessibilityAuditTests: XCTestCase {
     }
 }
 
-/// The same walk at the largest text size, AX5.
+/// The same walk at the largest text size, AX5. It audits the screens the default-size walk
+/// already audits on every pull request, so it runs in the full suite only.
 final class AccessibilityAuditLargeTextTests: AccessibilityAuditTests {
     override class var textSize: String? { "UICTContentSizeCategoryAccessibilityXXXL" }
+
+    override func setUpWithError() throws {
+        try skipOnPullRequests("The default-size walk audits the same screens on every pull request.")
+        try super.setUpWithError()
+    }
 }
