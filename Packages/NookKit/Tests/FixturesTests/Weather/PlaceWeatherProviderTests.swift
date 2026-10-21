@@ -7,8 +7,10 @@ import Testing
 /// Phase 29: the weather chain with stand-ins for Apple's parts: her choices, a city or her
 /// approximate location, the cache per place and hour, offline and stale forecasts.
 struct PlaceWeatherProviderTests {
-    private static let seattle = WeatherPlace(name: "Seattle, WA", coordinate: .init(latitude: 47.6, longitude: -122.3)!)!
-    private static let chicago = WeatherPlace(name: "Chicago, IL", coordinate: .init(latitude: 41.9, longitude: -87.6)!)!
+    private static let seattle = WeatherPlace(
+        name: "Seattle, WA", coordinate: .init(latitude: 47.6, longitude: -122.3)!)!
+    private static let chicago = WeatherPlace(
+        name: "Chicago, IL", coordinate: .init(latitude: 41.9, longitude: -87.6)!)!
     private static let start = Date(timeIntervalSince1970: 1_800_000_000)
 
     private static func snapshot(_ condition: WeatherCondition = .rain) -> WeatherSnapshot {
@@ -212,7 +214,9 @@ struct PlaceWeatherProviderTests {
         #expect(try await finder.cities(matching: "sea").map(\.name) == ["Seattle, WA"])
         #expect(try await finder.cities(matching: "x").isEmpty)
         #expect(try await finder.cities(matching: "zzzz").isEmpty)
-        await #expect(throws: WeatherError.unavailable) { try await FixtureCityFinder(isOffline: true).cities(matching: "sea") }
+        await #expect(throws: WeatherError.unavailable) {
+            try await FixtureCityFinder(isOffline: true).cities(matching: "sea")
+        }
     }
 
     @Test func fixtureLocationAnswersAsScripted() async {

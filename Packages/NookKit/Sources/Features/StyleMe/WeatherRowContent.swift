@@ -135,7 +135,8 @@ nonisolated enum WeatherWords {
         var line = summary(snapshot, locale: locale)
         if let low = snapshot.lowCelsius, let high = snapshot.highCelsius {
             let range = String(
-                localized: "\(temperature(celsius: low, locale: locale)) to \(temperature(celsius: high, locale: locale))",
+                localized:
+                    "\(temperature(celsius: low, locale: locale)) to \(temperature(celsius: high, locale: locale))",
                 bundle: .module, comment: "Today's low and high, as in 50° to 63°")
             line += ". " + range
         }

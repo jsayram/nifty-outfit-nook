@@ -16,7 +16,9 @@ public final class WeatherKitForecastSource: WeatherForecastSource {
 
     public init() {}
 
-    public func forecast(at coordinate: CoarseCoordinate, now: Date) async throws(Models.WeatherError) -> WeatherSnapshot {
+    public func forecast(at coordinate: CoarseCoordinate, now: Date) async throws(Models.WeatherError)
+        -> WeatherSnapshot
+    {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         do {
             let (current, daily) = try await WeatherService.shared.weather(for: location, including: .current, .daily)

@@ -144,7 +144,8 @@ nonisolated enum WeatherText {
     }
     static var liveDetail: String {
         String(
-            localized: "A rough location goes to Apple Weather for the forecast. It isn’t saved. Only the weather goes into Style Me.",
+            localized:
+                "A rough location goes to Apple Weather for the forecast. It isn’t saved. Only the weather goes into Style Me.",
             bundle: .module, comment: "Privacy and terms: under the Live weather switch")
     }
     static var off: String {
@@ -189,7 +190,8 @@ nonisolated enum WeatherText {
     }
     static var sample: String {
         String(
-            localized: "Live weather isn’t switched on in this test build. The weather you see is a sample, and nothing is sent.",
+            localized:
+                "Live weather isn’t switched on in this test build. The weather you see is a sample, and nothing is sent.",
             bundle: .module, comment: "Weather settings: the weather is made up in this build")
     }
     static var removeCity: String {
@@ -220,7 +222,8 @@ nonisolated enum WeatherText {
     }
     static var explainerMessage: String {
         String(
-            localized: "The app asks Apple Weather for today’s forecast near you. It uses a rough location, not your exact address, and doesn’t keep it. Only the weather itself, like “cool and rainy”, goes into Style Me.",
+            localized:
+                "The app asks Apple Weather for today’s forecast near you. It uses a rough location, not your exact address, and doesn’t keep it. Only the weather itself, like “cool and rainy”, goes into Style Me.",
             bundle: .module, comment: "Alert message before iOS asks for location")
     }
     static var explainerContinue: String {

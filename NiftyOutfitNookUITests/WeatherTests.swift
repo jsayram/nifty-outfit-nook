@@ -48,7 +48,8 @@ final class WeatherTests: XCTestCase {
         let explainer = XCUIApplication().alerts["Use the weather where you are?"]
         let inner = toggle.switches.firstMatch
         let target =
-            inner.exists ? inner.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            inner.exists
+            ? inner.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             : toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5))
         XCTAssertTrue(target.tapUntil(timeout: Self.wait) { explainer.exists }, "The explanation didn't show")
     }
@@ -171,7 +172,8 @@ final class WeatherTests: XCTestCase {
         for (state, label) in [("sun", "Window: Sunny"), ("cloudy", "Window: Cloudy"), ("night", "Window: Night")] {
             let app = launch(weather: state)
             XCTAssertTrue(
-                app.descendants(matching: .any)[label].waitUntilExists(timeout: Self.wait), "\(state) shows no \(label)")
+                app.descendants(matching: .any)[label].waitUntilExists(timeout: Self.wait), "\(state) shows no \(label)"
+            )
             app.terminate()
         }
     }

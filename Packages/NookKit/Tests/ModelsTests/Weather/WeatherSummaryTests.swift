@@ -20,8 +20,10 @@ struct WeatherSummaryTests {
 
     @Test func chanceIsRoundedToTens() {
         func percent(_ chance: Double) -> Int? {
-            WeatherSnapshot(condition: .cloudy, temperatureCelsius: 10, observedAt: .distantPast, precipitationChance: chance)
-                .summary.precipitationPercent
+            WeatherSnapshot(
+                condition: .cloudy, temperatureCelsius: 10, observedAt: .distantPast, precipitationChance: chance
+            )
+            .summary.precipitationPercent
         }
         #expect(percent(0) == 0)
         #expect(percent(0.04) == 0)

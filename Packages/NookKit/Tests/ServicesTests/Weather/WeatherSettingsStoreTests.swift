@@ -1,7 +1,8 @@
 import Foundation
 import Models
-@testable import Services
 import Testing
+
+@testable import Services
 
 /// Phase 29: her weather choices are kept on the iPhone, hold only a rounded city, and Delete my
 /// data empties them.
@@ -17,7 +18,8 @@ struct WeatherSettingsStoreTests {
 
     @Test func keepsWhatSheChose() throws {
         let store = store()
-        let city = try #require(WeatherPlace(name: "Seattle, WA", coordinate: .init(latitude: 47.61, longitude: -122.33)!))
+        let city = try #require(
+            WeatherPlace(name: "Seattle, WA", coordinate: .init(latitude: 47.61, longitude: -122.33)!))
         let chosen = WeatherSettings(isOn: true, usesMyLocation: true, city: city)
         store.save(chosen)
         #expect(store.current() == chosen)
@@ -39,7 +41,8 @@ struct WeatherSettingsStoreTests {
 
     @Test func aStoredPreciseCityIsRoundedWhenRead() {
         let name = "test.weather.\(UUID().uuidString)"
-        let json = #"{"isOn":true,"usesMyLocation":false,"city":{"name":"Home","coordinate":{"latitude":47.606209,"longitude":-122.332071}}}"#
+        let json =
+            #"{"isOn":true,"usesMyLocation":false,"city":{"name":"Home","coordinate":{"latitude":47.606209,"longitude":-122.332071}}}"#
         UserDefaults(suiteName: name)?.set(Data(json.utf8), forKey: DefaultsWeatherSettingsStore.key)
         let read = DefaultsWeatherSettingsStore(suiteName: name).current()
         #expect(read.city?.coordinate == CoarseCoordinate(latitude: 47.6, longitude: -122.3))

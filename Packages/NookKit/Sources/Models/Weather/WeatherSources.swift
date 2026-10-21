@@ -43,7 +43,8 @@ public struct WeatherCredit: Hashable, Sendable {
     public var legalURL: URL
 
     /// Apple's published page, used when the service can't be asked for the current one.
-    public static let legalFallbackURL = URL(string: "https://weatherkit.apple.com/legal-attribution.html")!
+    public static let legalFallbackURL: URL =
+        URL(string: "https://weatherkit.apple.com/legal-attribution.html") ?? URL(filePath: "/")
 
     public init(
         serviceName: String = "Apple Weather", markLightURL: URL? = nil, markDarkURL: URL? = nil,

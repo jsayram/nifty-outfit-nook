@@ -87,7 +87,8 @@ nonisolated enum AppWeather {
             case "allowed": return FixtureLocationProvider(access: .allowed, location: seattle)
             case "denied": return FixtureLocationProvider(access: .denied)
             case "ask": return FixtureLocationProvider(access: .notDetermined, location: seattle, grantsWhenAsked: true)
-            case "askDeny": return FixtureLocationProvider(access: .notDetermined, location: seattle, grantsWhenAsked: false)
+            case "askDeny":
+                return FixtureLocationProvider(access: .notDetermined, location: seattle, grantsWhenAsked: false)
             default: break
             }
         #endif

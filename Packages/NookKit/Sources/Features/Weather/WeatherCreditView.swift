@@ -28,7 +28,8 @@ struct WeatherCreditView: View {
             .accessibilityLabel(
                 Text(
                     "\(credit.serviceName) data sources", bundle: .module,
-                    comment: "VoiceOver label for the weather credit link, with the service's name"))
+                    comment: "VoiceOver label for the weather credit link, with the service's name")
+            )
             .accessibilityHint(
                 Text(
                     "Opens Apple's page about the weather data.", bundle: .module,

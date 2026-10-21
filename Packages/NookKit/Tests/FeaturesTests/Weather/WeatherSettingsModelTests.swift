@@ -10,9 +10,12 @@ import Testing
 /// switch back and keeps the city.
 @MainActor
 struct WeatherSettingsModelTests {
-    private static let seattle = WeatherPlace(name: "Seattle, WA", coordinate: .init(latitude: 47.6, longitude: -122.3)!)!
+    private static let seattle = WeatherPlace(
+        name: "Seattle, WA", coordinate: .init(latitude: 47.6, longitude: -122.3)!)!
 
-    private func load(location: FixtureLocationProvider, saved: WeatherSettings = .off) async -> (WeatherSettingsModel, NookServices) {
+    private func load(location: FixtureLocationProvider, saved: WeatherSettings = .off) async -> (
+        WeatherSettingsModel, NookServices
+    ) {
         var services = FixtureServices.make(FixtureConfiguration(set: .demo))
         services.weatherSettings = InMemoryWeatherSettingsStore(saved)
         services.location = location
@@ -50,7 +53,8 @@ struct WeatherSettingsModelTests {
     }
 
     @Test func sayingNoPutsTheSwitchBackAndKeepsTheCity() async {
-        let (model, services) = await load(location: FixtureLocationProvider(access: .notDetermined, grantsWhenAsked: false))
+        let (model, services) = await load(
+            location: FixtureLocationProvider(access: .notDetermined, grantsWhenAsked: false))
         model.choose(Self.seattle)
         model.setUsesMyLocation(true)
         await model.continueWithLocation()
@@ -81,7 +85,9 @@ struct WeatherSettingsModelTests {
         let saved = WeatherSettings(isOn: true, usesMyLocation: true, city: Self.seattle)
         let (model, services) = await load(location: FixtureLocationProvider(access: .allowed), saved: saved)
         model.setOn(false)
-        #expect(services.weatherSettings.current() == WeatherSettings(isOn: false, usesMyLocation: false, city: Self.seattle))
+        #expect(
+            services.weatherSettings.current()
+                == WeatherSettings(isOn: false, usesMyLocation: false, city: Self.seattle))
     }
 
     @Test func citySearchFindsMatchesAndSaysWhenNone() async {
