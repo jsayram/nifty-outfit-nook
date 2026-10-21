@@ -202,12 +202,13 @@ public enum Availability: Hashable, Sendable, Codable {
     case unavailable(until: Date?)
 }
 
-/// Where a garment's picture comes from. Stage A has no real photos.
+/// Where a picture comes from: none, the sample art, or a real photo she added (Phase 22a).
 public enum PhotoReference: Hashable, Sendable, Codable {
     /// Added by text only. Screens show a plain tile.
     case noPhoto
     /// Bundled sample art, named. Fixtures only.
     case sample(String)
-    /// A photo in the app's photo store (Stage B, Phase 22b).
+    /// A photo in the app's photo files on the iPhone, saved without its metadata (Phase 22a,
+    /// `PhotoFileStore` in Services). The ID is the file's name.
     case stored(EntityID<PhotoReference>)
 }

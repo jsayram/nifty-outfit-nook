@@ -47,15 +47,7 @@ final class AddPieceTests: XCTestCase {
         app.launchArguments =
             ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
         app.launch()
-        app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
-        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
-        app.buttons["onboarding.continue"].tapUntil(
-            app.navigationBars["How you like clothes to fit"], appears: Self.wait)
-        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Choose a starting closet"], appears: Self.wait)
-        element("onboarding.closet.empty", in: app).tapUntilSelected(timeout: Self.wait)
-        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Home"], appears: Self.wait)
-        app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
-        XCTAssertTrue(element("closet.empty.addPiece", in: app).waitUntilExists(timeout: Self.wait))
+        openHerOwnEmptyCloset(in: app)
 
         openDescribeInWords(in: app)
         type("Navy wool coat with big buttons", into: "field.description", in: app)
@@ -70,6 +62,34 @@ final class AddPieceTests: XCTestCase {
         app.launch()
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(gridPiece("Navy coat", in: app).waitUntilExists(timeout: Self.wait), "The piece wasn't kept")
+    }
+
+    /// Phase 22a: her own closet has real photos. Add a piece offers Take photo and Choose from
+    /// Photos (no Paste) with the line about how photos are kept, and Take photo explains, in
+    /// the app's words, before iOS asks; Not now asks nothing. The system camera and picker run
+    /// outside the app and aren't driven here. On a simulator where camera access was already
+    /// decided the explainer doesn't come, so the test only checks it when iOS hasn't asked yet.
+    @MainActor
+    func testHerOwnClosetOffersTheCameraAndPhotos() {
+        let app = XCUIApplication()
+        app.launchArguments =
+            ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+        app.launch()
+        openHerOwnEmptyCloset(in: app)
+
+        tap("closet.addPiece", in: app, showing: app.buttons["addPiece.camera"])
+        XCTAssertTrue(app.buttons["addPiece.library"].exists)
+        XCTAssertFalse(app.buttons["addPiece.paste"].exists, "Paste isn't offered with real photos")
+        XCTAssertTrue(element("addPiece.photoNote", in: app).exists)
+
+        let notNow = app.buttons["camera.explainer.notNow"]
+        tap("addPiece.camera", in: app) {
+            notNow.exists || app.alerts.firstMatch.exists || !app.buttons["addPiece.camera"].isHittable
+        }
+        if notNow.exists {
+            notNow.tapUntilGone(timeout: Self.wait)
+            XCTAssertTrue(app.buttons["addPiece.camera"].waitUntilExists(timeout: Self.wait))
+        }
     }
 
     /// Edit from garment detail: Cancel asks first when something changed, and Save changes
@@ -204,6 +224,20 @@ final class AddPieceTests: XCTestCase {
         let current = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
         field.typeTextAndWait(text, timeout: Self.wait)
+    }
+
+    /// From a fresh install through onboarding to her own, empty closet (kept in the store).
+    @MainActor
+    private func openHerOwnEmptyCloset(in app: XCUIApplication) {
+        app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(
+            app.navigationBars["How you like clothes to fit"], appears: Self.wait)
+        app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Choose a starting closet"], appears: Self.wait)
+        element("onboarding.closet.empty", in: app).tapUntilSelected(timeout: Self.wait)
+        app.buttons["onboarding.continue"].tapUntil(app.navigationBars["Home"], appears: Self.wait)
+        app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
+        XCTAssertTrue(element("closet.empty.addPiece", in: app).waitUntilExists(timeout: Self.wait))
     }
 
     @MainActor
