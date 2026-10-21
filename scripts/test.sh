@@ -20,6 +20,13 @@
 #   NOOK_XCTESTRUN=<file>.xctestrun scripts/test.sh ... tests what that build made, without building
 # (see .github/workflows/ci.yml).
 #
+# NOOK_PR_RUN=1 marks a pull request's CI run. The UI tests that a pull request doesn't need
+# (their behaviour is covered by package tests, or they repeat another test's screens at another
+# text size) skip themselves then, and run on merges to develop and main, nightly, and locally.
+# See UITestTier in NiftyOutfitNookUITests/UITestSupport.swift.
+#
+# NOOK_PARALLEL_WORKERS=<n> runs the tests on <n> cloned simulators at once. Off by default.
+#
 # Otherwise it builds once with build-for-testing, then tests without building, and prints how
 # long each step took. xcodebuild boots the simulator itself: waiting for a full boot first with
 # `simctl bootstatus` took 2 to 4 minutes on CI, against about a minute for xcodebuild's own boot.
@@ -32,6 +39,9 @@ simulator_id="$(scripts/simulator.sh)"
 # runner. xcodebuild passes TEST_RUNNER_* variables to the tests without the prefix.
 if [[ -n "${CI:-}" ]]; then
     export TEST_RUNNER_NOOK_CI=1
+fi
+if [[ -n "${NOOK_PR_RUN:-}" ]]; then
+    export TEST_RUNNER_NOOK_PR_RUN=1
 fi
 result_bundle="${NOOK_RESULT_BUNDLE:-build/TestResults.xcresult}"
 echo "Testing on simulator $simulator_id"
@@ -59,9 +69,45 @@ else
     fi
 fi
 
+extra=()
+if [[ -n "${CI:-}" ]]; then
+    # When a test fails, xcodebuild by default asks the simulator for a sysdiagnose, and on a
+    # hosted runner that has waited the full 600 seconds before reporting the failure ("Failure
+    # collecting diagnostics from simulator: Timed out after 600.0 seconds"). That was 8 of 8
+    # failed test jobs in October 2026. The result bundle still has the screenshots and the
+    # activity of the failed test.
+    extra+=(-collect-test-diagnostics never)
+fi
+if [[ -n "${NOOK_PARALLEL_WORKERS:-}" ]]; then
+    extra+=(-parallel-testing-enabled YES -parallel-testing-worker-count "$NOOK_PARALLEL_WORKERS"
+        -maximum-parallel-testing-workers "$NOOK_PARALLEL_WORKERS")
+fi
+
+# Whether the test run ended because the runner never got going, as opposed to a test failing:
+# not one test case was reported, and xcodebuild named a start-up problem. The hosted simulator
+# does this now and then ("Timed out waiting for AX loaded notification", "Early unexpected
+# exit, operation never finished bootstrapping"). A real failure has a failed test case and
+# never matches.
+runner_never_started() {
+    ! grep -q "Test Case '" "$1" &&
+        grep -qE 'Early unexpected exit, operation never finished bootstrapping|failed to initialize for UI testing|Timed out waiting for AX loaded notification' "$1"
+}
+
+run_tests() {
+    rm -rf "$result_bundle"
+    xcodebuild test-without-building "${common[@]}" -resultBundlePath "$result_bundle" ${extra[@]+"${extra[@]}"} "$@"
+}
+
 SECONDS=0
-rm -rf "$result_bundle"
 status=0
-xcodebuild test-without-building "${common[@]}" -resultBundlePath "$result_bundle" "$@" || status=$?
+log="$(mktemp)"
+run_tests "$@" 2>&1 | tee "$log" || status=$?
+if [[ $status -ne 0 && -n "${CI:-}" ]] && runner_never_started "$log"; then
+    echo "The test runner never started (no test ran). Restarting the simulator and trying once more."
+    xcrun simctl shutdown "$simulator_id" || true
+    status=0
+    run_tests "$@" || status=$?
+fi
+rm -f "$log"
 echo "Tested in ${SECONDS}s"
 exit $status

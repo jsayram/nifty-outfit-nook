@@ -142,8 +142,13 @@ final class SuitcasesAndLaundryTests: XCTestCase {
     /// every piece's name has room and its Mark clean can be reached. In one line the page was
     /// 435 points wide in a 402 point window, the names had no width at all, and Mark clean was
     /// cut off (QA, October 2026).
+    ///
+    /// Merges and nightly only, with the other AX5 checks. The AX5 audit sweep opens Laundry and
+    /// reports clipped text and hit regions there, and the default-size walk covers Laundry on
+    /// every pull request.
     @MainActor
-    func testLaundryAtTheLargestTextSize() {
+    func testLaundryAtTheLargestTextSize() throws {
+        try skipOnPullRequests("The AX5 audit sweep audits Laundry.")
         let app = XCUIApplication()
         app.launchArguments =
             UITestLaunch.standard + [

@@ -19,39 +19,35 @@ final class CatalogTests: XCTestCase {
         return app
     }
 
+    /// The catalog opens in place of the app's tabs, and its components say what VoiceOver needs:
+    /// the loading button says it is loading, chips and the segmented switch say which is
+    /// selected. One launch for what were four tests (October 2026); the checks are the same.
     @MainActor
-    func testCatalogOpensWithTheLaunchArgument() {
+    func testCatalogOpensAndItsComponentsReportTheirState() {
         let app = launchCatalog()
         XCTAssertTrue(app.navigationBars["Component catalog"].waitUntilExists(timeout: uiTestWait))
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The catalog replaces the app's tabs")
         XCTAssertTrue(app.buttons["Style me"].firstMatch.exists)
-    }
 
-    @MainActor
-    func testChipsReportTheirSelection() {
-        let app = launchCatalog()
+        let loading = app.buttons["Styling"]
+        XCTAssertTrue(loading.waitUntilExists(timeout: uiTestWait))
+        XCTAssertEqual(loading.value as? String, "Loading")
+
         let tops = app.buttons["Tops"]
         let bottoms = app.buttons["Bottoms"]
         XCTAssertTrue(tops.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(tops.isSelected)
         XCTAssertFalse(bottoms.isSelected)
-
         // The catalog's chips never say they're hittable, but take a tap.
         bottoms.tapUntil(timeout: uiTestWait, else: "\(bottoms) didn't become selected") {
             bottoms.exists && bottoms.isSelected
         }
         XCTAssertTrue(tops.isSelected, "Piece filters combine")
-    }
 
-    @MainActor
-    func testSegmentedSwitchMovesTheSelection() {
-        let app = launchCatalog()
         let simple = app.buttons["Simple"]
         let dressedUp = app.buttons["Dressed up"]
         XCTAssertTrue(simple.waitUntilExists(timeout: uiTestWait))
         XCTAssertTrue(simple.isSelected)
-
-        // The catalog's chips never say they're hittable, but take a tap.
         dressedUp.tapUntil(timeout: uiTestWait, else: "\(dressedUp) didn't become selected") {
             dressedUp.exists && dressedUp.isSelected
         }
@@ -64,14 +60,6 @@ final class CatalogTests: XCTestCase {
         let clear = app.buttons["Clear search"]
         scrollTo(clear, in: app)
         clear.tapUntilGone(timeout: uiTestWait)
-    }
-
-    @MainActor
-    func testLoadingButtonSaysItIsLoading() {
-        let app = launchCatalog()
-        let loading = app.buttons["Styling"]
-        XCTAssertTrue(loading.waitUntilExists(timeout: uiTestWait))
-        XCTAssertEqual(loading.value as? String, "Loading")
     }
 
     @MainActor

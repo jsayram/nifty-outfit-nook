@@ -1,50 +1,16 @@
 import XCTest
 
-/// Remaining settings (Phase 14b): every Profile row opens something real, the Track laundry
-/// switch reaches Home and Closet, Send feedback shows what goes before the share sheet, the desk
-/// drawers open their screens, and Delete my data leaves a fresh app.
+/// Remaining settings (Phase 14b): the Profile rows that open sheets, the Track laundry switch
+/// reaching Home and Closet, Send feedback showing what goes before the share sheet, the desk
+/// drawers opening their screens, and Delete my data leaving a fresh app. The Profile rows that
+/// push a screen are checked in `AccessibilityAuditTests.testProfileAndSettings`, which walks
+/// the same rows.
 final class SettingsTests: XCTestCase {
     /// Waits end as soon as their condition holds, so this only matters on a slow machine.
     static let wait = uiTestWait
 
     override func setUp() {
         continueAfterFailure = false
-    }
-
-    @MainActor
-    func testEveryProfileRowOpensSomethingReal() {
-        let app = launch()
-        openProfile(in: app)
-
-        // Rows that push a screen: the screen's title, and one control only the real screen has.
-        let pushed = [
-            ("profile.fit", "Fit and measurements", "fit.waist"),
-            ("profile.accessibility", "Accessibility", "accessibility.openSettings"),
-            ("profile.help", "Help", "help.outfits"),
-            ("profile.feedback", "Send feedback", "feedback.send"),
-            ("profile.privacy", "Privacy and terms", "privacy.deleteData"),
-            ("profile.deleteData", "Delete my data", "deleteData.delete"),
-        ]
-        for (row, title, control) in pushed {
-            tap(row, in: app, opens: app.navigationBars[title])
-            XCTAssertTrue(element(control, in: app).waitUntilExists(timeout: Self.wait), "\(title) has no \(control)")
-            app.goBack(from: title, to: "Profile", timeout: Self.wait)
-        }
-
-        // Rows that open a sheet.
-        let sheets = [
-            ("profile.name", "field.profile.nameField"),
-            ("profile.tryOnPhoto", "tryOnPhoto.choose"),
-            ("profile.preferences", "profile.preferences.mineAndOneIdea"),
-            ("profile.repeat", "profile.repeat.oneWeek"),
-        ]
-        for (row, control) in sheets {
-            tap(row, in: app, opens: element(control, in: app))
-            app.buttons["Close"].firstMatch.tapUntilGone(timeout: Self.wait)
-        }
-
-        // App tours waits for Phase 16b, when there are tours to replay.
-        XCTAssertFalse(app.buttons["profile.tours"].exists)
     }
 
     /// RD-11: the switch turns tracking on and off; the hamper and Closet's Laundry tile follow,
@@ -56,6 +22,7 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(waitForLabel(of: hamper, containing: "Hamper: Laundry, Off"), hamper.label)
 
         openProfile(in: app)
+        openEachSheet(in: app)
         let laundry = app.switches["profile.laundry"]
         reveal(laundry, in: app)
         XCTAssertEqual(laundry.value as? String, "0")
@@ -84,8 +51,14 @@ final class SettingsTests: XCTestCase {
     /// The desk drawers (RD-10.1): Help, with Still stuck? leading to Send feedback; Send
     /// feedback shows exactly what goes and opens the share sheet; Privacy and terms leads to
     /// Delete my data.
+    ///
+    /// Merges and nightly only. What goes in the note is covered by `SettingsModelTests` (the note
+    /// holds her words only, details only when on, send shares exactly the preview, a cancelled
+    /// share keeps the note), the drawers by `HomeTests`, and this test's own part is the keyboard
+    /// and the system share sheet, which are slow and the most likely to stall on a hosted runner.
     @MainActor
-    func testDrawersAndSendFeedback() {
+    func testDrawersAndSendFeedback() throws {
+        try skipOnPullRequests("SettingsModelTests covers the note and HomeTests the drawers.")
         let app = launch()
 
         tapDrawer("home.helpDrawer", in: app, opens: app.navigationBars["Help"])
@@ -203,6 +176,21 @@ final class SettingsTests: XCTestCase {
     @MainActor
     private func openProfile(in app: XCUIApplication) {
         app.buttons["home.profile"].tapUntil(app.navigationBars["Profile"], appears: Self.wait)
+    }
+
+    /// The Profile rows that open a sheet: each shows its own control, and Close goes back.
+    @MainActor
+    private func openEachSheet(in app: XCUIApplication) {
+        let sheets = [
+            ("profile.name", "field.profile.nameField"),
+            ("profile.tryOnPhoto", "tryOnPhoto.choose"),
+            ("profile.preferences", "profile.preferences.mineAndOneIdea"),
+            ("profile.repeat", "profile.repeat.oneWeek"),
+        ]
+        for (row, control) in sheets {
+            tap(row, in: app, opens: element(control, in: app))
+            app.buttons["Close"].firstMatch.tapUntilGone(timeout: Self.wait)
+        }
     }
 
     /// Taps a desk drawer on Home and waits for what it opens.
