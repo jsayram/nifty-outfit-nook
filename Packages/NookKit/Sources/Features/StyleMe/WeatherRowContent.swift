@@ -79,7 +79,7 @@ nonisolated struct WeatherRowContent: Hashable, Sendable {
         case .loading:
             String(localized: "Checking the weather…", bundle: .module, comment: "Weather sheet, while it loads")
         case .loaded(let snapshot):
-            WeatherWords.summary(snapshot, locale: locale)
+            WeatherWords.detail(snapshot, locale: locale)
         case .unavailable:
             String(
                 localized: "Can’t be read right now", bundle: .module,
@@ -127,6 +127,33 @@ nonisolated enum WeatherWords {
         case .rain: String(localized: "rain", bundle: .module, comment: "Weather, as in 58° and rain")
         case .snow: String(localized: "snow", bundle: .module, comment: "Weather, as in 30° and snow")
         }
+    }
+
+    /// "58° and rain", and when the service gave them, today's range and the chance of
+    /// precipitation: "58° and rain. 50° to 63°, 60% chance of precipitation."
+    static func detail(_ snapshot: WeatherSnapshot, locale: Locale) -> String {
+        var line = summary(snapshot, locale: locale)
+        if let low = snapshot.lowCelsius, let high = snapshot.highCelsius {
+            let range = String(
+                localized: "\(temperature(celsius: low, locale: locale)) to \(temperature(celsius: high, locale: locale))",
+                bundle: .module, comment: "Today's low and high, as in 50° to 63°")
+            line += ". " + range
+        }
+        if let chance = snapshot.precipitationChance {
+            let percent = Int((chance * 10).rounded()) * 10
+            let words = String(
+                localized: "\(percent)% chance of precipitation", bundle: .module,
+                comment: "Chance of rain or snow today, as in 60% chance of precipitation")
+            line += snapshot.lowCelsius == nil ? ". " + words : ", " + words
+        }
+        return line
+    }
+
+    static func temperature(celsius: Double, locale: Locale) -> String {
+        Measurement(value: celsius, unit: UnitTemperature.celsius)
+            .formatted(
+                .measurement(width: .narrow, usage: .weather, numberFormatStyle: .number.precision(.fractionLength(0)))
+                    .locale(locale))
     }
 
     /// "58° and rain".

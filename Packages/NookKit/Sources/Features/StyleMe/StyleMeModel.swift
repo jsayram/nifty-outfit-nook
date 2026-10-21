@@ -23,6 +23,8 @@ final class StyleMeModel {
     private(set) var check = StyleRequestCheck(issues: [], piecesInSource: 0, usablePieces: 0)
     private(set) var builder: StyleRequestBuilder?
     private(set) var weather: WeatherReading = .loading
+    /// Apple Weather's credit, shown under the Weather row while its forecast is in use (Phase 29).
+    private(set) var weatherCredit: WeatherCredit?
     /// Her usual fit from Profile, for the Comfort line (LR-18).
     private(set) var usualFit: Comfort?
     /// True once the draft has been set up from her preferences, so a reload keeps her choices.
@@ -65,6 +67,9 @@ final class StyleMeModel {
         let weather = await reading
         guard loads.isCurrent(load) else { return }
         self.weather = weather
+        let credit = weather.snapshot == nil ? nil : await services.weather.attribution()
+        guard loads.isCurrent(load) else { return }
+        weatherCredit = credit
     }
 
     /// Sets everything from loaded data. Separate from `load` so tests can hand data straight in.

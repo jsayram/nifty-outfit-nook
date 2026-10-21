@@ -17,9 +17,16 @@ public enum WeatherError: Error, Hashable, Sendable {
     case cancelled
 }
 
-/// Today's weather. Fixtures in Stage A, WeatherKit in Phase 29.
+/// Today's weather. Fixtures in Stage A, WeatherKit in Phase 29 (once its capability is on).
 public protocol WeatherProvider: Sendable {
     func currentWeather() async throws(WeatherError) -> WeatherSnapshot
+    /// Apple Weather's credit, which has to show wherever its forecast does. `nil` when the
+    /// weather isn't Apple's, so there's nothing to credit.
+    func attribution() async -> WeatherCredit?
+}
+
+extension WeatherProvider {
+    public func attribution() async -> WeatherCredit? { nil }
 }
 
 /// Why a picture couldn't be loaded.
