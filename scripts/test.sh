@@ -73,9 +73,9 @@ extra=()
 if [[ -n "${CI:-}" ]]; then
     # When a test fails, xcodebuild by default asks the simulator for a sysdiagnose, and on a
     # hosted runner that has waited the full 600 seconds before reporting the failure ("Failure
-    # collecting diagnostics from simulator: Timed out after 600.0 seconds"). That was 8 of 8
-    # failed test jobs in October 2026. The result bundle still has the screenshots and the
-    # activity of the failed test.
+    # collecting diagnostics from simulator: Timed out after 600.0 seconds"). That was 9 of 9
+    # failed test jobs in the 11 runs before 21 October 2026. The result bundle still has the
+    # screenshots and the activity of the failed test.
     extra+=(-collect-test-diagnostics never)
 fi
 if [[ -n "${NOOK_PARALLEL_WORKERS:-}" ]]; then
