@@ -38,6 +38,9 @@ public struct NookServices: Sendable {
     /// Export a copy, Check a copy and Restore (Phase 21b). `nil` where there's nothing to back
     /// up: the debug sample closet in memory, previews and most tests.
     public var backups: (any BackupService)?
+    /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
+    /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
+    public var account: any AccountService = UnavailableAccountService()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
