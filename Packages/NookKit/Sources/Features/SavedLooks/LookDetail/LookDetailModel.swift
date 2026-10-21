@@ -23,6 +23,9 @@ final class LookDetailModel {
     }
 
     let lookID: Look.ID
+    /// Opened from Saved Looks' search on an earlier result she didn't save (LR-06.4, Phase 21c):
+    /// the look shows even though it isn't saved, with Save look and nothing that changes it.
+    let allowsEarlierResult: Bool
     private(set) var phase: Phase = .loading
     private(set) var look: Look?
     /// Every garment she has, by ID, including pieces that left her closet.
@@ -42,11 +45,13 @@ final class LookDetailModel {
 
     init(
         lookID: Look.ID,
+        allowsEarlierResult: Bool = false,
         now: @escaping () -> Date = { .now },
         calendar: Calendar = .current,
         makeLookID: @escaping () -> Look.ID = { .random() }
     ) {
         self.lookID = lookID
+        self.allowsEarlierResult = allowsEarlierResult
         self.now = now
         self.calendar = calendar
         self.makeLookID = makeLookID
@@ -116,8 +121,26 @@ final class LookDetailModel {
         self.garments = Dictionary(garments.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         self.suitcases = suitcases
         self.profile = profile
-        look = looks.first { $0.id == lookID && $0.isSaved }
+        look = looks.first { $0.id == lookID && ($0.isSaved || allowsEarlierResult) }
         phase = look == nil ? .missing : .loaded
+    }
+
+    // MARK: An earlier result (LR-06.4)
+
+    /// True for an earlier result she hasn't saved: the page shows it with Save look only.
+    var isEarlierResult: Bool { look.map { !$0.isSaved } ?? false }
+
+    /// Save look on an earlier result: it goes into Saved Looks, named as Your looks names a
+    /// saved result (LR-08), and gets every saved look's buttons. Returns the look before, for Undo.
+    func saveEarlierResult(locale: Locale) async throws(StoreError) -> Look {
+        guard let before = look, !before.isSaved else { throw .unavailable }
+        var saved = before
+        saved.isSaved = true
+        saved.savedAt = now()
+        saved.name = YourLooksText.name(for: before, occasion: before.occasion, garments: garments, locale: locale)
+        try await services.looks.save(saved)
+        replace(saved)
+        return before
     }
 
     // MARK: What the screen shows
@@ -156,7 +179,13 @@ final class LookDetailModel {
         let now = now()
         var facts: [String] = []
         if let occasion = look.occasion { facts.append(occasion.title) }
-        facts.append(LookDetailText.saved(look.savedDate, now: now, calendar: calendar, locale: locale))
+        if look.isSaved {
+            facts.append(LookDetailText.saved(look.savedDate, now: now, calendar: calendar, locale: locale))
+        } else {
+            if let version = look.version { facts.append(YourLooksText.title(of: version)) }
+            facts.append(TryOnText.made(look.createdAt, now: now, calendar: calendar, locale: locale))
+            facts.append(LookDetailText.notSaved)
+        }
         if let lastWorn = look.lastWorn {
             facts.append(LastWornText.describe(lastWorn, now: now, calendar: calendar, locale: locale))
         }
@@ -281,7 +310,7 @@ final class LookDetailModel {
         return before
     }
 
-    /// Undo for a swap or a removed piece: exactly the look before (LR-08.2).
+    /// Undo for a swap, a removed piece or Save look: exactly the look before (LR-08.2).
     func restore(_ earlier: Look) async throws(StoreError) {
         try await services.looks.save(earlier)
         replace(earlier)

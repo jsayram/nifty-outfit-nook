@@ -15,8 +15,8 @@ struct SavedLookItem: Identifiable, Hashable {
     let removedCount: Int
     /// The pieces as the filter sees them (`LookFilter`).
     let filterPieces: [LookFilter.Piece]
-    /// More words search finds it by: the occasion, and the names of its pieces' kinds and
-    /// colours ("Shoes", "Black").
+    /// More words search finds it by: the occasion, and the names of its pieces' kinds, types and
+    /// colours ("Shoes", "Loafers", "Black").
     let searchWords: [String]
 
     var id: Look.ID { look.id }
@@ -32,6 +32,7 @@ struct SavedLookItem: Identifiable, Hashable {
         for piece in filterPieces {
             words.append(piece.category.chipTitle)
             words.append(piece.category.singularTitle)
+            if let subKind = piece.subKind { words.append(subKind.title) }
             words += piece.colors.map(\.title)
         }
         searchWords = words

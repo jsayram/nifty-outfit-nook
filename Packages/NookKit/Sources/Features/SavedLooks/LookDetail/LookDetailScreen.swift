@@ -21,6 +21,7 @@ struct LookDetailScreen: View {
     var isBeside = false
 
     @Environment(\.services) private var services
+    @Environment(\.locale) private var locale
     @State private var model: LookDetailModel
     @State private var swapping: SwapRoute?
     @State private var stub: ResultStub?
@@ -28,8 +29,11 @@ struct LookDetailScreen: View {
     @State private var toast: NookToastMessage?
     @State private var tryingOn: TryOnRoute?
 
+    /// - Parameter allowsEarlierResult: opened on an earlier result from Saved Looks' search
+    ///   (LR-06.4), which shows with Save look until it's saved.
     init(
-        lookID: Look.ID, changes: Int = 0, openGarment: @escaping (Garment.ID, String) -> Void,
+        lookID: Look.ID, changes: Int = 0, allowsEarlierResult: Bool = false,
+        openGarment: @escaping (Garment.ID, String) -> Void,
         openPicture: @escaping (TryOnPicture.ID) -> Void = { _ in },
         deleted: @escaping (SavedLookRemoval) -> Void,
         isBeside: Bool = false
@@ -39,7 +43,7 @@ struct LookDetailScreen: View {
         self.openPicture = openPicture
         self.deleted = deleted
         self.isBeside = isBeside
-        _model = State(initialValue: LookDetailModel(lookID: lookID))
+        _model = State(initialValue: LookDetailModel(lookID: lookID, allowsEarlierResult: allowsEarlierResult))
     }
 
     var body: some View {
@@ -59,7 +63,8 @@ struct LookDetailScreen: View {
                 },
                 findOne: { stub = .findOne(pieceName: $0.name) },
                 retry: reload,
-                openPicture: openPicture
+                openPicture: openPicture,
+                saveLook: saveEarlierResult
             )
         )
         // The name is the big title on the page instead.
@@ -90,12 +95,29 @@ struct LookDetailScreen: View {
         // A saved look's quick tour (Phase 16b), once it has loaded, with nothing open over it.
         .screenTour(
             LookTour.definition,
-            isReady: model.phase == .loaded && swapping == nil && stub == nil && renaming == nil && tryingOn == nil
+            isReady: model.phase == .loaded && !model.isEarlierResult && swapping == nil && stub == nil
+                && renaming == nil && tryingOn == nil
                 && toast == nil)
     }
 
     private func reload() {
         Task { await model.load(from: services) }
+    }
+
+    /// Save look on an earlier result: it joins Saved Looks, with Undo.
+    private func saveEarlierResult() {
+        Task {
+            do {
+                let before = try await model.saveEarlierResult(locale: locale)
+                toast = NookToastMessage(
+                    LookDetailText.savedToast, systemImage: "heart.fill", actionTitle: YourLooksText.undo
+                ) {
+                    Task { try? await model.restore(before) }
+                }
+            } catch {
+                toast = NookToastMessage(LookDetailText.failedToast, systemImage: "exclamationmark.circle")
+            }
+        }
     }
 
     private func openTryOn() {

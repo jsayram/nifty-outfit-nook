@@ -115,3 +115,63 @@ public enum Occasion: String, CaseIterable, Codable, Sendable {
     case concert
     case other
 }
+
+/// A narrower kind within a `GarmentCategory`, such as Cardigan or Blazer within Layers (PRD §7.6,
+/// the Add a piece mockup). Optional on every piece: `nil` means she didn't pick one, or none of
+/// these fits. Raw values are stored, so never rename or reuse one.
+public enum GarmentSubKind: String, CaseIterable, Codable, Sendable {
+    // Tops
+    case blouse
+    case tee
+    case shirt
+    case sweater
+    case knitTop
+    case tank
+    // Layers
+    case cardigan
+    case jacket
+    case blazer
+    case coat
+    case vest
+    // Bottoms
+    case trousers
+    case jeans
+    case skirt
+    case shorts
+    case leggings
+    // Shoes
+    case flats
+    case heels
+    case sneakers
+    case loafers
+    case boots
+    case sandals
+    // Bags
+    case handbag
+    case tote
+    case crossbody
+    case clutch
+    case backpack
+    // Accessories
+    case scarf
+    case belt
+    case hat
+    case jewelry
+
+    /// The kind this one belongs to.
+    public var category: GarmentCategory {
+        switch self {
+        case .blouse, .tee, .shirt, .sweater, .knitTop, .tank: .top
+        case .cardigan, .jacket, .blazer, .coat, .vest: .layer
+        case .trousers, .jeans, .skirt, .shorts, .leggings: .bottom
+        case .flats, .heels, .sneakers, .loafers, .boots, .sandals: .shoes
+        case .handbag, .tote, .crossbody, .clutch, .backpack: .bag
+        case .scarf, .belt, .hat, .jewelry: .accessory
+        }
+    }
+
+    /// The choices for one kind, in the order the form shows them. Dresses have none yet.
+    public static func choices(for category: GarmentCategory) -> [GarmentSubKind] {
+        allCases.filter { $0.category == category }
+    }
+}

@@ -105,7 +105,7 @@ struct BackupRoundTripTests {
         #expect(!paths.contains("photos/0b4f7a9e-9999-4c2a-9a51-orphan000001"))
         let garments = try String(contentsOf: staging.appending(path: "records/garment.json"), encoding: .utf8)
         #expect(!garments.contains("\"\(purged.rawValue)\""))
-        #expect(manifest.kind == .records && manifest.formatVersion == 1 && manifest.payloadVersion == 1)
+        #expect(manifest.kind == .records && manifest.formatVersion == 1 && manifest.payloadVersion == 2)
     }
 
     /// The passphrase is never written anywhere: not in the export's folder, the store, its journal

@@ -16,7 +16,8 @@ import UIKit
 /// Drawn 402 points wide (iPhone 17) at full height, without the navigation and tab bars:
 /// - "How would you like to add it?";
 /// - Describe in words with suggestions, one accepted and one skipped;
-/// - the empty form, the form with the problems Save found, and the cardigan filled in;
+/// - the empty form, the form with the problems Save found, and the cardigan filled in, with its
+///   type and an other name;
 /// - the filled form at AX5 and in dark;
 /// - "Continue where you left off?".
 @MainActor
@@ -24,8 +25,12 @@ import UIKit
 struct GarmentEditorSnapshotTests {
     static let width: CGFloat = 402
 
+    /// The cardigan draft, with a type and an other name (Phase 21c).
     private func filledModel() async -> GarmentEditorModel {
-        await loadedEditor(resumesDraft: true, services: editorServices(draft: .add))
+        let model = await loadedEditor(resumesDraft: true, services: editorServices(draft: .add))
+        model.chooseSubKind(.cardigan)
+        model.details.otherNames = ["Green cardigan"]
+        return model
     }
 
     @Test func choices() async {

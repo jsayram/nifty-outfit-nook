@@ -82,6 +82,19 @@ final class GarmentEditorModel {
     var details: GarmentDetails = .blank {
         didSet { if details != oldValue { changed() } }
     }
+    /// The other name she's typing, before Add puts it with the others (Phase 21c). Not part of
+    /// the draft until it's added; Save adds it first, so typed words aren't lost.
+    var newOtherName = "" {
+        didSet {
+            guard newOtherName != oldValue else { return }
+            if otherNameProblem != nil { otherNameProblem = nil }
+            // Typing here waits for a pause before the draft is written, as typing in any other
+            // field does. A draft written mid-word lost a letter of the name on the simulator.
+            if !isRestoring { scheduleDraftSave() }
+        }
+    }
+    /// Why the typed other name couldn't be added. Cleared as she types.
+    private(set) var otherNameProblem: FieldProblem?
     /// Her own words, on Describe in words.
     var description = "" {
         didSet { if description != oldValue { changed() } }
@@ -311,6 +324,46 @@ final class GarmentEditorModel {
     /// True when there's work to lose: changed details, or words she typed.
     var isDirty: Bool { currentDraft.hasChanges }
 
+    /// Choose the kind. A type from another kind goes, since a cardigan can't be a shoe.
+    func chooseCategory(_ category: GarmentCategory) {
+        var changed = details
+        changed.category = category
+        if let subKind = changed.subKind, subKind.category != category { changed.subKind = nil }
+        details = changed
+    }
+
+    /// Choose the type, or `nil` for none of these.
+    func chooseSubKind(_ subKind: GarmentSubKind?) {
+        details.subKind = subKind
+    }
+
+    /// The types she can pick for the chosen kind. Empty before a kind is chosen, and for kinds
+    /// with no types (dresses).
+    var subKindChoices: [GarmentSubKind] {
+        details.category.map(GarmentSubKind.choices(for:)) ?? []
+    }
+
+    /// Add on Other names: the typed name joins the others, or the problem shows under the field.
+    /// Returns whether it was added.
+    @discardableResult
+    func addOtherName() -> Bool {
+        do {
+            let name = try GarmentRules.newOtherName(newOtherName, adding: details)
+            details.otherNames.append(name)
+            newOtherName = ""
+            otherNameProblem = nil
+            return true
+        } catch {
+            otherNameProblem = error
+            return false
+        }
+    }
+
+    /// Removes one of the piece's other names.
+    func removeOtherName(_ name: String) {
+        details.otherNames.removeAll { $0 == name }
+    }
+
     func toggleColor(_ color: ColorName) {
         if let index = details.colors.firstIndex(of: color) {
             details.colors.remove(at: index)
@@ -332,7 +385,11 @@ final class GarmentEditorModel {
     func save(in closet: any ClosetStore) async -> Saved? {
         guard !isSaving else { return nil }
         showsProblems = true
+        // A name typed under Other names but not added yet is added now, so it isn't lost. One
+        // that can't be added stops Save, with its problem under the field.
+        let pendingAdded = newOtherName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || addOtherName()
         problems = GarmentRules.problems(in: details)
+        if !pendingAdded, let otherNameProblem { problems.byField[.otherNames] = otherNameProblem }
         guard problems.isEmpty else {
             problemCheckCount += 1
             return nil
