@@ -4,8 +4,12 @@ name: CI
 
 on:
   pull_request:
+    # `labeled` and `unlabeled` so adding the run-ui label starts the UI tests.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [develop, main]
+  # Run the whole UI suite by hand: Actions tab, CI, Run workflow.
+  workflow_dispatch:
 
 # Read-only token for every job. No job needs to write.
 permissions:
@@ -24,6 +28,11 @@ env:
   # images/macos/xcode-27-arm64-Readme.md, October 2026). Its default Xcode is 27.0, so each job
   # selects this one.
   XCODE_APP: /Applications/Xcode_27.1.app
+  # '1' except on a manual run. A few UI tests skip themselves when it is set, because package
+  # tests cover what they check or another test walks the same screens (UITestTier in
+  # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
+  # (workflow_dispatch) leaves it empty and runs every UI test.
+  NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
 
 jobs:
   swift-format:
@@ -39,45 +48,70 @@ jobs:
       - name: Lint
         run: scripts/format.sh
 
-  # Which kind of change a pull request is. A pull request that only touches docs (Markdown
-  # outside the source folders, docs/, website/) skips the build and test jobs below, and
-  # `build-and-test` still reports and passes. Anything else, and every push to develop or main,
-  # runs everything. The changed files come from git, between the pull request's base and head.
+  # Which kind of change this is, from git (a pull request's base and head, or a push's before and
+  # after). Two answers:
+  #   code  Anything but docs (Markdown outside the source folders, docs/, website/). A docs-only
+  #         change skips the build and test jobs below, and `build-and-test` still passes.
+  #   ui    A UI path changed (see the list in the step), or the pull request has the run-ui
+  #         label, or this is a manual run. Only then do the UI test jobs run. Every change that
+  #         isn't docs-only still builds, makes the archive check and runs every package test
+  #         (snapshot tests included).
   changes:
     name: changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       code: ${{ steps.filter.outputs.code }}
+      ui: ${{ steps.filter.outputs.ui }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Docs only?
+      - name: What changed?
         id: filter
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
           code=true
+          ui=true
+          files=""
           if [[ "$EVENT" == "pull_request" ]]; then
             files="$(git diff --name-only "$BASE...$HEAD")"
+          elif [[ "$EVENT" == "push" && ! "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE" 2>/dev/null; then
+            files="$(git diff --name-only "$BEFORE" "$AFTER")"
+          fi
+          if [[ -n "$files" ]]; then
             echo "$files"
             code=false
-            [[ -n "$files" ]] || code=true
+            ui=false
             while IFS= read -r file; do
               case "$file" in
-                # A Markdown file in a source folder can end up in the app bundle.
-                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | Packages/*) code=true ;;
+                # UI paths: the UI tests run only when one of these changes (or the run-ui label is
+                # on the pull request, or the workflow is run by hand). Views and screens in
+                # Features (its model files are not UI), strings, the design system, the app
+                # target (assets, entitlements, app file), its Info.plist, the Xcode project,
+                # and the UI tests themselves.
+                Packages/NookKit/Sources/Features/*Model.swift | Packages/NookKit/Sources/Features/*/*Model.swift | Packages/NookKit/Sources/Features/*/*/*Model.swift) code=true ;;
+                Packages/NookKit/Sources/Features/* | Packages/NookKit/Sources/DesignSystem/*) code=true; ui=true ;;
+                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | NiftyOutfitNook.xcodeproj/* | Configs/AppInfo.plist | *.xcstrings | *.xcassets/*) code=true; ui=true ;;
+                # Models, services, fixtures, backup, storage and the package tests build and test
+                # without UI tests. A Markdown file in a source folder can end up in the app bundle.
+                Packages/*) code=true ;;
                 *.md | docs/* | website/*) ;;
                 *) code=true ;;
               esac
             done <<< "$files"
           fi
-          echo "Build and test: $code"
+          if [[ ",$LABELS," == *",run-ui,"* && "$code" == "true" ]]; then ui=true; fi
+          echo "Build and package tests: $code, UI tests: $ui"
           echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "ui=$ui" >> "$GITHUB_OUTPUT"
 
   # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
   # only when every one of them passed.
@@ -99,7 +133,10 @@ jobs:
   # the full plan with the package tests), makes an unsigned Release archive for a real iPhone
   # and checks it (scripts/check-archive.sh: Info.plist, privacy manifest, entitlements, no test
   # or debug code, and scripts/check-release.sh on the device binary), then runs a few UI test
-  # classes on an iPhone simulator.
+  # classes and every package test target on an iPhone simulator. It runs the package tests
+  # itself because it has their build: until October 2026 the iPad part ran them, which meant
+  # uploading the full plan's products (144 MB) for that part to download, and the iPad part
+  # started its own tests about 8 minutes in.
   build-and-archive:
     name: build-and-archive
     needs: changes
@@ -114,9 +151,11 @@ jobs:
         run: |
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
+          echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
       - name: Check the two Package.resolved files agree
         run: scripts/check-package-pins.sh
       - name: Build for testing (UI test plan)
+        if: needs.changes.outputs.ui == 'true'
         env:
           NOOK_BUILD_ONLY: 1
           NOOK_TEST_PLAN: UITests
@@ -126,30 +165,23 @@ jobs:
           tar -czf "$RUNNER_TEMP/ui-test-products.tgz" -C build/DerivedData/Build/Products \
             Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
             $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - if: needs.changes.outputs.ui == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-test-products
           path: ${{ runner.temp }}/ui-test-products.tgz
           retention-days: 1
           overwrite: true
+      # Not uploaded: this job runs the package tests, so nothing else needs this build.
       - name: Build for testing (full plan, with the package tests)
         env:
           NOOK_BUILD_ONLY: 1
-        run: |
-          scripts/test.sh
-          tar -czf "$RUNNER_TEMP/all-test-products.tgz" -C build/DerivedData/Build/Products \
-            --exclude '*.o' --exclude '*.swiftmodule' \
-            Debug-iphonesimulator $(cd build/DerivedData/Build/Products && ls -- *_NiftyOutfitNook_*.xctestrun)
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: all-test-products
-          path: ${{ runner.temp }}/all-test-products.tgz
-          retention-days: 1
-          overwrite: true
-      # Before this job's own UI tests: with a simulator running, the archive took twice as long.
+        run: scripts/test.sh
+      # Before this job's own tests: with a simulator running, the archive took twice as long.
       - name: Archive (Release, unsigned) and check what would ship
         run: scripts/check-archive.sh
       - name: Test (ui-catalog-and-profile)
+        if: needs.changes.outputs.ui == 'true'
         # The UI tests' retry is explained in the ui-tests job below.
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_UITests_*.xctestrun)"
@@ -158,46 +190,61 @@ jobs:
           -only-testing:NiftyOutfitNookUITests/ProfileTests
           -only-testing:NiftyOutfitNookUITests/CutoutBenchTests
           -retry-tests-on-failure -test-iterations 2
+      - name: Test (every package test target)
+        # Also after a UI test failure, so one doesn't hide the other.
+        if: ${{ !cancelled() }}
+        env:
+          NOOK_RESULT_BUNDLE: build/TestResults-package.xcresult
+          # Failed snapshots write the new image and a diff here (passed through to the simulator).
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
+        run: >-
+          NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
+          scripts/test.sh -skip-testing:NiftyOutfitNookUITests
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: TestResults-build-and-archive
-          path: build/TestResults.xcresult
+          path: |
+            build/TestResults.xcresult
+            build/TestResults-package.xcresult
+            build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
 
   # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
-  # iPad layouts, on an iPad simulator. The iPad part also runs every package test target: they
-  # don't depend on the device, and that part has the most room.
-  # Rebalanced on 20 October 2026 from 6 CI runs on Xcode 27.1 (the classes' mean times, in
-  # seconds, from the test log: "Test Suite 'Class' passed ... in N seconds"). Before this, the
-  # home-and-settings part had 1224 seconds of tests (it took 24 to 39 minutes, and hit the
-  # 40-minute cap on a slow runner), and ui-rest had 766 (12 to 22 minutes). A class can take
-  # 1.5 to 2 times as long from one run to the next, and a failed test that retries adds its
-  # own time again plus a few minutes for xcodebuild to collect the failure's logs.
-  # A test job spends 6 to 7 minutes outside its tests (waiting for the build, downloading it,
-  # booting the simulator), and build-and-archive about 13 (two builds, the archive, then a cold
-  # boot while the others boot too). So the three iPhone parts below get about 930 to 1150
-  # seconds of tests each, which is 23 to 25 minutes a job, and build-and-archive keeps about
-  # 500. The free plan runs five macOS jobs at once, so more parts would only queue.
-  #   (build-and-archive)     CatalogTests 274, ProfileTests 175, CutoutBenchTests 57
-  #   ui-home-and-settings    AccessibilityAuditTests 479, SettingsTests 276, HomeTests 132,
-  #                           StyleMeTests 119
-  #   ui-add-and-tours        AccessibilityAuditLargeTextTests 464, AddPieceTests 237,
-  #                           ScreenToursTests 230
-  #   ui-rest                 SavedLooksTests 192, HomeTourTests 178, SuitcasesAndLaundryTests 121,
-  #                           YourLooksTests 111, LaunchTests 110, GarmentDetailTests 101,
-  #                           HomeVariantTests 91, OnboardingTests 76, SwapTests 64, ClosetTests 58,
-  #                           MakeYourOwnLookTests 49, and any new class
-  #   ui-ipad                 IPadTests 174, IPadKeyboardTests 118, IPadStyleMeAndSavedTests 98,
-  #                           package tests about 90 to 360
+  # iPad layouts, on an iPad simulator.
+  #
+  # What runs where. These parts run only when the change touches UI paths (see `changes`). They
+  # cover the real user flows once; a test that package tests already cover, or that repeats
+  # another test's screens at the largest text size, skips itself (NOOK_PR_RUN above) and runs
+  # only in a manual full-suite run. The sizes below are the normal run's, then the full suite's,
+  # in seconds of tests (the classes' mean times from the test log, 6 runs on Xcode 27.1, 20 and
+  # 21 October 2026). A class can take 1.5 to 2 times as long from one run to the next, and a
+  # failed test that retries adds its own time again.
+  # A test part spends 4 to 5 minutes outside its tests (waiting for the build, downloading it,
+  # booting the simulator), and build-and-archive about 8 (two builds, the archive, then a cold
+  # boot), so a run with UI tests is about 15 minutes.
+  #   (build-and-archive)     CatalogTests 103, ProfileTests 58 / 137, CutoutBenchTests 0 / 53,
+  #                           package tests about 200 to 250
+  #   ui-audit-and-settings   AccessibilityAuditTests 418, SettingsTests 112 / 217,
+  #                           HomeVariantTests 25 / 99, LaunchTests 12 / 77, and the large-text
+  #                           audits of Closet and Profile (0 / 231)
+  #   ui-add-and-saved        AddPieceTests 202, SavedLooksTests 150, HomeTourTests 120 / 138,
+  #                           OnboardingTests 82, BackupsTests 55, ScreenToursTests 0 / 257,
+  #                           and the large-text audits of Style Me, Saved Looks, Onboarding and
+  #                           Home (0 / 269)
+  #   ui-rest                 GarmentDetailTests 80, HomeTests 126, StyleMeTests 113,
+  #                           SuitcasesAndLaundryTests 85 / 109, SwapTests 59, ClosetTests 52,
+  #                           MakeYourOwnLookTests 51, YourLooksTests 38 / 117, and any new class
+  #   ui-ipad                 IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
-  # in ui-rest it would only skip itself on the iPhone.
+  # in ui-rest it would only skip itself on the iPhone. Every part, the iPad one too, tests what
+  # the UI test plan's build made and downloads only that (28 MB).
   ui-tests:
     name: ui-tests (${{ matrix.part }})
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.ui == 'true'
     runs-on: xcode-27
     timeout-minutes: 40
     permissions:
@@ -209,25 +256,32 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - part: ui-home-and-settings
+          - part: ui-audit-and-settings
             family: iPhone
-            products: ui-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -only-testing:NiftyOutfitNookUITests/SettingsTests
-              -only-testing:NiftyOutfitNookUITests/HomeTests
-              -only-testing:NiftyOutfitNookUITests/StyleMeTests
-          - part: ui-add-and-tours
+              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
+          - part: ui-add-and-saved
             family: iPhone
-            products: ui-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
+              -only-testing:NiftyOutfitNookUITests/SavedLooksTests
+              -only-testing:NiftyOutfitNookUITests/HomeTourTests
+              -only-testing:NiftyOutfitNookUITests/OnboardingTests
+              -only-testing:NiftyOutfitNookUITests/BackupsTests
               -only-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
-          # Every other UI test class, so a new one is never left out.
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testStyleMeAndYourLooks
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testHomeAndItsTour
+          # Every other UI test, so a new class or test is never left out: this part names only
+          # what the others run, and skips exactly that.
           - part: ui-rest
             family: iPhone
-            products: ui-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests
               -skip-testing:NiftyOutfitNookUITests/CatalogTests
@@ -235,11 +289,20 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
-              -skip-testing:NiftyOutfitNookUITests/HomeTests
-              -skip-testing:NiftyOutfitNookUITests/StyleMeTests
+              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -skip-testing:NiftyOutfitNookUITests/LaunchTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
+              -skip-testing:NiftyOutfitNookUITests/SavedLooksTests
+              -skip-testing:NiftyOutfitNookUITests/HomeTourTests
+              -skip-testing:NiftyOutfitNookUITests/OnboardingTests
+              -skip-testing:NiftyOutfitNookUITests/BackupsTests
               -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testStyleMeAndYourLooks
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testHomeAndItsTour
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
@@ -247,7 +310,6 @@ jobs:
           # one of these skips itself on an iPhone.
           - part: ui-ipad
             family: iPad
-            products: all-test-products
             selection: >-
               -only-testing:NiftyOutfitNookUITests/IPadTests
               -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
@@ -262,6 +324,7 @@ jobs:
         run: |
           sudo xcode-select --switch "$XCODE_APP"
           xcodebuild -version
+          echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
           simulator="$(scripts/simulator.sh)"
           echo "NOOK_SIM_ID=$simulator" >> "$GITHUB_ENV"
           # In the background: the next steps wait for the build meanwhile. xcodebuild waits
@@ -271,37 +334,32 @@ jobs:
         id: build
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/wait-for-artifact.sh ${{ matrix.products }} build-and-archive
+        run: scripts/wait-for-artifact.sh ui-test-products build-and-archive
       - if: steps.build.outputs.ready == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: ${{ matrix.products }}
+          name: ui-test-products
           path: ${{ runner.temp }}
       - name: Unpack the build, or build here if build-and-archive couldn't start
         env:
-          PRODUCTS: ${{ matrix.products }}
           READY: ${{ steps.build.outputs.ready }}
         run: |
           if [[ "$READY" == "true" ]]; then
             mkdir -p build/Products
-            tar -xzf "$RUNNER_TEMP/$PRODUCTS.tgz" -C build/Products
+            tar -xzf "$RUNNER_TEMP/ui-test-products.tgz" -C build/Products
             echo "PRODUCTS_DIR=build/Products" >> "$GITHUB_ENV"
           else
-            # ui-test-products is the UI test plan's build, all-test-products the full plan's.
-            if [[ "$PRODUCTS" == "ui-test-products" ]]; then export NOOK_TEST_PLAN=UITests; fi
-            NOOK_BUILD_ONLY=1 scripts/test.sh
-            # build-for-testing writes an .xctestrun for each of the scheme's test plans, and the test
-            # steps expect exactly one. Keep this plan's.
-            if [[ "$PRODUCTS" == "ui-test-products" ]]; then
-              rm -f build/DerivedData/Build/Products/NiftyOutfitNook_NiftyOutfitNook_*.xctestrun
-            else
-              rm -f build/DerivedData/Build/Products/NiftyOutfitNook_UITests_*.xctestrun
-            fi
+            NOOK_BUILD_ONLY=1 NOOK_TEST_PLAN=UITests scripts/test.sh
+            # build-for-testing writes an .xctestrun for each of the scheme's test plans, and the
+            # test step expects exactly one. Keep the UI plan's.
+            rm -f build/DerivedData/Build/Products/NiftyOutfitNook_NiftyOutfitNook_*.xctestrun
             echo "PRODUCTS_DIR=build/DerivedData/Build/Products" >> "$GITHUB_ENV"
           fi
       - name: Test (${{ matrix.part }})
         env:
           SELECTION: ${{ matrix.selection }}
+          # Empty unless a part sets `workers`: how many cloned simulators test at once.
+          NOOK_PARALLEL_WORKERS: ${{ matrix.workers }}
         # SELECTION is a fixed list of xcodebuild flags from the matrix above, split on spaces on purpose.
         #
         # A failed UI test runs once more, here only. This is for the hosted runner, not for our
@@ -312,25 +370,12 @@ jobs:
         run: >-
           NOOK_XCTESTRUN="$(ls "$PRODUCTS_DIR"/*.xctestrun)"
           scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
-      - name: Test (every package test target)
-        # Also after a UI test failure, so one doesn't hide the other.
-        if: ${{ !cancelled() && matrix.family == 'iPad' }}
-        env:
-          NOOK_RESULT_BUNDLE: build/TestResults-package.xcresult
-          # Failed snapshots write the new image and a diff here (passed through to the simulator).
-          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
-        run: >-
-          NOOK_XCTESTRUN="$(ls "$PRODUCTS_DIR"/*.xctestrun)"
-          scripts/test.sh -skip-testing:NiftyOutfitNookUITests
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: TestResults-${{ matrix.part }}
-          path: |
-            build/TestResults.xcresult
-            build/TestResults-package.xcresult
-            build/SnapshotArtifacts
+          path: build/TestResults.xcresult
           retention-days: 7
           if-no-files-found: ignore
 
@@ -348,6 +393,7 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           CODE: ${{ needs.changes.outputs.code }}
+          UI: ${{ needs.changes.outputs.ui }}
           BUILD_AND_ARCHIVE: ${{ needs.build-and-archive.result }}
           UI_TESTS: ${{ needs.ui-tests.result }}
         run: |
@@ -359,7 +405,13 @@ jobs:
             echo "Docs only: nothing to build or test."
             exit 0
           fi
-          [[ "$BUILD_AND_ARCHIVE" == "success" && "$UI_TESTS" == "success" ]]
+          [[ "$BUILD_AND_ARCHIVE" == "success" ]] || exit 1
+          if [[ "$UI" == "false" ]]; then
+            echo "No UI path changed: the UI tests were skipped on purpose."
+            [[ "$UI_TESTS" == "skipped" ]]
+          else
+            [[ "$UI_TESTS" == "success" ]]
+          fi
 
   gitleaks:
     name: gitleaks

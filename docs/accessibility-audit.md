@@ -4,7 +4,7 @@ Stage A, 17 October 2026. Jose doesn't have Lily's iPhone 12, so the checks that
 
 ## The audit tests
 
-`AccessibilityAuditTests` runs Xcode's accessibility audit (`XCUIApplication.performAccessibilityAudit(for: .all)`) on each main screen at the default text size, and `AccessibilityAuditLargeTextTests` runs the same walk at AX5. They're the closest a UI test gets to a VoiceOver pass: the audit checks contrast, elements VoiceOver can't find, hit regions under 44 points, missing or weak labels, Dynamic Type, clipped text and traits, on what's on screen when it runs.
+`AccessibilityAuditTests` runs Xcode's accessibility audit (`XCUIApplication.performAccessibilityAudit(for: .all)`) on each main screen at the default text size, whenever the UI tests run, and `AccessibilityAuditLargeTextTests` runs the same walk at AX5 in a manual full-suite run only (one audit per screen is enough). They're the closest a UI test gets to a VoiceOver pass: the audit checks contrast, elements VoiceOver can't find, hit regions under 44 points, missing or weak labels, Dynamic Type, clipped text and traits, on what's on screen when it runs.
 
 | Walk | Screens |
 |---|---|

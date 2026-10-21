@@ -72,8 +72,13 @@ final class YourLooksTests: XCTestCase {
     }
 
     /// `stylist-waits`: Your looks shows its styling state, and Cancel goes back to Style Me.
+    ///
+    /// The three forced-state tests below run in the full suite only. The states, Retry and
+    /// Cancel are `YourLooksModelTests` and `YourLooksSnapshotTests`, and `testAFullStylingRun`
+    /// walks the real screen, its navigation and its buttons on every pull request.
     @MainActor
-    func testStylingCanBeCancelled() {
+    func testStylingCanBeCancelled() throws {
+        try skipOnPullRequests("YourLooksModelTests and YourLooksSnapshotTests cover the states.")
         let app = launch("demo:stylist-waits")
         styleMe(in: app, waitForResult: false)
         XCTAssertTrue(element("results.styling", in: app).waitUntilExists(timeout: Self.wait))
@@ -83,7 +88,8 @@ final class YourLooksTests: XCTestCase {
 
     /// `offline-once`: offline, then Retry once the connection is back.
     @MainActor
-    func testOfflineThenRetry() {
+    func testOfflineThenRetry() throws {
+        try skipOnPullRequests("YourLooksModelTests covers offline and Retry.")
         let app = launch("demo:offline-once")
         styleMe(in: app, waitForResult: false)
         XCTAssertTrue(app.staticTexts["Styling needs a connection"].waitUntilExists(timeout: Self.wait))
@@ -95,7 +101,8 @@ final class YourLooksTests: XCTestCase {
 
     /// The other states, each forced by its flag: partial, insufficient and didn't finish.
     @MainActor
-    func testEachStateByFlag() {
+    func testEachStateByFlag() throws {
+        try skipOnPullRequests("YourLooksModelTests and YourLooksSnapshotTests cover each state.")
         let partial = launch("demo:stylist-partial")
         styleMe(in: partial, waitForResult: false)
         XCTAssertTrue(partial.buttons["results.version.dressedUp"].waitUntilExists(timeout: Self.wait))
