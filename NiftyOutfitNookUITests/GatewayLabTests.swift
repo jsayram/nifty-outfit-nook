@@ -54,6 +54,36 @@ final class GatewayLabTests: XCTestCase {
         XCTAssertTrue(status.waitUntilLabel(contains: "Signed out", timeout: uiTestWait))
     }
 
+    /// Phase 26: with no connection (`-connection offline` fixes the state), a calm banner says so
+    /// and what still works; and a connection that drops in the middle of a call is tried again
+    /// without her doing anything.
+    @MainActor
+    func testTheOfflineBannerAndAConnectionLostInTheMiddle() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-gateway-lab", "-connection", "offline"] + UITestLaunch.animationsOff
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Gateway"].waitUntilExists(timeout: uiTestWait))
+        let banner = app.staticTexts["cloudOfflineBanner"]
+        XCTAssertTrue(banner.waitUntilExists(timeout: uiTestWait))
+        XCTAssertTrue(banner.label.contains("offline."))
+        XCTAssertTrue(banner.label.contains("Your closet still works on this iPhone."))
+        keepScreenshot("5-offline-banner")
+
+        // The state is a hint only: with the fake backend reachable, a call still goes through, and
+        // when the connection drops in the middle of it, it is tried again.
+        let status = app.staticTexts["gatewayLab.status"]
+        let message = app.staticTexts["gatewayLab.message"]
+        app.buttons["gatewayLab.signIn"].tap()  // tap-unconfirmed: the next line waits for the status
+        XCTAssertTrue(status.waitUntilLabel(contains: "Signed in as usr_", timeout: uiTestWait))
+        choose("connectionLost", in: app)
+        whoAmI(app)
+        XCTAssertTrue(message.waitUntilLabel(contains: "The backend says you're usr_", timeout: uiTestWait))
+        let lastCall = app.descendants(matching: .any)["gatewayLab.lastCall"]
+        XCTAssertTrue(lastCall.waitUntilLabel(contains: "connection lost, retrying", timeout: uiTestWait))
+        XCTAssertTrue(lastCall.label.contains("← me 200"))
+        keepScreenshot("6-connection-lost-then-retried", showing: message)
+    }
+
     @MainActor
     private func choose(_ mode: String, in app: XCUIApplication) {
         // The list builds rows as they scroll in, so a mode further down may not exist yet.

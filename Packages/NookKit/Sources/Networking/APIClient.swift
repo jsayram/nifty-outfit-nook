@@ -48,13 +48,37 @@ public enum APIEvent: Sendable, Equatable {
     case received(endpoint: String, status: Int, code: String?)
     case refreshedToken(endpoint: String)
     case retrying(endpoint: String, after: Duration, reason: String)
+    /// A fresh token was still refused, or couldn't be had: the session is over and was ended on
+    /// this phone (26).
+    case sessionEnded(endpoint: String)
     case failed(endpoint: String, failure: APIFailure)
 }
 
-/// Bounded retries (SECURITY_STANDARD 4: every request has a timeout, cancellation and bounded
-/// retries). Phase 26 tunes these against the real backend.
+/// How long one call may take: each try, and all tries and waits together.
+public struct EndpointTiming: Sendable, Equatable {
+    /// One try. A hard limit, not just an idle one: a server that trickles bytes is cut off too.
+    public var attemptTimeout: Duration
+    /// Every try and every wait between them (PRD 11.7: 30 seconds unless the endpoint says more).
+    public var deadline: Duration
+
+    public init(attemptTimeout: Duration, deadline: Duration) {
+        self.attemptTimeout = attemptTimeout
+        self.deadline = deadline
+    }
+}
+
+/// Timeouts, deadlines and bounded retries (SECURITY_STANDARD 4: every request has a timeout,
+/// cancellation and bounded retries; PRD 11.7: a declared overall deadline, bounded attempts).
+/// The rules, in `docs/network-resilience.md`:
+/// - A try is cut off after `requestTimeout` (10 s), and a call after `overallDeadline` (30 s),
+///   whichever endpoint timing the call uses. A paid text request has longer ones, and a try-on
+///   picture the aggregate bound PRD 9.2.4 proposes, since its tries are short polls.
+/// - Only requests that are safe to repeat are retried, and only after a timeout, a connection
+///   lost on the way, a 5xx, a 429/503 with a short Retry-After, or "still running".
+/// - Backoff doubles from `baseDelay` up to `maxDelay`, with up to a quarter added at random.
 public struct RetryPolicy: Sendable, Equatable {
-    /// Tries per call, the first one included. A refreshed token after a 401 doesn't count.
+    /// Tries per call, the first one included. A refreshed token after a 401 doesn't count, and
+    /// neither do polls of an action that is still running (the deadline bounds those).
     public var maxAttempts: Int
     /// Backoff before the second try; doubles each time, up to `maxDelay`.
     public var baseDelay: Duration
@@ -62,21 +86,45 @@ public struct RetryPolicy: Sendable, Equatable {
     /// A 429 or 503 whose Retry-After is this short is waited out and retried; a longer one is
     /// handed to the screen, which says when to try again.
     public var longestRetryAfterToWait: Duration
-    /// Each try's timeout.
+    /// Each try's timeout, for endpoints without a timing of their own.
     public var requestTimeout: Duration
+    /// All tries and waits of one call, for endpoints without a timing of their own.
+    public var overallDeadline: Duration
+    /// Timings by endpoint ID, for the endpoints that need longer.
+    public var timingOverrides: [String: EndpointTiming]
+
+    /// The timings that differ from the default. A paid text request waits for the server's own
+    /// 30 second deadline and a little more; a try-on picture gets the 360 seconds PRD 9.2.4
+    /// proposes for a parent job (33a confirms it), each try being a short call.
+    public static let defaultTimingOverrides: [String: EndpointTiming] = [
+        APIV1.style.id: EndpointTiming(attemptTimeout: .seconds(40), deadline: .seconds(45)),
+        APIV1.tryOn.id: EndpointTiming(attemptTimeout: .seconds(30), deadline: .seconds(360)),
+    ]
 
     public init(
         maxAttempts: Int = 3, baseDelay: Duration = .milliseconds(400), maxDelay: Duration = .seconds(4),
-        longestRetryAfterToWait: Duration = .seconds(3), requestTimeout: Duration = .seconds(15)
+        longestRetryAfterToWait: Duration = .seconds(3), requestTimeout: Duration = .seconds(10),
+        overallDeadline: Duration = .seconds(30), timingOverrides: [String: EndpointTiming]? = nil
     ) {
         self.maxAttempts = maxAttempts
         self.baseDelay = baseDelay
         self.maxDelay = maxDelay
         self.longestRetryAfterToWait = longestRetryAfterToWait
         self.requestTimeout = requestTimeout
+        self.overallDeadline = overallDeadline
+        self.timingOverrides = timingOverrides ?? Self.defaultTimingOverrides
     }
 
     public static let standard = RetryPolicy()
+
+    public func timing(for endpoint: APIV1.Endpoint) -> EndpointTiming {
+        timingOverrides[endpoint.id] ?? EndpointTiming(attemptTimeout: requestTimeout, deadline: overallDeadline)
+    }
+
+    /// The longest any call can take, for the session's own resource limit.
+    var longestDeadline: Duration {
+        timingOverrides.values.reduce(overallDeadline) { max($0, $1.deadline) }
+    }
 }
 
 /// Sends contract requests to the backend over `URLSession`: the bearer token, one token refresh
@@ -107,8 +155,10 @@ public final class APIClient: Sendable {
     /// A session for the backend: nothing cached or stored on disk, no cookies, TLS 1.2 or later.
     public static func makeSession(policy: RetryPolicy = .standard, protocolClasses: [AnyClass] = []) -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = policy.requestTimeout.seconds
-        configuration.timeoutIntervalForResource = policy.requestTimeout.seconds * Double(policy.maxAttempts) + 10
+        // The client sets each request's own timeout and cuts it off at the deadline, so these two
+        // only have to be no shorter than the longest of those.
+        configuration.timeoutIntervalForRequest = policy.longestDeadline.seconds
+        configuration.timeoutIntervalForResource = policy.longestDeadline.seconds + 10
         configuration.waitsForConnectivity = false
         configuration.urlCache = nil
         configuration.httpCookieStorage = nil
@@ -149,15 +199,23 @@ public final class APIClient: Sendable {
             payload = nil
         }
 
+        let timing = policy.timing(for: endpoint)
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: timing.deadline)
+        /// Whether a wait of `delay` and then another try can still finish before the deadline.
+        func fits(_ delay: Duration) -> Bool { clock.now.advanced(by: delay) < deadline }
+
         var attempt = 0
+        var sends = 0
         var refreshedToken = false
         var forceRefresh = false
         while true {
             if Task.isCancelled { throw fail(endpoint, .cancelled) }
+            if clock.now >= deadline { throw fail(endpoint, .timedOut) }
             attempt += 1
+            sends += 1
             var request = URLRequest(url: baseURL.appending(path: endpoint.path))
             request.httpMethod = endpoint.method
-            request.timeoutInterval = policy.requestTimeout.seconds
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             if let payload {
                 request.httpBody = payload
@@ -168,7 +226,18 @@ public final class APIClient: Sendable {
                     let token = try await auth.token(forceRefresh: forceRefresh)
                     request.setValue("Bearer \(token.value)", forHTTPHeaderField: "Authorization")
                 } catch {
-                    throw fail(endpoint, error == .offline ? .offline : .signedOut)
+                    switch error {
+                    case .offline:
+                        throw fail(endpoint, .offline)
+                    case .signedOut, .cancelled:
+                        throw fail(endpoint, .signedOut)
+                    case .failed:
+                        // A fresh token that can't be had means the session is over. Any other
+                        // hiccup in the sign-in service is the service's, not hers.
+                        guard forceRefresh else { throw fail(endpoint, .unavailable(retryAfterSeconds: nil)) }
+                        await endSession(endpoint)
+                        throw fail(endpoint, .signedOut)
+                    }
                 }
                 forceRefresh = false
             }
@@ -185,17 +254,29 @@ public final class APIClient: Sendable {
                     for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
                 }
             }
+            // This try gets its full timeout, or what is left of the call's deadline.
+            let allowed = min(timing.attemptTimeout, clock.now.duration(to: deadline))
+            request.timeoutInterval = allowed.seconds
 
-            onEvent(.sent(endpoint: endpoint.id, attempt: attempt))
+            onEvent(.sent(endpoint: endpoint.id, attempt: sends))
             let data: Data
             let response: URLResponse
             do {
-                (data, response) = try await session.data(for: request)
+                (data, response) = try await fetch(request, within: allowed)
             } catch let error as URLError {
                 let failure = Self.failure(for: error)
-                if failure == .timedOut, endpoint.idempotent, attempt < policy.maxAttempts {
-                    try await wait(backoff(attempt), endpoint, reason: "timed out")
-                    continue
+                // A try that timed out, or whose connection dropped on the way, may or may not
+                // have reached the server. A request that is safe to repeat (every paid one
+                // carries its Idempotency-Key) is tried again, a bounded number of times. Having
+                // no connection at all (`notConnectedToInternet`) is not retried: nothing was sent.
+                let mayHaveBeenSent = failure == .timedOut || error.code == .networkConnectionLost
+                if mayHaveBeenSent, endpoint.idempotent, attempt < policy.maxAttempts {
+                    let delay = backoff(attempt)
+                    if fits(delay) {
+                        try await wait(
+                            delay, endpoint, reason: failure == .timedOut ? "timed out" : "connection lost")
+                        continue
+                    }
                 }
                 throw fail(endpoint, failure)
             } catch {
@@ -215,8 +296,12 @@ public final class APIClient: Sendable {
                 return decoded
             case 401:
                 // An expired or refused token: get a fresh one and try once more. A second 401
-                // means the session itself is gone.
-                guard endpoint.requiresAuth, !refreshedToken else { throw fail(endpoint, .signedOut) }
+                // means the session itself is gone, so it is ended here and she signs in again.
+                guard endpoint.requiresAuth else { throw fail(endpoint, .signedOut) }
+                guard !refreshedToken else {
+                    await endSession(endpoint)
+                    throw fail(endpoint, .signedOut)
+                }
                 refreshedToken = true
                 forceRefresh = true
                 attempt -= 1
@@ -229,10 +314,14 @@ public final class APIClient: Sendable {
             case 409 where envelope?.error.code == APIV1.ErrorCode.idempotencyConflict.rawValue:
                 throw fail(endpoint, .idempotencyConflict)
             case 409:
-                // action_in_progress: the same key is safe to send again once it has finished.
+                // action_in_progress: the job is still running, or its outcome is being checked.
+                // Asking again with the same key is safe, and it isn't a failed try, so it is
+                // polled every Retry-After (1 to 10 seconds) until the deadline.
                 let retryAfter = Self.retryAfter(http, envelope) ?? 2
-                if Duration.seconds(retryAfter) <= policy.longestRetryAfterToWait, attempt < policy.maxAttempts {
-                    try await wait(.seconds(retryAfter), endpoint, reason: "still running, Retry-After \(retryAfter)s")
+                let delay = Duration.seconds(min(max(retryAfter, 1), 10))
+                if fits(delay) {
+                    attempt -= 1
+                    try await wait(delay, endpoint, reason: "still running, asking again")
                     continue
                 }
                 throw fail(endpoint, .actionInProgress(retryAfterSeconds: retryAfter))
@@ -254,12 +343,21 @@ public final class APIClient: Sendable {
             case 410:
                 throw fail(endpoint, .updateRequired)
             case 429, 503:
+                // Retry-After is a promise not to be asked sooner, so a short one is waited out
+                // exactly, and a long one goes to the screen. A 503 without one gets the same
+                // backoff as a 5xx, for requests that are safe to repeat.
                 let retryAfter = Self.retryAfter(http, envelope)
-                if let retryAfter, Duration.seconds(retryAfter) <= policy.longestRetryAfterToWait,
-                    attempt < policy.maxAttempts
-                {
-                    try await wait(.seconds(retryAfter), endpoint, reason: "Retry-After \(retryAfter)s")
+                let delay = retryAfter.map { Duration.seconds($0) }
+                if let delay, delay <= policy.longestRetryAfterToWait, attempt < policy.maxAttempts, fits(delay) {
+                    try await wait(delay, endpoint, reason: "Retry-After \(retryAfter ?? 0)s")
                     continue
+                }
+                if http.statusCode == 503, retryAfter == nil, endpoint.idempotent, attempt < policy.maxAttempts {
+                    let pause = backoff(attempt)
+                    if fits(pause) {
+                        try await wait(pause, endpoint, reason: "unavailable, no Retry-After")
+                        continue
+                    }
                 }
                 if http.statusCode == 429 {
                     throw fail(endpoint, .rateLimited(retryAfterSeconds: retryAfter ?? 60))
@@ -267,8 +365,11 @@ public final class APIClient: Sendable {
                 throw fail(endpoint, .unavailable(retryAfterSeconds: retryAfter))
             case 500..<600:
                 if endpoint.idempotent, attempt < policy.maxAttempts {
-                    try await wait(backoff(attempt), endpoint, reason: "server error \(http.statusCode)")
-                    continue
+                    let delay = backoff(attempt)
+                    if fits(delay) {
+                        try await wait(delay, endpoint, reason: "server error \(http.statusCode)")
+                        continue
+                    }
                 }
                 throw fail(endpoint, .serverError)
             default:
@@ -283,6 +384,42 @@ public final class APIClient: Sendable {
         onEvent(.failed(endpoint: endpoint.id, failure: failure))
         Self.logger.info("\(endpoint.id, privacy: .public) failed: \(String(describing: failure), privacy: .public)")
         return failure
+    }
+
+    /// A response, or an error. `URLResponse` is immutable, so handing it between tasks is safe.
+    private struct Fetched: @unchecked Sendable {
+        var data: Data
+        var response: URLResponse
+    }
+
+    /// One try, cut off after `limit` however the server is behaving: a request that is racing a
+    /// timer inside a task group, so nothing is left running when it ends (and she leaving the
+    /// screen cancels both). `URLRequest.timeoutInterval` alone only limits silence, not a slow
+    /// trickle.
+    private func fetch(_ request: URLRequest, within limit: Duration) async throws -> (Data, URLResponse) {
+        let session = session
+        let fetched = try await withThrowingTaskGroup(of: Fetched?.self) { group in
+            group.addTask {
+                let (data, response) = try await session.data(for: request)
+                return Fetched(data: data, response: response)
+            }
+            group.addTask {
+                try await Task.sleep(for: limit)
+                return nil
+            }
+            defer { group.cancelAll() }
+            guard let first = try await group.next() else { throw URLError(.timedOut) }
+            guard let fetched = first else { throw URLError(.timedOut) }
+            return fetched
+        }
+        return (fetched.data, fetched.response)
+    }
+
+    /// Ends the session on this phone after a fresh token was refused: she is asked to sign in
+    /// again, and nothing in her closet changes.
+    private func endSession(_ endpoint: APIV1.Endpoint) async {
+        await auth.signOut()
+        onEvent(.sessionEnded(endpoint: endpoint.id))
     }
 
     private func wait(_ delay: Duration, _ endpoint: APIV1.Endpoint, reason: String) async throws(APIFailure) {
@@ -302,9 +439,12 @@ public final class APIClient: Sendable {
         return capped + capped * Double.random(in: 0...0.25)
     }
 
-    static func retryAfter(_ response: HTTPURLResponse, _ envelope: APIV1.ErrorEnvelope?) -> Int? {
-        if let header = response.value(forHTTPHeaderField: "Retry-After"), let seconds = Int(header), seconds >= 0 {
-            return seconds
+    /// Retry-After as whole seconds, from either form HTTP allows: a number of seconds, or a date
+    /// (RFC 9110 section 10.2.3). A date in the past means now. Anything else is ignored.
+    static func retryAfter(_ response: HTTPURLResponse, _ envelope: APIV1.ErrorEnvelope?, now: Date = Date()) -> Int? {
+        if let header = response.value(forHTTPHeaderField: "Retry-After")?.trimmingCharacters(in: .whitespaces) {
+            if let seconds = Int(header), seconds >= 0 { return seconds }
+            if let date = HTTPDate.parse(header) { return max(0, Int(date.timeIntervalSince(now).rounded(.up))) }
         }
         return envelope?.error.retryAfterSeconds
     }
@@ -335,6 +475,8 @@ extension APIEvent {
     /// One line for the debug gateway screen. Names the endpoint and status, never a token.
     public var summary: String {
         switch self {
+        case .sessionEnded(let endpoint):
+            "✕ \(endpoint): signed out, the session is over"
         case .sent(let endpoint, let attempt):
             attempt == 1 ? "→ \(endpoint)" : "→ \(endpoint) (try \(attempt))"
         case .received(let endpoint, let status, let code):
@@ -346,5 +488,16 @@ extension APIEvent {
         case .failed(let endpoint, let failure):
             "✕ \(endpoint): \(failure)"
         }
+    }
+}
+
+/// The date form of Retry-After: "Wed, 21 Oct 2026 07:28:00 GMT".
+enum HTTPDate {
+    static func parse(_ text: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "GMT")
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
+        return formatter.date(from: text)
     }
 }
