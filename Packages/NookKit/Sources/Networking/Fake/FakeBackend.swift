@@ -9,6 +9,9 @@ public enum FakeBackendMode: Sendable, Hashable {
     case slow(seconds: Double)
     /// Never answers, so the request times out.
     case timeout
+    /// Answers, but one byte every 100 ms: never silent for long, and never done. Only a hard
+    /// limit on the whole try ends it (26).
+    case trickle
     /// Refuses the next token it sees as expired (and keeps refusing that one), like a token that
     /// expired on the way. A fresh token works.
     case expiredToken
@@ -27,6 +30,12 @@ public enum FakeBackendMode: Sendable, Hashable {
     /// Does the work, then the answer never arrives (a timeout), like a dropped connection after
     /// the server finished. The client's retry with the same Idempotency-Key gets it back (24b).
     case answerLost
+    /// Does the work, then the connection drops before the answer arrives (`networkConnectionLost`),
+    /// like a phone leaving Wi-Fi mid-request. Retrying with the same key gets the answer back (26).
+    case connectionLost
+    /// Paid endpoints answer 409 action_in_progress with Retry-After: the job is still running,
+    /// or its outcome is being checked (26).
+    case actionInProgress(retryAfterSeconds: Int)
     /// Paid endpoints refuse every App Attest assertion with 403 attestation_required (24b).
     case attestationRejected
 }
@@ -34,6 +43,7 @@ public enum FakeBackendMode: Sendable, Hashable {
 /// What the fake answers one request with.
 enum FakeReply: Sendable {
     case respond(status: Int, headers: [String: String], body: Data, delay: Duration)
+    case trickle(status: Int, headers: [String: String], body: Data)
     case fail(URLError.Code, delay: Duration)
     case hang
 }
@@ -114,11 +124,19 @@ public final class FakeBackend: Sendable {
         case .unavailable(let seconds): return error(.unavailable, id, retryAfter: seconds)
         case .forbidden where endpoint?.requiresAuth == true: return error(.forbidden, id)
         case .attestationRejected where endpoint?.paid == true: return error(.attestationRequired, id)
-        case .normal, .slow, .expiredToken, .forbidden, .answerLost, .attestationRejected: break
+        case .actionInProgress(let seconds) where endpoint?.paid == true:
+            return error(.actionInProgress, id, retryAfter: seconds)
+        case .normal, .slow, .trickle, .expiredToken, .forbidden, .answerLost, .connectionLost, .attestationRejected,
+            .actionInProgress:
+            break
         }
 
         let answer = route(request, body: body, endpoint: endpoint, id: id, refuseNextToken: mode == .expiredToken)
         if mode == .answerLost { return .fail(.timedOut, delay: .milliseconds(80)) }
+        if mode == .connectionLost { return .fail(.networkConnectionLost, delay: .milliseconds(80)) }
+        if mode == .trickle, case .respond(let status, let headers, let body, _) = answer {
+            return .trickle(status: status, headers: headers, body: body)
+        }
         if case .slow(let seconds) = mode, case .respond(let status, let headers, let body, _) = answer {
             return .respond(status: status, headers: headers, body: body, delay: .seconds(seconds))
         }

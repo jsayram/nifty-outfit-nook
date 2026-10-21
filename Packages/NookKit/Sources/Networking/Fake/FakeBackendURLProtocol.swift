@@ -45,7 +45,7 @@ public final class FakeBackendURLProtocol: URLProtocol, @unchecked Sendable {
         let task = Task.detached {
             switch reply {
             case .hang:
-                // Never answers: URLSession's own timeout ends the request.
+                // Never answers: the client's timeout ends the request.
                 return
             case .fail(let code, let delay):
                 guard (try? await Task.sleep(for: delay)) != nil else { return }
@@ -53,6 +53,13 @@ public final class FakeBackendURLProtocol: URLProtocol, @unchecked Sendable {
             case .respond(let status, let headers, let body, let delay):
                 guard (try? await Task.sleep(for: delay)) != nil else { return }
                 loader.respond(status: status, headers: headers, body: body)
+            case .trickle(let status, let headers, let body):
+                loader.begin(status: status, headers: headers)
+                for byte in body {
+                    guard (try? await Task.sleep(for: .milliseconds(100))) != nil else { return }
+                    loader.load(Data([byte]))
+                }
+                loader.finish()
             }
         }
         work.withLock { $0 = task }
@@ -72,6 +79,22 @@ public final class FakeBackendURLProtocol: URLProtocol, @unchecked Sendable {
 
         func fail(_ error: URLError) {
             `protocol`.client?.urlProtocol(`protocol`, didFailWithError: error)
+        }
+
+        func begin(status: Int, headers: [String: String]) {
+            guard let url = `protocol`.request.url,
+                let response = HTTPURLResponse(
+                    url: url, statusCode: status, httpVersion: "HTTP/1.1", headerFields: headers)
+            else { return }
+            `protocol`.client?.urlProtocol(`protocol`, didReceive: response, cacheStoragePolicy: .notAllowed)
+        }
+
+        func load(_ data: Data) {
+            `protocol`.client?.urlProtocol(`protocol`, didLoad: data)
+        }
+
+        func finish() {
+            `protocol`.client?.urlProtocolDidFinishLoading(`protocol`)
         }
 
         func respond(status: Int, headers: [String: String], body: Data) {

@@ -65,21 +65,10 @@ nonisolated public enum CloudLimitText {
             return String(
                 localized: "That didn't finish. Try again in a minute. It won't be counted twice.", bundle: .module,
                 comment: "Cloud limit: the cloud job failed or its result is still being checked")
-        case .account(.offline):
-            return String(
-                localized: "You're offline. Your closet still works on this iPhone.", bundle: .module,
-                comment: "Cloud action: no connection")
-        case .account(.signedOut), .account(.cancelled):
-            return String(
-                localized: "Sign in to use cloud styling.", bundle: .module, comment: "Cloud action: signed out")
-        case .account(.updateRequired):
-            return String(
-                localized: "Update the app to keep using cloud styling.", bundle: .module,
-                comment: "Cloud action: this app version is too old for the server")
-        case .account:
-            return String(
-                localized: "Something went wrong. Try again later.", bundle: .module,
-                comment: "Cloud action: any other failure")
+        case .account(let problem):
+            // A cancelled call has no words and is never shown; an empty string is what a screen
+            // that shows it by mistake gets.
+            return CloudProblemText.message(for: problem) ?? ""
         case .needsConsent:
             return StylistConsentText.needsConsent
         }

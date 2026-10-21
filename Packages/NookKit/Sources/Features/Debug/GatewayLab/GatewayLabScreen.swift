@@ -10,6 +10,7 @@
     /// design.
     public struct GatewayLabScreen: View {
         @State private var model: GatewayLabModel
+        @Environment(\.connection) private var connection
 
         public init(account: any AccountService, controls: GatewayLabControls?, log: GatewayLabLog) {
             _model = State(initialValue: GatewayLabModel(account: account, controls: controls, log: log))
@@ -18,6 +19,14 @@
         public var body: some View {
             NavigationStack {
                 List {
+                    // Phase 26: where the cloud is needed, an offline banner says so and what still works.
+                    if connection.isOffline {
+                        Section {
+                            CloudOfflineBanner(retry: { Task { await model.whoAmI() } })
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                        }
+                    }
                     accountSection
                     if let message = model.message { resultSection(message) }
                     if let controls = model.controls { modesSection(controls) }
