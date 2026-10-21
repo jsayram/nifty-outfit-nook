@@ -27,7 +27,7 @@ final class PhotoClosetScrollTests: XCTestCase {
         let closet = app.tabBars.firstMatch.buttons["Closet"]
         // Seeding the closet on the first launch takes a few minutes.
         XCTAssertTrue(closet.waitForExistence(timeout: 1_800))
-        closet.tap()
+        closet.tapUntilSelected(timeout: uiTestWait)
         // The app scrolls on its own now; asking about the screen would disturb it.
         sleep(55)
     }
