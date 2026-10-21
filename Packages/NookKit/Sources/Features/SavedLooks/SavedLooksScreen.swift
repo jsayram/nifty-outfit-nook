@@ -362,7 +362,7 @@ struct SavedLooksScreen: View {
     /// Remove from closet on a look's piece: back to the look, with Undo (LR-16.1). The look now
     /// shows the piece faded with Swap it.
     private func pieceRemoved(_ removal: GarmentRemoval) {
-        if case .closet(.garment(let id, _)) = path.last, id == removal.garmentID {
+        if case .closet(.garment(let id, _, _)) = path.last, id == removal.garmentID {
             path.removeLast()
         }
         let closet = services.closet

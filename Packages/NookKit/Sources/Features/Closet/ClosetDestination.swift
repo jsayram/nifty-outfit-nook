@@ -5,7 +5,9 @@ import Models
 /// same screens from a look's piece. `ClosetDestinationScreen` draws them for both tabs.
 nonisolated enum ClosetDestination: Hashable, Sendable {
     /// Garment detail (Phase 7a). Carries the name so the title shows before the piece loads.
-    case garment(Garment.ID, name: String)
+    /// `remembering` is set when she opened it from Closet's Possible matches: the words she
+    /// searched for, which the detail offers to keep as another name (PRD §7.6).
+    case garment(Garment.ID, name: String, remembering: String? = nil)
     /// Add a piece (Phase 7b), from a photo or in words, or carrying on with a draft.
     case addPiece(AddPieceStart)
     /// Edit a piece (Phase 7b), from garment detail, or carrying on with a draft from Closet.
@@ -40,7 +42,7 @@ nonisolated enum ClosetDestination: Hashable, Sendable {
 
     var title: String {
         switch self {
-        case .garment(_, let name): name
+        case .garment(_, let name, _): name
         case .addPiece: String(localized: "Add a piece", bundle: .module, comment: "Screen title")
         case .editPiece: String(localized: "Edit piece", bundle: .module, comment: "Screen title")
         case .suitcases: String(localized: "Suitcases", bundle: .module, comment: "Screen title")

@@ -314,6 +314,17 @@
         }
       }
     },
+    "%lld of %lld words" : {
+      "comment" : "Under a possible match in Closet: how many of the typed words the piece has, as in 2 of 3 words",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld words"
+          }
+        }
+      }
+    },
     "%lld on" : {
       "comment" : "How many filters are on, spoken on Show filters",
       "localizations" : {
@@ -626,6 +637,17 @@
     },
     "2 weeks" : {
       "comment" : "Repeat setting value (LR-10)"
+    },
+    "a an the my your her with and or of for in on to that this some" : {
+      "comment" : "Filler words that Closet's possible matches ignore, separated by spaces. Translate as a list of common short words in your language, not word for word.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a an the my your her with and or of for in on to that this some"
+          }
+        }
+      }
     },
     "A bag" : {
       "comment" : "What a look needs"
@@ -986,6 +1008,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adds pieces, looks and suitcases you don’t have here. Nothing here is removed or changed; where a piece differs, this iPhone’s version stays."
+          }
+        }
+      }
+    },
+    "Adds these words to %@’s other names." : {
+      "comment" : "Hint on Remember, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds these words to %@’s other names."
           }
         }
       }
@@ -2895,6 +2928,17 @@
         }
       }
     },
+    "Has %@. Not recorded: %@" : {
+      "comment" : "Spoken on a possible match in Closet: the typed words it has, then the ones it doesn't",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has %@. Not recorded: %@"
+          }
+        }
+      }
+    },
     "Hasn’t arrived yet" : {
       "comment" : "Style Me: bought, not arrived"
     },
@@ -3461,6 +3505,17 @@
     },
     "Keep photo" : {
       "comment" : "Try-on photo sheet button"
+    },
+    "Keep these words as another name for %@, so the same search finds it next time." : {
+      "comment" : "Remember this name card, with the piece's name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep these words as another name for %@, so the same search finds it next time."
+          }
+        }
+      }
     },
     "Keep this on one line." : {
       "comment" : "Add a piece: a one-line field has a line break in it",
@@ -4428,6 +4483,17 @@
     "None" : {
       "comment" : "Style Me: no starting piece"
     },
+    "None of them has %@." : {
+      "comment" : "Closet: after the line under Possible matches, the typed words no possible match has, as in None of them has “party”.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of them has %@."
+          }
+        }
+      }
+    },
     "None of these" : {
       "comment" : "Add a piece: type chip when none of the listed types fits, or she'd rather not say",
       "localizations" : {
@@ -4502,7 +4568,7 @@
       }
     },
     "Not now" : {
-      "comment" : "Button: closes the laundry tracking sheet",
+      "comment" : "Button: closes a question without doing anything, as on the laundry tracking sheet and Remember this name",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4621,6 +4687,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing is erased"
+          }
+        }
+      }
+    },
+    "Nothing is kept." : {
+      "comment" : "Hint on Not now on the Remember this name card",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is kept."
           }
         }
       }
@@ -4884,6 +4961,17 @@
     },
     "Only the top changes. Everything else stays." : {
       "comment" : "Swap: under the buttons once she picked an option (FR-09)"
+    },
+    "Only these words are kept, on this piece. Your search isn’t saved." : {
+      "comment" : "Remember this name card: what Remember keeps",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only these words are kept, on this piece. Your search isn’t saved."
+          }
+        }
+      }
     },
     "Only when you ask" : {
       "comment" : "Try it on tour, step 2 title"
@@ -5171,6 +5259,17 @@
         }
       }
     },
+    "Other name" : {
+      "comment" : "Field on the Remember this name card",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other name"
+          }
+        }
+      }
+    },
     "Other names" : {
       "comment" : "Add a piece: field label, more names search finds the piece by",
       "localizations" : {
@@ -5377,6 +5476,28 @@
     "Policies" : {
       "comment" : "Privacy and terms: section header"
     },
+    "Possible match. Opens the piece." : {
+      "comment" : "Hint on a piece under Possible matches in Closet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Possible match. Opens the piece."
+          }
+        }
+      }
+    },
+    "Possible matches" : {
+      "comment" : "Closet: heading over pieces with some of the typed words",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Possible matches"
+          }
+        }
+      }
+    },
     "Preferences" : {
       "comment" : "Style Me row (LR-03)"
     },
@@ -5519,6 +5640,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Relaxed"
+          }
+        }
+      }
+    },
+    "Remember" : {
+      "comment" : "Button on the Remember this name card",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember"
+          }
+        }
+      }
+    },
+    "Remember this name?" : {
+      "comment" : "Heading of the Remember this name card",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember this name?"
+          }
+        }
+      }
+    },
+    "Remembered “%@”" : {
+      "comment" : "Toast after Remember this name, with the words kept",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remembered “%@”"
           }
         }
       }
@@ -7052,6 +7206,17 @@
     "These are your iPhone’s settings right now, and what the app does with each one." : {
       "comment" : "Accessibility tour, step 1"
     },
+    "These have some of your words, not all, so they might not be what you meant." : {
+      "comment" : "Closet: under the Possible matches heading",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These have some of your words, not all, so they might not be what you meant."
+          }
+        }
+      }
+    },
     "These looks are kept on this iPhone." : {
       "comment" : "Offline banner over results"
     },
@@ -7906,6 +8071,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "With no season picked, Style Me won’t suggest it."
+          }
+        }
+      }
+    },
+    "Words to remember" : {
+      "comment" : "Prompt in the Remember this name field when it's empty",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Words to remember"
           }
         }
       }

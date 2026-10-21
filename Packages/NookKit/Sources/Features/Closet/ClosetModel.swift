@@ -34,6 +34,11 @@ final class ClosetModel {
     private(set) var items: [ClosetItem] = []
     /// The pieces that match the search and filters, in the same order.
     private(set) var shown: [ClosetItem] = []
+    /// When nothing has every typed word, pieces that have some of them (PRD §7.6), with a note
+    /// saying which words aren't recorded on each. Closet itself only, not a picker.
+    private(set) var possible: [ClosetItem] = []
+    /// Typed words that no possible match has, for the line under them.
+    private(set) var missingEverywhere: [String] = []
     /// Her suitcases that aren't archived, by name, for the Suitcase filter (LR-11).
     private(set) var suitcases: [Suitcase] = []
     /// Laundry tracking (RD-11). Off: no Dirty chip, no badges, no Laundry entry.
@@ -238,17 +243,90 @@ final class ClosetModel {
     }
 
     private func refresh() {
+        possible = []
+        missingEverywhere = []
         guard filter.isActive else {
             shown = items
             return
         }
-        let categoryWords = Self.categoryWords
-        let colorWords = Self.colorWords
-        let matching = filter.apply(to: garments, suitcases: allSuitcases) { garment in
-            (categoryWords[garment.category] ?? []) + [garment.subKind?.title].compactMap { $0 }
-                + garment.colors.compactMap { colorWords[$0] }
-        }
+        let matching = filter.apply(to: garments, suitcases: allSuitcases, extraWords: Self.extraWords)
         shown = matching.compactMap { itemsByID[$0.id] }
+        guard shown.isEmpty, scope == nil else { return }
+        let matches = filter.possibleMatches(
+            in: garments, suitcases: allSuitcases, fillerWords: Self.fillerWords, extraWords: Self.extraWords)
+        possible = matches.compactMap { match in
+            itemsByID[match.garment.id].map {
+                $0.noting(Self.countNote(match), spoken: Self.spokenNote(match))
+            }
+        }
+        missingEverywhere =
+            matches.first.map { first in
+                first.missingWords.filter { word in matches.allSatisfy { $0.missingWords.contains(word) } }
+            } ?? []
+    }
+
+    /// The words a piece answers to besides its own text (`categoryWords`, `colorWords`).
+    private static func extraWords(_ garment: Garment) -> [String] {
+        (categoryWords[garment.category] ?? []) + [garment.subKind?.title].compactMap { $0 }
+            + garment.colors.compactMap { colorWords[$0] }
+    }
+
+    /// "2 of 3 words", under a possible match.
+    private static func countNote(_ match: PossibleMatch) -> String {
+        let found = match.matchedWords.count
+        let typed = found + match.missingWords.count
+        return String(
+            localized: "\(found) of \(typed) words", bundle: .module,
+            comment: "Under a possible match in Closet: how many of the typed words the piece has, as in 2 of 3 words")
+    }
+
+    /// "Has “navy” and “pants”. Not recorded: “party”", which VoiceOver reads for a possible match.
+    private static func spokenNote(_ match: PossibleMatch) -> String {
+        String(
+            localized: "Has \(quotedList(match.matchedWords)). Not recorded: \(quotedList(match.missingWords))",
+            bundle: .module,
+            comment: "Spoken on a possible match in Closet: the typed words it has, then the ones it doesn't")
+    }
+
+    /// “navy” and “pants”, or “party” or “cute”.
+    static func quotedList(_ words: [String], type: ListFormatStyle<StringStyle, [String]>.ListType = .and) -> String {
+        words.map {
+            String(localized: "“\($0)”", bundle: .module, comment: "Typed search, in quotes")
+        }
+        .formatted(.list(type: type))
+    }
+
+    /// The line under Possible matches: what they are, and any of her words none of them has.
+    var possibleMatchesNote: String {
+        let line = String(
+            localized: "These have some of your words, not all, so they might not be what you meant.",
+            bundle: .module, comment: "Closet: under the Possible matches heading")
+        guard !missingEverywhere.isEmpty else { return line }
+        let missing = Self.quotedList(missingEverywhere, type: .or)
+        let none = String(
+            localized: "None of them has \(missing).", bundle: .module,
+            comment:
+                "Closet: after the line under Possible matches, the typed words no possible match has, as in None of them has “party”."
+        )
+        return line + " " + none
+    }
+
+    /// Words that don't count for possible matches or Remember this name.
+    static var fillerWords: Set<String> {
+        let words = String(
+            localized: "a an the my your her with and or of for in on to that this some", bundle: .module,
+            comment:
+                "Filler words that Closet's possible matches ignore, separated by spaces. Translate as a list of common short words in your language, not word for word."
+        )
+        return Set(words.split(whereSeparator: \.isWhitespace).map(String.init))
+    }
+
+    /// What Remember this name offers for a piece opened from Possible matches: the typed words
+    /// without filler words, as she typed them. `nil` when there are no possible matches.
+    var rememberSuggestion: String? {
+        guard !possible.isEmpty else { return nil }
+        let words = filter.contentWords(ignoring: Self.fillerWords)
+        return words.isEmpty ? nil : words.joined(separator: " ")
     }
 
     /// The localized words a piece answers to in search besides its own text: its kind
