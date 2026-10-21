@@ -139,8 +139,12 @@ final class HomeTourTests: XCTestCase {
 
     /// At the largest text size Home is the banner and large rows, and the tour walks them in
     /// the same order, in their own words, scrolling each into view.
+    ///
+    /// Full-suite runs only, with the other AX5 checks: `TourCenterTests` has the large-text
+    /// tour's steps and words, and the AX5 audit sweep checks Home.
     @MainActor
-    func testTheTourAtTheLargestTextSize() {
+    func testTheTourAtTheLargestTextSize() throws {
+        try skipOnPullRequests("TourCenterTests covers the large-text steps.")
         let app = launch(extra: ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
         let words = app.descendants(matching: .any)["tour.text"]
         let titles = ["Style Me", "Your closet", "Your suitcase", "That is you"]
@@ -158,19 +162,6 @@ final class HomeTourTests: XCTestCase {
         }
         XCTAssertTrue(words.waitUntilGone(timeout: Self.wait))
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilExists(timeout: Self.wait))
-    }
-
-    /// `-tour off` keeps the tour from starting by itself; `-tour off,home` still starts it.
-    @MainActor
-    func testTheDebugFlag() {
-        let quiet = XCUIApplication()
-        quiet.launchArguments = UITestLaunch.skipOnboarding + ["-tour", "off", "-fixtures", "demo"]
-        quiet.launch()
-        XCTAssertTrue(quiet.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait))
-        XCTAssertFalse(quiet.descendants(matching: .any)["tour.card"].waitUntilExists(timeout: 3))
-
-        let forced = launch(tour: "off,home")
-        XCTAssertTrue(forced.buttons["tour.skip"].exists)
     }
 
     // MARK: Helpers

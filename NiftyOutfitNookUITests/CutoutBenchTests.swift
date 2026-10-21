@@ -2,8 +2,13 @@ import XCTest
 
 /// The debug cutout benchmark (`-cutout-bench`, Phase 8a). On the simulator Vision can't lift
 /// subjects, so each sample should say so plainly; on a device each one is measured.
+///
+/// Full-suite runs only: this is a developer screen, not something a user
+/// reaches, and on the simulator it only checks that nine drawn samples report "unsupported". The
+/// benchmark's logic is `CutoutBenchTests` in FeaturesTests and `CutoutFixtureTests`.
 final class CutoutBenchTests: XCTestCase {
-    override func setUp() {
+    override func setUpWithError() throws {
+        try skipOnPullRequests("A developer screen; its logic is package-tested.")
         continueAfterFailure = false
     }
 
