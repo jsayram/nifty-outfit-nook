@@ -189,7 +189,7 @@ The UI tests never start by themselves. A pull request that touches UI paths sti
 - The iPad layout logic tests (`WindowLayoutTests`, `RoomLayoutTests`, `RoomPlanTests`) are plain arithmetic and still run on every pull request.
 
 **Turning iPad testing back on:**
-1. In `.github/workflows/ci.yml`, delete the `exclude` under the `ui-tests` matrix (the `ui-ipad` part then runs whenever the UI tests do), and set the top-level `NOOK_IPAD_SNAPSHOTS` to `'1'` (the iPad snapshots then run in every package test run, and the iPad reference images get checked on each PR again). The `include_ipad` input can go.
+1. In `.github/workflows/ci.yml`, change the `ui-ipad` job's `if` to `needs.changes.outputs.ui == 'true'` (it then runs whenever the UI tests do), and change `NOOK_IPAD_SNAPSHOTS` in the package test step to `'1'` (the iPad snapshots then run in every package test run, and the iPad reference images get checked on each PR again). Keep `ui-ipad` in the `build-and-test` aggregator as it is. The `include_ipad` input and the `ipad` output of `changes` can go.
 2. Locally: `NOOK_IPAD_SNAPSHOTS=1 scripts/test.sh` for the snapshots, `NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests` for the UI tests. In Xcode, add `NOOK_IPAD_SNAPSHOTS` = `1` to the scheme's test environment variables.
 3. Remove this paragraph's "paused" wording here and in `AGENTS.md`.
 

@@ -51,9 +51,6 @@ env:
   # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
   # (workflow_dispatch) leaves it empty and runs every UI test.
   NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
-  # '1' only on a manual run with include_ipad ticked. The iPad snapshot tests in the package tests
-  # skip themselves otherwise (IPadSnapshots in Packages/NookKit/Tests/NookTestSupport).
-  NOOK_IPAD_SNAPSHOTS: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.include_ipad) == 'true' && '1' || '' }}
 
 jobs:
   swift-format:
@@ -86,6 +83,7 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
       ui: ${{ steps.filter.outputs.ui }}
       ui_paths: ${{ steps.filter.outputs.ui_paths }}
+      ipad: ${{ steps.filter.outputs.ipad }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -100,6 +98,10 @@ jobs:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
           LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          # "true" or "false" as text. A run started by `gh workflow run -f include_ipad=false`
+          # passes the text "false", which an expression would count as true, so it is compared
+          # here as text.
+          INCLUDE_IPAD: ${{ inputs.include_ipad }}
         run: |
           # Build and test everything unless a file list says less. The UI tests run on a manual
           # run (the batch), never on their own otherwise.
@@ -142,6 +144,11 @@ jobs:
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "ui=$ui" >> "$GITHUB_OUTPUT"
           echo "ui_paths=$ui_paths" >> "$GITHUB_OUTPUT"
+          # The paused iPad parts: only a manual run with include_ipad ticked.
+          ipad=false
+          if [[ "$EVENT" == "workflow_dispatch" && "$INCLUDE_IPAD" == "true" ]]; then ipad=true; fi
+          echo "iPad parts: $ipad"
+          echo "ipad=$ipad" >> "$GITHUB_OUTPUT"
 
   # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
   # only when every one of them passed.
@@ -169,7 +176,7 @@ jobs:
   # uploading the full plan's products (144 MB) for that part to download, and the iPad part
   # started its own tests about 8 minutes in. The package tests run on an iPhone simulator. The
   # iPad snapshot tests draw iPad-sized windows on it (no iPad simulator is involved), and skip
-  # themselves unless NOOK_IPAD_SNAPSHOTS is set (see `env` above).
+  # themselves unless NOOK_IPAD_SNAPSHOTS is set (see the package test step).
   build-and-archive:
     name: build-and-archive
     needs: changes
@@ -228,6 +235,9 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           NOOK_RESULT_BUNDLE: build/TestResults-package.xcresult
+          # '1' only on a manual run with include_ipad ticked. The iPad snapshot tests skip
+          # themselves otherwise (IPadSnapshots in Packages/NookKit/Tests/NookTestSupport).
+          NOOK_IPAD_SNAPSHOTS: ${{ needs.changes.outputs.ipad == 'true' && '1' || '' }}
           # Failed snapshots write the new image and a diff here (passed through to the simulator).
           TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ github.workspace }}/build/SnapshotArtifacts
         run: >-
@@ -245,10 +255,9 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # The other UI tests in three parts, by test class, on an iPhone simulator. A fourth part, the
-  # iPad layouts on an iPad simulator, exists but is paused: it runs only on a manual run with
-  # include_ipad ticked (iPad testing waits until the app's features are done; README.md,
-  # "Turning iPad testing back on").
+  # The other UI tests in three parts, by test class, on an iPhone simulator. The iPad layouts
+  # are paused: they are the separate `ui-ipad` job below, which runs only on a manual run with
+  # include_ipad ticked (iPad testing waits until the app's features are done).
   #
   # What runs when. These parts run only with the run-ui label on a pull request, or on a manual
   # run (the batch run on develop, scripts/run-ui-batch.sh); never by themselves (see `changes`).
@@ -291,14 +300,6 @@ jobs:
       # Let every part finish, so one failure doesn't hide another.
       fail-fast: false
       matrix:
-        # The parts are listed here, and `include` below gives each its simulator and tests. The
-        # `exclude` drops ui-ipad unless this is a manual run with include_ipad ticked. (Entries
-        # that only appear under `include` could not be excluded, which is why the names are here.)
-        # `format` because a run started with `gh workflow run -f include_ipad=false` passes the
-        # text "false", which a bare `inputs.include_ipad` would treat as true (22 October 2026).
-        part: [ui-audit-and-settings, ui-add-and-saved, ui-rest, ui-ipad]
-        exclude:
-          - part: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.include_ipad) == 'true' && 'none' || 'ui-ipad' }}
         include:
           - part: ui-audit-and-settings
             family: iPhone
@@ -350,14 +351,6 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
-          # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
-          # one of these skips itself on an iPhone. Paused: see the matrix's `exclude`.
-          - part: ui-ipad
-            family: iPad
-            selection: >-
-              -only-testing:NiftyOutfitNookUITests/IPadTests
-              -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
-              -only-testing:NiftyOutfitNookUITests/IPadKeyboardTests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -423,12 +416,93 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # The iPad UI tests (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. PAUSED: this
+  # job runs only on a manual run with include_ipad ticked (`changes` works that out). It is the
+  # `ui-tests` job above with one iPad part, kept as its own job so that a run without the box
+  # ticked doesn't start it at all. Every one of these tests skips itself on an iPhone. Keep its
+  # steps in line with `ui-tests`. To turn iPad back on, see "Turning iPad testing back on" in
+  # README.md.
+  ui-ipad:
+    name: ui-tests (ui-ipad)
+    needs: changes
+    if: needs.changes.outputs.ipad == 'true'
+    runs-on: xcode-27
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select Xcode and start booting the simulator
+        env:
+          NOOK_SIM_FAMILY: iPad
+        run: |
+          sudo xcode-select --switch "$XCODE_APP"
+          xcodebuild -version
+          echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
+          simulator="$(scripts/simulator.sh)"
+          echo "NOOK_SIM_ID=$simulator" >> "$GITHUB_ENV"
+          # In the background: the next steps wait for the build meanwhile. xcodebuild waits
+          # for the boot to finish, or boots the simulator itself if this failed.
+          xcrun simctl boot "$simulator" > "$RUNNER_TEMP/boot.log" 2>&1 &
+      - name: Wait for the build
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/wait-for-artifact.sh ui-test-products build-and-archive
+      - if: steps.build.outputs.ready == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ui-test-products
+          path: ${{ runner.temp }}
+      - name: Unpack the build, or build here if build-and-archive couldn't start
+        env:
+          READY: ${{ steps.build.outputs.ready }}
+        run: |
+          if [[ "$READY" == "true" ]]; then
+            mkdir -p build/Products
+            tar -xzf "$RUNNER_TEMP/ui-test-products.tgz" -C build/Products
+            echo "PRODUCTS_DIR=build/Products" >> "$GITHUB_ENV"
+          else
+            NOOK_BUILD_ONLY=1 NOOK_TEST_PLAN=UITests scripts/test.sh
+            # build-for-testing writes an .xctestrun for each of the scheme's test plans, and the
+            # test step expects exactly one. Keep the UI plan's.
+            rm -f build/DerivedData/Build/Products/NiftyOutfitNook_NiftyOutfitNook_*.xctestrun
+            echo "PRODUCTS_DIR=build/DerivedData/Build/Products" >> "$GITHUB_ENV"
+          fi
+      - name: Test (ui-ipad)
+        env:
+          SELECTION: >-
+            -only-testing:NiftyOutfitNookUITests/IPadTests
+            -only-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
+            -only-testing:NiftyOutfitNookUITests/IPadKeyboardTests
+        # SELECTION is a fixed list of xcodebuild flags, split on spaces on purpose.
+        #
+        # A failed UI test runs once more, here only. This is for the hosted runner, not for our
+        # tests: twice in about 25 runs (October 2026) a test was lost to the simulator failing to start the app
+        # ("Timed out while launching application via Xcode", "Failed to get launch progress"),
+        # which no wait in a test can catch. A test that fails twice still fails the job, and the
+        # first failure stays in the test results. Package tests and local runs never retry.
+        run: >-
+          NOOK_XCTESTRUN="$(ls "$PRODUCTS_DIR"/*.xctestrun)"
+          scripts/test.sh $SELECTION -retry-tests-on-failure -test-iterations 2
+      - name: Keep test results on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: TestResults-ui-ipad
+          path: build/TestResults.xcresult
+          retention-days: 7
+          if-no-files-found: ignore
+
   # The required check. It must run even when a job above fails or is cancelled (`always()`),
   # because GitHub counts a skipped required check as passed. When `changes` found a docs-only
   # pull request, the build and test jobs are skipped on purpose and this passes.
   build-and-test:
     name: build-and-test
-    needs: [changes, build-and-archive, ui-tests]
+    needs: [changes, build-and-archive, ui-tests, ui-ipad]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -440,16 +514,25 @@ jobs:
           UI: ${{ needs.changes.outputs.ui }}
           BUILD_AND_ARCHIVE: ${{ needs.build-and-archive.result }}
           UI_TESTS: ${{ needs.ui-tests.result }}
+          IPAD: ${{ needs.changes.outputs.ipad }}
+          UI_IPAD: ${{ needs.ui-ipad.result }}
         run: |
           echo "changes: $CHANGES (build and test: $CODE)"
           echo "build-and-archive: $BUILD_AND_ARCHIVE"
           echo "ui-tests: $UI_TESTS"
+          echo "ui-ipad: $UI_IPAD (iPad parts: $IPAD)"
           [[ "$CHANGES" == "success" ]] || exit 1
           if [[ "$CODE" == "false" ]]; then
             echo "Docs only: nothing to build or test."
             exit 0
           fi
           [[ "$BUILD_AND_ARCHIVE" == "success" ]] || exit 1
+          # The paused iPad job: skipped on purpose, unless this run asked for it.
+          if [[ "$IPAD" == "true" ]]; then
+            [[ "$UI_IPAD" == "success" ]] || exit 1
+          else
+            [[ "$UI_IPAD" == "skipped" ]] || exit 1
+          fi
           if [[ "$UI" == "false" ]]; then
             echo "The UI tests were skipped on purpose (no run-ui label, not a manual run)."
             [[ "$UI_TESTS" == "skipped" ]]
