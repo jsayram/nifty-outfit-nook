@@ -63,6 +63,10 @@ public struct NookServices: Sendable {
     public var feedback: any FeedbackService = UnavailableFeedbackService()
     /// Shrinks and cleans a screenshot she chooses for a note (Phase 24d).
     public var screenshots: any FeedbackScreenshotPreparing = UnavailableScreenshotPreparer()
+    /// 31: the phone's own crash, hang and speed reports from MetricKit, kept for 30 days. Only a
+    /// few numbers, and only shared on a note she approves. `nil` where nothing is collected: the
+    /// debug sample closet, previews and most tests. Delete my data clears it.
+    public var diagnostics: (any DiagnosticsReading)?
     /// The website's support page (Phase 24d), a placeholder address until the page is published.
     public var supportLinks = SupportLinks()
     /// 27a: her yes to the cloud stylist's provider. Erased by Delete my data.
@@ -103,7 +107,7 @@ public struct NookServices: Sendable {
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
                     onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
-                    aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads)
+                    aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads, diagnostics: diagnostics)
         }
         set { customDeletion = newValue }
     }

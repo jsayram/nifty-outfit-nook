@@ -9467,6 +9467,36 @@
     "Closet size: %lld pieces, %lld looks, %lld suitcases" : {
       "comment" : "Send feedback: a line of what's sent, three numbers and no names"
     },
+    "Crash and speed details, last %@ days:" : {
+      "comment" : "Send feedback: heading of the phone's crash and speed counts, with a number of days"
+    },
+    "Crashes: %@. Hangs: %@. Heavy processor use: %@. Heavy disk writing: %@." : {
+      "comment" : "Send feedback: four counts from the phone's reports"
+    },
+    "Ended by the system: %@ for memory, %@ for being too slow." : {
+      "comment" : "Send feedback: two counts from the phone's reports"
+    },
+    "Longest hang: %@ ms." : {
+      "comment" : "Send feedback: the longest time the app stopped answering, in milliseconds"
+    },
+    "Typical start-up: %@ ms." : {
+      "comment" : "Send feedback: the typical time to open the app, in milliseconds"
+    },
+    "Most memory used: %@ MB." : {
+      "comment" : "Send feedback: the most memory the app used, in megabytes"
+    },
+    "Crash type: %@, %@, %@ times." : {
+      "comment" : "Send feedback: one kind of crash, with fixed names and a count"
+    },
+    "Share crash and speed details" : {
+      "comment" : "Send feedback: the switch for the phone's crash and speed counts"
+    },
+    "Off unless you turn it on. Helps to find a problem that crashes or slows the app." : {
+      "comment" : "Send feedback: under the crash and speed switch"
+    },
+    "Counts and timings from your phone’s own reports. No screens, pieces, names or places." : {
+      "comment" : "Send feedback: under the crash and speed switch while it's on"
+    },
     "Screenshot: 1 picture, %@" : {
       "comment" : "Send feedback: a line of what's sent, with the picture's size like 143 KB"
     },

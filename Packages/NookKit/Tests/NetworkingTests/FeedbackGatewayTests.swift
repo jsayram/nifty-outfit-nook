@@ -49,13 +49,20 @@ struct FeedbackGatewayTests {
     static let details = FeedbackDiagnostics(
         appVersion: "0.1", build: "14", systemVersion: "26.5", deviceModel: "iPhone13,2")
 
+    static let health = DeviceHealthSummary(
+        windowDays: 14, crashes: 2, hangs: 1, cpuExceptions: 0, diskWriteExceptions: 0, memoryExits: 1,
+        watchdogExits: 0,
+        longestHangMs: 2400, launchMedianMs: 450, peakMemoryMB: 310,
+        crashKinds: [.init(exception: .badAccess, signal: .sigsegv, count: 2)])
+
     func note(
         _ message: String = "The hamper didn’t open Laundry.", details: Bool = false, reply: String? = nil,
-        counts: Bool = false, screenshot: Data? = nil
+        counts: Bool = false, health: Bool = false, screenshot: Data? = nil
     ) -> FeedbackNote {
         FeedbackNote(
             kind: .somethingWrong, message: message, diagnostics: details ? Self.details : nil, replyAddress: reply,
             closetCounts: counts ? FeedbackClosetCounts(pieces: 42, looks: 9, suitcases: 2) : nil,
+            deviceHealth: health ? Self.health : nil,
             screenshot: screenshot.map { FeedbackScreenshot(data: $0, pixelWidth: 390, pixelHeight: 844) })
     }
 
@@ -97,7 +104,7 @@ struct FeedbackGatewayTests {
         // Every value in the request is one of the note's sentValues (what the page lists before
         // she sends), or the kind, the note's random ID or the picture's type and bytes.
         let picture = DirtyPhoto.jpeg(metadata: false)
-        let full = note(details: true, reply: "lily@example.com", counts: true, screenshot: picture)
+        let full = note(details: true, reply: "lily@example.com", counts: true, health: true, screenshot: picture)
         let request = APIV1.FeedbackRequest(FeedbackSubmission(id: "sub_0123456789abcdef", note: full))
         let object = try #require(
             try JSONSerialization.jsonObject(with: APIV1.encoder().encode(request)) as? [String: Any])
@@ -105,6 +112,8 @@ struct FeedbackGatewayTests {
         func collect(_ value: Any, path: String) {
             if let dictionary = value as? [String: Any] {
                 for (key, child) in dictionary { collect(child, path: path + "/" + key) }
+            } else if let list = value as? [Any] {
+                for (index, child) in list.enumerated() { collect(child, path: path + "/\(index)") }
             } else {
                 leaves.append("\(path)=\(value)")
             }
@@ -119,13 +128,96 @@ struct FeedbackGatewayTests {
         // The top-level keys are the contract's, and nothing else.
         #expect(
             Set(object.keys)
-                == ["submissionId", "kind", "message", "replyTo", "diagnostics", "closetCounts", "attachment"])
+                == [
+                    "submissionId", "kind", "message", "replyTo", "diagnostics", "closetCounts", "deviceHealth",
+                    "attachment",
+                ])
         // Without the extras, none of those keys is there.
         let plain = APIV1.FeedbackRequest(FeedbackSubmission(id: "sub_0123456789abcdef", note: note()))
         let plainObject = try #require(
             try JSONSerialization.jsonObject(with: APIV1.encoder().encode(plain)) as? [String: Any])
         #expect(Set(plainObject.keys) == ["submissionId", "kind", "message"])
         #expect(try APIV1.encoder().encode(request).count < APIV1.sendFeedback.maxBodyBytes)
+    }
+
+    // MARK: Crash and speed details (31)
+
+    @Test func theApprovedSummaryReachesTheQueueAndNothingElseRidesAlong() async throws {
+        try await signIn()
+        _ = try await feedback.send(FeedbackSubmission(id: FeedbackSubmission.newID(), note: note(health: true)))
+        _ = try await feedback.send(FeedbackSubmission(id: FeedbackSubmission.newID(), note: note("Second")))
+        let tickets = backend.supportTickets
+        #expect(tickets[0].deviceHealth == Self.health)
+        #expect(tickets[1].deviceHealth == nil)
+        let report = try #require(
+            try JSONSerialization.jsonObject(with: backend.supportReport()) as? [String: Any])
+        #expect((report["last"] as? [String: Any])?["hasDeviceHealth"] as? Bool == false)
+    }
+
+    @Test func theSummaryHasOnlyNumbersAndFixedNames() throws {
+        let request = APIV1.FeedbackRequest(FeedbackSubmission(id: "sub_0123456789abcdef", note: note(health: true)))
+        let object = try #require(
+            try JSONSerialization.jsonObject(with: APIV1.encoder().encode(request)) as? [String: Any])
+        let health = try #require(object["deviceHealth"] as? [String: Any])
+        #expect(
+            Set(health.keys) == [
+                "windowDays", "crashes", "hangs", "cpuExceptions", "diskWriteExceptions", "memoryExits",
+                "watchdogExits",
+                "longestHangMs", "launchMedianMs", "peakMemoryMB", "crashKinds",
+            ])
+        for (name, value) in health where name != "crashKinds" { #expect(value is NSNumber, "\(name)") }
+        let kinds = try #require(health["crashKinds"] as? [[String: Any]])
+        #expect(Set(try #require(kinds.first).keys) == ["exception", "signal", "count"])
+        // Empty lists and unset timings are left out, not sent as zero.
+        let bare = APIV1.FeedbackRequest(
+            FeedbackSubmission(
+                id: "sub_0123456789abcdef",
+                note: FeedbackNote(
+                    kind: .idea, message: "Hi", deviceHealth: DeviceHealthSummary(windowDays: 3, crashes: 1))))
+        let bareObject = try #require(
+            try JSONSerialization.jsonObject(with: APIV1.encoder().encode(bare)) as? [String: Any])
+        let bareHealth = try #require(bareObject["deviceHealth"] as? [String: Any])
+        #expect(
+            bareHealth["crashKinds"] == nil && bareHealth["longestHangMs"] == nil && bareHealth["peakMemoryMB"] == nil)
+    }
+
+    @Test func theFakeRefusesAnythingTheContractWould() async throws {
+        try await signIn()
+        func send(_ health: [String: Any]) async throws -> Int {
+            let base: [String: Any] = [
+                "submissionId": FeedbackSubmission.newID(), "kind": "idea", "message": "Hi", "deviceHealth": health,
+            ]
+            return try await post(base)
+        }
+        let good: [String: Any] = [
+            "windowDays": 14, "crashes": 1, "hangs": 0, "cpuExceptions": 0, "diskWriteExceptions": 0, "memoryExits": 0,
+            "watchdogExits": 0,
+        ]
+        #expect(try await send(good) == 202)
+        #expect(try await send(good.merging(["stack": "0x1000 main"]) { $1 }) == 400)
+        #expect(try await send(good.merging(["terminationReason": "Namespace SIGNAL"]) { $1 }) == 400)
+        #expect(try await send(good.merging(["crashes": -1]) { $1 }) == 400)
+        #expect(try await send(good.merging(["crashes": 1.5]) { $1 }) == 400)
+        #expect(try await send(good.merging(["windowDays": 0]) { $1 }) == 400)
+        #expect(
+            try await send(
+                good.merging(["crashKinds": [["exception": "EXC_BAD_ACCESS in Foo", "signal": "sigsegv", "count": 1]]])
+                { $1 }) == 400)
+        #expect(try await send(["windowDays": 14]) == 400)
+        #expect(backend.supportTickets.count == 1)
+    }
+
+    /// Posts a body straight at the fake, as a client that wasn't this app would.
+    private func post(_ body: [String: Any]) async throws -> Int {
+        let session = APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self])
+        var request = URLRequest(url: backend.baseURL.appending(path: "v1/feedback"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(
+            "Bearer \(try await auth.token(forceRefresh: false).value)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (_, response) = try await session.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode ?? 0
     }
 
     // MARK: The screenshot

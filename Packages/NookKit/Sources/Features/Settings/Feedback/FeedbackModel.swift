@@ -17,6 +17,10 @@ import Observation
 ///   with the note's text and nothing else, so she picks where it goes (Messages, Mail). Support
 ///   has to work for everyone, so this stays.
 ///
+/// 31: when the phone has crash or speed reports of its own (Apple's MetricKit), a switch offers to
+/// share a short summary of them with the note: counts and timings, never a stack or a name. It is
+/// off for every note, it isn't kept in the draft, and she reads the summary on the page first.
+///
 /// Nothing about her is ever added: no closet contents, photos, measurements, looks or name. The
 /// app details are off until she turns them on, and they're lines she can read first.
 ///
@@ -72,6 +76,17 @@ final class FeedbackModel {
     }
     /// The three numbers `includesClosetCounts` adds, as shown.
     private(set) var closetCounts: FeedbackClosetCounts?
+    /// Off for every note (31). Turning it on reads the summary, which she sees on the page. Not
+    /// kept in the draft: she decides again for each note.
+    var includesDeviceHealth = false {
+        didSet {
+            if includesDeviceHealth { readDeviceHealth() } else { deviceHealth = nil }
+        }
+    }
+    /// The summary `includesDeviceHealth` adds, as shown.
+    private(set) var deviceHealth: DeviceHealthSummary?
+    /// True when the phone has something to share, so the switch shows. Read when the page opens.
+    private(set) var offersDeviceHealth = false
     /// The screenshot she chose, cleaned. In memory only: it isn't kept in the draft.
     private(set) var screenshot: FeedbackScreenshot?
     private(set) var isPreparingScreenshot = false
@@ -92,6 +107,8 @@ final class FeedbackModel {
     @ObservationIgnored private let service: any FeedbackService
     @ObservationIgnored private let screenshots: any FeedbackScreenshotPreparing
     @ObservationIgnored private let countCloset: (@Sendable () async -> FeedbackClosetCounts?)?
+    @ObservationIgnored private let readSummary: (@Sendable () async -> DeviceHealthSummary?)?
+    @ObservationIgnored private var healthTask: Task<Void, Never>?
     @ObservationIgnored private var sendTask: Task<Void, Never>?
     @ObservationIgnored private var countsTask: Task<Void, Never>?
     /// The last note tried and its ID. Sending the same note again uses the same ID, so a try
@@ -105,6 +122,7 @@ final class FeedbackModel {
         service: any FeedbackService = UnavailableFeedbackService(),
         screenshots: any FeedbackScreenshotPreparing = UnavailableScreenshotPreparer(),
         closetCounts: (@Sendable () async -> FeedbackClosetCounts?)? = nil,
+        deviceHealth: (@Sendable () async -> DeviceHealthSummary?)? = nil,
         announce: @escaping @MainActor (String) -> Void = { CloudProblemText.announce($0) }
     ) {
         self.diagnostics = diagnostics ?? .current
@@ -112,6 +130,7 @@ final class FeedbackModel {
         self.service = service
         self.screenshots = screenshots
         self.countCloset = closetCounts
+        self.readSummary = deviceHealth
         self.announce = announce
     }
 
@@ -121,6 +140,10 @@ final class FeedbackModel {
         let closet = services.closet
         let looks = services.looks
         let suitcases = services.suitcases
+        var health: (@Sendable () async -> DeviceHealthSummary?)?
+        if let diagnostics = services.diagnostics {
+            health = { await diagnostics.summary() }
+        }
         self.init(
             store: services.feedbackDrafts, service: services.feedback, screenshots: services.screenshots,
             closetCounts: {
@@ -128,7 +151,8 @@ final class FeedbackModel {
                     let cases = try? await suitcases.suitcases().count
                 else { return nil }
                 return FeedbackClosetCounts(pieces: pieces, looks: made, suitcases: cases)
-            })
+            },
+            deviceHealth: health)
     }
 
     /// Chooses the route: the support queue when she's signed in on a backend, the share sheet
@@ -136,6 +160,33 @@ final class FeedbackModel {
     func checkRoute() async {
         let canSend = await service.canSend()
         route = canSend ? .supportQueue : .shareSheet
+        // 31: the switch shows only on the support queue route, and only if there is something to share.
+        offersDeviceHealth = canSend ? await readSummary?() != nil : false
+        if !offersDeviceHealth { includesDeviceHealth = false }
+    }
+
+    private func readDeviceHealth() {
+        guard let readSummary else {
+            includesDeviceHealth = false
+            return
+        }
+        healthTask?.cancel()
+        healthTask = Task { [weak self] in
+            let summary = await readSummary()
+            guard !Task.isCancelled, let self, self.includesDeviceHealth else { return }
+            if let summary {
+                self.deviceHealth = summary
+            } else {
+                // Nothing to share any more (cleared since the page opened): the switch goes back
+                // off rather than being on with nothing to send.
+                self.includesDeviceHealth = false
+            }
+        }
+    }
+
+    /// Waits for the summary she asked for. For tests.
+    func finishReadingDeviceHealth() async {
+        await healthTask?.value
     }
 
     private func readCounts() {
@@ -210,7 +261,7 @@ final class FeedbackModel {
         return try FeedbackRules.note(
             kind: kind, message: message, includeDiagnostics: includesDetails, diagnostics: diagnostics,
             replyAddress: queue ? replyAddress : "", closetCounts: queue ? closetCounts : nil,
-            screenshot: queue ? screenshot : nil)
+            deviceHealth: queue ? deviceHealth : nil, screenshot: queue ? screenshot : nil)
     }
 
     /// Why the note can't go yet, once she has tried to send. It goes away as she fixes it.
@@ -241,7 +292,7 @@ final class FeedbackModel {
         guard route == .supportQueue else { return nil }
         let withoutAddress = try? FeedbackRules.note(
             kind: kind, message: message, includeDiagnostics: includesDetails, diagnostics: diagnostics,
-            closetCounts: closetCounts, screenshot: screenshot)
+            closetCounts: closetCounts, deviceHealth: deviceHealth, screenshot: screenshot)
         return withoutAddress.map(FeedbackComposer.text)
     }
 
@@ -355,6 +406,7 @@ final class FeedbackModel {
         includesDetails = false
         replyAddress = ""
         includesClosetCounts = false
+        includesDeviceHealth = false
         screenshot = nil
         screenshotProblem = nil
         receipt = nil

@@ -32,6 +32,28 @@ extension APIV1 {
             public var suitcases: Int
         }
 
+        /// 31: the phone's crash and speed counts, only when she approved sharing them. Numbers and
+        /// fixed names; there is no field for a stack, a name or any text.
+        public struct DeviceHealth: Codable, Sendable, Equatable {
+            public struct CrashKind: Codable, Sendable, Equatable {
+                public var exception: String
+                public var signal: String
+                public var count: Int
+            }
+
+            public var windowDays: Int
+            public var crashes: Int
+            public var hangs: Int
+            public var cpuExceptions: Int
+            public var diskWriteExceptions: Int
+            public var memoryExits: Int
+            public var watchdogExits: Int
+            public var longestHangMs: Int?
+            public var launchMedianMs: Int?
+            public var peakMemoryMB: Int?
+            public var crashKinds: [CrashKind]?
+        }
+
         public struct Attachment: Codable, Sendable, Equatable {
             public var contentType: String
             public var data: String
@@ -43,6 +65,7 @@ extension APIV1 {
         public var replyTo: String?
         public var diagnostics: Diagnostics?
         public var closetCounts: ClosetCounts?
+        public var deviceHealth: DeviceHealth?
         public var attachment: Attachment?
 
         /// Exactly what is in the note, and nothing else: there is no field here for anything she
@@ -60,6 +83,19 @@ extension APIV1 {
             }
             closetCounts = note.closetCounts.map {
                 ClosetCounts(pieces: $0.pieces, looks: $0.looks, suitcases: $0.suitcases)
+            }
+            deviceHealth = note.deviceHealth.map {
+                DeviceHealth(
+                    windowDays: $0.windowDays, crashes: $0.crashes, hangs: $0.hangs, cpuExceptions: $0.cpuExceptions,
+                    diskWriteExceptions: $0.diskWriteExceptions, memoryExits: $0.memoryExits,
+                    watchdogExits: $0.watchdogExits, longestHangMs: $0.longestHangMs,
+                    launchMedianMs: $0.launchMedianMs, peakMemoryMB: $0.peakMemoryMB,
+                    crashKinds: $0.crashKinds.isEmpty
+                        ? nil
+                        : $0.crashKinds.map {
+                            DeviceHealth.CrashKind(
+                                exception: $0.exception.rawValue, signal: $0.signal.rawValue, count: $0.count)
+                        })
             }
             // The screenshot is always a JPEG (`PhotoCleaner`).
             attachment = note.screenshot.map {

@@ -193,6 +193,16 @@ struct FeedbackPage: View {
                     systemImage: "tray.full", isOn: model.includesClosetCounts, identifier: "feedback.closetCounts",
                     set: { model.includesClosetCounts = $0 })
             }
+            // 31: only when the phone has crash or speed reports to share.
+            if model.offersDeviceHealth {
+                SettingsGroup {
+                    SettingsSwitchRow(
+                        title: FeedbackText.healthRow,
+                        detail: model.includesDeviceHealth ? FeedbackText.healthRowOn : FeedbackText.healthRowOff,
+                        systemImage: "waveform.path.ecg", isOn: model.includesDeviceHealth,
+                        identifier: "feedback.deviceHealth", set: { model.includesDeviceHealth = $0 })
+                }
+            }
         }
 
         SettingsGroup(header: FeedbackText.previewHeader, identifier: "feedback.preview") {
