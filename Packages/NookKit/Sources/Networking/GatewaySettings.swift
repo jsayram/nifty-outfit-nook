@@ -32,7 +32,11 @@ public struct GatewaySettings: Sendable, Equatable {
             $0.wholeMatch(of: /pk_(test|live)_[A-Za-z0-9+\/=_-]{10,}/) != nil ? $0 : nil
         }
         self.apiBaseURL = value(Self.apiBaseURLInfoKey).flatMap { text in
-            guard let url = URL(string: text), url.scheme == "https", url.host() != nil, url.query() == nil else {
+            // https only, with a host, and no query string and no user name or password in it: a
+            // web address with credentials would put them in the app.
+            guard let url = URL(string: text), url.scheme == "https", url.host() != nil, url.query() == nil,
+                url.user() == nil, url.password() == nil
+            else {
                 return nil
             }
             return url
