@@ -21,11 +21,10 @@ final class BackgroundJobsTests: XCTestCase {
         let app = launch()
         startStyleMe(in: app)
         XCTAssertTrue(app.staticTexts["results.leavingNote"].label.hasPrefix("You can leave this screen"))
-        // The offer shows only until iOS has an answer or she says Not now, on this simulator.
-        let notNow = app.buttons["results.notifyNotNow"]
-        if notNow.waitUntilExists(timeout: 3) {
-            tap(notNow, until: { !notNow.exists })
-        }
+        // The note offer may be on screen. It is left alone: Not now is kept on the simulator
+        // (and erased only by Delete my data), so tapping it here would hide the offer from
+        // `testInTheBackgroundANotificationSaysTheyAreReady` on every later run, and that test
+        // then never gets iOS's permission and sees no notification.
         keepScreenshot("27c-1-styling-can-leave")
 
         // Off to the closet to search while the stylist works.
@@ -52,6 +51,12 @@ final class BackgroundJobsTests: XCTestCase {
     func testInTheBackgroundANotificationSaysTheyAreReady() throws {
         try skipOnPullRequests(
             "iOS's own alert and the Home Screen are slow to script on CI; AIJobsTests covers the notification.")
+        // iOS's notification service comes up late on a cold iOS 27.0 simulator (SpringBoard's
+        // notification server waits on dasd, for minutes while the host is busy, October 2026),
+        // and until it does the app can't ask for permission or post. Wait for it here.
+        try XCTSkipUnless(
+            Self.waitForNotificationService(timeout: 300),
+            "This simulator's notification service didn't answer in 5 minutes, so no notification can show.")
         let app = launch()
         startStyleMe(in: app)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -68,18 +73,7 @@ final class BackgroundJobsTests: XCTestCase {
         XCUIDevice.shared.press(.home)
         let note = springboard.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "Your outfit ideas are ready")).firstMatch
-        let showed = note.waitUntilExists(timeout: Self.jobWait)
-        // A simulator whose notification service doesn't answer can't show anything (see
-        // `notificationServiceAnswers`): that is the simulator, not the app, so skip with the
-        // reason. With a working service a missing notification still fails.
-        if !showed {
-            try XCTSkipUnless(
-                Self.notificationServiceAnswers(),
-                "This simulator's notification service doesn't answer, so no notification can show. Seen on "
-                    + "the iOS 27.0 simulator under heavy host load: SpringBoard's notification server waits on a "
-                    + "deadlocked dasd (October 2026). A simulator on iOS 26.5 works (NOOK_SIM_OS=26.5).")
-        }
-        XCTAssertTrue(showed, "No notification")
+        XCTAssertTrue(note.waitUntilExists(timeout: Self.jobWait), "No notification")
         XCTAssertFalse(note.label.contains("blouse") || note.label.contains("trousers"), note.label)
         keepScreenshot("27c-6-notification")
         note.tapUntil(timeout: Self.wait, else: "The notification didn't open her looks") {
@@ -133,13 +127,13 @@ final class BackgroundJobsTests: XCTestCase {
 
     // MARK: Helpers
 
-    /// Whether iOS answers a question about notifications within 20 seconds. The same service
-    /// answers the app's own, and posts what it posts. Asked only after no notification showed.
-    private static func notificationServiceAnswers() -> Bool {
+    /// Waits until iOS answers a question about notifications, which the same service that posts
+    /// them does. Returns whether it did within `timeout` seconds.
+    private static func waitForNotificationService(timeout: TimeInterval) -> Bool {
         let answered = XCTestExpectation(description: "notification settings")
         answered.assertForOverFulfill = false
         UNUserNotificationCenter.current().getNotificationSettings { _ in answered.fulfill() }
-        return XCTWaiter().wait(for: [answered], timeout: 20) == .completed
+        return XCTWaiter().wait(for: [answered], timeout: timeout) == .completed
     }
 
     @MainActor
