@@ -1,0 +1,18 @@
+{
+  "contextRevision": "rev_1",
+  "consentVersion": "tryon-1",
+  "person": {
+    "contentType": "image/heic",
+    "data": "AAAA"
+  },
+  "garments": [
+    {
+      "id": "g1",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    }
+  ]
+}

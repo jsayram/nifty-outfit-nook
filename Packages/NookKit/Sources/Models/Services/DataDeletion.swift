@@ -155,14 +155,15 @@ public struct LocalDataDeletion: DataDeletionService {
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
         weatherSettings: (any WeatherSettingsStore)? = nil, stylistConsent: (any StylistConsentStore)? = nil,
         aiJobs: (any ErasableStore)? = nil, stylistThreads: (any StylistThreadStore)? = nil,
-        diagnostics: (any ErasableStore)? = nil
+        tryOnConsent: (any TryOnConsentStore)? = nil, diagnostics: (any ErasableStore)? = nil
     ) {
         self.init(
             stores: Self.stores(
                 closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                 lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
                 onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
-                aiJobs: aiJobs, stylistThreads: stylistThreads, diagnostics: diagnostics))
+                aiJobs: aiJobs, stylistThreads: stylistThreads, tryOnConsent: tryOnConsent,
+                diagnostics: diagnostics))
     }
 
     /// The stores of `services` in the order `NookServices` erases them, for a deletion that
@@ -175,7 +176,7 @@ public struct LocalDataDeletion: DataDeletionService {
             pictures: services.pictures, tours: services.tours, onboarding: services.onboarding,
             weatherSettings: services.weatherSettings, stylistConsent: services.stylistConsent,
             aiJobs: AIJobsEraser(services.aiJobs), stylistThreads: services.stylistThreads,
-            diagnostics: services.diagnostics)
+            tryOnConsent: services.tryOnConsent, diagnostics: services.diagnostics)
     }
 
     private static func stores(
@@ -184,7 +185,7 @@ public struct LocalDataDeletion: DataDeletionService {
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
         weatherSettings: (any WeatherSettingsStore)?, stylistConsent: (any StylistConsentStore)?,
         aiJobs: (any ErasableStore)?, stylistThreads: (any StylistThreadStore)?,
-        diagnostics: (any ErasableStore)? = nil
+        tryOnConsent: (any TryOnConsentStore)?, diagnostics: (any ErasableStore)? = nil
     ) -> [(DataPart, any ErasableStore)] {
         // 27c: AI jobs stop first, so none writes a look after the looks are gone; Ask stylist
         // conversations go with the looks.
@@ -194,6 +195,7 @@ public struct LocalDataDeletion: DataDeletionService {
         // erased before onboarding.
         let weather: [(DataPart, any ErasableStore)] =
             (weatherSettings.map { [(.profile, $0)] } ?? []) + (stylistConsent.map { [(.profile, $0)] } ?? [])
+            + (tryOnConsent.map { [(.profile, $0)] } ?? [])
         return jobs + [
             (.drafts, drafts),
             (.drafts, lookDrafts),

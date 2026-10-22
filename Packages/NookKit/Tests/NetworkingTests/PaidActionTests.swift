@@ -52,7 +52,7 @@ struct PaidActionTests {
     /// stylist's result cache never answers them (27a).
     static var swap: PaidActionRequest { .style(.sample(.ask, note: String(UUID().uuidString.prefix(8)))) }
     static var full: PaidActionRequest { .style(.sample(.full, note: String(UUID().uuidString.prefix(8)))) }
-    static let tryOn = PaidActionRequest.tryOn(contextRevision: "rev_1")
+    static let tryOn = PaidActionRequest.tryOn(.sample(note: "1"))
 
     @Test func aPaidActionRunsOnceAndIsCounted() async throws {
         let paid = try await service()

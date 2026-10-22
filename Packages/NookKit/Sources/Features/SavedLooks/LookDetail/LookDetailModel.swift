@@ -102,9 +102,9 @@ final class LookDetailModel {
 
     /// "Simulated · Made 28 Aug", with "Earlier version" when the look changed since.
     func pictureFacts(_ picture: TryOnPicture, locale: Locale) -> String {
-        var facts = [
-            SharedText.simulated, TryOnText.made(picture.createdAt, now: now(), calendar: calendar, locale: locale),
-        ]
+        var facts = [TryOnText.made(picture.createdAt, now: now(), calendar: calendar, locale: locale)]
+        // 33a: a real picture isn't simulated.
+        if !picture.isReal { facts.insert(SharedText.simulated, at: 0) }
         if isEarlierVersion(picture) { facts.append(TryOnText.earlierVersionShort) }
         return facts.joined(separator: " · ")
     }

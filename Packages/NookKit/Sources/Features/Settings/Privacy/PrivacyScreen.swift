@@ -25,6 +25,9 @@ struct PrivacyScreen: View {
     /// 27a: her yes to the cloud stylist, and the consent sheet the switch opens.
     @State private var stylistOn = false
     @State private var showsStylistConsent = false
+    /// 33a: her yes to try-on's image provider, and the consent the switch opens.
+    @State private var tryOnOn = false
+    @State private var showsTryOnConsent = false
 
     var body: some View {
         PrivacyPage(
@@ -34,12 +37,27 @@ struct PrivacyScreen: View {
             deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
             open: { page = $0 },
             weather: weatherContent,
-            stylist: services.cloudStyling ? stylistContent : nil
+            stylist: services.cloudStyling ? stylistContent : nil,
+            tryOn: services.tryOnPipeline == nil ? nil : tryOnContent
         )
         .task {
             await weather.load(from: services)
             isSignedIn = await services.account.isSignedIn()
             stylistOn = services.stylistConsent.current()?.isCurrent == true
+            tryOnOn = services.tryOnConsent.current()?.isCurrent == true
+        }
+        .nookSheet(isPresented: $showsTryOnConsent, title: TryOnConsentText.switchTitle, detents: [.large]) {
+            ScrollView {
+                TryOnConsentContent(
+                    allow: {
+                        services.tryOnConsent.save(TryOnConsent(agreedAt: .now))
+                        tryOnOn = true
+                        showsTryOnConsent = false
+                    },
+                    notNow: { showsTryOnConsent = false }
+                )
+                .padding(NookSpacing.medium)
+            }
         }
         .nookSheet(isPresented: $showsStylistConsent, title: StylistConsentText.title, detents: [.large]) {
             StylistConsentSheet(
@@ -105,6 +123,21 @@ struct PrivacyScreen: View {
             })
     }
 
+    /// 33a: turning it on shows the consent first; turning it off withdraws at once. A picture
+    /// already on its way still finishes; nothing more is sent.
+    private var tryOnContent: TryOnPrivacy {
+        TryOnPrivacy(
+            isOn: tryOnOn,
+            set: { on in
+                if on {
+                    showsTryOnConsent = true
+                } else {
+                    services.tryOnConsent.save(nil)
+                    tryOnOn = false
+                }
+            })
+    }
+
     private var weatherContent: WeatherPrivacy {
         WeatherPrivacy(
             isOn: weather.settings.isOn, usesMyLocation: weather.settings.usesMyLocation,
@@ -133,6 +166,8 @@ struct PrivacyPage: View {
     var weather: WeatherPrivacy?
     /// The stylist's consent switch (27a). `nil` while Style Me uses the stylist on the phone.
     var stylist: StylistPrivacy?
+    /// Try-on's consent switch (33a). `nil` while pictures are simulated on the phone.
+    var tryOn: TryOnPrivacy?
 
     var body: some View {
         SettingsPage(
@@ -156,6 +191,10 @@ struct PrivacyPage: View {
                 StylistPrivacyGroup(stylist: stylist)
             }
 
+            if let tryOn {
+                TryOnPrivacyGroup(tryOn: tryOn)
+            }
+
             if let weather {
                 WeatherPrivacyGroup(weather: weather)
             }
@@ -163,7 +202,10 @@ struct PrivacyPage: View {
             SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
                 SettingsNote(PrivacyText.laterNote)
                 ForEach(
-                    PrivacyText.later(includingWeather: weather == nil, includingStylist: stylist == nil), id: \.title
+                    PrivacyText.later(
+                        includingWeather: weather == nil, includingStylist: stylist == nil, includingTryOn: tryOn == nil
+                    ),
+                    id: \.title
                 ) { item in
                     SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
                 }
@@ -306,9 +348,12 @@ nonisolated enum PrivacyText {
 
     /// Weather leaves the list once the Weather group above it is real (Phase 29), and Style Me
     /// once its switch is (27a).
-    static func later(includingWeather: Bool, includingStylist: Bool = true) -> [PrivacyItem] {
+    static func later(includingWeather: Bool, includingStylist: Bool = true, includingTryOn: Bool = true)
+        -> [PrivacyItem]
+    {
         later.filter {
             (includingWeather || $0.systemImage != "cloud.sun") && (includingStylist || $0.systemImage != "sparkles")
+                && (includingTryOn || $0.systemImage != "camera")
         }
     }
 

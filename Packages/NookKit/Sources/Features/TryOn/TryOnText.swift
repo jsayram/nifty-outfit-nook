@@ -17,6 +17,12 @@ enum TryOnText {
     /// no one wearing them."
     static func spokenPicture(of content: LookBundleContent, lookName: String, locale: Locale) -> String {
         let names = content.pieces.map(\.name)
+        if content.isRealPicture {
+            let worn = names.formatted(.list(type: .and, width: .standard).locale(locale))
+            return String(
+                localized: "Try-on picture of \(lookName): you wearing \(worn).", bundle: .module,
+                comment: "Spoken for a real try-on picture (33a): the look's name, then its pieces")
+        }
         if content.tryOnPhoto != nil {
             let worn = names.formatted(.list(type: .and, width: .standard).locale(locale))
             return String(

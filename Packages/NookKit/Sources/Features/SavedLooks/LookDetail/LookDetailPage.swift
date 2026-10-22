@@ -34,6 +34,8 @@ struct LookDetailPage: View {
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.locale) private var locale
+    /// 33a: with real try-on pictures there's nothing simulated to say.
+    @Environment(\.services) private var services
 
     var body: some View {
         Group {
@@ -235,11 +237,13 @@ struct LookDetailPage: View {
                     }
                 }
             }
-            Text(SharedText.tryOnPicturesSimulated)
-                .nookTextStyle(.finePrint)
-                .foregroundStyle(.nook.textSecondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            if services.tryOnPipeline == nil {
+                Text(SharedText.tryOnPicturesSimulated)
+                    .nookTextStyle(.finePrint)
+                    .foregroundStyle(.nook.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 

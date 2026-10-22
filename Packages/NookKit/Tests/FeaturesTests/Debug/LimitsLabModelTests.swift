@@ -52,15 +52,15 @@ struct LimitsLabModelTests {
         let model = LimitsLabModel(account: SignedIn(), paid: paid, controls: nil)
         await model.start()
         #expect(model.usage?.allowance(.tryOn)?.remainingToday == 2)
-        await model.run(.tryOn(contextRevision: "r"))
-        #expect(model.message == "Done: a try-on picture (placeholder).")
+        await model.run(.tryOn(.sample(note: "r")))
+        #expect(model.message == "Done: a try-on picture (sample squares).")
         #expect(model.detail == "Run and counted once.")
         await model.sendAgain()
         #expect(model.detail == "The server had already done this one, so it wasn't run or counted again.")
         let keys = paid.keys.withLock { $0 }
         #expect(keys.count == 2 && keys[0] == keys[1])
         // A new action gets a new key.
-        await model.run(.tryOn(contextRevision: "r"))
+        await model.run(.tryOn(.sample(note: "r")))
         #expect(paid.keys.withLock { Set($0).count } == 2)
     }
 
@@ -68,7 +68,7 @@ struct LimitsLabModelTests {
         let paid = ScriptedPaid()
         let model = LimitsLabModel(account: SignedIn(), paid: paid, controls: nil)
         paid.next.withLock { $0 = .paused(feature: .tryOn, retryAfterSeconds: nil) }
-        await model.run(.tryOn(contextRevision: "r"))
+        await model.run(.tryOn(.sample(note: "r")))
         #expect(model.messageIsProblem)
         #expect(model.message == CloudLimitText.message(for: .paused(feature: .tryOn, retryAfterSeconds: nil)))
         #expect(model.detail == nil)

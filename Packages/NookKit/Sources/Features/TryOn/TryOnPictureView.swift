@@ -79,7 +79,7 @@ struct TryOnPictureView: View {
                     LookBundle(content, size: LookBundleSize(width: width * 0.78), title: lookName)
                         .accessibilityHidden(true)
                 }
-                if Self.showsBadge(width: width, showsPerson: photo != nil) {
+                if !content.isRealPicture, Self.showsBadge(width: width, showsPerson: photo != nil) {
                     Self.badge
                         .padding(Self.badgePadding(width: width))
                         .frame(
@@ -217,5 +217,6 @@ extension LookBundleContent {
                     photo: piece.photo, cutout: piece.cutout, isIdea: piece.isIdea)
             })
         if case .generated(let photo) = picture.image { tryOnPhoto = photo }
+        isRealPicture = picture.isReal
     }
 }

@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text); 30c: App Store purchases verified on the server (Apple's signature), styling access and picture credits enforced at the gateway, POST /v1/entitlements/claim, and appAccountToken on the user (30b: picture credits; 24d: support; 27a: the cloud stylist; try-on stays a placeholder until 33a)",
+  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -15,7 +15,8 @@
     "Stylist results: kind complete (three versions), partial (fewer, with each missing version and why), insufficient (no outfit can be made from these pieces; nothing counted), or answer (mode ask). fromCache is true when an identical request from the same account in the last 24 hours was answered again without asking the provider; such an answer doesn't count against an allowance.",
     "Support (24d): POST /v1/feedback sends one private note to the support queue. It needs a token but not App Attest, on purpose: support has to work on a device that can't attest, and it costs nothing. It is limited per account (a token bucket, a daily count and a daily count of screenshots) and for all accounts together; over a limit is rate_limited, or unavailable for the all-accounts limit and when Jose closes intake. submissionId makes a resend safe: the same submissionId from the same account gets the same ticket back and stores nothing twice. An optional screenshot (JPEG or PNG, base64) has its metadata (EXIF, GPS, text and thumbnail chunks) removed by the backend, whatever the app did first; anything else is invalid_request. Diagnostics and closetCounts are included only when the person turned them on, and the app shows exactly these values before sending.",
     "Picture credits (30b): after a StoreKit purchase of a credit pack the app sends the transaction's signed JWS to POST /v1/credits/claim, and finishes the transaction only after a 200. The backend reads the transaction ID and product ID from the JWS, never from the app, credits the pack's size from its own product list, and credits each transaction ID once: a repeat from the same account gets the first answer with replayed true, and a transaction already credited to another account is forbidden. Until 30c checks Apple's signature and the App Store Server API, crediting is mocked and only on when the backend's NOOK_CREDITS_MODE is mock; otherwise the endpoint is unavailable and the app keeps the transaction to try again. Credits never expire. GET /v1/usage shows the balance.",
-    "30c, purchases: every signed transaction the app sends (POST /v1/credits/claim, POST /v1/entitlements/claim) is verified on the server against Apple's certificates before anything is credited or linked. The app's X-Nook-Entitlement-Hint is never used to authorize anything. Styling access comes from Apple's records only: the subscription (renewals, expiry, grace period, refunds and Family Sharing revocations arrive through App Store Server Notifications, which aren't part of this contract) or the complimentary unlock. Pass user.appAccountToken to StoreKit with every purchase (Product.PurchaseOption.appAccountToken) so Apple's notifications can be matched to the account."
+    "30c, purchases: every signed transaction the app sends (POST /v1/credits/claim, POST /v1/entitlements/claim) is verified on the server against Apple's certificates before anything is credited or linked. The app's X-Nook-Entitlement-Hint is never used to authorize anything. Styling access comes from Apple's records only: the subscription (renewals, expiry, grace period, refunds and Family Sharing revocations arrive through App Store Server Notifications, which aren't part of this contract) or the complimentary unlock. Pass user.appAccountToken to StoreKit with every purchase (Product.PurchaseOption.appAccountToken) so Apple's notifications can be matched to the account.",
+    "Try-on (33a): POST /v1/try-on sends only the faceless photo (her head already masked with flat grey on the phone and her room replaced with a plain studio backdrop) and the photos of the pieces to put on her, with category and kind for each. Nothing else of hers may be sent: no face, no room, no names, notes or measurements. The backend writes the picture instruction itself from the categories and kinds. consentVersion is the try-on consent text she agreed to; if it doesn't cover the service the backend would send the photos to, the answer is consent_required and nothing is sent or counted. The first POST checks everything, admits and counts the action, starts the picture and answers 409 action_in_progress with Retry-After 5 and the message \"Your picture is being made.\". The app then asks again with the same Idempotency-Key and the SAME body (byte for byte, or it is idempotency_conflict) after Retry-After, until it gets 200 with the dressed picture or an error. An attempt that failed is started once more by the next ask (at most two attempts, the second counted again only if it works); after that the answer is 503 unavailable \"This action didn't work. Start a new one.\". A picture can take a few minutes; the action's lease is 6 minutes, after which the outcome is checked by hand (409 with Retry-After 60). The backend keeps the photos only sealed and only while the picture is made: the inputs are deleted as soon as the picture service answers, and the result is kept sealed for at most 30 minutes, and 2 minutes after it was first delivered. After that the same key gets 503 unavailable \"That picture is no longer kept. Make a new one.\". The first 200 has replayed false; later ones replayed true. The picture service may keep what it receives and use it to improve its models, which the consent text must say."
   ],
   "limits": {
     "maxBodyBytes": 65536,
@@ -33,6 +34,17 @@
       "attachmentsPerDay": 3,
       "allAccountsPerDay": 300,
       "note": "Only this endpoint accepts a body larger than limits.maxBodyBytes. The numbers are the backend's starting settings and are enforced on the server; the app never relies on them."
+    },
+    "tryOn": {
+      "maxBodyBytes": 6291456,
+      "personMaxBytes": 1500000,
+      "garmentMaxBytes": 400000,
+      "maxGarments": 9,
+      "imageTypes": [
+        "image/jpeg",
+        "image/png"
+      ],
+      "note": "POST /v1/try-on only. Sizes are of the decoded image bytes, checked on the server; the body as a whole stays under maxBodyBytes. At least one garment, each id once. Each image must really be the JPEG or PNG its contentType says; the backend removes metadata (EXIF, GPS, text chunks) whatever the app did first."
     }
   },
   "auth": {
@@ -241,18 +253,19 @@
     },
     {
       "id": "tryOn",
-      "summary": "PLACEHOLDER until Phase 33a: one try-on picture through the same admission path, with a stand-in job and a placeholder result.",
+      "summary": "One try-on picture (33a). The request carries the faceless photo of her on a plain studio backdrop (her head already a flat grey shape, made on the phone) and the photos of the pieces to put on her. It runs the full admission path (attestation, idempotency, consent, rate limit, one action at a time, allowance or a picture credit, switches, cost reservation), then the picture is made in the background: the first request answers 409 action_in_progress and the app asks again with the same Idempotency-Key and the same body until it gets 200 with the dressed picture, or an error.",
       "method": "POST",
       "path": "/v1/try-on",
       "auth": "required",
       "cost": "paid",
+      "maxBodyBytes": 6291456,
       "request": {
         "schema": "TryOnRequest",
         "example": "examples/try-on.request.json"
       },
       "response": {
         "status": 200,
-        "schema": "PaidActionResponse",
+        "schema": "TryOnResponse",
         "example": "examples/try-on.response.json"
       },
       "errors": [
@@ -264,6 +277,7 @@
         "forbidden",
         "not_registered",
         "attestation_required",
+        "consent_required",
         "idempotency_conflict",
         "action_in_progress",
         "rate_limited",
@@ -877,12 +891,85 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "contextRevision"
+        "contextRevision",
+        "consentVersion",
+        "person",
+        "garments"
       ],
       "properties": {
         "contextRevision": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "consentVersion": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,32}$"
+        },
+        "person": {
+          "$ref": "TryOnImage"
+        },
+        "garments": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {
+            "$ref": "TryOnGarment"
+          }
+        }
+      }
+    },
+    "TryOnImage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contentType",
+        "data"
+      ],
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "enum": [
+            "image/jpeg",
+            "image/png"
+          ]
+        },
+        "data": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+          "maxLength": 2000000
+        }
+      }
+    },
+    "TryOnGarment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "image"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom",
+            "dress",
+            "layer",
+            "shoes",
+            "bag",
+            "accessory"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{1,24}$"
+        },
+        "image": {
+          "$ref": "TryOnImage"
         }
       }
     },
@@ -924,22 +1011,42 @@
         }
       }
     },
-    "PlaceholderResult": {
+    "TryOnResultImage": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "placeholder"
+        "contentType",
+        "data"
       ],
       "properties": {
-        "placeholder": {
-          "type": "boolean",
+        "contentType": {
+          "type": "string",
           "enum": [
-            true
+            "image/jpeg",
+            "image/png",
+            "image/webp"
           ]
+        },
+        "data": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+          "maxLength": 16000000
         }
       }
     },
-    "PaidActionResponse": {
+    "TryOnResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image"
+      ],
+      "properties": {
+        "image": {
+          "$ref": "TryOnResultImage"
+        }
+      }
+    },
+    "TryOnResponse": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -952,7 +1059,7 @@
           "$ref": "PaidAction"
         },
         "result": {
-          "$ref": "PlaceholderResult"
+          "$ref": "TryOnResult"
         },
         "usage": {
           "$ref": "UsageCategory"
@@ -2019,7 +2126,7 @@
     }
   },
   "planned": {
-    "33a": "Try-on: POST /v1/try-on keeps its admission path; its request gains the faceless body photo and garment photos, and it becomes a job with up to three child pictures (PRD 9.2.4)."
+    "33a": "Built (see notes). Still to come: the job with up to three child pictures (PRD 9.2.4) and a backup picture service with its own consent text."
   },
   "attestation": {
     "clientData": "nook-assert-v1\\n<METHOD>\\n<PATH>\\n<Idempotency-Key>\\n<lowercase hex SHA-256 of the exact body bytes>",

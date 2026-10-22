@@ -45,8 +45,10 @@ public enum APIV1 {
     /// repeat with the first result, without running or counting it again.
     public static let style = Endpoint(
         id: "style", method: "POST", path: "/v1/style", requiresAuth: true, idempotent: true, paid: true)
+    /// 33a: the faceless photo and up to nine garment photos, base64 (contract limits.tryOn).
     public static let tryOn = Endpoint(
-        id: "tryOn", method: "POST", path: "/v1/try-on", requiresAuth: true, idempotent: true, paid: true)
+        id: "tryOn", method: "POST", path: "/v1/try-on", requiresAuth: true, idempotent: true, paid: true,
+        maxBodyBytes: 6_291_456)
 
     // 30b
     /// Safe to repeat: the server credits each App Store transaction once and answers a repeat
