@@ -149,6 +149,56 @@ class AccessibilityAuditTests: XCTestCase {
         }
     }
 
+    /// Stage B screens the walks above didn't reach (Phase 35a): the try-on photo sheet and
+    /// Styling access. `testBackups` and `testDeleteMyAccount` cover two more.
+    @MainActor
+    func testTryOnPhotoAndStylingAccess() throws {
+        let app = launch(
+            UITestLaunch.standard + [
+                "-seed-photo-closet", "3", "-fake-signed-in", "-seed-tryon", "-cloud-tryon", "-subscription", "none",
+            ])
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 120), "Home didn't open")
+        open("home.profile", showing: app.navigationBars["Profile"], in: app)
+        let done = app.buttons["tryOnPhoto.done"]
+        open("profile.tryOnPhoto", showing: done, in: app)
+        try audit("Your try-on photo", in: app)
+        app.scrollUntilHittable(done, up: 10, down: 10)
+        done.tapUntilGone(timeout: Self.wait)
+        open("profile.stylingAccess", showing: app.navigationBars["Styling access"], in: app)
+        try audit("Styling access", in: app)
+    }
+
+    /// Backups (Phase 21b). It's on Profile only for her own closet, so this starts with the empty
+    /// closet from onboarding, as `BackupsTests` does.
+    @MainActor
+    func testBackups() throws {
+        let app = launch(["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff)
+        open("welcome.getStarted", showing: app.navigationBars["Your name"], in: app)
+        open("onboarding.skip", showing: app.navigationBars["Your closet stays here"], in: app)
+        open("onboarding.continue", showing: app.navigationBars["How you like clothes to fit"], in: app)
+        open("onboarding.skip", showing: app.navigationBars["Choose a starting closet"], in: app)
+        let empty = element("onboarding.closet.empty", in: app)
+        reveal(empty, in: app)
+        empty.tapUntilSelected(timeout: Self.wait)
+        open("onboarding.continue", showing: app.navigationBars["Home"], in: app)
+        open("home.profile", showing: app.navigationBars["Profile"], in: app)
+        open("profile.backups", showing: app.buttons["backups.export"], in: app)
+        try audit("Backups", in: app)
+    }
+
+    /// Delete my account (Phase 24c), signed in with a subscription that still bills.
+    @MainActor
+    func testDeleteMyAccount() throws {
+        let app = launch(
+            UITestLaunch.standard + ["-seed-photo-closet", "3", "-fake-signed-in", "-subscription", "trial"])
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 120), "Home didn't open")
+        open("home.privacyDrawer", showing: app.navigationBars["Privacy and terms"], in: app)
+        let row = element("privacy.deleteAccount", in: app)
+        reveal(row, in: app)
+        row.tapUntil(app.navigationBars["Delete my account"], appears: Self.wait)
+        try audit("Delete my account", in: app)
+    }
+
     // MARK: Helpers
 
     @MainActor

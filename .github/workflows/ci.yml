@@ -442,6 +442,9 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testHomeAndItsTour
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testTryOnPhotoAndStylingAccess
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testBackups
+              -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testDeleteMyAccount
           # Every other UI test, so a new class or test is never left out: this part names only
           # what the others run, and skips exactly that.
           - part: ui-rest
@@ -468,6 +471,9 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testHomeAndItsTour
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testTryOnPhotoAndStylingAccess
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testBackups
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testDeleteMyAccount
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
