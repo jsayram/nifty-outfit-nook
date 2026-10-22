@@ -265,14 +265,14 @@ struct ScreenTourSnapshotTests {
     // MARK: iPad
 
     /// Your looks beside its buttons on the 11-inch iPad held sideways.
-    @Test func yourLooksOnIPad() async {
+    @Test(.ipadSnapshots) func yourLooksOnIPad() async {
         assertTourSnapshot(
             YourLooksPage(model: await styledLooks()), YourLooksTour.definition(hasVersions: true), step: 2,
             size: SnapshotWindow.landscape.size, safeArea: EdgeInsets(top: 24, leading: 0, bottom: 20, trailing: 0),
             barsHeight: 86, sizeClass: .regular, named: "your-looks-3-ipad")
     }
 
-    @Test func fitOnIPadUpright() async {
+    @Test(.ipadSnapshots) func fitOnIPadUpright() async {
         let model = ProfileModel()
         await model.load(from: services, locale: TestTime.locale)
         assertTourSnapshot(

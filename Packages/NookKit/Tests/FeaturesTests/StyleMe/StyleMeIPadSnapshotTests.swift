@@ -19,7 +19,7 @@ import UIKit
 /// - Style Me sideways and upright, the request beside the options, and a narrow window;
 /// - Swap a piece sideways and upright, the look beside the options.
 @MainActor
-@Suite(.heavyMainActorWork)
+@Suite(.heavyMainActorWork, .ipadSnapshots)
 struct StyleMeIPadSnapshotTests {
     // MARK: Your looks
 

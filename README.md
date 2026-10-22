@@ -43,7 +43,7 @@ The pre-commit hook needs gitleaks (`brew install gitleaks`). It stops any commi
 
 On CI (when `CI` is set), `scripts/test.sh` tells the tests so the large-closet speed checks allow three times their local bound. Each speed check also takes the fastest of three runs, so a stall from tests running in parallel doesn't fail it.
 
-`scripts/test.sh` uses the iOS 27.0 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests, `IPadTests`, `IPadStyleMeAndSavedTests` and `IPadKeyboardTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=26.5`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
+`scripts/test.sh` uses the iOS 27.0 runtime and prefers an iPhone 17 (see `scripts/simulator.sh`). `NOOK_SIM_FAMILY=iPad` picks an iPad (the iPad Pro 11-inch (M5) if there is one) for the iPad UI tests (paused; see "CI"), `IPadTests`, `IPadStyleMeAndSavedTests` and `IPadKeyboardTests`, which skip themselves on an iPhone (`docs/ipad.md`). The runtime is pinned because the snapshot references were recorded on it. Override with `NOOK_SIM_OS=26.5`, `NOOK_SIM_NAME="iPhone Air"` or `NOOK_SIM_ID=<udid>`, but expect snapshot failures on another runtime. Results land in `build/TestResults.xcresult`. Snapshot tests are explained in `Packages/NookKit/Sources/DesignSystem/README.md`.
 
 The NookKit package targets iOS only, so `swift test` on the Mac doesn't work. Its tests run through the app scheme's test plan (`NiftyOutfitNook.xctestplan`) on a simulator. The scheme has a second plan, `UITests.xctestplan`, with only the UI tests, so a UI-only run doesn't build the package test targets.
 
@@ -170,18 +170,41 @@ Rulesets on `main` and `develop` enforce this for everyone, administrators inclu
 
 ## CI
 
-GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`, and by hand (Actions tab, CI, Run workflow) for the full UI suite. Its three checks are all required:
+GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `develop` and `main`, and by hand for the batch UI run. Its three checks are all required.
+
+**What runs when** (since 22 October 2026):
+
+| Trigger | What runs |
+|---|---|
+| Pull request (the fast gate) | `swift-format`, `gitleaks`, the build and archive check, and every package test, iPhone snapshot tests included |
+| Pull request with the `run-ui` label | The fast gate plus the UI tests (the three iPhone parts) |
+| Push to `develop` or `main` | The fast gate again. No UI tests. |
+| Manual run on `develop`, the batch (`scripts/run-ui-batch.sh`) | The fast gate plus the whole UI suite on an iPhone simulator |
+
+The UI tests never start by themselves. A pull request that touches UI paths still gets the fast gate only, and a note in the run's summary says its UI tests are due. Run a batch after about every three UI-touching merges and at phase milestones: `scripts/run-ui-batch.sh` starts the manual run on the tip of `develop` and prints the run's URL (`gh run watch <id> --exit-status --interval 60` waits for it). If a batch fails, bisect the commits since the last green batch. Put the `run-ui` label on a pull request that needs its UI tests before it merges.
+
+**iPad testing is paused** until the app's features are done. The iPhone 12 is Lily's phone and the main target, and the iPad comes at the end, as UI work. Nothing was deleted:
+- The `ui-ipad` job (the iPad UI tests, on an iPad simulator) runs only on a manual run with `include_ipad` ticked. `scripts/run-ui-batch.sh --ipad` does that.
+- The iPad snapshot test cases in the package tests (the `*IPadSnapshotTests` suites, `piecesIPad`, the iPad tour and onboarding cases, the iPad component pages) skip themselves unless `NOOK_IPAD_SNAPSHOTS=1`. They draw iPad-sized windows with `ImageRenderer`, so they run on any simulator, and the package tests run on an iPhone simulator in CI. Their reference images are still in `__Snapshots__`.
+- The iPad layout logic tests (`WindowLayoutTests`, `RoomLayoutTests`, `RoomPlanTests`) are plain arithmetic and still run on every pull request.
+
+**Turning iPad testing back on:**
+1. In `.github/workflows/ci.yml`, delete the `exclude` under the `ui-tests` matrix (the `ui-ipad` part then runs whenever the UI tests do), and set the top-level `NOOK_IPAD_SNAPSHOTS` to `'1'` (the iPad snapshots then run in every package test run, and the iPad reference images get checked on each PR again). The `include_ipad` input can go.
+2. Locally: `NOOK_IPAD_SNAPSHOTS=1 scripts/test.sh` for the snapshots, `NOOK_SIM_FAMILY=iPad scripts/test.sh -only-testing:NiftyOutfitNookUITests/IPadTests` for the UI tests. In Xcode, add `NOOK_IPAD_SNAPSHOTS` = `1` to the scheme's test environment variables.
+3. Remove this paragraph's "paused" wording here and in `AGENTS.md`.
+
+**A self-hosted runner** on Jose's Mac is planned, to make the UI runs faster and cheaper than the hosted runners. It is not set up. Until then everything runs on GitHub's hosted `xcode-27` image.
 
 - `swift-format`: `scripts/format.sh` on an `xcode-27` runner.
 - `build-and-test`: passes only when these jobs all pass, all with Xcode 27.1:
-  - `build-and-archive` checks the two `Package.resolved` files agree, builds for testing, makes an unsigned Release archive for a real iPhone and checks what would ship (`scripts/check-archive.sh`, which also runs `scripts/check-release.sh` on the device binary), and runs every package test target, snapshot tests included. This runs on every change except docs-only ones. When UI paths changed it also builds the UI test plan, uploads it, and runs `CatalogTests`, `ProfileTests` and `CutoutBenchTests`.
-  - `ui-tests (ui-audit-and-settings)`, `(ui-add-and-saved)`, `(ui-rest)` and `(ui-ipad)` run the UI tests, in parts by test class, **only when the change touches UI paths**. They start with `build-and-archive`, boot their simulator while it builds, then download its build (`scripts/wait-for-artifact.sh`, this run's artifacts only) and test without building. `ui-rest` is every UI test the others don't name, so a new class is never skipped (a new iPad class goes in `ui-ipad`). The free plan runs five macOS jobs at once, so there are five.
+  - `build-and-archive` checks the two `Package.resolved` files agree, builds for testing, makes an unsigned Release archive for a real iPhone and checks what would ship (`scripts/check-archive.sh`, which also runs `scripts/check-release.sh` on the device binary), and runs every package test target on an iPhone simulator, iPhone snapshot tests included. This runs on every change except docs-only ones. When the UI tests run (see above) it also builds the UI test plan, uploads it, and runs `CatalogTests`, `ProfileTests` and `CutoutBenchTests`.
+  - `ui-tests (ui-audit-and-settings)`, `(ui-add-and-saved)` and `(ui-rest)` run the UI tests, in parts by test class, **only with the `run-ui` label or on a manual run** (and `(ui-ipad)` too, on a manual run with `include_ipad`). They start with `build-and-archive`, boot their simulator while it builds, then download its build (`scripts/wait-for-artifact.sh`, this run's artifacts only) and test without building. `ui-rest` is every UI test the others don't name, so a new class is never skipped (a new iPad class goes in `ui-ipad`). The free plan runs five macOS jobs at once, so a run has at most five.
 
   The small `changes` job decides, from the files changed:
   - Docs only (Markdown outside the source folders, `docs/`, `website/`): no build or test jobs; `build-and-test` still passes.
-  - **UI paths**, which turn the UI test jobs on: view and screen files under `Packages/NookKit/Sources/Features/` (any file there except `*Model.swift`), everything under `Packages/NookKit/Sources/DesignSystem/` (components, colours, typography, asset catalogs), everything under `NiftyOutfitNook/` (the app file, `Assets.xcassets`, entitlements), `Configs/AppInfo.plist`, `NiftyOutfitNook.xcodeproj/`, any `*.xcstrings` or `*.xcassets`, and `NiftyOutfitNookUITests/`.
-  - Everything else (models, services, fixtures, backup and storage code, package tests, `scripts/`, workflow files) builds, archives and runs the package tests, and skips the UI jobs. The skipped `ui-tests` jobs report as skipped and `build-and-test` accepts that, so they never block a merge.
-  - Add the `run-ui` label to a pull request to force the UI jobs, or run the workflow by hand for the full UI suite.
+  - **UI paths**, which make a change UI-touching (they no longer turn the UI test jobs on; the summary notes that the UI tests are due): view and screen files under `Packages/NookKit/Sources/Features/` (any file there except `*Model.swift`), everything under `Packages/NookKit/Sources/DesignSystem/` (components, colours, typography, asset catalogs), everything under `NiftyOutfitNook/` (the app file, `Assets.xcassets`, entitlements), `Configs/AppInfo.plist`, `NiftyOutfitNook.xcodeproj/`, any `*.xcstrings` or `*.xcassets`, and `NiftyOutfitNookUITests/`.
+  - Everything else (models, services, fixtures, backup and storage code, package tests, `scripts/`, workflow files) builds, archives and runs the package tests too.
+  - The UI jobs run only with the `run-ui` label on a non-docs pull request, or on a manual run. Otherwise they report as skipped, `build-and-test` accepts that, and they never block a merge.
 
   **Two tiers of UI tests.** A few UI tests skip themselves on CI (`NOOK_PR_RUN=1`, set by the workflow and passed on by `scripts/test.sh`) and run only in a manual full-suite run or locally. They are the large-text (AX5) audit sweep and the other AX5 checks, the two long tour walks (`ScreenToursTests`), the cutout benchmark, and tests whose behaviour package tests already cover (the fit-value sheet, the feedback share sheet, Your looks' forced states, the launch fixtures). Each such test starts with `try skipOnPullRequests("...")`, and its comment says what covers it. To run them locally, leave `NOOK_PR_RUN` unset.
 

@@ -30,7 +30,7 @@ struct LookBundleSnapshotTests {
         assertSnapshot(countsBoard(columns: 1), width: Self.phone, named: "pieces-phone")
     }
 
-    @Test func piecesIPad() {
+    @Test(.ipadSnapshots) func piecesIPad() {
         assertSnapshot(countsBoard(columns: 2), width: Self.iPad, sizeClass: .regular, named: "pieces-ipad")
     }
 

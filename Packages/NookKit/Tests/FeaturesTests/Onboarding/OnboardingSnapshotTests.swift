@@ -49,7 +49,7 @@ struct OnboardingSnapshotTests {
             welcomeView, height: Self.phone.height, dynamicTypeSize: .accessibility5, named: "welcome-ax5")
     }
 
-    @Test func welcomeOnIPad() {
+    @Test(.ipadSnapshots) func welcomeOnIPad() {
         assertWindowSnapshot(welcomeView, in: .portrait, backdrop: .floor, named: "welcome-ipad-portrait")
         assertWindowSnapshot(welcomeView, in: .landscape, backdrop: .floor, named: "welcome-ipad-landscape")
     }
@@ -85,7 +85,7 @@ struct OnboardingSnapshotTests {
             OnboardingPrivacyStep(model: model()), dynamicTypeSize: .accessibility5, named: "privacy-ax5")
     }
 
-    @Test func privacyStepOnIPad() {
+    @Test(.ipadSnapshots) func privacyStepOnIPad() {
         assertWindowSnapshot(
             OnboardingPrivacyStep(model: model()), in: .landscape, backdrop: .floor, named: "privacy-ipad-landscape")
     }

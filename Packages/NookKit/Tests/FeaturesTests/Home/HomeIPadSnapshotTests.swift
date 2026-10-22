@@ -17,7 +17,7 @@ import UIKit
 /// are drawn at 1x, like every screen snapshot: a 2x picture of a 13-inch screen is several
 /// megabytes and 1x still catches a moved drawing or a changed plate.
 @MainActor
-@Suite(.heavyMainActorWork)
+@Suite(.heavyMainActorWork, .ipadSnapshots)
 struct HomeIPadSnapshotTests {
     static let demo = HomeSnapshotTests.demo
 

@@ -301,6 +301,7 @@ about 4 MB at 2x.
   log), or one that won't encode to PNG (`piecesIPad`). Draw through `stillImage(of:scale:proposedSize:)`
   (`Tests/NookTestSupport/StillImage.swift`): it copies the picture into a plain bitmap and, if no pixel is visible,
   draws again with a new renderer, since a renderer keeps its first picture. A new snapshot helper should use it too.
+- **iPad snapshots are paused** (22 October 2026). Every iPad snapshot case carries the `.ipadSnapshots` trait and skips itself unless `NOOK_IPAD_SNAPSHOTS=1` (`scripts/test.sh` passes it on; `Tests/NookTestSupport/IPadSnapshots.swift` reads it). The references stay in git. They draw iPad-sized windows with `ImageRenderer`, so they don't need an iPad simulator. A new iPad snapshot test gets the trait too. Turning them back on is in the main README under CI.
 - **iPad screens** (Phases 15a and 15b, `docs/ipad.md`) are drawn at 1x with the same tolerances: a whole 13-inch window at
   2x is several megabytes, and 1x still catches a moved drawing or a changed line of text.
 - **Snapshot policy** (after the Stage A audit). The PNGs live in git, so every one costs every clone, and every
