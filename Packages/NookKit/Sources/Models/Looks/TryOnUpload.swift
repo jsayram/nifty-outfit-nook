@@ -191,6 +191,12 @@ public struct TryOnCall: Sendable, Equatable {
     /// The largest garment photo the phone sends: smaller than the backend's limit, so the faceless
     /// photo and nine garments at their largest still fit in one body.
     public static let garmentSendBytes = 340_000
+    /// The longest side, in pixels, of the faceless photo the phone sends. The backend refuses more
+    /// than the contract's `personMaxPixelsPerSide` (32b): the image service prices by megapixels.
+    public static let personSendSide = 1_280
+    /// The longest side of a garment photo the phone sends. The backend's cap is
+    /// `garmentMaxPixelsPerSide`.
+    public static let garmentSendSide = 768
 
     /// A short revision of what is sent. Names nothing of hers.
     public static func revision(person: Data, garments: [Data]) -> String {

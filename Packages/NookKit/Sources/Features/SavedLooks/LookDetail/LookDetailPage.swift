@@ -237,7 +237,7 @@ struct LookDetailPage: View {
                     }
                 }
             }
-            if services.tryOnPipeline == nil {
+            if services.tryOnPipeline == nil && !services.cloudUnavailable {
                 Text(SharedText.tryOnPicturesSimulated)
                     .nookTextStyle(.finePrint)
                     .foregroundStyle(.nook.textSecondary)

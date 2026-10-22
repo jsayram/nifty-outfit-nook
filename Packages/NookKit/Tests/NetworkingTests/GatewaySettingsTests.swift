@@ -39,6 +39,39 @@ struct GatewaySettingsTests {
         #expect(!GatewaySettings(info: info).usesRealServices)
     }
 
+    // MARK: Release fails closed (32b, L9)
+
+    private static let configured = GatewaySettings(info: [
+        "NookClerkPublishableKey": publishable, "NookAPIBaseURL": "https://beaming-oyster-905.convex.site",
+    ])
+
+    @Test func aReleaseBuildWithNoSettingsHasNoFakes() {
+        // `allowsFakes` is false in a Release build: the app passes it from `#if DEBUG`.
+        #expect(GatewayMode.resolve(settings: GatewaySettings(info: [:]), allowsFakes: false) == .unavailable)
+    }
+
+    @Test(arguments: [
+        ["NookClerkPublishableKey": "", "NookAPIBaseURL": ""],
+        ["NookClerkPublishableKey": "$(CLERK_PUBLISHABLE_KEY)", "NookAPIBaseURL": "$(NOOK_API_BASE_URL)"],
+        // Half set is still not configured.
+        ["NookClerkPublishableKey": GatewaySettingsTests.publishable],
+        ["NookAPIBaseURL": "https://beaming-oyster-905.convex.site"],
+        ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "http://insecure.example"],
+        ["NookClerkPublishableKey": GatewaySettingsTests.secret, "NookAPIBaseURL": "https://a.convex.site"],
+    ])
+    func aReleaseBuildWithMissingOrWrongSettingsNeverFallsBackToTheFakes(info: [String: String]) {
+        #expect(GatewayMode.resolve(settings: GatewaySettings(info: info), allowsFakes: false) == .unavailable)
+    }
+
+    @Test func aDebugBuildWithNoSettingsKeepsTheFakes() {
+        #expect(GatewayMode.resolve(settings: GatewaySettings(info: [:]), allowsFakes: true) == .fake)
+    }
+
+    @Test func configuredSettingsAreTheRealServicesInEveryBuild() {
+        #expect(GatewayMode.resolve(settings: Self.configured, allowsFakes: false) == .real)
+        #expect(GatewayMode.resolve(settings: Self.configured, allowsFakes: true) == .real)
+    }
+
     @Test func aSecretKeyIsNeverTakenForAPublishableOne() {
         #expect(
             GatewaySettings(info: ["NookClerkPublishableKey": GatewaySettingsTests.secret]).clerkPublishableKey == nil)

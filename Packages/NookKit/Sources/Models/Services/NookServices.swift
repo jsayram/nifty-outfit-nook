@@ -97,6 +97,11 @@ public struct NookServices: Sendable {
     /// 30a: true while try-on pictures are simulated on the phone and cost nothing. The image
     /// service (Phase 33) turns it off, and then pictures need styling access.
     public var tryOnIsSimulated = true
+    /// 32b (L9): true in a Release build with no backend settings. There are no fakes to fall back
+    /// to, so every cloud feature (try-on pictures, styling access and picture packs) says it isn't
+    /// available right now and nothing is simulated. Quick ideas and everything on the phone work
+    /// as usual. Always false in Debug builds, tests and previews, which have the fakes.
+    public var cloudUnavailable = false
     /// 33a: real try-on pictures (her face masked on the phone, dressed by the image service, her
     /// head put back on the phone). `nil` keeps Stage A's simulated pictures.
     public var tryOnPipeline: (any TryOnPipeline)?

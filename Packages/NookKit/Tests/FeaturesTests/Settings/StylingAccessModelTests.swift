@@ -41,6 +41,21 @@ struct StylingAccessModelTests {
         #expect(model.groupID != nil)
     }
 
+    /// 32b (L9): with no backend in the build nothing is offered or sold, and StoreKit isn't asked.
+    @Test func offersNothingWhenTheBuildHasNoBackend() async {
+        let store = notSubscribed()
+        var services = services(store)
+        services.cloudUnavailable = true
+        services.tryOnIsSimulated = false  // would sell packs, if the build had a backend
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        #expect(!model.isLoading)
+        #expect(model.cloudUnavailable)
+        #expect(model.offer == nil && !model.showsOffer)
+        #expect(model.packs.isEmpty && !model.showsPacks)
+        #expect(store.purchaseCount == 0)
+    }
+
     @Test func buyingStartsTheFreeMonthOnce() async {
         let store = notSubscribed()
         let model = StylingAccessModel(now: { TestTime.now })

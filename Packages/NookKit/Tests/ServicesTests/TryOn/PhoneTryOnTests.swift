@@ -21,6 +21,13 @@ struct PhoneTryOnTests {
         files = PhotoFileStore(directory: folder, freeSpace: { 10_000_000_000 })
     }
 
+    /// 32b: the backend refuses photos past the contract's pixel caps, so what the phone sends has
+    /// to stay inside them. `TryOnCall` holds the sizes the contract test checks against the caps.
+    @Test func sendsNoMorePixelsThanTheBackendTakes() {
+        #expect(PhoneTryOn.workingSize <= TryOnCall.personSendSide)
+        #expect(PhoneTryOn.garmentSize <= TryOnCall.garmentSendSide)
+    }
+
     func pipeline(_ analyzer: SyntheticPersonAnalyzer = SyntheticPersonAnalyzer()) -> PhoneTryOn {
         PhoneTryOn(analyzer: analyzer, paid: paid, files: files, images: DrawnGarments())
     }
