@@ -10,12 +10,19 @@ public struct GatewayAccountService: AccountService {
     private let appVersion: String
     /// This install's App Attest key (24b), forgotten after the account is deleted.
     private let attestation: AttestationSession?
+    /// 30c: where the account's purchase token goes for StoreKit, set at sign-in, cleared at
+    /// sign-out and deletion.
+    private let purchaseToken: PurchaseAccountToken
 
-    public init(auth: any AuthProvider, client: APIClient, appVersion: String, attestation: AttestationSession? = nil) {
+    public init(
+        auth: any AuthProvider, client: APIClient, appVersion: String, attestation: AttestationSession? = nil,
+        purchaseToken: PurchaseAccountToken = .shared
+    ) {
         self.auth = auth
         self.client = client
         self.appVersion = appVersion
         self.attestation = attestation
+        self.purchaseToken = purchaseToken
     }
 
     public var providerKind: AuthProviderKind { auth.kind }
@@ -40,7 +47,7 @@ public struct GatewayAccountService: AccountService {
     public func whoAmI() async throws(AccountProblem) -> AccountUser {
         do {
             let me = try await client.send(APIV1.me, as: APIV1.Me.self)
-            return AccountUser(id: me.user.id, createdAt: me.user.createdAt)
+            return user(me.user)
         } catch .notRegistered {
             // Signed in, but the session was never registered (for example the app closed right
             // after Apple's sheet). Registering is safe to repeat, so do it now.
@@ -51,6 +58,7 @@ public struct GatewayAccountService: AccountService {
     }
 
     public func signOut() async {
+        purchaseToken.set(nil)
         await auth.signOut()
     }
 
@@ -88,6 +96,7 @@ public struct GatewayAccountService: AccountService {
     }
 
     public func forgetAccountOnThisDevice() async {
+        purchaseToken.set(nil)
         await auth.signOut()
         await attestation?.reset()
     }
@@ -106,10 +115,17 @@ public struct GatewayAccountService: AccountService {
         do {
             let response = try await client.send(
                 APIV1.createSession, body: APIV1.SessionRequest(appVersion: appVersion), as: APIV1.SessionResponse.self)
-            return AccountUser(id: response.user.id, createdAt: response.user.createdAt)
+            return user(response.user)
         } catch {
             throw Self.problem(for: error)
         }
+    }
+
+    /// The account, with its purchase token handed to StoreKit's side (30c). An older backend
+    /// sends none, and then purchases carry none.
+    private func user(_ u: APIV1.User) -> AccountUser {
+        purchaseToken.set(u.appAccountToken.flatMap(UUID.init(uuidString:)))
+        return AccountUser(id: u.id, createdAt: u.createdAt)
     }
 
     static func problem(for failure: APIFailure) -> AccountProblem {

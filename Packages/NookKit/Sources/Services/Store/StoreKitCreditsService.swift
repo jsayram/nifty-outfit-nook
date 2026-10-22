@@ -21,6 +21,8 @@ import UIKit
 public final class StoreKitCreditsService: CreditsService {
     private let productIDs: Set<String>
     private let claimer: any CreditClaiming
+    /// 30c: the account token purchases carry, so Apple's notification names the account.
+    private let purchaseToken: PurchaseAccountToken
     /// Where recovery finds packs paid for but not credited: `Transaction.unfinished` in the app. Tests
     /// pass their own, because Xcode's StoreKit test environment drops an unfinished consumable
     /// from `Transaction.unfinished` about a second after it first lists it (30b, iOS 26.5
@@ -36,12 +38,14 @@ public final class StoreKitCreditsService: CreditsService {
 
     public init(
         productIDs: Set<String> = CreditPacks.all, claimer: any CreditClaiming,
+        purchaseToken: PurchaseAccountToken = .shared,
         unfinished: @escaping @Sendable () async -> [VerificationResult<Transaction>] = {
             await StoreKitCreditsService.allUnfinished()
         }
     ) {
         self.productIDs = productIDs
         self.claimer = claimer
+        self.purchaseToken = purchaseToken
         self.unfinished = unfinished
     }
 
@@ -107,7 +111,8 @@ public final class StoreKitCreditsService: CreditsService {
         }
         let result: Product.PurchaseResult
         do {
-            result = try await Self.buy(product)
+            result = try await StoreKitSubscriptionService.buy(
+                product, options: StoreKitSubscriptionService.purchaseOptions(token: purchaseToken.current))
         } catch {
             return .failed(StoreKitSubscriptionService.problem(for: error))
         }
@@ -190,16 +195,5 @@ public final class StoreKitCreditsService: CreditsService {
     private func broadcast(_ balance: Int) {
         let streams = state.withLock { Array($0.streams.values) }
         for stream in streams { stream.yield(balance) }
-    }
-
-    /// Apple's sheet, shown over the active window when there is one.
-    @MainActor private static func buy(_ product: Product) async throws -> Product.PurchaseResult {
-        let scene =
-            UIApplication.shared.connectedScenes
-            .first { $0.activationState == .foregroundActive } as? UIWindowScene
-        if let scene {
-            return try await product.purchase(confirmIn: scene)
-        }
-        return try await product.purchase()
     }
 }

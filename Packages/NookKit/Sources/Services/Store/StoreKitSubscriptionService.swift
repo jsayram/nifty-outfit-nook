@@ -20,6 +20,10 @@ import UIKit
 ///   never grants past the dates Apple gave, so a stale cache can't stretch access.
 /// - Nothing here is proof for the server: paid requests carry the status as a hint, and the
 ///   server checks Apple's records itself (30c).
+/// - 30c: purchases carry the account's `appAccountToken` (from the server), so Apple's server
+///   notifications name the account; and every read of the status sends the subscription's and
+///   the unlock's signed transactions to the server once per launch (`StylingAccessClaiming`),
+///   which is how an offer-code unlock, or a purchase made signed out, reaches the account.
 public final class StoreKitSubscriptionService: SubscriptionService {
     private let productID: String
     private let complimentaryID: String
@@ -32,6 +36,9 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     /// Restore's sync with the App Store. `AppStore.sync()` in the app; it can ask her to sign in
     /// to her Apple Account, so tests (which must never sign in) pass their own.
     private let sync: @Sendable () async throws -> Void
+    /// 30c: the server's claim endpoint, and the token purchases carry. No claimer: nothing is sent.
+    private let claimer: (any StylingAccessClaiming)?
+    private let purchaseToken: PurchaseAccountToken
     private let state = Mutex(State())
 
     private struct State {
@@ -40,6 +47,9 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         var streams: [UUID: AsyncStream<Models.SubscriptionStatus>.Continuation] = [:]
         /// When the last verified purchase in this process happened.
         var purchasedAt: Date?
+        /// 30c: transactions the server has taken in this process, so each is sent once.
+        var claimed: Set<UInt64> = []
+        var claiming = false
     }
 
     /// - Parameters:
@@ -50,6 +60,7 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         complimentaryID: String = SubscriptionProducts.complimentary, cache: any SubscriptionStatusCache,
         catchUpWindow: TimeInterval = 60,
         sync: @escaping @Sendable () async throws -> Void = { try await AppStore.sync() },
+        claimer: (any StylingAccessClaiming)? = nil, purchaseToken: PurchaseAccountToken = .shared,
         now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.productID = productID
@@ -57,6 +68,8 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         self.cache = cache
         self.catchUpWindow = catchUpWindow
         self.sync = sync
+        self.claimer = claimer
+        self.purchaseToken = purchaseToken
         self.now = now
     }
 
@@ -103,6 +116,7 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         let read = await readStatus()
         let kept = keepJustBought(over: read)
         cache.save(kept)
+        claimWithServer()
         return kept
     }
 
@@ -144,12 +158,13 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         }
         let result: Product.PurchaseResult
         do {
-            result = try await Self.buy(product)
+            result = try await Self.buy(product, options: Self.purchaseOptions(token: purchaseToken.current))
         } catch {
             return .failed(Self.problem(for: error))
         }
         switch result {
         case .success(.verified(let transaction)):
+            defer { claimWithServer() }
             // Read the status from the transaction itself: StoreKit's status can take a moment
             // to catch up after a purchase.
             let status = await statusAfterPurchase(transaction)
@@ -273,6 +288,33 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         return status
     }
 
+    /// 30c: sends the subscription's and the unlock's current signed transactions to the server,
+    /// each once per launch, in the background. A failure (signed out, offline) is tried again at
+    /// the next status read; the server takes a repeat as the same claim.
+    private func claimWithServer() {
+        guard let claimer else { return }
+        let start = state.withLock { state -> Bool in
+            guard !state.claiming else { return false }
+            state.claiming = true
+            return true
+        }
+        guard start else { return }
+        Task.detached(priority: .utility) { [weak self] in
+            guard let self else { return }
+            defer { self.state.withLock { $0.claiming = false } }
+            for id in [self.productID, self.complimentaryID] {
+                for await result in Transaction.currentEntitlements(for: id) {
+                    guard case .verified(let transaction) = result,
+                        !self.state.withLock({ $0.claimed.contains(transaction.id) })
+                    else { continue }
+                    if (try? await claimer.claimStylingAccess(signedTransaction: result.jwsRepresentation)) != nil {
+                        self.state.withLock { _ = $0.claimed.insert(transaction.id) }
+                    }
+                }
+            }
+        }
+    }
+
     private func broadcast(_ status: Models.SubscriptionStatus) {
         let streams = state.withLock { Array($0.streams.values) }
         for stream in streams { stream.yield(status) }
@@ -374,15 +416,24 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         return .failed
     }
 
+    /// 30c: what every purchase carries: the account's token when signed in, so Apple's server
+    /// notifications can be matched to the account. Nothing else.
+    public static func purchaseOptions(token: UUID?) -> Set<Product.PurchaseOption> {
+        guard let token else { return [] }
+        return [.appAccountToken(token)]
+    }
+
     /// Apple's sheet, shown over the active window when there is one.
-    @MainActor private static func buy(_ product: Product) async throws -> Product.PurchaseResult {
+    @MainActor static func buy(_ product: Product, options: Set<Product.PurchaseOption>) async throws
+        -> Product.PurchaseResult
+    {
         let scene =
             UIApplication.shared.connectedScenes
             .first { $0.activationState == .foregroundActive } as? UIWindowScene
         if let scene {
-            return try await product.purchase(confirmIn: scene)
+            return try await product.purchase(confirmIn: scene, options: options)
         }
-        return try await product.purchase()
+        return try await product.purchase(options: options)
     }
 }
 

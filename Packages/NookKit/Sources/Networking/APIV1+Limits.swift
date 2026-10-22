@@ -45,6 +45,8 @@ extension APIV1 {
         public var policyVersion: Int
         /// 30b: her picture-credit balance. Optional here so an older backend still decodes.
         public var credits: CreditBalance?
+        /// 30c: the server's view of styling access. Absent from older backends.
+        public var styling: StylingAccess?
     }
 
     public struct AttestChallenge: Codable, Sendable, Equatable {

@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "entitlement_required",
+    "message": "Styling access is needed for this.",
+    "requestId": "req_5f9d2e8a3b4c5d6e7f8a9b0c1d2e3f4a",
+    "feature": "style"
+  }
+}

@@ -1,6 +1,6 @@
-# Payments: the styling subscription, the complimentary unlock and picture credits (Phases 30a and 30b)
+# Payments: the styling subscription, the complimentary unlock and picture credits (Phases 30a to 30c)
 
-Status: built 22 October 2026 against Xcode's local StoreKit testing. The real products need App Store Connect, which is Jose's job (steps below). 30b added the complimentary unlock (an offer code) and picture packs, with crediting mocked on the server. Phase 30c (Apple's signature checked on the server, App Store Server Notifications, refunds, the gateway spending credits) comes next.
+Status: built 22 October 2026 against Xcode's local StoreKit testing. The real products need App Store Connect, which is Jose's job (steps below). 30b added the complimentary unlock (an offer code) and picture packs. 30c made the server the authority: it verifies Apple's signature on every purchase, follows App Store Server Notifications (renewals, expiry, grace periods, refunds, revocations), and decides styling access and picture credits itself.
 
 Spec: PRD §14 (one monthly auto-renewable subscription, a free first month for eligible users, Restore, Manage subscription, terms and privacy links, closet always free), the paywall and access mockups (`paywall.html`, `access.html`), `closet/compliance/IN_APP_PRIVACY_TEXT.md` "Phase 30a: before paying", and App Review Guideline 3.1.2.
 
@@ -20,6 +20,8 @@ Spec: PRD §14 (one monthly auto-renewable subscription, a free first month for 
 | `Services/Store/StoreKitCreditsService.swift` | 30b: packs through StoreKit: purchase, claim, then `finish()`; recovery of unfinished packs; its own `Transaction.updates` listener |
 | `Networking/GatewayCreditClaimer.swift`, `APIV1+Credits.swift`, `Fake/FakeBackend+Credits.swift` | 30b: POST /v1/credits/claim, its bodies, and the fake backend's side |
 | `Fixtures/Providers/ScriptedCreditsService.swift` | 30b: scripted packs for tests and `-subscription` debug launches |
+| `Models/Services/PurchaseClaims.swift` | 30c: `StylingAccessClaiming` (POST /v1/entitlements/claim) and `PurchaseAccountToken` (the account's `appAccountToken`) |
+| `Networking/GatewayCreditClaimer.swift`, `Fake/FakeBackend+Credits.swift` | 30c: also the styling-access claim, and the fake's side of it |
 
 ## Products
 
@@ -43,7 +45,14 @@ The app never types a price or a date: the price, period and trial come from Sto
 - **Access** (`hasStylingAccess(at:)`): a verified trial or paid month until its expiry date, and Apple's billing grace period until it ends. Billing retry without grace, expired, revoked and none give nothing. PRD §14.3.
 - **Stale data**: the cache only lets the app show something before StoreKit answers. A cached status never grants past the dates Apple gave: a free month that has ended reads as expired until StoreKit says it renewed. Unverified transactions are finished and never granted.
 - **After a purchase** StoreKit's status can lag a few hundred milliseconds. The status comes from the purchased transaction itself, and an empty answer from StoreKit within 60 seconds of a purchase doesn't erase it (still bounded by its own dates).
-- **Not proof**: the server is the authority (SECURITY_STANDARD §8). Paid requests carry `X-Nook-Entitlement-Hint` (none, trial, active, grace, billing-retry, expired, revoked), worked out when each request is sent. The contract says it's a hint; neither the fake nor the real backend admits or refuses anything because of it. 30c adds the server's own check against Apple.
+- **Not proof**: the server is the authority (SECURITY_STANDARD §8). Paid requests carry `X-Nook-Entitlement-Hint` (none, trial, active, grace, billing-retry, expired, revoked), worked out when each request is sent. The contract says it's a hint; neither the fake nor the real backend admits or refuses anything because of it.
+
+## The server's record (30c)
+
+- **Verified on the server**: every signed transaction the app sends, and every App Store Server Notification, is checked against Apple's certificate chain up to the pinned Apple Root CA - G3, then for this app's bundle ID and the deployment's environment (production takes production purchases, dev takes sandbox ones). The backend uses no library for it (backend README, "App Store purchases").
+- **Linking purchases to her account**: the server gives each account a random `appAccountToken` (in `POST /v1/session` and `GET /v1/me`). `GatewayAccountService` hands it to `PurchaseAccountToken`, and every StoreKit purchase (the subscription and the packs) carries it, so Apple's notifications name the account. Sign-out and deletion clear it. Offer codes can't carry it, so every status read sends the subscription's and the unlock's current signed transactions to `POST /v1/entitlements/claim`, once per launch each. That's also how a purchase made signed out reaches the account. A purchase another account already claimed is refused.
+- **Access on the server**: from Apple's dates when asked: the unlock until refunded or revoked, the subscription (free month included) until it expires, then through Apple's billing grace period. A refund, a Family Sharing revocation, the end of grace or expiry ends it even if a notification is late. Style Me and try-on without access get `entitlement_required` (403); this app reads it as "This account can't do that." for now, since Style Me doesn't check styling access itself yet (a question below).
+- **Credits on the server**: a ledger that only grows: a grant per pack (from the app's claim, or from Apple's ONE_TIME_CHARGE notification), one spend per try-on picture (never twice for the same request), the picture back when it fails, and a refund taking the pack back. If some were already spent, the balance stops at zero and the rest is recorded as owing, never charged and never taken from a later pack. Try-on uses the month's included pictures first (with styling access), then a credit; credits work without a subscription.
 - **Listener**: `AppSubscriptions.service` starts `Transaction.updates` at launch, finishes every transaction, reads the status again and tells every screen that's listening (refunds, renewals, approved Ask to Buy, purchases on another device).
 
 ## The complimentary unlock (30b)
@@ -52,14 +61,14 @@ The app never types a price or a date: the price, period and trial come from Sto
 - **Redeeming**: Styling access → Redeem a code opens Apple's own sheet (`offerCodeRedemption`; Apple doesn't allow a custom one). On iOS 27 the sheet returns the transaction; on iOS 26 it arrives through `Transaction.updates`. Either way `redeemedOfferCode()` finishes it and reads the status again, and the screen says "Your code is redeemed. Styling access is on." when the unlock shows up, even if it comes a moment later.
 - **The status**: `SubscriptionStatus.complimentarySince`, read from `Transaction.currentEntitlements(for:)`, which leaves out anything Apple refunded or revoked. It gives access on top of whatever the subscription says, never stretches a subscription's dates, and the hint on paid requests says `complimentary`.
 - **With a subscription**: redeeming doesn't cancel a subscription that still renews or refund it. The screen says so and keeps Manage subscription (PRD 14.2).
-- **Lily's sponsored policy** (PRD 14.4: no public allowances for her, an owner-funded budget) is server-side and needs Jose's confirmation of her account. It isn't built yet; the unlock alone gives her the public allowances. Planned for 30c or later.
+- **Lily's sponsored policy** (PRD 14.4: no public allowances for her, an owner-funded budget): 30c built a server-side plan override that only an admin can set, and gave it to nobody. It waits on Jose's confirmation of her account and budget; until then the unlock gives her the public allowances.
 
 ## Picture credits (30b)
 
 - **Buying**: Styling access shows "Extra try-on pictures" with one button per pack ("10 pictures, $2.99", price from StoreKit) only once try-on pictures cost something (`tryOnIsSimulated` false, Phase 33) and the server has said her balance. Until then the packs stay hidden, so Lily's TestFlight doesn't change.
 - **Crediting**: after Apple's sheet, the app sends the transaction's signed JWS to `POST /v1/credits/claim` and calls `finish()` only after the server answers 200. The server reads the transaction ID and product from the JWS (never from the app), credits the pack size from its own list, and credits each transaction ID once: a repeat from the same account gets the first grant back (`replayed`), another account gets `forbidden`.
 - **Never lost**: if the claim fails for any reason (offline, signed out, server busy or refusing), the transaction stays unfinished. The app claims it again at launch (`recoverUnfinished()` in `AppSubscriptions.follow()`), when Styling access opens, and when StoreKit re-sends it through `Transaction.updates`. The subscription's listener leaves consumables alone for this. An unverified transaction is never claimed or finished.
-- **Mocked until 30c**: the backend doesn't check Apple's signature yet, so crediting is on only when `NOOK_CREDITS_MODE=mock` (local and test deployments). Anywhere else the endpoint answers `unavailable` and the app keeps the purchase open. 30c verifies the JWS, takes credits back after a refund and makes the gateway spend them.
+- **Verified since 30c**: the backend checks Apple's signature before crediting (`NOOK_APPSTORE_MODE=apple`, or `test` with a test root on local and test deployments). With the checks off the endpoint answers `unavailable` and the app keeps the purchase open. A purchase Apple refunded is `forbidden`.
 - **Balance**: `GET /v1/usage` carries `credits.pictures`. Styling access shows "Picture credits: 12 left" next to the try-on allowance. Credits don't expire and work without a subscription (PRD 14.4, Guideline 3.1.1).
 - **Spending order** (PRD 14.4): a try-on picture uses the month's included pictures first, then a credit (`TryOnFunding`). The try-on sheet says which before she taps, and offers nothing once both are used. The gateway enforces it in 30c; until Phase 33 pictures are simulated and free.
 - **Recovery across devices**: the balance belongs to her signed-in account on the server, so a reinstall or a new iPhone shows the same balance after sign-in. Restore purchases can't rebuild consumables (Apple doesn't restore them), which is why the server keeps the ledger.
@@ -101,7 +110,7 @@ Do these before a TestFlight build can sell anything. Sandbox and TestFlight pur
 7. **Review information**: a screenshot of Styling access (the paywall), and a review note: "Profile → Styling access. The closet is free; Style Me, swaps, Ask stylist and try-on pictures use the subscription. Restore purchases and Manage subscription are on the same screen."
 8. **Billing grace period**: App → Subscriptions → Billing Grace Period → on, 16 days, for all renewals (the app handles it either way).
 9. **Family Sharing**: leave off unless Jose decides otherwise (it can be turned on later, not off).
-10. **App Store Server Notifications** (needed for 30c, set now or then): App Information → App Store Server Notifications → Version 2, production and sandbox URLs on the Convex HTTP action 30c builds.
+10. **App Store Server Notifications** (30c): see "30c: server notifications and switching on verification" below.
 11. **Legal links**: App Information → License Agreement (Apple's standard EULA, or a custom one), and the privacy policy URL. Apple asks for a terms of use (EULA) link in the app description too, for auto-renewable subscriptions.
 12. **Attach to the version**: on the first version that sells it, App Store → the version → In-App Purchases and Subscriptions → select the subscription, and submit them together.
 13. **Sandbox testers**: Users and Access → Sandbox → add a tester, then on the iPhone, Settings → Developer → Sandbox Apple Account. Check: buy, restore after reinstalling, cancel in Manage subscription, and that a sandbox month renews every 5 minutes.
@@ -117,7 +126,16 @@ Do these before a TestFlight build can sell anything. Sandbox and TestFlight pur
 ### 30b: picture packs
 
 19. **Packs**: In-App Purchases → create two Consumables: `com.jsayram.niftyoutfitnook.pictures.small` ("10 try-on pictures") and `com.jsayram.niftyoutfitnook.pictures.large` ("30 try-on pictures"), with the final prices (US$2.99 and US$6.99 are placeholders). If the sizes change, change `CREDIT_PACKS` in the backend's `convex/credits.ts` and `CreditPacks.pictures` in the app together, before release. Review note: "Extra try-on pictures; credits never expire and work without a subscription. Shown in Styling access once try-on pictures are on."
-20. **Hold them back** until 30c verifies purchases on the server and Phase 33 makes pictures real: the app doesn't show packs before then, and the backend's crediting is off outside mock mode.
+20. **Hold them back** until Phase 33 makes pictures real: the app doesn't show packs before then. (30c verifies them on the server.)
+
+### 30c: server notifications and switching on verification
+
+21. **The app's Apple ID**: App Information → General Information → Apple ID (a number). Set it on the production deployment: `npx convex env set NOOK_APP_APPLE_ID <number>`. Without it production verifies nothing.
+22. **Dev (sandbox) first**: on the dev deployment run `npx convex env set NOOK_APPSTORE_MODE apple` and `npx convex env set NOOK_APPSTORE_ENVIRONMENT Sandbox`, then deploy (`npx convex dev --once`).
+23. **Notification URLs**: App Information → App Store Server Notifications. Choose **Version 2** for both. Production Server URL: `https://<production deployment>.convex.site/appstore/v2/notifications`. Sandbox Server URL: `https://beaming-oyster-905.convex.site/appstore/v2/notifications` (dev). Save.
+24. **Test it**: in App Store Connect there's no button for it; the App Store Server API's "Request a Test Notification" sends one, which needs an App Store Connect API key (In-App Purchase type). Simpler: buy the subscription in the sandbox on a device signed in to dev, then check the dev deployment's logs for `"route":"appStoreNotification","status":200,"outcome":"subscription:subscribed"`. A `400` with `rejected:environment` means the deployment's environment doesn't match the URL; `503` means `NOOK_APPSTORE_MODE` isn't set.
+25. **Production**: on the production deployment set `NOOK_APPSTORE_MODE apple` and `NOOK_APP_APPLE_ID` (leave `NOOK_APPSTORE_ENVIRONMENT` unset: it defaults to Production). Never set `NOOK_APPSTORE_MODE test` or `NOOK_APPSTORE_TEST_ROOT` there (test mode refuses production purchases anyway).
+26. **Refund check in the sandbox**: refund a sandbox purchase (Settings → Developer → Sandbox Apple Account → manage, or Apple's sandbox refund flow), then confirm Style Me answers `entitlement_required` on the dev deployment.
 
 ## Questions for Jose
 
@@ -130,5 +148,8 @@ Do these before a TestFlight build can sell anything. Sandbox and TestFlight pur
 7. May an agent use an iOS 27.0 simulator once to find out why the StoreKit tests get no products there (see Testing)? Until then they run locally on iOS 26.5 and are skipped on CI.
 8. (30b) Pack sizes and prices: 10 pictures for US$2.99 and 30 for US$6.99 are placeholders. What should they be?
 9. (30b) The unlock's App Store price (placeholder US$49.99). Any price works since nobody buys it; a high one makes accidental purchase pointless if Apple ever shows it.
-10. (30b) Lily's sponsored policy (PRD 14.4: no public allowances, an owner-funded budget): build it in 30c, keyed to her signed-in account after you confirm it's her, or later?
-11. (30b) After an account deletion the backend deletes her credit grants with everything else. Should unspent paid credits instead be kept for a time, or refunded through Apple? (30c decides how long billing records are kept.)
+10. (30b, 30c) Lily's sponsored policy: the server's plan override is built and given to nobody. Confirm her signed-in account (its `usr_` ID) and her 30-day budget (placeholder US$5), and an admin sets it.
+11. (30b, 30c) After an account deletion the backend deletes her credit ledger and entitlements with everything else, so unspent paid credits are forfeited. Keep them for a time instead (they would need to survive under a keyed hash, like kept usage), or leave it?
+12. (30c) Style Me doesn't check styling access in the app: once the real backend is on, someone without access gets "This account can't do that." from the server. Add a Styling access prompt to Style Me (and swaps and Ask stylist) in a small app phase?
+13. (30c) Apple's CONSUMPTION_REQUEST (a refund request asking how much was used) is recorded and alerted but not answered. Answering needs an App Store Server API key and her consent to share it. Answer them, or let Apple decide without the data?
+14. (30c) A refund after credits were spent leaves "owing", which is never charged or taken from a later pack. Keep it that way, or take it from the next pack?

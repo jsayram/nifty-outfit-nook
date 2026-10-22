@@ -1,0 +1,8 @@
+{
+  "productId": "com.jsayram.niftyoutfitnook.styling.monthly",
+  "styling": {
+    "access": true,
+    "source": "subscription",
+    "expiresAt": "2026-11-22T09:00:00.000Z"
+  }
+}
