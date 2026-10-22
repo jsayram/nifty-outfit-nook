@@ -384,30 +384,32 @@ jobs:
   # another test's screens at the largest text size, skips itself (NOOK_PR_RUN above) and runs
   # only in a manual full-suite run, which is what the sizes below are.
   #
-  # Rebalanced on 22 October 2026, from the full suite's two batch runs that day (39830667919
-  # and 39853441466, seconds of tests per class from the test log). With three parts, ui-rest
-  # had about 1950 seconds of tests plus a retry and a 4-minute build, and hit the 40-minute
-  # cap both times (it had two more minutes of tests to go), while the other two had 1470 and
-  # 1610 and finished in 35. Four parts of about 1250 seconds each finish in 25 or 26 minutes,
-  # with the build ready. The free plan runs five macOS jobs at once: with the build job on the
-  # Mac that is these four plus ui-ipad.
-  # A class can take 1.5 to 2 times as long from one run to the next, and a failed test that
-  # retries adds its own time again.
+  # Rebalanced on 22 October 2026, from the full suite's runs that day (39830667919,
+  # 39853441466 and 39860006609; seconds of tests per class from the test log, the mean of the
+  # runs that had it). With three parts, ui-rest had about 1950 seconds of tests plus a retry
+  # and a 4-minute build, and hit the 40-minute cap in both batches (it had two more minutes
+  # of tests to go), while the other two had 1470 and 1610 and finished in 35. The first run of
+  # four parts finished in 20, 25, 31 and 35 minutes: the same classes take up to 1.4 times as
+  # long on one hosted VM as on another, and the 35-minute part had been planned from one run's
+  # times, 190 seconds too light (WeatherTests has moved out of it). Parts of about 1250 seconds each finish in about 25
+  # minutes on an average VM and in about 33 on a slow one. The free plan runs five macOS jobs
+  # at once: with the build job on the Mac that is these four plus ui-ipad.
+  # A failed test that retries adds its own time again.
   #   (build-and-archive)     CatalogTests, ProfileTests, CutoutBenchTests, and every package test
-  #   ui-audit-and-settings   AccessibilityAuditTests 783, SettingsTests 225, and the large-text
-  #                           audits of Closet and Profile 250 (about 1260)
-  #   ui-large-text-and-add   the other seven large-text audits 818 (DeleteMyAccount alone is 332),
-  #                           AddPieceTests 215, HomeTourTests 115, OnboardingTests 56,
-  #                           BackupsTests 29 (about 1230)
-  #   ui-saved-tours-and-jobs SavedLooksTests 200, ScreenToursTests 179, HomeVariantTests 101,
-  #                           LaunchTests 88, StylingAccessTests 26, AccountDeletionTests 252,
-  #                           BackgroundJobsTests 213, WeatherTests 166 (about 1225)
+  #   ui-audit-and-settings   AccessibilityAuditTests 690, SettingsTests 200, the large-text
+  #                           audits of Closet and Profile 215, WeatherTests 193 (about 1300)
+  #   ui-large-text-and-add   the other seven large-text audits 830 (DeleteMyAccount alone is 313),
+  #                           AddPieceTests 210, HomeTourTests 118, OnboardingTests 58,
+  #                           BackupsTests 30 (about 1250)
+  #   ui-saved-tours-and-jobs SavedLooksTests 225, ScreenToursTests 214, HomeVariantTests 119,
+  #                           LaunchTests 99, StylingAccessTests 29, AccountDeletionTests 251,
+  #                           BackgroundJobsTests 290 (about 1230)
   #   ui-rest                 ClosetTests, YourLooksTests, GarmentDetailTests, SupportFeedbackTests,
   #                           StyleMeTests, SuitcasesAndLaundryTests, HomeTests, LimitsLabTests,
   #                           CloudStylistTests, GatewayLabTests, SwapTests, SignInAndReportTests,
   #                           MakeYourOwnLookTests, TryOnPhotoSetupTests, TryOnTests,
   #                           DeviceChecksTests, PrivacyWalkthroughTests, and any new class or test
-  #                           (about 1240, 1310 with the retries seen)
+  #                           (about 1220)
   #   ui-ipad (paused)        IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone. Every part, the iPad one too, tests what
@@ -434,6 +436,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/SettingsTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
+              -only-testing:NiftyOutfitNookUITests/WeatherTests
           - part: ui-large-text-and-add
             family: iPhone
             selection: >-
@@ -458,7 +461,6 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/StylingAccessTests
               -only-testing:NiftyOutfitNookUITests/AccountDeletionTests
               -only-testing:NiftyOutfitNookUITests/BackgroundJobsTests
-              -only-testing:NiftyOutfitNookUITests/WeatherTests
           # Every other UI test, so a new class or test is never left out: this part names only
           # what the others run, and skips exactly that.
           - part: ui-rest
