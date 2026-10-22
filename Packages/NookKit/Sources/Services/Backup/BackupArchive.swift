@@ -173,9 +173,18 @@ struct BackupArchiveReader {
         else { throw BackupError.damaged }
 
         let available = freeSpace?() ?? Self.volumeSpace(at: staging)
-        let needed = manifest.files.values.reduce(Int64(0)) { $0 + max($1.size, 0) }
-        guard needed + limits.freeSpaceMargin <= available else {
-            throw BackupError.notEnoughSpace(needed: needed + limits.freeSpaceMargin)
+        // 32b: summed without overflow. A crafted manifest with sizes near Int64.max made `+` trap
+        // and end the app; now it is damaged, like any other size the files can't have.
+        var needed: Int64 = 0
+        for file in manifest.files.values {
+            let (sum, overflow) = needed.addingReportingOverflow(max(file.size, 0))
+            guard !overflow else { throw BackupError.damaged }
+            needed = sum
+        }
+        let (neededWithMargin, marginOverflow) = needed.addingReportingOverflow(limits.freeSpaceMargin)
+        guard !marginOverflow else { throw BackupError.damaged }
+        guard neededWithMargin <= available else {
+            throw BackupError.notEnoughSpace(needed: neededWithMargin)
         }
 
         var seen: Set<String> = [BackupFormat.manifestPath]
@@ -192,7 +201,7 @@ struct BackupArchiveReader {
             seen.insert(entry.path)
             staged += entry.size
             guard staged + limits.freeSpaceMargin <= available else {
-                throw BackupError.notEnoughSpace(needed: needed + limits.freeSpaceMargin)
+                throw BackupError.notEnoughSpace(needed: neededWithMargin)
             }
             let hash = try stage(entry, from: decoder, under: staging)
             guard hash == expected.sha256 else { throw BackupError.damaged }

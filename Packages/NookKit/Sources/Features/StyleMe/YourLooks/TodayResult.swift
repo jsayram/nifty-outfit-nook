@@ -288,7 +288,7 @@ struct ResultActions: View {
                 swap
                 ask
             }
-            if needsConnection || services.tryOnPipeline == nil {
+            if needsConnection || (services.tryOnPipeline == nil && !services.cloudUnavailable) {
                 finePrint
             }
         }

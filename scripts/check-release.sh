@@ -6,9 +6,20 @@
 # the sample data (Fixtures/Sets and the sample photo providers, Phase 20a), and that the
 # debug-only launch arguments (-catalog, -cutout-bench, Phase 16a's -tour, Phase 17's -onboarding,
 # -toasts-stay and -animations, Phase 20a's -fixtures, the device checks' -device-checks,
-# -make-old-store, -migration-kill-at and -migration-pause-at, 33a's -seed-tryon and
+# -make-old-store, -migration-kill-at and -migration-pause-at, and 33a's -seed-tryon and
 # -cloud-tryon, and 33b's -fake-camera) aren't in it. 33a: nor is the drawn stand-in person the
 # simulator uses (SyntheticPerson), nor 33b's stand-in camera (FakeTryOnCamera).
+# Phase 32b added the later debug screens and switches: the gateway and limits
+# labs, the diagnostics lab, the fake sign-in, the cloud stylist against the fake backend, the
+# seeded photo closet, the sample feedback screenshot, frame stats and the weather test switches.
+#
+# 32b (L9): a Release build fails closed. The in-process fake backend and fake sign-in are compiled
+# only into Debug (FakeGateway and everything under Networking/Fake is inside `#if DEBUG` or
+# unreachable from Release code), so a Release build with no backend settings has no fake to fall
+# back to. The check looks for the fakes' type names in the Release binary and for the fake
+# backend's host (a name under .invalid): if code in Release can reach the fakes, the binary has
+# them. This is the reliable check (a binary can't tell us which settings it was built with, and
+# CI archives are built without any on purpose).
 #
 # It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
 # or test-support resource bundle, or any file with the name of one of the repo's sample photos
@@ -40,19 +51,29 @@ text="$(strings "$binary")"
 failed=0
 for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting \
     DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
-    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson FakeTryOnCamera DebugTryOnCamera; do
+    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson \
+    GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot \
+    FakeGateway FakeBackend FakeAuthProvider FakeDeviceAttester FakeStylist FakeTryOn FakeToken FakeTryOnCamera DebugTryOnCamera; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
     fi
 done
 for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animations -fixtures \
-    -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon -fake-camera; do
+    -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon \
+    -gateway-lab -limits-lab -diagnostics-lab -diagnostics-sample-reports -fake-signed-in -cloud-stylist \
+    -seed-photo-closet -feedback-sample-screenshot -frame-stats -weather-cities -weather-location \
+    -weather-settings-memory -fake-camera; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1
     fi
 done
+# The fake backend's address (fake-<random>.backend.invalid): nothing in Release may name it.
+if grep -q -- "\.backend\.invalid" <<<"$text"; then
+    echo "Release binary contains the fake backend's address" >&2
+    failed=1
+fi
 if [[ -d "$(dirname "$binary")/Frameworks" ]] && ls "$(dirname "$binary")/Frameworks" | grep -qi snapshot; then
     echo "Release app bundles a snapshot-testing framework" >&2
     failed=1
@@ -147,4 +168,4 @@ fi
 if [[ $failed -ne 0 ]]; then
     exit 1
 fi
-echo "Release app has no catalog, benchmark, snapshot-testing code, sample data code, sample photos or secrets"
+echo "Release app has no catalog, benchmark, snapshot-testing code, fake backend, sample data code, sample photos or secrets"

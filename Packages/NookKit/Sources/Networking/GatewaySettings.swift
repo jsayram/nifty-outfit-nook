@@ -6,7 +6,8 @@ import Foundation
 /// public repo until Jose sets up the services (docs/backend-switch.md).
 ///
 /// With both set, the app signs in through Clerk and calls the Convex deployment. With either
-/// missing or malformed, it runs on the fake sign-in and the in-process fake backend.
+/// missing or malformed, a Debug build runs on the fake sign-in and the in-process fake backend,
+/// and a Release build runs on nothing: cloud features say they aren't available (`GatewayMode`).
 public struct GatewaySettings: Sendable, Equatable {
     public static let publishableKeyInfoKey = "NookClerkPublishableKey"
     public static let apiBaseURLInfoKey = "NookAPIBaseURL"
@@ -49,39 +50,23 @@ public struct GatewaySettings: Sendable, Equatable {
     }
 }
 
-/// The gateway the app runs on without a Clerk key: the fake sign-in and the in-process fake
-/// backend, through the same `APIClient` and `GatewayAccountService` the real one uses.
-public struct FakeGateway: Sendable {
-    public let auth: FakeAuthProvider
-    public let backend: FakeBackend
-    public let account: GatewayAccountService
-    /// 24b: paid actions, signed by a stand-in for App Attest (the simulator can't attest).
-    public let attester: FakeDeviceAttester
-    public let paid: GatewayPaidActionService
-    /// 24d: notes to the support queue.
-    public let feedback: GatewayFeedbackService
-    /// 30b: picture-credit claims.
-    public let credits: GatewayCreditClaimer
+/// Which gateway a build runs on. Decided once, from the settings and the build kind.
+///
+/// Release fails closed (32b, L9): with the settings missing, a Release build has no fake sign-in
+/// and no fake backend to fall back to, so it reports `.unavailable` and the cloud features show a
+/// calm "not available right now". `FakeGateway` doesn't exist in a Release build at all
+/// (`scripts/check-release.sh` checks the binary).
+public enum GatewayMode: Sendable, Equatable {
+    /// Clerk and the Convex deployment.
+    case real
+    /// The in-process fakes. Debug builds only.
+    case fake
+    /// No backend: signed out, nothing cloud works, nothing is simulated.
+    case unavailable
 
-    public init(
-        appVersion: String, tokenLifetime: TimeInterval = 60, policy: RetryPolicy = .standard,
-        onEvent: @escaping @Sendable (APIEvent) -> Void = { _ in }
-    ) {
-        let auth = FakeAuthProvider(lifetime: tokenLifetime)
-        let backend = FakeBackend()
-        let client = APIClient(
-            baseURL: backend.baseURL,
-            session: APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self]),
-            auth: auth, policy: policy, onEvent: onEvent)
-        self.auth = auth
-        self.backend = backend
-        let attester = FakeDeviceAttester()
-        self.attester = attester
-        let attestation = AttestationSession(attester: attester, store: MemoryAttestKeyStore(), client: client)
-        self.account = GatewayAccountService(
-            auth: auth, client: client, appVersion: appVersion, attestation: attestation)
-        self.paid = GatewayPaidActionService(client: client, attestation: attestation)
-        self.feedback = GatewayFeedbackService(auth: auth, client: client)
-        self.credits = GatewayCreditClaimer(client: client)
+    /// - Parameter allowsFakes: true only in a Debug build (`#if DEBUG` at the call site).
+    public static func resolve(settings: GatewaySettings, allowsFakes: Bool) -> GatewayMode {
+        if settings.usesRealServices { return .real }
+        return allowsFakes ? .fake : .unavailable
     }
 }

@@ -89,6 +89,29 @@ struct CraftedArchiveTests {
         }
     }
 
+    /// 32b: sizes in the manifest that overflow when added used to trap (the app ended) before
+    /// any file was read. Now the copy is damaged, and nothing is staged.
+    @Test func manifestSizesThatOverflowAreRefused() throws {
+        let hash = BackupFormat.sha256(Self.photo)
+        for files in [
+            [
+                "photos/a": BackupManifest.File(size: .max / 2 + 1, sha256: hash),
+                "photos/b": .init(size: .max / 2 + 1, sha256: hash),
+            ],
+            ["photos/a": BackupManifest.File(size: .max - 10, sha256: hash)],
+        ] {
+            let phone = try BackupTestBed("crafted-overflow")
+            var manifest = CraftedArchive.manifest(files: [:])
+            manifest.files = files
+            let file = try CraftedArchive.make(
+                in: phone, manifest: manifest, entries: [CraftedArchive.Entry(.regularFile, "photos/a", Self.photo)])
+            let checker = RestoreChecker(location: phone.location)
+            #expect(throws: BackupError.damaged) { _ = try checker.check(file, passphrase: BackupTestBed.passphrase) }
+            let staged = (try? FileManager.default.contentsOfDirectory(atPath: phone.location.staging.path)) ?? []
+            #expect(staged.isEmpty)
+        }
+    }
+
     @Test func aRecordThatFailsItsChecksIsRefused() throws {
         // A garment whose key isn't its ID, and one whose name breaks the rules.
         let garment = try RecordPayload.encode(

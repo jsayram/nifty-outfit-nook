@@ -32,7 +32,7 @@ nonisolated enum AppTryOn {
 
     @MainActor
     static func usesCloud(_ arguments: [String]) -> Bool {
-        if AppGateway.settings.usesRealServices { return true }
+        if AppGateway.mode == .real { return true }
         #if DEBUG
             return arguments.contains("-cloud-tryon")
         #else

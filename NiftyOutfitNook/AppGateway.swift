@@ -7,12 +7,27 @@ import Services
 
 /// The app's one gateway to the backend (Phase 24a). With a Clerk publishable key and the backend
 /// URL set (Configs/Secrets.xcconfig, docs/backend-switch.md) it signs in through Clerk and calls
-/// the Convex deployment; without them it runs on the fake sign-in and the in-process fake
-/// backend. Screens see only `AccountService` either way.
+/// the Convex deployment. Without them a Debug build runs on the fake sign-in and the in-process
+/// fake backend. A Release build runs on neither: it fails closed (32b, L9), with every service
+/// "unavailable" (signed out, nothing cloud works) and `cloudUnavailable` true, so the cloud
+/// features say they aren't available right now. `FakeGateway` isn't compiled into Release at all.
+/// Screens see only `AccountService` either way.
 @MainActor
 enum AppGateway {
     static let settings = GatewaySettings(info: Bundle.main.infoDictionary ?? [:])
     static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+
+    /// Fakes exist only in Debug builds.
+    #if DEBUG
+        private static let allowsFakes = true
+    #else
+        private static let allowsFakes = false
+    #endif
+    static let mode = GatewayMode.resolve(settings: settings, allowsFakes: allowsFakes)
+
+    /// True in a Release build with the backend settings missing. The services below are then the
+    /// unavailable ones, and `NookServices.cloudUnavailable` tells the screens.
+    static var cloudUnavailable: Bool { mode == .unavailable }
 
     #if DEBUG
         /// The debug gateway screen's request log.
@@ -25,32 +40,64 @@ enum AppGateway {
         private static let onEvent: @Sendable (APIEvent) -> Void = { _ in }
     #endif
 
-    /// The fakes, when the real services aren't configured.
-    static let fake: FakeGateway? =
-        settings.usesRealServices
-        ? nil : FakeGateway(appVersion: appVersion, policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent)
+    #if DEBUG
+        /// The fakes, when the real services aren't configured. Debug builds only.
+        static let fake: FakeGateway? =
+            mode == .fake
+            ? FakeGateway(appVersion: appVersion, policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent)
+            : nil
+    #endif
 
     static let real = RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
 
-    static let account: any AccountService = real?.account ?? fake?.account ?? UnavailableAccountService()
+    static let account: any AccountService = {
+        if let real { return real.account }
+        #if DEBUG
+            if let fake { return fake.account }
+        #endif
+        return UnavailableAccountService()
+    }()
 
     /// Send feedback's support queue (Phase 24d): the real backend, or the fake one. It takes notes
     /// only while she's signed in; signed out, Send feedback uses the share sheet.
-    static let feedback: any FeedbackService = real?.feedback ?? fake?.feedback ?? UnavailableFeedbackService()
+    static let feedback: any FeedbackService = {
+        if let real { return real.feedback }
+        #if DEBUG
+            if let fake { return fake.feedback }
+        #endif
+        return UnavailableFeedbackService()
+    }()
 
     /// 30b: picture-credit claims, on the real backend or the fake one.
-    static let credits: any CreditClaiming = real?.credits ?? fake?.credits ?? UnavailableCreditClaimer()
+    static let credits: any CreditClaiming = {
+        if let real { return real.credits }
+        #if DEBUG
+            if let fake { return fake.credits }
+        #endif
+        return UnavailableCreditClaimer()
+    }()
 
     /// 30c: the subscription's and the unlock's signed transactions, sent to the same backend.
-    static let stylingAccess: any StylingAccessClaiming =
-        real?.credits ?? fake?.credits ?? UnavailableCreditClaimer()
+    static let stylingAccess: any StylingAccessClaiming = {
+        if let real { return real.credits }
+        #if DEBUG
+            if let fake { return fake.credits }
+        #endif
+        return UnavailableCreditClaimer()
+    }()
 
     /// The website's support page, from `NOOK_SUPPORT_URL` (a placeholder address until 35b).
     static let supportLinks = SupportLinks(info: Bundle.main.infoDictionary ?? [:])
 
     /// Paid cloud work (Phase 24b): App Attest on a device with the real backend; the stand-in
     /// attester with the fake backend.
-    static let paid: any PaidActionService = real?.paid ?? fake?.paid ?? UnavailablePaidActionService()
+    static let paid: any PaidActionService = {
+        if let real { return real.paid }
+        #if DEBUG
+            if let fake { return fake.paid }
+        #endif
+        return UnavailablePaidActionService()
+    }()
 
     /// Send feedback's queue, its screenshot maker and the support page (Phase 24d).
     static func installSupport(into services: inout NookServices) {

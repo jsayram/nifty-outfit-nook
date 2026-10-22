@@ -978,6 +978,9 @@
     "No picture this time" : {
       "comment" : "Try it on sheet: a server limit"
     },
+    "Not available right now" : {
+      "comment" : "Heading when a cloud feature can't run in this build (no backend settings)"
+    },
     "Not subscribed" : {
       "comment" : "Profile: Styling access row value"
     },
@@ -1070,6 +1073,9 @@
     },
     "Styling access" : {
       "comment" : "Styling access: screen title and Profile row"
+    },
+    "Styling access and picture packs can’t be offered right now. Quick ideas and everything on your phone keep working." : {
+      "comment" : "Styling access when this build has no backend (nothing can be bought)"
     },
     "Styling access is a monthly subscription, and new subscribers get the first month free. Profile, then Styling access, shows the price and Restore purchases." : {
       "comment" : "Help: Free and paid, the quieter line, without styling access"
@@ -1199,6 +1205,9 @@
     },
     "To pay nothing, cancel at least a day before %@: Settings, then your name, then Subscriptions." : {
       "comment" : "Paywall: how to cancel the free month. The argument is a date."
+    },
+    "Try it on can’t make pictures right now. Your saved looks and pictures aren’t affected." : {
+      "comment" : "Try it on sheet when this build has no picture service"
     },
     "Try-on picture of %@: you wearing %@." : {
       "comment" : "Spoken for a real try-on picture (33a): the look's name, then its pieces"

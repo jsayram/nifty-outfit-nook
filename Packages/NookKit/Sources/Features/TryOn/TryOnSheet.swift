@@ -20,7 +20,7 @@ extension View {
             item: route,
             title: { _ in TryOnText.tryOn },
             // 33a: real pictures aren't simulated.
-            subtitle: { $0.model.isReal ? nil : SharedText.simulated },
+            subtitle: { $0.model.isReal || $0.model.isUnavailable ? nil : SharedText.simulated },
             // Full height: the picture and its two buttons don't fit a half-height sheet.
             detents: [.large],
             content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture) }
@@ -56,6 +56,7 @@ struct TryOnSheetContent: View {
             case .making: making
             case .made(let picture): made(picture)
             case .failed(let failure): failed(failure)
+            case .unavailable: unavailable
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -225,6 +226,17 @@ struct TryOnSheetContent: View {
         }
     }
 
+    /// 32b (L9): no backend in this build. Calm, with nothing to retry.
+    private var unavailable: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.medium) {
+            CloudUnavailableNote(message: TryOnSheetText.unavailableMessage)
+            NookButton(TryOnSheetText.done, kind: .soft, fillsWidth: true) { dismiss() }
+                .accessibilityIdentifier("tryOn.done")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tryOn.unavailable")
+    }
+
     private func failed(_ failure: TryOnModel.Failure) -> some View {
         NookErrorState(
             TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure), retry: model.make
@@ -275,6 +287,13 @@ struct TryOnSheetContent: View {
 
 /// The words on the Try it on sheet.
 enum TryOnSheetText {
+    /// 32b (L9): the build has no backend settings.
+    static var unavailableMessage: String {
+        String(
+            localized: "Try it on can’t make pictures right now. Your saved looks and pictures aren’t affected.",
+            bundle: .module, comment: "Try it on sheet when this build has no picture service")
+    }
+
     static var what: String {
         String(
             localized: "Try it on makes one picture of this look, only now that you ask.", bundle: .module,
