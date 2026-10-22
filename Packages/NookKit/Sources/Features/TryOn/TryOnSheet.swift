@@ -46,17 +46,12 @@ struct TryOnSheetContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: NookSpacing.large) {
-            switch model.step {
-            case .ready: ready
-            case .alreadyMade(let picture): alreadyMade(picture)
-            case .consent: TryOnConsentContent(allow: model.allow, notNow: model.notNow)
-            case .preparing: preparing
-            case .sending: sending
-            case .refused(let problem): refused(problem)
-            case .making: making
-            case .made(let picture): made(picture)
-            case .failed(let failure): failed(failure)
-            case .unavailable: unavailable
+            if model.showsWalkthrough {
+                // Above the switch on purpose: the step changes behind it (the phone finishes and
+                // the job starts) and the walkthrough must keep playing, not start over.
+                walkthrough
+            } else {
+                steps
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -76,6 +71,24 @@ struct TryOnSheetContent: View {
         }
         // The sheet's quick tour (Stage A audit), before anything is made. The sheet draws it.
         .screenTour(TryOnTour.definition, isReady: model.step == .ready)
+    }
+
+    @ViewBuilder
+    private var steps: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.large) {
+            switch model.step {
+            case .ready: ready
+            case .alreadyMade(let picture): alreadyMade(picture)
+            case .consent: TryOnConsentContent(allow: model.allow, notNow: model.notNow)
+            case .preparing: preparing
+            case .sending: sending
+            case .refused(let problem): refused(problem)
+            case .making: making
+            case .made(let picture): made(picture)
+            case .failed(let failure): failed(failure)
+            case .unavailable: unavailable
+            }
+        }
     }
 
     // MARK: Steps
@@ -156,10 +169,10 @@ struct TryOnSheetContent: View {
         .accessibilityIdentifier("tryOn.making")
     }
 
-    /// 33a: on the phone, before anything is sent.
+    /// 33a: on the phone, before anything is sent. 33c: with the real step it is on.
     private var preparing: some View {
         VStack(spacing: NookSpacing.large) {
-            NookLoadingState(TryOnSheetText.preparingTitle, message: TryOnSheetText.preparingMessage)
+            progressContent
             NookButton(TryOnSheetText.cancel, kind: .soft, fillsWidth: true, action: model.cancel)
                 .accessibilityIdentifier("tryOn.cancel")
         }
@@ -171,7 +184,7 @@ struct TryOnSheetContent: View {
     /// 33a: the faceless photo is on its way; she can leave.
     private var sending: some View {
         VStack(spacing: NookSpacing.large) {
-            NookLoadingState(TryOnSheetText.sendingTitle, message: TryOnSheetText.sendingMessage)
+            progressContent
             NookButton(TryOnSheetText.leave, kind: .primary, fillsWidth: true) { dismiss() }
                 .accessibilityIdentifier("tryOn.leave")
             NookButton(TryOnSheetText.cancel, kind: .soft, fillsWidth: true, action: model.cancel)
@@ -182,9 +195,44 @@ struct TryOnSheetContent: View {
         .accessibilityIdentifier("tryOn.sending")
     }
 
+    /// 33c: the privacy walkthrough while it plays (her first picture, or when she asks). The real
+    /// work carries on behind it, so Cancel is here, and Keep browsing once the photos are out.
+    private var walkthrough: some View {
+        VStack(spacing: NookSpacing.large) {
+            PrivacyWalkthroughView(canSkip: model.canSkipWalkthrough, finished: model.walkthroughEnded)
+            if case .sending = model.step {
+                NookButton(TryOnSheetText.leave, kind: .primary, fillsWidth: true) { dismiss() }
+                    .accessibilityIdentifier("tryOn.leave")
+            }
+            NookButton(TryOnSheetText.cancel, kind: .soft, fillsWidth: true, action: model.cancel)
+                .accessibilityIdentifier("tryOn.cancel")
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// 33c: the step the picture really is on, with all the steps listed.
+    @ViewBuilder
+    private var progressContent: some View {
+        if let progress = model.progress {
+            VStack(spacing: NookSpacing.large) {
+                NookLoadingState(TryOnStepText.headline(progress), message: TryOnStepText.message(progress))
+                TryOnStepsList(progress: progress)
+                NookButton(TryOnStepText.watchHow, systemImage: "play.circle", kind: .text, fillsWidth: true) {
+                    model.replayWalkthrough()
+                }
+                .accessibilityHint(Text(TryOnStepText.watchHowHint))
+                .accessibilityIdentifier("tryOn.watchHow")
+            }
+            .onChange(of: progress) { _, progress in
+                AccessibilityNotification.Announcement(TryOnStepText.headline(progress)).post()
+            }
+        }
+    }
+
     /// 33a: the phone wouldn't send this photo. Nothing left the phone.
     private func refused(_ problem: TryOnPrepareProblem) -> some View {
         VStack(alignment: .leading, spacing: NookSpacing.medium) {
+            if let progress = model.progress { TryOnStepsList(progress: progress) }
             Label {
                 Text(TryOnSheetText.refusedTitle(problem))
             } icon: {
@@ -238,9 +286,13 @@ struct TryOnSheetContent: View {
     }
 
     private func failed(_ failure: TryOnModel.Failure) -> some View {
-        NookErrorState(
-            TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure), retry: model.make
-        )
+        VStack(spacing: NookSpacing.large) {
+            if let progress = model.progress { TryOnStepsList(progress: progress) }
+            NookErrorState(
+                TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure),
+                retry: model.make
+            )
+        }
         .frame(maxWidth: .infinity)
         .accessibilityIdentifier("tryOn.failed")
     }
@@ -400,20 +452,6 @@ enum TryOnSheetText {
     }
 
     // MARK: 33a
-
-    static var preparingTitle: String {
-        String(localized: "Hiding your face", bundle: .module, comment: "Try it on sheet (33a): on the phone")
-    }
-
-    static var preparingMessage: String {
-        String(
-            localized: "Swapping in a studio backdrop. Nothing has left your iPhone yet.", bundle: .module,
-            comment: "Try it on sheet (33a): on the phone, before sending")
-    }
-
-    static var sendingTitle: String {
-        String(localized: "Dressing you", bundle: .module, comment: "Try it on sheet (33a): the job is running")
-    }
 
     static var sendingMessage: String {
         String(
