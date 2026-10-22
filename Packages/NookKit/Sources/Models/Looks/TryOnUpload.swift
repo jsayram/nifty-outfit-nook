@@ -29,24 +29,38 @@ public struct TryOnConsent: Codable, Hashable, Sendable {
     public var isCurrent: Bool { version == Self.currentVersion }
 }
 
-/// Where her try-on consent is kept.
+/// Where her try-on consent is kept, and whether she has seen the privacy walkthrough (33c), which
+/// plays once on her first real try-on. Withdrawing consent keeps the second; Delete my data erases
+/// both.
 public protocol TryOnConsentStore: ErasableStore {
     func current() -> TryOnConsent?
     /// `nil` withdraws it.
     func save(_ consent: TryOnConsent?)
+    /// 33c: she has watched the walkthrough all the way through.
+    func hasSeenWalkthrough() -> Bool
+    func markWalkthroughSeen()
 }
 
 /// Consent in memory: previews, tests and the debug sample closet.
 public final class InMemoryTryOnConsentStore: TryOnConsentStore {
-    private let state: Mutex<TryOnConsent?>
-
-    public init(_ consent: TryOnConsent? = nil) {
-        state = Mutex(consent)
+    private struct State {
+        var consent: TryOnConsent?
+        var seenWalkthrough: Bool
     }
 
-    public func current() -> TryOnConsent? { state.withLock { $0 } }
-    public func save(_ consent: TryOnConsent?) { state.withLock { $0 = consent } }
-    public func eraseAll() async throws(StoreError) { state.withLock { $0 = nil } }
+    private let state: Mutex<State>
+
+    public init(_ consent: TryOnConsent? = nil, seenWalkthrough: Bool = false) {
+        state = Mutex(State(consent: consent, seenWalkthrough: seenWalkthrough))
+    }
+
+    public func current() -> TryOnConsent? { state.withLock { $0.consent } }
+    public func save(_ consent: TryOnConsent?) { state.withLock { $0.consent = consent } }
+    public func hasSeenWalkthrough() -> Bool { state.withLock { $0.seenWalkthrough } }
+    public func markWalkthroughSeen() { state.withLock { $0.seenWalkthrough = true } }
+    public func eraseAll() async throws(StoreError) {
+        state.withLock { $0 = State(consent: nil, seenWalkthrough: false) }
+    }
 }
 
 /// One garment photo exactly as it left the phone.
@@ -279,8 +293,11 @@ public enum TryOnPrepareProblem: Error, Hashable, Sendable {
 public protocol TryOnPipeline: Sendable {
     /// On the phone, before anything is sent: masks her head, swaps the room for the backdrop,
     /// checks that no face can be found any more, and writes the files. Throws instead of
-    /// sending anything when any check fails.
-    func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem) -> TryOnUpload
+    /// sending anything when any check fails. `progress` is told, on the main actor, as each step
+    /// starts (33c), so the loading screen shows the step the phone is really on.
+    func prepare(
+        photo: PhotoReference, pieces: [Garment], progress: @escaping @MainActor @Sendable (TryOnStage) -> Void
+    ) async throws(TryOnPrepareProblem) -> TryOnUpload
     /// Sends the upload as one paid action with the job's key, and returns the dressed picture.
     func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String)
         async throws(CloudLimitProblem) -> Data
@@ -289,6 +306,13 @@ public protocol TryOnPipeline: Sendable {
     /// Removes files written for an upload: the work files always, the sent ones too unless a
     /// picture keeps them.
     func discard(_ upload: TryOnUpload, keepingSent: Bool) async
+}
+
+extension TryOnPipeline {
+    /// Prepares without reporting each step.
+    public func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem) -> TryOnUpload {
+        try await prepare(photo: photo, pieces: pieces, progress: { _ in })
+    }
 }
 
 /// A try-on job as it is kept (27c): the look as it was, the upload's files and her consent, so a

@@ -403,6 +403,8 @@ public final class AIJobs {
             case .tryOn(let request):
                 guard let pipeline = services.tryOnPipeline else { return .failed(.notCompleted) }
                 let dressed: Data
+                // 33c: the loading screen's captions follow these real steps.
+                update(job.id) { $0.tryOnStage = .dressing }
                 do {
                     dressed = try await pipeline.dress(
                         request.upload, consentVersion: request.consentVersion, idempotencyKey: job.idempotencyKey)
@@ -410,6 +412,7 @@ public final class AIJobs {
                     throw CloudStylist.error(for: error)
                 }
                 // Her head goes back on the phone. The picture keeps exactly what was sent.
+                update(job.id) { $0.tryOnStage = .restoring }
                 let image: PhotoReference
                 do {
                     image = try await pipeline.restore(dressed, upload: request.upload)

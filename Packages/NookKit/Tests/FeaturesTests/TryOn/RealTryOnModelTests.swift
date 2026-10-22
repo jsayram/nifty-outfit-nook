@@ -99,6 +99,120 @@ struct RealTryOnModelTests {
         await again.start(with: services)
         #expect(again.step == .alreadyMade(try #require(done.picture)))
     }
+
+    // MARK: 33c: the loading screen follows the real steps
+
+    @Test func thePhoneReportsEachStepAndTheScreenShowsTheOneItIsOn() async throws {
+        let pipeline = StubPipeline(waits: true)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        #expect(model.progress == .preparing(.hidingFace))
+        await pipeline.waitForSend()
+        // The phone ran all its steps, then the job took over: now it is being dressed.
+        #expect(model.preparingStage == .checkingFace)
+        let progress = try #require(model.progress)
+        #expect(progress.stage == .dressing && !progress.isStopped)
+        pipeline.open()
+        await model.settle()
+    }
+
+    @Test func aRefusalStopsTheListAtTheStepItHappenedOn() async throws {
+        let pipeline = StubPipeline(refuse: .faceStillVisible, at: .checkingFace)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        await model.settle()
+        #expect(model.step == .refused(.faceStillVisible))
+        #expect(model.stoppedAt == .checkingFace)
+        let progress = try #require(model.progress)
+        #expect(progress.mark(for: .studioBackdrop) == .done && progress.mark(for: .checkingFace) == .stopped)
+        // Nothing past the check happened, and nothing left the phone.
+        #expect(progress.mark(for: .dressing) == .todo && progress.nothingSentYet && pipeline.sent == 0)
+    }
+
+    @Test func aFailedJobStopsTheListAtDressing() async throws {
+        let pipeline = StubPipeline(failDressing: .didNotFinish(retryAfterSeconds: nil))
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        await model.settle()
+        guard case .sending(let id) = model.step else {
+            Issue.record("not sending: \(model.step)")
+            return
+        }
+        _ = await services.aiJobs.finished(id)
+        await model.settle()
+        #expect(model.step == .failed(.notCompleted))
+        #expect(model.stoppedAt == .dressing)
+        #expect(model.progress?.mark(for: .dressing) == .stopped)
+    }
+
+    // MARK: 33c: first time and later
+
+    @Test func theFirstRealPictureStartsTheWalkthroughAndItCantBeSkipped() async throws {
+        let pipeline = StubPipeline(waits: true)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        #expect(model.showsWalkthrough && !model.canSkipWalkthrough)
+        await pipeline.waitForSend()
+        // The picture is made behind it.
+        #expect(model.showsWalkthrough)
+        // Played to the end: remembered, and the real captions take over.
+        model.walkthroughEnded(completed: true)
+        #expect(!model.showsWalkthrough && services.tryOnConsent.hasSeenWalkthrough())
+        pipeline.open()
+        await model.settle()
+    }
+
+    @Test func laterPicturesShowTheRealCaptionsNotTheWalkthrough() async throws {
+        let pipeline = StubPipeline(waits: true)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        services.tryOnConsent.markWalkthroughSeen()
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        #expect(!model.showsWalkthrough && model.progress != nil)
+        // She can watch it again, and then she can skip it. A replay isn't "the first time".
+        model.replayWalkthrough()
+        #expect(model.showsWalkthrough && model.canSkipWalkthrough)
+        model.walkthroughEnded(completed: false)
+        #expect(!model.showsWalkthrough)
+        await pipeline.waitForSend()
+        pipeline.open()
+        await model.settle()
+    }
+
+    @Test func aWalkthroughThatWasntWatchedToTheEndPlaysAgainNextTime() async throws {
+        let pipeline = StubPipeline(refuse: .noFace)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        await model.settle()
+        // The phone refused while it played: the failure replaces it, and it wasn't seen.
+        #expect(model.step == .refused(.noFace) && !model.showsWalkthrough)
+        #expect(!services.tryOnConsent.hasSeenWalkthrough())
+    }
+
+    @Test func watchingAReplayDoesntChangeWhatWasSeen() async throws {
+        let pipeline = StubPipeline(waits: true)
+        let services = services(pipeline, consent: TryOnConsent(agreedAt: TestTime.now))
+        let model = try await model(services)
+        await model.start(with: services)
+        model.make()
+        model.replayWalkthrough()
+        model.walkthroughEnded(completed: true)
+        #expect(!services.tryOnConsent.hasSeenWalkthrough())
+        await pipeline.waitForSend()
+        pipeline.open()
+        await model.settle()
+    }
 }
 
 /// A pipeline that records what it was asked and answers at once (or refuses, or waits).
@@ -114,27 +228,41 @@ final class StubPipeline: TryOnPipeline, Sendable {
 
     private let state = Mutex(State())
     private let refuse: TryOnPrepareProblem?
+    private let refuseAt: TryOnStage
     private let waits: Bool
+    /// 33c: fails the dressing step (the image service says no).
+    private let failDressing: CloudLimitProblem?
 
     static let upload = TryOnUpload(
         sent: TryOnSent(person: .stored("sent-person"), garments: []), work: nil,
         geometry: TryOnGeometry(width: 4, height: 4, face: [1, 1, 1, 1]), contextRevision: "rev_stub")
 
-    init(refuse: TryOnPrepareProblem? = nil, waits: Bool = false) {
+    init(
+        refuse: TryOnPrepareProblem? = nil, at refuseAt: TryOnStage = .hidingFace, waits: Bool = false,
+        failDressing: CloudLimitProblem? = nil
+    ) {
         self.refuse = refuse
+        self.refuseAt = refuseAt
         self.waits = waits
+        self.failDressing = failDressing
     }
 
     var prepared: Int { state.withLock { $0.prepared } }
     var sent: Int { state.withLock { $0.sent } }
     var pieces: [Garment.ID] { state.withLock { $0.pieces } }
 
-    func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem) -> TryOnUpload {
+    func prepare(
+        photo: PhotoReference, pieces: [Garment], progress: @escaping @MainActor @Sendable (TryOnStage) -> Void
+    ) async throws(TryOnPrepareProblem) -> TryOnUpload {
         state.withLock {
             $0.prepared += 1
             $0.pieces = pieces.map(\.id)
         }
-        if let refuse { throw refuse }
+        // The phone's own steps, in order, stopping where it refuses.
+        for stage in TryOnStage.allCases where stage.isBeforeSending {
+            await progress(stage)
+            if let refuse, stage == refuseAt { throw refuse }
+        }
         return Self.upload
     }
 
@@ -147,6 +275,7 @@ final class StubPipeline: TryOnPipeline, Sendable {
             return state.sendWaiters
         }
         for waiter in waiters { waiter.resume() }
+        if let failDressing { throw failDressing }
         if waits {
             await withCheckedContinuation { continuation in
                 let now = state.withLock { state -> Bool in

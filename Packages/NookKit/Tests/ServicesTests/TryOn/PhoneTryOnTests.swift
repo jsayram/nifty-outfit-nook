@@ -119,6 +119,40 @@ struct PhoneTryOnTests {
         for reference in upload.sent.imageReferences { #expect(files.data(for: storedID(reference)) == nil) }
     }
 
+    // MARK: 33c: the steps are reported as the phone does them
+
+    /// The steps `prepare` reports, and what it threw (if anything).
+    func steps(_ pipeline: PhoneTryOn, photo: PhotoReference) async -> (
+        stages: [TryOnStage], problem: TryOnPrepareProblem?
+    ) {
+        let heard = Mutex<[TryOnStage]>([])
+        do {
+            _ = try await pipeline.prepare(photo: photo, pieces: Self.pieces) { stage in
+                heard.withLock { $0.append(stage) }
+            }
+            return (heard.withLock { $0 }, nil)
+        } catch {
+            return (heard.withLock { $0 }, error)
+        }
+    }
+
+    @Test func thePhoneReportsHidingTheBackdropAndTheCheckInOrder() async throws {
+        let result = await steps(pipeline(), photo: try photo())
+        #expect(result.problem == nil)
+        #expect(result.stages == [.hidingFace, .studioBackdrop, .checkingFace])
+    }
+
+    @Test func aRefusalReportsOnlyTheStepsThatRan() async throws {
+        // Two people: refused while finding and covering her head, before the backdrop.
+        let two = await steps(pipeline(), photo: try photo(SyntheticPerson.draw(centers: [0.3, 0.72]).bitmap))
+        #expect(two.problem == .severalPeople && two.stages == [.hidingFace])
+        // A face still found after masking: refused at the check, after the backdrop.
+        let late = await steps(
+            PhoneTryOn(analyzer: SeesAFaceAfterMasking(), paid: paid, files: files, images: DrawnGarments()),
+            photo: try photo())
+        #expect(late.problem == .faceStillVisible && late.stages == [.hidingFace, .studioBackdrop, .checkingFace])
+    }
+
     // MARK: Fail closed: nothing written, nothing sent
 
     @Test func aFaceStillFoundAfterMaskingRefusesAndSendsNothing() async throws {

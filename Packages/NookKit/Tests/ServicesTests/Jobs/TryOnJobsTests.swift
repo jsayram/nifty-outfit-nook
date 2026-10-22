@@ -90,6 +90,48 @@ struct TryOnJobsTests {
         await jobs.saved()
     }
 
+    /// 33c: the loading screen's captions come from the job's real step, kept on the job.
+    @Test func aRunningJobKnowsWhichStepItIsOn() async throws {
+        let pipeline = ScriptedTryOn([.wait])
+        let jobs = jobs()
+        let job = jobs.startTryOn(Self.request, services: services(pipeline))
+        // Waiting for nothing: it starts at once, and the request is out, being dressed.
+        await pipeline.waitForCall()
+        let running = try #require(jobs.job(job.id))
+        #expect(running.tryOnStage == .dressing)
+        let progress = try #require(TryOnProgress(job: running))
+        #expect(progress.mark(for: .checkingFace) == .done && progress.mark(for: .dressing) == .doing)
+        #expect(progress.mark(for: .restoring) == .todo)
+        await pipeline.open()
+        let done = try #require(await jobs.finished(job.id))
+        let finished = try #require(TryOnProgress(job: done))
+        #expect(TryOnStage.allCases.allSatisfy { finished.mark(for: $0) == .done })
+        await jobs.saved()
+    }
+
+    @Test func aFailureStopsAtTheStepThatFailed() async throws {
+        // The image service says no: it stopped at dressing, and nothing later was done.
+        let refused = ScriptedTryOn([.fail(.didNotFinish(retryAfterSeconds: nil))])
+        let first = jobs()
+        let job = first.startTryOn(Self.request, services: services(refused))
+        let failed = try #require(await first.finished(job.id))
+        #expect(failed.tryOnStage == .dressing)
+        let atDressing = try #require(TryOnProgress(job: failed))
+        #expect(atDressing.mark(for: .dressing) == .stopped && atDressing.mark(for: .restoring) == .todo)
+        #expect(atDressing.mark(for: .hidingFace) == .done)
+        await first.saved()
+
+        // The picture came back but her head couldn't be put back on: it stopped at restoring.
+        let broken = ScriptedTryOn([.failToRestore])
+        let second = jobs()
+        let other = second.startTryOn(Self.request, services: services(broken))
+        let lost = try #require(await second.finished(other.id))
+        #expect(lost.state == .failed && lost.tryOnStage == .restoring)
+        let atRestoring = try #require(TryOnProgress(job: lost))
+        #expect(atRestoring.mark(for: .dressing) == .done && atRestoring.mark(for: .restoring) == .stopped)
+        await second.saved()
+    }
+
     @Test func herCancelStopsItAndLetsGoOfTheFiles() async throws {
         let pipeline = ScriptedTryOn([.wait])
         let jobs = jobs()
@@ -133,6 +175,8 @@ actor ScriptedTryOn: TryOnPipeline {
         case fail(CloudLimitProblem)
         /// Waits until `open()`, then gives the picture.
         case wait
+        /// 33c: dresses her, then the phone can't put her head back on.
+        case failToRestore
     }
 
     struct Discard: Equatable {
@@ -142,6 +186,7 @@ actor ScriptedTryOn: TryOnPipeline {
 
     private var steps: [Step]
     private(set) var keys: [String] = []
+    private var failsRestore = false
     private(set) var discarded: [Discard] = []
     private var gate: CheckedContinuation<Void, Never>?
     private var callWaiters: [CheckedContinuation<Void, Never>] = []
@@ -151,9 +196,9 @@ actor ScriptedTryOn: TryOnPipeline {
         self.steps = steps
     }
 
-    nonisolated func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem)
-        -> TryOnUpload
-    { TryOnJobsTests.upload }
+    nonisolated func prepare(
+        photo: PhotoReference, pieces: [Garment], progress: @escaping @MainActor @Sendable (TryOnStage) -> Void
+    ) async throws(TryOnPrepareProblem) -> TryOnUpload { TryOnJobsTests.upload }
 
     func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String)
         async throws(CloudLimitProblem) -> Data
@@ -162,7 +207,11 @@ actor ScriptedTryOn: TryOnPipeline {
         for waiter in callWaiters { waiter.resume() }
         callWaiters = []
         let step = steps.isEmpty ? .picture : steps.removeFirst()
+        failsRestore = false
         switch step {
+        case .failToRestore:
+            failsRestore = true
+            return Data([1])
         case .picture: return Data([1])
         case .fail(let problem): throw problem
         case .wait:
@@ -172,7 +221,8 @@ actor ScriptedTryOn: TryOnPipeline {
     }
 
     func restore(_ dressed: Data, upload: TryOnUpload) async throws(TryOnError) -> PhotoReference {
-        .stored("restored")
+        if failsRestore { throw .notCompleted }
+        return .stored("restored")
     }
 
     func discard(_ upload: TryOnUpload, keepingSent: Bool) async {

@@ -88,6 +88,9 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
     /// The result is also in her history. False when the store couldn't be written (the iPhone
     /// was locked), so the next foreground writes it.
     public var isKept: Bool
+    /// 33c: a try-on job's step while it runs (and the step it stopped at), so the loading screen
+    /// shows real progress. `nil` for other jobs and until the first step starts.
+    public var tryOnStage: TryOnStage?
 
     public init(
         id: ID = .random(), kind: Kind, idempotencyKey: String, request: Request, state: State = .queued,
@@ -106,6 +109,7 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
         wasSent = false
         isSeen = false
         isKept = true
+        tryOnStage = nil
     }
 
     /// The Style Me request this job styles, if it's a styling job.

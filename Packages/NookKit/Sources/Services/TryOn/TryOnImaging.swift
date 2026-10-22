@@ -68,6 +68,19 @@ public enum HeadMasking {
     public static func mask(_ image: TryOnBitmap, analysis: PersonAnalysis) throws(TryOnPrepareProblem)
         -> MaskedPortrait
     {
+        paint(try head(of: image, analysis: analysis), on: image)
+    }
+
+    /// The checks and the grey head shape: the first half of `mask`. Split from `paint` so the
+    /// loading screen (33c) can say when the studio backdrop starts.
+    struct HeadPlan {
+        var analysis: PersonAnalysis
+        var matte: TryOnMask
+        var head: TryOnMask
+        var face: DetectedFace
+    }
+
+    static func head(of image: TryOnBitmap, analysis: PersonAnalysis) throws(TryOnPrepareProblem) -> HeadPlan {
         let width = image.width
         let height = image.height
         let matte = analysis.matte.resized(width: width, height: height)
@@ -92,7 +105,15 @@ public enum HeadMasking {
         let head = headShape(face: face, box: box, matte: matte)
         // The grey must cover every pixel of the face's box.
         guard coverage(of: box, by: head) >= 0.999 else { throw .faceStillVisible }
+        return HeadPlan(analysis: analysis, matte: matte, head: head, face: face)
+    }
 
+    /// Her room replaced by the studio backdrop, and the head shape filled with flat grey.
+    static func paint(_ plan: HeadPlan, on image: TryOnBitmap) -> MaskedPortrait {
+        let width = image.width
+        let height = image.height
+        let matte = plan.matte
+        let head = plan.head
         var studio = image
         var faceless = image
         for y in 0..<height {
@@ -112,7 +133,7 @@ public enum HeadMasking {
             }
         }
         return MaskedPortrait(
-            studio: studio, faceless: faceless, matte: matte, head: head, face: face, pose: analysis.pose)
+            studio: studio, faceless: faceless, matte: matte, head: head, face: plan.face, pose: plan.analysis.pose)
     }
 
     /// Her outline above the chin, near the face, joined with a padded oval around the face: a
