@@ -69,7 +69,6 @@ struct TryOnCaptureScreen: View {
             guard !isStillImage, old == nil, let new else { return }
             AccessibilityNotification.Announcement(TryOnSetupText.countdown(new)).post()
         }
-        .accessibilityIdentifier("tryOnCapture")
     }
 
     // MARK: Parts

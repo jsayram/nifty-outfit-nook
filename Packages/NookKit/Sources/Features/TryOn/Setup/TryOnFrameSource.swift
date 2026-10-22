@@ -1,8 +1,10 @@
 import AVFoundation
+import ImageIO
 import Models
 import SwiftUI
 import Synchronization
 import UIKit
+import UniformTypeIdentifiers
 
 /// Where the try-on camera screen gets its picture and its hints (Phase 33b): the real camera, or a
 /// scripted stand-in for tests and the simulator, which has no camera.
@@ -75,7 +77,10 @@ final class AVTryOnCamera: TryOnFrameSource {
         _ = await engine.start(position: position)
     }
 
-    func takePhoto() async -> Data? { await engine.takePhoto() }
+    func takePhoto() async -> Data? {
+        guard let data = await engine.takePhoto() else { return nil }
+        return await CameraPhotoSize.capped(data)
+    }
 
     func preview() -> AnyView { AnyView(CameraPreview(session: engine.session)) }
 }
@@ -225,5 +230,33 @@ private struct CameraPreview: UIViewRepresentable {
                 connection.videoRotationAngle = 90
             }
         }
+    }
+}
+
+/// The try-on photo from the camera is kept at no more than 2,048 pixels on its long side (PR 101:
+/// the backend refuses a try-on photo past that, and what the phone sends is made from it at 1,280
+/// anyway). A phone's own photo is 3,000 to 4,000 pixels, which only costs space and time in the
+/// check. The copy is upright, so it carries no orientation, and is a JPEG; the intake that follows
+/// still strips everything else.
+nonisolated enum CameraPhotoSize {
+    static let longSide = 2_048
+
+    @concurrent
+    static func capped(_ data: Data, maxPixelSize: Int = longSide) async -> Data? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+            let image = CGImageSourceCreateThumbnailAtIndex(
+                source, 0,
+                [
+                    kCGImageSourceCreateThumbnailFromImageAlways: true,
+                    kCGImageSourceCreateThumbnailWithTransform: true,
+                    kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+                ] as CFDictionary)
+        else { return nil }
+        let output = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil)
+        else { return nil }
+        CGImageDestinationAddImage(
+            destination, image, [kCGImageDestinationLossyCompressionQuality: 0.9] as CFDictionary)
+        return CGImageDestinationFinalize(destination) ? output as Data : nil
     }
 }

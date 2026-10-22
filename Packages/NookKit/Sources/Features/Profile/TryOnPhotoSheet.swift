@@ -330,7 +330,6 @@ struct TryOnPhotoSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .accessibilityIdentifier("tryOnPhoto.review")
         }
     }
 
