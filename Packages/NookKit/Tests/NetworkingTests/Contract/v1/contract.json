@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist)",
+  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -1754,6 +1754,9 @@
         "closetCounts": {
           "$ref": "FeedbackClosetCounts"
         },
+        "deviceHealth": {
+          "$ref": "FeedbackDeviceHealth"
+        },
         "attachment": {
           "$ref": "FeedbackAttachment"
         }
@@ -1814,6 +1817,125 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 100000
+        }
+      }
+    },
+    "FeedbackDeviceHealth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "windowDays",
+        "crashes",
+        "hangs",
+        "cpuExceptions",
+        "diskWriteExceptions",
+        "memoryExits",
+        "watchdogExits"
+      ],
+      "properties": {
+        "windowDays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 90
+        },
+        "crashes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "hangs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "cpuExceptions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "diskWriteExceptions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "memoryExits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "watchdogExits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "longestHangMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600000
+        },
+        "launchMedianMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600000
+        },
+        "peakMemoryMB": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "crashKinds": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "FeedbackCrashKind"
+          }
+        }
+      }
+    },
+    "FeedbackCrashKind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exception",
+        "signal",
+        "count"
+      ],
+      "properties": {
+        "exception": {
+          "type": "string",
+          "enum": [
+            "badAccess",
+            "badInstruction",
+            "arithmetic",
+            "software",
+            "breakpoint",
+            "syscall",
+            "crash",
+            "resource",
+            "guard",
+            "other"
+          ]
+        },
+        "signal": {
+          "type": "string",
+          "enum": [
+            "sigabrt",
+            "sigsegv",
+            "sigbus",
+            "sigill",
+            "sigtrap",
+            "sigfpe",
+            "sigkill",
+            "sigterm",
+            "sigpipe",
+            "none",
+            "other"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
         }
       }
     },

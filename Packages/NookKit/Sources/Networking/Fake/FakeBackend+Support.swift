@@ -35,6 +35,8 @@ public struct FakeSupportTicket: Sendable, Equatable {
     public var replyTo: String?
     public var diagnostics: [String: String]?
     public var closetCounts: [String: Int]?
+    /// 31: the approved device-health summary, as the fake read it from the request.
+    public var deviceHealth: DeviceHealthSummary?
     public var screenshot: Screenshot?
     public var createdAt: Date
 }
@@ -80,6 +82,7 @@ extension FakeBackend {
             var note: [String: Any] = [
                 "kind": last.kind, "message": last.message, "hasReplyAddress": last.replyTo != nil,
                 "hasDiagnostics": last.diagnostics != nil, "hasClosetCounts": last.closetCounts != nil,
+                "hasDeviceHealth": last.deviceHealth != nil,
             ]
             if let replyTo = last.replyTo { note["replyTo"] = replyTo }
             if let diagnostics = last.diagnostics { note["diagnostics"] = diagnostics }
@@ -157,7 +160,8 @@ extension FakeBackend {
                 reference: "NK-" + FakeToken.randomHex(4).uppercased(), subject: subject,
                 submissionId: parsed.submissionId, kind: parsed.kind, message: parsed.message,
                 replyTo: parsed.replyTo, diagnostics: parsed.diagnostics, closetCounts: parsed.closetCounts,
-                screenshot: parsed.screenshot, createdAt: Self.millisecondPrecision(time))
+                deviceHealth: parsed.deviceHealth, screenshot: parsed.screenshot,
+                createdAt: Self.millisecondPrecision(time))
             state.support.tickets.append(ticket)
             return .taken(ticket, observer: state.support.observer)
         }
@@ -193,12 +197,13 @@ private struct ParsedNote {
     var replyTo: String?
     var diagnostics: [String: String]?
     var closetCounts: [String: Int]?
+    var deviceHealth: DeviceHealthSummary?
     var screenshot: FakeSupportTicket.Screenshot?
 
     static func parse(_ object: [String: Any]) -> Result<ParsedNote, Problem> {
         func fail(_ text: String) -> Result<ParsedNote, Problem> { .failure(Problem(message: text)) }
         let allowed: Set<String> = [
-            "submissionId", "kind", "message", "replyTo", "diagnostics", "closetCounts", "attachment",
+            "submissionId", "kind", "message", "replyTo", "diagnostics", "closetCounts", "deviceHealth", "attachment",
         ]
         if let unknown = object.keys.sorted().first(where: { !allowed.contains($0) }) {
             return fail("Unknown field: \(unknown).")
@@ -252,6 +257,13 @@ private struct ParsedNote {
             }
             closetCounts = checked
         }
+        var deviceHealth: DeviceHealthSummary?
+        if let value = object["deviceHealth"] {
+            guard let dictionary = value as? [String: Any], let checked = parseDeviceHealth(dictionary) else {
+                return fail("deviceHealth has the wrong fields.")
+            }
+            deviceHealth = checked
+        }
         var screenshot: FakeSupportTicket.Screenshot?
         if let value = object["attachment"] {
             guard let dictionary = value as? [String: Any], Set(dictionary.keys) == ["contentType", "data"],
@@ -271,7 +283,56 @@ private struct ParsedNote {
         return .success(
             ParsedNote(
                 submissionId: submissionId, kind: kind, message: message, replyTo: replyTo, diagnostics: diagnostics,
-                closetCounts: closetCounts, screenshot: screenshot))
+                closetCounts: closetCounts, deviceHealth: deviceHealth, screenshot: screenshot))
+    }
+
+    /// The contract's `FeedbackDeviceHealth`: exactly these fields, whole numbers in range, at most
+    /// eight crash kinds with fixed names. Anything else is refused.
+    private static func parseDeviceHealth(_ dictionary: [String: Any]) -> DeviceHealthSummary? {
+        let required = [
+            "windowDays", "crashes", "hangs", "cpuExceptions", "diskWriteExceptions", "memoryExits", "watchdogExits",
+        ]
+        let optional = ["longestHangMs", "launchMedianMs", "peakMemoryMB", "crashKinds"]
+        let keys = Set(dictionary.keys)
+        guard Set(required).isSubset(of: keys), keys.isSubset(of: Set(required + optional)) else { return nil }
+        func whole(_ name: String) -> Int? {
+            guard let number = dictionary[name] as? NSNumber, CFGetTypeID(number) != CFBooleanGetTypeID(),
+                number.doubleValue == number.doubleValue.rounded()
+            else { return nil }
+            return number.intValue
+        }
+        guard let windowDays = whole("windowDays"), (1...90).contains(windowDays) else { return nil }
+        var counts: [Int] = []
+        for name in required.dropFirst() {
+            guard let count = whole(name), (0...10_000).contains(count) else { return nil }
+            counts.append(count)
+        }
+        func timing(_ name: String, upTo limit: Int) -> Int?? {
+            guard dictionary[name] != nil else { return .some(nil) }
+            guard let value = whole(name), (0...limit).contains(value) else { return nil }
+            return .some(value)
+        }
+        guard let hang = timing("longestHangMs", upTo: 3_600_000), let launch = timing("launchMedianMs", upTo: 600_000),
+            let memory = timing("peakMemoryMB", upTo: 65_536)
+        else { return nil }
+        var kinds: [DeviceHealthSummary.CrashKind] = []
+        if let raw = dictionary["crashKinds"] {
+            guard let list = raw as? [[String: Any]], list.count <= DeviceHealthSummary.maximumCrashKinds else {
+                return nil
+            }
+            for item in list {
+                guard Set(item.keys) == ["exception", "signal", "count"],
+                    let exception = (item["exception"] as? String).flatMap(CrashExceptionKind.init(rawValue:)),
+                    let signal = (item["signal"] as? String).flatMap(CrashSignalKind.init(rawValue:)),
+                    let count = (item["count"] as? NSNumber)?.intValue, (0...10_000).contains(count)
+                else { return nil }
+                kinds.append(.init(exception: exception, signal: signal, count: count))
+            }
+        }
+        return DeviceHealthSummary(
+            windowDays: windowDays, crashes: counts[0], hangs: counts[1], cpuExceptions: counts[2],
+            diskWriteExceptions: counts[3], memoryExits: counts[4], watchdogExits: counts[5], longestHangMs: hang,
+            launchMedianMs: launch, peakMemoryMB: memory, crashKinds: kinds)
     }
 }
 

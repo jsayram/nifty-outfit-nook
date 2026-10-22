@@ -44,6 +44,8 @@ final class SupportFeedbackTests: XCTestCase {
         let closet = app.switches["feedback.closetCounts"]
         app.reveal(closet, timeout: Self.wait)
         flip(closet)
+        // 31: with no crash or speed reports on the phone there is nothing to offer, so no switch.
+        XCTAssertFalse(app.switches["feedback.deviceHealth"].exists)
 
         // What the page lists is what will be sent.
         let preview = element("feedback.previewText", in: app)
@@ -67,6 +69,55 @@ final class SupportFeedbackTests: XCTestCase {
         keepScreenshot("24d-2-sent")
     }
 
+    /// Phase 31: with crash and speed reports on the phone (sample ones, from `-diagnostics-sample-reports`),
+    /// Send feedback offers to share a summary. It is off, it lists every line once it is on, and the
+    /// fake backend takes the note with it.
+    @MainActor
+    func testCrashAndSpeedDetailsAreOfferedListedAndSent() {
+        let app = launch(signedIn: true, extra: ["-diagnostics-sample-reports"])
+        openFeedback(in: app)
+        let message = field("field.feedback.message", in: app)
+        app.reveal(message, timeout: Self.wait)
+        message.tapUntilFocused(timeout: Self.wait)
+        message.typeTextAndWait("It crashed when I opened Laundry.", timeout: Self.wait)
+
+        let health = app.switches["feedback.deviceHealth"]
+        app.reveal(health, timeout: Self.wait)
+        XCTAssertEqual(health.value as? String, "0", "It must be off for every note")
+        let preview = element("feedback.previewText", in: app)
+        app.reveal(preview, timeout: Self.wait)
+        XCTAssertFalse(preview.label.contains("Crash and speed details"), preview.label)
+        flip(health)
+        XCTAssertTrue(waitForLabel(of: preview, containing: "Crash and speed details"), preview.label)
+        for line in ["Crashes: 1.", "Hangs: 1.", "Crash type: badAccess, sigsegv, 1 times."] {
+            XCTAssertTrue(preview.label.contains(line), "The page doesn’t list “\(line)”: \(preview.label)")
+        }
+        keepScreenshot("31-1-crash-and-speed-details")
+
+        let send = element("feedback.send", in: app)
+        app.reveal(send, timeout: Self.wait)
+        send.tapUntil(element("feedback.sent", in: app), appears: Self.wait)
+    }
+
+    /// Phase 31: the debug diagnostics screen shows what the phone kept, and nothing personal from
+    /// the sample reports.
+    @MainActor
+    func testTheDiagnosticsScreenShowsWhatWasKept() {
+        let app = XCUIApplication()
+        app.launchArguments = UITestLaunch.standard + ["-diagnostics-lab"]
+        app.launch()
+        let empty = element("diagnosticsLab.empty", in: app)
+        XCTAssertTrue(empty.waitUntilExists(timeout: 120), "The diagnostics screen didn't open")
+        let add = element("diagnosticsLab.add", in: app)
+        add.tapUntil(app.staticTexts["Events (6)"], appears: Self.wait)
+        XCTAssertFalse(empty.exists)
+        // The summary a note would carry is listed, with the sample crashes added up.
+        XCTAssertTrue(
+            app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Crashes: 2.")).firstMatch.exists)
+        XCTAssertFalse(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Maria")).firstMatch.exists)
+        keepScreenshot("31-2-diagnostics-screen")
+    }
+
     @MainActor
     func testSignedOutSendFeedbackStillUsesTheShareSheetAndHasTheSupportPage() {
         let app = launch(signedIn: false)
@@ -84,11 +135,11 @@ final class SupportFeedbackTests: XCTestCase {
     // MARK: Helpers
 
     @MainActor
-    private func launch(signedIn: Bool) -> XCUIApplication {
+    private func launch(signedIn: Bool, extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments =
             UITestLaunch.standard + ["-fixtures", "demo", "-feedback-sample-screenshot"]
-            + (signedIn ? ["-fake-signed-in"] : [])
+            + (signedIn ? ["-fake-signed-in"] : []) + extra
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 120), "Home didn't open")
         return app
