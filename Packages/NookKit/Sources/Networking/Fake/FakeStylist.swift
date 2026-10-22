@@ -7,6 +7,12 @@ public enum FakeStylistBehaviour: String, Sendable, CaseIterable {
     /// The provider fails (overloaded, refused, invalid JSON): 503, "It didn't work this time. It
     /// wasn't counted."
     case fails
+    /// 27c: answers like `normal`, but only after `slowAnswer`, like a busy provider, so there's
+    /// time to leave the screen, browse and search before the looks are ready.
+    case slow
+
+    /// How long `slow` takes. Under the paid-text try timeout (40 seconds), so one try answers.
+    public static let slowAnswer: Duration = .seconds(15)
 }
 
 /// The fake backend's stand-in stylist: the same plain rules as the backend's fake

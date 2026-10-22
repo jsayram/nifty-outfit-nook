@@ -71,13 +71,14 @@ struct StylingProgress: View {
             .accessibilityElement(children: .contain)
 
             meter
-            Text(
-                "Leaving this screen stops it, and nothing is used.", bundle: .module,
-                comment: "Your looks while styling: leaving cancels the request"
-            )
-            .nookTextStyle(.note)
-            .foregroundStyle(.nook.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            leavingNote
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("results.leavingNote")
+            if model.isCloud && model.notificationOffer == .offer {
+                NotificationOfferCard(model: model)
+            }
             NookButton(
                 String(localized: "Cancel", bundle: .module, comment: "Stops styling on Your looks"),
                 kind: .soft, fillsWidth: true, action: cancel
@@ -86,6 +87,23 @@ struct StylingProgress: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, NookSpacing.small)
+    }
+
+    /// What leaving does: Stage A's stylist on the phone stops; a cloud job keeps going (27c).
+    @ViewBuilder private var leavingNote: some View {
+        if !model.isCloud {
+            Text(
+                "Leaving this screen stops it, and nothing is used.", bundle: .module,
+                comment: "Your looks while styling: leaving cancels the request")
+        } else if model.isTakingLong {
+            Text(
+                "This is taking a little longer. It keeps going if you leave.", bundle: .module,
+                comment: "Your looks while a cloud styling job is late and still being checked")
+        } else {
+            Text(
+                "You can leave this screen. Your looks keep coming, and you’ll see a note when they’re ready.",
+                bundle: .module, comment: "Your looks while a cloud styling job runs: leaving doesn't stop it")
+        }
     }
 
     /// Two thirds once the request has gone, a third before. It moves only without Reduce Motion.
@@ -109,6 +127,54 @@ struct StylingProgress: View {
             Text(
                 "Step \(stepNumber) of 3", bundle: .module,
                 comment: "VoiceOver value of the styling progress bar"))
+    }
+}
+
+/// 27c: the first time a job that can take a while starts, a short explanation before iOS asks
+/// about notifications. Not now keeps it from coming back; the banner in the app works either way.
+private struct NotificationOfferCard: View {
+    let model: YourLooksModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: NookSpacing.small) {
+            Text("Want a note when they’re ready?", bundle: .module, comment: "Your looks: offer of notifications")
+                .nookTextStyle(.headline)
+                .foregroundStyle(.nook.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text(
+                "If you leave the app, a notification can tell you when your outfit ideas are ready. It never says what’s in them.",
+                bundle: .module, comment: "Your looks: why the app asks about notifications"
+            )
+            .nookTextStyle(.body)
+            .foregroundStyle(.nook.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: NookSpacing.small) { buttons }
+                VStack(spacing: NookSpacing.small) { buttons }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .nookCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("results.notifyOffer")
+    }
+
+    @ViewBuilder private var buttons: some View {
+        NookButton(
+            String(localized: "Notify me", bundle: .module, comment: "Your looks: turn on notifications for jobs"),
+            kind: .primary, size: .small, fillsWidth: true
+        ) {
+            Task { await model.allowNotifications() }
+        }
+        .accessibilityIdentifier("results.notifyMe")
+        NookButton(
+            String(localized: "Not now", bundle: .module, comment: "Your looks: don't turn on notifications"),
+            kind: .soft, size: .small, fillsWidth: true
+        ) {
+            Task { await model.declineNotifications() }
+        }
+        .accessibilityIdentifier("results.notifyNotNow")
     }
 }
 

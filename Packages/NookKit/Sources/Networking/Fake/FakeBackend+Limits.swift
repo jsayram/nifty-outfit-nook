@@ -79,6 +79,10 @@ extension FakeBackend {
     /// Paid jobs that really ran. A retry the backend answered from its record doesn't count.
     public var paidJobsRun: Int { state.withLock { $0.ledger.jobsRun } }
 
+    /// 27c: paid actions admitted, one per Idempotency-Key. A new key is a new action, even when
+    /// the result cache answers it; the same key again is the same action.
+    public var paidActionCount: Int { state.withLock { $0.ledger.actions.count } }
+
     /// Forgets every paid action, rate bucket and allowance use (keys and accounts stay).
     public func resetUsage() {
         state.withLock {

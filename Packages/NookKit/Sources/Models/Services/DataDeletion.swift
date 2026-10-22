@@ -153,13 +153,15 @@ public struct LocalDataDeletion: DataDeletionService {
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
-        weatherSettings: (any WeatherSettingsStore)? = nil, stylistConsent: (any StylistConsentStore)? = nil
+        weatherSettings: (any WeatherSettingsStore)? = nil, stylistConsent: (any StylistConsentStore)? = nil,
+        aiJobs: (any ErasableStore)? = nil, stylistThreads: (any StylistThreadStore)? = nil
     ) {
         self.init(
             stores: Self.stores(
                 closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                 lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent))
+                onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
+                aiJobs: aiJobs, stylistThreads: stylistThreads))
     }
 
     /// The stores of `services` in the order `NookServices` erases them, for a deletion that
@@ -170,20 +172,26 @@ public struct LocalDataDeletion: DataDeletionService {
             closet: services.closet, looks: services.looks, suitcases: services.suitcases, profile: services.profile,
             drafts: services.drafts, lookDrafts: services.lookDrafts, feedbackDrafts: services.feedbackDrafts,
             pictures: services.pictures, tours: services.tours, onboarding: services.onboarding,
-            weatherSettings: services.weatherSettings, stylistConsent: services.stylistConsent)
+            weatherSettings: services.weatherSettings, stylistConsent: services.stylistConsent,
+            aiJobs: AIJobsEraser(services.aiJobs), stylistThreads: services.stylistThreads)
     }
 
     private static func stores(
         closet: any ClosetStore, looks: any LookStore, suitcases: any SuitcaseStore, profile: any ProfileStore,
         drafts: any DraftStore, lookDrafts: any LookDraftStore, feedbackDrafts: any FeedbackDraftStore,
         pictures: any TryOnPictureStore, tours: any TourProgressStore, onboarding: any OnboardingStateStore,
-        weatherSettings: (any WeatherSettingsStore)?, stylistConsent: (any StylistConsentStore)?
+        weatherSettings: (any WeatherSettingsStore)?, stylistConsent: (any StylistConsentStore)?,
+        aiJobs: (any ErasableStore)?, stylistThreads: (any StylistThreadStore)?
     ) -> [(DataPart, any ErasableStore)] {
+        // 27c: AI jobs stop first, so none writes a look after the looks are gone; Ask stylist
+        // conversations go with the looks.
+        let jobs: [(DataPart, any ErasableStore)] =
+            (aiJobs.map { [(.looks, $0)] } ?? []) + (stylistThreads.map { [(.looks, $0)] } ?? [])
         // Her live-weather choices (Phase 29) and her stylist consent (27a) are profile settings,
         // erased before onboarding.
         let weather: [(DataPart, any ErasableStore)] =
             (weatherSettings.map { [(.profile, $0)] } ?? []) + (stylistConsent.map { [(.profile, $0)] } ?? [])
-        return [
+        return jobs + [
             (.drafts, drafts),
             (.drafts, lookDrafts),
             (.drafts, feedbackDrafts),

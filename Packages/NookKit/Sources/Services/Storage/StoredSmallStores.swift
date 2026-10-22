@@ -233,3 +233,53 @@ public final class StoredProfileSettingsKeeper: ProfileSettingsKeeper {
         try? table.removeAll(in: ModelContext(container))
     }
 }
+
+/// Paid AI jobs (Phase 27c), in the store on the iPhone, so a job carries on after a relaunch
+/// with its own Idempotency-Key. Never exported; erased by Delete my data.
+@ModelActor
+public actor StoredAIJobStore: AIJobStore {
+    private let table = RecordTable<AIJob>(kind: .aiJob)
+
+    public func jobs() async throws(StoreError) -> [AIJob] {
+        try table.all(in: modelContext).values.sorted { $0.createdAt < $1.createdAt }
+    }
+
+    public func save(_ job: AIJob) async throws(StoreError) {
+        try table.write([job.id.rawValue: job], in: modelContext)
+    }
+
+    public func remove(_ ids: [AIJob.ID]) async throws(StoreError) {
+        try table.write([:], removing: ids.map(\.rawValue), in: modelContext)
+    }
+
+    public func eraseAll() async throws(StoreError) {
+        try table.removeAll(in: modelContext)
+    }
+}
+
+/// Ask stylist conversations (Phase 27c), in the store on the iPhone. Exported and restored with
+/// her looks; erased by Delete my data.
+@ModelActor
+public actor StoredStylistThreadStore: StylistThreadStore {
+    private let table = RecordTable<StylistThread>(kind: .stylistThread)
+
+    public func threads() async throws(StoreError) -> [StylistThread] {
+        try table.all(in: modelContext).values.sorted { $0.updatedAt > $1.updatedAt }
+    }
+
+    public func thread(_ id: StylistThread.ID) async throws(StoreError) -> StylistThread? {
+        try table.value(id.rawValue, in: modelContext)
+    }
+
+    public func save(_ thread: StylistThread) async throws(StoreError) {
+        try table.write([thread.id.rawValue: thread], in: modelContext)
+    }
+
+    public func delete(_ id: StylistThread.ID) async throws(StoreError) {
+        try table.write([:], removing: [id.rawValue], in: modelContext)
+    }
+
+    public func eraseAll() async throws(StoreError) {
+        try table.removeAll(in: modelContext)
+    }
+}

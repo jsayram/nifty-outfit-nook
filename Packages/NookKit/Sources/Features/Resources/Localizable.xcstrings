@@ -9130,6 +9130,54 @@
           }
         }
       }
+    },
+    "This is taking a little longer. It keeps going if you leave." : {
+      "comment" : "Your looks while a cloud styling job is late and still being checked"
+    },
+    "You can leave this screen. Your looks keep coming, and you’ll see a note when they’re ready." : {
+      "comment" : "Your looks while a cloud styling job runs: leaving doesn't stop it"
+    },
+    "Want a note when they’re ready?" : {
+      "comment" : "Your looks: offer of notifications"
+    },
+    "If you leave the app, a notification can tell you when your outfit ideas are ready. It never says what’s in them." : {
+      "comment" : "Your looks: why the app asks about notifications"
+    },
+    "Notify me" : {
+      "comment" : "Your looks: turn on notifications for jobs"
+    },
+    "Your looks are ready" : {
+      "comment" : "Banner and notification: styling done"
+    },
+    "Your outfit ideas didn’t finish" : {
+      "comment" : "Banner: a styling job didn't finish"
+    },
+    "The stylist answered" : {
+      "comment" : "Banner and notification: answer ready"
+    },
+    "The stylist couldn’t answer this time" : {
+      "comment" : "Banner: an Ask stylist job didn't finish"
+    },
+    "Your try-on picture is ready" : {
+      "comment" : "Banner and notification: try-on done"
+    },
+    "Your try-on picture didn’t finish" : {
+      "comment" : "Banner: a try-on job didn't finish"
+    },
+    "Tap to see them." : {
+      "comment" : "Banner: what tapping it does"
+    },
+    "Tap to try again." : {
+      "comment" : "Banner: what tapping a failed job does"
+    },
+    "Open Outfit Nook to see them." : {
+      "comment" : "Notification body for a finished job"
+    },
+    "Your outfit ideas are ready" : {
+      "comment" : "Notification title: styling done"
+    },
+    "Hide" : {
+      "comment" : "VoiceOver: hides the job banner"
     }
   },
   "version" : "1.0"

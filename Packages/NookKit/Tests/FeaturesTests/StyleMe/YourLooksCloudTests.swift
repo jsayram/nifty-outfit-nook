@@ -120,7 +120,7 @@ struct YourLooksCloudTests {
         await model.settle()
         #expect(model.status == .showing)
         #expect(try await services.looks.looks().count == before + 3)
-        #expect(gated.stylingJobs.runningCount == 0)
+        #expect(gated.aiJobs.activeJobs.isEmpty)
     }
 
     @Test func herCancelStopsACloudRequest() async throws {
@@ -132,7 +132,61 @@ struct YourLooksCloudTests {
         model.cancel()
         #expect(model.status == .failed(.stopped))
         await model.settle()
-        #expect(services.stylingJobs.runningCount == 0)
+        #expect(services.aiJobs.activeJobs.isEmpty)
+    }
+
+    /// 27c: the banner, a notification or a relaunch opens Your looks for a request whose job
+    /// already finished. It shows that job's looks and asks nothing.
+    @Test func aScreenOpenedLaterShowsTheFinishedJobWithoutAskingAgain() async throws {
+        let stylist = GatedStylist()
+        var services = cloudServices(ScriptedStylist())
+        services.stylist = stylist
+        let request = lookRequest()
+        let model = yourLooksModel(request)
+        model.start(with: services)
+        while await stylist.waiting == 0 { await Task.yield() }
+        model.leave()
+        await stylist.open()
+        await model.settle()
+        let jobID = try #require(model.jobID)
+        // She was elsewhere: the banner and Home's dot.
+        #expect(services.aiJobs.announcement == jobID)
+        #expect(services.aiJobs.unseenResults(.styling) == 1)
+
+        let opened = yourLooksModel(request)
+        opened.start(with: services)
+        await opened.settle()
+        #expect(opened.status == .showing)
+        #expect(!opened.isFromHistory)
+        #expect(opened.result?.simple?.id == model.result?.simple?.id)
+        #expect(await stylist.waiting == 1)
+        // Seeing it clears the banner and the dot.
+        #expect(services.aiJobs.announcement == nil)
+        #expect(services.aiJobs.unseenResults(.styling) == 0)
+    }
+
+    @Test func noBannerWhileSheWaitsOnTheScreen() async throws {
+        let services = cloudServices(ScriptedStylist())
+        let model = await styledLooks(services: services)
+        #expect(model.status == .showing)
+        #expect(services.aiJobs.announcement == nil)
+        #expect(services.aiJobs.unseenResults(.styling) == 0)
+    }
+
+    @Test func aCloudJobSaysLeavingIsFineAndOffersANoteOnce() async throws {
+        let stylist = ScriptedStylist([.wait])
+        let services = cloudServices(stylist)
+        let notifier = OfferingNotifier()
+        services.aiJobs.notifier = notifier
+        let model = yourLooksModel()
+        model.start(with: services)
+        while await stylist.calls == 0 { await Task.yield() }
+        while model.notificationOffer != .offer { await Task.yield() }
+        #expect(model.isCloud)
+        await model.declineNotifications()
+        #expect(model.notificationOffer == .off)
+        #expect(await notifier.declined)
+        model.cancel()
     }
 
     @Test func theNotesSayWhereTheLooksCameFrom() {
@@ -160,4 +214,14 @@ actor GatedStylist: Stylist {
         if !isOpen { await withCheckedContinuation { waiters.append($0) } }
         return try await MockStylist().style(context)
     }
+}
+
+/// Offers a note until she declines.
+actor OfferingNotifier: AIJobNotifier {
+    private(set) var declined = false
+    func offer() async -> AIJobNotificationOffer { declined ? .off : .offer }
+    func requestPermission() async -> Bool { true }
+    func declineOffer() async { declined = true }
+    func notifyDone(_ kind: AIJob.Kind, id: AIJob.ID) async {}
+    func withdraw(_ id: AIJob.ID) async {}
 }

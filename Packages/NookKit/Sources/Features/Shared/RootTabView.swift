@@ -53,6 +53,9 @@ private struct RootTabs: View {
     /// width is compact so it puts its bar at the bottom on iPad (RD-01.6), and every tab gets
     /// the real class back (`windowSizeClass(_:)`).
     @Environment(\.horizontalSizeClass) private var windowSizeClass
+    /// 27c: whether the app is in front, for the jobs' banner or notification, and to pick up
+    /// jobs again when she comes back.
+    @Environment(\.scenePhase) private var scenePhase
 
     init(services: NookServices) {
         self.services = services
@@ -68,6 +71,8 @@ private struct RootTabs: View {
                 HomeScreen(openTab: { selection = $0 }, openLook: openSavedLook, path: $homePath)
                     .windowSizeClass(windowSizeClass)
             }
+            // 27c: a dot while outfit ideas she hasn't seen are ready. Style Me lives on Home.
+            .badge(services.aiJobs.unseenResults(.styling) > 0 ? Text(verbatim: "") : nil)
             Tab(AppTab.closet.title, systemImage: AppTab.closet.systemImage, value: AppTab.closet) {
                 ClosetScreen(path: $closetPath)
                     .windowSizeClass(windowSizeClass)
@@ -92,6 +97,29 @@ private struct RootTabs: View {
         .environment(\.feedbackDraft, feedback)
         // The note she left unsent before the app last closed (Phase 21a).
         .task { await feedback.restore() }
+        // 27c: a finished job's banner, over every tab.
+        .overlay(alignment: .top) {
+            AIJobBanner(jobs: services.aiJobs, open: openJob)
+        }
+        // 27c: jobs kept from before carry on, with their own keys.
+        .task { await services.aiJobs.resume(with: services) }
+        .onChange(of: scenePhase) { _, phase in
+            services.aiJobs.isInForeground = phase == .active
+            if phase == .active { Task { await services.aiJobs.resume(with: services) } }
+        }
+        .onChange(of: services.aiJobs.openRequest) { _, id in
+            guard let id else { return }
+            services.aiJobs.didOpen()
+            if let job = services.aiJobs.job(id) { openJob(job) }
+        }
+    }
+
+    /// 27c: opens a finished job's result: Your looks for a styling job, on Home where Style Me
+    /// lives. A job with no screen yet (Ask stylist, try-on) only hides the banner.
+    private func openJob(_ job: AIJob) {
+        services.aiJobs.dismissAnnouncement()
+        guard case .styling(let context, _) = job.request else { return }
+        show(.home, home: [.yourLooks(context.request)])
     }
 
     /// Replay from App tours (Phase 16b): opens the tour's screen, where it starts from step 1

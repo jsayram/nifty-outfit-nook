@@ -10,8 +10,10 @@ import Observation
 /// exactly one more request and replaces all three versions (LR-05a.4). Every result is kept in
 /// the look store as background history, unsaved (LR-06).
 ///
-/// Only `start`, `retry` and `tryDifferentOutfit` call the stylist. Leaving the screen cancels a
-/// request that's still running, and its answer is never shown.
+/// Only `start`, `retry` and `tryDifferentOutfit` call the stylist. With Stage A's stylist on the
+/// phone, leaving the screen cancels a request that's still running. A cloud request is a job in
+/// `AIJobs` (27c): leaving doesn't stop it, its looks land in her history, and coming back (or
+/// the banner, or a notification) shows them here.
 ///
 /// Swap a piece changes a version by hand (Phase 11, LR-07, LR-08): the changed look takes the
 /// version's place on Today, marked "Swapped", and Undo steps back through the changes to the
@@ -92,6 +94,18 @@ final class YourLooksModel {
     private var histories: [LookVersion: EditHistory<Look>] = [:]
     /// Pieces the stylist could use for this request, for the progress step.
     private(set) var usablePieces = 0
+    /// 27c: the cloud job behind this screen, once there is one.
+    private(set) var jobID: AIJob.ID?
+    /// 27c: the job's answer is late, so it's asking again with the same key. Observed through
+    /// `AIJobs`, so the progress line changes on its own.
+    var isTakingLong: Bool {
+        guard isStyling, let jobID else { return false }
+        return services.aiJobs.job(jobID)?.state == .stillRunning
+    }
+    /// 27c: whether to offer a note when the looks are ready. Shown while a cloud job runs.
+    private(set) var notificationOffer: AIJobNotificationOffer = .off
+    /// 27c: the screen is on show, so its job needs no banner.
+    private var isVisible = false
     /// How many times the stylist was asked, for tests and the checkpoint.
     private(set) var requestsSent = 0
     /// True when the looks couldn't be read, so the Saved tab shows its error state.
@@ -131,9 +145,33 @@ final class YourLooksModel {
     /// Sends the request the first time the screen appears. Coming back to the screen never
     /// sends it again on its own.
     func start(with services: NookServices) {
+        appear()
         guard status == .notStarted else { return }
         self.services = services
-        style()
+        style(attaching: true)
+    }
+
+    /// 27c: the screen is showing again (it was pushed over, or another tab was in front).
+    func appear() {
+        guard !isVisible else { return }
+        isVisible = true
+        if let jobID { services.aiJobs.showing(jobID) }
+    }
+
+    /// 27c: whether this is the cloud stylist, so the progress says leaving is fine.
+    var isCloud: Bool { services.cloudStyling }
+
+    /// 27c: she said yes to a note when her looks are ready: iOS asks next.
+    func allowNotifications() async {
+        await services.aiJobs.notifier.requestPermission()
+        notificationOffer = await services.aiJobs.notifier.offer()
+        if notificationOffer == .offer { notificationOffer = .off }
+    }
+
+    /// 27c: Not now. It isn't offered again.
+    func declineNotifications() async {
+        notificationOffer = .off
+        await services.aiJobs.notifier.declineOffer()
     }
 
     /// Tries the same request again after a failure. Sends one request.
@@ -171,8 +209,8 @@ final class YourLooksModel {
     /// comes, is dropped. With a result on screen she's back on it; without one, it's stopped.
     func cancel() {
         guard isStyling else { return }
-        // Her Cancel stops a cloud request too; leaving the screen doesn't (`leave()`).
-        if services.cloudStyling { services.stylingJobs.cancel(request.id) }
+        // Her Cancel stops a cloud job too; leaving the screen doesn't (`leave()`).
+        if services.cloudStyling, let jobID { services.aiJobs.cancel(jobID) }
         run += 1
         styling?.cancel()
         styling = nil
@@ -180,8 +218,10 @@ final class YourLooksModel {
     }
 
     /// The screen went away. Stage A's stylist on the phone stops, as before; a cloud request
-    /// keeps going in `StylingJobs`, and this model shows its looks if the screen comes back.
+    /// keeps going in `AIJobs`, and this model shows its looks if the screen comes back.
     func leave() {
+        if isVisible, let jobID { services.aiJobs.stoppedShowing(jobID) }
+        isVisible = false
         guard !services.cloudStyling else { return }
         cancel()
     }
@@ -195,7 +235,7 @@ final class YourLooksModel {
         if case .styling = status { true } else { false }
     }
 
-    private func style() {
+    private func style(attaching: Bool = false) {
         run += 1
         let thisRun = run
         problem = nil
@@ -203,11 +243,14 @@ final class YourLooksModel {
         requestsSent += 1
         let request = request
         styling = Task { [weak self] in
-            await self?.perform(request, run: thisRun)
+            await self?.perform(request, run: thisRun, attaching: attaching)
         }
     }
 
-    private func perform(_ request: StyleRequest, run thisRun: Int) async {
+    /// - Parameter attaching: 27c, the screen's first start. A job already exists for this request
+    ///   when the screen was opened from the banner or a notification, or after a relaunch: the
+    ///   screen shows it instead of asking again.
+    private func perform(_ request: StyleRequest, run thisRun: Int, attaching: Bool) async {
         let context: StylingContext
         var looks: [Look] = []
         do {
@@ -230,6 +273,9 @@ final class YourLooksModel {
             return finish(.closetUnavailable, run: thisRun)
         }
         usablePieces = context.eligibleGarments.count
+        if services.cloudStyling, attaching, let existing = services.aiJobs.job(forStyleRequest: request.id) {
+            return await follow(existing.id, run: thisRun)
+        }
         // 27a, FR-58: before a paid request, an earlier result from her own history that still
         // fits today's request. Nothing is sent and nothing is used.
         if services.cloudStyling && !wantsFreshIdeas,
@@ -241,21 +287,16 @@ final class YourLooksModel {
         }
         status = .styling(.choosing)
 
-        // 27a: the cloud stylist runs in the app-level owner, not in this screen, so leaving
+        // 27a, 27c: the cloud stylist runs as an app-level job, not in this screen, so leaving
         // doesn't stop it and its looks are kept in her history either way.
         if services.cloudStyling {
-            let result = await services.stylingJobs.run(context, services: services).value
-            guard thisRun == run else { return }
-            switch result {
-            case .success(let outcome):
-                await reloadLooks()
-                guard thisRun == run else { return }
-                show(outcome)
-                styling = nil
-            case .failure(let error):
-                finish(Self.failure(for: error), run: thisRun)
+            let job: AIJob
+            do {
+                job = try services.aiJobs.startStyling(context, services: services)
+            } catch {
+                return finish(Self.failure(for: error), run: thisRun)
             }
-            return
+            return await follow(job.id, run: thisRun)
         }
 
         let outcome: StyleOutcome
@@ -272,6 +313,45 @@ final class YourLooksModel {
         guard thisRun == run else { return }
         show(outcome)
         styling = nil
+    }
+
+    /// 27c: shows the job's state now, and its result when it comes.
+    private func follow(_ id: AIJob.ID, run thisRun: Int) async {
+        if let previous = jobID, previous != id, isVisible { services.aiJobs.stoppedShowing(previous) }
+        if jobID != id {
+            jobID = id
+            if isVisible { services.aiJobs.showing(id) }
+        }
+        if services.aiJobs.job(id)?.state.isActive == true {
+            status = .styling(.choosing)
+            if notificationOffer == .off { notificationOffer = await services.aiJobs.notifier.offer() }
+            _ = await services.aiJobs.finished(id)
+        }
+        guard thisRun == run else { return }
+        guard let job = services.aiJobs.job(id) else { return finish(.stopped, run: thisRun) }
+        switch job.state {
+        case .done:
+            guard let outcome = job.outcome else { return finish(.notCompleted, run: thisRun) }
+            await reloadLooks()
+            guard thisRun == run else { return }
+            show(outcome)
+            styling = nil
+            if isVisible { services.aiJobs.markSeen(id) }
+        case .failed:
+            finish(Self.failure(for: job.failure ?? .notCompleted), run: thisRun)
+        case .cancelled, .queued, .running, .stillRunning:
+            finish(.stopped, run: thisRun)
+        }
+    }
+
+    private static func failure(for failure: AIJob.Failure) -> Failure {
+        switch failure {
+        case .offline: .offline
+        case .notCompleted: .notCompleted
+        case .needsConsent: .needsConsent
+        case .requestChanged: .requestChanged
+        case .limited(let problem): .limited(problem)
+        }
     }
 
     /// Keeps the versions as unsaved background history (LR-06) and marks a suitcase as used

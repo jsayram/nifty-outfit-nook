@@ -82,6 +82,15 @@ struct HomeScreen: View {
                     case .help: HelpScreen()
                     case .feedback: FeedbackScreen()
                     case .privacy: PrivacyScreen()
+                    case .yourLooks(let request):
+                        // 27c: a finished job's looks, opened from the banner or a notification.
+                        // Its ways back go to Style Me.
+                        YourLooksScreen(
+                            request: request,
+                            routes: YourLooksRoutes(
+                                backToStyleMe: { path = [.styleMe(choosingOccasion: false)] },
+                                useMainCloset: { path = [.styleMe(choosingOccasion: false)] },
+                                addPieces: { _ in path = [.styleMe(choosingOccasion: false)] }))
                     }
                 }
                 .nookSheet(item: $sheet, title: { $0.title }, subtitle: { $0.subtitle }) { sheet in
