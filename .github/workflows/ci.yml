@@ -53,7 +53,7 @@ env:
   NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
   # '1' only on a manual run with include_ipad ticked. The iPad snapshot tests in the package tests
   # skip themselves otherwise (IPadSnapshots in Packages/NookKit/Tests/NookTestSupport).
-  NOOK_IPAD_SNAPSHOTS: ${{ github.event_name == 'workflow_dispatch' && inputs.include_ipad && '1' || '' }}
+  NOOK_IPAD_SNAPSHOTS: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.include_ipad) == 'true' && '1' || '' }}
 
 jobs:
   swift-format:
@@ -294,9 +294,11 @@ jobs:
         # The parts are listed here, and `include` below gives each its simulator and tests. The
         # `exclude` drops ui-ipad unless this is a manual run with include_ipad ticked. (Entries
         # that only appear under `include` could not be excluded, which is why the names are here.)
+        # `format` because a run started with `gh workflow run -f include_ipad=false` passes the
+        # text "false", which a bare `inputs.include_ipad` would treat as true (22 October 2026).
         part: [ui-audit-and-settings, ui-add-and-saved, ui-rest, ui-ipad]
         exclude:
-          - part: ${{ github.event_name == 'workflow_dispatch' && inputs.include_ipad && 'none' || 'ui-ipad' }}
+          - part: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.include_ipad) == 'true' && 'none' || 'ui-ipad' }}
         include:
           - part: ui-audit-and-settings
             family: iPhone
