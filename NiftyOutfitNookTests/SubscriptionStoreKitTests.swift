@@ -1,4 +1,5 @@
 import Foundation
+import MachO
 import Models
 import Services
 import StoreKit
@@ -22,6 +23,9 @@ struct SubscriptionStoreKitTests {
 
     @Test func offerComesFromTheStoreWithTheFreeMonth() async throws {
         let (_, service, _) = try setUp()
+        // StoreKit's local testing refuses a host app without it (Configs/*-Debug.entitlements).
+        #expect(AppEntitlements.embedded()?.contains("get-task-allow") == true, "\(AppEntitlements.embedded() ?? "none")")
+        await expectStoreKitTesting()
         let offer = try await service.offer()
         #expect(offer.productID == Self.product)
         #expect(offer.displayPrice == "$9.99")
@@ -213,6 +217,23 @@ struct SubscriptionStoreKitTests {
         return (session, service, cache)
     }
 
+    /// Fails with what the environment looks like when StoreKit's test environment won't serve
+    /// this app, so a CI failure says why instead of only "unavailable".
+    private func expectStoreKitTesting() async {
+        let products = await eventually(.seconds(10)) {
+            ((try? await Product.products(for: [Self.product])) ?? []).isEmpty == false
+        }
+        if !products {
+            Issue.record(
+                """
+                StoreKit's test environment returned no products. \
+                OS: \(ProcessInfo.processInfo.operatingSystemVersionString), \
+                host: \(Bundle.main.bundleIdentifier ?? "none"), \
+                entitlements: \(AppEntitlements.embedded() ?? "none found")
+                """)
+        }
+    }
+
     /// Asks again until `check` is true or `limit` passes. StoreKit reports a change a moment
     /// after it happens.
     private func eventually(_ limit: Duration = .seconds(20), _ check: () async -> Bool) async -> Bool {
@@ -247,6 +268,26 @@ struct SubscriptionStoreKitTests {
 
 /// Finds this test bundle, which holds the StoreKit configuration file.
 private final class BundleMarker {}
+
+/// The entitlements signed into the host app, read from its `__TEXT,__entitlements` section (where
+/// simulator builds keep them). StoreKit's local testing needs `get-task-allow` among them.
+enum AppEntitlements {
+    static func embedded() -> String? {
+        // The app's own executable, not the debug dylib Xcode splits Debug builds into.
+        let index = (0..<_dyld_image_count()).first {
+            String(cString: _dyld_get_image_name($0)).hasSuffix(".app/NiftyOutfitNook")
+        }
+        guard let index, let header = _dyld_get_image_header(index) else { return nil }
+        var size: UInt = 0
+        let data = header.withMemoryRebound(to: mach_header_64.self, capacity: 1) {
+            getsectiondata($0, "__TEXT", "__entitlements", &size)
+        }
+        guard let data, size > 0 else { return nil }
+        let plist = String(decoding: UnsafeBufferPointer(start: data, count: Int(size)), as: UTF8.self)
+        // Only the keys, on one line.
+        return plist.matches(of: /<key>([^<]+)<\/key>/).map { String($0.1) }.joined(separator: ", ")
+    }
+}
 
 /// A clock a test can move forward: the real time plus an offset.
 final class TestClock: Sendable {

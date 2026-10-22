@@ -341,7 +341,7 @@ struct DeleteAccountModelTests {
     }
 
     @Test func theSubscriptionNoteSaysDeletingDoesntCancelIt() {
-        #expect(DeleteDataText.subscriptionNote.contains("doesn’t cancel a subscription"))
+        #expect(DeleteDataText.subscriptionNote.contains("doesn’t cancel your subscription"))
         #expect(DeleteDataText.subscriptionNote.contains("Subscriptions"))
     }
 }
