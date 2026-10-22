@@ -8,7 +8,9 @@
 # -toasts-stay and -animations, Phase 20a's -fixtures, the device checks' -device-checks,
 # -make-old-store, -migration-kill-at and -migration-pause-at, and 33a's -seed-tryon and
 # -cloud-tryon) aren't in it. 33a: nor is the drawn stand-in person the simulator uses
-# (SyntheticPerson).
+# (SyntheticPerson). Phase 32b added the later debug screens and switches: the gateway and limits
+# labs, the diagnostics lab, the fake sign-in, the cloud stylist against the fake backend, the
+# seeded photo closet, the sample feedback screenshot, frame stats and the weather test switches.
 #
 # It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
 # or test-support resource bundle, or any file with the name of one of the repo's sample photos
@@ -40,14 +42,18 @@ text="$(strings "$binary")"
 failed=0
 for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting \
     DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
-    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson; do
+    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson \
+    GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
     fi
 done
 for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animations -fixtures \
-    -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon; do
+    -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon \
+    -gateway-lab -limits-lab -diagnostics-lab -diagnostics-sample-reports -fake-signed-in -cloud-stylist \
+    -seed-photo-closet -feedback-sample-screenshot -frame-stats -weather-cities -weather-location \
+    -weather-settings-memory; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1
