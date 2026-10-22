@@ -83,8 +83,12 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     public func start() {
         state.withLock { state in
             guard state.listener == nil else { return }
+            // The iterator is made here, not inside the task: a task at utility priority can
+            // start late on a busy machine, and an update that arrived before it began to iterate
+            // was never delivered (measured on the iOS 26.5 simulator, 22 October 2026).
+            nonisolated(unsafe) var updates = Transaction.updates.makeAsyncIterator()
             state.listener = Task.detached(priority: .utility) { [weak self] in
-                for await update in Transaction.updates {
+                while let update = await updates.next() {
                     await self?.handle(update)
                 }
             }

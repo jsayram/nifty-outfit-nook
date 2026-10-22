@@ -16,10 +16,12 @@ import Testing
 /// time. StoreKit takes a moment to report a change after it happens, so checks of what StoreKit
 /// says wait for it, up to a limit; checks of the app's own rules use an injected clock.
 ///
-/// Not on CI for now: on CI's iOS 27.0 simulator StoreKit's test environment serves no products to
+/// Not on hosted CI: on the iOS 27.0 simulator StoreKit's test environment serves no products to
 /// the host app (`SKInternalErrorDomain` 17), although the app is signed with `get-task-allow`
-/// (checked below, PR #91's diagnostics). All eleven pass on the iOS 26.5 simulator. Run them with
-/// `scripts/test.sh -only-testing:NiftyOutfitNookTests`; `docs/payments.md` has the open question.
+/// (checked below, PR #91's diagnostics). All eleven pass on the iOS 26.5 simulator. The gate on
+/// the self-hosted runner runs them there, on a simulator of its own, with `NOOK_STOREKIT=1`
+/// (`.github/workflows/ci.yml`). Locally: `scripts/test.sh -only-testing:NiftyOutfitNookTests`.
+/// `docs/payments.md` has the open question.
 @Suite(
     .serialized, .timeLimit(.minutes(2)),
     .disabled(if: StoreKitTestingOnCI.isCI, "StoreKit's test environment serves no products on CI's iOS 27.0 simulator"))
@@ -194,11 +196,12 @@ struct SubscriptionStoreKitTests {
         #expect(trial.state == .trial)
         // A month is 30 seconds now; StoreKit renews by itself.
         #expect(trialEnd.timeIntervalSince(Date()) < 60)
+        var latest = trial
         #expect(
             await eventually(.seconds(75)) {
-                let status = await service.refresh()
-                return status.state == .active && (status.expiresAt ?? .distantPast) > trialEnd
-            })
+                latest = await service.refresh()
+                return latest.state == .active && (latest.expiresAt ?? .distantPast) > trialEnd
+            }, "No renewal in 75 seconds. Trial ended \(trialEnd), the last status was \(latest), now \(Date())")
         let reinstalled = Self.reinstalled()
         #expect(await eventually { (try? await reinstalled.restore())?.state == .active })
         try session.expireSubscription(productIdentifier: Self.product)
@@ -296,9 +299,65 @@ struct StoreKitTestingHostTests {
     }
 }
 
+/// Waits on a stream with a limit. A test that waits on a stream with a plain `for await` and
+/// never hears what it expects (StoreKit reports a change a moment late, and an update can come
+/// before StoreKit has caught up) sits there until the suite's two-minute time limit ends it, and
+/// then the test host restarts. These give up after `limit` and hand back what they did hear, so
+/// the failure says what arrived.
+enum StoreKitWaits {
+    /// Reads `stream` until `count` elements arrive or `limit` passes.
+    static func collect<Element: Sendable>(
+        _ stream: AsyncStream<Element>, count: Int, limit: Duration = .seconds(20)
+    ) async -> [Element] {
+        let heard = Mutex<[Element]>([])
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                for await element in stream {
+                    let total = heard.withLock { $0.append(element); return $0.count }
+                    if total >= count { return }
+                }
+            }
+            group.addTask { try? await Task.sleep(for: limit) }
+            await group.next()
+            group.cancelAll()
+        }
+        return heard.withLock { $0 }
+    }
+
+    /// Reads `stream` until an element matches or `limit` passes. Also returns everything heard.
+    static func listen<Element: Sendable>(
+        to stream: AsyncStream<Element>, limit: Duration = .seconds(20),
+        until match: @escaping @Sendable (Element) -> Bool
+    ) async -> (found: Element?, heard: [Element]) {
+        let heard = Mutex<[Element]>([])
+        let found = await withTaskGroup(of: Element?.self) { group in
+            group.addTask {
+                for await element in stream {
+                    heard.withLock { $0.append(element) }
+                    if match(element) { return element }
+                }
+                return nil
+            }
+            group.addTask {
+                try? await Task.sleep(for: limit)
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        return (found, heard.withLock { $0 })
+    }
+}
+
 enum StoreKitTestingOnCI {
-    /// `scripts/test.sh` passes `NOOK_CI` on CI (as `TEST_RUNNER_NOOK_CI`).
-    static var isCI: Bool { ProcessInfo.processInfo.environment["NOOK_CI"] != nil }
+    /// `scripts/test.sh` passes `NOOK_CI` on CI (as `TEST_RUNNER_NOOK_CI`). It also passes
+    /// `NOOK_STOREKIT` (from its own `NOOK_STOREKIT=1`) in the CI step that runs these suites on
+    /// the self-hosted runner's own iOS 26.5 simulator, and that turns the skip off.
+    static var isCI: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["NOOK_CI"] != nil && environment["NOOK_STOREKIT"] == nil
+    }
 }
 
 /// Finds this test bundle, which holds the StoreKit configuration file.

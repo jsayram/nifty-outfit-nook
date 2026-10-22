@@ -65,8 +65,11 @@ public final class StoreKitCreditsService: CreditsService {
     public func start() {
         state.withLock { state in
             guard state.listener == nil else { return }
+            // The iterator is made here, not inside the task, so an update that arrives before a
+            // late-starting task begins to iterate isn't missed (see StoreKitSubscriptionService).
+            nonisolated(unsafe) var updates = Transaction.updates.makeAsyncIterator()
             state.listener = Task.detached(priority: .utility) { [weak self] in
-                for await update in Transaction.updates {
+                while let update = await updates.next() {
                     guard let self, self.productIDs.contains(update.unsafePayloadValue.productID) else { continue }
                     _ = await self.credit(update)
                 }
