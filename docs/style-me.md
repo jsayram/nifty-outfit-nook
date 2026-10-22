@@ -84,7 +84,7 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 
 ## Decisions for Jose
 
-1. **An empty main closet can't style.** PRD §8.1 allows clearly labelled hypothetical ideas with zero inventory. Stage A's mock stylist and `ResultCheck` need an owned Simple, so for now the empty closet offers Add a piece instead.
+1. **An empty main closet can't style.** PRD §8.1 allows clearly labelled hypothetical ideas with zero inventory. Stage A's mock stylist and `ResultCheck` need an owned Simple, so for now the empty closet offers Add a piece instead. Still open after 27a: the cloud stylist keeps the same rule until Jose decides.
 2. **The occasion and source are remembered** since Phase 13: Style Me starts from the ones she chose last (`Profile.remembered`), and Other isn't remembered. A remembered suitcase that's gone still shows "This suitcase isn't there any more", so nothing styles from everything without her choosing it.
 3. **Preferences on Style Me is for this request.** It starts from her saved choice each time; changing the saved one is Profile's job (14a). FR-05 asks to keep "refine this request" and "update a usual preference" apart.
 4. **"Colour", not "Color"**, to match the rest of the app (Closet's filters, Add a piece). The amendment writes Color.
@@ -98,3 +98,4 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 - **13 (done):** remembering the source (FR-67) and the occasion, Add pieces opening the real suitcase, and "Style me from this suitcase" (`docs/suitcases-and-laundry.md`).
 - **14a (done):** her usual fit and Preferences in Profile (`docs/profile.md`).
 - **15b (done):** on a wide iPad the request sits beside the options (`docs/ipad.md`).
+- **27a (done):** with the real services (or `-cloud-stylist` in debug builds) Style me goes to the cloud stylist, after her consent and a check of her history first ([decision 0008](decisions/0008-cloud-stylist.md)). The request screen is unchanged.

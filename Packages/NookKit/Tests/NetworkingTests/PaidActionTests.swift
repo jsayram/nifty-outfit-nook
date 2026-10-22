@@ -46,8 +46,10 @@ struct PaidActionTests {
         }
     }
 
-    static let swap = PaidActionRequest.style(mode: .swap, contextRevision: "rev_1")
-    static let full = PaidActionRequest.style(mode: .full, contextRevision: "rev_1")
+    /// A new quick request (an Ask stylist question) and a new full one on every use, so the
+    /// stylist's result cache never answers them (27a).
+    static var swap: PaidActionRequest { .style(.sample(.ask, note: String(UUID().uuidString.prefix(8)))) }
+    static var full: PaidActionRequest { .style(.sample(.full, note: String(UUID().uuidString.prefix(8)))) }
     static let tryOn = PaidActionRequest.tryOn(contextRevision: "rev_1")
 
     @Test func aPaidActionRunsOnceAndIsCounted() async throws {
@@ -177,8 +179,8 @@ struct PaidActionTests {
         let failure: APIFailure? = await { () async -> APIFailure? in
             do throws(APIFailure) {
                 _ = try await client().send(
-                    APIV1.style, body: APIV1.StyleRequest(mode: "swap", contextRevision: "r"),
-                    idempotencyKey: IdempotencyKey.make(), signer: nil, as: APIV1.PaidActionResponse.self)
+                    APIV1.style, body: APIV1.StyleRequest(StyleCall.sample(.ask)),
+                    idempotencyKey: IdempotencyKey.make(), signer: nil, as: APIV1.StyleResponse.self)
                 return nil
             } catch {
                 return error
@@ -233,7 +235,10 @@ struct AttestationTests {
         #expect(clientData == example["clientData"])
         #expect(AttestClientData.hash(clientData).base64EncodedString() == example["clientDataHashBase64"])
         // The app's own encoding of that request gives the same body bytes.
-        let encoded = try APIV1.encoder().encode(APIV1.StyleRequest(mode: "full", contextRevision: "rev_7f3a9c"))
+        let call = StyleCall(
+            mode: .full, contextRevision: "rev_7f3a9c", consentVersion: "stylist-1", pieces: [], outfit: nil,
+            question: nil)
+        let encoded = try APIV1.encoder().encode(APIV1.StyleRequest(call))
         #expect(String(decoding: encoded, as: UTF8.self) == example["body"])
     }
 

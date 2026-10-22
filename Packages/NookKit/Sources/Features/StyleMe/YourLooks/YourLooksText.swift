@@ -120,6 +120,15 @@ struct YourLooksText {
             return String(
                 localized: "That’s every outfit \(sourceName) can make for this request, so this one came round again.",
                 bundle: .module, comment: "Note on Your looks after Try a different outfit: the source's name")
+        case .fromHistory:
+            return String(
+                localized: "From your history: it still fits today’s request, so nothing was used.",
+                bundle: .module,
+                comment: "Note on Your looks: an earlier result reused before asking the stylist (FR-58)")
+        case .answeredAgain:
+            return String(
+                localized: "You asked for the same thing earlier today, so these are the same looks. Nothing was used.",
+                bundle: .module, comment: "Note on Your looks: the server answered from its 24-hour result cache")
         }
     }
 

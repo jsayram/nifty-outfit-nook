@@ -36,6 +36,10 @@ final class YourLooksModel {
         case closetUnavailable
         /// The suitcase or starting piece changed since she asked (`StylingContextError`).
         case requestChanged
+        /// 27a: she hasn't agreed to send requests to the stylist's provider. Nothing was sent.
+        case needsConsent
+        /// 27a: a server limit stopped it (too many at once, an allowance used up, paused).
+        case limited(CloudLimitProblem)
     }
 
     enum Status: Equatable {
@@ -95,6 +99,8 @@ final class YourLooksModel {
 
     /// Main-piece combinations already shown for this request.
     private var shown: Set<Set<Garment.ID>> = []
+    /// 27a: after New ideas she wants the stylist, not her history, for the rest of this screen.
+    private var wantsFreshIdeas = false
     private var services: NookServices = .unavailable
     private var styling: Task<Void, Never>?
     /// Bumped by every new run and by cancelling, so a stale answer is never shown.
@@ -146,17 +152,38 @@ final class YourLooksModel {
             if !main.isEmpty { shown.insert(main) }
         }
         request = request.again(id: makeID(), createdAt: now())
+        wantsFreshIdeas = true
         style()
+    }
+
+    /// 27a, FR-58: the result on screen came from her own history, not a new request.
+    var isFromHistory: Bool {
+        result?.notes.contains(.fromHistory) == true
+    }
+
+    /// 27a: she said yes to the stylist's consent text. Keeps it, then sends the request.
+    func agreeToStylist() {
+        services.stylistConsent.save(StylistConsent(agreedAt: now()))
+        retry()
     }
 
     /// Stops a request that's still running: Cancel, or leaving the screen. Its answer, if it
     /// comes, is dropped. With a result on screen she's back on it; without one, it's stopped.
     func cancel() {
         guard isStyling else { return }
+        // Her Cancel stops a cloud request too; leaving the screen doesn't (`leave()`).
+        if services.cloudStyling { services.stylingJobs.cancel(request.id) }
         run += 1
         styling?.cancel()
         styling = nil
         status = result == nil ? .failed(.stopped) : .showing
+    }
+
+    /// The screen went away. Stage A's stylist on the phone stops, as before; a cloud request
+    /// keeps going in `StylingJobs`, and this model shows its looks if the screen comes back.
+    func leave() {
+        guard !services.cloudStyling else { return }
+        cancel()
     }
 
     /// Waits for the running request, for tests.
@@ -182,12 +209,14 @@ final class YourLooksModel {
 
     private func perform(_ request: StyleRequest, run thisRun: Int) async {
         let context: StylingContext
+        var looks: [Look] = []
         do {
             async let garmentList = services.closet.garments()
             async let suitcaseList = services.suitcases.suitcases()
             async let lookList = services.looks.looks()
             async let profile = services.profile.profile()
-            let (garments, suitcases, looks) = try await (garmentList, suitcaseList, lookList)
+            let (garments, suitcases, storedLooks) = try await (garmentList, suitcaseList, lookList)
+            looks = storedLooks
             let usualFit = try await profile.usualFit
             guard thisRun == run else { return }
             self.usualFit = usualFit
@@ -201,7 +230,33 @@ final class YourLooksModel {
             return finish(.closetUnavailable, run: thisRun)
         }
         usablePieces = context.eligibleGarments.count
+        // 27a, FR-58: before a paid request, an earlier result from her own history that still
+        // fits today's request. Nothing is sent and nothing is used.
+        if services.cloudStyling && !wantsFreshIdeas,
+            let earlier = StyleHistory.match(for: context, in: looks)
+        {
+            show(.complete(earlier))
+            styling = nil
+            return
+        }
         status = .styling(.choosing)
+
+        // 27a: the cloud stylist runs in the app-level owner, not in this screen, so leaving
+        // doesn't stop it and its looks are kept in her history either way.
+        if services.cloudStyling {
+            let result = await services.stylingJobs.run(context, services: services).value
+            guard thisRun == run else { return }
+            switch result {
+            case .success(let outcome):
+                await reloadLooks()
+                guard thisRun == run else { return }
+                show(outcome)
+                styling = nil
+            case .failure(let error):
+                finish(Self.failure(for: error), run: thisRun)
+            }
+            return
+        }
 
         let outcome: StyleOutcome
         do {
@@ -271,6 +326,8 @@ final class YourLooksModel {
         case .cancelled: .stopped
         case .notCompleted, .timedOut: .notCompleted
         case .invalidRequest: .requestChanged
+        case .needsConsent: .needsConsent
+        case .limited(let problem): .limited(problem)
         }
     }
 

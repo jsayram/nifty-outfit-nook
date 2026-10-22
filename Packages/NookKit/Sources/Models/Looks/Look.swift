@@ -31,6 +31,13 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
     /// Days she chose Wear today for this look (LR-10), oldest first, at most one per day.
     public var wornOn: [Date]
     public var createdAt: Date
+    /// 27a: the stylist's one-line reason for this version, shown under the look. `nil` for looks
+    /// she made herself and for Stage A's mock stylist. **Personal**.
+    public var why: String?
+    /// 27a, FR-58: the request this look answered, in allowlisted structured terms, so a later
+    /// request can find it in her history before asking the stylist again. Never free text, never
+    /// today's comfort. `nil` for looks she made and for results not from the cloud stylist.
+    public var intent: StyleIntent?
 
     public init(
         id: ID,
@@ -43,7 +50,9 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         isSaved: Bool = false,
         savedAt: Date? = nil,
         wornOn: [Date] = [],
-        createdAt: Date
+        createdAt: Date,
+        why: String? = nil,
+        intent: StyleIntent? = nil
     ) {
         self.id = id
         self.resultID = resultID
@@ -56,6 +65,8 @@ public struct Look: Identifiable, Hashable, Sendable, Codable {
         self.savedAt = savedAt
         self.wornOn = wornOn
         self.createdAt = createdAt
+        self.why = why
+        self.intent = intent
     }
 
     /// IDs of the owned pieces, in piece order.

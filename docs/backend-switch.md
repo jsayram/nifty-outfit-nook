@@ -35,6 +35,10 @@ The backend needs its switches and ceilings set before any paid work runs (backe
 
 Delete my account works on the fakes. On the real backend it needs, in the backend repo's README ("Switching on the real calls"): Clerk's secret key and `NOOK_CLERK_DELETE_MODE=clerk`, a pepper (`NOOK_SUBJECT_PEPPER`), and the Sign in with Apple revocation, which isn't built (first check whether deleting the Clerk user already revokes Apple's link). The app's side is ready: `ClerkAuthProvider.reauthenticateForDeletion` asks Apple directly for a fresh authorization code. It hasn't run on a device; check it there with a test account: the Apple sheet, the deletion finishing, the Clerk user gone from the dashboard, and the app no longer listed in Settings > your name > Sign in with Apple.
 
+## Cloud stylist (Phase 27a)
+
+With the real services configured, Style Me uses the cloud stylist ([decision 0008](decisions/0008-cloud-stylist.md)); nothing in the app changes when the backend switches from its fake to Anthropic. On the backend (its README, "How to switch the stylist to Anthropic"): a result key (`NOOK_RESULT_KEY`), then `ANTHROPIC_API_KEY`, both set by Jose in Convex and never in a file. Like every paid endpoint it needs App Attest on a device first. On the simulator, `-cloud-stylist` runs it against the fake backend.
+
 ## Before production
 
 - Decision 0005's open points: the Clerk Keychain accessibility class needs Jose's written exception first.

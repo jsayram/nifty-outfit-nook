@@ -1,0 +1,20 @@
+{
+  "mode": "ask",
+  "contextRevision": "rev_7f3a9c",
+  "consentVersion": "stylist-1",
+  "closet": [
+    { "id": "g-blouse-cream", "category": "top", "kind": "blouse", "colors": ["cream"], "dressiness": "smart", "warmth": "light", "name": "Cream silk blouse" },
+    { "id": "g-trousers-olive", "category": "bottom", "kind": "trousers", "colors": ["olive"], "dressiness": "smart", "warmth": "medium", "name": "Olive trousers" },
+    { "id": "g-loafers-brown", "category": "shoes", "kind": "loafers", "colors": ["brown"], "dressiness": "smart", "warmth": "medium", "name": "Brown loafers" },
+    { "id": "g-flats-black", "category": "shoes", "kind": "flats", "colors": ["black"], "dressiness": "smart", "warmth": "light", "name": "Black flats" }
+  ],
+  "question": {
+    "look": ["g-blouse-cream", "g-trousers-olive", "g-loafers-brown"],
+    "occasion": "office",
+    "text": "Would the black flats work instead?",
+    "earlier": [
+      { "from": "her", "text": "Is this too plain for a client lunch?" },
+      { "from": "stylist", "text": "It reads polished. A belt or a statement earring would lift it." }
+    ]
+  }
+}

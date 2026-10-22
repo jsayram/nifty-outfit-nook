@@ -62,11 +62,11 @@ public struct CloudUsage: Sendable, Equatable {
     }
 }
 
-/// A paid action to ask for. Placeholders until 27a and 33a give them their real inputs.
+/// A paid action to ask for. Try-on is a placeholder until 33a gives it its real inputs.
 public enum PaidActionRequest: Sendable, Equatable {
-    public enum StyleMode: String, Sendable { case full, swap, ask }
-    /// `contextRevision` names the version of what's being styled, never its content.
-    case style(mode: StyleMode, contextRevision: String)
+    /// 27a: the cloud stylist (an outfit, or an Ask stylist question).
+    case style(StyleCall)
+    /// `contextRevision` names the version of what's being drawn, never its content.
     case tryOn(contextRevision: String)
 
     public var feature: PaidFeature {
@@ -78,8 +78,7 @@ public enum PaidActionRequest: Sendable, Equatable {
 
     public var category: UsageCategory {
         switch self {
-        case .style(.full, _): .styleFull
-        case .style: .styleQuick
+        case .style(let call): call.mode == .full ? .styleFull : .styleQuick
         case .tryOn: .tryOn
         }
     }
@@ -92,17 +91,20 @@ public struct PaidActionReceipt: Sendable, Equatable {
     /// True when this was a retry the server had already done: it wasn't run or counted again.
     public var replayed: Bool
     public var usage: UsageAllowance
+    /// 27a: the stylist's checked answer. `nil` for try-on.
+    public var style: StyleAnswer?
 
-    public init(id: String, feature: PaidFeature, replayed: Bool, usage: UsageAllowance) {
+    public init(id: String, feature: PaidFeature, replayed: Bool, usage: UsageAllowance, style: StyleAnswer? = nil) {
         self.id = id
         self.feature = feature
         self.replayed = replayed
         self.usage = usage
+        self.style = style
     }
 }
 
 /// Why a paid action, or reading usage, didn't happen, in the terms a screen needs.
-public enum CloudLimitProblem: Error, Sendable, Equatable {
+public enum CloudLimitProblem: Error, Sendable, Hashable {
     /// Too many in a short time. Try again after this many seconds.
     case rateLimited(retryAfterSeconds: Int)
     /// An allowance is used up until `resetAt`.
@@ -118,6 +120,8 @@ public enum CloudLimitProblem: Error, Sendable, Equatable {
     case didNotFinish(retryAfterSeconds: Int?)
     /// Signing in, the connection or the server.
     case account(AccountProblem)
+    /// 27a: her consent doesn't cover where the server would send this. Nothing was sent.
+    case needsConsent
 }
 
 /// Paid cloud work through the gateway (24b). The same idempotency key must be passed for every

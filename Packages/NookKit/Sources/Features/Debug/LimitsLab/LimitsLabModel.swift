@@ -145,8 +145,8 @@
 
         static func doneText(_ request: PaidActionRequest) -> String {
             switch request {
-            case .style(.full, _): "Done: an outfit idea (placeholder)."
-            case .style: "Done: a swap or question (placeholder)."
+            case .style(let call) where call.mode == .full: "Done: an outfit idea (sample pieces)."
+            case .style: "Done: a swap or question (sample pieces)."
             case .tryOn: "Done: a try-on picture (placeholder)."
             }
         }

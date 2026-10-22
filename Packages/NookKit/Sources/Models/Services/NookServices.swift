@@ -58,6 +58,15 @@ public struct NookServices: Sendable {
     /// Paid cloud work and her allowances (Phase 24b), for the stylist (27a) and try-on (33a).
     /// Signed out until the app sets one, like `account`.
     public var paid: any PaidActionService = UnavailablePaidActionService()
+    /// 27a: her yes to the cloud stylist's provider. Erased by Delete my data.
+    public var stylistConsent: any StylistConsentStore = InMemoryStylistConsentStore()
+    /// 27a: true when `stylist` is the cloud stylist. Then Style Me checks her history first
+    /// (FR-58) and Privacy and terms shows the stylist's consent switch. Stage A's mock stylist
+    /// sends nothing, so neither applies.
+    public var cloudStyling = false
+    /// 27a: runs cloud styling requests apart from any screen, so leaving Your looks never stops
+    /// one and its looks still land in her history. Copies of these services share it.
+    public var stylingJobs = StylingJobs()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
@@ -67,7 +76,7 @@ public struct NookServices: Sendable {
                 ?? LocalDataDeletion(
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                    onboarding: onboarding, weatherSettings: weatherSettings)
+                    onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent)
         }
         set { customDeletion = newValue }
     }

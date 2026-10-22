@@ -1,0 +1,24 @@
+{
+  "action": {
+    "id": "act_1a2b3c4d5e6f708192a3b4c5d6e7f809",
+    "kind": "style",
+    "status": "succeeded",
+    "replayed": false,
+    "createdAt": "2026-10-21T11:04:10.000Z"
+  },
+  "result": {
+    "kind": "answer",
+    "looks": [],
+    "missing": [],
+    "answer": { "text": "Yes. Black flats make it a little crisper; the brown loafers keep it warmer with the olive.", "pieces": ["g-flats-black", "g-loafers-brown"] },
+    "fromCache": false
+  },
+  "usage": {
+    "category": "styleQuick",
+    "usedToday": 2,
+    "limitToday": 40,
+    "usedThisMonth": 9,
+    "limitThisMonth": 600,
+    "resetsAt": "2026-10-22T08:40:00.000Z"
+  }
+}

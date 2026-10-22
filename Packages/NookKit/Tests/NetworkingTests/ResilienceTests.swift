@@ -76,7 +76,8 @@ struct ResilienceTests {
         return GatewayPaidActionService(client: client, attestation: session)
     }
 
-    static let swap = PaidActionRequest.style(mode: .swap, contextRevision: "rev_1")
+    /// A new quick request on every use, so the stylist's result cache never answers it (27a).
+    static var swap: PaidActionRequest { .style(.sample(.ask, note: String(UUID().uuidString.prefix(8)))) }
 
     // MARK: Timeouts
 

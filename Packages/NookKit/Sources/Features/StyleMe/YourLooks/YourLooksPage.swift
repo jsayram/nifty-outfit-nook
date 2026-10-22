@@ -19,6 +19,8 @@ struct YourLooksActions {
     var addPieces: () -> Void = {}
     var openSaved: (Look) -> Void = { _ in }
     var reloadSaved: () -> Void = {}
+    /// 27a: opens the stylist's consent text.
+    var reviewConsent: () -> Void = {}
 }
 
 /// Your looks (`results-versions.html`, LR-05a, LR-06): the Today and Saved tabs, then the

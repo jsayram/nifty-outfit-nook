@@ -355,6 +355,29 @@ struct FailureState: View {
                     bundle: .module, comment: "Your looks when the suitcase or starting piece changed"),
                 retryTitle: Self.backTitle,
                 retry: actions.backToStyleMe)
+        case .needsConsent:
+            // 27a: nothing was sent. Review shows the consent text; Back keeps her request.
+            NookErrorState(
+                StylistConsentText.needsConsentTitle,
+                message: StylistConsentText.needsConsent,
+                retryTitle: StylistConsentText.review,
+                retry: actions.reviewConsent
+            ) {
+                backButton(kind: .soft)
+                savedButton
+            }
+        case .limited(let problem):
+            // 27a: a server limit. Its own words say when it can work again; nothing was counted.
+            NookErrorState(
+                String(
+                    localized: "Styling is resting for now", bundle: .module,
+                    comment: "Your looks when a cloud limit stops styling"),
+                message: CloudLimitText.message(for: problem),
+                retry: actions.retry
+            ) {
+                backButton(kind: .soft)
+                savedButton
+            }
         }
     }
 

@@ -16,11 +16,14 @@ public struct FakeLimits: Sendable, Equatable {
     ]
     /// Features switched off, as the server's kill switch or a spending ceiling would.
     public var paused: Set<String> = []
+    /// 27a: how the stand-in stylist behaves.
+    public var stylist = FakeStylistBehaviour.normal
 
     public init() {}
 
     public static func == (a: FakeLimits, b: FakeLimits) -> Bool {
         a.rateCapacity == b.rateCapacity && a.rateSeconds == b.rateSeconds && a.paused == b.paused
+            && a.stylist == b.stylist
             && a.allowances.mapValues { [$0.day, $0.month] } == b.allowances.mapValues { [$0.day, $0.month] }
     }
 }
@@ -33,6 +36,11 @@ struct FakeLedger {
         var feature: String
         var category: String
         var createdAt: Date
+        /// 27a: false for an answer that needed no provider call (from the result cache, or
+        /// pieces that can't make an outfit). It uses no allowance, like the backend's noCharge.
+        var counted = true
+        /// 27a: the stylist's answer, for a replay of the same key.
+        var style: APIV1.StylistResult?
     }
 
     var challenges: [String: (subject: String, expiresAt: Date, used: Bool)] = [:]
@@ -40,8 +48,10 @@ struct FakeLedger {
     var buckets: [String: (tokens: Double, updatedAt: Date)] = [:]
     /// By "<subject> <Idempotency-Key>".
     var actions: [String: Action] = [:]
-    /// How many paid jobs actually ran: a replay doesn't add one.
+    /// How many paid jobs actually ran: a replay or a cached answer doesn't add one.
     var jobsRun = 0
+    /// 27a: the result cache, by account and normalized request, for 24 hours.
+    var styleCache: [String: (result: APIV1.StylistResult, at: Date)] = [:]
 }
 
 extension FakeBackend {
@@ -61,6 +71,11 @@ extension FakeBackend {
 
     public var limits: FakeLimits { state.withLock { $0.limits } }
 
+    /// 27a: how the stand-in stylist behaves from now on.
+    public func setStylist(_ behaviour: FakeStylistBehaviour) {
+        state.withLock { $0.limits.stylist = behaviour }
+    }
+
     /// Paid jobs that really ran. A retry the backend answered from its record doesn't count.
     public var paidJobsRun: Int { state.withLock { $0.ledger.jobsRun } }
 
@@ -70,6 +85,7 @@ extension FakeBackend {
             $0.ledger.actions = [:]
             $0.ledger.buckets = [:]
             $0.ledger.jobsRun = 0
+            $0.ledger.styleCache = [:]
         }
     }
 
@@ -113,7 +129,8 @@ extension FakeBackend {
         let time = now()
         let times = state.ledger.actions.values
             .filter {
-                $0.subject == subject && $0.category == category && $0.createdAt > time.addingTimeInterval(-30 * 86_400)
+                $0.subject == subject && $0.category == category && $0.counted
+                    && $0.createdAt > time.addingTimeInterval(-30 * 86_400)
             }
             .map(\.createdAt).sorted()
         let today = times.filter { $0 > time.addingTimeInterval(-86_400) }
@@ -167,13 +184,19 @@ extension FakeBackend {
             return error(.invalidRequest, id)
         }
         let feature = endpoint == APIV1.style ? "style" : "tryOn"
-        let allowed: Set<String> = feature == "style" ? ["mode", "contextRevision"] : ["contextRevision"]
-        let mode = object["mode"] as? String
-        guard Set(object.keys) == allowed,
-            (object["contextRevision"] as? String)?.wholeMatch(of: /[A-Za-z0-9_-]{1,64}/) != nil,
-            feature == "tryOn" || ["full", "swap", "ask"].contains(mode ?? "")
-        else { return error(.invalidRequest, id) }
-        let category = feature == "tryOn" ? "tryOn" : (mode == "full" ? "styleFull" : "styleQuick")
+        var styleRequest: APIV1.StyleRequest?
+        if feature == "style" {
+            // 27a: the stylist's body, checked like the backend checks it, then her consent.
+            guard let decoded = try? JSONDecoder().decode(APIV1.StyleRequest.self, from: body),
+                FakeStylist.isValid(object, decoded: decoded)
+            else { return error(.invalidRequest, id) }
+            styleRequest = decoded
+        } else {
+            guard Set(object.keys) == ["contextRevision"],
+                (object["contextRevision"] as? String)?.wholeMatch(of: /[A-Za-z0-9_-]{1,64}/) != nil
+            else { return error(.invalidRequest, id) }
+        }
+        let category = feature == "tryOn" ? "tryOn" : (styleRequest?.mode == "full" ? "styleFull" : "styleQuick")
 
         // App Attest, as the real gateway checks it.
         guard let keyID = request.value(forHTTPHeaderField: "X-Nook-Attest-Key"),
@@ -184,7 +207,19 @@ extension FakeBackend {
                     method: endpoint.method, path: endpoint.path, idempotencyKey: key, body: body))
         else { return error(.attestationRequired, id) }
 
+        if let styleRequest, !FakeStylist.consentVersions.contains(styleRequest.consentVersion) {
+            return error(.consentRequired, id)
+        }
         let fingerprint = Data(SHA256.hash(data: Data((endpoint.id + "\n").utf8) + body))
+        // The result cache's key: the account and the request without the app's own revision.
+        var cacheKey: String?
+        if var normalized = styleRequest {
+            normalized.contextRevision = ""
+            normalized.closet.sort { $0.id < $1.id }
+            if let data = try? APIV1.encoder().encode(normalized) {
+                cacheKey = subject + " " + Data(SHA256.hash(data: data)).base64EncodedString()
+            }
+        }
         enum Outcome {
             case reply(FakeReply)
             case done(FakeLedger.Action, replayed: Bool, usage: APIV1.UsageCategory)
@@ -222,24 +257,46 @@ extension FakeBackend {
                         .quotaExceeded, id, retryAfter: max(1, Int(resetAt.timeIntervalSince(time).rounded(.up))),
                         category: category, resetAt: resetAt))
             }
-            let action = FakeLedger.Action(
+            var action = FakeLedger.Action(
                 id: "act_" + FakeToken.randomHex(16), subject: subject, fingerprint: fingerprint, feature: feature,
                 category: category, createdAt: Self.millisecondPrecision(time))
+            if let styleRequest, let cacheKey {
+                // 27a: the result cache first (no job, no allowance), then the stylist.
+                if let cached = state.ledger.styleCache[cacheKey], cached.at > time.addingTimeInterval(-86_400) {
+                    var again = cached.result
+                    again.fromCache = true
+                    action.style = again
+                    action.counted = false
+                } else if state.limits.stylist == .fails {
+                    state.ledger.jobsRun += 1
+                    return .reply(
+                        error(
+                            .unavailable, id, message: "It didn't work this time. It wasn't counted.", retryAfter: 30))
+                } else {
+                    state.ledger.jobsRun += 1
+                    let result = FakeStylist.answer(styleRequest)
+                    action.style = result
+                    action.counted = result.kind != "insufficient"
+                    if result.kind != "insufficient" { state.ledger.styleCache[cacheKey] = (result, time) }
+                }
+            } else {
+                state.ledger.jobsRun += 1
+            }
             state.ledger.actions[actionKey] = action
-            state.ledger.jobsRun += 1
             return .done(action, replayed: false, usage: snapshot(state, subject: subject, category: category))
         }
         switch outcome {
         case .reply(let reply):
             return reply
         case .done(let action, let replayed, let usage):
+            let paidAction = APIV1.PaidAction(
+                id: action.id, kind: action.feature, status: "succeeded", replayed: replayed,
+                createdAt: .init(action.createdAt))
+            if let style = action.style {
+                return encode(200, APIV1.StyleResponse(action: paidAction, result: style, usage: usage), id)
+            }
             return encode(
-                200,
-                APIV1.PaidActionResponse(
-                    action: .init(
-                        id: action.id, kind: action.feature, status: "succeeded", replayed: replayed,
-                        createdAt: .init(action.createdAt)),
-                    result: .init(placeholder: true), usage: usage), id)
+                200, APIV1.PaidActionResponse(action: paidAction, result: .init(placeholder: true), usage: usage), id)
         }
     }
 

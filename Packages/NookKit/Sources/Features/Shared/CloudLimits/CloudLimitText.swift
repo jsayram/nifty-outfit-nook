@@ -69,6 +69,8 @@ nonisolated public enum CloudLimitText {
             // A cancelled call has no words and is never shown; an empty string is what a screen
             // that shows it by mistake gets.
             return CloudProblemText.message(for: problem) ?? ""
+        case .needsConsent:
+            return StylistConsentText.needsConsent
         }
     }
 

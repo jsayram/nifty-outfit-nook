@@ -33,7 +33,7 @@ struct AccountDeletionGatewayTests {
         let account = GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0", attestation: attestation)
         _ = try await account.signIn()
         let paid = GatewayPaidActionService(client: client, attestation: attestation)
-        _ = try await paid.run(.style(mode: .full, contextRevision: "rev_1"), idempotencyKey: IdempotencyKey.make())
+        _ = try await paid.run(.style(.sample(.full)), idempotencyKey: IdempotencyKey.make())
         #expect(backend.holdsData(forSubject: "lily"))
         #expect(store.load() != nil)
         return (account, attestation, store)
