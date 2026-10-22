@@ -65,7 +65,21 @@ struct ContractTests {
             let swift = try #require(APIV1.endpoints.first { $0.id == id })
             #expect(swift.maxBodyBytes == (endpoint["maxBodyBytes"] as? Int ?? APIV1.maxBodyBytes), "\(id)")
         }
-        #expect(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id) == ["sendFeedback"])
+        #expect(
+            Set(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id)) == ["sendFeedback", "tryOn"])
+    }
+
+    /// 33a: what the phone sends fits what the backend takes.
+    @Test func tryOnLimitsMatch() throws {
+        let limits = try #require((Self.contract()["limits"] as? [String: Any])?["tryOn"] as? [String: Any])
+        #expect(limits["maxBodyBytes"] as? Int == APIV1.tryOn.maxBodyBytes)
+        #expect(limits["maxGarments"] as? Int == TryOnCall.maximumGarments)
+        #expect(limits["personMaxBytes"] as? Int == TryOnCall.personMaxBytes)
+        #expect(limits["garmentMaxBytes"] as? Int == TryOnCall.garmentMaxBytes)
+        // Everything at its largest still fits in one body once it is base64 (4/3 larger).
+        #expect(TryOnCall.garmentSendBytes <= TryOnCall.garmentMaxBytes)
+        let largest = (TryOnCall.personMaxBytes + TryOnCall.maximumGarments * TryOnCall.garmentSendBytes) * 4 / 3
+        #expect(largest + 16_384 <= APIV1.tryOn.maxBodyBytes)
     }
 
     @Test func feedbackLimitsMatch() throws {
@@ -109,7 +123,7 @@ struct ContractTests {
         ("v1/examples/style.response.json", "styleResponse"),
         ("v1/examples/style-ask.request.json", "styleRequest"),
         ("v1/examples/style-ask.response.json", "styleResponse"),
-        ("v1/examples/try-on.response.json", "paidActionResponse"),
+        ("v1/examples/try-on.response.json", "tryOnResponse"),
         ("v1/examples/deletion.request.json", "deletionRequest"),
         ("v1/examples/deletion-status.request.json", "deletionStatusRequest"),
         ("v1/examples/deletion.response.json", "deletionStatus"),
@@ -139,7 +153,7 @@ struct ContractTests {
             case "attestKeyResponse": try encoder.encode(decoder.decode(APIV1.AttestKeyResponse.self, from: original))
             case "styleRequest": try encoder.encode(decoder.decode(APIV1.StyleRequest.self, from: original))
             case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
-            case "paidActionResponse": try encoder.encode(decoder.decode(APIV1.PaidActionResponse.self, from: original))
+            case "tryOnResponse": try encoder.encode(decoder.decode(APIV1.TryOnResponse.self, from: original))
             case "styleResponse": try encoder.encode(decoder.decode(APIV1.StyleResponse.self, from: original))
             case "deletionRequest": try encoder.encode(decoder.decode(APIV1.DeletionRequest.self, from: original))
             case "deletionStatusRequest":

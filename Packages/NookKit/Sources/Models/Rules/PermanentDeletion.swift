@@ -78,7 +78,7 @@ public enum PermanentDeletion {
         try await services.closet.deletePermanently(id)
         // Its photo, cutout and pictures' files go once nothing points to them (Phase 22b).
         await services.imageFiles.release(
-            piece.imageReferences + (draft.map(Self.photos) ?? []) + pictures.compactMap(\.storedImage),
+            piece.imageReferences + (draft.map(Self.photos) ?? []) + pictures.flatMap(\.storedImages),
             deletedForGood: true)
     }
 
@@ -98,7 +98,7 @@ public enum PermanentDeletion {
         let gone = Set(purged)
         let photos = expiring.filter { gone.contains($0.id) }.flatMap(\.imageReferences)
         if !photos.isEmpty || !pictures.isEmpty {
-            await services.imageFiles.release(photos + pictures.compactMap(\.storedImage), deletedForGood: true)
+            await services.imageFiles.release(photos + pictures.flatMap(\.storedImages), deletedForGood: true)
         }
         return purged
     }

@@ -1,0 +1,90 @@
+{
+  "contextRevision": "rev_1",
+  "consentVersion": "tryon-1",
+  "person": {
+    "contentType": "image/jpeg",
+    "data": "/9j/4AAQ"
+  },
+  "garments": [
+    {
+      "id": "g0",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g1",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g2",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g3",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g4",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g5",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g6",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g7",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g8",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    },
+    {
+      "id": "g9",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    }
+  ]
+}

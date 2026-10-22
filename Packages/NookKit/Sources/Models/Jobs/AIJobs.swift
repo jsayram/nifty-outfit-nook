@@ -106,6 +106,11 @@ public final class AIJobs {
         jobs.last { $0.styleRequestID == id }
     }
 
+    /// 33a: the newest try-on job for this look.
+    public func job(forTryOnOf lookID: Look.ID) -> AIJob? {
+        jobs.last { $0.tryOnLookID == lookID }
+    }
+
     /// Jobs not finished yet.
     public var activeJobs: [AIJob] { jobs.filter { $0.state.isActive } }
 
@@ -158,6 +163,15 @@ public final class AIJobs {
         }
     }
 
+    /// 33a: starts a try-on picture as a job, or gives back the one already running for this look.
+    /// The upload was prepared and checked on the phone first; nothing else is sent.
+    @discardableResult
+    public func startTryOn(_ request: TryOnJobRequest, services: NookServices) -> AIJob {
+        self.services = services
+        if let existing = job(forTryOnOf: request.look.id), existing.state.isActive { return existing }
+        return add(AIJob(kind: .tryOn, idempotencyKey: makeKey(), request: .tryOn(request), createdAt: now()))
+    }
+
     /// Her Cancel. The server may still finish an action it already started; it's never run twice.
     public func cancel(_ id: AIJob.ID) {
         guard let job = job(id), job.state.isActive else { return }
@@ -167,6 +181,7 @@ public final class AIJobs {
             $0.state = .cancelled
             $0.finishedAt = now()
         }
+        letGoOfUpload(id, keepingSent: false)
         finishWaiters(id)
         runNext()
     }
@@ -204,6 +219,11 @@ public final class AIJobs {
         guard let job = job(id), !job.isSeen else { return }
         update(id) { $0.isSeen = true }
         Task { await notifier.withdraw(id) }
+    }
+
+    /// 33a: she opened this try-on picture, wherever from: its job needs no banner or dot.
+    public func markPictureSeen(_ id: TryOnPicture.ID) {
+        for job in jobs where job.picture?.id == id { markSeen(job.id) }
     }
 
     /// A job whose result she asked to open from outside the screens (a notification she tapped).
@@ -256,6 +276,7 @@ public final class AIJobs {
                 // Never sent, and she asked a while ago: not sent now, so nothing she asked for
                 // long ago is charged by surprise (Phase 26's "nothing queued while offline").
                 finish(job.id, .failed, failure: .notCompleted)
+                letGoOfUpload(job.id, keepingSent: false)
             } else if job.state != .queued {
                 update(job.id) { $0.state = .queued }
             }
@@ -324,12 +345,14 @@ public final class AIJobs {
                 announce(id)
             case .failed(let failure):
                 finish(id, .failed, failure: failure)
+                letGoOfUpload(id, keepingSent: false)
                 announce(id)
             case .stopped:
                 return
             case .stillRunning:
                 if now().timeIntervalSince(job.createdAt) > giveUpAfter {
                     finish(id, .failed, failure: .notCompleted)
+                    letGoOfUpload(id, keepingSent: false)
                     announce(id)
                 } else {
                     update(id) { $0.state = .stillRunning }
@@ -348,7 +371,7 @@ public final class AIJobs {
 
     private func perform(_ job: AIJob, sentBefore: Bool) async -> Attempt {
         guard let services else { return .failed(.notCompleted) }
-        do {
+        do throws(StylistError) {
             switch job.request {
             case .styling(let context, let consent):
                 let outcome: StyleOutcome
@@ -377,6 +400,26 @@ public final class AIJobs {
                     return .failed(.notCompleted)
                 }
                 return .done(.answer(thread: request.thread, turn: turn.id))
+            case .tryOn(let request):
+                guard let pipeline = services.tryOnPipeline else { return .failed(.notCompleted) }
+                let dressed: Data
+                do {
+                    dressed = try await pipeline.dress(
+                        request.upload, consentVersion: request.consentVersion, idempotencyKey: job.idempotencyKey)
+                } catch {
+                    throw CloudStylist.error(for: error)
+                }
+                // Her head goes back on the phone. The picture keeps exactly what was sent.
+                let image: PhotoReference
+                do {
+                    image = try await pipeline.restore(dressed, upload: request.upload)
+                } catch {
+                    return Task.isCancelled ? .stopped : .failed(.notCompleted)
+                }
+                let picture = TryOnPicture(
+                    id: .random(), of: request.look, image: .generated(image), createdAt: now(),
+                    sent: request.upload.sent)
+                return .done(.tryOn(picture))
             }
         } catch {
             switch error {
@@ -395,9 +438,12 @@ public final class AIJobs {
     /// Writes a styling job's looks to her history and marks its suitcase used, once. If the store
     /// can't be written (the iPhone is locked), the job remembers and the next `resume` tries again.
     private func keep(_ id: AIJob.ID) async {
-        guard let services, let job = job(id), case .styling(let context, _) = job.request,
-            let outcome = job.outcome
-        else { return }
+        guard let services, let job = job(id) else { return }
+        if case .tryOn = job.request {
+            await keepPicture(id, services: services)
+            return
+        }
+        guard case .styling(let context, _) = job.request, let outcome = job.outcome else { return }
         var kept = true
         if let result = outcome.result, !result.notes.contains(.fromHistory) {
             for look in result.versions {
@@ -408,6 +454,34 @@ public final class AIJobs {
             do { try await services.suitcases.markUsed(suitcaseID, at: context.now) } catch { kept = false }
         }
         update(id) { $0.isKept = kept }
+    }
+
+    /// 33a: keeps the finished picture in her Pictures, then lets go of the files only the phone
+    /// needed to make it (her photo with her real head, her outline and the head shape). What was
+    /// sent stays with the picture for "See what was sent".
+    private func keepPicture(_ id: AIJob.ID, services: NookServices) async {
+        guard let picture = job(id)?.picture else { return }
+        do {
+            try await services.pictures.save(picture)
+        } catch {
+            update(id) { $0.isKept = false }
+            return
+        }
+        update(id) { $0.isKept = true }
+        letGoOfUpload(id, keepingSent: true)
+    }
+
+    /// 33a: removes a try-on job's work files (and, unless a picture keeps them, the sent ones),
+    /// and forgets them in the job, so the sweep doesn't keep them either.
+    private func letGoOfUpload(_ id: AIJob.ID, keepingSent: Bool) {
+        guard let services, let pipeline = services.tryOnPipeline, let job = job(id),
+            case .tryOn(var request) = job.request
+        else { return }
+        let upload = request.upload
+        guard upload.work != nil || !keepingSent else { return }
+        request.upload.work = nil
+        update(id) { $0.request = .tryOn(request) }
+        Task { await pipeline.discard(upload, keepingSent: keepingSent) }
     }
 
     /// The banner in the app, or a notification in the background. Nothing for a result she's

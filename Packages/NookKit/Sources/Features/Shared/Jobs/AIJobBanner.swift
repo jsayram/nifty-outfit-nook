@@ -30,6 +30,12 @@ nonisolated enum AIJobText {
         }
     }
 
+    /// 33a: a finished picture is one thing to see.
+    static func detail(_ kind: AIJob.Kind, done: Bool) -> String {
+        guard kind == .tryOn, done else { return detail(done: done) }
+        return String(localized: "Tap to see it.", bundle: .module, comment: "Banner: what tapping a finished picture does")
+    }
+
     static func detail(done: Bool) -> String {
         done
             ? String(localized: "Tap to see them.", bundle: .module, comment: "Banner: what tapping it does")
@@ -93,7 +99,7 @@ struct AIJobBanner: View {
                             .nookTextStyle(.headline)
                             .foregroundStyle(.nook.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(AIJobText.detail(done: done))
+                        Text(AIJobText.detail(job.kind, done: done))
                             .nookTextStyle(.note)
                             .foregroundStyle(.nook.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)

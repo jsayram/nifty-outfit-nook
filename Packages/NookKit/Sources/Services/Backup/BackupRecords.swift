@@ -156,6 +156,8 @@ struct BackupContents: Sendable {
                     counts.pictures += 1
                     referencedLooks.append(picture.lookID.rawValue)
                     if case .generated(let photo) = picture.image { addPhoto(photo) }
+                    // 33a: what was sent for it, which "See what was sent" shows.
+                    for photo in picture.sent?.imageReferences ?? [] { addPhoto(photo) }
                 }
             case .garmentDraft:
                 counts.drafts += 1
@@ -181,7 +183,8 @@ struct BackupContents: Sendable {
         switch RecordKind(rawValue: conflict.kind) {
         case .garment:
             for photo in decode(Garment.self, row)?.imageReferences ?? [] { addPhoto(photo) }
-        case .picture: decode(TryOnPicture.self, row)?.storedImage.map { addPhoto($0) }
+        case .picture:
+            for photo in decode(TryOnPicture.self, row)?.storedImages ?? [] { addPhoto(photo) }
         case .garmentDraft:
             if let draft = decode(GarmentDraft.self, row) {
                 addPhoto(draft.details.photo)

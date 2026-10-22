@@ -93,6 +93,11 @@ public struct NookServices: Sendable {
     /// 30a: true while try-on pictures are simulated on the phone and cost nothing. The image
     /// service (Phase 33) turns it off, and then pictures need styling access.
     public var tryOnIsSimulated = true
+    /// 33a: real try-on pictures (her face masked on the phone, dressed by the image service, her
+    /// head put back on the phone). `nil` keeps Stage A's simulated pictures.
+    public var tryOnPipeline: (any TryOnPipeline)?
+    /// 33a: her yes to sending try-on photos to the image provider. Erased by Delete my data.
+    public var tryOnConsent: any TryOnConsentStore = InMemoryTryOnConsentStore()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
@@ -103,7 +108,7 @@ public struct NookServices: Sendable {
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
                     onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
-                    aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads)
+                    aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads, tryOnConsent: tryOnConsent)
         }
         set { customDeletion = newValue }
     }

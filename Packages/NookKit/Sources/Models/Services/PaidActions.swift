@@ -65,12 +65,13 @@ public struct CloudUsage: Sendable, Equatable {
     }
 }
 
-/// A paid action to ask for. Try-on is a placeholder until 33a gives it its real inputs.
+/// A paid action to ask for.
 public enum PaidActionRequest: Sendable, Equatable {
     /// 27a: the cloud stylist (an outfit, or an Ask stylist question).
     case style(StyleCall)
-    /// `contextRevision` names the version of what's being drawn, never its content.
-    case tryOn(contextRevision: String)
+    /// 33a: a try-on picture: only the faceless photo on the studio backdrop and the garment
+    /// photos, prepared and checked on the phone.
+    case tryOn(TryOnCall)
 
     public var feature: PaidFeature {
         switch self {
@@ -96,13 +97,19 @@ public struct PaidActionReceipt: Sendable, Equatable {
     public var usage: UsageAllowance
     /// 27a: the stylist's checked answer. `nil` for try-on.
     public var style: StyleAnswer?
+    /// 33a: the dressed picture (her head still grey), for try-on.
+    public var tryOnImage: Data?
 
-    public init(id: String, feature: PaidFeature, replayed: Bool, usage: UsageAllowance, style: StyleAnswer? = nil) {
+    public init(
+        id: String, feature: PaidFeature, replayed: Bool, usage: UsageAllowance, style: StyleAnswer? = nil,
+        tryOnImage: Data? = nil
+    ) {
         self.id = id
         self.feature = feature
         self.replayed = replayed
         self.usage = usage
         self.style = style
+        self.tryOnImage = tryOnImage
     }
 }
 

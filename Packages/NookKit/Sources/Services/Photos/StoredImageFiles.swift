@@ -88,7 +88,16 @@ public struct StoredImageFiles: ImageFiles {
     /// The photo IDs the store's records point to, or `nil` when the store can't be read.
     private func referencedIDs() -> Set<String>? {
         guard let rows = try? StoreRow.all(in: ModelContext(container)) else { return nil }
-        return BackupContents(rows).photoIDs
+        var ids = BackupContents(rows).photoIDs
+        // 33a: a try-on job's upload files, which a job resumed after a relaunch sends again. Jobs
+        // aren't exported, so they aren't in the export's list.
+        for row in rows where row.kind == RecordKind.aiJob.rawValue {
+            guard let job = try? RecordPayload.decode(AIJob.self, from: row.payload, version: row.payloadVersion),
+                case .tryOn(let request) = job.request
+            else { continue }
+            for case .stored(let id) in request.upload.imageReferences { ids.insert(id.rawValue) }
+        }
+        return ids
     }
 
     private static func storedID(_ photo: PhotoReference) -> String? {

@@ -28,6 +28,14 @@ extension TryOnPicture {
     public var storedImage: PhotoReference? {
         if case .generated(let photo) = image, case .stored = photo { photo } else { nil }
     }
+
+    /// Every stored file the picture points to: its image and, for a real picture (33a), the
+    /// faceless photo and garment photos that were sent.
+    public var storedImages: [PhotoReference] {
+        ([storedImage].compactMap { $0 } + (sent?.imageReferences ?? [])).filter {
+            if case .stored = $0 { true } else { false }
+        }
+    }
 }
 
 extension Garment {

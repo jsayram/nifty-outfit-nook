@@ -18,6 +18,8 @@ struct PictureDetailScreen: View {
     @Environment(\.services) private var services
     @State private var model: PictureDetailModel
     @State private var toast: NookToastMessage?
+    /// 33a: "See what was sent", open.
+    @State private var showsSent = false
 
     init(
         pictureID: TryOnPicture.ID, seeLook: @escaping (Look) -> Void, deleted: @escaping (PictureRemoval) -> Void,
@@ -32,15 +34,24 @@ struct PictureDetailScreen: View {
     var body: some View {
         PictureDetailPage(
             model: model,
-            actions: PictureDetailActions(seeLook: seeLook, delete: delete, retry: reload)
+            actions: PictureDetailActions(
+                seeLook: seeLook, delete: delete, retry: reload, seeWhatWasSent: { showsSent = true })
         )
+        .nookSheet(isPresented: $showsSent, title: SentText.title, detents: [.large]) {
+            if let sent = model.item?.picture.sent {
+                SentImagesView(sent: sent, garments: model.garments)
+            }
+        }
         // The title is big on the page instead.
         .pagedTitle(TryOnText.pictureTitle, isPushed: !isBeside)
         .overlay {
             Color.clear
                 .nookToast($toast)
         }
-        .task { await model.load(from: services) }
+        .task {
+            await model.load(from: services)
+            services.aiJobs.markPictureSeen(model.pictureID)
+        }
         // A try-on picture's quick tour (Phase 16b), while its look is still saved to go back to.
         .screenTour(
             PictureTour.definition, isReady: model.phase == .loaded && model.item?.look != nil && toast == nil)

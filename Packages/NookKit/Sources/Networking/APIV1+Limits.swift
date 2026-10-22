@@ -65,10 +65,6 @@ extension APIV1 {
         public var registeredAt: DateTime
     }
 
-    public struct TryOnRequest: Codable, Sendable, Equatable {
-        public var contextRevision: String
-    }
-
     public struct PaidAction: Codable, Sendable, Equatable {
         public var id: String
         public var kind: String
@@ -77,15 +73,4 @@ extension APIV1 {
         public var createdAt: DateTime
     }
 
-    /// Until 33a, try-on's result says only that it is a placeholder (the stylist's is in
-    /// APIV1+Stylist.swift).
-    public struct PlaceholderResult: Codable, Sendable, Equatable {
-        public var placeholder: Bool
-    }
-
-    public struct PaidActionResponse: Codable, Sendable, Equatable {
-        public var action: PaidAction
-        public var result: PlaceholderResult
-        public var usage: UsageCategory
-    }
 }

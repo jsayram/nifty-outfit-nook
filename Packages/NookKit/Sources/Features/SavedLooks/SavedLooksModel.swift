@@ -271,9 +271,8 @@ final class SavedLooksModel {
 
     /// Lets go of a deleted picture's stored image.
     nonisolated static func release(_ removal: PictureRemoval, using services: NookServices) async {
-        if let photo = removal.picture.storedImage {
-            await services.imageFiles.release([photo], deletedForGood: false)
-        }
+        let photos = removal.picture.storedImages
+        if !photos.isEmpty { await services.imageFiles.release(photos, deletedForGood: false) }
     }
 
     /// Undo for Delete picture: the same picture back, linked to its look as before.

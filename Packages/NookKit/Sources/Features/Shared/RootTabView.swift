@@ -81,6 +81,8 @@ private struct RootTabs: View {
                 SavedLooksScreen(path: $savedLooksPath)
                     .windowSizeClass(windowSizeClass)
             }
+            // 33a: a dot while a try-on picture she hasn't seen is ready. Pictures live here.
+            .badge(services.aiJobs.unseenResults(.tryOn) > 0 ? Text(verbatim: "") : nil)
         }
         .tint(.nook.accent)
         // iPadOS 26 puts a tab view's bar at the top of a regular-width window, and SwiftUI has
@@ -115,11 +117,23 @@ private struct RootTabs: View {
     }
 
     /// 27c: opens a finished job's result: Your looks for a styling job, on Home where Style Me
-    /// lives. A job with no screen yet (Ask stylist, try-on) only hides the banner.
+    /// lives. 33a: a try-on picture opens in Saved Looks (or, when it didn't finish, its look, to
+    /// try again). Ask stylist, with no screen yet, only hides the banner.
     private func openJob(_ job: AIJob) {
         services.aiJobs.dismissAnnouncement()
-        guard case .styling(let context, _) = job.request else { return }
-        show(.home, home: [.yourLooks(context.request)])
+        switch job.request {
+        case .styling(let context, _):
+            show(.home, home: [.yourLooks(context.request)])
+        case .tryOn(let request):
+            if let picture = job.picture {
+                services.aiJobs.markSeen(job.id)
+                openInSavedLooks([.picture(picture.id)])
+            } else {
+                openInSavedLooks([.look(request.look.id)])
+            }
+        case .ask:
+            break
+        }
     }
 
     /// Replay from App tours (Phase 16b): opens the tour's screen, where it starts from step 1

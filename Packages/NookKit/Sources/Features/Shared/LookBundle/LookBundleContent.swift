@@ -20,6 +20,8 @@ struct LookBundleContent: Identifiable, Hashable {
     /// or in the fixtures a sample preview). Only try-on pictures set it; a bundle drawn from the
     /// pieces ignores it.
     var tryOnPhoto: PhotoReference?
+    /// 33a: a real picture of her, made from her try-on photo: no Simulated badge.
+    var isRealPicture = false
 
     init(id: String, name: String? = nil, layoutSeed: String? = nil, pieces: [LookBundlePiece]) {
         self.id = id
