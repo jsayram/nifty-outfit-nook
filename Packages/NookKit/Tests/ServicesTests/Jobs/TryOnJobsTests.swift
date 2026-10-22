@@ -124,6 +124,67 @@ struct TryOnJobsTests {
         await relaunched.saved()
         await running.saved()
     }
+
+    // MARK: 35: following the action by its ID
+
+    static let actionID = "act_" + String(repeating: "a", count: 32)
+
+    @Test func aLateAnswerKeepsTheActionIDAndTheNextAskStartsFromIt() async throws {
+        let pipeline = ScriptedTryOn([.startedThenFail(Self.actionID, .busy(retryAfterSeconds: 5)), .picture])
+        let jobs = jobs()
+        let job = jobs.startTryOn(Self.request, services: services(pipeline))
+        // Still running: the server named the action, so the job kept its ID.
+        await clock.waitForSleepers(1)
+        await jobs.saved()
+        #expect(jobs.job(job.id)?.state == .stillRunning)
+        #expect(jobs.job(job.id)?.actionID == Self.actionID)
+        clock.advance(by: .seconds(20))
+        let done = try #require(await jobs.finished(job.id))
+        #expect(done.state == .done)
+        // The second ask carried the ID to resume from, and the same key.
+        #expect(await pipeline.resumes == [nil, Self.actionID])
+        #expect(await pipeline.keys == ["idem_tryon_one_0000", "idem_tryon_one_0000"])
+        await jobs.saved()
+    }
+
+    @Test func afterARelaunchTheStoredActionIDIsHandedBackToResumeFrom() async throws {
+        let first = ScriptedTryOn([.startedThenWait(Self.actionID)])
+        let running = jobs()
+        let job = running.startTryOn(Self.request, services: services(first))
+        await first.waitForCall()
+        // The ID reaches the job through the main actor; wait until the store holds it.
+        while running.job(job.id)?.actionID == nil { await Task.yield() }
+        await running.saved()
+        let kept = try #require(try await storage.aiJobs.jobs().first)
+        #expect(kept.actionID == Self.actionID)
+
+        // Killed here. The relaunched app finds the job with its ID and asks for the status.
+        let second = ScriptedTryOn([.picture])
+        let relaunched = jobs(on: try store.open())
+        await relaunched.resume(with: services(second))
+        let done = try #require(await relaunched.finished(job.id))
+        #expect(done.state == .done)
+        #expect(await second.resumes == [Self.actionID])
+        #expect(await second.keys == ["idem_tryon_one_0000"])
+        await first.open()
+        await relaunched.saved()
+        await running.saved()
+    }
+
+    @Test func aJobKeptBeforeThisChangeHasNoActionIDAndStillLoads() async throws {
+        let pipeline = ScriptedTryOn([.picture])
+        let jobs = jobs()
+        let job = jobs.startTryOn(Self.request, services: services(pipeline))
+        _ = await jobs.finished(job.id)
+        await jobs.saved()
+        let kept = try #require(try await storage.aiJobs.jobs().first)
+        // An older record has no such field: it decodes with none.
+        var object = try #require(
+            try JSONSerialization.jsonObject(with: JSONEncoder().encode(kept)) as? [String: Any])
+        object["actionID"] = nil
+        let older = try JSONDecoder().decode(AIJob.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(older.actionID == nil && older.id == kept.id)
+    }
 }
 
 /// A try-on pipeline that answers as scripted and records keys and discards.
@@ -133,6 +194,10 @@ actor ScriptedTryOn: TryOnPipeline {
         case fail(CloudLimitProblem)
         /// Waits until `open()`, then gives the picture.
         case wait
+        /// 35: the server names the action (`link.started`), then it fails like `fail`.
+        case startedThenFail(String, CloudLimitProblem)
+        /// 35: the server names the action, then it waits until `open()` and gives the picture.
+        case startedThenWait(String)
     }
 
     struct Discard: Equatable {
@@ -142,6 +207,8 @@ actor ScriptedTryOn: TryOnPipeline {
 
     private var steps: [Step]
     private(set) var keys: [String] = []
+    /// 35: the action ID each call was given to resume with, in order (nil for a first send).
+    private(set) var resumes: [String?] = []
     private(set) var discarded: [Discard] = []
     private var gate: CheckedContinuation<Void, Never>?
     private var callWaiters: [CheckedContinuation<Void, Never>] = []
@@ -158,7 +225,14 @@ actor ScriptedTryOn: TryOnPipeline {
     func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String)
         async throws(CloudLimitProblem) -> Data
     {
+        try await dress(upload, consentVersion: consentVersion, idempotencyKey: idempotencyKey, link: .none)
+    }
+
+    func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> Data
+    {
         keys.append(idempotencyKey)
+        resumes.append(link.resume)
         for waiter in callWaiters { waiter.resume() }
         callWaiters = []
         let step = steps.isEmpty ? .picture : steps.removeFirst()
@@ -166,6 +240,13 @@ actor ScriptedTryOn: TryOnPipeline {
         case .picture: return Data([1])
         case .fail(let problem): throw problem
         case .wait:
+            await withCheckedContinuation { gate = $0 }
+            return Data([1])
+        case .startedThenFail(let id, let problem):
+            link.started(id)
+            throw problem
+        case .startedThenWait(let id):
+            link.started(id)
             await withCheckedContinuation { gate = $0 }
             return Data([1])
         }

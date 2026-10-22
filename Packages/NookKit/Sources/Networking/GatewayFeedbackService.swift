@@ -45,7 +45,7 @@ public struct GatewayFeedbackService: FeedbackService {
         case .invalidResponse: .rejected
         // Paid-only answers; support never gets them.
         case .attestationRequired, .attestationUnavailable, .consentRequired, .idempotencyConflict: .rejected
-        case .actionInProgress(let seconds): .unavailable(retryAfterSeconds: seconds)
+        case .actionInProgress(let seconds), .actionRunning(_, let seconds): .unavailable(retryAfterSeconds: seconds)
         case .quotaExceeded(_, _, let seconds): .rateLimited(retryAfterSeconds: seconds)
         case .featurePaused(_, let seconds): .unavailable(retryAfterSeconds: seconds)
         }

@@ -139,6 +139,38 @@ public enum CloudLimitProblem: Error, Sendable, Hashable, Codable {
 public protocol PaidActionService: Sendable {
     func usage() async throws(CloudLimitProblem) -> CloudUsage
     func run(_ request: PaidActionRequest, idempotencyKey: String) async throws(CloudLimitProblem) -> PaidActionReceipt
+    /// Phase 35: the same, for an action that may already be running on the server. A try-on is
+    /// uploaded once; while it runs it is asked for by its action ID, not by sending the photos
+    /// again. `link` carries that ID in (after a relaunch) and out (as soon as the server names it).
+    func run(_ request: PaidActionRequest, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> PaidActionReceipt
+}
+
+extension PaidActionService {
+    /// A service that doesn't know the status call (a test stand-in) just runs the request.
+    public func run(_ request: PaidActionRequest, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> PaidActionReceipt
+    {
+        try await run(request, idempotencyKey: idempotencyKey)
+    }
+}
+
+/// How one paid action is followed across tries and relaunches (Phase 35). The server names the
+/// action when it starts it; from then on its status is asked for with that ID alone.
+public struct ActionLink: Sendable {
+    /// The ID kept from an earlier try (the app was relaunched, or the answer was late): ask for
+    /// this action's status instead of sending the request again.
+    public var resume: String?
+    /// Called once, when the server says the action is running, so the caller can keep the ID.
+    public var started: @Sendable (String) -> Void
+
+    public init(resume: String? = nil, started: @escaping @Sendable (String) -> Void = { _ in }) {
+        self.resume = resume
+        self.started = started
+    }
+
+    /// No earlier ID, and nobody to tell.
+    public static let none = ActionLink()
 }
 
 /// One paid action from her first tap until it works or is refused (Phase 26). It holds the

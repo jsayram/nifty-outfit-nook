@@ -67,7 +67,7 @@ struct ContractTests {
         }
         #expect(
             Set(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id)) == [
-                "sendFeedback", "tryOn",
+                "sendFeedback", "tryOn", "actionStatus",
             ])
     }
 
@@ -142,6 +142,12 @@ struct ContractTests {
         ("v1/examples/entitlement-claim.request.json", "creditClaimRequest"),
         ("v1/examples/entitlement-claim.response.json", "entitlementClaimResponse"),
         ("v1/examples/error.entitlement_required.json", "error"),
+        ("v1/examples/action-status.request.json", "actionStatusRequest"),
+        ("v1/examples/action-status.response.json", "actionStatusResponse"),
+        ("v1/examples/action-status.running.response.json", "actionStatusResponse"),
+        ("v1/examples/action-status.failed.response.json", "actionStatusResponse"),
+        ("v1/examples/action-status.expired.response.json", "actionStatusResponse"),
+        ("v1/examples/action-in-progress.own-action.error.json", "error"),
     ])
     func goldenExamplesRoundTrip(path: String, type: String) throws {
         // Decoding then encoding gives the same JSON: the Swift types neither drop nor add a field.
@@ -162,6 +168,10 @@ struct ContractTests {
             case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
             case "tryOnResponse": try encoder.encode(decoder.decode(APIV1.TryOnResponse.self, from: original))
             case "styleResponse": try encoder.encode(decoder.decode(APIV1.StyleResponse.self, from: original))
+            case "actionStatusRequest":
+                try encoder.encode(decoder.decode(APIV1.ActionStatusRequest.self, from: original))
+            case "actionStatusResponse":
+                try encoder.encode(decoder.decode(APIV1.ActionStatusResponse.self, from: original))
             case "deletionRequest": try encoder.encode(decoder.decode(APIV1.DeletionRequest.self, from: original))
             case "deletionStatusRequest":
                 try encoder.encode(decoder.decode(APIV1.DeletionStatusRequest.self, from: original))
@@ -189,6 +199,29 @@ struct ContractTests {
                 APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/error.\(name).json"))
             #expect(APIV1.ErrorCode(rawValue: envelope.error.code) != nil)
         }
+    }
+
+    /// 35: the first 409 names the action, and the status call is free, needs no assertion and polls by ID.
+    @Test func theStatusCallMatchesTheContract() throws {
+        let envelope = try JSONDecoder().decode(
+            APIV1.ErrorEnvelope.self, from: Self.data("v1/examples/action-in-progress.own-action.error.json"))
+        #expect(envelope.error.code == APIV1.ErrorCode.actionInProgress.rawValue)
+        #expect(envelope.error.actionId?.wholeMatch(of: /act_[0-9a-f]{32}/) != nil)
+        let listed = try #require(Self.contract()["endpoints"] as? [[String: Any]])
+        let status = try #require(listed.first { $0["id"] as? String == "actionStatus" })
+        #expect(status["cost"] as? String == "free")
+        #expect(!APIV1.actionStatus.paid && APIV1.actionStatus.idempotent)
+        #expect(APIV1.actionStatus.maxBodyBytes == 1_024)
+        #expect(!(status["errors"] as? [String] ?? []).contains("attestation_required"))
+        // The running answer says when to ask again; a finished one carries the result and no wait.
+        let running = try JSONDecoder().decode(
+            APIV1.ActionStatusResponse.self, from: Self.data("v1/examples/action-status.running.response.json"))
+        #expect(running.action.status == "running" && running.action.retryAfterSeconds == 5)
+        #expect(running.tryOnResult == nil && running.usage == nil)
+        let done = try JSONDecoder().decode(
+            APIV1.ActionStatusResponse.self, from: Self.data("v1/examples/action-status.response.json"))
+        #expect(done.action.status == "succeeded" && done.action.retryAfterSeconds == nil)
+        #expect(done.tryOnResult?.image.bytes != nil && done.usage?.category == "tryOn")
     }
 
     @Test func paidEndpointsMatchTheContract() throws {

@@ -31,7 +31,7 @@ The debug sample closet keeps its jobs in memory, like everything else in it.
 
 At launch and each time the app comes back to the front, `AIJobs.resume`:
 
-- asks again, with its key, for every job that was sent (once, however long ago; the server answers a finished one from its record for free);
+- asks again, with its key, for every job that was sent (once, however long ago; the server answers a finished one from its record for free). A try-on job that already has the server's action ID (`AIJob.actionID`, Phase 35) asks for that action's status with the ID alone; its photos are never uploaded again;
 - sends a job that was never sent, unless she asked more than 10 minutes ago, when it says it didn't finish instead (Phase 26's rule: nothing she asked for long ago is charged by surprise);
 - writes looks again that couldn't be written when the job finished (the store is locked with the iPhone, `FileProtectionType.complete`);
 - tidies away finished jobs older than a day.

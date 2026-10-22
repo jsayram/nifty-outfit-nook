@@ -29,6 +29,10 @@ public enum APIFailure: Error, Sendable, Equatable {
     case idempotencyConflict
     /// 409 action_in_progress: still running or being checked.
     case actionInProgress(retryAfterSeconds: Int)
+    // 35
+    /// 409 action_in_progress that names this key's own action: it is running on the server. Ask
+    /// for its status with the ID; sending the request again would upload everything again.
+    case actionRunning(actionID: String, retryAfterSeconds: Int)
     /// 429 quota_exceeded: an allowance is used up until `resetAt`.
     case quotaExceeded(category: String, resetAt: Date?, retryAfterSeconds: Int)
     /// 503 feature_paused: switched off on the server, or its spending ceiling is reached.
@@ -102,6 +106,7 @@ public struct RetryPolicy: Sendable, Equatable {
     public static let defaultTimingOverrides: [String: EndpointTiming] = [
         APIV1.style.id: EndpointTiming(attemptTimeout: .seconds(40), deadline: .seconds(45)),
         APIV1.tryOn.id: EndpointTiming(attemptTimeout: .seconds(30), deadline: .seconds(360)),
+        // 35: one status ask is short. How long a picture is waited for is the try-on's own deadline.
         // A note can carry a screenshot of up to 600 KB: room to upload it on a slow connection.
         APIV1.sendFeedback.id: EndpointTiming(attemptTimeout: .seconds(20), deadline: .seconds(45)),
     ]
@@ -346,10 +351,16 @@ public final class APIClient: Sendable {
             case 409 where envelope?.error.code == APIV1.ErrorCode.idempotencyConflict.rawValue:
                 throw fail(endpoint, .idempotencyConflict)
             case 409:
-                // action_in_progress: the job is still running, or its outcome is being checked.
+                let retryAfter = Self.retryAfter(http, envelope) ?? 2
+                // 35: this key's own action is running on the server, and the answer names it. The
+                // caller asks for its status; sending the same request again would upload it all again.
+                if let actionID = envelope?.error.actionId {
+                    throw fail(endpoint, .actionRunning(actionID: actionID, retryAfterSeconds: retryAfter))
+                }
+                // action_in_progress without an ID (another action is running, or an older
+                // backend): the job is still running, or its outcome is being checked.
                 // Asking again with the same key is safe, and it isn't a failed try, so it is
                 // polled every Retry-After (1 to 10 seconds) until the deadline.
-                let retryAfter = Self.retryAfter(http, envelope) ?? 2
                 let delay = Duration.seconds(min(max(retryAfter, 1), 10))
                 if fits(delay) {
                     attempt -= 1
@@ -406,6 +417,48 @@ public final class APIClient: Sendable {
                 throw fail(endpoint, .serverError)
             default:
                 throw fail(endpoint, .rejected(code: envelope?.error.code ?? String(http.statusCode)))
+            }
+        }
+    }
+
+    // MARK: Following a running action (35)
+
+    /// Asks where an action stands until it has finished, with only its ID on the wire, never the
+    /// photos. The first ask comes after `after` (the server's Retry-After from the 409, or none
+    /// when resuming after a relaunch), and each later one after the wait the answer names (1 to 10
+    /// seconds). A limit on the status call is waited out like a short Retry-After. It stops when
+    /// the action has finished (succeeded, failed or expired), when the call fails, or at the
+    /// deadline of `paid`'s endpoint timing, which is measured from here, with `.actionInProgress`.
+    public func awaitAction(
+        _ actionID: String, firstAskAfter after: Duration, deadlineOf paid: APIV1.Endpoint
+    ) async throws(APIFailure) -> APIV1.ActionStatusResponse {
+        let deadline = time.now() + policy.timing(for: paid).deadline
+        var delay = after
+        while true {
+            if Task.isCancelled { throw fail(APIV1.actionStatus, .cancelled) }
+            if delay > .zero {
+                guard time.now() + delay < deadline else {
+                    throw fail(
+                        APIV1.actionStatus, .actionInProgress(retryAfterSeconds: Int(delay.seconds.rounded(.up))))
+                }
+                try await wait(delay, APIV1.actionStatus, reason: "still running, asking its status")
+            }
+            if time.now() >= deadline {
+                throw fail(APIV1.actionStatus, .actionInProgress(retryAfterSeconds: 2))
+            }
+            do {
+                let response = try await send(
+                    APIV1.actionStatus, body: APIV1.ActionStatusRequest(actionId: actionID),
+                    as: APIV1.ActionStatusResponse.self)
+                switch response.action.status {
+                case "succeeded", "failed", "expired": return response
+                default:
+                    let seconds = min(max(response.action.retryAfterSeconds ?? 2, 1), 10)
+                    delay = .seconds(seconds)
+                }
+            } catch .rateLimited(let seconds) {
+                // Our own limit on this call (30 a minute): wait it out, within the deadline.
+                delay = .seconds(min(max(seconds, 1), 10))
             }
         }
     }

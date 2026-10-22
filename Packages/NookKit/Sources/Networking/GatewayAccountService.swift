@@ -143,7 +143,7 @@ public struct GatewayAccountService: AccountService {
         case .rejected, .idempotencyConflict: .rejected
         // Paid-only answers; account calls never get them.
         case .attestationRequired, .attestationUnavailable, .consentRequired: .forbidden
-        case .actionInProgress(let seconds): .rateLimited(retryAfterSeconds: seconds)
+        case .actionInProgress(let seconds), .actionRunning(_, let seconds): .rateLimited(retryAfterSeconds: seconds)
         case .quotaExceeded(_, _, let seconds): .rateLimited(retryAfterSeconds: seconds)
         case .featurePaused(_, let seconds): .unavailable(retryAfterSeconds: seconds)
         }

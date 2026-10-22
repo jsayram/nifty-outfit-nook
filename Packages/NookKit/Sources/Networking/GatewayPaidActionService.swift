@@ -29,19 +29,73 @@ public struct GatewayPaidActionService: PaidActionService {
     public func run(_ request: PaidActionRequest, idempotencyKey: String) async throws(CloudLimitProblem)
         -> PaidActionReceipt
     {
+        try await run(request, idempotencyKey: idempotencyKey, link: .none)
+    }
+
+    /// The request is sent once. If the server says it is running and names the action, from then
+    /// on only the action's ID is sent (Phase 35), so a try-on's photos go up one time however
+    /// long the picture takes. With `link.resume` (a relaunch, or a late answer) it starts there.
+    public func run(_ request: PaidActionRequest, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> PaidActionReceipt
+    {
         do {
-            return try await send(request, idempotencyKey: idempotencyKey)
-        } catch .attestationRequired {
-            // The backend didn't accept this install's key: register a new one and try once more,
-            // with the same key, so it still can't run twice.
-            await attestation.reset()
-            do {
-                return try await send(request, idempotencyKey: idempotencyKey)
-            } catch {
-                throw Self.problem(for: error)
+            if let resumed = link.resume {
+                do {
+                    return try await follow(resumed, request, wait: .zero)
+                } catch .rejected(code: APIV1.ErrorCode.notFound.rawValue) {
+                    // The server doesn't have that action any more: ask the old way, once, with the
+                    // same key. It answers from its record, or starts the action again.
+                }
             }
+            return try await sendAndFollow(request, idempotencyKey: idempotencyKey, link: link)
         } catch {
             throw Self.problem(for: error)
+        }
+    }
+
+    private func sendAndFollow(_ request: PaidActionRequest, idempotencyKey: String, link: ActionLink)
+        async throws(APIFailure) -> PaidActionReceipt
+    {
+        do {
+            do {
+                return try await send(request, idempotencyKey: idempotencyKey)
+            } catch .attestationRequired {
+                // The backend didn't accept this install's key: register a new one and try once
+                // more, with the same key, so it still can't run twice.
+                await attestation.reset()
+                return try await send(request, idempotencyKey: idempotencyKey)
+            }
+        } catch .actionRunning(let actionID, let retryAfter) {
+            link.started(actionID)
+            return try await follow(actionID, request, wait: .seconds(min(max(retryAfter, 1), 10)))
+        }
+    }
+
+    /// Asks for the action's status until it has finished, then turns the answer into a receipt.
+    private func follow(_ actionID: String, _ request: PaidActionRequest, wait: Duration)
+        async throws(APIFailure) -> PaidActionReceipt
+    {
+        let paid = request.feature == .style ? APIV1.style : APIV1.tryOn
+        let response = try await client.awaitAction(actionID, firstAskAfter: wait, deadlineOf: paid)
+        switch response.action.status {
+        case "succeeded":
+            guard let usage = response.usage.flatMap(Self.allowance) else { throw .invalidResponse }
+            switch request {
+            case .style:
+                guard let answer = response.styleResult?.styleAnswer else { throw .invalidResponse }
+                return PaidActionReceipt(
+                    id: response.action.id, feature: .style, replayed: false, usage: usage, style: answer)
+            case .tryOn:
+                guard let image = response.tryOnResult?.image.bytes else { throw .invalidResponse }
+                return PaidActionReceipt(
+                    id: response.action.id, feature: .tryOn, replayed: false, usage: usage, tryOnImage: image)
+            }
+        case "failed":
+            // Nothing was counted. A new tap is a new action with a new key.
+            throw .unavailable(retryAfterSeconds: 30)
+        default:
+            // Expired: it was made, but the picture is no longer kept.
+            throw .unavailable(retryAfterSeconds: nil)
         }
     }
 
@@ -61,8 +115,9 @@ public struct GatewayPaidActionService: PaidActionService {
                 id: response.action.id, feature: .style, replayed: response.action.replayed, usage: usage, style: answer
             )
         case .tryOn(let call):
-            // 33a: the first answer is "still running" (409); the client asks again with the same
-            // key and body until the picture comes back, within try-on's 360-second deadline.
+            // 33a: the first answer is "still running" (409, 35: with the action's ID). The
+            // caller then follows it by ID, within try-on's 360-second deadline. A 200 here is the
+            // picture, for a request that was already done.
             let response = try await client.send(
                 APIV1.tryOn, body: APIV1.TryOnRequest(call), idempotencyKey: idempotencyKey, signer: signer,
                 as: APIV1.TryOnResponse.self)
@@ -99,7 +154,7 @@ public struct GatewayPaidActionService: PaidActionService {
                 resetAt: resetAt ?? now.addingTimeInterval(TimeInterval(seconds)))
         case .featurePaused(let feature, let seconds):
             .paused(feature: feature.flatMap(PaidFeature.init(rawValue:)), retryAfterSeconds: seconds)
-        case .actionInProgress(let seconds):
+        case .actionInProgress(let seconds), .actionRunning(_, let seconds):
             .busy(retryAfterSeconds: seconds)
         case .attestationRequired, .attestationUnavailable:
             .deviceNotVerified

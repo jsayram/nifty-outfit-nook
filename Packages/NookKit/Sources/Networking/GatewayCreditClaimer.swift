@@ -41,7 +41,8 @@ public struct GatewayCreditClaimer: CreditClaiming, StylingAccessClaiming {
         case .offline, .timedOut, .cancelled: .offline
         case .signedOut, .notRegistered: .signedOut
         case .forbidden, .rejected: .rejected
-        case .rateLimited, .unavailable, .actionInProgress, .quotaExceeded, .featurePaused: .unavailable
+        case .rateLimited, .unavailable, .actionInProgress, .actionRunning, .quotaExceeded, .featurePaused:
+            .unavailable
         case .serverError, .updateRequired, .invalidResponse, .attestationRequired, .attestationUnavailable,
             .consentRequired, .idempotencyConflict:
             .failed

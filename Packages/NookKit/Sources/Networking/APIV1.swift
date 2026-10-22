@@ -60,9 +60,16 @@ public enum APIV1 {
     public static let claimEntitlement = Endpoint(
         id: "claimEntitlement", method: "POST", path: "/v1/entitlements/claim", requiresAuth: true, idempotent: true)
 
+    // 35
+    /// Where a paid action stands, by its ID: how a try-on is polled without sending the photos
+    /// again. Read-only, so safe to repeat. A 1 KiB body at most: the ID and nothing else.
+    public static let actionStatus = Endpoint(
+        id: "actionStatus", method: "POST", path: "/v1/actions/status", requiresAuth: true, idempotent: true,
+        maxBodyBytes: 1_024)
+
     public static let endpoints = [
         health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
-        sendFeedback, claimCredits, claimEntitlement,
+        sendFeedback, claimCredits, claimEntitlement, actionStatus,
     ]
 
     // MARK: Bodies
@@ -139,6 +146,8 @@ public enum APIV1 {
             public var resetAt: String?
             /// feature_paused: which feature.
             public var feature: String?
+            /// 35: action_in_progress about this key's own action: its ID, for the status call.
+            public var actionId: String?
         }
         public var error: Body
     }

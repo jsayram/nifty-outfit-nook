@@ -284,11 +284,25 @@ public protocol TryOnPipeline: Sendable {
     /// Sends the upload as one paid action with the job's key, and returns the dressed picture.
     func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String)
         async throws(CloudLimitProblem) -> Data
+    /// Phase 35: the same, following the action by its ID. The photos are uploaded once; while the
+    /// picture is made only the ID is sent, and the ID is handed to `link.started` so a relaunch
+    /// can carry on with it (`link.resume`).
+    func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> Data
     /// On the phone: puts her real head back over the grey and writes the finished picture.
     func restore(_ dressed: Data, upload: TryOnUpload) async throws(TryOnError) -> PhotoReference
     /// Removes files written for an upload: the work files always, the sent ones too unless a
     /// picture keeps them.
     func discard(_ upload: TryOnUpload, keepingSent: Bool) async
+}
+
+extension TryOnPipeline {
+    /// A pipeline that doesn't follow actions by ID (a test stand-in) just sends the upload.
+    public func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> Data
+    {
+        try await dress(upload, consentVersion: consentVersion, idempotencyKey: idempotencyKey)
+    }
 }
 
 /// A try-on job as it is kept (27c): the look as it was, the upload's files and her consent, so a

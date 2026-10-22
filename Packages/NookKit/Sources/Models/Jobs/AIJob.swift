@@ -80,6 +80,10 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
     public var finishedAt: Date?
     public var result: Result?
     public var failure: Failure?
+    /// Phase 35: the server's ID for this job's action, once it has said it is running. A job
+    /// resumed after a relaunch, or asked again after a late answer, asks for this action's
+    /// status with it, instead of sending the photos again. Missing in jobs kept before this.
+    public var actionID: String?
     /// True once the request may have reached the server. A resumed job that was never sent is
     /// treated as new; one that was is asked again with its key.
     public var wasSent: Bool
@@ -104,6 +108,7 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
         result = nil
         failure = nil
         wasSent = false
+        actionID = nil
         isSeen = false
         isKept = true
     }

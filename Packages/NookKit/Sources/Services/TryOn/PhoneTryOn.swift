@@ -156,6 +156,12 @@ public struct PhoneTryOn: TryOnPipeline {
     public func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String)
         async throws(CloudLimitProblem) -> Data
     {
+        try await dress(upload, consentVersion: consentVersion, idempotencyKey: idempotencyKey, link: .none)
+    }
+
+    public func dress(_ upload: TryOnUpload, consentVersion: String, idempotencyKey: String, link: ActionLink)
+        async throws(CloudLimitProblem) -> Data
+    {
         guard let person = stored(upload.sent.person) else { throw .didNotFinish(retryAfterSeconds: nil) }
         var garments: [TryOnCall.Garment] = []
         for garment in upload.sent.garments {
@@ -165,7 +171,7 @@ public struct PhoneTryOn: TryOnPipeline {
         }
         let call = TryOnCall(
             contextRevision: upload.contextRevision, consentVersion: consentVersion, person: person, garments: garments)
-        let receipt = try await paid.run(.tryOn(call), idempotencyKey: idempotencyKey)
+        let receipt = try await paid.run(.tryOn(call), idempotencyKey: idempotencyKey, link: link)
         guard let image = receipt.tryOnImage else { throw .didNotFinish(retryAfterSeconds: nil) }
         return image
     }
