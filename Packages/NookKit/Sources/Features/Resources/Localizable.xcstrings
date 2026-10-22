@@ -825,6 +825,21 @@
     "2 weeks" : {
       "comment" : "Repeat setting value (LR-10)"
     },
+    "%@, done" : {
+      "comment" : "VoiceOver: a finished try-on step"
+    },
+    "%@, in progress" : {
+      "comment" : "VoiceOver: the try-on step running"
+    },
+    "%@, not started" : {
+      "comment" : "VoiceOver: a try-on step still to come"
+    },
+    "%@, stopped here" : {
+      "comment" : "VoiceOver: the try-on step that failed or was refused"
+    },
+    "%@, waiting for your other picture" : {
+      "comment" : "VoiceOver: a try-on step that hasn't started"
+    },
     "A bit more light would help." : {
       "comment" : "Try-on camera hint"
     },
@@ -882,6 +897,9 @@
     "Check again" : {
       "comment" : "Try-on photo setup button"
     },
+    "Checking that no face is left" : {
+      "comment" : "Try-on step 3, on the phone: the check before anything is sent (33c)"
+    },
     "Checking with the App Store" : {
       "comment" : "Styling access: loading"
     },
@@ -933,11 +951,20 @@
     "How try-on pictures work" : {
       "comment" : "Try-on consent: title"
     },
+    "How your photo stays private. %@" : {
+      "comment" : "VoiceOver: the privacy walkthrough. The argument is its steps, one sentence each."
+    },
+    "It checks that no face is left. If one is, nothing is sent." : {
+      "comment" : "Privacy walkthrough, beat 4 (33c)"
+    },
     "It didn’t work just now. You can check again, or keep the photo: it’s checked once more before any picture is made." : {
       "comment" : "Try-on photo setup: the check didn't run"
     },
     "It seems to show more than one person. Try again with just you in the picture." : {
       "comment" : "Try-on photo setup: the check failed"
+    },
+    "It swaps your room for a plain studio backdrop." : {
+      "comment" : "Privacy walkthrough, beat 3 (33c)"
     },
     "Just you in the picture, please." : {
       "comment" : "Try-on camera hint"
@@ -996,8 +1023,17 @@
     "Nothing was sent, and nothing has changed. Your current photo, if you have one, is still yours." : {
       "comment" : "Try-on photo setup: after a failed check"
     },
+    "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
+      "comment" : "Under the privacy walkthrough and See what was sent (33c)"
+    },
+    "On your phone" : {
+      "comment" : "Privacy walkthrough: under the lock (33c)"
+    },
     "Only the photo without your face and your clothing photos were sent. You can leave this screen: we’ll tell you when your picture is ready, and your iPhone puts you back together." : {
       "comment" : "Try it on sheet (33a): the job is running"
+    },
+    "Only this photo and your clothing photos are sent." : {
+      "comment" : "Privacy walkthrough, beat 5 (33c)"
     },
     "Opens the App Store to confirm." : {
       "comment" : "Paywall: VoiceOver hint on the purchase button"
@@ -1010,6 +1046,9 @@
     },
     "Purchases are turned off on this iPhone in Screen Time." : {
       "comment" : "Styling access: purchases not allowed"
+    },
+    "Putting you back together on your phone" : {
+      "comment" : "Try-on step 5, on the phone: her own head goes back on (33c)"
     },
     "Renews %@ at %@ a month." : {
       "comment" : "Styling access: subscribed. The arguments are a date and the App Store's price."
@@ -1035,6 +1074,9 @@
     "Set up your try-on photo first" : {
       "comment" : "Try it on sheet (33a)"
     },
+    "Shows how your photo is kept private while your picture is made." : {
+      "comment" : "VoiceOver hint for Watch how it works (33c)"
+    },
     "Shows the photos that left your iPhone to make this picture." : {
       "comment" : "VoiceOver hint for See what was sent"
     },
@@ -1049,6 +1091,12 @@
     },
     "Step back a little, so your whole body is in view." : {
       "comment" : "Try-on camera hint"
+    },
+    "Steps" : {
+      "comment" : "VoiceOver: the try-on steps list"
+    },
+    "Still dressing you. This one is taking a little longer. You can leave this screen: we’ll tell you when your picture is ready." : {
+      "comment" : "Try-on loading screen: the job is taking longer"
     },
     "Style Me is off. Your closet, saved looks and making your own looks still work." : {
       "comment" : "Privacy and terms: the stylist switch is off"
@@ -1113,8 +1161,8 @@
     "Swap a piece and Ask stylist" : {
       "comment" : "Paywall: an included feature"
     },
-    "Swapping in a studio backdrop. Nothing has left your iPhone yet." : {
-      "comment" : "Try it on sheet (33a): on the phone, before sending"
+    "Swapping in a studio backdrop" : {
+      "comment" : "Try-on step 2, on the phone (33c)"
     },
     "Switch camera" : {
       "comment" : "Try-on camera: front or back"
@@ -1188,8 +1236,14 @@
     "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Try-on consent"
     },
+    "This happens on your iPhone. Nothing has been sent yet." : {
+      "comment" : "Try-on loading screen: the phone's own steps"
+    },
     "This happens on your iPhone. Nothing is sent." : {
       "comment" : "Try-on photo setup: working"
+    },
+    "This is your photo. It starts on your iPhone." : {
+      "comment" : "Privacy walkthrough, beat 1 (33c)"
     },
     "This photo couldn’t be read. Try another one." : {
       "comment" : "Try-on photo setup: the photo couldn't be read"
@@ -1264,6 +1318,12 @@
     },
     "Waiting for the App Store" : {
       "comment" : "Paywall: while buying"
+    },
+    "Waiting to start" : {
+      "comment" : "Try-on loading screen: an earlier job runs"
+    },
+    "Watch how it works" : {
+      "comment" : "Try-on loading screen: plays the privacy walkthrough again (33c)"
     },
     "We can’t delete copies Black Forest Labs keeps." : {
       "comment" : "Try-on consent"
@@ -9305,8 +9365,14 @@
     "Your iPhone couldn’t find your face. Face the camera, with your face clear and well lit." : {
       "comment" : "Try-on photo setup: the check failed"
     },
+    "Your iPhone covers your head and hair." : {
+      "comment" : "Privacy walkthrough, beat 2 (33c)"
+    },
     "Your iPhone may be out of space. Nothing was saved." : {
       "comment" : "Add a piece: after a photo couldn't be saved"
+    },
+    "Your iPhone puts your face back on. It never left your phone." : {
+      "comment" : "Privacy walkthrough, beat 7 (33c)"
     },
     "Your iPhone’s settings now" : {
       "comment" : "Accessibility: section header"
@@ -9408,6 +9474,9 @@
     "Your note went where you sent it. This is what it said." : {
       "comment" : "Send feedback: after sending"
     },
+    "Your other picture finishes first. Nothing has been sent yet." : {
+      "comment" : "Try-on loading screen: waiting for an earlier job"
+    },
     "Your outfit pictures" : {
       "comment" : "Saved Looks tour, step 2 title"
     },
@@ -9436,6 +9505,12 @@
     },
     "Your photo, without your face, on a plain backdrop" : {
       "comment" : "See what was sent: the faceless photo"
+    },
+    "Your picture comes back with you dressed." : {
+      "comment" : "Privacy walkthrough, beat 6 (33c)"
+    },
+    "Your picture is back. Your iPhone is putting your face back on." : {
+      "comment" : "Try-on loading screen: the last step"
     },
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"

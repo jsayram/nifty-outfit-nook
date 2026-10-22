@@ -403,6 +403,8 @@ public final class AIJobs {
             case .tryOn(let request):
                 guard let pipeline = services.tryOnPipeline else { return .failed(.notCompleted) }
                 let dressed: Data
+                // 33c: the loading screen's captions follow these real steps.
+                update(job.id) { $0.tryOnStage = .dressing }
                 do {
                     // 35: the photos go up once. The server's action ID is kept with the job as soon as
                     // it is known, so a late answer or a relaunch asks for its status, not for a resend.
@@ -417,6 +419,7 @@ public final class AIJobs {
                     throw CloudStylist.error(for: error)
                 }
                 // Her head goes back on the phone. The picture keeps exactly what was sent.
+                update(job.id) { $0.tryOnStage = .restoring }
                 let image: PhotoReference
                 do {
                     image = try await pipeline.restore(dressed, upload: request.upload)

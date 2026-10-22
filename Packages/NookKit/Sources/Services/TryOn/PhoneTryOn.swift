@@ -40,13 +40,15 @@ public struct PhoneTryOn: TryOnPipeline {
 
     // MARK: Before sending
 
-    public func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem) -> TryOnUpload {
+    public func prepare(
+        photo: PhotoReference, pieces: [Garment], progress: @escaping @MainActor @Sendable (TryOnStage) -> Void
+    ) async throws(TryOnPrepareProblem) -> TryOnUpload {
         guard photo != .noPhoto else { throw .noTryOnPhoto }
         guard let original = await data(for: photo, maxPixelSize: 2 * Self.workingSize),
             let bitmap = TryOnBitmap.decode(original, maxPixelSize: Self.workingSize)
         else { throw .photoUnreadable }
 
-        let (portrait, personJPEG) = try await Self.facelessPortrait(of: bitmap, using: analyzer)
+        let (portrait, personJPEG) = try await Self.facelessPortrait(of: bitmap, using: analyzer, progress: progress)
 
         var garments: [(Garment, Data)] = []
         for piece in pieces where garments.count < TryOnCall.maximumGarments {
@@ -90,16 +92,24 @@ public struct PhoneTryOn: TryOnPipeline {
     /// sent, both in the pixels and in the JPEG made from them. Throws instead of going on when any
     /// of it fails. `prepare` and the photo check at setup (`TryOnPhotoChecker`) both use this, so
     /// a photo she is told is fine is one try-on will accept.
-    static func facelessPortrait(of bitmap: TryOnBitmap, using analyzer: any PersonAnalyzing)
-        async throws(TryOnPrepareProblem) -> (portrait: MaskedPortrait, jpeg: Data)
-    {
+    ///
+    /// `progress` hears each step as it starts (33c): hiding the face (finding her and covering her
+    /// head), the studio backdrop, then the check for a face.
+    static func facelessPortrait(
+        of bitmap: TryOnBitmap, using analyzer: any PersonAnalyzing,
+        progress: @MainActor @Sendable (TryOnStage) -> Void = { _ in }
+    ) async throws(TryOnPrepareProblem) -> (portrait: MaskedPortrait, jpeg: Data) {
+        await progress(.hidingFace)
         let analysis: PersonAnalysis
         do {
             analysis = try await analyzer.analyze(bitmap)
         } catch {
             throw .checksUnavailable
         }
-        let portrait = try HeadMasking.mask(bitmap, analysis: analysis)
+        let plan = try HeadMasking.head(of: bitmap, analysis: analysis)
+        await progress(.studioBackdrop)
+        let portrait = HeadMasking.paint(plan, on: bitmap)
+        await progress(.checkingFace)
 
         guard
             let personJPEG = jpeg(portrait.faceless, quality: personQuality, limit: TryOnCall.personMaxBytes),

@@ -61,6 +61,16 @@ final class TryOnModel {
     /// Saves the look first, when it isn't saved yet (Your looks). `nil` for a saved look.
     let saveLook: (() async throws(StoreError) -> Look)?
 
+    /// 33c: the step the phone is on while it prepares.
+    private(set) var preparingStage: TryOnStage = .hidingFace
+    /// 33c: the step a refusal or a failed job stopped at, so the screen shows where it stopped.
+    private(set) var stoppedAt: TryOnStage?
+    /// 33c: the privacy walkthrough is playing instead of the loading screen. It plays by itself
+    /// on her first real picture, and again when she asks (`replayWalkthrough`).
+    private(set) var isWalkingThrough = false
+    /// 33c: the walkthrough on screen is a replay, which she can skip. The first showing isn't.
+    private(set) var walkthroughIsReplay = false
+
     private var services: NookServices = .unavailable
     private var making: Task<Void, Never>?
     /// 33a: the job this sheet is showing, while it shows it.
@@ -79,6 +89,39 @@ final class TryOnModel {
         self.garments = garments
         self.saveLook = saveLook
         self.now = now
+    }
+
+    /// 33c: where the picture is, for the loading screen's captions: the phone's own step, or the
+    /// job's real state. Where it stopped, after a refusal or a failure.
+    var progress: TryOnProgress? {
+        switch step {
+        case .preparing: .preparing(preparingStage)
+        case .sending(let id): services.aiJobs.job(id).flatMap(TryOnProgress.init(job:)) ?? .preparing(.dressing)
+        case .refused, .failed: stoppedAt.map(TryOnProgress.stopped(at:))
+        default: nil
+        }
+    }
+
+    /// 33c: the walkthrough is shown only while the picture is being made.
+    var showsWalkthrough: Bool {
+        guard isWalkingThrough else { return false }
+        if case .sending = step { return true }
+        return step == .preparing
+    }
+
+    /// 33c: the first showing plays to the end; a replay can be skipped.
+    var canSkipWalkthrough: Bool { walkthroughIsReplay }
+
+    /// 33c: Watch how it works, while the picture is made.
+    func replayWalkthrough() {
+        walkthroughIsReplay = true
+        isWalkingThrough = true
+    }
+
+    /// 33c: the walkthrough ended: played to the end (so the first time is remembered), or skipped.
+    func walkthroughEnded(completed: Bool) {
+        isWalkingThrough = false
+        if completed, !walkthroughIsReplay { services.tryOnConsent.markWalkthroughSeen() }
     }
 
     /// True when making a picture also saves the look.
@@ -133,6 +176,11 @@ final class TryOnModel {
             return
         }
         step = .preparing
+        preparingStage = .hidingFace
+        stoppedAt = nil
+        // 33c: her first real picture plays the walkthrough once, while the phone works.
+        walkthroughIsReplay = false
+        isWalkingThrough = !services.tryOnConsent.hasSeenWalkthrough()
         let version = consent.version
         making = Task { await prepareAndSend(consentVersion: version) }
     }
@@ -181,9 +229,14 @@ final class TryOnModel {
         let pieces = look.garmentIDs.compactMap { garments[$0] }
         let upload: TryOnUpload
         do {
-            upload = try await pipeline.prepare(photo: photo, pieces: pieces)
+            upload = try await pipeline.prepare(photo: photo, pieces: pieces) { [weak self] stage in
+                self?.preparingStage = stage
+            }
         } catch {
-            if !Task.isCancelled { step = .refused(error) }
+            if !Task.isCancelled {
+                stoppedAt = preparingStage
+                step = .refused(error)
+            }
             return
         }
         // She left while the phone was preparing: nothing is sent.
@@ -224,6 +277,7 @@ final class TryOnModel {
                 step = .ready
             default:
                 // The server says her consent doesn't cover where it would send the photos.
+                stoppedAt = job.tryOnStage ?? .dressing
                 step = job.failure == .needsConsent ? .consent : .failed(Self.failure(job.failure))
             }
         }

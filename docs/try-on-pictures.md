@@ -199,6 +199,50 @@ Phase 33b, 22 October 2026. The screens and their words are in `docs/profile.md`
 
 Corrected on 22 October 2026 (Jose): the consent no longer says "Our server keeps neither". It says "Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." That is what the backend does: the sealed inputs are deleted when the provider call ends, and the sealed result is kept at most 30 minutes (2 minutes after the phone first receives it). The version stays `tryon-1`: nothing real has been sent under it yet, and the backend only checks which provider the text names, which didn't change. If real pictures were already made under the old text, bump the version (`TryOnConsent.currentVersion` and the backend's `TRYON_CONSENT_COVERS`).
 
+## Privacy walkthrough (33c)
+
+Phase 33c, 22 October 2026. What happens to her photo, shown while her picture is made. Both parts are driven by what the app really does, and tests check it.
+
+### The steps are the real ones
+
+`TryOnStage` (Models) lists them in the order the code does them. Each one is a real boundary, reported as it starts:
+
+| Step | Caption | Where it comes from |
+|---|---|---|
+| `hidingFace` | Hiding your face | `PhoneTryOn.facelessPortrait`: finding her outline and face, then the head shape for the grey |
+| `studioBackdrop` | Swapping in a studio backdrop | `HeadMasking.paint`: her room replaced, the grey painted (`mask` is now `head` then `paint`, so the app can say when the second half starts) |
+| `checkingFace` | Checking that no face is left | The check on the faceless pixels and on the exact JPEG. Any face refuses, and nothing is sent |
+| `dressing` | Dressing you | The 27c job's request: the faceless photo and clothing photos go out, the image service dresses her, the picture comes back |
+| `restoring` | Putting you back together on your phone | `PhoneTryOn.restore`: her own head goes back on |
+
+The phone's steps reach the screen through `prepare(photo:pieces:progress:)` (the progress closure runs on the main actor, in order). The job's step is `AIJob.tryOnStage`, set by `AIJobs` as it starts `dress` and `restore` and kept if the job fails, so a failed job says where it stopped, even after a relaunch (an older kept job has none, and counts as the request). `TryOnProgress` turns either into a mark for every step: done, doing, waiting (an earlier job runs first), not started, or stopped.
+
+Sending the photos and the image service dressing her are one step on purpose: the app makes one request and gets the picture when it is ready, so it can't tell the two apart, and showing two would be guessing.
+
+No caption comes from a timer. The list follows the model: while the phone prepares it shows the step the phone is on; once the job takes over it shows the job's state (waiting, dressing, taking longer, restoring). A refusal on the phone stops at its step and nothing was sent (so it ends at "Checking that no face is left" when a face is still found); a failed job stops at "Dressing you" or "Putting you back together on your phone". The list is on the loading screen, the refusal and the failure.
+
+### The first-time walkthrough
+
+On her first real picture, after she taps Allow (or Make a picture), a 5.8 second walkthrough plays in place of the loading screen while the phone works. It is drawn, with a drawn figure (not her photo, so nothing of hers is on screen and there is nothing to hide in the app switcher): a soft privacy veil over the head and hair from the neck up (no head is cut off), her room becoming the studio backdrop, a check mark for the face check, the faceless photo going up to a cloud, coming back dressed, and the veil lifting with her face and an "On your phone" lock.
+
+Its beats are `WalkthroughBeat`: your photo (0.6 s), veil (0.9), backdrop (0.8), checked (0.7), sent (1.0), dressed (0.8), face back (1.0). `PrivacyWalkthroughTests.everyRealStepHasABeatAndTheyComeInTheRealOrder` fails if a real step has no beat or a beat is out of order. The beats are on a clock (`PrivacyWalkthroughModel`), the real work doesn't wait for them, and if the phone refuses or the job fails while it plays, the failure replaces it and it counts as not seen.
+
+- **First showing.** No Skip: it is under six seconds and holds nothing up. It is remembered once it has played to the end (`TryOnConsentStore.markWalkthroughSeen`, kept beside the consent, left alone when she turns try-on off and erased by Delete my data).
+- **Later pictures** show only the real captions. "Watch how it works" on the loading screen plays it again, and a replay has **Skip**.
+- **Reduce Motion** swaps the movement for a fade: the figure never moves or changes size (`WalkthroughMotion`), it fades down while the photo is out and the cloud fades in, and each frame cross-fades. Nothing slides or scales.
+- **VoiceOver** reads the drawing and caption as one element: "How your photo stays private." then every step in a sentence. The loading list reads each step with where it is ("Dressing you, in progress", "Putting you back together on your phone, not started", "Dressing you, stopped here") and announces the step when it changes.
+- **Dynamic Type**: the captions and list wrap at any size (checked at AX5 by measuring); the drawing keeps its size.
+
+### The words
+
+Under the walkthrough, and under the picture on **See what was sent**, is the plan's line, word for word: "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." The consent has the same sentence (`whatGoes`, with "Your face never leaves your iPhone..." ahead of it).
+
+**Reconciled with 33b's consent fix.** The line says where the photos go, and 33b's corrected consent adds that on the way "Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." The two don't contradict each other, but the line alone could read as if only Black Forest Labs ever has them. So the second sentence now sits in a small note right under the line, on the walkthrough and on See what was sent (`WalkthroughText.serverNote`): "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." A test checks the note and the consent say the same 30 minutes, and that the line is exactly the approved one. The approved sentence itself isn't changed.
+
+### Tests
+
+`TryOnProgressTests` (the mapping from phone steps and job states, failure stops at the right step, an older job without a stage, the walkthrough flag in the consent store), `PrivacyWalkthroughTests` (beats against the real steps, frames in pipeline order, 5 to 6 seconds, the words, Reduce Motion, playing on a manual clock, no Skip on the first showing, Skip on a replay, leaving), `RealTryOnModelTests` (the steps shown while preparing and sending, a refusal and a failed job stopping at their step, first time versus later, replays), `TryOnJobsTests` (the job's step, a failure at dressing and at restoring), `PhoneTryOnTests` (the phone reports its steps in order and a refusal reports only the steps that ran), `PrivacyWalkthroughSnapshotTests` (key frames, Reduce Motion, the loading steps, AX5 fit) and the UI test `PrivacyWalkthroughTests`.
+
 ## Sample previews
 
 The fixtures carry six AI-generated pictures of the sample woman wearing a look (`Tests/NookTestSupport/SampleWardrobe/tryon`, no real person). They are `.generated` pictures with a `PhotoReference.sample`, shown through the image loader.
