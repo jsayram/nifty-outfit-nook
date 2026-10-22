@@ -1,0 +1,16 @@
+// Settings for the NiftyOutfitNookTests target (Phase 30a): unit tests hosted in the app. Only
+// tests that need the app as their host live here: StoreKit's test sessions (`SKTestSession`)
+// refuse to run in a package test bundle, which has no app, so the subscription tests run here.
+// Everything else stays in the NookKit package tests.
+
+PRODUCT_NAME = $(TARGET_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = com.jsayram.niftyoutfitnook.tests
+GENERATE_INFOPLIST_FILE = YES
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/NiftyOutfitNook.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NiftyOutfitNook
+BUNDLE_LOADER = $(TEST_HOST)
+#include "Version.xcconfig"
+
+// StoreKitTest's own header uses an API StoreKit deprecated in iOS 18 (`SKPaymentTransactionState`
+// in SKTestTransaction.h), and warnings fail the build. Only that clang warning is silenced, and
+// only for this target; Swift warnings still fail it.
+OTHER_SWIFT_FLAGS = $(inherited) -Xcc -Wno-deprecated-declarations

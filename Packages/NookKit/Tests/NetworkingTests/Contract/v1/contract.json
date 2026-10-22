@@ -46,7 +46,8 @@
       "Accept": "application/json",
       "Idempotency-Key": "On every paid endpoint: 16 to 64 characters from A-Z a-z 0-9 _ -, new for each new action and reused for every retry of it. Kept at least 24 hours.",
       "X-Nook-Attest-Key": "On every paid endpoint: the App Attest key ID (base64) registered with POST /v1/attest/key.",
-      "X-Nook-Assertion": "On every paid endpoint: base64 of the App Attest assertion (CBOR, as DCAppAttestService.generateAssertion returns it) over SHA-256 of the client data in attestation.clientData."
+      "X-Nook-Assertion": "On every paid endpoint: base64 of the App Attest assertion (CBOR, as DCAppAttestService.generateAssertion returns it) over SHA-256 of the client data in attestation.clientData.",
+      "X-Nook-Entitlement-Hint": "Optional, on paid endpoints (30a): what StoreKit on the phone says about her styling subscription, one of none, trial, active, grace, billing-retry, expired, revoked. A hint only: the backend never admits or refuses anything because of it. Its own check against Apple's records comes in 30c."
     },
     "response": {
       "Content-Type": "application/json on every response, errors included.",

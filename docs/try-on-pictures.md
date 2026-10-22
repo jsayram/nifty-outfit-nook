@@ -45,7 +45,7 @@ The picture is kept in the store before the sheet says it's made (PRD §9.2.1 st
 
 **From look detail** See the picture pushes the picture, and a new picture shows in the look's list when the sheet closes.
 
-**Allowance.** PRD §14.4 has pictures use an image allowance. Stage A shows no purchase or allowance screen, only the free note. The paywall is Stage B (Phase 30a).
+**Allowance (Phase 30a).** PRD §14.4 has pictures use an image allowance that comes with styling access. While pictures are simulated on the phone (`NookServices.tryOnIsSimulated`) they cost nothing and the sheet keeps the free note. Once the image service is real (33a), the sheet says "Uses 1 of the 30 try-on pictures that come with styling access each month." (30 is a placeholder, decision D12), or, without access, "Try-on pictures come with styling access. Your saved pictures stay free to open." with See styling access, and Make a picture isn't offered (`TryOnAllowance`, `docs/payments.md`). The server counts and enforces the allowance (24b); credit packs are 30b.
 
 ## The Pictures tab
 
@@ -132,7 +132,7 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 - **14a (done):** the try-on photo sheet in Profile (`docs/profile.md`).
 - **15b (done):** on iPad a picture opens beside the Pictures grid (`docs/ipad.md`).
 - **22b (done):** a generated picture's image is a stored file, removed once Delete picture's Undo has gone, or when a piece it shows is deleted for good (`docs/image-storage.md`).
-- **30a:** the picture allowance and purchases.
+- **30a (done):** the picture allowance follows styling access; credit packs are 30b.
 - **33:** real pictures from the gated image service, its permission and cost check, behind `TryOnService`.
 - **21b and 22b (done):** deleting a piece for good deletes the pictures that show it, with their files.
 

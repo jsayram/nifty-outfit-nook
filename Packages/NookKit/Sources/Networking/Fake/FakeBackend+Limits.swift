@@ -76,6 +76,10 @@ extension FakeBackend {
         state.withLock { $0.limits.stylist = behaviour }
     }
 
+    /// 30a: the `X-Nook-Entitlement-Hint` of the last paid request, as sent. Like the real
+    /// backend until 30c, the fake never admits or refuses anything because of it.
+    public var lastEntitlementHint: String? { state.withLock { $0.lastEntitlementHint } }
+
     /// Paid jobs that really ran. A retry the backend answered from its record doesn't count.
     public var paidJobsRun: Int { state.withLock { $0.ledger.jobsRun } }
 
@@ -182,6 +186,8 @@ extension FakeBackend {
         guard let key = request.value(forHTTPHeaderField: "Idempotency-Key"),
             key.wholeMatch(of: /[A-Za-z0-9_-]{16,64}/) != nil
         else { return error(.invalidRequest, id, message: "Send an Idempotency-Key header.") }
+        let hint = request.value(forHTTPHeaderField: EntitlementHintSource.header)
+        state.withLock { $0.lastEntitlementHint = hint }
         guard (request.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased().hasPrefix("application/json")
         else { return error(.unsupportedMediaType, id) }
         guard let body, let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else {

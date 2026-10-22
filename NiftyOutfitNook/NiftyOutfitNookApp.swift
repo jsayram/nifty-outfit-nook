@@ -56,6 +56,8 @@ struct NiftyOutfitNookApp: App {
             root
                 .environment(\.connection, connection)
                 .task { await connection.follow(connectivitySource) }
+                // 30a: the subscription hint on paid requests follows StoreKit.
+                .task { await AppSubscriptions.follow() }
                 .onAppear { AppJobs.installDelegate() }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -165,6 +167,8 @@ struct NiftyOutfitNookApp: App {
         let keptJobs = AppJobs.kept(in: storage)
         let sampleJobs = AppJobs.inMemory()
         let jobNotifier = AppJobs.notifier
+        // 30a: StoreKit, with its transaction listener started now, at launch.
+        let subscriptions = AppSubscriptions.service
         AppJobs.all = [keptJobs, sampleJobs]
         return AppLaunch(
             onboarding: onboarding,
@@ -210,6 +214,7 @@ struct NiftyOutfitNookApp: App {
                     services.backups = storage.backups
                     services.account = account
                     services.paid = paid
+                    services.subscriptions = subscriptions
                     AppGateway.installSupport(into: &services)
                     return services
                 case .sample, nil:
@@ -232,6 +237,7 @@ struct NiftyOutfitNookApp: App {
                         account: account)
                     services.account = account
                     services.paid = paid
+                    services.subscriptions = subscriptions
                     AppGateway.installSupport(into: &services)
                     return services
                 }

@@ -10,6 +10,7 @@ struct DeleteDataScreen: View {
     @Environment(\.dataDeleted) private var dataDeleted
     @State private var model: DeleteDataModel
     @State private var isAsking = false
+    @State private var showsManage = false
 
     /// - Parameter scope: `thisDevice` for Delete my data, `account` for Delete my account (24c).
     init(scope: DeletionScope = .thisDevice) {
@@ -17,27 +18,31 @@ struct DeleteDataScreen: View {
     }
 
     var body: some View {
-        DeleteDataPage(model: model, delete: { isAsking = true }, done: { dataDeleted() })
-            .navigationTitle(DeleteDataText.screenTitle(model.scope))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // The title is on the wall, as on Profile.
-                ToolbarItem(placement: .principal) {
-                    Text(verbatim: "").accessibilityHidden(true)
-                }
+        DeleteDataPage(
+            model: model, delete: { isAsking = true }, done: { dataDeleted() },
+            manageSubscription: { showsManage = true }
+        )
+        .nookManageSubscriptionsSheet(isPresented: $showsManage, groupID: model.subscriptionGroupID)
+        .navigationTitle(DeleteDataText.screenTitle(model.scope))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // The title is on the wall, as on Profile.
+            ToolbarItem(placement: .principal) {
+                Text(verbatim: "").accessibilityHidden(true)
             }
-            .alert(DeleteDataText.askTitle(model.scope), isPresented: $isAsking) {
-                Button(DeleteDataText.askDelete(model.scope), role: .destructive) {
-                    Task { await delete() }
-                }
-                Button(DeleteDataText.askCancel, role: .cancel) {}
-            } message: {
-                Text(DeleteDataText.askMessage(model.scope))
+        }
+        .alert(DeleteDataText.askTitle(model.scope), isPresented: $isAsking) {
+            Button(DeleteDataText.askDelete(model.scope), role: .destructive) {
+                Task { await delete() }
             }
-            .task { await model.load(from: services) }
-            // Delete my data's quick tour (Stage A audit), once the counts are read. Not while it
-            // asks or deletes, or after a deletion that didn't finish.
-            .screenTour(DeleteDataTour.definition, isReady: model.counts != nil && model.phase == .ready && !isAsking)
+            Button(DeleteDataText.askCancel, role: .cancel) {}
+        } message: {
+            Text(DeleteDataText.askMessage(model.scope))
+        }
+        .task { await model.load(from: services) }
+        // Delete my data's quick tour (Stage A audit), once the counts are read. Not while it
+        // asks or deletes, or after a deletion that didn't finish.
+        .screenTour(DeleteDataTour.definition, isReady: model.counts != nil && model.phase == .ready && !isAsking)
     }
 
     private func delete() async {
@@ -55,6 +60,8 @@ struct DeleteDataPage: View {
     var delete: () -> Void = {}
     /// Delete my account, after a deletion the backend is still finishing: starts the app fresh.
     var done: () -> Void = {}
+    /// 30a: Apple's Manage subscription sheet.
+    var manageSubscription: () -> Void = {}
 
     var body: some View {
         SettingsPage(
@@ -90,7 +97,18 @@ struct DeleteDataPage: View {
             SettingsGroup(header: DeleteDataText.afterHeader) {
                 if model.scope == .account {
                     SettingsNote(DeleteDataText.afterAccount)
-                    SettingsNote(DeleteDataText.subscriptionNote)
+                    // 30a: only while a subscription may still bill her.
+                    if model.subscriptionMayRenew {
+                        SettingsNote(DeleteDataText.subscriptionNote)
+                            .accessibilityIdentifier("deleteData.subscriptionNote")
+                        Button(action: manageSubscription) {
+                            NookRow(
+                                StylingAccessText.manage, subtitle: StylingAccessText.manageDetail,
+                                systemImage: "creditcard", accessory: .chevron)
+                        }
+                        .buttonStyle(.nookRow)
+                        .accessibilityIdentifier("deleteData.manageSubscription")
+                    }
                     SettingsNote(DeleteDataText.providersNote)
                 } else {
                     SettingsNote(DeleteDataText.after)
@@ -399,12 +417,12 @@ nonisolated enum DeleteDataText {
             bundle: .module, comment: "Delete my account: what happens after")
     }
 
-    /// App Store rules: deleting an account doesn't cancel an App Store subscription. Payments
-    /// arrive in Phase 30, which also checks for an active subscription and links to it.
+    /// App Store rules: deleting an account doesn't cancel an App Store subscription. Shown only
+    /// while she has one that may renew, with Manage subscription under it (30a).
     static var subscriptionNote: String {
         String(
             localized:
-                "Deleting your account doesn’t cancel a subscription. If you have one, cancel it in the Settings app: tap your name, then Subscriptions.",
+                "Deleting your account doesn’t cancel your subscription. Cancel it with Manage subscription below, or in the Settings app: tap your name, then Subscriptions.",
             bundle: .module, comment: "Delete my account: the subscription note")
     }
 

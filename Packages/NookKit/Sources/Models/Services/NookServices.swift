@@ -86,6 +86,11 @@ public struct NookServices: Sendable {
     public var aiJobs = AIJobs()
     /// 27c: Ask stylist conversations, kept so she can leave and come back.
     public var stylistThreads: any StylistThreadStore = InMemoryStylistThreadStore()
+    /// 30a: the styling subscription through StoreKit. Never subscribed until the app sets one.
+    public var subscriptions: any SubscriptionService = UnavailableSubscriptionService()
+    /// 30a: true while try-on pictures are simulated on the phone and cost nothing. The image
+    /// service (Phase 33) turns it off, and then pictures need styling access.
+    public var tryOnIsSimulated = true
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.

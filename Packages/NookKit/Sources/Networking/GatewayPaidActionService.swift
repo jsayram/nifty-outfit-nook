@@ -7,10 +7,15 @@ import Models
 public struct GatewayPaidActionService: PaidActionService {
     private let client: APIClient
     private let attestation: AttestationSession
+    /// 30a: the subscription hint on every paid request. Only a hint; the server decides (30c).
+    private let entitlementHint: EntitlementHintSource
 
-    public init(client: APIClient, attestation: AttestationSession) {
+    public init(
+        client: APIClient, attestation: AttestationSession, entitlementHint: EntitlementHintSource = .shared
+    ) {
         self.client = client
         self.attestation = attestation
+        self.entitlementHint = entitlementHint
     }
 
     public func usage() async throws(CloudLimitProblem) -> CloudUsage {
@@ -43,10 +48,11 @@ public struct GatewayPaidActionService: PaidActionService {
     private func send(_ request: PaidActionRequest, idempotencyKey: String) async throws(APIFailure)
         -> PaidActionReceipt
     {
+        let signer = HintedSigner(base: attestation, hint: entitlementHint.current)
         switch request {
         case .style(let call):
             let response = try await client.send(
-                APIV1.style, body: APIV1.StyleRequest(call), idempotencyKey: idempotencyKey, signer: attestation,
+                APIV1.style, body: APIV1.StyleRequest(call), idempotencyKey: idempotencyKey, signer: signer,
                 as: APIV1.StyleResponse.self)
             guard let usage = Self.allowance(response.usage), let answer = response.result.styleAnswer else {
                 throw .invalidResponse
@@ -57,7 +63,7 @@ public struct GatewayPaidActionService: PaidActionService {
         case .tryOn(let revision):
             let response = try await client.send(
                 APIV1.tryOn, body: APIV1.TryOnRequest(contextRevision: revision),
-                idempotencyKey: idempotencyKey, signer: attestation, as: APIV1.PaidActionResponse.self)
+                idempotencyKey: idempotencyKey, signer: signer, as: APIV1.PaidActionResponse.self)
             guard let usage = Self.allowance(response.usage) else { throw .invalidResponse }
             return PaidActionReceipt(
                 id: response.action.id, feature: .tryOn, replayed: response.action.replayed, usage: usage)

@@ -40,6 +40,8 @@ struct TryOnSheetContent: View {
 
     @Environment(\.services) private var services
     @Environment(\.dismiss) private var dismiss
+    /// 30a: Styling access, when pictures need it.
+    @State private var showsStylingAccess = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: NookSpacing.large) {
@@ -55,6 +57,11 @@ struct TryOnSheetContent: View {
         .animation(.default, value: model.step)
         .task { await model.start(with: services) }
         .onDisappear { model.cancel() }
+        .sheet(isPresented: $showsStylingAccess, onDismiss: { Task { await model.start(with: services) } }) {
+            NavigationStack {
+                StylingAccessScreen(isSheet: true)
+            }
+        }
         .onChange(of: model.step) { _, step in
             if case .made = step {
                 AccessibilityNotification.Announcement(TryOnSheetText.madeTitle).post()
@@ -76,10 +83,24 @@ struct TryOnSheetContent: View {
             if model.savesLook {
                 line(TryOnSheetText.savesTheLook, systemImage: "heart")
             }
-            note(TryOnSheetText.free)
-            NookButton(TryOnSheetText.make, systemImage: "camera", fillsWidth: true, action: model.make)
-                .accessibilityIdentifier("tryOn.make")
-                .tourAnchor(TryOnTour.Anchor.make, label: TryOnSheetText.make, action: model.make)
+            switch model.allowance {
+            case .freeSimulated:
+                note(TryOnSheetText.free)
+            case .included(let perMonth):
+                note(TryOnSheetText.included(perMonth))
+            case .needsStylingAccess:
+                note(TryOnSheetText.needsAccess)
+            }
+            if model.allowance == .needsStylingAccess {
+                NookButton(
+                    TryOnSheetText.seeStylingAccess, systemImage: "sparkles", fillsWidth: true
+                ) { showsStylingAccess = true }
+                .accessibilityIdentifier("tryOn.stylingAccess")
+            } else {
+                NookButton(TryOnSheetText.make, systemImage: "camera", fillsWidth: true, action: model.make)
+                    .accessibilityIdentifier("tryOn.make")
+                    .tourAnchor(TryOnTour.Anchor.make, label: TryOnSheetText.make, action: model.make)
+            }
         }
         // A container keeps its children's own identifiers.
         .accessibilityElement(children: .contain)
@@ -209,7 +230,25 @@ enum TryOnSheetText {
             bundle: .module, comment: "Try it on sheet, from Your looks for a look that isn't saved")
     }
 
-    /// PRD §14.4: pictures will use an allowance. Stage A shows no purchase screen.
+    /// 30a: a picture uses one of the month's pictures that come with styling access.
+    static func included(_ perMonth: Int) -> String {
+        String(
+            localized: "Uses 1 of the \(perMonth) try-on pictures that come with styling access each month.",
+            bundle: .module, comment: "Try it on sheet: with styling access. The argument is a number.")
+    }
+
+    /// 30a: pictures need styling access, which she doesn't have now.
+    static var needsAccess: String {
+        String(
+            localized: "Try-on pictures come with styling access. Your saved pictures stay free to open.",
+            bundle: .module, comment: "Try it on sheet: without styling access")
+    }
+
+    static var seeStylingAccess: String {
+        String(localized: "See styling access", bundle: .module, comment: "Try it on sheet button")
+    }
+
+    /// PRD §14.4: pictures use an allowance, except simulated ones, which cost nothing (30a).
     static var free: String {
         String(
             localized: "Simulated pictures are free in this test build.", bundle: .module,

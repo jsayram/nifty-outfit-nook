@@ -38,6 +38,11 @@ final class DeleteDataModel {
     private(set) var counts: Counts?
     /// What the deletion covers, from the service, in reading order (closet first).
     private(set) var parts: [DataPart]
+    /// 30a: Delete my account, while she has a subscription that may still bill her: the note
+    /// that deleting doesn't cancel it, and Manage subscription.
+    private(set) var subscriptionMayRenew = false
+    /// The subscription group, for Apple's Manage subscription sheet.
+    private(set) var subscriptionGroupID: String?
     @ObservationIgnored private var loads = LoadGeneration()
     let scope: DeletionScope
 
@@ -54,6 +59,13 @@ final class DeleteDataModel {
         // What's held elsewhere first, in the service's order, then this iPhone, closet first.
         parts = covered.filter(\.isRemote) + DataPart.allCases.filter { !$0.isRemote && covered.contains($0) }
         let load = loads.begin()
+        if scope == .account {
+            // StoreKit's own records on the phone, so this works offline and signed out of the App
+            // Store too. A refresh failing leaves the cached status.
+            let subscriptions = services.subscriptions
+            subscriptionMayRenew = await subscriptions.refresh().mayRenew
+            subscriptionGroupID = await subscriptions.subscriptionGroupID()
+        }
         do {
             var counts = Counts()
             counts.pieces = try await services.closet.garments().count
@@ -72,9 +84,10 @@ final class DeleteDataModel {
     }
 
     /// Sets the counts directly, for snapshot tests.
-    func show(_ counts: Counts?, phase: Phase = .ready) {
+    func show(_ counts: Counts?, phase: Phase = .ready, subscriptionMayRenew: Bool = false) {
         self.counts = counts
         self.phase = phase
+        self.subscriptionMayRenew = subscriptionMayRenew
     }
 
     /// Deletes everything in scope. Returns true when every part was deleted.

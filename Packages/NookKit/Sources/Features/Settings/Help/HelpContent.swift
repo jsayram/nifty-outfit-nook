@@ -20,15 +20,15 @@ nonisolated struct HelpTopic: Identifiable, Hashable, Sendable {
     var note: String?
 }
 
-/// Help's topics, in order (`help.html`). "Free and paid" from the mockup waits for the
-/// subscription phase (30a): Stage A has no prices.
+/// Help's topics, in order (`help.html`). "Free and paid" came with the subscription (30a).
 nonisolated enum HelpContent {
     /// The topics for the debug sample closet, which comes back as it ships at each launch.
     static var topics: [HelpTopic] { topics(keepsChanges: false) }
 
     /// The topics, with "Your data" saying whether her changes are kept when the app closes
-    /// (`NookServices.keepsChanges`, Phase 21a).
-    static func topics(keepsChanges: Bool) -> [HelpTopic] {
+    /// (`NookServices.keepsChanges`, Phase 21a), and "Free and paid" whether she has styling
+    /// access (30a).
+    static func topics(keepsChanges: Bool, hasStylingAccess: Bool = false) -> [HelpTopic] {
         [
             HelpTopic(
                 id: "outfits", section: .everyday,
@@ -106,6 +106,23 @@ nonisolated enum HelpContent {
                     localized:
                         "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline.",
                     bundle: .module, comment: "Help: What needs a connection, the quieter line")),
+            HelpTopic(
+                id: "freeAndPaid", section: .goodToKnow,
+                title: String(localized: "Free and paid", bundle: .module, comment: "Help topic"),
+                systemImage: "creditcard",
+                answer: String(
+                    localized:
+                        "Your closet, laundry, suitcases, saved looks, search and the looks you make yourself are always free. Style Me, swaps, Ask stylist and try-on pictures use styling access.",
+                    bundle: .module, comment: "Help: Free and paid"),
+                note: hasStylingAccess
+                    ? String(
+                        localized:
+                            "You have styling access. To cancel or change how you pay, open Profile, then Styling access, then Manage subscription.",
+                        bundle: .module, comment: "Help: Free and paid, the quieter line, with styling access")
+                    : String(
+                        localized:
+                            "Styling access is a monthly subscription, and new subscribers get the first month free. Profile, then Styling access, shows the price and Restore purchases.",
+                        bundle: .module, comment: "Help: Free and paid, the quieter line, without styling access")),
             HelpTopic(
                 id: "fit", section: .goodToKnow,
                 title: String(localized: "Try-on pictures and real fit", bundle: .module, comment: "Help topic"),

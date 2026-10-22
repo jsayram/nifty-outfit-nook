@@ -35,6 +35,8 @@ final class TryOnModel {
     }
 
     private(set) var step: Step = .ready
+    /// 30a: what a picture costs her. Free while pictures are simulated on the phone.
+    private(set) var allowance = TryOnAllowance.freeSimulated
     private(set) var look: Look
     /// Her garments, for drawing the picture.
     let garments: [Garment.ID: Garment]
@@ -69,6 +71,9 @@ final class TryOnModel {
     func start(with services: NookServices) async {
         self.services = services
         guard step == .ready else { return }
+        let status = await services.subscriptions.cachedStatus()
+        allowance = TryOnAllowance.current(
+            status: status, picturesAreSimulated: services.tryOnIsSimulated, at: now())
         let pictures = (try? await services.pictures.pictures()) ?? []
         if let existing = TryOnLinks.reusable(for: look, in: pictures) {
             step = .alreadyMade(existing)
@@ -77,7 +82,8 @@ final class TryOnModel {
 
     /// Make a picture (or Make another, or Try again).
     func make() {
-        guard step != .making else { return }
+        // 30a: never starts a paid picture without styling access. The server checks too (30c).
+        guard step != .making, allowance != .needsStylingAccess else { return }
         step = .making
         making = Task { await perform() }
     }

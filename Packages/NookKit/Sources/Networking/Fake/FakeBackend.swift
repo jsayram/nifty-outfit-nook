@@ -67,6 +67,8 @@ public final class FakeBackend: Sendable {
         /// 24b: allowances, switches, keys and paid actions (FakeBackend+Limits.swift).
         var limits = FakeLimits()
         var ledger = FakeLedger()
+        /// 30a: the last paid request's subscription hint. Recorded, never used to admit anything.
+        var lastEntitlementHint: String?
         /// 24c: account deletions (FakeBackend+Deletion.swift).
         var deletions = FakeDeletions()
         /// 24d: support notes (FakeBackend+Support.swift).

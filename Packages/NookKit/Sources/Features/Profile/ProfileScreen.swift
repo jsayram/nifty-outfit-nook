@@ -6,6 +6,8 @@ import SwiftUI
 nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     /// Fit and measurements (Phase 14a).
     case fit
+    /// The styling subscription (Phase 30a).
+    case stylingAccess
     // Phase 14b.
     case accessibility
     case help
@@ -28,6 +30,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     var title: String {
         switch self {
         case .fit: ProfileText.fitRow
+        case .stylingAccess: StylingAccessText.title
         case .accessibility: ProfileText.accessibilityRow
         case .help: ProfileText.helpRow
         case .feedback: ProfileText.feedbackRow
@@ -40,6 +43,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     var systemImage: String {
         switch self {
         case .fit: "ruler"
+        case .stylingAccess: "sparkles"
         case .accessibility: "accessibility"
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
@@ -53,6 +57,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     var identifier: String {
         switch self {
         case .fit: "fit"
+        case .stylingAccess: "stylingAccess"
         case .accessibility: "accessibility"
         case .help: "help"
         case .feedback: "feedback"
@@ -148,6 +153,7 @@ struct ProfileScreen: View {
         .navigationDestination(item: $pushed) { destination in
             switch destination {
             case .fit: FitScreen(model: model)
+            case .stylingAccess: StylingAccessScreen()
             case .accessibility: AccessibilityScreen()
             case .help: HelpScreen()
             case .feedback: FeedbackScreen()

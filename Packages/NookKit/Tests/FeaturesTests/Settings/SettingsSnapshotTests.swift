@@ -142,10 +142,13 @@ struct SettingsSnapshotTests {
         assertSnapshot(deleteData(.incomplete(report)), colorScheme: .dark, named: "delete-data-incomplete-dark")
     }
 
-    /// Delete my account (24c), before and after a deletion the server is still finishing.
+    /// Delete my account (24c), before and after a deletion the server is still finishing. Before,
+    /// with a subscription that may renew (30a): the note and Manage subscription; after, none.
     @Test func deleteAccountScreen() {
         let model = DeleteDataModel(scope: .account)
-        model.show(DeleteDataModel.Counts(pieces: 21, looks: 6, pictures: 3, suitcases: 6, drafts: 1))
+        model.show(
+            DeleteDataModel.Counts(pieces: 21, looks: 6, pictures: 3, suitcases: 6, drafts: 1),
+            subscriptionMayRenew: true)
         assertSnapshot(DeleteDataPage(model: model), named: "delete-account")
         let report = DeletionReport(
             scope: .account,

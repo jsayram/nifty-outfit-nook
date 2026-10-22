@@ -14,10 +14,19 @@
 		4E4F4F4B0000000000000041 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000040 /* Networking */; };
 		4E4F4F4B0000000000000043 /* ClerkAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000042 /* ClerkAuth */; };
 		4E4F4F4B0000000000000031 /* SampleWardrobe in Resources */ = {isa = PBXBuildFile; fileRef = 4E4F4F4B0000000000000030 /* SampleWardrobe */; };
+		4E4F4F4B0000000000000053 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000051 /* Models */; };
+		4E4F4F4B0000000000000054 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 4E4F4F4B0000000000000052 /* Services */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		4E4F4F4B0000000000000012 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4E4F4F4B0000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4E4F4F4B000000000000000A;
+			remoteInfo = NiftyOutfitNook;
+		};
+		4E4F4F4B000000000000004B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4E4F4F4B0000000000000001 /* Project object */;
 			proxyType = 1;
@@ -34,6 +43,8 @@
 		4E4F4F4B000000000000001B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B000000000000001C /* App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = App.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B000000000000001D /* UITests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UITests.xcconfig; sourceTree = "<group>"; };
+		4E4F4F4B0000000000000045 /* NiftyOutfitNookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NiftyOutfitNookTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E4F4F4B0000000000000046 /* UnitTests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UnitTests.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B000000000000001E /* Dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Dev.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B000000000000001F /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
 		4E4F4F4B0000000000000020 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
@@ -51,6 +62,11 @@
 		4E4F4F4B0000000000000007 /* NiftyOutfitNookUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NiftyOutfitNookUITests;
+			sourceTree = "<group>";
+		};
+		4E4F4F4B0000000000000044 /* NiftyOutfitNookTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NiftyOutfitNookTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -76,6 +92,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4E4F4F4B0000000000000049 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E4F4F4B0000000000000053 /* Models in Frameworks */,
+				4E4F4F4B0000000000000054 /* Services in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -84,6 +109,7 @@
 			children = (
 				4E4F4F4B0000000000000006 /* NiftyOutfitNook */,
 				4E4F4F4B0000000000000007 /* NiftyOutfitNookUITests */,
+				4E4F4F4B0000000000000044 /* NiftyOutfitNookTests */,
 				4E4F4F4B000000000000002B /* NookKit */,
 				4E4F4F4B0000000000000030 /* SampleWardrobe */,
 				4E4F4F4B0000000000000004 /* Configs */,
@@ -96,6 +122,7 @@
 			children = (
 				4E4F4F4B0000000000000008 /* NiftyOutfitNook.app */,
 				4E4F4F4B0000000000000009 /* NiftyOutfitNookUITests.xctest */,
+				4E4F4F4B0000000000000045 /* NiftyOutfitNookTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +135,7 @@
 				4E4F4F4B000000000000001B /* Release.xcconfig */,
 				4E4F4F4B000000000000001C /* App.xcconfig */,
 				4E4F4F4B000000000000001D /* UITests.xcconfig */,
+				4E4F4F4B0000000000000046 /* UnitTests.xcconfig */,
 				4E4F4F4B0000000000000021 /* Signing.local.xcconfig.example */,
 				4E4F4F4B0000000000000005 /* Environments */,
 			);
@@ -178,6 +206,31 @@
 			productReference = 4E4F4F4B0000000000000009 /* NiftyOutfitNookUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		4E4F4F4B0000000000000047 /* NiftyOutfitNookTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4E4F4F4B000000000000004D /* Build configuration list for PBXNativeTarget "NiftyOutfitNookTests" */;
+			buildPhases = (
+				4E4F4F4B0000000000000048 /* Sources */,
+				4E4F4F4B0000000000000049 /* Frameworks */,
+				4E4F4F4B000000000000004A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4E4F4F4B000000000000004C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4E4F4F4B0000000000000044 /* NiftyOutfitNookTests */,
+			);
+			name = NiftyOutfitNookTests;
+			packageProductDependencies = (
+				4E4F4F4B0000000000000051 /* Models */,
+				4E4F4F4B0000000000000052 /* Services */,
+			);
+			productName = NiftyOutfitNookTests;
+			productReference = 4E4F4F4B0000000000000045 /* NiftyOutfitNookTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -193,6 +246,10 @@
 					};
 					4E4F4F4B000000000000000B = {
 						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 4E4F4F4B000000000000000A;
+					};
+					4E4F4F4B0000000000000047 = {
+						CreatedOnToolsVersion = 27.1;
 						TestTargetID = 4E4F4F4B000000000000000A;
 					};
 				};
@@ -213,6 +270,7 @@
 			targets = (
 				4E4F4F4B000000000000000A /* NiftyOutfitNook */,
 				4E4F4F4B000000000000000B /* NiftyOutfitNookUITests */,
+				4E4F4F4B0000000000000047 /* NiftyOutfitNookTests */,
 			);
 		};
 /* End PBXProject section */
@@ -227,6 +285,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4E4F4F4B0000000000000011 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4E4F4F4B000000000000004A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -250,6 +315,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4E4F4F4B0000000000000048 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -257,6 +329,11 @@
 			isa = PBXTargetDependency;
 			target = 4E4F4F4B000000000000000A /* NiftyOutfitNook */;
 			targetProxy = 4E4F4F4B0000000000000012 /* PBXContainerItemProxy */;
+		};
+		4E4F4F4B000000000000004C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4E4F4F4B000000000000000A /* NiftyOutfitNook */;
+			targetProxy = 4E4F4F4B000000000000004B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -303,6 +380,20 @@
 			};
 			name = Release;
 		};
+		4E4F4F4B000000000000004E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4E4F4F4B0000000000000046 /* UnitTests.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		4E4F4F4B000000000000004F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4E4F4F4B0000000000000046 /* UnitTests.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -333,6 +424,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4E4F4F4B000000000000004D /* Build configuration list for PBXNativeTarget "NiftyOutfitNookTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E4F4F4B000000000000004E /* Debug */,
+				4E4F4F4B000000000000004F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -359,6 +459,14 @@
 		4E4F4F4B0000000000000042 /* ClerkAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ClerkAuth;
+		};
+		4E4F4F4B0000000000000051 /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Models;
+		};
+		4E4F4F4B0000000000000052 /* Services */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Services;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

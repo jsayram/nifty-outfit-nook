@@ -19,6 +19,9 @@
         }
       }
     },
+    "%@ a month." : {
+      "comment" : "Paywall: the offer with no free trial. The argument is the App Store's price."
+    },
     "%@ and %@" : {
       "comment" : "Today's weather: a temperature and a condition, as in 58° and rain",
       "localizations" : {
@@ -41,6 +44,9 @@
     },
     "%@ dress" : {
       "comment" : "Name of a saved look: a dress's colour"
+    },
+    "%@ free, then %@ a month." : {
+      "comment" : "Paywall: the offer. The arguments are the trial's length, like 1 month, and the price."
     },
     "%@ has %@ you can use today." : {
       "comment" : "Your looks: insufficient wardrobe, the source's name and a count"
@@ -229,6 +235,9 @@
     "%@, dressed up" : {
       "comment" : "Name of a saved Dressed up look"
     },
+    "%@, first charge" : {
+      "comment" : "Paywall: the second step of the timeline. The argument is a date."
+    },
     "%@, optional" : {
       "comment" : "VoiceOver name of an optional field, like Brand, optional",
       "localizations" : {
@@ -242,6 +251,9 @@
     },
     "%@, something new" : {
       "comment" : "Name of a saved Something new look"
+    },
+    "%@, then every month until you cancel." : {
+      "comment" : "Paywall: the first charge. The argument is the App Store's price."
     },
     "%@: %@" : {
       "comment" : "Spoken for a look bundle: the look's title, then its pieces, as in Look: Black tee, Jeans",
@@ -267,6 +279,29 @@
     },
     "%@′ %@″" : {
       "comment" : "A height in feet and inches, like 4′ 11″. Keep the prime marks."
+    },
+    "%lld days" : {
+      "comment" : "A length of time. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld drafts" : {
       "comment" : "Delete my data: how many unsaved drafts",
@@ -307,6 +342,29 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld looks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld months" : {
+      "comment" : "A length of time. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld month"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld months"
                 }
               }
             }
@@ -663,6 +721,52 @@
         }
       }
     },
+    "%lld weeks" : {
+      "comment" : "A length of time. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld week"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld weeks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld years" : {
+      "comment" : "A length of time. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld year"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld years"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "+ Make your own" : {
       "comment" : "Saved Looks: opens Make your own look (RD-08, LR-08)"
     },
@@ -678,11 +782,50 @@
     "Allow" : {
       "comment" : "Stylist consent: agree"
     },
+    "Always free" : {
+      "comment" : "Paywall: section header"
+    },
     "Anthropic makes Claude, the AI that suggests your outfits." : {
       "comment" : "Stylist consent: who the recipient is"
     },
+    "Apple couldn’t take the last payment, so styling access is paused. Update your payment details in Manage subscription, and it starts again." : {
+      "comment" : "Styling access: billing retry"
+    },
+    "Apple couldn’t take the last payment. Styling access stays on until %@ while you update your payment details in Manage subscription." : {
+      "comment" : "Styling access: billing grace period. The argument is a date."
+    },
+    "Apple refunded this subscription, so styling access is off. Your closet, looks and pictures are all still here." : {
+      "comment" : "Styling access: subscription refunded or revoked"
+    },
+    "Cancel at least a day before it renews: Settings, then your name, then Subscriptions. You keep styling access until the end of the month you’ve paid for." : {
+      "comment" : "Paywall: how to cancel, without a free month"
+    },
+    "Cancel, or update how you pay, with Apple" : {
+      "comment" : "Styling access: under Manage subscription"
+    },
+    "Charged today, then every month until you cancel. This Apple Account has already had its free month." : {
+      "comment" : "Paywall: under the offer, without a free month"
+    },
+    "Checking with the App Store" : {
+      "comment" : "Styling access: loading"
+    },
+    "Ended" : {
+      "comment" : "Profile: Styling access row value"
+    },
+    "Ends %@. It won’t renew, so nothing more will be charged." : {
+      "comment" : "Styling access: subscribed, cancelled. The argument is a date."
+    },
+    "Free and paid" : {
+      "comment" : "Help topic"
+    },
+    "Free month" : {
+      "comment" : "Profile: Styling access row value"
+    },
     "From your history: it still fits today’s request, so nothing was used." : {
       "comment" : "Note on Your looks: an earlier result reused before asking the stylist (FR-58)"
+    },
+    "Manage subscription" : {
+      "comment" : "Styling access: button"
     },
     "Never sent: your photos, your name, your measurements or weight, your location." : {
       "comment" : "Stylist consent: what is never sent"
@@ -690,11 +833,47 @@
     "New ideas" : {
       "comment" : "Your looks button over a look from her history"
     },
+    "No active subscription was found for this Apple Account." : {
+      "comment" : "Styling access: restore found nothing"
+    },
+    "Not subscribed" : {
+      "comment" : "Profile: Styling access row value"
+    },
+    "Nothing is charged today. It renews automatically every month until you cancel." : {
+      "comment" : "Paywall: under the offer, with a free month"
+    },
+    "Opens the App Store to confirm." : {
+      "comment" : "Paywall: VoiceOver hint on the purchase button"
+    },
+    "Payment problem" : {
+      "comment" : "Profile: Styling access row value"
+    },
     "Piece descriptions, the occasion and the weather go to Anthropic when you ask. Never your photos, name, measurements or location." : {
       "comment" : "Privacy and terms: under the stylist switch"
     },
+    "Purchases are turned off on this iPhone in Screen Time." : {
+      "comment" : "Styling access: purchases not allowed"
+    },
+    "Renews %@ at %@ a month." : {
+      "comment" : "Styling access: subscribed. The arguments are a date and the App Store's price."
+    },
+    "Renews %@." : {
+      "comment" : "Styling access: subscribed, price unknown. The argument is a date."
+    },
+    "Restore purchases" : {
+      "comment" : "Styling access: button"
+    },
+    "Restoring" : {
+      "comment" : "Styling access: while restoring"
+    },
     "Review" : {
       "comment" : "Opens the stylist consent sheet"
+    },
+    "See styling access" : {
+      "comment" : "Try it on sheet button"
+    },
+    "Start free month" : {
+      "comment" : "Paywall: the purchase button"
     },
     "Style Me is off. Your closet, saved looks and making your own looks still work." : {
       "comment" : "Privacy and terms: the stylist switch is off"
@@ -711,11 +890,92 @@
     "Style Me, swaps and Ask stylist" : {
       "comment" : "Privacy and terms: the stylist consent switch"
     },
+    "Style Me, swaps, Ask stylist and try-on pictures" : {
+      "comment" : "Profile: the line under the Styling access row"
+    },
+    "Style Me, swaps, Ask stylist and try-on pictures use styling access. Your closet stays free." : {
+      "comment" : "Styling access: the line under the title"
+    },
+    "Styling access" : {
+      "comment" : "Styling access: screen title and Profile row"
+    },
+    "Styling access is a monthly subscription, and new subscribers get the first month free. Profile, then Styling access, shows the price and Restore purchases." : {
+      "comment" : "Help: Free and paid, the quieter line, without styling access"
+    },
+    "Styling access is off. Your closet, looks and pictures are all still here." : {
+      "comment" : "Styling access: subscription ended"
+    },
+    "Styling access is on." : {
+      "comment" : "Paywall: after buying"
+    },
+    "Styling access starts. Nothing is charged." : {
+      "comment" : "Paywall: what happens today, with a free month"
+    },
     "Styling is resting for now" : {
       "comment" : "Your looks when a cloud limit stops styling"
     },
+    "Styling isn’t unlimited. When an allowance is used up, the app says when more comes back." : {
+      "comment" : "Paywall: under the included features"
+    },
+    "Subscribe" : {
+      "comment" : "Styling access: section header over the offer"
+    },
+    "Subscribe for %@ a month" : {
+      "comment" : "Paywall: the purchase button without a free month. The argument is the price."
+    },
+    "Subscribed" : {
+      "comment" : "Profile: Styling access row value"
+    },
+    "Subscription ended" : {
+      "comment" : "Styling access: status"
+    },
+    "Subscription refunded" : {
+      "comment" : "Styling access: status"
+    },
+    "Swap a piece and Ask stylist" : {
+      "comment" : "Paywall: an included feature"
+    },
+    "That didn’t work, and nothing was charged. Try again." : {
+      "comment" : "Styling access: purchase failed"
+    },
+    "The App Store can’t be reached. Check your connection and try again." : {
+      "comment" : "Styling access: offline"
+    },
+    "The App Store didn’t answer, so the price can’t be shown. Try again later." : {
+      "comment" : "Paywall: the offer couldn't be loaded"
+    },
+    "The subscription isn’t available right now. Nothing was charged." : {
+      "comment" : "Styling access: product unavailable"
+    },
+    "To pay nothing, cancel at least a day before %@: Settings, then your name, then Subscriptions." : {
+      "comment" : "Paywall: how to cancel the free month. The argument is a date."
+    },
+    "Try-on pictures come with styling access. Your saved pictures stay free to open." : {
+      "comment" : "Try it on sheet: without styling access"
+    },
+    "Up to %lld a day" : {
+      "comment" : "Paywall: the allowance for swaps and questions. The argument is a number."
+    },
+    "Up to %lld a month. Reopening one is free." : {
+      "comment" : "Paywall: the try-on allowance. The argument is a number."
+    },
+    "Up to %lld requests a day" : {
+      "comment" : "Paywall: Style Me's allowance. The argument is a number."
+    },
+    "Uses 1 of the %lld try-on pictures that come with styling access each month." : {
+      "comment" : "Try it on sheet: with styling access. The argument is a number."
+    },
+    "Waiting for approval. When it’s approved, styling access starts on its own." : {
+      "comment" : "Paywall: Ask to Buy or another approval"
+    },
+    "Waiting for the App Store" : {
+      "comment" : "Paywall: while buying"
+    },
     "What Anthropic does with it: doesn’t use it to train its models, and deletes it within 30 days. If its safety checks flag a request, it can keep it for up to 2 years. It may be processed outside the US." : {
       "comment" : "Stylist consent: what the recipient does with it"
+    },
+    "What’s included" : {
+      "comment" : "Paywall: section header"
     },
     "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat." : {
       "comment" : "Stylist consent: what is sent"
@@ -2246,7 +2506,7 @@
     "Deleting" : {
       "comment" : "VoiceOver value while data is being deleted"
     },
-    "Deleting your account doesn’t cancel a subscription. If you have one, cancel it in the Settings app: tap your name, then Subscriptions." : {
+    "Deleting your account doesn’t cancel your subscription. Cancel it with Manage subscription below, or in the Settings app: tap your name, then Subscriptions." : {
       "comment" : "Delete my account: the subscription note"
     },
     "Denim" : {
@@ -8477,6 +8737,9 @@
     "You choose what to share" : {
       "comment" : "Privacy tour, step 1 title"
     },
+    "You have styling access. To cancel or change how you pay, open Profile, then Styling access, then Manage subscription." : {
+      "comment" : "Help: Free and paid, the quieter line, with styling access"
+    },
     "You left before your looks came, so nothing was used. Your request is kept." : {
       "comment" : "Your looks after leaving mid-way"
     },
@@ -8662,6 +8925,12 @@
     "Your closet still works on this iPhone." : {
       "comment" : "Offline banner where cloud styling is needed: what still works"
     },
+    "Your closet, laundry, suitcases, saved looks, search and the looks you make yourself are always free. Style Me, swaps, Ask stylist and try-on pictures use styling access." : {
+      "comment" : "Help: Free and paid"
+    },
+    "Your closet, laundry, suitcases, saved looks, search and the looks you make yourself work without a subscription, and keep working if it ends." : {
+      "comment" : "Paywall: what stays free"
+    },
     "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
       "comment" : "Delete my data: the question"
     },
@@ -8687,6 +8956,15 @@
     },
     "Your first name" : {
       "comment" : "Name on your sign: the empty field's prompt"
+    },
+    "Your free month ends %@. Then %@ a month, every month until you cancel." : {
+      "comment" : "Styling access: trial. The arguments are a date and the App Store's price."
+    },
+    "Your free month ends %@. Then it renews monthly until you cancel." : {
+      "comment" : "Styling access: trial, price unknown. The argument is a date."
+    },
+    "Your free month ends %@. You’ve cancelled, so nothing will be charged." : {
+      "comment" : "Styling access: trial, cancelled. The argument is a date."
     },
     "Your iCloud copy" : {
       "comment" : "Delete my account: a part"
@@ -8861,6 +9139,12 @@
     },
     "Your sign-in to the app, on every device" : {
       "comment" : "Delete my account: under Your account"
+    },
+    "Your subscription" : {
+      "comment" : "Styling access: section header"
+    },
+    "Your subscription is restored." : {
+      "comment" : "Styling access: restored"
     },
     "Your suitcase" : {
       "comment" : "Home tour, step 3 title on the iPad, at large text sizes and sideways"
