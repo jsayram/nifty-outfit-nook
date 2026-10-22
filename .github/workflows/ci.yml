@@ -26,6 +26,11 @@ on:
           testing is paused until the app's features are done.
         type: boolean
         default: false
+      cold_cache:
+        description: >-
+          Self-hosted runner only: empty its DerivedData cache first, to time a cold run.
+        type: boolean
+        default: false
 
 # Read-only token for every job. No job needs to write.
 permissions:
@@ -46,23 +51,36 @@ env:
   # images/macos/xcode-27-arm64-Readme.md, October 2026). Its default Xcode is 27.0, so each job
   # selects this one.
   XCODE_APP: /Applications/Xcode_27.1.app
+  # The self-hosted runner (Jose's Mac) has Xcode 27.1 at /Applications/Xcode.app instead.
+  # scripts/ci-select-xcode.sh uses XCODE_APP when it exists and falls back to that, so one value
+  # works on both. Which runner the macOS jobs use is the repository variable MACOS_RUNNER (see
+  # the README, "CI"): empty or unset means GitHub's `xcode-27`.
   # '1' except on a manual run. A few UI tests skip themselves when it is set, because package
   # tests cover what they check or another test walks the same screens (UITestTier in
   # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
   # (workflow_dispatch) leaves it empty and runs every UI test.
   NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
+  # '1' only on a manual run with cold_cache ticked (scripts/ci-local-cache.sh).
+  NOOK_CI_COLD: ${{ github.event_name == 'workflow_dispatch' && inputs.cold_cache && '1' || '' }}
 
 jobs:
   swift-format:
     name: swift-format
-    runs-on: xcode-27
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
     timeout-minutes: 15
     steps:
+      # A pull request from a fork never runs on the self-hosted runner: the runs-on line above
+      # sends it to GitHub's hosted image, and this stops the job if that ever goes wrong.
+      - name: Refuse a fork's pull request on the self-hosted runner
+        if: ${{ runner.environment == 'self-hosted' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "A pull request from a fork must not run on the self-hosted runner." >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Select Xcode
-        run: sudo xcode-select --switch "$XCODE_APP"
+        run: scripts/ci-select-xcode.sh
       - name: Lint
         run: scripts/format.sh
 
@@ -181,17 +199,31 @@ jobs:
     name: build-and-archive
     needs: changes
     if: needs.changes.outputs.code == 'true'
-    runs-on: xcode-27
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
     timeout-minutes: 40
     steps:
+      # A pull request from a fork never runs on the self-hosted runner: the runs-on line above
+      # sends it to GitHub's hosted image, and this stops the job if that ever goes wrong.
+      - name: Refuse a fork's pull request on the self-hosted runner
+        if: ${{ runner.environment == 'self-hosted' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "A pull request from a fork must not run on the self-hosted runner." >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Select Xcode
         run: |
-          sudo xcode-select --switch "$XCODE_APP"
-          xcodebuild -version
+          scripts/ci-select-xcode.sh
           echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
+      # Self-hosted only: keep DerivedData between jobs, and test on a simulator made for this job
+      # (deleted in the last step). Other people use this Mac's simulators, so a job never uses
+      # one of those.
+      - name: Prepare the self-hosted runner (cache, own simulator)
+        if: ${{ runner.environment == 'self-hosted' }}
+        run: |
+          scripts/ci-local-cache.sh
+          echo "NOOK_SIM_ID=$(scripts/ci-simulator.sh create iPhone)" >> "$GITHUB_ENV"
       - name: Check the two Package.resolved files agree
         run: scripts/check-package-pins.sh
       - name: Build for testing (UI test plan)
@@ -201,11 +233,15 @@ jobs:
           NOOK_TEST_PLAN: UITests
         run: |
           scripts/test.sh
-          # tar keeps the apps' symlinks and permissions, which an artifact's zip doesn't.
-          tar -czf "$RUNNER_TEMP/ui-test-products.tgz" -C build/DerivedData/Build/Products \
-            Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
-            $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
-      - if: needs.changes.outputs.ui == 'true'
+          # The UI test jobs download this build, except on the self-hosted runner: the next job
+          # builds from the cached DerivedData there, which is faster than an upload and a download.
+          if [[ "$RUNNER_ENVIRONMENT" == "github-hosted" ]]; then
+            # tar keeps the apps' symlinks and permissions, which an artifact's zip doesn't.
+            tar -czf "$RUNNER_TEMP/ui-test-products.tgz" -C build/DerivedData/Build/Products \
+              Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
+              $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
+          fi
+      - if: ${{ needs.changes.outputs.ui == 'true' && runner.environment == 'github-hosted' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-test-products
@@ -254,6 +290,9 @@ jobs:
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
+      - name: Delete this job's simulator
+        if: ${{ always() && runner.environment == 'self-hosted' && env.NOOK_SIM_ID != '' }}
+        run: scripts/ci-simulator.sh delete "$NOOK_SIM_ID"
 
   # The other UI tests in three parts, by test class, on an iPhone simulator. The iPad layouts
   # are paused: they are the separate `ui-ipad` job below, which runs only on a manual run with
@@ -290,7 +329,7 @@ jobs:
     name: ui-tests (${{ matrix.part }})
     needs: changes
     if: needs.changes.outputs.ui == 'true'
-    runs-on: xcode-27
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
     timeout-minutes: 40
     permissions:
       contents: read
@@ -352,17 +391,30 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
     steps:
+      # A pull request from a fork never runs on the self-hosted runner: the runs-on line above
+      # sends it to GitHub's hosted image, and this stops the job if that ever goes wrong.
+      - name: Refuse a fork's pull request on the self-hosted runner
+        if: ${{ runner.environment == 'self-hosted' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "A pull request from a fork must not run on the self-hosted runner." >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Select Xcode and start booting the simulator
+      - name: Select Xcode
+        run: scripts/ci-select-xcode.sh
+      - name: Start booting the simulator
         env:
           NOOK_SIM_FAMILY: ${{ matrix.family }}
         run: |
-          sudo xcode-select --switch "$XCODE_APP"
-          xcodebuild -version
           echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
-          simulator="$(scripts/simulator.sh)"
+          if [[ "$RUNNER_ENVIRONMENT" == "self-hosted" ]]; then
+            # The cached DerivedData, and a simulator made for this job (deleted in the last step).
+            scripts/ci-local-cache.sh
+            simulator="$(scripts/ci-simulator.sh create "$NOOK_SIM_FAMILY")"
+          else
+            simulator="$(scripts/simulator.sh)"
+          fi
           echo "NOOK_SIM_ID=$simulator" >> "$GITHUB_ENV"
           # In the background: the next steps wait for the build meanwhile. xcodebuild waits
           # for the boot to finish, or boots the simulator itself if this failed.
@@ -371,7 +423,16 @@ jobs:
         id: build
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/wait-for-artifact.sh ui-test-products build-and-archive
+        # Self-hosted: one runner runs one job at a time, so waiting here would hold the runner
+        # build-and-archive needs (it would give up after 3 minutes and build here anyway).
+        # Skip the wait and build here, from the cached DerivedData: a no-op when it is current.
+        run: |
+          if [[ "$RUNNER_ENVIRONMENT" == "self-hosted" ]]; then
+            echo "Self-hosted runner: building here from the cached DerivedData, not waiting."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            scripts/wait-for-artifact.sh ui-test-products build-and-archive
+          fi
       - if: steps.build.outputs.ready == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -415,6 +476,9 @@ jobs:
           path: build/TestResults.xcresult
           retention-days: 7
           if-no-files-found: ignore
+      - name: Delete this job's simulator
+        if: ${{ always() && runner.environment == 'self-hosted' && env.NOOK_SIM_ID != '' }}
+        run: scripts/ci-simulator.sh delete "$NOOK_SIM_ID"
 
   # The iPad UI tests (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. PAUSED: this
   # job runs only on a manual run with include_ipad ticked (`changes` works that out). It is the
@@ -426,23 +490,36 @@ jobs:
     name: ui-tests (ui-ipad)
     needs: changes
     if: needs.changes.outputs.ipad == 'true'
-    runs-on: xcode-27
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
     timeout-minutes: 40
     permissions:
       contents: read
       actions: read
     steps:
+      # A pull request from a fork never runs on the self-hosted runner: the runs-on line above
+      # sends it to GitHub's hosted image, and this stops the job if that ever goes wrong.
+      - name: Refuse a fork's pull request on the self-hosted runner
+        if: ${{ runner.environment == 'self-hosted' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "A pull request from a fork must not run on the self-hosted runner." >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Select Xcode and start booting the simulator
+      - name: Select Xcode
+        run: scripts/ci-select-xcode.sh
+      - name: Start booting the simulator
         env:
           NOOK_SIM_FAMILY: iPad
         run: |
-          sudo xcode-select --switch "$XCODE_APP"
-          xcodebuild -version
           echo "Runner: $(sysctl -n hw.ncpu) cores, $(($(sysctl -n hw.memsize) / 1073741824)) GB memory"
-          simulator="$(scripts/simulator.sh)"
+          if [[ "$RUNNER_ENVIRONMENT" == "self-hosted" ]]; then
+            # The cached DerivedData, and a simulator made for this job (deleted in the last step).
+            scripts/ci-local-cache.sh
+            simulator="$(scripts/ci-simulator.sh create "$NOOK_SIM_FAMILY")"
+          else
+            simulator="$(scripts/simulator.sh)"
+          fi
           echo "NOOK_SIM_ID=$simulator" >> "$GITHUB_ENV"
           # In the background: the next steps wait for the build meanwhile. xcodebuild waits
           # for the boot to finish, or boots the simulator itself if this failed.
@@ -451,7 +528,16 @@ jobs:
         id: build
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/wait-for-artifact.sh ui-test-products build-and-archive
+        # Self-hosted: one runner runs one job at a time, so waiting here would hold the runner
+        # build-and-archive needs (it would give up after 3 minutes and build here anyway).
+        # Skip the wait and build here, from the cached DerivedData: a no-op when it is current.
+        run: |
+          if [[ "$RUNNER_ENVIRONMENT" == "self-hosted" ]]; then
+            echo "Self-hosted runner: building here from the cached DerivedData, not waiting."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            scripts/wait-for-artifact.sh ui-test-products build-and-archive
+          fi
       - if: steps.build.outputs.ready == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -496,6 +582,9 @@ jobs:
           path: build/TestResults.xcresult
           retention-days: 7
           if-no-files-found: ignore
+      - name: Delete this job's simulator
+        if: ${{ always() && runner.environment == 'self-hosted' && env.NOOK_SIM_ID != '' }}
+        run: scripts/ci-simulator.sh delete "$NOOK_SIM_ID"
 
   # The required check. It must run even when a job above fails or is cancelled (`always()`),
   # because GitHub counts a skipped required check as passed. When `changes` found a docs-only
