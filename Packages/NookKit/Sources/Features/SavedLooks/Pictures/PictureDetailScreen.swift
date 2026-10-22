@@ -20,6 +20,8 @@ struct PictureDetailScreen: View {
     @State private var toast: NookToastMessage?
     /// 33a: "See what was sent", open.
     @State private var showsSent = false
+    /// Release: Report a problem, open.
+    @State private var reporting: AIReportRoute?
 
     init(
         pictureID: TryOnPicture.ID, seeLook: @escaping (Look) -> Void, deleted: @escaping (PictureRemoval) -> Void,
@@ -35,8 +37,10 @@ struct PictureDetailScreen: View {
         PictureDetailPage(
             model: model,
             actions: PictureDetailActions(
-                seeLook: seeLook, delete: delete, retry: reload, seeWhatWasSent: { showsSent = true })
+                seeLook: seeLook, delete: delete, retry: reload, seeWhatWasSent: { showsSent = true },
+                report: report)
         )
+        .aiReportSheet($reporting)
         .nookSheet(isPresented: $showsSent, title: SentText.title, detents: [.large]) {
             if let sent = model.item?.picture.sent {
                 SentImagesView(sent: sent, garments: model.garments)
@@ -55,6 +59,12 @@ struct PictureDetailScreen: View {
         // A try-on picture's quick tour (Phase 16b), while its look is still saved to go back to.
         .screenTour(
             PictureTour.definition, isReady: model.phase == .loaded && model.item?.look != nil && toast == nil)
+    }
+
+    /// Release: hiding a reported picture removes it, as Delete picture does, with Undo.
+    private func report() {
+        guard let picture = model.item?.picture else { return }
+        reporting = AIReportRoute(target: .picture(picture), hide: { delete() })
     }
 
     private func reload() {

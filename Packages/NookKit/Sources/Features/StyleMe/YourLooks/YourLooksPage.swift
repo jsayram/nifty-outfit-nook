@@ -21,6 +21,11 @@ struct YourLooksActions {
     var reloadSaved: () -> Void = {}
     /// 27a: opens the stylist's consent text.
     var reviewConsent: () -> Void = {}
+    /// Release: Sign in beside Quick ideas, after she said Not now to signing in.
+    var signIn: () -> Void = {}
+    /// Release (guideline 1.2): Report a problem on the stylist's look or its why line: the
+    /// result, and what she may say it's about.
+    var report: (AIReportTarget, [AIReportSubject]) -> Void = { _, _ in }
 }
 
 /// Your looks (`results-versions.html`, LR-05a, LR-06): the Today and Saved tabs, then the

@@ -34,6 +34,10 @@ struct YourLooksScreen: View {
     @State private var swapping: SwapRoute?
     /// 27a: the stylist's consent sheet, from Review.
     @State private var showsConsent = false
+    /// Release: Report a problem, open for a result.
+    @State private var reporting: AIReportRoute?
+    @Environment(\.signIn) private var signIn
+    @Environment(\.signInAgain) private var signInAgain
 
     init(request: StyleRequest, routes: YourLooksRoutes = YourLooksRoutes()) {
         self.routes = routes
@@ -58,9 +62,17 @@ struct YourLooksScreen: View {
                 addPieces: { routes.addPieces(model.request.source) },
                 openSaved: { stub = .saved($0.id) },
                 reloadSaved: { Task { await model.reloadLooks() } },
-                reviewConsent: { showsConsent = true }
+                reviewConsent: { showsConsent = true },
+                signIn: {
+                    Task { if await signInAgain(.styling) { model.retry() } }
+                },
+                report: { target, subjects in
+                    reporting = AIReportRoute(
+                        target: target, subjects: subjects, hide: { Task { await model.hideResult() } })
+                }
             )
         )
+        .aiReportSheet($reporting)
         .nookSheet(isPresented: $showsConsent, title: StylistConsentText.title, detents: [.large]) {
             StylistConsentSheet(
                 allow: {
@@ -85,6 +97,7 @@ struct YourLooksScreen: View {
                 .nookToast($toast)
         }
         .task {
+            model.signIn = signIn
             model.start(with: services, connection: connection)
         }
         // Your looks' quick tour (Phase 16b), once the looks are ready on the Today tab, with no

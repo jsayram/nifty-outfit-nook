@@ -42,8 +42,41 @@ final class ProfileModel {
 
     // MARK: Loading
 
+    /// Release: Profile's account row. `nil` hides it (no sign-in in this build, previews).
+    enum Account: Equatable {
+        case signedIn
+        case signedOut
+        /// A build with no backend: signing in isn't available right now.
+        case unavailable
+    }
+
+    private(set) var account: Account?
+
+    /// Release: reads whether she's signed in, for the account row.
+    func loadAccount(from services: NookServices) async {
+        if services.cloudUnavailable {
+            account = .unavailable
+        } else if services.offersSignIn {
+            account = await services.account.isSignedIn() ? .signedIn : .signedOut
+        } else {
+            account = nil
+        }
+    }
+
+    /// Release: Sign out from Profile. Her closet and everything on the phone stay.
+    func signOut(in services: NookServices) async {
+        await services.account.signOut()
+        await loadAccount(from: services)
+    }
+
+    /// Sets the account row directly, for tests that hand data straight in.
+    func show(account: Account?) {
+        self.account = account
+    }
+
     func load(from services: NookServices, locale: Locale) async {
         self.locale = locale
+        await loadAccount(from: services)
         let load = loads.begin()
         if phase != .loaded { phase = .loading }
         do {

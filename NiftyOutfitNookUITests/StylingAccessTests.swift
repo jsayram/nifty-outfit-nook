@@ -33,9 +33,13 @@ final class StylingAccessTests: XCTestCase {
         XCTAssertFalse(element("access.manage", in: app).exists)
         keepScreenshot("paywall")
 
+        // Release: buying is claimed on the server, so the first purchase asks her to sign in
+        // (the fake Sign in with Apple in a debug build), then carries on by itself.
         let subscribe = element("access.subscribe", in: app)
         app.reveal(subscribe, timeout: Self.wait)
-        subscribe.tapUntil(element("access.message", in: app), appears: Self.wait)
+        let apple = app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch
+        subscribe.tapUntil(apple, appears: Self.wait)
+        apple.tapUntil(element("access.message", in: app), appears: Self.wait)
         XCTAssertTrue(labelled("Styling access is on.", in: app).exists)
         XCTAssertTrue(labelled("Your free month ends", in: app).waitUntilExists(timeout: Self.wait))
         XCTAssertTrue(element("access.manage", in: app).exists)

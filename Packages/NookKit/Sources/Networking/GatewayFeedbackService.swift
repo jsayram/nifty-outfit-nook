@@ -28,6 +28,19 @@ public struct GatewayFeedbackService: FeedbackService {
         }
     }
 
+    /// Release: a report about an AI result, through the same endpoint.
+    public func sendReport(_ submission: AIReportSubmission) async throws(FeedbackSendProblem) -> FeedbackReceipt {
+        do {
+            let answer = try await client.send(
+                APIV1.sendFeedback, body: APIV1.FeedbackRequest(submission), as: APIV1.FeedbackReceipt.self)
+            return FeedbackReceipt(
+                reference: answer.ticket.ref, receivedAt: APIV1.parseDate(answer.ticket.receivedAt) ?? Date(),
+                hasScreenshot: answer.ticket.hasAttachment)
+        } catch {
+            throw Self.problem(for: error)
+        }
+    }
+
     static func problem(for failure: APIFailure) -> FeedbackSendProblem {
         switch failure {
         case .offline: .offline

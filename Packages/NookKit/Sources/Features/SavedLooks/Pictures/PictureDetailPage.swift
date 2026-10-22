@@ -9,6 +9,8 @@ struct PictureDetailActions {
     var retry: () -> Void = {}
     /// 33a: opens "See what was sent" for a real picture.
     var seeWhatWasSent: () -> Void = {}
+    /// Release (guideline 1.2): Report a problem on a real picture.
+    var report: () -> Void = {}
 }
 
 /// Picture detail, top to bottom (`picture.html`): Try-on picture and "Simulated · Made 28 Aug",
@@ -80,6 +82,13 @@ struct PictureDetailPage: View {
             )
             .accessibilityHint(Text(SentText.hint))
             .accessibilityIdentifier("picture.seeWhatWasSent")
+        }
+        // Release (guideline 1.2): a real picture was made by the image service, so it can be
+        // reported. A simulated one is drawn on the phone.
+        if item.picture.isReal {
+            NookButton(AIReportText.reportAProblem, systemImage: "flag", kind: .text, action: actions.report)
+                .accessibilityHint(Text(AIReportText.reportHint))
+                .accessibilityIdentifier("picture.report")
         }
         NookButton(TryOnText.delete, systemImage: "trash", kind: .text, action: actions.delete)
             .accessibilityHint(Text(TryOnText.deleteHint))

@@ -843,6 +843,9 @@
     "A bit more light would help." : {
       "comment" : "Try-on camera hint"
     },
+    "A few words, if you like" : {
+      "comment" : "Report sheet: note field placeholder"
+    },
     "A photo of your body, without your face and on a plain backdrop, and that look’s piece photos, only when you tap Try it on. Your face never leaves your iPhone." : {
       "comment" : "Privacy and terms: under the try-on switch"
     },
@@ -854,6 +857,9 @@
     },
     "A plain wall and light on your face help. Arms a little away from your body." : {
       "comment" : "Try-on camera: a tip under the hint"
+    },
+    "Account" : {
+      "comment" : "Profile: section header for signing in"
     },
     "Add a photo of yourself in Profile, Your try-on photo. Nothing was sent." : {
       "comment" : "Try it on sheet (33a)"
@@ -872,6 +878,12 @@
     },
     "Any hairstyle is fine. Hats, scarves and turtlenecks work too, but your picture looks best without them." : {
       "comment" : "Try-on photo sheet: hair, hats, scarves and turtlenecks"
+    },
+    "Anything to add?" : {
+      "comment" : "Report sheet: note field label"
+    },
+    "Apple confirms it’s you. The app keeps only a random account number, not your name." : {
+      "comment" : "Sign-in sheet: what signing in shares"
     },
     "Apple couldn’t take the last payment, so styling access is paused. Update your payment details in Manage subscription, and it starts again." : {
       "comment" : "Styling access: billing retry"
@@ -912,8 +924,14 @@
     "Choose another photo" : {
       "comment" : "Try-on photo setup button"
     },
+    "Choose what’s wrong first." : {
+      "comment" : "Report sheet: Send without a reason"
+    },
     "Close camera" : {
       "comment" : "Try-on camera: closes it"
+    },
+    "Cloud styling, try-on pictures and support use this account." : {
+      "comment" : "Profile: under Signed in with Apple"
     },
     "Dressing you" : {
       "comment" : "Try it on sheet (33a): the job is running"
@@ -945,6 +963,12 @@
     "Hats, scarves and turtlenecks are fine, but your picture looks best without them." : {
       "comment" : "Try-on photo setup: a gentle note after the check"
     },
+    "Hide these looks" : {
+      "comment" : "Report sheet: switch to hide the result"
+    },
+    "Hide this picture" : {
+      "comment" : "Report sheet: switch to hide the picture"
+    },
     "Hiding your face" : {
       "comment" : "Try it on sheet (33a): on the phone"
     },
@@ -954,17 +978,29 @@
     "How your photo stays private. %@" : {
       "comment" : "VoiceOver: the privacy walkthrough. The argument is its steps, one sentence each."
     },
+    "Include the picture" : {
+      "comment" : "Report sheet: switch to send the picture"
+    },
     "It checks that no face is left. If one is, nothing is sent." : {
       "comment" : "Privacy walkthrough, beat 4 (33c)"
     },
     "It didn’t work just now. You can check again, or keep the photo: it’s checked once more before any picture is made." : {
       "comment" : "Try-on photo setup: the check didn't run"
     },
+    "It looks wrong on me" : {
+      "comment" : "Report sheet: reason"
+    },
     "It seems to show more than one person. Try again with just you in the picture." : {
       "comment" : "Try-on photo setup: the check failed"
     },
     "It swaps your room for a plain studio backdrop." : {
       "comment" : "Privacy walkthrough, beat 3 (33c)"
+    },
+    "It’s removed from your pictures after sending. You can undo that straight away." : {
+      "comment" : "Report sheet: under Hide this picture"
+    },
+    "It’s wrong or offensive" : {
+      "comment" : "Report sheet: reason"
     },
     "Just you in the picture, please." : {
       "comment" : "Try-on camera hint"
@@ -1023,11 +1059,17 @@
     "Nothing was sent, and nothing has changed. Your current photo, if you have one, is still yours." : {
       "comment" : "Try-on photo setup: after a failed check"
     },
+    "Off: the picture stays on this iPhone." : {
+      "comment" : "Report sheet: under Include the picture, off"
+    },
     "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Under the privacy walkthrough and See what was sent (33c)"
     },
     "On your phone" : {
       "comment" : "Privacy walkthrough: under the lock (33c)"
+    },
+    "Only needed for cloud styling, try-on pictures and styling access." : {
+      "comment" : "Profile: under Sign in, signed out"
     },
     "Only the photo without your face and your clothing photos were sent. You can leave this screen: we’ll tell you when your picture is ready, and your iPhone puts you back together." : {
       "comment" : "Try it on sheet (33a): the job is running"
@@ -1050,11 +1092,17 @@
     "Putting you back together on your phone" : {
       "comment" : "Try-on step 5, on the phone: her own head goes back on (33c)"
     },
+    "Reference %@" : {
+      "comment" : "Report sheet: the ticket reference, like NK-7F3A9C21"
+    },
     "Renews %@ at %@ a month." : {
       "comment" : "Styling access: subscribed. The arguments are a date and the App Store's price."
     },
     "Renews %@." : {
       "comment" : "Styling access: subscribed, price unknown. The argument is a date."
+    },
+    "Report a problem" : {
+      "comment" : "Link under an AI result: opens the report sheet"
     },
     "Restore purchases" : {
       "comment" : "Styling access: button"
@@ -1071,6 +1119,15 @@
     "See what was sent" : {
       "comment" : "Button and title (33a)"
     },
+    "Send report" : {
+      "comment" : "Report sheet: send button"
+    },
+    "Sent: your reason, your note, and which result it was and when. No photos, and never your closet or your name." : {
+      "comment" : "Report sheet: what goes, without a picture"
+    },
+    "Sent: your reason, your note, the picture, and which result it was and when. Never your closet or your name." : {
+      "comment" : "Report sheet: what goes, with the picture"
+    },
     "Set up your try-on photo first" : {
       "comment" : "Try it on sheet (33a)"
     },
@@ -1080,8 +1137,65 @@
     "Shows the photos that left your iPhone to make this picture." : {
       "comment" : "VoiceOver hint for See what was sent"
     },
+    "Sign in" : {
+      "comment" : "Profile: account row, signed out"
+    },
+    "Sign in for cloud styling" : {
+      "comment" : "Sign-in sheet title: Style Me"
+    },
+    "Sign in for try-on pictures" : {
+      "comment" : "Sign-in sheet title: try-on"
+    },
+    "Sign in to delete your account" : {
+      "comment" : "Sign-in sheet title: Delete my account after the session ended"
+    },
+    "Sign in to get styling access" : {
+      "comment" : "Sign-in sheet title: buying styling access or a picture pack"
+    },
+    "Sign in to send it to us directly" : {
+      "comment" : "Send feedback: signed out"
+    },
+    "Sign in to send this to us" : {
+      "comment" : "Sign-in sheet title: support"
+    },
+    "Sign in to send your report" : {
+      "comment" : "Sign-in sheet title: reporting an AI result"
+    },
+    "Sign out" : {
+      "comment" : "Profile: account row action"
+    },
+    "Sign out?" : {
+      "comment" : "Profile: asks before signing out"
+    },
+    "Signed in with Apple" : {
+      "comment" : "Profile: account row, signed in"
+    },
+    "Signed out. Your closet stays on this iPhone." : {
+      "comment" : "Profile: shown after Sign out, and read by VoiceOver"
+    },
+    "Signing in isn’t available right now. Your closet still works on this iPhone." : {
+      "comment" : "Profile: account row in a build with no backend"
+    },
+    "Signing in lets you use cloud styling, try-on pictures and styling access." : {
+      "comment" : "Sign-in sheet: why, from Profile"
+    },
+    "Signing in lets your note reach us directly, with a screenshot if you add one." : {
+      "comment" : "Sign-in sheet: why, for support"
+    },
+    "Signing in lets your report reach us directly, so we can look into it." : {
+      "comment" : "Sign-in sheet: why, for a report"
+    },
+    "Signing in links what you buy to your account, so our server knows it’s yours." : {
+      "comment" : "Sign-in sheet: why, for buying"
+    },
+    "Signing in…" : {
+      "comment" : "Sign-in sheet: while Sign in with Apple runs"
+    },
     "So nothing was sent. Try a photo where you face the camera, with your face clear and well lit." : {
       "comment" : "Try it on sheet (33a): fail closed, after the title"
+    },
+    "Something else" : {
+      "comment" : "Report sheet: reason"
     },
     "Start free month" : {
       "comment" : "Paywall: the purchase button"
@@ -1188,6 +1302,18 @@
     "Tap to see it." : {
       "comment" : "Banner: what tapping a finished picture does"
     },
+    "Tell us what’s wrong with this result. It comes to us privately, and we read every report." : {
+      "comment" : "Report sheet: first line"
+    },
+    "Tells us privately that this result is wrong or offensive." : {
+      "comment" : "VoiceOver hint on Report a problem"
+    },
+    "Thank you. Your report is on its way to us." : {
+      "comment" : "Report sheet: sent"
+    },
+    "Thanks for telling us. Try a different outfit for new ideas without those pieces together." : {
+      "comment" : "Your looks after hiding a reported result"
+    },
     "That didn’t work, and nothing was charged. Try again." : {
       "comment" : "Styling access: purchase failed"
     },
@@ -1215,6 +1341,9 @@
     "The light seems to be behind you. Light on you works better." : {
       "comment" : "Try-on photo setup: a gentle tip"
     },
+    "The outfit" : {
+      "comment" : "Report sheet: subject"
+    },
     "The photo didn’t come out. Try again." : {
       "comment" : "Try-on camera: the shutter failed"
     },
@@ -1224,14 +1353,38 @@
     "The photo that was sent: your body on a plain studio backdrop, with your head covered in flat grey." : {
       "comment" : "VoiceOver: the faceless photo on See what was sent"
     },
+    "The picture couldn’t be included. Turn off Include the picture, then send again." : {
+      "comment" : "Report sheet: the picture couldn't be read or was refused"
+    },
+    "The picture, with your face, goes to our private support inbox only. Never to the image service." : {
+      "comment" : "Report sheet: under Include the picture, on"
+    },
+    "The reason under it" : {
+      "comment" : "Report sheet: subject"
+    },
+    "The stylist works on our server. Signing in keeps your requests and your allowance yours, and no one else’s." : {
+      "comment" : "Sign-in sheet: why, for Style Me"
+    },
+    "The stylist’s answer" : {
+      "comment" : "Report sheet: subject"
+    },
     "The subscription isn’t available right now. Nothing was charged." : {
       "comment" : "Styling access: product unavailable"
     },
     "The try-on pictures included with styling access are used for now. More come back with time, or you can buy extra pictures in Styling access." : {
       "comment" : "Try it on sheet: allowance used, no credits"
     },
+    "Then it goes to our private support inbox, with a screenshot if you add one." : {
+      "comment" : "Send feedback: under Sign in to send it to us directly"
+    },
+    "These aren’t my clothes" : {
+      "comment" : "Report sheet: reason"
+    },
     "These pieces have no photos to send" : {
       "comment" : "Try it on sheet (33a)"
+    },
+    "They leave your history after sending. A look you saved stays saved." : {
+      "comment" : "Report sheet: under Hide these looks"
     },
     "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Try-on consent"
@@ -1254,6 +1407,9 @@
     "This photo works" : {
       "comment" : "Try-on photo setup: the check passed"
     },
+    "Those looks are hidden" : {
+      "comment" : "Your looks after hiding a reported result"
+    },
     "To make it even better" : {
       "comment" : "Try-on photo setup: gentle tips"
     },
@@ -1265,6 +1421,9 @@
     },
     "Try-on picture of %@: you wearing %@." : {
       "comment" : "Spoken for a real try-on picture (33a): the look's name, then its pieces"
+    },
+    "Try-on pictures are made on our server. Signing in keeps your requests and your allowance yours, and no one else’s." : {
+      "comment" : "Sign-in sheet: why, for try-on"
     },
     "Try-on pictures are off. Nothing more will be sent. Your pictures stay in the app. Black Forest Labs may keep what it already received." : {
       "comment" : "Privacy and terms: the try-on switch is off"
@@ -1334,8 +1493,14 @@
     "What’s included" : {
       "comment" : "Paywall: section header"
     },
+    "What’s it about?" : {
+      "comment" : "Report sheet: above the subject choice"
+    },
     "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat." : {
       "comment" : "Stylist consent: what is sent"
+    },
+    "What’s wrong?" : {
+      "comment" : "Report sheet: above the reasons"
     },
     "Why: %@" : {
       "comment" : "VoiceOver: the stylist's reason for this look"
@@ -9117,6 +9282,9 @@
     "You started “%@” with %@ and didn’t save it." : {
       "comment" : "Make your own look: draft card, with the look's name and how many pieces"
     },
+    "You were signed out. Sign in again so we can delete the account that’s yours." : {
+      "comment" : "Sign-in sheet: why, for Delete my account"
+    },
     "You wore this %lld days ago" : {
       "comment" : "Recent-wear note on Your looks (LR-10): how many days ago"
     },
@@ -9291,8 +9459,14 @@
     "Your closet, laundry, suitcases, saved looks, search and the looks you make yourself work without a subscription, and keep working if it ends." : {
       "comment" : "Paywall: what stays free"
     },
+    "Your closet, looks and pictures stay on this iPhone. Cloud styling and try-on pictures ask you to sign in again." : {
+      "comment" : "Profile: under Sign out?"
+    },
     "Your closet, looks, pictures, suitcases, profile and unsaved work will be deleted from this iPhone. This can’t be undone." : {
       "comment" : "Delete my data: the question"
+    },
+    "Your closet, Quick ideas and backups work without signing in, and stay on this iPhone." : {
+      "comment" : "Sign-in sheet: what works signed out"
     },
     "Your copy is saved as “%@”. It holds your measurements and photos; keep the passphrase somewhere safe." : {
       "comment" : "Export a copy: done, with the file name",
@@ -9829,6 +10003,9 @@
     },
     "You’re signed out and the app starts fresh, as if it were just installed. Signing in again later makes a new, empty account." : {
       "comment" : "Delete my account: what happens after"
+    },
+    "You’ve sent a lot of reports. Try again in %@." : {
+      "comment" : "Report sheet: too many reports; the argument is a wait like '5 minutes'"
     },
     "“%@”" : {
       "comment" : "Typed search, in quotes",

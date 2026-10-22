@@ -93,6 +93,8 @@ private struct RootTabs: View {
         .environment(\.openInSavedLooks, OpenInSavedLooksAction { path in openInSavedLooks(path) })
         .environment(\.openInCloset, OpenInClosetAction { path in openInCloset(path) })
         .environment(\.openForTour, OpenForTourAction { tour in openForTour(tour) })
+        // Release: a cloud feature asks her to sign in the first time she uses it (`SignInGate`).
+        .signInGate()
         .environment(\.services, services)
         .environment(\.garmentImages, garmentImages)
         .environment(\.stickerCache, stickers)

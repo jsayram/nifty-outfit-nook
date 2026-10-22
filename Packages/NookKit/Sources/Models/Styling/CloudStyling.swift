@@ -259,22 +259,25 @@ public struct CloudStylist: KeyedStylist {
         async throws(StylistError) -> StyleOutcome
     {
         let call = StyleCall.outfit(from: context, consentVersion: consentVersion)
-        guard let answer = try await send(call, idempotencyKey: idempotencyKey) else { throw .notCompleted }
-        return try Self.outcome(answer, for: context, sentIDs: Set(call.pieces.map(\.id)))
+        let (answer, actionID) = try await send(call, idempotencyKey: idempotencyKey)
+        guard let answer else { throw .notCompleted }
+        return try Self.outcome(answer, for: context, sentIDs: Set(call.pieces.map(\.id)), actionID: actionID)
     }
 
     /// 27c: an Ask stylist question, with its job's key. Only the pieces that were sent may be
     /// mentioned.
     public func ask(_ request: AskStylistRequest, idempotencyKey: String) async throws(StylistError) -> StylistReply {
         let call = request.call
-        guard case .answer(let text, let pieces, _) = try await send(call, idempotencyKey: idempotencyKey),
+        guard case .answer(let text, let pieces, _) = try await send(call, idempotencyKey: idempotencyKey).answer,
             !text.isEmpty
         else { throw .notCompleted }
         let sent = Set(call.pieces.map(\.id))
         return StylistReply(text: text, pieces: pieces.filter(sent.contains))
     }
 
-    private func send(_ call: StyleCall, idempotencyKey: String) async throws(StylistError) -> StyleAnswer? {
+    private func send(_ call: StyleCall, idempotencyKey: String) async throws(StylistError) -> (
+        answer: StyleAnswer?, actionID: String
+    ) {
         let receipt: PaidActionReceipt
         do {
             receipt = try await paid.run(.style(call), idempotencyKey: idempotencyKey)
@@ -282,12 +285,17 @@ public struct CloudStylist: KeyedStylist {
             throw Self.error(for: error)
         }
         if Task.isCancelled { throw .cancelled }
-        return receipt.style
+        return (receipt.style, receipt.id)
     }
 
     /// The backend's checked answer as the app's outcome. Every piece must be one that was sent;
     /// anything else means the answer can't be trusted, so it didn't finish.
-    static func outcome(_ answer: StyleAnswer, for context: StylingContext, sentIDs: Set<Garment.ID>)
+    /// - Parameter actionID: Release: the server's ID for the action that made it, which becomes
+    ///   the result's ID, so Report a problem can name the action (`AIReportTarget`). A random ID
+    ///   when there's none.
+    static func outcome(
+        _ answer: StyleAnswer, for context: StylingContext, sentIDs: Set<Garment.ID>, actionID: String? = nil
+    )
         throws(StylistError)
         -> StyleOutcome
     {
@@ -303,7 +311,7 @@ public struct CloudStylist: KeyedStylist {
             else { throw .notCompleted }
             let categories = Dictionary(
                 context.eligibleGarments.map { ($0.id, $0.category) }, uniquingKeysWith: { first, _ in first })
-            let resultID = StyleResult.ID.random()
+            let resultID = actionID.map { StyleResult.ID($0) } ?? .random()
             let intent = StyleIntent(request)
             let simpleIDs = Set(simpleVersion.pieces)
             let looks = versions.map { version in

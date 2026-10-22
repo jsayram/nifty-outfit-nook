@@ -136,6 +136,7 @@ struct ContractTests {
         ("v1/examples/deletion.response.json", "deletionStatus"),
         ("v1/examples/deletion-status.response.json", "deletionStatus"),
         ("v1/examples/feedback.request.json", "feedbackRequest"),
+        ("v1/examples/feedback-ai-report.request.json", "feedbackRequest"),
         ("v1/examples/feedback.response.json", "feedbackReceipt"),
         ("v1/examples/credits-claim.request.json", "creditClaimRequest"),
         ("v1/examples/credits-claim.response.json", "creditClaimResponse"),

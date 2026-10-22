@@ -181,6 +181,9 @@ struct NiftyOutfitNookApp: App {
         let paid = AppGateway.paid
         // 32b (L9): true only in a Release build with no backend settings.
         let cloudUnavailable = AppGateway.cloudUnavailable
+        // Release: Clerk, or the fake sign-in in a Debug build. None in a Release build with no
+        // backend settings, where the cloud features say they aren't available right now.
+        let offersSignIn = !cloudUnavailable
         // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.
         let cloudStylist = AppStylist.usesCloud(arguments) ? paid : nil
         // 33a: real try-on pictures, with her face kept on the phone. With the real backend, or
@@ -249,6 +252,8 @@ struct NiftyOutfitNookApp: App {
                     services.account = account
                     // 32b (L9): a Release build with no backend settings says so; nothing is simulated.
                     services.cloudUnavailable = cloudUnavailable
+                    // Release: Sign in with Apple when she first uses a cloud feature (`SignInGate`).
+                    services.offersSignIn = offersSignIn
                     services.paid = paid
                     services.subscriptions = subscriptions
                     services.credits = credits
@@ -279,6 +284,8 @@ struct NiftyOutfitNookApp: App {
                     services.account = account
                     // 32b (L9): a Release build with no backend settings says so; nothing is simulated.
                     services.cloudUnavailable = cloudUnavailable
+                    // Release: Sign in with Apple when she first uses a cloud feature (`SignInGate`).
+                    services.offersSignIn = offersSignIn
                     services.paid = paid
                     services.subscriptions = subscriptions
                     services.credits = credits

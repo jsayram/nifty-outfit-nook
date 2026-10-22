@@ -55,6 +55,11 @@ public struct NookServices: Sendable {
     /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
     /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
     public var account: any AccountService = UnavailableAccountService()
+    /// Release: true when the app has a way to sign in (Clerk, or the fake sign-in in a Debug
+    /// build). Then a cloud feature asks her to sign in the first time she uses it, and Profile
+    /// shows the account row. False in a Release build with no backend settings (`cloudUnavailable`),
+    /// in previews and in most tests, where nothing asks.
+    public var offersSignIn = false
     /// Paid cloud work and her allowances (Phase 24b), for the stylist (27a) and try-on (33a).
     /// Signed out until the app sets one, like `account`.
     public var paid: any PaidActionService = UnavailablePaidActionService()

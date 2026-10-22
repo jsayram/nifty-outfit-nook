@@ -322,6 +322,17 @@ nonisolated enum FeedbackText {
         }
     }
 
+    /// Release: signed out, on the share-sheet route.
+    static var signInToSend: String {
+        String(localized: "Sign in to send it to us directly", bundle: .module, comment: "Send feedback: signed out")
+    }
+
+    static var signInToSendDetail: String {
+        String(
+            localized: "Then it goes to our private support inbox, with a screenshot if you add one.", bundle: .module,
+            comment: "Send feedback: under Sign in to send it to us directly")
+    }
+
     static var kindHeader: String {
         String(localized: "What is it about?", bundle: .module, comment: "Send feedback: above the kind chips")
     }

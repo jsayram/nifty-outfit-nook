@@ -33,7 +33,7 @@ struct TodayResult: View {
                 if let lane = result.madeBy, lane != .cloud {
                     QuickIdeasLabel(
                         lane: lane, reason: model.quickIdeasReason, retry: actions.retry,
-                        reviewConsent: actions.reviewConsent
+                        reviewConsent: actions.reviewConsent, signIn: actions.signIn
                     )
                     .readablePane()
                 }
@@ -62,6 +62,7 @@ struct TodayResult: View {
                     }
                     bundle(content, result: result, isWide: isWide)
                     why(look)
+                    report(look, result: result)
                 } trailing: { isWide in
                     if isWide {
                         notes(result, look: look)
@@ -232,6 +233,27 @@ struct TodayResult: View {
         }
     }
 
+    // MARK: Report a problem
+
+    /// Release (guideline 1.2): a quiet link under an AI-made look: the cloud stylist's, or Apple's
+    /// on-device model's. Quick ideas are rules on the phone, not AI, so they have none.
+    @ViewBuilder
+    private func report(_ look: Look, result: StyleResult) -> some View {
+        let madeByAI = result.madeBy == .onDevice || (result.madeBy == nil && model.isCloud)
+        if madeByAI {
+            let hasWhy = model.originalLook?.pieces == look.pieces && !(model.originalLook?.why ?? "").isEmpty
+            NookButton(
+                AIReportText.reportAProblem, systemImage: "flag", kind: .text, size: .small,
+                action: {
+                    actions.report(.look(look, result: result), hasWhy ? [.look, .why] : [.look])
+                }
+            )
+            .accessibilityHint(Text(AIReportText.reportHint))
+            .accessibilityIdentifier("results.report")
+            .frame(maxWidth: .infinity)
+        }
+    }
+
     // MARK: Try a different outfit
 
     private var tryDifferent: some View {
@@ -393,7 +415,7 @@ struct ProblemBanner: View {
             NookBanner(StylistConsentText.needsConsent, systemImage: "hand.raised")
         case .limited(let problem):
             NookBanner(CloudLimitText.message(for: problem), systemImage: "hourglass")
-        case .notCompleted, .closetUnavailable, .requestChanged:
+        case .notCompleted, .closetUnavailable, .requestChanged, .hidden:
             NookBanner(
                 String(
                     localized: "A different outfit didn’t come through. Nothing was charged.", bundle: .module,

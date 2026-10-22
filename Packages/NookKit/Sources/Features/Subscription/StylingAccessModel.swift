@@ -184,7 +184,10 @@ final class StylingAccessModel {
     }
 
     /// 30b: buys a picture pack, which the server then credits.
-    func buyPack(_ productID: String, in services: NookServices) async {
+    func buyPack(_ productID: String, in services: NookServices, signIn: SignInCheck = .notNeeded) async {
+        guard busy == .none else { return }
+        // Release: the pack is credited on the server, so she signs in first. Not now buys nothing.
+        guard await signIn(.stylingAccess) else { return }
         guard busy == .none else { return }
         busy = .buyingPack(productID)
         message = nil
@@ -204,7 +207,11 @@ final class StylingAccessModel {
         }
     }
 
-    func purchase(in services: NookServices) async {
+    func purchase(in services: NookServices, signIn: SignInCheck = .notNeeded) async {
+        guard busy == .none else { return }
+        // Release: styling access is claimed on the server, so she signs in first, and the
+        // purchase carries on once she's in. Not now buys nothing.
+        guard await signIn(.stylingAccess) else { return }
         guard busy == .none else { return }
         busy = .purchasing
         message = nil

@@ -65,6 +65,8 @@ public protocol FeedbackService: Sendable {
     func canSend() async -> Bool
     /// Sends the note. Safe to repeat with the same submission ID.
     func send(_ submission: FeedbackSubmission) async throws(FeedbackSendProblem) -> FeedbackReceipt
+    /// Release: a report about an AI result, to the same queue (`AIReport`).
+    func sendReport(_ submission: AIReportSubmission) async throws(FeedbackSendProblem) -> FeedbackReceipt
 }
 
 /// No support queue: what screens get when nothing configured one. Send feedback uses the share sheet.

@@ -8,6 +8,7 @@ import SwiftUI
 struct DeleteDataScreen: View {
     @Environment(\.services) private var services
     @Environment(\.dataDeleted) private var dataDeleted
+    @Environment(\.signIn) private var signIn
     @State private var model: DeleteDataModel
     @State private var isAsking = false
     @State private var showsManage = false
@@ -46,7 +47,7 @@ struct DeleteDataScreen: View {
     }
 
     private func delete() async {
-        if await model.delete(in: services) {
+        if await model.delete(in: services, signIn: signIn) {
             // Everything is gone: every tab is built again, on Home.
             dataDeleted()
         }
