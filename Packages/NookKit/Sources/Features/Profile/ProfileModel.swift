@@ -34,6 +34,8 @@ final class ProfileModel {
     private(set) var keptDirtyCount = 0
     /// 30a: her styling subscription, for the Styling access row.
     private(set) var subscription = SubscriptionState.none
+    /// 30b: she has the complimentary unlock.
+    private(set) var isComplimentary = false
     /// The clock for the subscription's dates. Tests fix it.
     @ObservationIgnored var now: () -> Date = { .now }
     @ObservationIgnored private var loads = LoadGeneration()
@@ -58,14 +60,20 @@ final class ProfileModel {
             keptDirtyCount = Self.dirtyCount(in: garments)
         }
         // StoreKit's own records, read on the phone. The cached status shows first.
-        subscription = await services.subscriptions.cachedStatus().effectiveState(at: now())
+        let cached = await services.subscriptions.cachedStatus()
+        subscription = cached.effectiveState(at: now())
+        isComplimentary = cached.isComplimentary
         let fresh = await services.subscriptions.refresh()
-        if loads.isCurrent(load) { subscription = fresh.effectiveState(at: now()) }
+        if loads.isCurrent(load) {
+            subscription = fresh.effectiveState(at: now())
+            isComplimentary = fresh.isComplimentary
+        }
     }
 
     /// Sets the subscription state directly, for tests that hand data straight in.
-    func show(subscription: SubscriptionState) {
+    func show(subscription: SubscriptionState, isComplimentary: Bool = false) {
         self.subscription = subscription
+        self.isComplimentary = isComplimentary
     }
 
     /// Pieces in her closet marked as in the wash, whether or not tracking is on.

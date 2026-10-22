@@ -26,6 +26,10 @@
 	<true/>
 	<key>NookWeatherKitEnabled</key>
 	<string>$(NOOK_WEATHERKIT)</string>
+	<!-- Picture packs (Phase 30b): StoreKit keeps consumables in the transaction history, so an
+	     unfinished pack stays in Transaction.unfinished until the server has credited it. -->
+	<key>SKIncludeConsumableInAppPurchaseHistory</key>
+	<true/>
 	<!-- Backups (Phase 21b): the export file's type, so the Files sheet names it and Restore's
 	     picker can ask for it. An encrypted archive; nothing else opens it on iOS. -->
 	<key>UTExportedTypeDeclarations</key>

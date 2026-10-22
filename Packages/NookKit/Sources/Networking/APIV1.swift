@@ -48,9 +48,15 @@ public enum APIV1 {
     public static let tryOn = Endpoint(
         id: "tryOn", method: "POST", path: "/v1/try-on", requiresAuth: true, idempotent: true, paid: true)
 
+    // 30b
+    /// Safe to repeat: the server credits each App Store transaction once and answers a repeat
+    /// with the first grant.
+    public static let claimCredits = Endpoint(
+        id: "claimCredits", method: "POST", path: "/v1/credits/claim", requiresAuth: true, idempotent: true)
+
     public static let endpoints = [
         health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
-        sendFeedback,
+        sendFeedback, claimCredits,
     ]
 
     // MARK: Bodies

@@ -124,6 +124,9 @@ extension FakeBackend {
             state.ledger.challenges = state.ledger.challenges.filter { $0.value.subject != subject }
             state.ledger.buckets[subject] = nil
             deleteSupport(for: subject, in: &state)
+            // 30b: her picture-credit grants, as the backend deletes them for now (30c decides how
+            // long billing records are kept).
+            state.credits.grants = state.credits.grants.filter { $0.value.subject != subject }
             record.set("serverData", "done")
             if record.state("account") != "done" {
                 if state.deletions.accountStepFailures > 0 {

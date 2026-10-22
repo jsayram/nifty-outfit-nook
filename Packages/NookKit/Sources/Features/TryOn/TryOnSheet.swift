@@ -88,10 +88,14 @@ struct TryOnSheetContent: View {
                 note(TryOnSheetText.free)
             case .included(let perMonth):
                 note(TryOnSheetText.included(perMonth))
+            case .credits(let left):
+                note(TryOnSheetText.usesCredit(left))
+            case .allowanceUsed:
+                note(TryOnSheetText.allowanceUsed)
             case .needsStylingAccess:
                 note(TryOnSheetText.needsAccess)
             }
-            if model.allowance == .needsStylingAccess {
+            if !model.allowance.canMake {
                 NookButton(
                     TryOnSheetText.seeStylingAccess, systemImage: "sparkles", fillsWidth: true
                 ) { showsStylingAccess = true }
@@ -235,6 +239,21 @@ enum TryOnSheetText {
         String(
             localized: "Uses 1 of the \(perMonth) try-on pictures that come with styling access each month.",
             bundle: .module, comment: "Try it on sheet: with styling access. The argument is a number.")
+    }
+
+    /// 30b: the picture uses one of her purchased credits.
+    static func usesCredit(_ left: Int) -> String {
+        String(
+            localized: "Uses 1 of your \(left) picture credits. Credits don’t expire.", bundle: .module,
+            comment: "Try it on sheet: paid with a purchased credit. The argument is how many she has. Pluralized.")
+    }
+
+    /// 30b: the included pictures are used and she has no credits.
+    static var allowanceUsed: String {
+        String(
+            localized:
+                "The try-on pictures included with styling access are used for now. More come back with time, or you can buy extra pictures in Styling access.",
+            bundle: .module, comment: "Try it on sheet: allowance used, no credits")
     }
 
     /// 30a: pictures need styling access, which she doesn't have now.

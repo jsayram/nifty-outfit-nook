@@ -35,7 +35,8 @@ final class TryOnModel {
     }
 
     private(set) var step: Step = .ready
-    /// 30a: what a picture costs her. Free while pictures are simulated on the phone.
+    /// 30a: what a picture costs her. Free while pictures are simulated on the phone. 30b: the
+    /// month's pictures first, then credits.
     private(set) var allowance = TryOnAllowance.freeSimulated
     private(set) var look: Look
     /// Her garments, for drawing the picture.
@@ -72,8 +73,10 @@ final class TryOnModel {
         self.services = services
         guard step == .ready else { return }
         let status = await services.subscriptions.cachedStatus()
+        // 30b: what's left of the month's pictures and her credits, once pictures cost something.
+        let usage = services.tryOnIsSimulated ? nil : try? await services.paid.usage()
         allowance = TryOnAllowance.current(
-            status: status, picturesAreSimulated: services.tryOnIsSimulated, at: now())
+            status: status, picturesAreSimulated: services.tryOnIsSimulated, at: now(), usage: usage)
         let pictures = (try? await services.pictures.pictures()) ?? []
         if let existing = TryOnLinks.reusable(for: look, in: pictures) {
             step = .alreadyMade(existing)
@@ -82,8 +85,9 @@ final class TryOnModel {
 
     /// Make a picture (or Make another, or Try again).
     func make() {
-        // 30a: never starts a paid picture without styling access. The server checks too (30c).
-        guard step != .making, allowance != .needsStylingAccess else { return }
+        // 30a: never starts a paid picture without styling access or (30b) credits. The server
+        // checks too (30c).
+        guard step != .making, allowance.canMake else { return }
         step = .making
         making = Task { await perform() }
     }

@@ -13,6 +13,9 @@ public final class ScriptedSubscriptionService: SubscriptionService {
         var streams: [UUID: AsyncStream<SubscriptionStatus>.Continuation] = [:]
         var purchases = 0
         var restores = 0
+        /// 30b: what redeeming an offer code gives. Nil changes nothing.
+        var redemption: SubscriptionStatus?
+        var redemptions = 0
     }
 
     private let state: Mutex<State>
@@ -33,6 +36,12 @@ public final class ScriptedSubscriptionService: SubscriptionService {
     /// How many purchases and restores were asked for.
     public var purchaseCount: Int { state.withLock { $0.purchases } }
     public var restoreCount: Int { state.withLock { $0.restores } }
+    public var redemptionCount: Int { state.withLock { $0.redemptions } }
+
+    /// 30b: what the next offer code redemption gives, as Apple's sheet would.
+    public func scriptRedemption(_ status: SubscriptionStatus?) {
+        state.withLock { $0.redemption = status }
+    }
 
     /// Changes the status, as a renewal, a refund or another device would, and tells every stream.
     public func update(_ status: SubscriptionStatus) {
@@ -86,6 +95,16 @@ public final class ScriptedSubscriptionService: SubscriptionService {
         }
     }
 
+    public func redeemedOfferCode() async -> SubscriptionStatus {
+        let status = state.withLock { state in
+            state.redemptions += 1
+            if let redeemed = state.redemption { state.status = redeemed }
+            return state.status
+        }
+        update(status)
+        return status
+    }
+
     private static func bought(offer: SubscriptionOffer?, at date: Date) -> PurchaseOutcome {
         guard let offer else { return .failed(.unavailable) }
         let calendar = Calendar(identifier: .gregorian)
@@ -108,7 +127,8 @@ extension SubscriptionOffer {
 
 extension ScriptedSubscriptionService {
     /// A scripted subscription for a debug launch: `-subscription none|trial|active|grace|retry|
-    /// expired|revoked|used-trial`, dated from `now`.
+    /// expired|revoked|used-trial|complimentary`, dated from `now`. Redeeming a code (30b) always
+    /// gives the complimentary unlock.
     public static func debug(_ name: String, now: Date) -> ScriptedSubscriptionService {
         let calendar = Calendar(identifier: .gregorian)
         let monthLater = calendar.date(byAdding: .month, value: 1, to: now) ?? now
@@ -135,11 +155,17 @@ extension ScriptedSubscriptionService {
                 SubscriptionStatus(state: .expired, productID: id, expiresAt: monthBefore, checkedAt: now)
             case "revoked":
                 SubscriptionStatus(state: .revoked, productID: id, expiresAt: monthLater, checkedAt: now)
+            case "complimentary":
+                SubscriptionStatus(state: .none, checkedAt: now, complimentarySince: now)
             default:
                 .none(at: now)
             }
         var offer = SubscriptionOffer.sample
-        if name != "none" { offer.freeTrial = nil }
-        return ScriptedSubscriptionService(status: status, offer: offer)
+        if name != "none" && name != "complimentary" { offer.freeTrial = nil }
+        let service = ScriptedSubscriptionService(status: status, offer: offer)
+        var redeemed = status
+        redeemed.complimentarySince = status.complimentarySince ?? now
+        service.scriptRedemption(redeemed)
+        return service
     }
 }

@@ -13,6 +13,7 @@ struct StylingAccessScreen: View {
     @Environment(\.dismiss) private var dismiss
     @State private var model = StylingAccessModel()
     @State private var showsManage = false
+    @State private var showsRedeem = false
     @State private var page: WebsiteLink?
 
     var body: some View {
@@ -22,7 +23,9 @@ struct StylingAccessScreen: View {
                 subscribe: { Task { await model.purchase(in: services) } },
                 restore: { Task { await model.restore(in: services) } },
                 manage: { showsManage = true },
-                open: { page = $0 }
+                open: { page = $0 },
+                redeem: { showsRedeem = true },
+                buyPack: { id in Task { await model.buyPack(id, in: services) } }
             )
         )
         .navigationTitle(StylingAccessText.title)
@@ -40,12 +43,19 @@ struct StylingAccessScreen: View {
             }
         }
         .modifier(ManageSubscriptionsSheet(isPresented: $showsManage, groupID: model.groupID))
+        // 30b: Apple's own offer code sheet (Apple doesn't allow a custom one).
+        .modifier(
+            OfferCodeSheet(isPresented: $showsRedeem) {
+                Task { await model.redeemed(in: services) }
+            }
+        )
         .fullScreenCover(item: $page) { link in
             SafariView(url: link.url)
                 .ignoresSafeArea()
         }
         .task { await model.load(from: services) }
         .task { await model.follow(services) }
+        .task { await model.followCredits(services) }
         // Back from Apple's sheet: she may have cancelled or changed how she pays.
         .onChange(of: showsManage) { _, isShown in
             if !isShown { Task { await model.load(from: services) } }
@@ -64,6 +74,27 @@ private struct ManageSubscriptionsSheet: ViewModifier {
             content.manageSubscriptionsSheet(isPresented: $isPresented, subscriptionGroupID: groupID)
         } else {
             content.manageSubscriptionsSheet(isPresented: $isPresented)
+        }
+    }
+}
+
+/// 30b: Apple's offer code sheet. On iOS 27 it hands back the redeemed transaction; before that the
+/// transaction arrives through `Transaction.updates`. Either way the services finish it and read
+/// the status again (`redeemedOfferCode()`), so `done` only has to say the sheet closed with a
+/// redemption. A failure or a sheet closed without a code says nothing.
+private struct OfferCodeSheet: ViewModifier {
+    @Binding var isPresented: Bool
+    let done: () -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27, *) {
+            content.offerCodeRedemption(options: [], isPresented: $isPresented) { result in
+                if case .success = result { done() }
+            }
+        } else {
+            content.offerCodeRedemption(isPresented: $isPresented) { result in
+                if case .success = result { done() }
+            }
         }
     }
 }

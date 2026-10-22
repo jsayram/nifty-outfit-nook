@@ -60,6 +60,8 @@ public struct FakeGateway: Sendable {
     public let paid: GatewayPaidActionService
     /// 24d: notes to the support queue.
     public let feedback: GatewayFeedbackService
+    /// 30b: picture-credit claims.
+    public let credits: GatewayCreditClaimer
 
     public init(
         appVersion: String, tokenLifetime: TimeInterval = 60, policy: RetryPolicy = .standard,
@@ -80,5 +82,6 @@ public struct FakeGateway: Sendable {
             auth: auth, client: client, appVersion: appVersion, attestation: attestation)
         self.paid = GatewayPaidActionService(client: client, attestation: attestation)
         self.feedback = GatewayFeedbackService(auth: auth, client: client)
+        self.credits = GatewayCreditClaimer(client: client)
     }
 }

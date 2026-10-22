@@ -10,14 +10,19 @@ import UIKit
 ///   billing retry apart), and falls back to the latest transaction when StoreKit has no status
 ///   yet. Only verified transactions count; an unverified one is finished and ignored.
 /// - `start()` listens to `Transaction.updates` for the life of the app: renewals, refunds, an
-///   approved Ask to Buy, a purchase on another device. Each update is finished, the status read
-///   again, cached, and sent to every `statusUpdates()` stream.
+///   approved Ask to Buy, a purchase on another device, a redeemed offer code. Each update is
+///   finished, the status read again, cached, and sent to every `statusUpdates()` stream. Picture
+///   packs (consumables) are left alone: `StoreKitCreditsService` finishes them only once the
+///   server has credited them (30b).
+/// - 30b: the complimentary unlock (a non-consumable from an offer code) is read from
+///   `Transaction.currentEntitlements`, which leaves out anything Apple refunded or revoked.
 /// - The cache only lets the app show a status before StoreKit answers. `hasStylingAccess(at:)`
 ///   never grants past the dates Apple gave, so a stale cache can't stretch access.
 /// - Nothing here is proof for the server: paid requests carry the status as a hint, and the
 ///   server checks Apple's records itself (30c).
 public final class StoreKitSubscriptionService: SubscriptionService {
     private let productID: String
+    private let complimentaryID: String
     private let cache: any SubscriptionStatusCache
     private let now: @Sendable () -> Date
     /// How long after a purchase an empty answer from StoreKit is taken as StoreKit catching up
@@ -41,12 +46,14 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     ///   - sync: what Restore purchases asks the App Store to do. Tests pass their own.
     ///   - now: the clock. Tests pass their own.
     public init(
-        productID: String = SubscriptionProducts.monthly, cache: any SubscriptionStatusCache,
+        productID: String = SubscriptionProducts.monthly,
+        complimentaryID: String = SubscriptionProducts.complimentary, cache: any SubscriptionStatusCache,
         catchUpWindow: TimeInterval = 60,
         sync: @escaping @Sendable () async throws -> Void = { try await AppStore.sync() },
         now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.productID = productID
+        self.complimentaryID = complimentaryID
         self.cache = cache
         self.catchUpWindow = catchUpWindow
         self.sync = sync
@@ -175,6 +182,20 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         return status
     }
 
+    public func redeemedOfferCode() async -> Models.SubscriptionStatus {
+        // The redemption's transaction may be here already, or still on its way through
+        // `Transaction.updates` (before iOS 27 the sheet doesn't return it). Finish what's here;
+        // the listener finishes the rest and tells every screen.
+        for await result in Transaction.unfinished {
+            let transaction = result.unsafePayloadValue
+            guard transaction.productType != .consumable else { continue }
+            await transaction.finish()
+        }
+        let status = await refresh()
+        broadcast(status)
+        return status
+    }
+
     // MARK: Reading StoreKit
 
     private func product() async throws -> Product {
@@ -187,6 +208,8 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     }
 
     private func handle(_ update: VerificationResult<Transaction>) async {
+        // 30b: a picture pack is finished only after the server credits it (StoreKitCreditsService).
+        if update.unsafePayloadValue.productType == .consumable { return }
         switch update {
         case .verified(let transaction):
             await transaction.finish()
@@ -197,9 +220,26 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         broadcast(status)
     }
 
-    /// The status StoreKit reports now, or the cached one (bounded by its own dates) when
-    /// StoreKit can't be read at all.
+    /// The subscription's status and the complimentary unlock, as StoreKit reports them now.
     private func readStatus() async -> Models.SubscriptionStatus {
+        var status = await readSubscription()
+        status.complimentarySince = await complimentarySince()
+        return status
+    }
+
+    /// 30b: when the complimentary unlock was redeemed, if she has it. Only a verified, unrevoked
+    /// entitlement counts.
+    private func complimentarySince() async -> Date? {
+        for await result in Transaction.currentEntitlements(for: complimentaryID) {
+            if case .verified(let transaction) = result, transaction.revocationDate == nil {
+                return transaction.purchaseDate
+            }
+        }
+        return nil
+    }
+
+    /// The subscription's status from StoreKit.
+    private func readSubscription() async -> Models.SubscriptionStatus {
         let checked = now()
         if let product = try? await product(), let subscription = product.subscription,
             let statuses = try? await subscription.status
@@ -220,14 +260,16 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     private func keepJustBought(over read: Models.SubscriptionStatus) -> Models.SubscriptionStatus {
         guard read.state == .none, let purchasedAt = state.withLock({ $0.purchasedAt }),
             now().timeIntervalSince(purchasedAt) < catchUpWindow,
-            let cached = cache.load(), cached.hasStylingAccess(at: now())
+            var cached = cache.load(), cached.hasStylingAccess(at: now())
         else { return read }
+        cached.complimentarySince = read.complimentarySince
         return cached
     }
 
     private func statusAfterPurchase(_ transaction: Transaction) async -> Models.SubscriptionStatus {
         var status = Self.status(from: transaction, renewal: nil, checkedAt: now())
         status.willAutoRenew = transaction.revocationDate == nil
+        status.complimentarySince = await complimentarySince()
         return status
     }
 

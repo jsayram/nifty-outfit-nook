@@ -51,10 +51,13 @@ public struct UsageAllowance: Sendable, Equatable {
 public struct CloudUsage: Sendable, Equatable {
     public var allowances: [UsageAllowance]
     public var paused: Set<PaidFeature>
+    /// 30b: her picture-credit balance. Nil when the server didn't say.
+    public var credits: Int?
 
-    public init(allowances: [UsageAllowance], paused: Set<PaidFeature>) {
+    public init(allowances: [UsageAllowance], paused: Set<PaidFeature>, credits: Int? = nil) {
         self.allowances = allowances
         self.paused = paused
+        self.credits = credits
     }
 
     public func allowance(_ category: UsageCategory) -> UsageAllowance? {

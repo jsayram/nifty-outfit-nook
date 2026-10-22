@@ -128,7 +128,7 @@ extension FakeBackend {
                 features: ["style", "tryOn"].map {
                     APIV1.FeatureState(feature: $0, state: state.limits.paused.contains($0) ? "paused" : "on")
                 },
-                policyVersion: 1)
+                policyVersion: 1, credits: .init(pictures: state.credits.balance(of: subject)))
         }
     }
 

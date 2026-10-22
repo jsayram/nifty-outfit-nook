@@ -63,7 +63,44 @@ struct SubscriptionStatusTests {
 
     @Test func hintsNameEveryState() {
         #expect(EntitlementHint(.billingRetry).rawValue == "billing-retry")
-        #expect(Set(SubscriptionState.allCases.map(EntitlementHint.init)) == Set(EntitlementHint.allCases))
+        // 30b: every state, plus the complimentary unlock.
+        #expect(
+            Set(SubscriptionState.allCases.map(EntitlementHint.init)).union([.complimentary])
+                == Set(EntitlementHint.allCases))
+    }
+
+    // MARK: 30b: the complimentary unlock
+
+    @Test func theComplimentaryUnlockGivesAccessWithNoEnd() throws {
+        var unlocked = SubscriptionStatus.none(at: TestTime.now)
+        unlocked.complimentarySince = TestTime.day(-400)
+        #expect(unlocked.isComplimentary)
+        #expect(unlocked.hasStylingAccess(at: TestTime.day(1_000)))
+        #expect(!unlocked.mayRenew)
+        #expect(unlocked.hint(at: TestTime.now) == .complimentary)
+        // Beside an ended subscription it still counts; the subscription's own state is kept.
+        var both = status(.expired, ends: -3)
+        both.complimentarySince = TestTime.day(-1)
+        #expect(both.hasStylingAccess(at: TestTime.now))
+        #expect(both.effectiveState(at: TestTime.now) == .expired)
+        // It survives the cache, and a status cached before 30b (no such field) still decodes.
+        let data = try JSONEncoder().encode(unlocked)
+        #expect(try JSONDecoder().decode(SubscriptionStatus.self, from: data) == unlocked)
+        let old = try JSONEncoder().encode(status(.trial, ends: 3))
+        var object = try #require(try JSONSerialization.jsonObject(with: old) as? [String: Any])
+        object["complimentarySince"] = nil
+        let decoded = try JSONDecoder().decode(
+            SubscriptionStatus.self, from: try JSONSerialization.data(withJSONObject: object))
+        #expect(!decoded.isComplimentary)
+    }
+
+    @Test func picturesSpendTheMonthFirstThenCredits() {
+        #expect(TryOnFunding.next(hasAccess: true, allowanceLeft: 4, credits: 10) == .allowance)
+        #expect(TryOnFunding.next(hasAccess: true, allowanceLeft: nil, credits: nil) == .allowance)
+        #expect(TryOnFunding.next(hasAccess: true, allowanceLeft: 0, credits: 10) == .credit)
+        #expect(TryOnFunding.next(hasAccess: true, allowanceLeft: 0, credits: 0) == .nothing)
+        #expect(TryOnFunding.next(hasAccess: false, allowanceLeft: 4, credits: 2) == .credit)
+        #expect(TryOnFunding.next(hasAccess: false, allowanceLeft: 4, credits: nil) == .nothing)
     }
 
     @Test func statusSurvivesTheCache() throws {

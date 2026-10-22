@@ -116,6 +116,8 @@ struct ContractTests {
         ("v1/examples/deletion-status.response.json", "deletionStatus"),
         ("v1/examples/feedback.request.json", "feedbackRequest"),
         ("v1/examples/feedback.response.json", "feedbackReceipt"),
+        ("v1/examples/credits-claim.request.json", "creditClaimRequest"),
+        ("v1/examples/credits-claim.response.json", "creditClaimResponse"),
     ])
     func goldenExamplesRoundTrip(path: String, type: String) throws {
         // Decoding then encoding gives the same JSON: the Swift types neither drop nor add a field.
@@ -142,6 +144,10 @@ struct ContractTests {
             case "deletionStatus": try encoder.encode(decoder.decode(APIV1.DeletionStatus.self, from: original))
             case "feedbackRequest": try encoder.encode(decoder.decode(APIV1.FeedbackRequest.self, from: original))
             case "feedbackReceipt": try encoder.encode(decoder.decode(APIV1.FeedbackReceipt.self, from: original))
+            case "creditClaimRequest":
+                try encoder.encode(decoder.decode(APIV1.CreditClaimRequest.self, from: original))
+            case "creditClaimResponse":
+                try encoder.encode(decoder.decode(APIV1.CreditClaimResponse.self, from: original))
             default: try encoder.encode(decoder.decode(APIV1.ErrorEnvelope.self, from: original))
             }
         #expect(try Self.sameJSON(original, reencoded), "\(path)")

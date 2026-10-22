@@ -34,5 +34,8 @@
       "state": "paused"
     }
   ],
-  "policyVersion": 1
+  "policyVersion": 1,
+  "credits": {
+    "pictures": 12
+  }
 }
