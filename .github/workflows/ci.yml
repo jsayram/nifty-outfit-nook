@@ -358,6 +358,7 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/LaunchTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
+              -only-testing:NiftyOutfitNookUITests/StylingAccessTests
           - part: ui-add-and-saved
             family: iPhone
             selection: >-
@@ -384,6 +385,7 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
               -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
               -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/StylingAccessTests
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
               -skip-testing:NiftyOutfitNookUITests/SavedLooksTests
               -skip-testing:NiftyOutfitNookUITests/HomeTourTests
