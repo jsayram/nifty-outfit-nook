@@ -99,3 +99,4 @@ Opening Style Me sends nothing; only the button does (RD-02.1). The button build
 - **14a (done):** her usual fit and Preferences in Profile (`docs/profile.md`).
 - **15b (done):** on a wide iPad the request sits beside the options (`docs/ipad.md`).
 - **27a (done):** with the real services (or `-cloud-stylist` in debug builds) Style me goes to the cloud stylist, after her consent and a check of her history first ([decision 0008](decisions/0008-cloud-stylist.md)). The request screen is unchanged.
+- **28 (done):** when the cloud stylist can't answer (no consent, offline, a limit, a failure, or no backend), Quick ideas made on the phone from her own pieces answer instead, labelled "Quick ideas (on your phone)" ([decision 0010](decisions/0010-on-device-stylist.md)). The request screen is unchanged.

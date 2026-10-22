@@ -29,6 +29,14 @@ struct TodayResult: View {
                     ProblemBanner(problem: problem, retry: actions.retry)
                         .readablePane()
                 }
+                // Phase 28: looks made on the phone say so, and why.
+                if let lane = result.madeBy, lane != .cloud {
+                    QuickIdeasLabel(
+                        lane: lane, reason: model.quickIdeasReason, retry: actions.retry,
+                        reviewConsent: actions.reviewConsent
+                    )
+                    .readablePane()
+                }
                 Text(text.requestLine)
                     .nookTextStyle(.note)
                     .foregroundStyle(.nook.textSecondary)
@@ -70,7 +78,7 @@ struct TodayResult: View {
                     }
                     ResultActions(
                         isSaved: model.isSaved(look),
-                        needsConnection: model.problem == .offline,
+                        needsConnection: model.problem == .offline || model.quickIdeasReason == .offline,
                         look: look,
                         actions: actions
                     )
@@ -227,9 +235,15 @@ struct TodayResult: View {
     // MARK: Try a different outfit
 
     private var tryDifferent: some View {
-        let caption = String(
-            localized: "Uses 1 styling", bundle: .module,
-            comment: "Caption under Try a different outfit: it costs one styling request (amendment, LR-05a)")
+        // Phase 28: Quick ideas on the phone cost nothing, so they don't say they do.
+        let caption =
+            model.nextRequestUsesStyling
+            ? String(
+                localized: "Uses 1 styling", bundle: .module,
+                comment: "Caption under Try a different outfit: it costs one styling request (amendment, LR-05a)")
+            : String(
+                localized: "Made on this iPhone, free", bundle: .module,
+                comment: "Caption under Try a different outfit when Quick ideas on the phone will answer")
         // FR-58: over a look from her history, the way on is New ideas.
         let title =
             model.isFromHistory

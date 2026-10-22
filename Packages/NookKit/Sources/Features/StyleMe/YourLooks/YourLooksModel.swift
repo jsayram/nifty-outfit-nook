@@ -15,6 +15,11 @@ import Observation
 /// `AIJobs` (27c): leaving doesn't stop it, its looks land in her history, and coming back (or
 /// the banner, or a notification) shows them here.
 ///
+/// Phase 28: with the cloud stylist set up, `StylistRouter` picks who answers each request. The
+/// cloud stylist (as an `AIJobs` job) when she agreed and the phone is online; otherwise, or when
+/// the cloud refuses or fails, Quick ideas made on the phone, labelled with the reason
+/// (`quickIdeasReason`), so Style Me always gives her looks from her own pieces.
+///
 /// Swap a piece changes a version by hand (Phase 11, LR-07, LR-08): the changed look takes the
 /// version's place on Today, marked "Swapped", and Undo steps back through the changes to the
 /// stylist's look exactly. Changes stay on this screen until she saves the look; a new result
@@ -96,6 +101,9 @@ final class YourLooksModel {
     private(set) var usablePieces = 0
     /// 27c: the cloud job behind this screen, once there is one.
     private(set) var jobID: AIJob.ID?
+    /// Phase 28: why the looks on screen were made on the phone instead of by the cloud stylist.
+    /// `nil` when the cloud answered, or with no cloud stylist set up.
+    private(set) var quickIdeasReason: QuickIdeasReason?
     /// 27c: the job's answer is late, so it's asking again with the same key. Observed through
     /// `AIJobs`, so the progress line changes on its own.
     var isTakingLong: Bool {
@@ -116,6 +124,8 @@ final class YourLooksModel {
     /// 27a: after New ideas she wants the stylist, not her history, for the rest of this screen.
     private var wantsFreshIdeas = false
     private var services: NookServices = .unavailable
+    /// Phase 28: whether the phone is online, for the router. Unknown counts as online.
+    private var connection: ConnectionStatus = .unreported
     private var styling: Task<Void, Never>?
     /// Bumped by every new run and by cancelling, so a stale answer is never shown.
     private var run = 0
@@ -144,8 +154,9 @@ final class YourLooksModel {
 
     /// Sends the request the first time the screen appears. Coming back to the screen never
     /// sends it again on its own.
-    func start(with services: NookServices) {
+    func start(with services: NookServices, connection: ConnectionStatus = .unreported) {
         appear()
+        self.connection = connection
         guard status == .notStarted else { return }
         self.services = services
         style(attaching: true)
@@ -160,6 +171,21 @@ final class YourLooksModel {
 
     /// 27c: whether this is the cloud stylist, so the progress says leaving is fine.
     var isCloud: Bool { services.cloudStyling }
+
+    /// Phase 28: what the router decides from, as things are now.
+    var stylistConditions: StylistConditions {
+        StylistConditions(
+            cloudSetUp: services.cloudStyling, hasConsent: services.stylistConsent.current()?.isCurrent == true,
+            connection: connection.state, onDeviceModel: services.onDeviceModel.status(),
+            hasOnDeviceStylist: services.onDeviceStylist != nil)
+    }
+
+    /// Phase 28: whether the next request (Try a different outfit) would go to the cloud stylist
+    /// and use a styling request. Stage A's stand-in counts as one, as before; Quick ideas don't.
+    var nextRequestUsesStyling: Bool {
+        if services.cloudStyling { return StylistRouter.route(stylistConditions).lane == .cloud }
+        return result?.madeBy == nil
+    }
 
     /// 27c: she said yes to a note when her looks are ready: iOS asks next.
     func allowNotifications() async {
@@ -274,7 +300,7 @@ final class YourLooksModel {
         }
         usablePieces = context.eligibleGarments.count
         if services.cloudStyling, attaching, let existing = services.aiJobs.job(forStyleRequest: request.id) {
-            return await follow(existing.id, run: thisRun)
+            return await follow(existing.id, context: context, run: thisRun)
         }
         // 27a, FR-58: before a paid request, an earlier result from her own history that still
         // fits today's request. Nothing is sent and nothing is used.
@@ -288,15 +314,22 @@ final class YourLooksModel {
         status = .styling(.choosing)
 
         // 27a, 27c: the cloud stylist runs as an app-level job, not in this screen, so leaving
-        // doesn't stop it and its looks are kept in her history either way.
+        // doesn't stop it and its looks are kept in her history either way. Phase 28: only when
+        // the router picks it; otherwise the phone answers at once.
         if services.cloudStyling {
+            let conditions = stylistConditions
+            let route = StylistRouter.route(conditions)
+            guard route.lane == .cloud else { return await styleOnPhone(context, route: route, run: thisRun) }
             let job: AIJob
             do {
                 job = try services.aiJobs.startStyling(context, services: services)
             } catch {
+                if let fallback = StylistRouter.fallback(after: error, conditions) {
+                    return await styleOnPhone(context, route: fallback, run: thisRun)
+                }
                 return finish(Self.failure(for: error), run: thisRun)
             }
-            return await follow(job.id, run: thisRun)
+            return await follow(job.id, context: context, run: thisRun)
         }
 
         let outcome: StyleOutcome
@@ -315,8 +348,9 @@ final class YourLooksModel {
         styling = nil
     }
 
-    /// 27c: shows the job's state now, and its result when it comes.
-    private func follow(_ id: AIJob.ID, run thisRun: Int) async {
+    /// 27c: shows the job's state now, and its result when it comes. Phase 28: a job that was
+    /// refused or failed gives way to Quick ideas, with the reason.
+    private func follow(_ id: AIJob.ID, context: StylingContext, run thisRun: Int) async {
         if let previous = jobID, previous != id, isVisible { services.aiJobs.stoppedShowing(previous) }
         if jobID != id {
             jobID = id
@@ -338,9 +372,61 @@ final class YourLooksModel {
             styling = nil
             if isVisible { services.aiJobs.markSeen(id) }
         case .failed:
-            finish(Self.failure(for: job.failure ?? .notCompleted), run: thisRun)
+            let failure = job.failure ?? .notCompleted
+            if let reason = StylistRouter.reason(after: failure) {
+                await styleOnPhone(context, route: StylistRouter.onPhone(reason, stylistConditions), run: thisRun)
+            } else {
+                finish(Self.failure(for: failure), run: thisRun)
+            }
         case .cancelled, .queued, .running, .stillRunning:
             finish(.stopped, run: thisRun)
+        }
+    }
+
+    /// Phase 28: styles on the phone, with the on-device model when the route says so and Quick
+    /// ideas otherwise (and if the model fails). Nothing is sent and nothing is charged.
+    private func styleOnPhone(_ context: StylingContext, route: StylistRoute, run thisRun: Int) async {
+        let quickIdeas = services.quickIdeas ?? QuickIdeasStylist.standard
+        var lane = route.lane
+        var outcome: StyleOutcome?
+        if lane == .onDevice, let onDevice = services.onDeviceStylist {
+            outcome = try? await onDevice.style(context)
+            if let result = outcome?.result, !ResultCheck.problems(in: result, for: context).isEmpty { outcome = nil }
+            if outcome == nil { lane = .rules }
+        } else {
+            lane = .rules
+        }
+        guard thisRun == run else { return }
+        if outcome == nil {
+            do {
+                outcome = try await quickIdeas.style(context)
+            } catch {
+                return finish(Self.failure(for: error), run: thisRun)
+            }
+        }
+        guard thisRun == run, let outcome else { return }
+        if let result = outcome.result, !ResultCheck.problems(in: result, for: context).isEmpty {
+            return finish(.notCompleted, run: thisRun)
+        }
+        let marked = Self.marked(outcome, lane)
+        await keep(marked, services: services)
+        guard thisRun == run else { return }
+        show(marked)
+        quickIdeasReason = route.reason
+        styling = nil
+    }
+
+    /// The outcome with the stylist that made it.
+    private static func marked(_ outcome: StyleOutcome, _ lane: StylistLane) -> StyleOutcome {
+        switch outcome {
+        case .complete(var result):
+            result.madeBy = lane
+            return .complete(result)
+        case .partial(var result, let missing):
+            result.madeBy = lane
+            return .partial(result, missing: missing)
+        case .insufficient:
+            return outcome
         }
     }
 
@@ -367,6 +453,7 @@ final class YourLooksModel {
     }
 
     private func show(_ outcome: StyleOutcome) {
+        quickIdeasReason = nil
         switch outcome {
         case .complete(let result):
             self.result = result

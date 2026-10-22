@@ -9280,6 +9280,84 @@
     },
     "Hide" : {
       "comment" : "VoiceOver: hides the job banner"
+    },
+    "%@, in %@%@." : {
+      "comment" : "Quick ideas why line for Simple: occasion, colours, then weather (for example ', with a layer for the rain')"
+    },
+    "The same outfit with a dressier %@ for a lift." : {
+      "comment" : "Quick ideas why line for Dressed up; the piece kind, such as top"
+    },
+    "A fresh take with another of your %@." : {
+      "comment" : "Quick ideas why line for Something new when ideas aren't allowed; the piece kind, plural"
+    },
+    "Simple plus one idea to try: %@." : {
+      "comment" : "Quick ideas why line for Something new with an idea piece"
+    },
+    "Smart enough for the office" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Easy for a casual day" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Relaxed for brunch" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Dressed up for date night" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Polished for the event" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Comfortable for the concert" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "Picked from your pieces" : {
+      "comment" : "Quick ideas why line start"
+    },
+    "calm neutrals" : {
+      "comment" : "Quick ideas why line: an all-neutral outfit"
+    },
+    "neutrals with a touch of %@" : {
+      "comment" : "Quick ideas why line: neutrals and one colour"
+    },
+    "a mix of your colours" : {
+      "comment" : "Quick ideas why line: several colours"
+    },
+    ", with a layer for the wet weather" : {
+      "comment" : "Quick ideas why line end"
+    },
+    ", with a warm layer for the cold" : {
+      "comment" : "Quick ideas why line end"
+    },
+    ", with a layer for the cool day" : {
+      "comment" : "Quick ideas why line end"
+    },
+    ", light for the heat" : {
+      "comment" : "Quick ideas why line end"
+    },
+    "Ideas from Apple Intelligence (on your phone)" : {
+      "comment" : "Your looks label when Apple's on-device model made the looks"
+    },
+    "Quick ideas (on your phone)" : {
+      "comment" : "Your looks label when the rule-based stylist on the phone made the looks"
+    },
+    "Made on this iPhone from your own pieces." : {
+      "comment" : "Quick ideas label: what made the looks"
+    },
+    "For the stylist’s ideas, Style Me needs your OK." : {
+      "comment" : "Quick ideas label without stylist consent"
+    },
+    "You’re offline, so these were made on this iPhone from your own pieces." : {
+      "comment" : "Quick ideas label when offline"
+    },
+    "The stylist didn’t finish, so these were made on this iPhone. Nothing was charged." : {
+      "comment" : "Quick ideas label after the cloud stylist failed"
+    },
+    "Ask the stylist" : {
+      "comment" : "Quick ideas label: tries the cloud stylist again"
+    },
+    "Made on this iPhone, free" : {
+      "comment" : "Caption under Try a different outfit when Quick ideas on the phone will answer"
     }
   },
   "version" : "1.0"

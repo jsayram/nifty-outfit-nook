@@ -39,16 +39,60 @@ struct YourLooksCloudTests {
         return .complete(result)
     }
 
-    @Test func withoutConsentNothingIsSentAndAllowStylesRightAway() async throws {
-        let stylist = ScriptedStylist([.fail(.needsConsent)])
-        let services = cloudServices(stylist, consent: nil)
+    /// Phase 28: without consent nothing is sent, and Quick ideas made on the phone show at once
+    /// with Review; Allow then asks the cloud stylist.
+    @Test func withoutConsentQuickIdeasShowAndAllowAsksTheStylist() async throws {
+        let stylist = ScriptedStylist()
+        let quick = ScriptedStylist()
+        var services = cloudServices(stylist, consent: nil)
+        services.quickIdeas = quick
         let model = await styledLooks(services: services)
-        #expect(model.status == .failed(.needsConsent))
+        #expect(model.status == .showing)
+        #expect(model.result?.madeBy == .rules)
+        #expect(model.quickIdeasReason == .needsConsent)
+        #expect(!model.nextRequestUsesStyling)
+        #expect(await stylist.calls == 0)
+        #expect(await quick.calls == 1)
         model.agreeToStylist()
         await model.settle()
         #expect(services.stylistConsent.current()?.version == StylistConsent.currentVersion)
         #expect(model.status == .showing)
-        #expect(await stylist.calls == 2)
+        #expect(model.result?.madeBy == nil)
+        #expect(model.quickIdeasReason == nil)
+        #expect(await stylist.calls == 1)
+    }
+
+    /// The Phase 28 checkpoint on the model: consent off and offline, Style Me still gives Quick
+    /// ideas, made only of her own pieces, that suit the rainy 14.5° day, and sends nothing.
+    @Test func consentOffAndOfflineStillGiveQuickIdeasFromHerPieces() async throws {
+        let stylist = ScriptedStylist()
+        let services = cloudServices(stylist, consent: nil)
+        let model = yourLooksModel()
+        model.start(with: services, connection: ConnectionStatus(.offline))
+        await model.settle()
+        #expect(model.status == .showing)
+        let result = try #require(model.result)
+        #expect(result.madeBy == .rules)
+        #expect(model.quickIdeasReason == .needsConsent)
+        let closet = Dictionary(uniqueKeysWithValues: try await services.closet.garments().map { ($0.id, $0) })
+        for look in result.versions {
+            #expect(look.garmentIDs.allSatisfy { closet[$0] != nil })
+            #expect(look.why?.isEmpty == false)
+        }
+        let simple = try #require(result.simple).garmentIDs.compactMap { closet[$0] }
+        // 14.5° is cool: medium or warm pieces, and a layer for the rain when she has one.
+        for piece in simple where [.top, .bottom, .dress, .layer].contains(piece.category) {
+            #expect(TemperatureBand.cool.suitableWarmth.contains(piece.warmth), "\(piece.name)")
+        }
+        #expect(simple.contains { $0.category == .layer })
+        #expect(await stylist.calls == 0)
+
+        // With her OK but still offline: Quick ideas again, now saying she's offline.
+        services.stylistConsent.save(StylistConsent(agreedAt: TestTime.now))
+        model.retry()
+        await model.settle()
+        #expect(model.quickIdeasReason == .offline)
+        #expect(await stylist.calls == 0)
     }
 
     @Test func anEarlierResultFromHerHistoryIsShownWithoutAskingAgain() async throws {
@@ -91,15 +135,22 @@ struct YourLooksCloudTests {
         #expect(await stylist.calls == 1)
     }
 
-    @Test func limitsAndProviderFailuresAreSaidCalmly() async throws {
+    /// Phase 28: a limit or a failed cloud request gives way to Quick ideas, with the reason, and
+    /// Ask the stylist (retry) goes back to the cloud.
+    @Test func limitsAndProviderFailuresGiveWayToQuickIdeas() async throws {
         let limited = await styledLooks(
             services: cloudServices(ScriptedStylist([.fail(.limited(.rateLimited(retryAfterSeconds: 12)))])))
-        #expect(limited.status == .failed(.limited(.rateLimited(retryAfterSeconds: 12))))
+        #expect(limited.status == .showing)
+        #expect(limited.result?.madeBy == .rules)
+        #expect(limited.quickIdeasReason == .limited(.rateLimited(retryAfterSeconds: 12)))
         let failed = await styledLooks(services: cloudServices(ScriptedStylist([.fail(.notCompleted)])))
-        #expect(failed.status == .failed(.notCompleted))
+        #expect(failed.status == .showing)
+        #expect(failed.quickIdeasReason == .cloudDidNotFinish)
         failed.retry()
         await failed.settle()
         #expect(failed.status == .showing)
+        #expect(failed.quickIdeasReason == nil)
+        #expect(failed.result?.madeBy == nil)
     }
 
     /// Jose, 21 October 2026: leaving Your looks doesn't stop a cloud request. Its looks land in
