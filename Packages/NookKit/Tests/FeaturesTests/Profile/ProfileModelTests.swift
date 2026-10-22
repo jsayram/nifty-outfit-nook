@@ -2,6 +2,7 @@ import Fixtures
 import Foundation
 import Models
 import NookTestSupport
+import Synchronization
 import Testing
 
 @testable import Features
@@ -255,22 +256,29 @@ struct ProfileModelTests {
         #expect(try await services.pictures.pictures() == pictures)
     }
 
-    /// Phase 22a: her own photo from the picker, kept through the intake (which strips its
-    /// metadata). A photo she replaces or removes is deleted from the iPhone at once.
+    /// Phase 22a and 33b: her own photo, kept through the intake (which strips its metadata) and
+    /// checked, then used. A photo she replaces or removes is deleted from the iPhone at once.
     @Test func herOwnPhotoReplacesTheOldOneAndRemovingDeletesIt() async throws {
         let intake = RecordingPhotoIntake()
         var services = services()
         services.photos = intake
         let model = await loaded(services)
 
-        #expect(await model.useTryOnPhoto(.bytes("me"), in: services))
+        let first = try #require(await model.prepareTryOnPhoto(.bytes("me"), in: services))
+        #expect(first.photo == .stored(EntityID("photo-1")) && first.source == .library)
+        // Kept and checked, but not hers yet: nothing changed, nothing deleted.
+        #expect(model.tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+        #expect(intake.discarded.isEmpty)
+        #expect(await model.saveTryOnPhoto(first, in: services))
         #expect(model.tryOnPhoto == .stored(EntityID("photo-1")))
         #expect(try await services.profile.profile().tryOnPhoto == .stored(EntityID("photo-1")))
         #expect(intake.kept == [Data("me".utf8)])
         // The example it replaced isn't a file, so nothing of hers was deleted yet.
         #expect(intake.discarded == [ProfileModel.exampleTryOnPhoto])
 
-        #expect(await model.useTryOnPhoto(.bytes("me again"), in: services))
+        let second = try #require(await model.prepareTryOnPhoto(.bytes("me again", from: .camera), in: services))
+        #expect(second.source == .camera)
+        #expect(await model.saveTryOnPhoto(second, in: services))
         #expect(intake.discarded.last == .stored(EntityID("photo-1")))
 
         #expect(await model.removePhoto(in: services))
@@ -278,12 +286,54 @@ struct ProfileModelTests {
         #expect(try await services.profile.profile().tryOnPhoto == nil)
     }
 
+    @Test func aPhotoShePassesOnIsDeletedAndHerCurrentPhotoStays() async throws {
+        let intake = RecordingPhotoIntake()
+        var services = services()
+        services.photos = intake
+        let model = await loaded(services)
+        let candidate = try #require(await model.prepareTryOnPhoto(.bytes("not this one"), in: services))
+        await model.discardTryOnPhoto(candidate, in: services)
+        #expect(intake.discarded == [candidate.photo])
+        #expect(model.tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+        #expect(try await services.profile.profile().tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+    }
+
+    /// Phase 33b: the photo is checked before she saves it, with the checks try-on runs.
+    @Test func thePhotoIsCheckedBeforeItIsSavedAndAProblemChangesNothing() async throws {
+        let intake = RecordingPhotoIntake()
+        var services = services()
+        services.photos = intake
+        let checker = StubPhotoChecker(.problem(.noFace))
+        services.tryOnPhotoChecker = checker
+        let model = await loaded(services)
+
+        let candidate = try #require(await model.prepareTryOnPhoto(.bytes("two people"), in: services))
+        #expect(candidate.check == .problem(.noFace))
+        #expect(checker.checked == [candidate.photo])
+        // Her try-on photo is untouched until she uses one that works.
+        #expect(model.tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+        #expect(try await services.profile.profile().tryOnPhoto == ProfileModel.exampleTryOnPhoto)
+
+        // "Check again" asks the checker again.
+        checker.verdict = .fine(tips: [.armsOut])
+        #expect(await model.checkTryOnPhoto(candidate.photo, in: services) == .fine(tips: [.armsOut]))
+    }
+
+    @Test func whereNothingChecksPhotosEveryPhotoIsFine() async throws {
+        var services = services()
+        services.photos = RecordingPhotoIntake()
+        let model = await loaded(services)
+        let candidate = try #require(await model.prepareTryOnPhoto(.bytes(), in: services))
+        #expect(candidate.check == .fine(tips: []))
+    }
+
     @Test func aTryOnPhotoThatCantBeKeptChangesNothing() async throws {
         let intake = RecordingPhotoIntake(.fails(.unreadable))
         var services = services()
         services.photos = intake
         let model = await loaded(services)
-        #expect(!(await model.useTryOnPhoto(.bytes(), in: services)))
+        #expect(await model.prepareTryOnPhoto(.bytes(), in: services) == nil)
+        #expect(await model.prepareTryOnPhoto(.unreadable, in: services) == nil)
         #expect(model.tryOnPhoto == ProfileModel.exampleTryOnPhoto)
         #expect(intake.discarded.isEmpty)
     }
@@ -294,7 +344,8 @@ struct ProfileModelTests {
         services.photos = intake
         let model = ProfileModel()
         model.show(Profile(), locale: us)
-        #expect(!(await model.useTryOnPhoto(.bytes(), in: services)))
+        let candidate = try #require(await model.prepareTryOnPhoto(.bytes(), in: services))
+        #expect(!(await model.saveTryOnPhoto(candidate, in: services)))
         #expect(intake.discarded == [.stored(EntityID("photo-1"))])
     }
 
@@ -315,5 +366,26 @@ struct ProfileModelTests {
         #expect(model.profile.preferences.pieceMode == .mineAndOneIdea)
         #expect(model.profile.measurements.isEmpty)
         #expect(model.profile.fitPieces.isEmpty)
+    }
+}
+
+/// A photo check that answers what it's told, and records what it was asked.
+final class StubPhotoChecker: TryOnPhotoChecking {
+    private let state: Mutex<(verdict: TryOnPhotoCheck, checked: [PhotoReference])>
+
+    init(_ verdict: TryOnPhotoCheck) { state = Mutex((verdict, [])) }
+
+    var verdict: TryOnPhotoCheck {
+        get { state.withLock { $0.verdict } }
+        set { state.withLock { $0.verdict = newValue } }
+    }
+
+    var checked: [PhotoReference] { state.withLock { $0.checked } }
+
+    func check(_ photo: PhotoReference) async -> TryOnPhotoCheck {
+        state.withLock {
+            $0.checked.append(photo)
+            return $0.verdict
+        }
     }
 }

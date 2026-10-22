@@ -241,9 +241,12 @@ struct ProfileScreen: View {
             TryOnPhotoSheet(
                 hasPhoto: model.hasTryOnPhoto,
                 ownPhoto: services.photos.usesSystemPicker
-                    ? OwnTryOnPhoto(photo: model.tryOnPhoto) { picked in
-                        await model.useTryOnPhoto(picked, in: services)
-                    } : nil
+                    ? OwnTryOnPhoto(
+                        photo: model.tryOnPhoto, frames: services.frameAnalyzer,
+                        prepare: { await model.prepareTryOnPhoto($0, in: services) },
+                        check: { await model.checkTryOnPhoto($0, in: services) },
+                        save: { await model.saveTryOnPhoto($0, in: services) },
+                        discard: { await model.discardTryOnPhoto($0, in: services) }) : nil
             ) {
                 await model.useExamplePhoto(in: services)
             } remove: {

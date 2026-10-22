@@ -133,7 +133,7 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 - **15b (done):** on iPad a picture opens beside the Pictures grid (`docs/ipad.md`).
 - **22b (done):** a generated picture's image is a stored file, removed once Delete picture's Undo has gone, or when a piece it shows is deleted for good (`docs/image-storage.md`).
 - **30a (done):** the picture allowance follows styling access; credit packs are 30b.
-- **33a (done):** real pictures, with her face kept on the phone ("Real pictures (33a)" above). 33b (the try-on photo setup) and 33c (the privacy walkthrough) are next.
+- **33a (done):** real pictures, with her face kept on the phone ("Real pictures (33a)" above). 33b (the try-on photo setup) is done ("Photo setup (33b)" below), and 33c (the privacy walkthrough) is next.
 - **21b and 22b (done):** deleting a piece for good deletes the pictures that show it, with their files.
 
 ## Real pictures (33a)
@@ -180,6 +180,23 @@ The real Vision path was checked on a Mac (22 October 2026) on the AI-generated 
 - `RealTryOnModelTests`: no consent means nothing prepared or sent; Allow then a picture as a job; a refused photo explained with nothing sent; leaving the sheet leaves the job running.
 - `TryOnGatewayTests` and `ContractTests`: still running then the picture, counted once, replayed with the same key; only the contract's fields on the wire; a failed picture not counted; consent to another text refused; the try-on limits match the contract.
 - UI, `TryOnTests` (skipped on pull requests): the checkpoint below.
+
+## Photo setup (33b)
+
+Phase 33b, 22 October 2026. The screens and their words are in `docs/profile.md`, "Your try-on photo, taken with the app". This is how it connects to try-on.
+
+- **One set of checks.** `PhoneTryOn.facelessPortrait` is her outline, one face, the head and hair filled with grey, then no face found in the pixels or in the JPEG. `prepare` runs it before anything is sent, and `TryOnPhotoChecker` (Services) runs the same function when she sets up the photo, so a photo the setup accepts is one try-on accepts, and one it explains is one try-on would have refused for the same reason (`TryOnPhotoCheckerTests.theCheckAndTryOnAgreeOnEveryPhoto`). The check writes nothing and sends nothing: the faceless picture it makes is thrown away.
+- **Gentle tips.** If Vision can look at the photo, the same framing rules as the camera's hints (`FramingGuidance`) add tips: whole body, distance, facing the camera, arms, light. They never refuse a photo and never mention hair. Where the photo sits in the picture isn't a tip, since she isn't framing it now. Hats, scarves and turtlenecks aren't detected: the sheet says once that they're fine but the picture looks best without them.
+- **Any hairstyle is fine** (Jose, 19 October 2026). Nothing in setup asks her to tie her hair up. The grey head shape takes in her hair, whatever it is (`HeadMasking.headShape`), and the 19 October hard cases (long, curly, afro and short hair) are on the device checklist (2.14).
+- **No pose changes.** The model gets her photo as she stands, so the camera aims for the pose she wants to wear clothes in: facing the camera, arms a little away from her body, whole body in view.
+- **Sizes.** The camera's photo is cut down to at most 2,048 pixels on its long side before it is kept (`CameraPhotoSize`), so it is inside the backend's 2,048-pixel cap for her photo (PR 101) even before try-on makes the 1,280-pixel faceless copy it actually sends. A photo from Photos is kept at the intake's usual size (up to 4,096) and is cut to 1,280 when try-on prepares it, so what is sent is always inside the cap.
+- **What is stored.** Only the intake's cleaned copy (`PhotoIntake.keep`, 22a and 22b), and only once she taps Use this photo; the live frames are never kept. A copy she doesn't use is deleted at once. A copy left behind by a kill is removed by the launch sweep for files nothing points to (22b).
+- **The checks come first, before she can save.** When the checks can't run (Vision failing, as on a simulator) she can keep the photo anyway, and try-on still checks again before anything is sent (fail closed, 33a).
+- **Permission.** The camera's purpose string is now "Take photos of your clothes to add them to your closet, and take your try-on photo if you set one up." (`closet/compliance/PERMISSIONS.md`; `scripts/check-archive.sh` checks it). Choosing from Photos asks for nothing.
+
+### The consent text
+
+Corrected on 22 October 2026 (Jose): the consent no longer says "Our server keeps neither". It says "Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." That is what the backend does: the sealed inputs are deleted when the provider call ends, and the sealed result is kept at most 30 minutes (2 minutes after the phone first receives it). The version stays `tryon-1`: nothing real has been sent under it yet, and the backend only checks which provider the text names, which didn't change. If real pictures were already made under the old text, bump the version (`TryOnConsent.currentVersion` and the backend's `TRYON_CONSENT_COVERS`).
 
 ## Sample previews
 

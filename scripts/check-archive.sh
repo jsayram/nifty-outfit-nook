@@ -77,7 +77,7 @@ if info.get("UILaunchScreen", {}).get("UIColorName") != "LaunchBackground":
 # uses the system picker, which needs no key) and approximate location while in use, for the
 # weather (Phase 29), which must stay reduced accuracy.
 allowed_permissions = {
-    "NSCameraUsageDescription": "Take photos of your clothes to add them to your closet.",
+    "NSCameraUsageDescription": "Take photos of your clothes to add them to your closet, and take your try-on photo if you set one up.",
     "NSLocationWhenInUseUsageDescription": "Your rough location gets the forecast, so outfit ideas suit the weather. It's used only for the forecast and isn't saved.",
 }
 if info.get("NSLocationDefaultAccuracyReduced") is not True:
