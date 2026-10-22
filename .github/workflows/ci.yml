@@ -190,10 +190,10 @@ jobs:
   # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
   # only when every one of them passed.
   #
-  # The free plan runs at most five macOS jobs at once, so there are at most five: this build job
-  # and up to four test jobs (three on an iPhone, and the iPad one on a manual run that asks for
-  # it). The test jobs start with this one, not after it, and boot their simulator
-  # while it builds (booting takes 2 to 5 minutes on the hosted runner). When this job uploads
+  # The free plan runs at most five macOS jobs at once. With this job on the self-hosted Mac that
+  # leaves five hosted test jobs (four on an iPhone, and the iPad one on a manual run that asks
+  # for it). With this job hosted too, a sixth waits for a runner.
+  # The test jobs start with this one, not after it, and boot their simulator while it builds (booting takes 2 to 5 minutes on the hosted runner). When this job uploads
   # what it built, they download it and test it without building. Building during a boot on the
   # same runner was much slower (a build took 9 minutes instead of 1 to 2.5, October 2026).
   # If this job can't get a runner within 3 minutes (other runs hold them, or these test jobs
@@ -262,7 +262,8 @@ jobs:
               Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
               $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
           fi
-      - if: ${{ needs.changes.outputs.ui == 'true' && env.NOOK_UI_ON_MAC == '' }}
+      - name: Upload the UI test build
+        if: ${{ needs.changes.outputs.ui == 'true' && env.NOOK_UI_ON_MAC == '' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-test-products
@@ -373,7 +374,7 @@ jobs:
           done
           exit "$status"
 
-  # The other UI tests in three parts, by test class, on an iPhone simulator. The iPad layouts
+  # The other UI tests in four parts, by test class, on an iPhone simulator. The iPad layouts
   # are paused: they are the separate `ui-ipad` job below, which runs only on a manual run with
   # include_ipad ticked (iPad testing waits until the app's features are done).
   #
@@ -381,25 +382,34 @@ jobs:
   # run (the batch run on develop, scripts/run-ui-batch.sh); never by themselves (see `changes`).
   # They cover the real user flows once; a test that package tests already cover, or that repeats
   # another test's screens at the largest text size, skips itself (NOOK_PR_RUN above) and runs
-  # only in a manual full-suite run. The sizes below are the normal run's, then the full suite's,
-  # in seconds of tests (the classes' mean times from the test log, 6 runs on Xcode 27.1, 20 and
-  # 21 October 2026). A class can take 1.5 to 2 times as long from one run to the next, and a
-  # failed test that retries adds its own time again.
-  # A test part spends 4 to 5 minutes outside its tests (waiting for the build, downloading it,
-  # booting the simulator), and build-and-archive about 8 (two builds, the archive, then a cold
-  # boot), so a run with UI tests is about 15 minutes.
-  #   (build-and-archive)     CatalogTests 103, ProfileTests 58 / 137, CutoutBenchTests 0 / 53,
-  #                           package tests about 200 to 250
-  #   ui-audit-and-settings   AccessibilityAuditTests 418, SettingsTests 112 / 217,
-  #                           HomeVariantTests 25 / 99, LaunchTests 12 / 77, and the large-text
-  #                           audits of Closet and Profile (0 / 231)
-  #   ui-add-and-saved        AddPieceTests 202, SavedLooksTests 150, HomeTourTests 120 / 138,
-  #                           OnboardingTests 82, BackupsTests 55, ScreenToursTests 0 / 257,
-  #                           and the large-text audits of Style Me, Saved Looks, Onboarding and
-  #                           Home (0 / 269)
-  #   ui-rest                 GarmentDetailTests 80, HomeTests 126, StyleMeTests 113,
-  #                           SuitcasesAndLaundryTests 85 / 109, SwapTests 59, ClosetTests 52,
-  #                           MakeYourOwnLookTests 51, YourLooksTests 38 / 117, and any new class
+  # only in a manual full-suite run, which is what the sizes below are.
+  #
+  # Rebalanced on 22 October 2026, from the full suite's runs that day (39830667919,
+  # 39853441466 and 39860006609; seconds of tests per class from the test log, the mean of the
+  # runs that had it). With three parts, ui-rest had about 1950 seconds of tests plus a retry
+  # and a 4-minute build, and hit the 40-minute cap in both batches (it had two more minutes
+  # of tests to go), while the other two had 1470 and 1610 and finished in 35. The first run of
+  # four parts finished in 20, 25, 31 and 35 minutes: the same classes take up to 1.4 times as
+  # long on one hosted VM as on another, and the 35-minute part had been planned from one run's
+  # times, 190 seconds too light (WeatherTests has moved out of it). Parts of about 1250 seconds each finish in about 25
+  # minutes on an average VM and in about 33 on a slow one. The free plan runs five macOS jobs
+  # at once: with the build job on the Mac that is these four plus ui-ipad.
+  # A failed test that retries adds its own time again.
+  #   (build-and-archive)     CatalogTests, ProfileTests, CutoutBenchTests, and every package test
+  #   ui-audit-and-settings   AccessibilityAuditTests 690, SettingsTests 200, the large-text
+  #                           audits of Closet and Profile 215, WeatherTests 193 (about 1300)
+  #   ui-large-text-and-add   the other seven large-text audits 830 (DeleteMyAccount alone is 313),
+  #                           AddPieceTests 210, HomeTourTests 118, OnboardingTests 58,
+  #                           BackupsTests 30 (about 1250)
+  #   ui-saved-tours-and-jobs SavedLooksTests 225, ScreenToursTests 214, HomeVariantTests 119,
+  #                           LaunchTests 99, StylingAccessTests 29, AccountDeletionTests 251,
+  #                           BackgroundJobsTests 290 (about 1230)
+  #   ui-rest                 ClosetTests, YourLooksTests, GarmentDetailTests, SupportFeedbackTests,
+  #                           StyleMeTests, SuitcasesAndLaundryTests, HomeTests, LimitsLabTests,
+  #                           CloudStylistTests, GatewayLabTests, SwapTests, SignInAndReportTests,
+  #                           MakeYourOwnLookTests, TryOnPhotoSetupTests, TryOnTests,
+  #                           DeviceChecksTests, PrivacyWalkthroughTests, and any new class or test
+  #                           (about 1220)
   #   ui-ipad (paused)        IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone. Every part, the iPad one too, tests what
@@ -424,20 +434,16 @@ jobs:
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -only-testing:NiftyOutfitNookUITests/SettingsTests
-              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
-              -only-testing:NiftyOutfitNookUITests/LaunchTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
-              -only-testing:NiftyOutfitNookUITests/StylingAccessTests
-          - part: ui-add-and-saved
+              -only-testing:NiftyOutfitNookUITests/WeatherTests
+          - part: ui-large-text-and-add
             family: iPhone
             selection: >-
               -only-testing:NiftyOutfitNookUITests/AddPieceTests
-              -only-testing:NiftyOutfitNookUITests/SavedLooksTests
               -only-testing:NiftyOutfitNookUITests/HomeTourTests
               -only-testing:NiftyOutfitNookUITests/OnboardingTests
               -only-testing:NiftyOutfitNookUITests/BackupsTests
-              -only-testing:NiftyOutfitNookUITests/ScreenToursTests
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testStyleMeAndYourLooks
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
@@ -445,6 +451,16 @@ jobs:
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testTryOnPhotoAndStylingAccess
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testBackups
               -only-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testDeleteMyAccount
+          - part: ui-saved-tours-and-jobs
+            family: iPhone
+            selection: >-
+              -only-testing:NiftyOutfitNookUITests/SavedLooksTests
+              -only-testing:NiftyOutfitNookUITests/ScreenToursTests
+              -only-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -only-testing:NiftyOutfitNookUITests/LaunchTests
+              -only-testing:NiftyOutfitNookUITests/StylingAccessTests
+              -only-testing:NiftyOutfitNookUITests/AccountDeletionTests
+              -only-testing:NiftyOutfitNookUITests/BackgroundJobsTests
           # Every other UI test, so a new class or test is never left out: this part names only
           # what the others run, and skips exactly that.
           - part: ui-rest
@@ -456,17 +472,12 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/CutoutBenchTests
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditTests
               -skip-testing:NiftyOutfitNookUITests/SettingsTests
-              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
-              -skip-testing:NiftyOutfitNookUITests/LaunchTests
-              -skip-testing:NiftyOutfitNookUITests/StylingAccessTests
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
+              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
               -skip-testing:NiftyOutfitNookUITests/AddPieceTests
-              -skip-testing:NiftyOutfitNookUITests/SavedLooksTests
               -skip-testing:NiftyOutfitNookUITests/HomeTourTests
               -skip-testing:NiftyOutfitNookUITests/OnboardingTests
               -skip-testing:NiftyOutfitNookUITests/BackupsTests
-              -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
-              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testClosetAndItsScreens
-              -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testProfileAndSettings
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testStyleMeAndYourLooks
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testSavedLooksAndPictures
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testOnboarding
@@ -474,6 +485,14 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testTryOnPhotoAndStylingAccess
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testBackups
               -skip-testing:NiftyOutfitNookUITests/AccessibilityAuditLargeTextTests/testDeleteMyAccount
+              -skip-testing:NiftyOutfitNookUITests/SavedLooksTests
+              -skip-testing:NiftyOutfitNookUITests/ScreenToursTests
+              -skip-testing:NiftyOutfitNookUITests/HomeVariantTests
+              -skip-testing:NiftyOutfitNookUITests/LaunchTests
+              -skip-testing:NiftyOutfitNookUITests/StylingAccessTests
+              -skip-testing:NiftyOutfitNookUITests/AccountDeletionTests
+              -skip-testing:NiftyOutfitNookUITests/BackgroundJobsTests
+              -skip-testing:NiftyOutfitNookUITests/WeatherTests
               -skip-testing:NiftyOutfitNookUITests/IPadTests
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
@@ -518,16 +537,20 @@ jobs:
             echo "Self-hosted runner: building here from the cached DerivedData, not waiting."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
-            scripts/wait-for-artifact.sh ui-test-products build-and-archive
+            scripts/wait-for-artifact.sh ui-test-products build-and-archive "Upload the UI test build"
           fi
-      - if: steps.build.outputs.ready == 'true'
+      - name: Download the build
+        id: download
+        if: steps.build.outputs.ready == 'true'
+        # A failed download falls back to building here, like a build job that never started.
+        continue-on-error: true
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ui-test-products
           path: ${{ runner.temp }}
       - name: Unpack the build, or build here if build-and-archive couldn't start
         env:
-          READY: ${{ steps.build.outputs.ready }}
+          READY: ${{ steps.download.outcome == 'success' }}
         run: |
           if [[ "$READY" == "true" ]]; then
             mkdir -p build/Products
@@ -623,16 +646,20 @@ jobs:
             echo "Self-hosted runner: building here from the cached DerivedData, not waiting."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
-            scripts/wait-for-artifact.sh ui-test-products build-and-archive
+            scripts/wait-for-artifact.sh ui-test-products build-and-archive "Upload the UI test build"
           fi
-      - if: steps.build.outputs.ready == 'true'
+      - name: Download the build
+        id: download
+        if: steps.build.outputs.ready == 'true'
+        # A failed download falls back to building here, like a build job that never started.
+        continue-on-error: true
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ui-test-products
           path: ${{ runner.temp }}
       - name: Unpack the build, or build here if build-and-archive couldn't start
         env:
-          READY: ${{ steps.build.outputs.ready }}
+          READY: ${{ steps.download.outcome == 'success' }}
         run: |
           if [[ "$READY" == "true" ]]; then
             mkdir -p build/Products
