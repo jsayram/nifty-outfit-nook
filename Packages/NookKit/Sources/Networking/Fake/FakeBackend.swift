@@ -196,21 +196,24 @@ public final class FakeBackend: Sendable {
             if let problem = checkSessionBody(request, body) { return problem(id) }
             let (user, isNew) = state.withLock { state -> (APIV1.User, Bool) in
                 if let existing = state.principals[parsed.subject] {
-                    return (APIV1.User(id: existing.id, createdAt: existing.createdAt), false)
+                    return (Self.user(existing.id, existing.createdAt), false)
                 }
                 let created = (id: "usr_" + FakeToken.randomHex(16), createdAt: Self.millisecondPrecision(now()))
                 state.principals[parsed.subject] = created
-                return (APIV1.User(id: created.id, createdAt: created.createdAt), true)
+                return (Self.user(created.id, created.createdAt), true)
             }
             return encode(200, APIV1.SessionResponse(user: user, newAccount: isNew), id)
         case APIV1.me:
             guard let existing = state.withLock({ $0.principals[parsed.subject] }) else {
                 return error(.notRegistered, id)
             }
-            return encode(200, APIV1.Me(user: APIV1.User(id: existing.id, createdAt: existing.createdAt)), id)
+            return encode(200, APIV1.Me(user: Self.user(existing.id, existing.createdAt)), id)
         case APIV1.sendFeedback:
             guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
             return routeFeedback(request, body: body, subject: parsed.subject, id: id)
+        case APIV1.claimEntitlement:
+            guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
+            return routeEntitlement(request, body: body, subject: parsed.subject, id: id)
         case APIV1.claimCredits:
             guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
             return routeCredits(request, body: body, subject: parsed.subject, id: id)

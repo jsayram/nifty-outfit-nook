@@ -37,5 +37,10 @@
   "policyVersion": 1,
   "credits": {
     "pictures": 12
+  },
+  "styling": {
+    "access": true,
+    "source": "subscription",
+    "expiresAt": "2026-11-22T09:00:00.000Z"
   }
 }

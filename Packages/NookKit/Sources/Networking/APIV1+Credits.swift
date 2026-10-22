@@ -26,4 +26,22 @@ extension APIV1 {
         public var claim: Claim
         public var credits: CreditBalance
     }
+
+    // 30c
+
+    /// The subscription's or the complimentary unlock's signed JWS, as StoreKit gives it.
+    public typealias EntitlementClaimRequest = CreditClaimRequest
+
+    /// The server's own view of her styling access, from Apple's verified records only.
+    public struct StylingAccess: Codable, Sendable, Equatable {
+        public var access: Bool
+        /// subscription, unlock, plan or none.
+        public var source: String
+        public var expiresAt: DateTime?
+    }
+
+    public struct EntitlementClaimResponse: Codable, Sendable, Equatable {
+        public var productId: String
+        public var styling: StylingAccess
+    }
 }

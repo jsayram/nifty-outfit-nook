@@ -53,10 +53,14 @@ public enum APIV1 {
     /// with the first grant.
     public static let claimCredits = Endpoint(
         id: "claimCredits", method: "POST", path: "/v1/credits/claim", requiresAuth: true, idempotent: true)
+    // 30c
+    /// Safe to repeat: links the subscription or the complimentary unlock to this account once.
+    public static let claimEntitlement = Endpoint(
+        id: "claimEntitlement", method: "POST", path: "/v1/entitlements/claim", requiresAuth: true, idempotent: true)
 
     public static let endpoints = [
         health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
-        sendFeedback, claimCredits,
+        sendFeedback, claimCredits, claimEntitlement,
     ]
 
     // MARK: Bodies
@@ -79,12 +83,16 @@ public enum APIV1 {
     public struct User: Codable, Sendable, Equatable {
         public var id: String
         public var createdAt: Date
+        /// 30c: the UUID the app passes to StoreKit with every purchase, so Apple's server
+        /// notifications name this account. Absent from older backends.
+        public var appAccountToken: String?
 
-        enum CodingKeys: String, CodingKey { case id, createdAt }
+        enum CodingKeys: String, CodingKey { case id, createdAt, appAccountToken }
 
-        public init(id: String, createdAt: Date) {
+        public init(id: String, createdAt: Date, appAccountToken: String? = nil) {
             self.id = id
             self.createdAt = createdAt
+            self.appAccountToken = appAccountToken
         }
 
         public init(from decoder: any Decoder) throws {
@@ -96,12 +104,14 @@ public enum APIV1 {
                     forKey: .createdAt, in: container, debugDescription: "Not an ISO 8601 date-time")
             }
             createdAt = date
+            appAccountToken = try container.decodeIfPresent(String.self, forKey: .appAccountToken)
         }
 
         public func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(id, forKey: .id)
             try container.encode(APIV1.formatDate(createdAt), forKey: .createdAt)
+            try container.encodeIfPresent(appAccountToken, forKey: .appAccountToken)
         }
     }
 
@@ -155,13 +165,15 @@ public enum APIV1 {
         case featurePaused = "feature_paused"
         // 27a
         case consentRequired = "consent_required"
+        // 30c
+        case entitlementRequired = "entitlement_required"
 
         /// The HTTP status the contract gives each code.
         public var status: Int {
             switch self {
             case .invalidRequest: 400
             case .unauthenticated, .tokenExpired: 401
-            case .forbidden, .attestationRequired, .consentRequired: 403
+            case .forbidden, .attestationRequired, .consentRequired, .entitlementRequired: 403
             case .notFound, .notRegistered: 404
             case .methodNotAllowed: 405
             case .idempotencyConflict, .actionInProgress: 409

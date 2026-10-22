@@ -19,7 +19,11 @@ enum AppSubscriptions {
                 return ScriptedSubscriptionService.debug(name, now: Date())
             }
         #endif
-        let storeKit = StoreKitSubscriptionService(cache: DefaultsSubscriptionStatusCache())
+        // 30c: the server takes the subscription's and the unlock's signed transactions. Not while
+        // the hosted unit tests run inside the app: they drive StoreKit themselves (as for packs).
+        let hostedTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        let storeKit = StoreKitSubscriptionService(
+            cache: DefaultsSubscriptionStatusCache(), claimer: hostedTests ? nil : AppGateway.stylingAccess)
         // Before anything reads the status, so no transaction that arrives at launch is missed.
         storeKit.start()
         return storeKit
@@ -44,7 +48,7 @@ enum AppSubscriptions {
     }()
 
     /// Keeps the hint on paid requests in step with StoreKit for the life of the app. The server
-    /// never trusts it (30c).
+    /// never trusts it: since 30c it decides from Apple's verified records.
     static func follow() async {
         let service = service
         let hint = EntitlementHintSource.shared

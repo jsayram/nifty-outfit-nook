@@ -1,10 +1,11 @@
 import Foundation
 import Models
 
-/// `CreditClaiming` over the v1 gateway (30b): POST /v1/credits/claim with the signed-in token.
-/// The same code runs against the fake backend and the real one. No App Attest: the signed
-/// transaction is the proof, and a claim costs nothing.
-public struct GatewayCreditClaimer: CreditClaiming {
+/// `CreditClaiming` over the v1 gateway (30b): POST /v1/credits/claim with the signed-in token,
+/// and 30c's `StylingAccessClaiming`: POST /v1/entitlements/claim. The same code runs against the
+/// fake backend and the real one. No App Attest: the signed transaction is the proof, and a claim
+/// costs nothing.
+public struct GatewayCreditClaimer: CreditClaiming, StylingAccessClaiming {
     private let client: APIClient
 
     public init(client: APIClient) {
@@ -19,6 +20,17 @@ public struct GatewayCreditClaimer: CreditClaiming {
             return CreditClaim(
                 transactionID: answer.claim.transactionId, pictures: answer.claim.pictures,
                 replayed: answer.claim.replayed, balance: answer.credits.pictures)
+        } catch {
+            throw Self.problem(for: error)
+        }
+    }
+
+    public func claimStylingAccess(signedTransaction: String) async throws(CreditClaimProblem) -> Bool {
+        do {
+            let answer = try await client.send(
+                APIV1.claimEntitlement, body: APIV1.EntitlementClaimRequest(signedTransaction: signedTransaction),
+                as: APIV1.EntitlementClaimResponse.self)
+            return answer.styling.access
         } catch {
             throw Self.problem(for: error)
         }
