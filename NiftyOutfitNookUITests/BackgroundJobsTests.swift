@@ -1,3 +1,4 @@
+import UserNotifications
 import XCTest
 
 /// Background AI jobs (Phase 27c) on the real screens, against the fake backend's slow stylist
@@ -51,6 +52,12 @@ final class BackgroundJobsTests: XCTestCase {
     func testInTheBackgroundANotificationSaysTheyAreReady() throws {
         try skipOnPullRequests(
             "iOS's own alert and the Home Screen are slow to script on CI; AIJobsTests covers the notification.")
+        try XCTSkipUnless(
+            Self.notificationServiceAnswers(),
+            "This simulator's notification service doesn't answer, so no notification can show. Seen on the "
+                + "iOS 27.0 simulator on the Mac that hosts the self-hosted runner: SpringBoard's notification "
+                + "server waits on a deadlocked dasd (October 2026). A simulator on iOS 26.5 works "
+                + "(NOOK_SIM_OS=26.5), and so do GitHub's hosted runners.")
         let app = launch()
         startStyleMe(in: app)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -97,7 +104,13 @@ final class BackgroundJobsTests: XCTestCase {
             tap(app.buttons["Review"], until: { allow.exists })
             tap(allow, until: { app.staticTexts["results.styling"].exists })
         }
-        XCTAssertTrue(app.staticTexts["results.styling"].waitUntilExists(timeout: Self.wait))
+        // Her own closet and history are kept on the simulator between runs (a CI retry, a second
+        // local run). The same request again comes from her history, so ask afresh with New ideas.
+        let styling = app.staticTexts["results.styling"]
+        if !styling.waitUntilExists(timeout: 5), app.buttons["results.tryDifferent"].exists {
+            tap(app.buttons["results.tryDifferent"], until: { styling.exists })
+        }
+        XCTAssertTrue(styling.waitUntilExists(timeout: Self.wait))
         keepScreenshot("27c-8-styling-before-kill")
 
         // Killed mid-job, then opened again.
@@ -114,6 +127,15 @@ final class BackgroundJobsTests: XCTestCase {
     }
 
     // MARK: Helpers
+
+    /// Whether iOS answers a question about notifications within 20 seconds. The same service
+    /// answers the app's own, and posts what it posts.
+    private static func notificationServiceAnswers() -> Bool {
+        let answered = XCTestExpectation(description: "notification settings")
+        answered.assertForOverFulfill = false
+        UNUserNotificationCenter.current().getNotificationSettings { _ in answered.fulfill() }
+        return XCTWaiter().wait(for: [answered], timeout: 20) == .completed
+    }
 
     @MainActor
     private func launch() -> XCUIApplication {
