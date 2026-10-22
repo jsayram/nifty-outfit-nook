@@ -25,6 +25,15 @@ struct GatewaySettingsTests {
         ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "http://insecure.example"],
         ["NookClerkPublishableKey": GatewaySettingsTests.secret, "NookAPIBaseURL": "https://a.convex.site"],
         ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "https:"],
+        // A web address with a user name and password in it (Phase 25a).
+        [
+            "NookClerkPublishableKey": GatewaySettingsTests.publishable,
+            "NookAPIBaseURL": "https://someone:made-up@a.convex.site",
+        ],
+        [
+            "NookClerkPublishableKey": GatewaySettingsTests.publishable,
+            "NookAPIBaseURL": "https://someone@a.convex.site",
+        ],
     ])
     func anythingMissingOrWrongStaysOnTheFakes(info: [String: String]) {
         #expect(!GatewaySettings(info: info).usesRealServices)
