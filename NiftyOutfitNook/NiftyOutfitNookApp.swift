@@ -187,6 +187,9 @@ struct NiftyOutfitNookApp: App {
                     services.images = StoredPhotoProvider(
                         files: photos, thumbnails: thumbnails, fallback: services.images)
                     if let imageFiles { services.imageFiles = imageFiles }
+                    // Phase 28: Quick ideas, the stylist on the phone, in place of Stage A's stand-in.
+                    // A debug launch that asks for a failing or partial stylist keeps the stand-in.
+                    if configuration.behavior == .normal { services.stylist = QuickIdeasStylist.standard }
                     // Her weather choices (Phase 29) are erased with the profile, before onboarding.
                     AppWeather.install(into: &services, arguments: arguments)
                     // The cloud stylist (Phase 27a), once the backend is real or a debug launch asks.

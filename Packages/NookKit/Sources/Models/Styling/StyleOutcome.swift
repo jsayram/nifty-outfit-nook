@@ -35,6 +35,10 @@ public struct StyleResult: Identifiable, Hashable, Sendable, Codable {
     public var alternates: [PieceAlternates]
     public var notes: [ResultNote]
     public var createdAt: Date
+    /// Phase 28: which stylist made it, when Your looks has to say so: `.rules` for Quick ideas
+    /// and `.onDevice` for Apple's on-device model. `nil` for the cloud stylist, her history and
+    /// Stage A's stand-in stylist.
+    public var madeBy: StylistLane?
 
     public init(
         id: ID,
@@ -42,7 +46,8 @@ public struct StyleResult: Identifiable, Hashable, Sendable, Codable {
         versions: [Look],
         alternates: [PieceAlternates] = [],
         notes: [ResultNote] = [],
-        createdAt: Date
+        createdAt: Date,
+        madeBy: StylistLane? = nil
     ) {
         self.id = id
         self.requestID = requestID
@@ -50,6 +55,7 @@ public struct StyleResult: Identifiable, Hashable, Sendable, Codable {
         self.alternates = alternates
         self.notes = notes
         self.createdAt = createdAt
+        self.madeBy = madeBy
     }
 
     public func look(for version: LookVersion) -> Look? {

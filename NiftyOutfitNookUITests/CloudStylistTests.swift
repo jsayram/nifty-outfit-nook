@@ -17,12 +17,14 @@ final class CloudStylistTests: XCTestCase {
         let app = launch(stylist: "normal")
         styleMe(in: app)
 
-        // Nothing is sent before she says yes.
-        XCTAssertTrue(app.staticTexts["Style Me needs your OK"].waitUntilExists(timeout: Self.wait))
+        // Nothing is sent before she says yes: Quick ideas made on the phone, with Review.
+        let quickIdeas = app.descendants(matching: .any)["results.quickIdeas"]
+        XCTAssertTrue(quickIdeas.waitUntilExists(timeout: Self.wait))
         keepScreenshot("27a-1-needs-consent")
         tap(app.buttons["Review"], until: { app.buttons["stylistConsent.allow"].exists })
         keepScreenshot("27a-2-consent-sheet")
-        tap(app.buttons["stylistConsent.allow"], until: { app.buttons["results.version.simple"].exists })
+        tap(app.buttons["stylistConsent.allow"], until: { !quickIdeas.exists })
+        XCTAssertTrue(app.buttons["results.version.simple"].waitUntilExists(timeout: Self.wait))
 
         // Looks from the stylist, with its why line under the look.
         let why = app.staticTexts["results.why"]
@@ -45,23 +47,42 @@ final class CloudStylistTests: XCTestCase {
     func testNotNowSendsNothingAndAFailingProviderIsACalmRetry() {
         let app = launch(stylist: "fails")
         styleMe(in: app)
-        XCTAssertTrue(app.staticTexts["Style Me needs your OK"].waitUntilExists(timeout: Self.wait))
+        let quickIdeas = app.descendants(matching: .any)["results.quickIdeas"]
+        XCTAssertTrue(quickIdeas.waitUntilExists(timeout: Self.wait))
         tap(app.buttons["Review"], until: { app.buttons["stylistConsent.notNow"].exists })
         tap(app.buttons["stylistConsent.notNow"], until: { !app.buttons["stylistConsent.notNow"].exists })
-        XCTAssertTrue(app.staticTexts["Style Me needs your OK"].exists)
+        XCTAssertTrue(quickIdeas.exists)
 
+        // The provider fails: Quick ideas again, saying so, with Ask the stylist to try again.
         tap(app.buttons["Review"], until: { app.buttons["stylistConsent.allow"].exists })
-        tap(app.buttons["stylistConsent.allow"], until: { app.staticTexts["Styling didn’t finish"].exists })
-        XCTAssertTrue(app.buttons["Try again"].exists)
+        tap(app.buttons["stylistConsent.allow"], until: { app.buttons["Ask the stylist"].exists })
+        XCTAssertTrue(quickIdeas.exists)
         keepScreenshot("27a-5-provider-failed")
+    }
+
+    /// The Phase 28 checkpoint: with her consent off and the phone offline, Style Me still gives
+    /// Quick ideas made of her own pieces, dressed for the rainy day, and sends nothing.
+    @MainActor
+    func testOfflineWithoutConsentStillGivesQuickIdeas() {
+        let app = launch(stylist: "normal", extra: ["-connection", "offline"])
+        styleMe(in: app)
+        let quickIdeas = app.descendants(matching: .any)["results.quickIdeas"]
+        XCTAssertTrue(quickIdeas.waitUntilExists(timeout: Self.wait))
+        XCTAssertEqual(quickIdeas.label, "Quick ideas (on your phone)")
+        let why = app.staticTexts["results.why"]
+        XCTAssertTrue(why.waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(why.label.contains("wet weather"), why.label)
+        keepScreenshot("28-1-quick-ideas-offline")
+        tap(app.buttons["results.version.dressedUp"], until: { app.buttons["results.version.dressedUp"].isSelected })
+        keepScreenshot("28-2-dressed-up")
     }
 
     // MARK: Helpers
 
     @MainActor
-    private func launch(stylist: String) -> XCUIApplication {
+    private func launch(stylist: String, extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo", "-cloud-stylist", stylist]
+        app.launchArguments = UITestLaunch.standard + ["-fixtures", "demo", "-cloud-stylist", stylist] + extra
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait))
         return app

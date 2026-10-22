@@ -23,6 +23,8 @@ struct YourLooksScreen: View {
     var routes = YourLooksRoutes()
 
     @Environment(\.services) private var services
+    /// Phase 28: the router sends nothing to the cloud while the phone is offline.
+    @Environment(\.connection) private var connection
     @Environment(\.locale) private var locale
     @Environment(\.openInSavedLooks) private var openInSavedLooks
     @State private var model: YourLooksModel
@@ -83,7 +85,7 @@ struct YourLooksScreen: View {
                 .nookToast($toast)
         }
         .task {
-            model.start(with: services)
+            model.start(with: services, connection: connection)
         }
         // Your looks' quick tour (Phase 16b), once the looks are ready on the Today tab, with no
         // problem banner, sheet or toast over them.

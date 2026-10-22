@@ -71,6 +71,15 @@ public struct NookServices: Sendable {
     /// (FR-58) and Privacy and terms shows the stylist's consent switch. Stage A's mock stylist
     /// sends nothing, so neither applies.
     public var cloudStyling = false
+    /// Phase 28: Quick ideas, the stylist on the phone that answers when the cloud can't (no
+    /// consent, offline, a limit, a failure). `nil` uses the standard one (`QuickIdeasStylist`
+    /// with Features' words); tests put a scripted stylist here.
+    public var quickIdeas: (any Stylist)?
+    /// Phase 28: a stylist on Apple's on-device model, for iPhones with Apple Intelligence. None is
+    /// built yet (`docs/decisions/0010-on-device-stylist.md`), so the router never picks that lane.
+    public var onDeviceStylist: (any Stylist)?
+    /// Phase 28: whether Apple's on-device model can run here. The app sets the real check.
+    public var onDeviceModel: any OnDeviceModelCheck = NoOnDeviceModel()
     /// 27c: every paid AI job (Style Me's outfit ideas, Ask stylist, try-on in 33a), run apart
     /// from any screen and kept across a relaunch, with the banner and notifications that say a
     /// job is done. Copies of these services share it.
