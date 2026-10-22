@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Networking
@@ -12,14 +13,18 @@ import Testing
 struct CloudStylistTests {
     let backend = FakeBackend()
     let auth = FakeAuthProvider(subject: "lily")
-    let policy = RetryPolicy(baseDelay: .milliseconds(5), maxDelay: .milliseconds(10), requestTimeout: .seconds(5))
+    let policy = RetryPolicy(requestTimeout: .seconds(60))
+    /// The client's clock, which a wait between retries jumps ahead on instead of really waiting,
+    /// so these tests neither take real seconds nor have a timeout that a slow machine could hit.
+    let clock = ManualClock()
     static let now = Date(timeIntervalSince1970: 1_792_000_000)
 
     func paid() async throws -> GatewayPaidActionService {
+        let clock = clock
         let client = APIClient(
             baseURL: backend.baseURL,
             session: APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self]),
-            auth: auth, policy: policy)
+            auth: auth, policy: policy, clock: clock, sleep: { try await clock.skip($0) })
         try await auth.signInWithApple()
         _ = try await GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0").whoAmI()
         let session = AttestationSession(attester: FakeDeviceAttester(), store: MemoryAttestKeyStore(), client: client)
