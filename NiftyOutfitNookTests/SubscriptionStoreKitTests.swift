@@ -15,7 +15,14 @@ import Testing
 /// The tests share one test environment (SKTestSession is a single instance), so they run one at a
 /// time. StoreKit takes a moment to report a change after it happens, so checks of what StoreKit
 /// says wait for it, up to a limit; checks of the app's own rules use an injected clock.
-@Suite(.serialized, .timeLimit(.minutes(2)))
+///
+/// Not on CI for now: on CI's iOS 27.0 simulator StoreKit's test environment serves no products to
+/// the host app (`SKInternalErrorDomain` 17), although the app is signed with `get-task-allow`
+/// (checked below, PR #91's diagnostics). All eleven pass on the iOS 26.5 simulator. Run them with
+/// `scripts/test.sh -only-testing:NiftyOutfitNookTests`; `docs/payments.md` has the open question.
+@Suite(
+    .serialized, .timeLimit(.minutes(2)),
+    .disabled(if: StoreKitTestingOnCI.isCI, "StoreKit's test environment serves no products on CI's iOS 27.0 simulator"))
 struct SubscriptionStoreKitTests {
     static let product = SubscriptionProducts.monthly
 
@@ -23,8 +30,6 @@ struct SubscriptionStoreKitTests {
 
     @Test func offerComesFromTheStoreWithTheFreeMonth() async throws {
         let (_, service, _) = try setUp()
-        // StoreKit's local testing refuses a host app without it (Configs/*-Debug.entitlements).
-        #expect(AppEntitlements.embedded()?.contains("get-task-allow") == true, "\(AppEntitlements.embedded() ?? "none")")
         await expectStoreKitTesting()
         let offer = try await service.offer()
         #expect(offer.productID == Self.product)
@@ -142,14 +147,22 @@ struct SubscriptionStoreKitTests {
 
     @Test func restoreFindsTheSubscriptionOnAFreshInstall() async throws {
         let (_, service, _) = try setUp()
-        _ = await service.purchase()
+        let outcome = await service.purchase()
+        guard case .purchased(let bought) = outcome else {
+            Issue.record("Expected a purchase, got \(outcome)")
+            return
+        }
         // A fresh install: nothing cached, a new service.
         let reinstalled = Self.reinstalled()
         #expect(await reinstalled.cachedStatus().state == .none)
+        var restored: Models.SubscriptionStatus?
         #expect(
             await eventually {
-                (try? await reinstalled.restore())?.state == .trial
-            })
+                restored = try? await reinstalled.restore()
+                return restored?.state == bought.state
+            }, "Restored \(String(describing: restored)), bought \(bought)")
+        #expect(restored?.hasStylingAccess(at: Date()) == true)
+        #expect(restored?.productID == Self.product)
     }
 
     @Test func askToBuyWaitsThenStartsWhenApproved() async throws {
@@ -264,6 +277,28 @@ struct SubscriptionStoreKitTests {
             return found
         }
     }
+}
+
+/// What runs on CI too: the host app carries what StoreKit's local testing needs.
+struct StoreKitTestingHostTests {
+    /// StoreKit's local testing refuses a host app without `get-task-allow`
+    /// (`Configs/*-Debug.entitlements`).
+    @Test func theHostAppIsSignedForDevelopment() {
+        let entitlements = AppEntitlements.embedded()
+        #expect(entitlements?.contains("get-task-allow") == true, "\(entitlements ?? "none")")
+    }
+
+    @Test func theConfigurationFileIsInTheTestBundle() throws {
+        let url = try #require(
+            Bundle(for: BundleMarker.self).url(forResource: "NiftyOutfitNook", withExtension: "storekit"))
+        let text = try String(contentsOf: url, encoding: .utf8)
+        #expect(text.contains(SubscriptionProducts.monthly))
+    }
+}
+
+enum StoreKitTestingOnCI {
+    /// `scripts/test.sh` passes `NOOK_CI` on CI (as `TEST_RUNNER_NOOK_CI`).
+    static var isCI: Bool { ProcessInfo.processInfo.environment["NOOK_CI"] != nil }
 }
 
 /// Finds this test bundle, which holds the StoreKit configuration file.
