@@ -61,11 +61,22 @@ final class BackupArchiveWriter {
         defer { try? handle.close() }
         var hasher = SHA256()
         var written: Int64 = 0
-        while let chunk = try handle.read(upToCount: 1 << 20), !chunk.isEmpty {
-            written += Int64(chunk.count)
-            guard written <= size else { throw BackupError.failed }
-            hasher.update(data: chunk)
-            try chunk.withUnsafeBytes { try encoder.writeBlob(key: Self.data, from: $0) }
+        // Phase 32a: each piece is read inside its own autorelease pool. `FileHandle.read` hands
+        // back memory Foundation only frees when the pool it runs in drains, and an export runs in
+        // one pool from start to end, so every photo stayed in memory until the export was done:
+        // 1,000 photos of 1.8 MB made a 1.7 GB peak (measured), which ends the app on an iPhone 12.
+        var finished = false
+        while !finished {
+            try autoreleasepool {
+                guard let chunk = try handle.read(upToCount: 1 << 20), !chunk.isEmpty else {
+                    finished = true
+                    return
+                }
+                written += Int64(chunk.count)
+                guard written <= size else { throw BackupError.failed }
+                hasher.update(data: chunk)
+                try chunk.withUnsafeBytes { try encoder.writeBlob(key: Self.data, from: $0) }
+            }
         }
         let hash = hasher.finalize().map { String(format: "%02x", $0) }.joined()
         guard written == size, hash == sha256 else { throw BackupError.failed }
