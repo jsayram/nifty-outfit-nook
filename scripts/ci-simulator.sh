@@ -7,7 +7,9 @@
 # never boots or reuses one of those. It makes a simulator named nook-ci-..., and deletes only
 # that one. Nothing here shuts down or deletes any other simulator, with one exception: a
 # nook-ci- simulator (or a clone of one) left behind by an earlier job that was killed before its
-# cleanup step ran. The runner runs one job at a time, so any other nook-ci- simulator is stale.
+# cleanup step ran. The runner runs one job at a time, so any other nook-ci- simulator is stale,
+# except the one in NOOK_SIM_ID, which is this job's own: a job that makes a second simulator
+# (the StoreKit step's iOS 26.5 one) keeps the first.
 #
 # The runtime is iOS 27.0 (NOOK_SIM_OS to change it): the snapshot test references were
 # recorded on it (Packages/NookKit/Sources/DesignSystem/README.md, "Snapshot tests"). It must

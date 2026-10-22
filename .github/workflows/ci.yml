@@ -288,6 +288,37 @@ jobs:
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
           scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      # The StoreKit suites (SubscriptionStoreKitTests, with CreditsStoreKitTests nested in it)
+      # skip themselves on CI: the iOS 27.0 simulator serves StoreKit's test environment no
+      # products. They pass on iOS 26.5, so on the self-hosted runner they run here on a second
+      # simulator of this job's own, an iPhone 12 on iOS 26.5, made for this step and deleted in
+      # the last one. The build is the one above (the deployment target is iOS 26.0), so this
+      # costs a boot and the tests, not a build. Hosted runners keep skipping them.
+      #
+      # Left out here: checkpointPurchaseRenewRestoreExpire, which waits on StoreKit's own sped-up
+      # clock (a month is 30 seconds) and takes 95 seconds or more. On this Mac, at a load average
+      # of 500 to 900 from other jobs and agents, it passed once in ten runs (the others missed the
+      # renewal or hit the suite's two-minute limit). Its parts have their own fast tests (a forced renewal, expiry,
+      # restore on a fresh install, purchase). Run it with `scripts/test.sh -only-testing:
+      # NiftyOutfitNookTests/SubscriptionStoreKitTests/checkpointPurchaseRenewRestoreExpire()`.
+      - name: Make the StoreKit test simulator (self-hosted only)
+        if: ${{ !cancelled() && runner.environment == 'self-hosted' }}
+        run: |
+          # NOOK_SIM_ID is still the iOS 27.0 simulator: create leaves it alone.
+          echo "NOOK_STOREKIT_SIM_ID=$(NOOK_SIM_OS=26.5 scripts/ci-simulator.sh create iPhone)" >> "$GITHUB_ENV"
+      - name: Test (StoreKit suites on iOS 26.5, self-hosted only)
+        if: ${{ !cancelled() && runner.environment == 'self-hosted' && env.NOOK_STOREKIT_SIM_ID != '' }}
+        # About 1.5 minutes when it runs. A simulator that never gets to the tests on a very busy
+        # Mac would otherwise hold the runner for the rest of the job's 40 minutes.
+        timeout-minutes: 10
+        env:
+          NOOK_STOREKIT: 1
+          NOOK_SIM_ID: ${{ env.NOOK_STOREKIT_SIM_ID }}
+          NOOK_RESULT_BUNDLE: build/TestResults-storekit.xcresult
+        run: >-
+          NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
+          scripts/test.sh -only-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests
+          '-skip-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests/checkpointPurchaseRenewRestoreExpire()'
       - name: Keep test results on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -296,12 +327,19 @@ jobs:
           path: |
             build/TestResults.xcresult
             build/TestResults-package.xcresult
+            build/TestResults-storekit.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
-      - name: Delete this job's simulator
-        if: ${{ always() && runner.environment == 'self-hosted' && env.NOOK_SIM_ID != '' }}
-        run: scripts/ci-simulator.sh delete "$NOOK_SIM_ID"
+      - name: Delete this job's simulators
+        if: ${{ always() && runner.environment == 'self-hosted' }}
+        run: |
+          # Each one on its own: a failed delete of the first must not skip the second.
+          status=0
+          for udid in "${NOOK_SIM_ID:-}" "${NOOK_STOREKIT_SIM_ID:-}"; do
+            [[ -z "$udid" ]] || scripts/ci-simulator.sh delete "$udid" || status=1
+          done
+          exit "$status"
 
   # The other UI tests in three parts, by test class, on an iPhone simulator. The iPad layouts
   # are paused: they are the separate `ui-ipad` job below, which runs only on a manual run with
