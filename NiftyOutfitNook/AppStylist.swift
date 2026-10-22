@@ -41,11 +41,13 @@ nonisolated enum AppStylist {
     #if DEBUG
         /// `-cloud-stylist [normal|fails|slow]` against the fake backend: signs in with the fake Apple
         /// sign-in at launch (paid requests need an account) and sets how its stylist behaves.
+        /// With `-signed-out` it stays signed out, so Style Me's sign-in sheet shows (Release).
         @MainActor
         static func prepareFakeIfAsked(arguments: [String]) async {
             guard let index = arguments.firstIndex(of: "-cloud-stylist"), let fake = AppGateway.fake else { return }
             let value = arguments.indices.contains(index + 1) ? arguments[index + 1] : ""
             fake.backend.setStylist(FakeStylistBehaviour(rawValue: value) ?? .normal)
+            guard !arguments.contains("-signed-out") else { return }
             if !(await fake.account.isSignedIn()) { _ = try? await fake.account.signIn() }
         }
     #endif

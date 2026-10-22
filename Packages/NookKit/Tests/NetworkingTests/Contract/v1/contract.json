@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text); 35: action status, POST /v1/actions/status (a running action is polled by its ID, with no photos)",
+  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text); 35: action status, POST /v1/actions/status (a running action is polled by its ID, with no photos); Release: kind aiReport on POST /v1/feedback (Report a problem on AI results, guideline 1.2)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -34,7 +34,9 @@
       "perDay": 10,
       "attachmentsPerDay": 3,
       "allAccountsPerDay": 300,
-      "note": "Only this endpoint accepts a body larger than limits.maxBodyBytes. The numbers are the backend's starting settings and are enforced on the server; the app never relies on them."
+      "note": "Only this endpoint accepts a body larger than limits.maxBodyBytes. The numbers are the backend's starting settings and are enforced on the server; the app never relies on them. AI reports (kind aiReport) have their own rate of aiReportsPerHour in a burst and aiReportsPerDay per account, count towards allAccountsPerDay, and don't use up the notes' perDay.",
+      "aiReportsPerHour": 5,
+      "aiReportsPerDay": 20
     },
     "tryOn": {
       "maxBodyBytes": 6291456,
@@ -347,7 +349,7 @@
     },
     {
       "id": "sendFeedback",
-      "summary": "Sends one private note to the support queue, with an optional reply address, an optional screenshot and, only if the person turned them on, app details and closet counts. 202 with a ticket reference. Safe to repeat with the same submissionId. No App Attest, on purpose.",
+      "summary": "Sends one private note to the support queue, with an optional reply address, an optional screenshot and, only if the person turned them on, app details and closet counts. 202 with a ticket reference. Safe to repeat with the same submissionId. No App Attest, on purpose. Release (guideline 1.2): kind aiReport is a report about one AI result (a look, its why line, an Ask stylist answer or a try-on picture), with the aiReport block, which names the result and never a provider or model; the backend adds those from its own record of the action. A picture may come only with a try-on picture report, and only when she ticked Include the picture.",
       "method": "POST",
       "path": "/v1/feedback",
       "auth": "required",
@@ -1773,7 +1775,8 @@
           "enum": [
             "somethingWrong",
             "idea",
-            "other"
+            "other",
+            "aiReport"
           ]
         },
         "message": {
@@ -1797,6 +1800,73 @@
         },
         "attachment": {
           "$ref": "FeedbackAttachment"
+        },
+        "aiReport": {
+          "$ref": "AIReport"
+        }
+      }
+    },
+    "AIReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "reason",
+        "resultId",
+        "madeBy",
+        "madeAt",
+        "hidden"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "enum": [
+            "look",
+            "why",
+            "askAnswer",
+            "tryOnPicture"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "wrongOrOffensive",
+            "notMyClothes",
+            "looksWrongOnMe",
+            "other"
+          ]
+        },
+        "resultId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "actionId": {
+          "type": "string",
+          "pattern": "^act_[0-9a-f]{32}$"
+        },
+        "lookVersion": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "dressedUp",
+            "somethingNew"
+          ]
+        },
+        "madeBy": {
+          "type": "string",
+          "enum": [
+            "cloud",
+            "onDevice",
+            "phone"
+          ]
+        },
+        "madeAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 30
+        },
+        "hidden": {
+          "type": "boolean"
         }
       }
     },

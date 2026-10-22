@@ -59,6 +59,18 @@ extension APIV1 {
             public var data: String
         }
 
+        /// Release (guideline 1.2): the result a report is about. Never a provider or a model.
+        public struct AIReport: Codable, Sendable, Equatable {
+            public var subject: String
+            public var reason: String
+            public var resultId: String
+            public var actionId: String?
+            public var lookVersion: String?
+            public var madeBy: String
+            public var madeAt: String
+            public var hidden: Bool
+        }
+
         public var submissionId: String
         public var kind: String
         public var message: String
@@ -67,6 +79,31 @@ extension APIV1 {
         public var closetCounts: ClosetCounts?
         public var deviceHealth: DeviceHealth?
         public var attachment: Attachment?
+        public var aiReport: AIReport?
+
+        /// Release: a report about an AI result, as kind `aiReport`. The picture goes only when
+        /// she ticked Include the picture (`AIReport.picture`), as the cleaned JPEG.
+        public init(_ submission: AIReportSubmission) {
+            let report = submission.report
+            let target = report.target
+            submissionId = submission.id
+            kind = "aiReport"
+            message = report.message
+            aiReport = AIReport(
+                subject: target.subject.rawValue, reason: report.reason.rawValue,
+                resultId: Self.resultID(target.resultID), actionId: target.actionID,
+                lookVersion: target.lookVersion?.rawValue, madeBy: target.madeBy.rawValue,
+                madeAt: APIV1.formatDate(target.madeAt), hidden: report.hidden)
+            attachment = report.picture.map {
+                Attachment(contentType: "image/jpeg", data: $0.data.base64EncodedString())
+            }
+        }
+
+        /// The contract allows letters, digits, `_` and `-`, at most 64. The app's IDs fit;
+        /// anything else is sent as a stand-in rather than refused, since the report matters more.
+        static func resultID(_ id: String) -> String {
+            id.wholeMatch(of: /[A-Za-z0-9_-]{1,64}/) != nil ? id : "unknown"
+        }
 
         /// Exactly what is in the note, and nothing else: there is no field here for anything she
         /// didn't see on the page (`FeedbackNote.sentValues`).

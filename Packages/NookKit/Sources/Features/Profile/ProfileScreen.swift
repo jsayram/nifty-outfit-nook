@@ -125,6 +125,9 @@ struct ProfileScreen: View {
 
     @Environment(\.tourCenter) private var tours
     @Environment(\.openForTour) private var openForTour
+    @Environment(\.signInAgain) private var signInAgain
+    /// Release: Sign out, asked first.
+    @State private var asksSignOut = false
 
     var body: some View {
         ProfilePage(
@@ -139,9 +142,23 @@ struct ProfileScreen: View {
                     if sheet == .appTours { tours?.holdBack(.profile) }
                     self.sheet = sheet
                 },
-                setTracksLaundry: { isOn in Task { await setTracksLaundry(isOn) } }
+                setTracksLaundry: { isOn in Task { await setTracksLaundry(isOn) } },
+                account: account
             )
         )
+        .confirmationDialog(
+            ProfileText.signOutQuestion, isPresented: $asksSignOut, titleVisibility: .visible
+        ) {
+            Button(SignInText.signOut, role: .destructive) {
+                Task {
+                    await model.signOut(in: services)
+                    toast = NookToastMessage(SignInText.signedOutNote, systemImage: "person.crop.circle")
+                }
+            }
+            .accessibilityIdentifier("profile.signOut.confirm")
+        } message: {
+            Text(ProfileText.signOutMessage)
+        }
         .navigationTitle(ProfileText.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -177,6 +194,22 @@ struct ProfileScreen: View {
         .screenTour(
             ProfileTour.definition,
             isReady: model.phase == .loaded && sheet == nil && pushed == nil && replaying == nil && toast == nil)
+    }
+
+    /// Release: the account row. Signed in, it asks before signing out; signed out, it opens the
+    /// sign-in sheet, and the row changes once she's in.
+    private func account() {
+        switch model.account {
+        case .signedIn:
+            asksSignOut = true
+        case .signedOut:
+            Task {
+                _ = await signInAgain(.account)
+                await model.loadAccount(from: services)
+            }
+        case .unavailable, nil:
+            break
+        }
     }
 
     /// The try-on photo sheet and App tours open full height, so nothing in them is cut off

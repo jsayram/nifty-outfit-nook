@@ -375,6 +375,68 @@ struct FeedbackGatewayTests {
             try await none.send(FeedbackSubmission(id: FeedbackSubmission.newID(), note: note()))
         }
     }
+
+    // MARK: Reports about AI results (Release, guideline 1.2)
+
+    static let actionID = "act_0f1e2d3c4b5a69788796a5b4c3d2e1f0"
+
+    func report(_ subject: AIReportSubject, picture: Data? = nil, hidden: Bool = false) -> AIReportSubmission {
+        let target = AIReportTarget(
+            subject: subject, resultID: Self.actionID, actionID: Self.actionID,
+            lookVersion: subject == .tryOnPicture ? nil : .simple, madeBy: .cloud,
+            madeAt: Date(timeIntervalSince1970: 1_800_000_000), picture: .stored("photo-1"))
+        return AIReportSubmission(
+            report: AIReport(
+                target: target, reason: .notMyClothes, note: "",
+                picture: picture.map { FeedbackScreenshot(data: $0, pixelWidth: 390, pixelHeight: 844) },
+                hidden: hidden))
+    }
+
+    @Test func aReportReachesTheQueueAsAnAIReportWithTheResultsIDsAndNoProvider() async throws {
+        try await signIn()
+        let receipt = try await feedback.sendReport(report(.look, hidden: true))
+        #expect(receipt.reference.hasPrefix("NK-"))
+        #expect(!receipt.hasScreenshot)
+        let ticket = try #require(backend.supportTickets.last)
+        #expect(ticket.kind == "aiReport")
+        #expect(ticket.message == "No note added.")
+        #expect(ticket.screenshot == nil)
+        let block = try #require(ticket.aiReport)
+        #expect(block["subject"] == "look")
+        #expect(block["reason"] == "notMyClothes")
+        #expect(block["actionId"] == Self.actionID)
+        #expect(block["lookVersion"] == "simple")
+        #expect(block["hidden"] == "true")
+        #expect(Set(block.keys).isDisjoint(with: ["provider", "model"]))
+    }
+
+    @Test func theBodyCarriesThePictureOnlyWhenSheTickedIt() throws {
+        let without =
+            try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(APIV1.FeedbackRequest(report(.tryOnPicture)))) as? [String: Any]
+        #expect(without?["attachment"] == nil)
+        #expect(without?["kind"] as? String == "aiReport")
+        let with =
+            try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(APIV1.FeedbackRequest(report(.tryOnPicture, picture: Data([1, 2, 3])))))
+            as? [String: Any]
+        #expect((with?["attachment"] as? [String: Any])?["contentType"] as? String == "image/jpeg")
+        // A look's report never carries one, even if one was handed in.
+        let look = APIV1.FeedbackRequest(report(.look, picture: Data([1, 2, 3])))
+        #expect(look.attachment == nil)
+    }
+
+    @Test func reportsHaveTheirOwnLimitAndLeaveNotesAlone() async throws {
+        try await signIn()
+        for _ in 0..<5 { _ = try await feedback.sendReport(report(.why)) }
+        await #expect(throws: FeedbackSendProblem.self) { try await feedback.sendReport(report(.why)) }
+        // Her support notes still go.
+        _ = try await feedback.send(FeedbackSubmission(id: FeedbackSubmission.newID(), note: note()))
+    }
+
+    @Test func signedOutAReportCantGo() async {
+        await #expect(throws: FeedbackSendProblem.signedOut) { try await feedback.sendReport(report(.look)) }
+    }
 }
 
 /// The wall clock the fake backend and the fake sign-in share in these tests. It moves only when
@@ -383,4 +445,5 @@ final class Wall: Sendable {
     private let date = Mutex(Date(timeIntervalSince1970: 1_800_000_000))
     var now: Date { date.withLock { $0 } }
     func advance(_ seconds: TimeInterval) { date.withLock { $0.addTimeInterval(seconds) } }
+
 }

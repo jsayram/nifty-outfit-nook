@@ -135,6 +135,8 @@ struct QuickIdeasLabel: View {
     let reason: QuickIdeasReason?
     let retry: () -> Void
     let reviewConsent: () -> Void
+    /// Release: signed out, after Not now: Sign in, then the stylist tries again.
+    var signIn: () -> Void = {}
 
     @Environment(\.connection) private var connection
 
@@ -155,6 +157,7 @@ struct QuickIdeasLabel: View {
     private var actionTitle: String? {
         switch reason {
         case .needsConsent: StylistConsentText.review
+        case .limited(.account(.signedOut)): SignInText.signIn
         case .offline where !connection.isOffline, .cloudDidNotFinish:
             String(
                 localized: "Ask the stylist", bundle: .module,
@@ -166,6 +169,7 @@ struct QuickIdeasLabel: View {
     private var action: (() -> Void)? {
         switch reason {
         case .needsConsent: reviewConsent
+        case .limited(.account(.signedOut)): signIn
         case .offline where !connection.isOffline, .cloudDidNotFinish: retry
         default: nil
         }

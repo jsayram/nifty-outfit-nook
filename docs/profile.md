@@ -37,6 +37,10 @@ Since Phase 14b, Track laundry is a switch and the fourth group opens real scree
 
 **Preferences and Avoid repeating outfits for.** One row per value with what it does; tapping saves and closes. Style Me starts from the saved Preferences each time and can change it for one request (10a). The repeat sheet notes that single favourite pieces can still come back (LR-10). A save that fails keeps the sheet open and says so.
 
+## Account row (Release)
+
+Under the name: "Signed in with Apple" with Sign out (asked first; her closet stays), or "Sign in", which opens the sign-in sheet. Shown only when the build has a sign-in (Clerk, or the fake in Debug); in a Release build with no backend settings it says signing in isn't available right now. See [decision 0011](decisions/0011-sign-in-and-ai-reports.md).
+
 ## Fit and measurements
 
 Top to bottom, as `fit.html`:

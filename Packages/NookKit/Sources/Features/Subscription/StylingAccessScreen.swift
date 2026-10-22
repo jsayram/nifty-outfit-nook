@@ -11,6 +11,7 @@ struct StylingAccessScreen: View {
 
     @Environment(\.services) private var services
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.signIn) private var signIn
     @State private var model = StylingAccessModel()
     @State private var showsManage = false
     @State private var showsRedeem = false
@@ -20,12 +21,13 @@ struct StylingAccessScreen: View {
         StylingAccessPage(
             model: model,
             actions: StylingAccessActions(
-                subscribe: { Task { await model.purchase(in: services) } },
+                subscribe: { Task { await model.purchase(in: services, signIn: signIn) } },
                 restore: { Task { await model.restore(in: services) } },
                 manage: { showsManage = true },
                 open: { page = $0 },
-                redeem: { showsRedeem = true },
-                buyPack: { id in Task { await model.buyPack(id, in: services) } }
+                // Release: a redeemed code is claimed on the server too, so she signs in first.
+                redeem: { Task { if await signIn(.stylingAccess) { showsRedeem = true } } },
+                buyPack: { id in Task { await model.buyPack(id, in: services, signIn: signIn) } }
             )
         )
         .navigationTitle(StylingAccessText.title)

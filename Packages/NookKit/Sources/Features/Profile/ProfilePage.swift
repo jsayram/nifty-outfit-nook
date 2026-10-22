@@ -9,6 +9,8 @@ struct ProfileActions {
     var open: (ProfileDestination) -> Void = { _ in }
     var openSheet: (ProfileSheet) -> Void = { _ in }
     var setTracksLaundry: @MainActor @Sendable (Bool) -> Void = { _ in }
+    /// Release: the account row: Sign in, or Sign out when signed in.
+    var account: () -> Void = {}
 }
 
 /// Profile, top to bottom (`settings.html`, Phase 14a): the wall with her name sign, then three
@@ -84,6 +86,10 @@ struct ProfilePage: View {
                 action: actions.editName
             )
             .tourAnchor(ProfileTour.Anchor.name, label: ProfileText.nameRow, action: actions.editName)
+            // Release: signed in or not, under the name. Nothing asks at launch.
+            if let account = model.account {
+                accountRow(account)
+            }
             // 30a: under the name, as in `settings.html`.
             row(
                 StylingAccessText.title, subtitle: StylingAccessText.rowDetail,
@@ -156,6 +162,27 @@ struct ProfilePage: View {
                     }
                 }
             }
+        }
+    }
+
+    /// Release: "Signed in with Apple" with Sign out, "Sign in", or, in a build with no backend,
+    /// a row that says signing in isn't available right now.
+    @ViewBuilder
+    private func accountRow(_ account: ProfileModel.Account) -> some View {
+        switch account {
+        case .signedIn:
+            row(
+                SignInText.signedIn, subtitle: SignInText.signedInDetail, value: SignInText.signOut,
+                systemImage: "apple.logo", identifier: "profile.account", action: actions.account)
+        case .signedOut:
+            row(
+                SignInText.signIn, subtitle: SignInText.signedOutDetail, systemImage: "person.crop.circle",
+                identifier: "profile.account", action: actions.account)
+        case .unavailable:
+            NookRow(SignInText.signIn, subtitle: SignInText.unavailableDetail, systemImage: "person.crop.circle")
+                .foregroundStyle(.nook.textSecondary)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("profile.account")
         }
     }
 

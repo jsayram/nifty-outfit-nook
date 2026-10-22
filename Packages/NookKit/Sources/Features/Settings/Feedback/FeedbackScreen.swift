@@ -10,6 +10,7 @@ struct FeedbackScreen: View {
     /// The note kept at the root, so a half-written one waits for her (`nil` in previews).
     @Environment(\.feedbackDraft) private var shared
     @Environment(\.services) private var services
+    @Environment(\.signInAgain) private var signInAgain
     @State private var local = FeedbackModel()
     @Environment(\.dismiss) private var dismiss
     @AccessibilityFocusState private var focus: FeedbackField?
@@ -32,7 +33,9 @@ struct FeedbackScreen: View {
                 model.startOver()
                 dismiss()
             },
-            writeAnother: { model.startOver() }
+            writeAnother: { model.startOver() },
+            signIn: services.offersSignIn && !services.cloudUnavailable
+                ? { Task { if await signInAgain(.support) { await model.checkRoute() } } } : nil
         )
         .navigationTitle(SettingsText.feedbackTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -127,6 +130,9 @@ struct FeedbackPage: View {
     var openSupportPage: (() -> Void)?
     var done: () -> Void = {}
     var writeAnother: () -> Void = {}
+    /// Release: signed out on a build with sign-in, Sign in to send it to us directly. `nil`
+    /// hides it (no sign-in in this build, snapshot tests).
+    var signIn: (() -> Void)?
 
     var body: some View {
         SettingsPage(
@@ -212,6 +218,22 @@ struct FeedbackPage: View {
                     .padding(.horizontal, NookSpacing.small)
             }
             SettingsNote(model.route == .supportQueue ? FeedbackText.queueNote : FeedbackText.neverSent)
+        }
+
+        // Release: signed out, the share sheet still works; signing in sends it to us directly.
+        if model.route == .shareSheet, let signIn {
+            VStack(alignment: .leading, spacing: NookSpacing.xSmall) {
+                NookButton(
+                    FeedbackText.signInToSend, systemImage: "person.crop.circle", kind: .soft, fillsWidth: true,
+                    action: signIn
+                )
+                .accessibilityIdentifier("feedback.signIn")
+                Text(FeedbackText.signInToSendDetail)
+                    .nookTextStyle(.note)
+                    .foregroundStyle(.nook.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, NookSpacing.small)
+            }
         }
 
         VStack(alignment: .leading, spacing: NookSpacing.small) {

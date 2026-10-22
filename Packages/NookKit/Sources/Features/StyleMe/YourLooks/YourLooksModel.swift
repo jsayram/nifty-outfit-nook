@@ -47,6 +47,8 @@ final class YourLooksModel {
         case needsConsent
         /// 27a: a server limit stopped it (too many at once, an allowance used up, paused).
         case limited(CloudLimitProblem)
+        /// Release: she reported the result and hid it.
+        case hidden
     }
 
     enum Status: Equatable {
@@ -124,6 +126,9 @@ final class YourLooksModel {
     /// 27a: after New ideas she wants the stylist, not her history, for the rest of this screen.
     private var wantsFreshIdeas = false
     private var services: NookServices = .unavailable
+    /// Release: asks her to sign in before the first cloud request. The screen sets it from the
+    /// environment; tests leave it saying yes.
+    @ObservationIgnored var signIn = SignInCheck.notNeeded
     /// Phase 28: whether the phone is online, for the router. Unknown counts as online.
     private var connection: ConnectionStatus = .unreported
     private var styling: Task<Void, Never>?
@@ -252,6 +257,27 @@ final class YourLooksModel {
         cancel()
     }
 
+    /// Release (guideline 1.2): she reported the stylist's result and chose to hide it. Its looks
+    /// leave her history (a saved one stays saved), its pieces aren't suggested again on this
+    /// screen, and the screen says it's hidden, with Try a different outfit. Nothing is sent.
+    func hideResult() async {
+        guard let result, !isStyling else { return }
+        let categories = garments.mapValues(\.category)
+        for look in result.versions {
+            let main = WearRules.mainPieces(of: look, categories: categories)
+            if !main.isEmpty { shown.insert(main) }
+            if !isSaved(look) { try? await services.looks.delete(look.id) }
+        }
+        self.result = nil
+        missing = []
+        problem = nil
+        quickIdeasReason = nil
+        request = request.again(id: makeID(), createdAt: now())
+        wantsFreshIdeas = true
+        status = .failed(.hidden)
+        await reloadLooks()
+    }
+
     /// Waits for the running request, for tests.
     func settle() async {
         await styling?.value
@@ -320,6 +346,15 @@ final class YourLooksModel {
             let conditions = stylistConditions
             let route = StylistRouter.route(conditions)
             guard route.lane == .cloud else { return await styleOnPhone(context, route: route, run: thisRun) }
+            // Release: the cloud stylist needs her signed in. The first time, the sign-in sheet asks
+            // and her request carries on once she's in; Not now gives her Quick ideas instead, with
+            // a Sign in button beside them. Nothing is sent either way until she's signed in.
+            guard await signIn(.styling) else {
+                guard thisRun == run else { return }
+                let signedOut = StylistRouter.onPhone(.limited(.account(.signedOut)), conditions)
+                return await styleOnPhone(context, route: signedOut, run: thisRun)
+            }
+            guard thisRun == run else { return }
             let job: AIJob
             do {
                 job = try services.aiJobs.startStyling(context, services: services)

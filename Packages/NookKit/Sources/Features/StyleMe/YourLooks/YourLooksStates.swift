@@ -432,6 +432,18 @@ struct FailureState: View {
                 backButton(kind: .soft)
                 savedButton
             }
+        case .hidden:
+            // Release: she reported the result and hid it. A new request avoids its pieces.
+            NookEmptyState(
+                AIReportText.hiddenTitle, message: AIReportText.hiddenMessage, systemImage: "eye.slash"
+            ) {
+                NookButton(
+                    String(localized: "Try a different outfit", bundle: .module, comment: "Your looks button (LR-05a)"),
+                    systemImage: "arrow.triangle.2.circlepath", kind: .primary, fillsWidth: true, action: actions.retry
+                )
+                .accessibilityIdentifier("results.hidden.tryDifferent")
+                backButton(kind: .soft)
+            }
         case .limited(let problem):
             // 27a: a server limit. Its own words say when it can work again; nothing was counted.
             NookErrorState(

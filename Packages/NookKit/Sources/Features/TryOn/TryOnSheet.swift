@@ -23,7 +23,8 @@ extension View {
             subtitle: { $0.model.isReal || $0.model.isUnavailable ? nil : SharedText.simulated },
             // Full height: the picture and its two buttons don't fit a half-height sheet.
             detents: [.large],
-            content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture) }
+            // Release: the sheet asks for sign-in itself, since nothing can be presented from under it.
+            content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture).signInGate() }
         )
     }
 }
@@ -41,6 +42,7 @@ struct TryOnSheetContent: View {
 
     @Environment(\.services) private var services
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.signIn) private var signIn
     /// 30a: Styling access, when pictures need it.
     @State private var showsStylingAccess = false
 
@@ -56,13 +58,17 @@ struct TryOnSheetContent: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.default, value: model.step)
-        .task { await model.start(with: services) }
+        .task {
+            model.signIn = signIn
+            await model.start(with: services)
+        }
         // A simulated picture stops when she leaves; a real one on its way carries on as its job.
         .onDisappear { model.leave() }
         .sheet(isPresented: $showsStylingAccess, onDismiss: { Task { await model.start(with: services) } }) {
             NavigationStack {
                 StylingAccessScreen(isSheet: true)
             }
+            .signInGate()
         }
         .onChange(of: model.step) { _, step in
             if case .made = step {

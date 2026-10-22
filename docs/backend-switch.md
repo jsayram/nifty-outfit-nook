@@ -56,3 +56,8 @@ Send feedback goes to the support queue once she is signed in on the real backen
 ## Going back to the fakes
 
 Delete `Configs/Secrets.xcconfig` (or empty either value) and rebuild a Debug build. A Release build goes to the unavailable state instead.
+
+## Sign-in in the app (Release)
+
+Once Clerk is configured, nothing asks at launch: the sign-in sheet appears the first time she uses a cloud feature, and Profile has a Signed in with Apple / Sign in row ([decision 0011](decisions/0011-sign-in-and-ai-reports.md)). With the settings missing, a Release build offers no sign-in and the cloud features say they aren't available right now. Check on a device with the dev instance: Style me signed out, the sheet, Sign in with Apple, then the looks arrive without tapping Style me again.
+

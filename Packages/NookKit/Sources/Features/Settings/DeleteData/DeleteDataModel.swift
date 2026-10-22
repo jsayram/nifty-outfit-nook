@@ -91,10 +91,20 @@ final class DeleteDataModel {
     }
 
     /// Deletes everything in scope. Returns true when every part was deleted.
-    func delete(in services: NookServices) async -> Bool {
+    /// - Parameter signIn: Release: Delete my account needs her signed in. If the session has
+    ///   ended, the sign-in sheet asks first (and once more if the server says she's signed out);
+    ///   Not now deletes nothing.
+    func delete(in services: NookServices, signIn: SignInCheck = .notNeeded) async -> Bool {
+        guard phase != .deleting else { return false }
+        if scope == .account {
+            guard await signIn(.deleteAccount) else { return false }
+        }
         guard phase != .deleting else { return false }
         phase = .deleting
-        let report = await services.deletion.delete(scope)
+        var report = await services.deletion.delete(scope)
+        if scope == .account, report.notStarted == .signedOut, signIn.isInstalled, await signIn(.deleteAccount) {
+            report = await services.deletion.delete(scope)
+        }
         if let reason = report.notStarted {
             phase = reason == .cancelled ? .ready : .notStarted(reason)
             return false

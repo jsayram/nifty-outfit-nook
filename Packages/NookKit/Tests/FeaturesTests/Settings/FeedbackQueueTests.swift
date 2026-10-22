@@ -450,6 +450,23 @@ actor ScriptedFeedbackService: FeedbackService {
 
     func submissions() -> [FeedbackSubmission] { taken }
 
+    /// Release: the reports about AI results it was given.
+    private var reports: [AIReportSubmission] = []
+    func reportSubmissions() -> [AIReportSubmission] { reports }
+
+    func sendReport(_ submission: AIReportSubmission) async throws(FeedbackSendProblem) -> FeedbackReceipt {
+        reports.append(submission)
+        let next = script.count > 1 ? script.removeFirst() : script[0]
+        switch next {
+        case .failure(let problem): throw problem
+        case .success(let receipt):
+            return receipt
+                ?? FeedbackReceipt(
+                    reference: "NK-0000BBBB", receivedAt: Date(timeIntervalSince1970: 1_800_000_000),
+                    hasScreenshot: submission.report.picture != nil)
+        }
+    }
+
     func canSend() async -> Bool { signedIn }
 
     func send(_ submission: FeedbackSubmission) async throws(FeedbackSendProblem) -> FeedbackReceipt {

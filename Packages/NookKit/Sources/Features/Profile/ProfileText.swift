@@ -3,6 +3,18 @@ import Models
 
 /// The words on Profile and its sheets (Phase 14a, `settings.html`).
 nonisolated enum ProfileText {
+    /// Release: Sign out's question.
+    static var signOutQuestion: String {
+        String(localized: "Sign out?", bundle: .module, comment: "Profile: asks before signing out")
+    }
+
+    static var signOutMessage: String {
+        String(
+            localized:
+                "Your closet, looks and pictures stay on this iPhone. Cloud styling and try-on pictures ask you to sign in again.",
+            bundle: .module, comment: "Profile: under Sign out?")
+    }
+
     static var title: String {
         String(localized: "Profile", bundle: .module, comment: "Screen title")
     }

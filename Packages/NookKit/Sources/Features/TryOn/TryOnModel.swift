@@ -72,6 +72,12 @@ final class TryOnModel {
     private(set) var walkthroughIsReplay = false
 
     private var services: NookServices = .unavailable
+    /// Release: asks her to sign in before her first real picture. The sheet sets it.
+    @ObservationIgnored var signIn = SignInCheck.notNeeded
+    /// Release: she's signed in (or there's nothing to ask), so Make a picture goes straight on.
+    @ObservationIgnored private var signInChecked = false
+    /// Release: the sign-in sheet is open for this picture.
+    private(set) var isAskingToSignIn = false
     private var making: Task<Void, Never>?
     /// 33a: the job this sheet is showing, while it shows it.
     private var shownJob: AIJob.ID?
@@ -168,6 +174,20 @@ final class TryOnModel {
         guard isReal else {
             step = .making
             making = Task { await perform() }
+            return
+        }
+        // Release: a real picture needs her signed in. The first time, the sign-in sheet asks;
+        // once she's in, Make a picture carries on by itself. Not now leaves the sheet as it was.
+        if signIn.isInstalled, !signInChecked {
+            guard !isAskingToSignIn else { return }
+            isAskingToSignIn = true
+            Task {
+                let signedIn = await signIn(.tryOn)
+                isAskingToSignIn = false
+                guard signedIn else { return }
+                signInChecked = true
+                make()
+            }
             return
         }
         // 33a: no consent, no call, and nothing is prepared either.
