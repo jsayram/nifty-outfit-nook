@@ -80,7 +80,8 @@ public struct GatewayPaidActionService: PaidActionService {
     static func usage(_ body: APIV1.Usage) -> CloudUsage {
         CloudUsage(
             allowances: body.categories.compactMap(allowance),
-            paused: Set(body.features.filter { $0.state != "on" }.compactMap { PaidFeature(rawValue: $0.feature) }))
+            paused: Set(body.features.filter { $0.state != "on" }.compactMap { PaidFeature(rawValue: $0.feature) }),
+            credits: body.credits?.pictures)
     }
 
     static func problem(for failure: APIFailure, paid: Bool = true, now: Date = Date()) -> CloudLimitProblem {

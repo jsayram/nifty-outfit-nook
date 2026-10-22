@@ -87,7 +87,8 @@ struct ProfilePage: View {
             // 30a: under the name, as in `settings.html`.
             row(
                 StylingAccessText.title, subtitle: StylingAccessText.rowDetail,
-                value: StylingAccessText.rowValue(model.subscription), systemImage: "sparkles",
+                value: StylingAccessText.rowValue(model.subscription, isComplimentary: model.isComplimentary),
+                systemImage: "sparkles",
                 identifier: "profile.stylingAccess"
             ) {
                 actions.open(.stylingAccess)

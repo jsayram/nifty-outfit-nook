@@ -12,8 +12,12 @@ public enum SubscriptionProducts {
     public static let groupName = "Styling"
     /// The monthly styling subscription.
     public static let monthly = "com.jsayram.niftyoutfitnook.styling.monthly"
-    /// Every product 30a reads.
-    public static let all: Set<String> = [monthly]
+    /// 30b: the complimentary unlock (PRD 14.2): a non-consumable that gives styling access with
+    /// no end and no renewal. Never sold in the app; Jose gives it with free one-time App Store
+    /// offer codes, which she redeems in Styling access.
+    public static let complimentary = "com.jsayram.niftyoutfitnook.styling.complimentary"
+    /// Every product that gives styling access.
+    public static let all: Set<String> = [monthly, complimentary]
 }
 
 /// Where her styling subscription stands, in the words the app uses. StoreKit's own states, with
@@ -47,10 +51,13 @@ public struct SubscriptionStatus: Sendable, Equatable, Codable {
     public var willAutoRenew: Bool
     /// When StoreKit was read. A cached status is never stretched past its own dates.
     public var checkedAt: Date
+    /// 30b: when she redeemed the complimentary unlock, if she has it (and Apple hasn't taken it
+    /// back). It gives styling access with no end, alongside whatever the subscription says.
+    public var complimentarySince: Date?
 
     public init(
         state: SubscriptionState, productID: String? = nil, expiresAt: Date? = nil, gracePeriodEndsAt: Date? = nil,
-        willAutoRenew: Bool = false, checkedAt: Date
+        willAutoRenew: Bool = false, checkedAt: Date, complimentarySince: Date? = nil
     ) {
         self.state = state
         self.productID = productID
@@ -58,6 +65,7 @@ public struct SubscriptionStatus: Sendable, Equatable, Codable {
         self.gracePeriodEndsAt = gracePeriodEndsAt
         self.willAutoRenew = willAutoRenew
         self.checkedAt = checkedAt
+        self.complimentarySince = complimentarySince
     }
 
     /// Nothing bought, read at `date`.
@@ -70,6 +78,8 @@ public struct SubscriptionStatus: Sendable, Equatable, Codable {
     /// read since: the status is only as good as the dates Apple gave, so stale data never grants
     /// more than they say. Billing retry without a grace period, expired and revoked give nothing.
     public func hasStylingAccess(at now: Date) -> Bool {
+        // 30b: the complimentary unlock has no end date. Apple taking it back removes it.
+        if isComplimentary { return true }
         switch state {
         case .trial, .active:
             guard let expiresAt else { return false }
@@ -81,6 +91,9 @@ public struct SubscriptionStatus: Sendable, Equatable, Codable {
             return false
         }
     }
+
+    /// 30b: whether she has the complimentary unlock.
+    public var isComplimentary: Bool { complimentarySince != nil }
 
     /// Whether there's a subscription that may still bill her: what Delete my account warns
     /// about (24c). Billing retry counts, since Apple is still trying to charge.
@@ -105,7 +118,7 @@ public struct SubscriptionStatus: Sendable, Equatable, Codable {
     /// The non-authoritative hint the app sends with paid requests (30a). The server decides from
     /// Apple's own records (30c) and never trusts this.
     public func hint(at now: Date) -> EntitlementHint {
-        EntitlementHint(effectiveState(at: now))
+        isComplimentary ? .complimentary : EntitlementHint(effectiveState(at: now))
     }
 }
 
@@ -119,6 +132,8 @@ public enum EntitlementHint: String, Sendable, Equatable, CaseIterable {
     case billingRetry = "billing-retry"
     case expired
     case revoked
+    /// 30b: the complimentary unlock.
+    case complimentary
 
     public init(_ state: SubscriptionState) {
         switch state {
@@ -239,6 +254,9 @@ public protocol SubscriptionService: Sendable {
     /// Restore purchases: asks the App Store to sync, then reads the status again. Apple may ask
     /// her to sign in. Only when she taps it.
     func restore() async throws(SubscriptionProblem) -> SubscriptionStatus
+    /// 30b: after Apple's offer code sheet says a code was redeemed. Finishes what the redemption
+    /// delivered, reads the status again and tells every listener.
+    func redeemedOfferCode() async -> SubscriptionStatus
 }
 
 /// Keeps the last status between launches, so the app can show it before StoreKit answers.
@@ -271,6 +289,7 @@ public struct UnavailableSubscriptionService: SubscriptionService {
     public func offer() async throws(SubscriptionProblem) -> SubscriptionOffer { throw .unavailable }
     public func purchase() async -> PurchaseOutcome { .failed(.unavailable) }
     public func restore() async throws(SubscriptionProblem) -> SubscriptionStatus { throw .unavailable }
+    public func redeemedOfferCode() async -> SubscriptionStatus { .none(at: Date()) }
 }
 
 /// The try-on picture allowance (PRD 14.4) as the try-on sheet shows it.
@@ -279,17 +298,39 @@ public enum TryOnAllowance: Sendable, Equatable {
     case freeSimulated
     /// Pictures come with styling access: this many a month. The server counts them (24b).
     case included(perMonth: Int)
+    /// 30b: the picture uses 1 of her purchased credits (the month's are used, or she has no
+    /// styling access). This many are left.
+    case credits(Int)
+    /// 30b: styling access, but this month's pictures are used and she has no credits.
+    case allowanceUsed
     /// Pictures need styling access, which she doesn't have now.
     case needsStylingAccess
 
-    /// The allowance for a status at `now`. While pictures are simulated nothing is charged, so
-    /// the subscription doesn't matter.
+    /// The allowance for a status at `now`, spending the month's pictures first, then credits
+    /// (`TryOnFunding`). While pictures are simulated nothing is charged, so neither matters.
+    /// - Parameter usage: what the server last said is left, with her credits. Nil when unknown.
     public static func current(
         status: SubscriptionStatus, picturesAreSimulated: Bool, at now: Date,
-        allowances: StylingAllowances = .placeholder
+        allowances: StylingAllowances = .placeholder, usage: CloudUsage? = nil
     ) -> TryOnAllowance {
         if picturesAreSimulated { return .freeSimulated }
-        return status.hasStylingAccess(at: now) ? .included(perMonth: allowances.tryOnPerMonth) : .needsStylingAccess
+        let hasAccess = status.hasStylingAccess(at: now)
+        let credits = usage?.credits
+        switch TryOnFunding.next(
+            hasAccess: hasAccess, allowanceLeft: usage?.allowance(.tryOn)?.remainingToday, credits: credits)
+        {
+        case .allowance: return .included(perMonth: allowances.tryOnPerMonth)
+        case .credit: return .credits(credits ?? 0)
+        case .nothing: return hasAccess ? .allowanceUsed : .needsStylingAccess
+        }
+    }
+
+    /// Whether a picture can be made now.
+    public var canMake: Bool {
+        switch self {
+        case .freeSimulated, .included, .credits: true
+        case .allowanceUsed, .needsStylingAccess: false
+        }
     }
 }
 

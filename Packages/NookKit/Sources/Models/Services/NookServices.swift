@@ -88,6 +88,8 @@ public struct NookServices: Sendable {
     public var stylistThreads: any StylistThreadStore = InMemoryStylistThreadStore()
     /// 30a: the styling subscription through StoreKit. Never subscribed until the app sets one.
     public var subscriptions: any SubscriptionService = UnavailableSubscriptionService()
+    /// 30b: picture packs (consumables the server credits). None until the app sets StoreKit's.
+    public var credits: any CreditsService = UnavailableCreditsService()
     /// 30a: true while try-on pictures are simulated on the phone and cost nothing. The image
     /// service (Phase 33) turns it off, and then pictures need styling access.
     public var tryOnIsSimulated = true

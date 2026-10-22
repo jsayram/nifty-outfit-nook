@@ -349,6 +349,29 @@
         }
       }
     },
+    "%lld picture credits added." : {
+      "comment" : "Styling access: after buying a pack. The argument is a number. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld picture credit added."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld picture credits added."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld months" : {
       "comment" : "A length of time. Pluralized.",
       "localizations" : {
@@ -961,6 +984,29 @@
     },
     "Up to %lld requests a day" : {
       "comment" : "Paywall: Style Me's allowance. The argument is a number."
+    },
+    "Uses 1 of your %lld picture credits. Credits don’t expire." : {
+      "comment" : "Try it on sheet: paid with a purchased credit. The argument is how many she has. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Uses your last picture credit. Credits don’t expire."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Uses 1 of your %lld picture credits. Credits don’t expire."
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Uses 1 of the %lld try-on pictures that come with styling access each month." : {
       "comment" : "Try it on sheet: with styling access. The argument is a number."

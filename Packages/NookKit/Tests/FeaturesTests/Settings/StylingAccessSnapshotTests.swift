@@ -15,6 +15,7 @@ import UIKit
 /// - Not subscribed, with the free month (light) and at AX5.
 /// - In the free month (dark).
 /// - A billing grace period, and an ended subscription with the price-only offer.
+/// - 30b: complimentary access with a renewing subscription, picture credits and the packs.
 @MainActor
 @Suite(.heavyMainActorWork)
 struct StylingAccessSnapshotTests {
@@ -57,6 +58,17 @@ struct StylingAccessSnapshotTests {
         let ended = SubscriptionStatus(
             state: .expired, productID: product, expiresAt: TestTime.day(-10), checkedAt: TestTime.now)
         assertSnapshot(page(ended, offer: offer), named: "ended")
+    }
+
+    /// 30b: the complimentary unlock beside a subscription that still renews, picture credits next
+    /// to the try-on allowance, and the packs, once pictures cost something.
+    @Test func complimentaryWithCreditsAndPacks() {
+        let model = StylingAccessModel(now: { TestTime.now })
+        let status = SubscriptionStatus(
+            state: .active, productID: product, expiresAt: TestTime.day(12), willAutoRenew: true,
+            checkedAt: TestTime.now, complimentarySince: TestTime.day(-2))
+        model.show(status: status, offer: nil, credits: 12, packs: CreditPackOffer.samples)
+        assertSnapshot(StylingAccessPage(model: model), named: "complimentary-credits-packs")
     }
 
     // MARK: Drawing

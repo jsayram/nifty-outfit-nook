@@ -1,7 +1,53 @@
 {
   "identifier" : "5E1C0A30",
   "nonRenewingSubscriptions" : [],
-  "products" : [],
+  "products" : [
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "6740000011",
+      "localizations" : [
+        {
+          "description" : "Ten extra try-on pictures. Credits don't expire.",
+          "displayName" : "10 try-on pictures",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.jsayram.niftyoutfitnook.pictures.small",
+      "referenceName" : "Pictures, small pack (PLACEHOLDER size and price)",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "6740000012",
+      "localizations" : [
+        {
+          "description" : "Thirty extra try-on pictures. Credits don't expire.",
+          "displayName" : "30 try-on pictures",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.jsayram.niftyoutfitnook.pictures.large",
+      "referenceName" : "Pictures, large pack (PLACEHOLDER size and price)",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "6740000010",
+      "localizations" : [
+        {
+          "description" : "Styling access with no end date, given with an offer code",
+          "displayName" : "Complimentary styling",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.jsayram.niftyoutfitnook.styling.complimentary",
+      "referenceName" : "Styling, complimentary unlock (PLACEHOLDER price; codes only)",
+      "type" : "NonConsumable"
+    }
+  ],
   "settings" : {
     "_applicationInternalID" : "6740000000",
     "_developerTeamID" : "",

@@ -1,0 +1,12 @@
+{
+  "claim": {
+    "transactionId": "2000000123456789",
+    "productId": "com.jsayram.niftyoutfitnook.pictures.small",
+    "pictures": 10,
+    "replayed": false,
+    "claimedAt": "2026-10-22T09:30:00.000Z"
+  },
+  "credits": {
+    "pictures": 12
+  }
+}

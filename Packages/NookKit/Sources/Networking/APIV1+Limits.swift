@@ -43,6 +43,8 @@ extension APIV1 {
         public var categories: [UsageCategory]
         public var features: [FeatureState]
         public var policyVersion: Int
+        /// 30b: her picture-credit balance. Optional here so an older backend still decodes.
+        public var credits: CreditBalance?
     }
 
     public struct AttestChallenge: Codable, Sendable, Equatable {

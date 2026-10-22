@@ -101,6 +101,8 @@ public enum RealGateway {
         public let paid: GatewayPaidActionService
         /// 24d: notes to the support queue.
         public let feedback: GatewayFeedbackService
+        /// 30b: picture-credit claims.
+        public let credits: GatewayCreditClaimer
     }
 
     @MainActor
@@ -117,6 +119,7 @@ public enum RealGateway {
             account: GatewayAccountService(
                 auth: auth, client: client, appVersion: appVersion, attestation: attestation),
             paid: GatewayPaidActionService(client: client, attestation: attestation),
-            feedback: GatewayFeedbackService(auth: auth, client: client))
+            feedback: GatewayFeedbackService(auth: auth, client: client),
+            credits: GatewayCreditClaimer(client: client))
     }
 }

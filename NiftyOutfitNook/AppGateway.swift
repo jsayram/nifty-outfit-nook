@@ -38,6 +38,9 @@ enum AppGateway {
     /// only while she's signed in; signed out, Send feedback uses the share sheet.
     static let feedback: any FeedbackService = real?.feedback ?? fake?.feedback ?? UnavailableFeedbackService()
 
+    /// 30b: picture-credit claims, on the real backend or the fake one.
+    static let credits: any CreditClaiming = real?.credits ?? fake?.credits ?? UnavailableCreditClaimer()
+
     /// The website's support page, from `NOOK_SUPPORT_URL` (a placeholder address until 35b).
     static let supportLinks = SupportLinks(info: Bundle.main.infoDictionary ?? [:])
 

@@ -24,8 +24,11 @@ nonisolated enum StylingAccessText {
     // MARK: Profile row
 
     /// The value on Profile's Styling access row.
-    static func rowValue(_ state: SubscriptionState) -> String {
-        switch state {
+    static func rowValue(_ state: SubscriptionState, isComplimentary: Bool = false) -> String {
+        if isComplimentary {
+            return String(localized: "Complimentary", bundle: .module, comment: "Profile: Styling access row value")
+        }
+        return switch state {
         case .none:
             String(localized: "Not subscribed", bundle: .module, comment: "Profile: Styling access row value")
         case .trial:
@@ -125,6 +128,74 @@ nonisolated enum StylingAccessText {
                     "Apple refunded this subscription, so styling access is off. Your closet, looks and pictures are all still here.",
                 bundle: .module, comment: "Styling access: subscription refunded or revoked")
         }
+    }
+
+    // MARK: Complimentary access (30b)
+
+    static var yourAccessHeader: String {
+        String(localized: "Your access", bundle: .module, comment: "Styling access: section header, complimentary")
+    }
+
+    static var complimentaryTitle: String {
+        String(localized: "Complimentary access", bundle: .module, comment: "Styling access: status")
+    }
+
+    static var complimentaryDetail: String {
+        String(
+            localized: "Styling access is on at no charge. It doesn’t renew and has no end date.", bundle: .module,
+            comment: "Styling access: complimentary unlock")
+    }
+
+    static var complimentaryAndSubscription: String {
+        String(
+            localized:
+                "You also have a subscription. Redeeming a code didn’t cancel it or refund earlier charges. To stop paying for it, cancel it in Manage subscription.",
+            bundle: .module, comment: "Styling access: complimentary unlock while a subscription still renews")
+    }
+
+    static var redeem: String {
+        String(localized: "Redeem a code", bundle: .module, comment: "Styling access: button")
+    }
+
+    static var redeemDetail: String {
+        String(
+            localized: "For an App Store offer code you were given", bundle: .module,
+            comment: "Styling access: under Redeem a code")
+    }
+
+    // MARK: Picture credits (30b)
+
+    static var creditsTitle: String {
+        String(localized: "Picture credits", bundle: .module, comment: "Styling access: the credit balance row")
+    }
+
+    /// The balance: "12 left. They don't expire."
+    static func creditsDetail(_ count: Int) -> String {
+        String(
+            localized: "\(count) left. Credits don’t expire, and work without a subscription.", bundle: .module,
+            comment: "Styling access: credit balance. The argument is a number.")
+    }
+
+    static var packsHeader: String {
+        String(localized: "Extra try-on pictures", bundle: .module, comment: "Styling access: section header")
+    }
+
+    static var packsNote: String {
+        String(
+            localized:
+                "One-time purchases. Each picture uses 1 credit once the month’s included pictures are used. Credits don’t expire.",
+            bundle: .module, comment: "Styling access: under the picture packs")
+    }
+
+    /// A pack's button: "10 pictures, $2.99".
+    static func packButton(_ pack: CreditPackOffer) -> String {
+        String(
+            localized: "\(pack.pictures) pictures, \(pack.displayPrice)", bundle: .module,
+            comment: "Styling access: buy a picture pack. The arguments are a number and the App Store's price.")
+    }
+
+    static var buyingPack: String {
+        String(localized: "Waiting for the App Store", bundle: .module, comment: "Styling access: while buying a pack")
     }
 
     // MARK: The offer
@@ -321,6 +392,23 @@ nonisolated enum StylingAccessText {
             String(
                 localized: "No active subscription was found for this Apple Account.", bundle: .module,
                 comment: "Styling access: restore found nothing")
+        case .redeemed:
+            String(
+                localized: "Your code is redeemed. Styling access is on.", bundle: .module,
+                comment: "Styling access: after redeeming an offer code")
+        case .creditsAdded(let count):
+            String(
+                localized: "\(count) picture credits added.", bundle: .module,
+                comment: "Styling access: after buying a pack. The argument is a number. Pluralized.")
+        case .creditsAwaiting:
+            String(
+                localized:
+                    "Your purchase went through. The pictures will be added when the app can reach the server. Nothing more will be charged.",
+                bundle: .module, comment: "Styling access: pack bought but not credited yet")
+        case .packPending:
+            String(
+                localized: "Waiting for approval. When it’s approved, the pictures are added on their own.",
+                bundle: .module, comment: "Styling access: pack waiting for Ask to Buy")
         case .problem(let problem):
             switch problem {
             case .offline:

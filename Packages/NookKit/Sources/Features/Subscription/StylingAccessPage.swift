@@ -8,6 +8,10 @@ struct StylingAccessActions {
     var restore: () -> Void = {}
     var manage: () -> Void = {}
     var open: (WebsiteLink) -> Void = { _ in }
+    /// 30b: Apple's offer code sheet.
+    var redeem: () -> Void = {}
+    /// 30b: buys a picture pack by its product ID.
+    var buyPack: (String) -> Void = { _ in }
 }
 
 /// Styling access, top to bottom (`access.html`, `paywall.html`, Phase 30a):
@@ -18,6 +22,9 @@ struct StylingAccessActions {
 ///    Account can still have it), the day of the first charge, how to cancel, and Subscribe.
 /// 3. What's included, with the allowances, and what's always free.
 /// 4. Restore purchases, Manage subscription, Terms of use and Privacy policy.
+///
+/// 30b: the complimentary unlock first when she has it, her picture credits next to the try-on
+/// allowance, the picture packs while they're sold, and Redeem a code (Apple's own sheet).
 ///
 /// A custom page rather than StoreKit's `SubscriptionStoreView`: it says the allowances and what
 /// stays free in the app's own words and design, the try-on and Help screens share its state,
@@ -42,6 +49,9 @@ struct StylingAccessPage: View {
                 NookLoadingState(StylingAccessText.loading)
                     .floorCard()
             } else {
+                if model.isComplimentary {
+                    complimentary
+                }
                 if model.state != .none {
                     yourSubscription
                 }
@@ -49,6 +59,9 @@ struct StylingAccessPage: View {
                     offer
                 }
                 included
+                if model.showsPacks {
+                    packs
+                }
                 SettingsGroup(header: StylingAccessText.freeHeader) {
                     SettingsNote(StylingAccessText.freeDetail)
                 }
@@ -58,6 +71,37 @@ struct StylingAccessPage: View {
     }
 
     // MARK: Groups
+
+    /// 30b: the complimentary unlock.
+    private var complimentary: some View {
+        SettingsGroup(header: StylingAccessText.yourAccessHeader, identifier: "access.complimentary") {
+            NookRow(
+                StylingAccessText.complimentaryTitle, subtitle: StylingAccessText.complimentaryDetail,
+                systemImage: "gift")
+            if model.subscriptionStillBills {
+                SettingsNote(StylingAccessText.complimentaryAndSubscription)
+            }
+        }
+    }
+
+    /// 30b: picture packs, one button each, with the App Store's price.
+    private var packs: some View {
+        SettingsGroup(header: StylingAccessText.packsHeader, identifier: "access.packs") {
+            ForEach(model.packs) { pack in
+                let buying = model.busy == .buyingPack(pack.productID)
+                NookButton(
+                    buying ? StylingAccessText.buyingPack : StylingAccessText.packButton(pack),
+                    systemImage: "camera", kind: .soft, isLoading: buying, fillsWidth: true,
+                    action: { actions.buyPack(pack.productID) }
+                )
+                .accessibilityHint(StylingAccessText.subscribeHint)
+                .accessibilityIdentifier("access.pack.\(pack.pictures)")
+                .padding(.horizontal, NookSpacing.small)
+                .padding(.vertical, NookSpacing.xSmall)
+            }
+            SettingsNote(StylingAccessText.packsNote)
+        }
+    }
 
     private var yourSubscription: some View {
         SettingsGroup(header: StylingAccessText.yourSubscriptionHeader, identifier: "access.status") {
@@ -127,6 +171,13 @@ struct StylingAccessPage: View {
             SettingsInfoRow(
                 title: StylingAccessText.tryOn, detail: StylingAccessText.tryOnAllowance(allowances.tryOnPerMonth),
                 systemImage: "camera")
+            if model.showsCredits, let credits = model.credits {
+                SettingsInfoRow(
+                    title: StylingAccessText.creditsTitle, detail: StylingAccessText.creditsDetail(credits),
+                    systemImage: "photo.stack"
+                )
+                .accessibilityIdentifier("access.credits")
+            }
             SettingsNote(StylingAccessText.notUnlimited)
         }
     }
@@ -136,6 +187,11 @@ struct StylingAccessPage: View {
             row(
                 StylingAccessText.restore, value: model.busy == .restoring ? StylingAccessText.restoring : nil,
                 systemImage: "arrow.clockwise", identifier: "access.restore", action: actions.restore)
+            if model.showsRedeem {
+                row(
+                    StylingAccessText.redeem, subtitle: StylingAccessText.redeemDetail, systemImage: "giftcard",
+                    identifier: "access.redeem", action: actions.redeem)
+            }
             if model.showsManage {
                 row(
                     StylingAccessText.manage, subtitle: StylingAccessText.manageDetail, systemImage: "creditcard",
@@ -173,15 +229,15 @@ struct StylingAccessPage: View {
 
     private func icon(for message: StylingAccessModel.Message) -> String {
         switch message {
-        case .started, .restored: "checkmark.circle"
-        case .pending: "hourglass"
+        case .started, .restored, .redeemed, .creditsAdded: "checkmark.circle"
+        case .pending, .packPending, .creditsAwaiting: "hourglass"
         case .nothingToRestore, .problem: "exclamationmark.triangle"
         }
     }
 
     private func tone(for message: StylingAccessModel.Message) -> NookBannerTone {
         switch message {
-        case .started, .restored, .pending: .neutral
+        case .started, .restored, .pending, .redeemed, .creditsAdded, .creditsAwaiting, .packPending: .neutral
         case .nothingToRestore, .problem: .warning
         }
     }

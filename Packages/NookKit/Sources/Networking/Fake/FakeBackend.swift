@@ -73,6 +73,8 @@ public final class FakeBackend: Sendable {
         var deletions = FakeDeletions()
         /// 24d: support notes (FakeBackend+Support.swift).
         var support = FakeSupport()
+        /// 30b: picture credits (FakeBackend+Credits.swift).
+        var credits = FakeCredits()
     }
 
     let state = Mutex(State())
@@ -209,6 +211,9 @@ public final class FakeBackend: Sendable {
         case APIV1.sendFeedback:
             guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
             return routeFeedback(request, body: body, subject: parsed.subject, id: id)
+        case APIV1.claimCredits:
+            guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
+            return routeCredits(request, body: body, subject: parsed.subject, id: id)
         default:
             guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
             return routeLimits(request, body: body, endpoint: endpoint, subject: parsed.subject, id: id)

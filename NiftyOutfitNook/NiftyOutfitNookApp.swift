@@ -169,6 +169,8 @@ struct NiftyOutfitNookApp: App {
         let jobNotifier = AppJobs.notifier
         // 30a: StoreKit, with its transaction listener started now, at launch.
         let subscriptions = AppSubscriptions.service
+        // 30b: picture packs, with their transaction listener started now too.
+        let credits = AppSubscriptions.credits
         AppJobs.all = [keptJobs, sampleJobs]
         return AppLaunch(
             onboarding: onboarding,
@@ -215,6 +217,7 @@ struct NiftyOutfitNookApp: App {
                     services.account = account
                     services.paid = paid
                     services.subscriptions = subscriptions
+                    services.credits = credits
                     AppGateway.installSupport(into: &services)
                     return services
                 case .sample, nil:
@@ -238,6 +241,7 @@ struct NiftyOutfitNookApp: App {
                     services.account = account
                     services.paid = paid
                     services.subscriptions = subscriptions
+                    services.credits = credits
                     AppGateway.installSupport(into: &services)
                     return services
                 }
