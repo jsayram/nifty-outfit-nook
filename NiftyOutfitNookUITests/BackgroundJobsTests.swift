@@ -52,12 +52,6 @@ final class BackgroundJobsTests: XCTestCase {
     func testInTheBackgroundANotificationSaysTheyAreReady() throws {
         try skipOnPullRequests(
             "iOS's own alert and the Home Screen are slow to script on CI; AIJobsTests covers the notification.")
-        try XCTSkipUnless(
-            Self.notificationServiceAnswers(),
-            "This simulator's notification service doesn't answer, so no notification can show. Seen on the "
-                + "iOS 27.0 simulator on the Mac that hosts the self-hosted runner: SpringBoard's notification "
-                + "server waits on a deadlocked dasd (October 2026). A simulator on iOS 26.5 works "
-                + "(NOOK_SIM_OS=26.5), and so do GitHub's hosted runners.")
         let app = launch()
         startStyleMe(in: app)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -74,7 +68,18 @@ final class BackgroundJobsTests: XCTestCase {
         XCUIDevice.shared.press(.home)
         let note = springboard.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "Your outfit ideas are ready")).firstMatch
-        XCTAssertTrue(note.waitUntilExists(timeout: Self.jobWait), "No notification")
+        let showed = note.waitUntilExists(timeout: Self.jobWait)
+        // A simulator whose notification service doesn't answer can't show anything (see
+        // `notificationServiceAnswers`): that is the simulator, not the app, so skip with the
+        // reason. With a working service a missing notification still fails.
+        if !showed {
+            try XCTSkipUnless(
+                Self.notificationServiceAnswers(),
+                "This simulator's notification service doesn't answer, so no notification can show. Seen on "
+                    + "the iOS 27.0 simulator under heavy host load: SpringBoard's notification server waits on a "
+                    + "deadlocked dasd (October 2026). A simulator on iOS 26.5 works (NOOK_SIM_OS=26.5).")
+        }
+        XCTAssertTrue(showed, "No notification")
         XCTAssertFalse(note.label.contains("blouse") || note.label.contains("trousers"), note.label)
         keepScreenshot("27c-6-notification")
         note.tapUntil(timeout: Self.wait, else: "The notification didn't open her looks") {
@@ -129,7 +134,7 @@ final class BackgroundJobsTests: XCTestCase {
     // MARK: Helpers
 
     /// Whether iOS answers a question about notifications within 20 seconds. The same service
-    /// answers the app's own, and posts what it posts.
+    /// answers the app's own, and posts what it posts. Asked only after no notification showed.
     private static func notificationServiceAnswers() -> Bool {
         let answered = XCTestExpectation(description: "notification settings")
         answered.assertForOverFulfill = false
