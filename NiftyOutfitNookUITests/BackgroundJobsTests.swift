@@ -1,3 +1,4 @@
+import UserNotifications
 import XCTest
 
 /// Background AI jobs (Phase 27c) on the real screens, against the fake backend's slow stylist
@@ -20,11 +21,10 @@ final class BackgroundJobsTests: XCTestCase {
         let app = launch()
         startStyleMe(in: app)
         XCTAssertTrue(app.staticTexts["results.leavingNote"].label.hasPrefix("You can leave this screen"))
-        // The offer shows only until iOS has an answer or she says Not now, on this simulator.
-        let notNow = app.buttons["results.notifyNotNow"]
-        if notNow.waitUntilExists(timeout: 3) {
-            tap(notNow, until: { !notNow.exists })
-        }
+        // The note offer may be on screen. It is left alone: Not now is kept on the simulator
+        // (and erased only by Delete my data), so tapping it here would hide the offer from
+        // `testInTheBackgroundANotificationSaysTheyAreReady` on every later run, and that test
+        // then never gets iOS's permission and sees no notification.
         keepScreenshot("27c-1-styling-can-leave")
 
         // Off to the closet to search while the stylist works.
@@ -51,6 +51,12 @@ final class BackgroundJobsTests: XCTestCase {
     func testInTheBackgroundANotificationSaysTheyAreReady() throws {
         try skipOnPullRequests(
             "iOS's own alert and the Home Screen are slow to script on CI; AIJobsTests covers the notification.")
+        // iOS's notification service comes up late on a cold iOS 27.0 simulator (SpringBoard's
+        // notification server waits on dasd, for minutes while the host is busy, October 2026),
+        // and until it does the app can't ask for permission or post. Wait for it here.
+        try XCTSkipUnless(
+            Self.waitForNotificationService(timeout: 300),
+            "This simulator's notification service didn't answer in 5 minutes, so no notification can show.")
         let app = launch()
         startStyleMe(in: app)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -97,7 +103,13 @@ final class BackgroundJobsTests: XCTestCase {
             tap(app.buttons["Review"], until: { allow.exists })
             tap(allow, until: { app.staticTexts["results.styling"].exists })
         }
-        XCTAssertTrue(app.staticTexts["results.styling"].waitUntilExists(timeout: Self.wait))
+        // Her own closet and history are kept on the simulator between runs (a CI retry, a second
+        // local run). The same request again comes from her history, so ask afresh with New ideas.
+        let styling = app.staticTexts["results.styling"]
+        if !styling.waitUntilExists(timeout: 5), app.buttons["results.tryDifferent"].exists {
+            tap(app.buttons["results.tryDifferent"], until: { styling.exists })
+        }
+        XCTAssertTrue(styling.waitUntilExists(timeout: Self.wait))
         keepScreenshot("27c-8-styling-before-kill")
 
         // Killed mid-job, then opened again.
@@ -114,6 +126,15 @@ final class BackgroundJobsTests: XCTestCase {
     }
 
     // MARK: Helpers
+
+    /// Waits until iOS answers a question about notifications, which the same service that posts
+    /// them does. Returns whether it did within `timeout` seconds.
+    private static func waitForNotificationService(timeout: TimeInterval) -> Bool {
+        let answered = XCTestExpectation(description: "notification settings")
+        answered.assertForOverFulfill = false
+        UNUserNotificationCenter.current().getNotificationSettings { _ in answered.fulfill() }
+        return XCTWaiter().wait(for: [answered], timeout: timeout) == .completed
+    }
 
     @MainActor
     private func launch() -> XCUIApplication {
