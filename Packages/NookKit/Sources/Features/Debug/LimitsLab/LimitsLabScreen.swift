@@ -79,7 +79,7 @@
                 button("Full outfit idea", id: "fullOutfit") {
                     await model.run(.style(.sample(.full, note: Self.tapNote())))
                 }
-                button("Make a try-on picture", id: "tryOn") { await model.run(.tryOn(contextRevision: "rev_lab")) }
+                button("Make a try-on picture", id: "tryOn") { await model.run(.tryOn(.sample(note: "lab"))) }
                 button("Send the last one again (same key)", id: "sendAgain") { await model.sendAgain() }
                     .disabled(!model.canSendAgain)
                 if model.controls != nil {

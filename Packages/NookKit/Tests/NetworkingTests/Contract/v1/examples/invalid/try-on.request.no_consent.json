@@ -1,0 +1,17 @@
+{
+  "contextRevision": "rev_1",
+  "person": {
+    "contentType": "image/jpeg",
+    "data": "/9j/4AAQ"
+  },
+  "garments": [
+    {
+      "id": "g1",
+      "category": "top",
+      "image": {
+        "contentType": "image/jpeg",
+        "data": "/9j/4AAQ"
+      }
+    }
+  ]
+}

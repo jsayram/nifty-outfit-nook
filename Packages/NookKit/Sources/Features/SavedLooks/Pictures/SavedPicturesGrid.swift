@@ -175,7 +175,7 @@ struct SavedPictureCell: View {
     /// (`TryOnPictureView.photoBadgeMinimumWidth`), so then the line starts with Simulated
     /// (RD-04.2).
     private var dateLine: String {
-        let saysSimulated = style == .row || item.content.tryOnPhoto != nil
+        let saysSimulated = !item.content.isRealPicture && (style == .row || item.content.tryOnPhoto != nil)
         var parts = saysSimulated ? [SharedText.simulated, date] : [date]
         switch item.status {
         case .current: break

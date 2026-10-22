@@ -147,7 +147,7 @@
             switch request {
             case .style(let call) where call.mode == .full: "Done: an outfit idea (sample pieces)."
             case .style: "Done: a swap or question (sample pieces)."
-            case .tryOn: "Done: a try-on picture (placeholder)."
+            case .tryOn: "Done: a try-on picture (sample squares)."
             }
         }
 

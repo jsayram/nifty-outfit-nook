@@ -277,6 +277,8 @@ struct ResultActions: View {
     let actions: YourLooksActions
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// 33a: with real try-on pictures there's nothing simulated to say.
+    @Environment(\.services) private var services
 
     var body: some View {
         VStack(spacing: NookSpacing.small) {
@@ -286,19 +288,25 @@ struct ResultActions: View {
                 swap
                 ask
             }
-            Text(
-                needsConnection
-                    ? String(
-                        localized: "Try it on and Ask stylist need a connection. Save and Swap work offline.",
-                        bundle: .module, comment: "Under the results buttons while offline")
-                    : SharedText.tryOnPicturesSimulated
-            )
-            .nookTextStyle(.finePrint)
-            .foregroundStyle(.nook.textSecondary)
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
+            if needsConnection || services.tryOnPipeline == nil {
+                finePrint
+            }
         }
         .padding(.top, NookSpacing.small)
+    }
+
+    private var finePrint: some View {
+        Text(
+            needsConnection
+                ? String(
+                    localized: "Try it on and Ask stylist need a connection. Save and Swap work offline.",
+                    bundle: .module, comment: "Under the results buttons while offline")
+                : SharedText.tryOnPicturesSimulated
+        )
+        .nookTextStyle(.finePrint)
+        .foregroundStyle(.nook.textSecondary)
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var save: some View {

@@ -280,6 +280,29 @@
     "%@′ %@″" : {
       "comment" : "A height in feet and inches, like 4′ 11″. Keep the prime marks."
     },
+    "%lld clothing photos" : {
+      "comment" : "See what was sent: the garment photos. The argument is how many. Pluralized.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld clothing photo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld clothing photos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld days" : {
       "comment" : "A length of time. Pluralized.",
       "localizations" : {
@@ -802,6 +825,21 @@
     "2 weeks" : {
       "comment" : "Repeat setting value (LR-10)"
     },
+    "A photo of your body, without your face and on a plain backdrop, and that look’s piece photos, only when you tap Try it on. Your face never leaves your iPhone." : {
+      "comment" : "Privacy and terms: under the try-on switch"
+    },
+    "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+      "comment" : "Try-on consent: the approved disclosure, word for word"
+    },
+    "A piece no longer in your closet" : {
+      "comment" : "See what was sent"
+    },
+    "Add a photo of yourself in Profile, Your try-on photo. Nothing was sent." : {
+      "comment" : "Try it on sheet (33a)"
+    },
+    "Add photos to the pieces in this look, then try again. Nothing was sent." : {
+      "comment" : "Try it on sheet (33a)"
+    },
     "Allow" : {
       "comment" : "Stylist consent: agree"
     },
@@ -832,6 +870,12 @@
     "Checking with the App Store" : {
       "comment" : "Styling access: loading"
     },
+    "Dressing you" : {
+      "comment" : "Try it on sheet (33a): the job is running"
+    },
+    "Each picture shows “See what was sent”, so you can check exactly what left your iPhone." : {
+      "comment" : "Try-on consent"
+    },
     "Ended" : {
       "comment" : "Profile: Styling access row value"
     },
@@ -847,8 +891,20 @@
     "From your history: it still fits today’s request, so nothing was used." : {
       "comment" : "Note on Your looks: an earlier result reused before asking the stylist (FR-58)"
     },
+    "Hiding your face" : {
+      "comment" : "Try it on sheet (33a): on the phone"
+    },
+    "How try-on pictures work" : {
+      "comment" : "Try-on consent: title"
+    },
+    "Keep browsing" : {
+      "comment" : "Try it on sheet (33a): closes the sheet"
+    },
     "Manage subscription" : {
       "comment" : "Styling access: button"
+    },
+    "Never sent: your face, your room, your measurements, your notes, your name." : {
+      "comment" : "Try-on consent"
     },
     "Never sent: your photos, your name, your measurements or weight, your location." : {
       "comment" : "Stylist consent: what is never sent"
@@ -859,11 +915,23 @@
     "No active subscription was found for this Apple Account." : {
       "comment" : "Styling access: restore found nothing"
     },
+    "No picture this time" : {
+      "comment" : "Try it on sheet: a server limit"
+    },
     "Not subscribed" : {
       "comment" : "Profile: Styling access row value"
     },
+    "Nothing else was sent: not your face, your room, your measurements, your notes or your name." : {
+      "comment" : "See what was sent: under the photos"
+    },
     "Nothing is charged today. It renews automatically every month until you cancel." : {
       "comment" : "Paywall: under the offer, with a free month"
+    },
+    "Nothing was sent" : {
+      "comment" : "Try it on sheet (33a)"
+    },
+    "Only the photo without your face and your clothing photos were sent. You can leave this screen: we’ll tell you when your picture is ready, and your iPhone puts you back together." : {
+      "comment" : "Try it on sheet (33a): the job is running"
     },
     "Opens the App Store to confirm." : {
       "comment" : "Paywall: VoiceOver hint on the purchase button"
@@ -894,6 +962,18 @@
     },
     "See styling access" : {
       "comment" : "Try it on sheet button"
+    },
+    "See what was sent" : {
+      "comment" : "Button and title (33a)"
+    },
+    "Set up your try-on photo first" : {
+      "comment" : "Try it on sheet (33a)"
+    },
+    "Shows the photos that left your iPhone to make this picture." : {
+      "comment" : "VoiceOver hint for See what was sent"
+    },
+    "So nothing was sent. Try a photo where you face the camera, with your face clear and well lit." : {
+      "comment" : "Try it on sheet (33a): fail closed, after the title"
     },
     "Start free month" : {
       "comment" : "Paywall: the purchase button"
@@ -958,6 +1038,12 @@
     "Swap a piece and Ask stylist" : {
       "comment" : "Paywall: an included feature"
     },
+    "Swapping in a studio backdrop. Nothing has left your iPhone yet." : {
+      "comment" : "Try it on sheet (33a): on the phone, before sending"
+    },
+    "Tap to see it." : {
+      "comment" : "Banner: what tapping a finished picture does"
+    },
     "That didn’t work, and nothing was charged. Try again." : {
       "comment" : "Styling access: purchase failed"
     },
@@ -967,11 +1053,29 @@
     "The App Store didn’t answer, so the price can’t be shown. Try again later." : {
       "comment" : "Paywall: the offer couldn't be loaded"
     },
+    "The photo that was sent: your body on a plain studio backdrop, with your head covered in flat grey." : {
+      "comment" : "VoiceOver: the faceless photo on See what was sent"
+    },
     "The subscription isn’t available right now. Nothing was charged." : {
       "comment" : "Styling access: product unavailable"
     },
+    "The try-on pictures included with styling access are used for now. More come back with time, or you can buy extra pictures in Styling access." : {
+      "comment" : "Try it on sheet: allowance used, no credits"
+    },
+    "These pieces have no photos to send" : {
+      "comment" : "Try it on sheet (33a)"
+    },
+    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps neither." : {
+      "comment" : "Try-on consent"
+    },
     "To pay nothing, cancel at least a day before %@: Settings, then your name, then Subscriptions." : {
       "comment" : "Paywall: how to cancel the free month. The argument is a date."
+    },
+    "Try-on picture of %@: you wearing %@." : {
+      "comment" : "Spoken for a real try-on picture (33a): the look's name, then its pieces"
+    },
+    "Try-on pictures are off. Nothing more will be sent. Your pictures stay in the app. Black Forest Labs may keep what it already received." : {
+      "comment" : "Privacy and terms: the try-on switch is off"
     },
     "Try-on pictures come with styling access. Your saved pictures stay free to open." : {
       "comment" : "Try it on sheet: without styling access"
@@ -1016,6 +1120,9 @@
     },
     "Waiting for the App Store" : {
       "comment" : "Paywall: while buying"
+    },
+    "We can’t delete copies Black Forest Labs keeps." : {
+      "comment" : "Try-on consent"
     },
     "What Anthropic does with it: doesn’t use it to train its models, and deletes it within 30 days. If its safety checks flag a request, it can keep it for up to 2 years. It may be processed outside the US." : {
       "comment" : "Stylist consent: what the recipient does with it"
@@ -8997,6 +9104,15 @@
     "Your data is deleted. The app is starting fresh." : {
       "comment" : "Toast on the welcome after Delete my data"
     },
+    "Your face couldn’t be hidden in this photo" : {
+      "comment" : "Try it on sheet (33a): fail closed"
+    },
+    "Your face never leaves your iPhone. Before anything is sent, your iPhone covers your head and hair and puts you on a plain studio backdrop. If it can’t do that, nothing is sent." : {
+      "comment" : "Try-on consent"
+    },
+    "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+      "comment" : "Under every try-on picture (33a)"
+    },
     "Your favourite outfits" : {
       "comment" : "Saved Looks tour, step 1 title"
     },
@@ -9017,6 +9133,12 @@
     },
     "Your iCloud copy is deleted the next time this iPhone is online." : {
       "comment" : "Delete my account: iCloud copy pending"
+    },
+    "Your iPhone couldn’t check your photo this time. Try again in a moment." : {
+      "comment" : "Try it on sheet (33a): the checks didn't run"
+    },
+    "Your iPhone couldn’t find you in your try-on photo, so nothing was sent. Try a photo of your whole body." : {
+      "comment" : "Try it on sheet (33a): fail closed"
     },
     "Your iPhone may be out of space. Nothing was saved." : {
       "comment" : "Add a piece: after a photo couldn't be saved"
@@ -9124,6 +9246,9 @@
     "Your outfit pictures" : {
       "comment" : "Saved Looks tour, step 2 title"
     },
+    "Your outline wasn’t clear enough to be sure, so nothing was sent. Try a photo against a plain wall, in good light." : {
+      "comment" : "Try it on sheet (33a): fail closed"
+    },
     "Your own clothes first. Something new adds one piece you don’t have, marked “Not in your closet”." : {
       "comment" : "Preferences sheet: Mine + one idea"
     },
@@ -9137,6 +9262,9 @@
           }
         }
       }
+    },
+    "Your photo, without your face, on a plain backdrop" : {
+      "comment" : "See what was sent: the faceless photo"
     },
     "Your pictures didn’t load" : {
       "comment" : "Pictures tab error title"
@@ -9203,6 +9331,9 @@
     },
     "Your try-on photo" : {
       "comment" : "Profile row and sheet title (RD-06)"
+    },
+    "Your try-on photo seems to show more than one person, so nothing was sent. Try a photo of just you." : {
+      "comment" : "Try it on sheet (33a): fail closed"
     },
     "Your unsaved changes to it go too." : {
       "comment" : "Delete for good: its unsaved Edit draft goes too",

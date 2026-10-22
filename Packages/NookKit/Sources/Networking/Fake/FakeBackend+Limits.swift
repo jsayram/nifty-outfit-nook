@@ -18,12 +18,14 @@ public struct FakeLimits: Sendable, Equatable {
     public var paused: Set<String> = []
     /// 27a: how the stand-in stylist behaves.
     public var stylist = FakeStylistBehaviour.normal
+    /// 33a: how the stand-in image service behaves.
+    public var tryOn = FakeTryOnBehaviour.instant
 
     public init() {}
 
     public static func == (a: FakeLimits, b: FakeLimits) -> Bool {
         a.rateCapacity == b.rateCapacity && a.rateSeconds == b.rateSeconds && a.paused == b.paused
-            && a.stylist == b.stylist
+            && a.stylist == b.stylist && a.tryOn == b.tryOn
             && a.allowances.mapValues { [$0.day, $0.month] } == b.allowances.mapValues { [$0.day, $0.month] }
     }
 }
@@ -41,6 +43,11 @@ struct FakeLedger {
         var counted = true
         /// 27a: the stylist's answer, for a replay of the same key.
         var style: APIV1.StylistResult?
+        /// 33a: when the try-on picture is ready, and the picture once it is.
+        var tryOnReadyAt: Date?
+        var tryOnImage: Data?
+        var tryOnRequest: APIV1.TryOnRequest?
+        var failed = false
     }
 
     var challenges: [String: (subject: String, expiresAt: Date, used: Bool)] = [:]
@@ -52,6 +59,8 @@ struct FakeLedger {
     var jobsRun = 0
     /// 27a: the result cache, by account and normalized request, for 24 hours.
     var styleCache: [String: (result: APIV1.StylistResult, at: Date)] = [:]
+    /// 33a: every try-on body received.
+    var tryOnRequests: [APIV1.TryOnRequest] = []
 }
 
 extension FakeBackend {
@@ -70,6 +79,14 @@ extension FakeBackend {
     }
 
     public var limits: FakeLimits { state.withLock { $0.limits } }
+
+    /// 33a: how the stand-in image service behaves from now on.
+    public func setTryOn(_ behaviour: FakeTryOnBehaviour) {
+        state.withLock { $0.limits.tryOn = behaviour }
+    }
+
+    /// 33a: the try-on requests received, as sent (for tests of what leaves the phone).
+    public var tryOnRequests: [APIV1.TryOnRequest] { state.withLock { $0.ledger.tryOnRequests } }
 
     /// 27a: how the stand-in stylist behaves from now on.
     public func setStylist(_ behaviour: FakeStylistBehaviour) {
@@ -195,6 +212,7 @@ extension FakeBackend {
         }
         let feature = endpoint == APIV1.style ? "style" : "tryOn"
         var styleRequest: APIV1.StyleRequest?
+        var tryOnRequest: APIV1.TryOnRequest?
         if feature == "style" {
             // 27a: the stylist's body, checked like the backend checks it, then her consent.
             guard let decoded = try? JSONDecoder().decode(APIV1.StyleRequest.self, from: body),
@@ -202,9 +220,11 @@ extension FakeBackend {
             else { return error(.invalidRequest, id) }
             styleRequest = decoded
         } else {
-            guard Set(object.keys) == ["contextRevision"],
-                (object["contextRevision"] as? String)?.wholeMatch(of: /[A-Za-z0-9_-]{1,64}/) != nil
+            // 33a: only the faceless photo and garment photos, checked like the backend checks them.
+            guard let decoded = try? JSONDecoder().decode(APIV1.TryOnRequest.self, from: body),
+                FakeTryOn.isValid(object, decoded: decoded)
             else { return error(.invalidRequest, id) }
+            tryOnRequest = decoded
         }
         let category = feature == "tryOn" ? "tryOn" : (styleRequest?.mode == "full" ? "styleFull" : "styleQuick")
 
@@ -218,6 +238,9 @@ extension FakeBackend {
         else { return error(.attestationRequired, id) }
 
         if let styleRequest, !FakeStylist.consentVersions.contains(styleRequest.consentVersion) {
+            return error(.consentRequired, id)
+        }
+        if let tryOnRequest, !FakeTryOn.consentVersions.contains(tryOnRequest.consentVersion) {
             return error(.consentRequired, id)
         }
         let fingerprint = Data(SHA256.hash(data: Data((endpoint.id + "\n").utf8) + body))
@@ -234,14 +257,42 @@ extension FakeBackend {
             case reply(FakeReply)
             case done(FakeLedger.Action, replayed: Bool, usage: APIV1.UsageCategory)
         }
+        let behaviour = state.withLock { $0.limits.tryOn }
         let outcome: Outcome = state.withLock { state in
             guard let stored = state.ledger.keys[keyID], stored.subject == subject, counter > stored.counter else {
                 return .reply(error(.attestationRequired, id))
             }
             state.ledger.keys[keyID]?.counter = counter
             let actionKey = subject + " " + key
-            if let existing = state.ledger.actions[actionKey] {
+            if var existing = state.ledger.actions[actionKey] {
                 guard existing.fingerprint == fingerprint else { return .reply(error(.idempotencyConflict, id)) }
+                // 33a: a try-on job runs on after the first answer; asking again gets "still
+                // running" until the picture is ready, then the picture (the first time unreplayed).
+                if let readyAt = existing.tryOnReadyAt {
+                    if now() < readyAt {
+                        return .reply(
+                            error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
+                    }
+                    if existing.failed {
+                        return .reply(error(.unavailable, id, message: "This action didn't work. Start a new one."))
+                    }
+                    let first = existing.tryOnImage == nil
+                    if first, let request = existing.tryOnRequest {
+                        if behaviour == .fails {
+                            existing.failed = true
+                            existing.counted = false
+                            state.ledger.actions[actionKey] = existing
+                            return .reply(
+                                error(
+                                    .unavailable, id, message: "It didn't work this time. It wasn't counted.",
+                                    retryAfter: 30))
+                        }
+                        existing.tryOnImage = FakeTryOn.dress(request)
+                        state.ledger.actions[actionKey] = existing
+                    }
+                    return .done(
+                        existing, replayed: !first, usage: snapshot(state, subject: subject, category: category))
+                }
                 return .done(existing, replayed: true, usage: snapshot(state, subject: subject, category: category))
             }
             if state.limits.paused.contains(feature) {
@@ -289,6 +340,19 @@ extension FakeBackend {
                     action.counted = result.kind != "insufficient"
                     if result.kind != "insufficient" { state.ledger.styleCache[cacheKey] = (result, time) }
                 }
+            } else if let tryOnRequest {
+                // 33a: admitted and started; the picture comes back to a later ask with this key.
+                state.ledger.jobsRun += 1
+                state.ledger.tryOnRequests.append(tryOnRequest)
+                action.tryOnRequest = tryOnRequest
+                action.tryOnReadyAt = time.addingTimeInterval(behaviour.delay)
+                if behaviour == .instant {
+                    action.tryOnImage = FakeTryOn.dress(tryOnRequest)
+                    state.ledger.actions[actionKey] = action
+                    return .done(action, replayed: false, usage: snapshot(state, subject: subject, category: category))
+                }
+                state.ledger.actions[actionKey] = action
+                return .reply(error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
             } else {
                 state.ledger.jobsRun += 1
             }
@@ -305,8 +369,12 @@ extension FakeBackend {
             if let style = action.style {
                 return encode(200, APIV1.StyleResponse(action: paidAction, result: style, usage: usage), id)
             }
+            guard let image = action.tryOnImage else { return error(.internal, id) }
             return encode(
-                200, APIV1.PaidActionResponse(action: paidAction, result: .init(placeholder: true), usage: usage), id)
+                200,
+                APIV1.TryOnResponse(
+                    action: paidAction, result: .init(image: .init(contentType: "image/jpeg", data: image)),
+                    usage: usage), id)
         }
     }
 

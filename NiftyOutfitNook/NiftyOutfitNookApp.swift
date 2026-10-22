@@ -176,6 +176,10 @@ struct NiftyOutfitNookApp: App {
         let paid = AppGateway.paid
         // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.
         let cloudStylist = AppStylist.usesCloud(arguments) ? paid : nil
+        // 33a: real try-on pictures, with her face kept on the phone. With the real backend, or
+        // `-cloud-tryon` on the fake.
+        let cloudTryOn = AppTryOn.usesCloud(arguments) ? paid : nil
+        let tryOnAnalyzer = AppTryOn.analyzer(arguments: arguments)
         // 27c: one set of AI jobs for the life of the app: kept in the store for her own closet,
         // in memory for the debug sample closet (which comes back as it ships at each launch).
         let keptJobs = AppJobs.kept(in: storage)
@@ -214,6 +218,8 @@ struct NiftyOutfitNookApp: App {
                     AppWeather.install(into: &services, arguments: arguments)
                     // The cloud stylist (Phase 27a), once the backend is real or a debug launch asks.
                     AppStylist.install(into: &services, paid: cloudStylist)
+                    // 33a: try-on pictures, made from her own photo files.
+                    AppTryOn.install(into: &services, paid: cloudTryOn, files: photos, analyzer: tryOnAnalyzer)
                     // 27c: AI jobs and Ask stylist conversations, kept in the store.
                     services.aiJobs = keptJobs
                     services.stylistThreads = storage.stylistThreads
@@ -225,7 +231,8 @@ struct NiftyOutfitNookApp: App {
                             stores: [(.looks, AIJobsEraser(keptJobs))] + storage.erasableData + [
                                 (.drafts, AppDiagnostics.log),
                                 (.profile, tours), (.profile, services.weatherSettings),
-                                (.profile, services.stylistConsent), (.profile, jobNotifier),
+                                (.profile, services.stylistConsent), (.profile, services.tryOnConsent),
+                                (.profile, jobNotifier),
                                 (.profile, onboarding),
                             ]),
                         account: account)
@@ -247,6 +254,9 @@ struct NiftyOutfitNookApp: App {
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
                     AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
                     AppStylist.install(into: &services, paid: cloudStylist, keepsSettings: closet != nil)
+                    AppTryOn.install(
+                        into: &services, paid: cloudTryOn, files: photos, analyzer: tryOnAnalyzer,
+                        keepsSettings: closet != nil)
                     services.aiJobs = sampleJobs
                     AppDiagnostics.install(into: &services)
                     services.deletion = AccountDataDeletion(
@@ -274,6 +284,8 @@ struct NiftyOutfitNookApp: App {
                     await DebugPhotoCloset.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
                     await AppGateway.signInIfAsked(arguments: arguments)
                     await AppStylist.prepareFakeIfAsked(arguments: arguments)
+                    await AppTryOn.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
+                    await AppTryOn.prepareFakeIfAsked(arguments: arguments)
                     await AppDiagnostics.seedIfAsked(arguments: arguments)
                 #endif
                 if let imageFiles {

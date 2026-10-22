@@ -54,6 +54,9 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
     public enum Request: Hashable, Sendable, Codable {
         case styling(StylingContext, consentVersion: String)
         case ask(AskStylistRequest)
+        /// 33a: a try-on picture, prepared on the phone (only the faceless photo and the garment
+        /// photos are sent).
+        case tryOn(TryOnJobRequest)
     }
 
     /// Where the result is. Style Me's looks are also in her history (the look store); the outcome
@@ -62,6 +65,8 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
         case styling(StyleOutcome)
         /// The stylist's turn in a conversation.
         case answer(thread: StylistThread.ID, turn: StylistThread.Turn.ID)
+        /// 33a: the finished try-on picture, with her own head back on it.
+        case tryOn(TryOnPicture)
     }
 
     public let id: ID
@@ -106,6 +111,16 @@ public struct AIJob: Identifiable, Hashable, Sendable, Codable {
     /// The Style Me request this job styles, if it's a styling job.
     public var styleRequestID: StyleRequest.ID? {
         if case .styling(let context, _) = request { context.request.id } else { nil }
+    }
+
+    /// 33a: the try-on picture, when it's done.
+    public var picture: TryOnPicture? {
+        if case .tryOn(let picture) = result { picture } else { nil }
+    }
+
+    /// 33a: the look a try-on job pictures.
+    public var tryOnLookID: Look.ID? {
+        if case .tryOn(let request) = request { request.look.id } else { nil }
     }
 
     /// The styling outcome, when it's done.

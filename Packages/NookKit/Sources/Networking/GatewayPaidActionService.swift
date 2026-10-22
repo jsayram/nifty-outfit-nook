@@ -60,13 +60,18 @@ public struct GatewayPaidActionService: PaidActionService {
             return PaidActionReceipt(
                 id: response.action.id, feature: .style, replayed: response.action.replayed, usage: usage, style: answer
             )
-        case .tryOn(let revision):
+        case .tryOn(let call):
+            // 33a: the first answer is "still running" (409); the client asks again with the same
+            // key and body until the picture comes back, within try-on's 360-second deadline.
             let response = try await client.send(
-                APIV1.tryOn, body: APIV1.TryOnRequest(contextRevision: revision),
-                idempotencyKey: idempotencyKey, signer: signer, as: APIV1.PaidActionResponse.self)
-            guard let usage = Self.allowance(response.usage) else { throw .invalidResponse }
+                APIV1.tryOn, body: APIV1.TryOnRequest(call), idempotencyKey: idempotencyKey, signer: signer,
+                as: APIV1.TryOnResponse.self)
+            guard let usage = Self.allowance(response.usage), let image = response.result.image.bytes else {
+                throw .invalidResponse
+            }
             return PaidActionReceipt(
-                id: response.action.id, feature: .tryOn, replayed: response.action.replayed, usage: usage)
+                id: response.action.id, feature: .tryOn, replayed: response.action.replayed, usage: usage,
+                tryOnImage: image)
         }
     }
 

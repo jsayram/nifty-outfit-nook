@@ -7,6 +7,8 @@ struct PictureDetailActions {
     var seeLook: (Look) -> Void = { _ in }
     var delete: () -> Void = {}
     var retry: () -> Void = {}
+    /// 33a: opens "See what was sent" for a real picture.
+    var seeWhatWasSent: () -> Void = {}
 }
 
 /// Picture detail, top to bottom (`picture.html`): Try-on picture and "Simulated · Made 28 Aug",
@@ -71,11 +73,21 @@ struct PictureDetailPage: View {
         TryOnPictureView(content: item.content, lookName: item.lookName, width: Self.pictureWidth)
             .accessibilityIdentifier("picture.image")
         lookLink(item)
+        if item.picture.isReal {
+            NookButton(
+                SentText.title, systemImage: "arrow.up.forward.square", kind: .soft, fillsWidth: true,
+                action: actions.seeWhatWasSent
+            )
+            .accessibilityHint(Text(SentText.hint))
+            .accessibilityIdentifier("picture.seeWhatWasSent")
+        }
         NookButton(TryOnText.delete, systemImage: "trash", kind: .text, action: actions.delete)
             .accessibilityHint(Text(TryOnText.deleteHint))
             .accessibilityIdentifier("picture.delete")
             .tourAnchor(PictureTour.Anchor.delete, label: TryOnText.delete) { actions.delete() }
-        about(showsPerson: item.content.tryOnPhoto != nil)
+        about(
+            item.picture.isReal
+                ? TryOnConsentText.underPicture : TryOnText.aboutSimulated(showsPerson: item.content.tryOnPhoto != nil))
     }
 
     private var header: some View {
@@ -166,12 +178,12 @@ struct PictureDetailPage: View {
     }
 
     /// What a simulated picture is, on a soft tint.
-    private func about(showsPerson: Bool) -> some View {
+    private func about(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: NookSpacing.small) {
             Image(systemName: "info.circle")
                 .foregroundStyle(.nook.accent)
                 .accessibilityHidden(true)
-            Text(TryOnText.aboutSimulated(showsPerson: showsPerson))
+            Text(text)
                 .nookTextStyle(.note)
                 .foregroundStyle(.nook.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)

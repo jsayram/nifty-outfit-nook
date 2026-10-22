@@ -19,7 +19,8 @@ extension View {
         nookSheet(
             item: route,
             title: { _ in TryOnText.tryOn },
-            subtitle: { _ in SharedText.simulated },
+            // 33a: real pictures aren't simulated.
+            subtitle: { $0.model.isReal ? nil : SharedText.simulated },
             // Full height: the picture and its two buttons don't fit a half-height sheet.
             detents: [.large],
             content: { route in TryOnSheetContent(model: route.model, seePicture: seePicture) }
@@ -48,6 +49,10 @@ struct TryOnSheetContent: View {
             switch model.step {
             case .ready: ready
             case .alreadyMade(let picture): alreadyMade(picture)
+            case .consent: TryOnConsentContent(allow: model.allow, notNow: model.notNow)
+            case .preparing: preparing
+            case .sending: sending
+            case .refused(let problem): refused(problem)
             case .making: making
             case .made(let picture): made(picture)
             case .failed(let failure): failed(failure)
@@ -56,7 +61,8 @@ struct TryOnSheetContent: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.default, value: model.step)
         .task { await model.start(with: services) }
-        .onDisappear { model.cancel() }
+        // A simulated picture stops when she leaves; a real one on its way carries on as its job.
+        .onDisappear { model.leave() }
         .sheet(isPresented: $showsStylingAccess, onDismiss: { Task { await model.start(with: services) } }) {
             NavigationStack {
                 StylingAccessScreen(isSheet: true)
@@ -77,7 +83,11 @@ struct TryOnSheetContent: View {
         VStack(alignment: .leading, spacing: NookSpacing.medium) {
             VStack(alignment: .leading, spacing: NookSpacing.medium) {
                 line(TryOnSheetText.what, systemImage: "camera")
-                line(TryOnSheetText.simulatedHere, systemImage: "sparkles")
+                if model.isReal {
+                    line(TryOnConsentText.faceStays, systemImage: "lock")
+                } else {
+                    line(TryOnSheetText.simulatedHere, systemImage: "sparkles")
+                }
             }
             .tourAnchor(TryOnTour.Anchor.about, label: TryOnSheetText.what)
             if model.savesLook {
@@ -143,6 +153,56 @@ struct TryOnSheetContent: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("tryOn.making")
+    }
+
+    /// 33a: on the phone, before anything is sent.
+    private var preparing: some View {
+        VStack(spacing: NookSpacing.large) {
+            NookLoadingState(TryOnSheetText.preparingTitle, message: TryOnSheetText.preparingMessage)
+            NookButton(TryOnSheetText.cancel, kind: .soft, fillsWidth: true, action: model.cancel)
+                .accessibilityIdentifier("tryOn.cancel")
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tryOn.preparing")
+    }
+
+    /// 33a: the faceless photo is on its way; she can leave.
+    private var sending: some View {
+        VStack(spacing: NookSpacing.large) {
+            NookLoadingState(TryOnSheetText.sendingTitle, message: TryOnSheetText.sendingMessage)
+            NookButton(TryOnSheetText.leave, kind: .primary, fillsWidth: true) { dismiss() }
+                .accessibilityIdentifier("tryOn.leave")
+            NookButton(TryOnSheetText.cancel, kind: .soft, fillsWidth: true, action: model.cancel)
+                .accessibilityIdentifier("tryOn.cancel")
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tryOn.sending")
+    }
+
+    /// 33a: the phone wouldn't send this photo. Nothing left the phone.
+    private func refused(_ problem: TryOnPrepareProblem) -> some View {
+        VStack(alignment: .leading, spacing: NookSpacing.medium) {
+            Label {
+                Text(TryOnSheetText.refusedTitle(problem))
+            } icon: {
+                Image(systemName: "lock.shield")
+                    .foregroundStyle(.nook.accent)
+            }
+            .nookTextStyle(.headline)
+            .foregroundStyle(.nook.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityAddTraits(.isHeader)
+            Text(TryOnSheetText.refusedMessage(problem))
+                .nookTextStyle(.body)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            NookButton(TryOnSheetText.done, kind: .soft, fillsWidth: true) { dismiss() }
+                .accessibilityIdentifier("tryOn.done")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tryOn.refused")
     }
 
     private func made(_ picture: TryOnPicture) -> some View {
@@ -320,8 +380,90 @@ enum TryOnSheetText {
         String(localized: "Done", bundle: .module, comment: "Button: closes the Try it on sheet")
     }
 
+    // MARK: 33a
+
+    static var preparingTitle: String {
+        String(localized: "Hiding your face", bundle: .module, comment: "Try it on sheet (33a): on the phone")
+    }
+
+    static var preparingMessage: String {
+        String(
+            localized: "Swapping in a studio backdrop. Nothing has left your iPhone yet.", bundle: .module,
+            comment: "Try it on sheet (33a): on the phone, before sending")
+    }
+
+    static var sendingTitle: String {
+        String(localized: "Dressing you", bundle: .module, comment: "Try it on sheet (33a): the job is running")
+    }
+
+    static var sendingMessage: String {
+        String(
+            localized:
+                "Only the photo without your face and your clothing photos were sent. You can leave this screen: we’ll tell you when your picture is ready, and your iPhone puts you back together.",
+            bundle: .module, comment: "Try it on sheet (33a): the job is running")
+    }
+
+    static var leave: String {
+        String(localized: "Keep browsing", bundle: .module, comment: "Try it on sheet (33a): closes the sheet")
+    }
+
+    static func refusedTitle(_ problem: TryOnPrepareProblem) -> String {
+        switch problem {
+        case .noTryOnPhoto:
+            String(localized: "Set up your try-on photo first", bundle: .module, comment: "Try it on sheet (33a)")
+        case .noGarmentPhotos:
+            String(
+                localized: "These pieces have no photos to send", bundle: .module, comment: "Try it on sheet (33a)")
+        case .notSaved, .photoUnreadable, .checksUnavailable:
+            String(localized: "Nothing was sent", bundle: .module, comment: "Try it on sheet (33a)")
+        case .noPerson, .noFace, .severalPeople, .unclearOutline, .faceStillVisible:
+            String(
+                localized: "Your face couldn’t be hidden in this photo", bundle: .module,
+                comment: "Try it on sheet (33a): fail closed")
+        }
+    }
+
+    static func refusedMessage(_ problem: TryOnPrepareProblem) -> String {
+        switch problem {
+        case .noTryOnPhoto:
+            String(
+                localized: "Add a photo of yourself in Profile, Your try-on photo. Nothing was sent.", bundle: .module,
+                comment: "Try it on sheet (33a)")
+        case .noGarmentPhotos:
+            String(
+                localized: "Add photos to the pieces in this look, then try again. Nothing was sent.",
+                bundle: .module, comment: "Try it on sheet (33a)")
+        case .noPerson:
+            String(
+                localized:
+                    "Your iPhone couldn’t find you in your try-on photo, so nothing was sent. Try a photo of your whole body.",
+                bundle: .module, comment: "Try it on sheet (33a): fail closed")
+        case .noFace, .faceStillVisible:
+            String(
+                localized:
+                    "So nothing was sent. Try a photo where you face the camera, with your face clear and well lit.",
+                bundle: .module, comment: "Try it on sheet (33a): fail closed, after the title")
+        case .severalPeople:
+            String(
+                localized:
+                    "Your try-on photo seems to show more than one person, so nothing was sent. Try a photo of just you.",
+                bundle: .module, comment: "Try it on sheet (33a): fail closed")
+        case .unclearOutline:
+            String(
+                localized:
+                    "Your outline wasn’t clear enough to be sure, so nothing was sent. Try a photo against a plain wall, in good light.",
+                bundle: .module, comment: "Try it on sheet (33a): fail closed")
+        case .photoUnreadable, .checksUnavailable, .notSaved:
+            String(
+                localized: "Your iPhone couldn’t check your photo this time. Try again in a moment.", bundle: .module,
+                comment: "Try it on sheet (33a): the checks didn't run")
+        }
+    }
+
     static func failedTitle(_ failure: TryOnModel.Failure) -> String {
         switch failure {
+        case .limited:
+            String(localized: "No picture this time", bundle: .module, comment: "Try it on sheet: a server limit")
         case .offline:
             String(localized: "Pictures need a connection", bundle: .module, comment: "Try it on sheet: offline")
         case .notCompleted:
@@ -333,6 +475,8 @@ enum TryOnSheetText {
 
     static func failedMessage(_ failure: TryOnModel.Failure) -> String {
         switch failure {
+        case .limited(let problem):
+            CloudLimitText.message(for: problem)
         case .offline:
             String(
                 localized: "Nothing was made or used. Try again when you’re online.", bundle: .module,

@@ -22,19 +22,29 @@ public struct TryOnPicture: Identifiable, Hashable, Sendable, Codable {
     public var captured: CapturedLook
     public var image: TryOnImage
     public var createdAt: Date
+    /// 33a: exactly what left the phone to make it (the faceless photo and the garment photos), for
+    /// "See what was sent". `nil` for simulated pictures and samples, which sent nothing.
+    public var sent: TryOnSent?
 
-    public init(id: ID, lookID: Look.ID, captured: CapturedLook, image: TryOnImage, createdAt: Date) {
+    public init(
+        id: ID, lookID: Look.ID, captured: CapturedLook, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil
+    ) {
         self.id = id
         self.lookID = lookID
         self.captured = captured
         self.image = image
         self.createdAt = createdAt
+        self.sent = sent
     }
 
     /// A picture of `look` as it is now.
-    public init(id: ID, of look: Look, image: TryOnImage, createdAt: Date) {
-        self.init(id: id, lookID: look.id, captured: CapturedLook(look), image: image, createdAt: createdAt)
+    public init(id: ID, of look: Look, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil) {
+        self.init(id: id, lookID: look.id, captured: CapturedLook(look), image: image, createdAt: createdAt, sent: sent)
     }
+
+    /// 33a: a real picture, made from her photo by the image service. Simulated pictures and the
+    /// fixtures' samples aren't.
+    public var isReal: Bool { sent != nil }
 }
 
 /// A look as it was when a try-on picture was made: what the picture shows, and what search on
