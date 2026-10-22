@@ -30,7 +30,13 @@ tip="$(gh api "repos/{owner}/{repo}/git/ref/heads/$ref" --jq .object.sha)"
 echo "Starting the batch UI run on $ref at ${tip:0:9} (iPad: $ipad)."
 # 30 seconds back, so a few seconds of clock difference with GitHub can't hide the new run.
 started="$(date -u -v-30S +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '30 seconds ago' +%Y-%m-%dT%H:%M:%SZ)"
-gh workflow run ci.yml --ref "$ref" -f "include_ipad=$ipad" > /dev/null  # newer gh prints the run URL itself; this script finds it below
+# include_ipad is sent only when asked for: gh sends -f values as text, and the text "false" is not
+# a boolean. Newer gh prints the run URL itself; this script finds it below instead.
+if [[ "$ipad" == true ]]; then
+  gh workflow run ci.yml --ref "$ref" -f include_ipad=true > /dev/null
+else
+  gh workflow run ci.yml --ref "$ref" > /dev/null
+fi
 
 # The run takes a few seconds to appear. Look for the one made after the dispatch, for this commit.
 for _ in $(seq 1 30); do
