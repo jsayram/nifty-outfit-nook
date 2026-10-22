@@ -14,7 +14,8 @@ Every call the app makes to the backend has a timeout, can be cancelled, retries
 | Backoff between tries | 0.4 s, 0.8 s, up to 4 s, plus up to a quarter at random | `APIClient.backoff` |
 | Retried after | a timeout, a connection lost on the way, a 5xx, a 503 without Retry-After | `APIClient.send` |
 | Retried after a Retry-After of 3 s or less | 429 and 503, after exactly that long; a longer one goes to the screen | same |
-| Polled again, not counted as a try | 409 `action_in_progress`, every Retry-After (1 to 10 s) until the deadline | same |
+| Polled again, not counted as a try | 409 `action_in_progress` without an action ID, every Retry-After (1 to 10 s) until the deadline | same |
+| Followed by ID, not sent again (35) | 409 `action_in_progress` with `error.actionId`: `POST /v1/actions/status` with only the ID, every 1 to 10 s (the answer says when), until the picture is there, within the paid endpoint's deadline counted from the first status ask | `APIClient.awaitAction` |
 | Never retried | any other 4xx, 429 `quota_exceeded`, 503 `feature_paused`, malformed JSON | same |
 | 401 | one fresh token and one more try; a second 401 ends the session | same |
 | Only requests that are safe to repeat are retried | `Endpoint.idempotent`: every paid one carries its Idempotency-Key | `APIV1.swift` |
@@ -67,7 +68,8 @@ The tests don't wait on real time. `APIClient` and `CloudTask` take a clock (`Co
 | 429 with Retry-After | `aShortRetryAfterIsWaitedOutExactlyAndNotSooner`, `aRateLimitThatKeepsAnsweringIsGivenUpOnAfterTheBoundedTries`, `aLongRetryAfterIsHandedToTheScreenWithoutWaiting`, `retryAfterIsReadAsSecondsOrAsADate` |
 | 500 and 503 | `serverErrorsAreRetriedWithBackoffThenGivenUpOn`, `unavailableWithoutAnyHintIsRetriedWithBackoffThenGivenUpOn`, `unavailableWithAShortRetryAfterIsWaitedOutThenGivenUpOn`, `unavailableWithALongRetryAfterIsHandedToTheScreen`, `aRequestThatIsNotSafeToRepeatIsNotRetriedAfterAServerError` |
 | Malformed JSON | `malformedJSONIsReportedAndNotRetried` |
-| Still running | `anActionThatIsStillRunningIsAskedAboutAgainWithTheSameKey`, `anActionThatNeverFinishesIsHandedBackAsBusyAtTheDeadline` |
+| Still running | `anActionThatIsStillRunningIsAskedAboutAgainWithTheSameKey`, `anActionThatNeverFinishesIsHandedBackAsBusyAtTheDeadline` (a 409 with no action ID, the old way) |
+| Still running, by ID (35) | `ActionStatusPollTests`: `thePhotosGoUpOnceAndEveryPollCarriesOnlyTheID`, `aRelaunchAsksForTheStatusAndNeverUploadsAgain`, `anActionTheServerDoesNotKnowIsAskedTheOldWayOnce`, `aFailedPictureEndsThePollAndIsNotCounted`, `aPictureThatIsNoLongerKeptSaysItDidNotFinish`, `theStatusCallsOwnLimitIsWaitedOut`, `aPictureTakingLongerThanTheDeadlineIsPickedUpAgainByItsID` |
 | Cancellation | `leavingAScreenDuringABackoffWaitStopsTheCallAndSendsNothingMore`, `cancellingARequestInFlightEndsItAtOnce`, `aCancelledPaidRequestIsNotChargedTwiceWhenAskedAgainWithItsKey` |
 
 `CloudTaskTests`, `ConnectionStatusTests` and `CloudProblemTextTests` cover what a screen sees. The debug gateway screen (`-gateway-lab`) has the new fake modes, and `GatewayLabTests.testTheOfflineBannerAndAConnectionLostInTheMiddle` (with `-connection offline`, which fixes the state in debug builds) keeps screenshots of the banner and of a call that recovers from a dropped connection.
@@ -75,9 +77,24 @@ The tests don't wait on real time. `APIClient` and `CloudTask` take a clock (`Co
 ## Not built here
 
 - No screen uses `CloudTask` or `CloudOfflineBanner` yet beyond the debug one: the stylist (27a) and try-on (33a) are the first. Your looks still has its own stand-in offline states.
-- The try-on polling endpoint and its real deadline come with 33a; the client already polls `action_in_progress` until the deadline.
+- The try-on polling endpoint came with 33a (the same request again); Phase 35 replaced it with the status call below.
 - IPv6-only networks (PRD criterion 48) and a real device in airplane mode are on the device checklist below.
 
 ## Device checklist
 
 On an iPhone, with the real backend once it is switched on: airplane mode in the middle of a request (the banner shows, nothing is charged twice, asking again works), Wi-Fi to cellular during a request, Low Data Mode, and a network that only has IPv6 (a Mac sharing its connection with NAT64).
+
+## Following a running action (35)
+
+Before Phase 35 a try-on was polled by sending the same POST again: the same Idempotency-Key and the same body, up to 6 MiB of photos, with a fresh App Attest assertion. That is about 8 to 10 MB uploaded per picture on cellular data at a typical 1.2 MB body and six polls (closet `LOAD_TEST_REPORT.md`). Now:
+
+1. The first POST uploads the photos and the server answers 409 `action_in_progress` with `error.actionId`, the ID of this key's own action.
+2. The app asks `POST /v1/actions/status` with `{"actionId": ...}` (a body of about 50 bytes, 1 KiB at most) until the answer is `succeeded` (with the picture and the usage), `failed` (nothing was counted) or `expired` (made, but no longer kept). `running` says how long to wait (2 seconds for the stylist, 5 for a try-on, 60 while the outcome is being checked); the client keeps that between 1 and 10 seconds.
+3. The ID is kept on the job (`AIJob.actionID`, set through `ActionLink.started`), so a late answer (the 360-second deadline) or a relaunch asks for the status and never uploads again. If the server doesn't know the ID any more (404), the client sends the request once the old way with the same key.
+4. A 409 without an ID (another action of hers is running, or an older backend) is still polled by sending the request again.
+
+`PaidActionService.run(_:idempotencyKey:link:)` carries this; the old `run(_:idempotencyKey:)` is the same with no ID. The stylist's request goes through the same code, so a late stylist answer is followed by ID too; its body is small (a closet snapshot), so its ID isn't kept across a relaunch, and a resumed stylist job sends its request once more.
+
+**App Attest on the status call: none, on purpose.** It runs nothing paid, counts nothing and writes nothing but its own rate bucket. It needs the bearer token, and an action ID (128 random bits, never listed anywhere) that must be this account's; another account's ID and an unknown one are the same 404. What it returns is only what the same account's own paid request would. An assertion on each poll would cost a Secure Enclave signature per poll on the phone and a counter write per poll on the server, which is the cost this change removes. The status call has its own limit of 30 a minute per account (rate_limited), separate from the paid limit.
+
+**What changed for her:** a try-on that fails is final for that tap. Before, the next poll silently started a second provider attempt (PRD 11.6 allows two); now "It didn't work this time. It wasn't counted." comes straight away and Try again is a new tap with a new key.

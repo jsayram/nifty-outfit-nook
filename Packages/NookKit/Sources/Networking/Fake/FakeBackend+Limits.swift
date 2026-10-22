@@ -50,6 +50,8 @@ import Foundation
             var tryOnImage: Data?
             var tryOnRequest: APIV1.TryOnRequest?
             var failed = false
+            /// 35: the picture is no longer kept (`FakeBackend.expireTryOnResults()`).
+            var expired = false
         }
 
         var challenges: [String: (subject: String, expiresAt: Date, used: Bool)] = [:]
@@ -63,6 +65,12 @@ import Foundation
         var styleCache: [String: (result: APIV1.StylistResult, at: Date)] = [:]
         /// 33a: every try-on body received.
         var tryOnRequests: [APIV1.TryOnRequest] = []
+        /// 35: every POST /v1/try-on received, and the bytes of their bodies: what was uploaded.
+        var tryOnPosts = 0
+        var tryOnPostBytes = 0
+        /// 35: every status ask received, and the largest body one carried.
+        var statusRequests = 0
+        var largestStatusBody = 0
     }
 
     extension FakeBackend {
@@ -89,6 +97,22 @@ import Foundation
 
         /// 33a: the try-on requests received, as sent (for tests of what leaves the phone).
         public var tryOnRequests: [APIV1.TryOnRequest] { state.withLock { $0.ledger.tryOnRequests } }
+
+        /// 35: how many times POST /v1/try-on was sent to the backend (the first ask and any ask
+        /// the old way), and the request body bytes in all of them: what the phone uploaded.
+        public var tryOnPosts: Int { state.withLock { $0.ledger.tryOnPosts } }
+        public var tryOnUploadedBytes: Int { state.withLock { $0.ledger.tryOnPostBytes } }
+
+        /// 35: status asks received, and the largest request body one carried.
+        public var statusRequests: Int { state.withLock { $0.ledger.statusRequests } }
+        public var largestStatusBody: Int { state.withLock { $0.ledger.largestStatusBody } }
+
+        /// 35: every finished picture is no longer kept, as it is two minutes after delivery.
+        public func expireTryOnResults() {
+            state.withLock { state in
+                for key in state.ledger.actions.keys { state.ledger.actions[key]?.expired = true }
+            }
+        }
 
         /// 27a: how the stand-in stylist behaves from now on.
         public func setStylist(_ behaviour: FakeStylistBehaviour) {
@@ -133,6 +157,8 @@ import Foundation
                 return registerKey(request, body: body, subject: subject, id: id)
             case APIV1.style, APIV1.tryOn:
                 return paid(request, body: body, endpoint: endpoint, subject: subject, id: id)
+            case APIV1.actionStatus:
+                return actionStatus(request, body: body, subject: subject, id: id)
             default:
                 return error(.notFound, id)
             }
@@ -207,7 +233,13 @@ import Foundation
                 key.wholeMatch(of: /[A-Za-z0-9_-]{16,64}/) != nil
             else { return error(.invalidRequest, id, message: "Send an Idempotency-Key header.") }
             let hint = request.value(forHTTPHeaderField: EntitlementHintSource.header)
-            state.withLock { $0.lastEntitlementHint = hint }
+            state.withLock {
+                $0.lastEntitlementHint = hint
+                if endpoint == APIV1.tryOn {
+                    $0.ledger.tryOnPosts += 1
+                    $0.ledger.tryOnPostBytes += body?.count ?? 0
+                }
+            }
             guard (request.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased().hasPrefix("application/json")
             else { return error(.unsupportedMediaType, id) }
             guard let body, let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else {
@@ -276,7 +308,13 @@ import Foundation
                     if let readyAt = existing.tryOnReadyAt {
                         if now() < readyAt {
                             return .reply(
-                                error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
+                                error(
+                                    .actionInProgress, id, message: "Your picture is being made.", retryAfter: 2,
+                                    actionId: existing.id))
+                        }
+                        if existing.expired {
+                            return .reply(
+                                error(.unavailable, id, message: "That picture is no longer kept. Make a new one."))
                         }
                         if existing.failed {
                             return .reply(error(.unavailable, id, message: "This action didn't work. Start a new one."))
@@ -361,7 +399,10 @@ import Foundation
                             action, replayed: false, usage: snapshot(state, subject: subject, category: category))
                     }
                     state.ledger.actions[actionKey] = action
-                    return .reply(error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
+                    return .reply(
+                        error(
+                            .actionInProgress, id, message: "Your picture is being made.", retryAfter: 2,
+                            actionId: action.id))
                 } else {
                     state.ledger.jobsRun += 1
                 }
@@ -384,6 +425,78 @@ import Foundation
                     APIV1.TryOnResponse(
                         action: paidAction, result: .init(image: .init(contentType: "image/jpeg", data: image)),
                         usage: usage), id)
+            }
+        }
+
+        /// 35, POST /v1/actions/status: where one of the caller's actions stands, as the backend answers
+        /// it: only the action's ID goes in, an action that isn't the caller's is the same 404 as one
+        /// that doesn't exist, and a finished one carries its result. No App Attest.
+        private func actionStatus(_ request: URLRequest, body: Data?, subject: String, id: String) -> FakeReply {
+            guard (request.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased().hasPrefix("application/json")
+            else { return error(.unsupportedMediaType, id) }
+            guard let body, body.count <= APIV1.actionStatus.maxBodyBytes else { return error(.payloadTooLarge, id) }
+            guard let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                Set(object.keys) == ["actionId"], let actionID = object["actionId"] as? String,
+                actionID.wholeMatch(of: /act_[0-9a-f]{32}/) != nil
+            else { return error(.invalidRequest, id) }
+            let behaviour = state.withLock { $0.limits.tryOn }
+            enum Found {
+                case reply(FakeReply)
+                case state(String, FakeLedger.Action, usage: APIV1.UsageCategory?)
+            }
+            let found: Found = state.withLock { state in
+                state.ledger.statusRequests += 1
+                state.ledger.largestStatusBody = max(state.ledger.largestStatusBody, body.count)
+                // Its own limit, like the backend's: 30 a minute.
+                let time = now()
+                let key = "status " + subject
+                let bucket = state.ledger.buckets[key] ?? (30, time)
+                let tokens = min(30, bucket.tokens + time.timeIntervalSince(bucket.updatedAt) * 0.5)
+                guard tokens >= 1 else {
+                    state.ledger.buckets[key] = (tokens, time)
+                    return .reply(error(.rateLimited, id, retryAfter: max(1, Int(((1 - tokens) / 0.5).rounded(.up)))))
+                }
+                state.ledger.buckets[key] = (tokens - 1, time)
+                guard let actionKey = state.ledger.actions.first(where: { $0.value.id == actionID })?.key,
+                    var action = state.ledger.actions[actionKey], action.subject == subject
+                else { return .reply(error(.notFound, id, message: "No such action.")) }
+                if action.feature == "style" {
+                    let usage = snapshot(state, subject: subject, category: action.category)
+                    return .state(action.expired ? "expired" : "succeeded", action, usage: action.expired ? nil : usage)
+                }
+                if action.failed { return .state("failed", action, usage: nil) }
+                if let readyAt = action.tryOnReadyAt, time < readyAt { return .state("running", action, usage: nil) }
+                if action.expired { return .state("expired", action, usage: nil) }
+                if action.tryOnImage == nil, let tryOnRequest = action.tryOnRequest {
+                    if behaviour == .fails {
+                        action.failed = true
+                        action.counted = false
+                        state.ledger.actions[actionKey] = action
+                        return .state("failed", action, usage: nil)
+                    }
+                    action.tryOnImage = FakeTryOn.dress(tryOnRequest)
+                    state.ledger.actions[actionKey] = action
+                }
+                return .state(
+                    "succeeded", action, usage: snapshot(state, subject: subject, category: action.category))
+            }
+            switch found {
+            case .reply(let reply):
+                return reply
+            case .state(let status, let action, let usage):
+                var response = APIV1.ActionStatusResponse(
+                    action: .init(
+                        id: action.id, kind: action.feature, status: status, createdAt: .init(action.createdAt),
+                        retryAfterSeconds: status == "running" ? 2 : nil),
+                    styleResult: nil, tryOnResult: nil, usage: nil)
+                if status == "succeeded" {
+                    response.usage = usage
+                    response.styleResult = action.style
+                    response.tryOnResult = action.tryOnImage.map {
+                        .init(image: .init(contentType: "image/jpeg", data: $0))
+                    }
+                }
+                return encode(200, response, id)
             }
         }
 

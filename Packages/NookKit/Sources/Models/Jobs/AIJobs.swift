@@ -406,8 +406,15 @@ public final class AIJobs {
                 // 33c: the loading screen's captions follow these real steps.
                 update(job.id) { $0.tryOnStage = .dressing }
                 do {
+                    // 35: the photos go up once. The server's action ID is kept with the job as soon as
+                    // it is known, so a late answer or a relaunch asks for its status, not for a resend.
+                    let id = job.id
+                    let link = ActionLink(resume: job.actionID) { [weak self] actionID in
+                        Task { @MainActor in self?.update(id) { $0.actionID = actionID } }
+                    }
                     dressed = try await pipeline.dress(
-                        request.upload, consentVersion: request.consentVersion, idempotencyKey: job.idempotencyKey)
+                        request.upload, consentVersion: request.consentVersion, idempotencyKey: job.idempotencyKey,
+                        link: link)
                 } catch {
                     throw CloudStylist.error(for: error)
                 }

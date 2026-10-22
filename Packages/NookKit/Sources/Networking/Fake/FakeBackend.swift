@@ -262,7 +262,8 @@ import Synchronization
 
         func error(
             _ code: APIV1.ErrorCode, _ id: String, message: String? = nil, retryAfter: Int? = nil,
-            headers: [String: String] = [:], category: String? = nil, resetAt: Date? = nil, feature: String? = nil
+            headers: [String: String] = [:], category: String? = nil, resetAt: Date? = nil, feature: String? = nil,
+            actionId: String? = nil
         ) -> FakeReply {
             var headers = headers
             if let retryAfter { headers["Retry-After"] = String(retryAfter) }
@@ -271,7 +272,7 @@ import Synchronization
                 error: .init(
                     code: code.rawValue, message: message ?? "Fake backend: \(code.rawValue).", requestId: id,
                     retryAfterSeconds: retryAfter, category: category, resetAt: resetAt.map(APIV1.formatDate),
-                    feature: feature))
+                    feature: feature, actionId: actionId))
             return json(code.status, (try? APIV1.encoder().encode(body)) ?? Data(), id, headers: headers)
         }
 

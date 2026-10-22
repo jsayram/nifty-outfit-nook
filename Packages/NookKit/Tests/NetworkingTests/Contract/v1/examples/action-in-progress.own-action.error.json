@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "action_in_progress",
+    "message": "Your picture is being made.",
+    "retryAfterSeconds": 5,
+    "actionId": "act_8796a5b4c3d2e1f00f1e2d3c4b5a6978",
+    "requestId": "req_3d9b0c6e1f2a4b5c8d7e6f5a4b3c2d1f"
+  }
+}
