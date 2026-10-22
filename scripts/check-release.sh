@@ -6,7 +6,10 @@
 # the sample data (Fixtures/Sets and the sample photo providers, Phase 20a), and that the
 # debug-only launch arguments (-catalog, -cutout-bench, Phase 16a's -tour, Phase 17's -onboarding,
 # -toasts-stay and -animations, Phase 20a's -fixtures, and the device checks' -device-checks,
-# -make-old-store, -migration-kill-at and -migration-pause-at) aren't in it.
+# -make-old-store, -migration-kill-at and -migration-pause-at) aren't in it. Phase 32b added the
+# later debug screens and switches: the gateway and limits labs, the diagnostics lab, the fake
+# sign-in, the cloud stylist against the fake backend, the seeded photo closet, the sample feedback
+# screenshot, frame stats and the weather test switches.
 #
 # It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
 # or test-support resource bundle, or any file with the name of one of the repo's sample photos
@@ -38,14 +41,18 @@ text="$(strings "$binary")"
 failed=0
 for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting \
     DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
-    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe; do
+    MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe \
+    GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
     fi
 done
 for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animations -fixtures \
-    -device-checks -make-old-store -migration-kill-at -migration-pause-at; do
+    -device-checks -make-old-store -migration-kill-at -migration-pause-at \
+    -gateway-lab -limits-lab -diagnostics-lab -diagnostics-sample-reports -fake-signed-in -cloud-stylist \
+    -seed-photo-closet -feedback-sample-screenshot -frame-stats -weather-cities -weather-location \
+    -weather-settings-memory; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1
