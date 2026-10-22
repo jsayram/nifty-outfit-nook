@@ -55,6 +55,9 @@ final class StylingAccessModel {
     /// 30b: packs are sold once try-on pictures cost something (Phase 33); until then pictures
     /// are free and simulated.
     private(set) var sellsPacks = false
+    /// 32b (L9): a build with no backend settings. Nothing is offered or sold, because a purchase
+    /// could never be matched to an account.
+    private(set) var cloudUnavailable = false
     /// 30b: Apple's offer code sheet closed and the unlock may still be on its way.
     private var awaitingRedemption = false
     /// The clock. Tests and snapshots fix it.
@@ -73,7 +76,7 @@ final class StylingAccessModel {
 
     /// Whether the offer and the Subscribe button show: whenever she has no access, except while
     /// Apple is still trying a payment (then she fixes the payment in Manage subscription).
-    var showsOffer: Bool { !hasAccess && state != .billingRetry }
+    var showsOffer: Bool { !cloudUnavailable && !hasAccess && state != .billingRetry }
 
     /// Whether there's a subscription for Manage subscription to show.
     var showsManage: Bool { state != .none }
@@ -113,6 +116,11 @@ final class StylingAccessModel {
 
     /// The cached status at once, then StoreKit's, and the offer.
     func load(from services: NookServices) async {
+        if services.cloudUnavailable {
+            cloudUnavailable = true
+            isLoading = false
+            return
+        }
         let subscriptions = services.subscriptions
         status = await subscriptions.cachedStatus()
         status = await subscriptions.refresh()

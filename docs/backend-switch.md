@@ -1,6 +1,6 @@
 # Switching from the fakes to Clerk and Convex
 
-The app runs on a fake sign-in and an in-process fake backend until two build settings are set (Phase 24a, [decision 0005](decisions/0005-gateway-and-identity.md)). This page lists what Jose does to switch. The backend side, with the Convex commands, is in the private backend repo's README.
+A Debug build runs on a fake sign-in and an in-process fake backend until two build settings are set (Phase 24a, [decision 0005](decisions/0005-gateway-and-identity.md)). A Release build never uses the fakes (32b, see "Release fails closed" below). This page lists what Jose does to switch. The backend side, with the Convex commands, is in the private backend repo's README.
 
 Nothing here is secret, and no secret goes in this repo. The Clerk **publishable** key ships inside every app; the Clerk **secret** key and every provider key live only in Convex environment variables.
 
@@ -23,7 +23,11 @@ In `nifty-outfit-nook-backend`, following its README: Jose runs `npx convex logi
 3. Add the **Sign in with Apple** capability to the app target in Xcode, so the entitlement is in the build.
 4. Build and run with `-gateway-lab`. The Sign-in row says "Clerk (real)". Sign in with Apple, then Who am I?.
 
-With either value missing or malformed the app stays on the fakes, so a fresh clone or CI never needs these.
+With either value missing or malformed a Debug build stays on the fakes, so a fresh clone or CI never needs these for Debug builds and tests.
+
+## Release fails closed (32b)
+
+The fakes are compiled only into Debug builds (`#if DEBUG` around `FakeGateway` and everything in `Networking/Fake`). A Release build with either value missing or malformed has no fake to fall back to: every service is the "unavailable" one (signed out, nothing cloud works), `NookServices.cloudUnavailable` is true, and try-on and Styling access say "Not available right now". Quick ideas and everything on the phone work as usual. `GatewayMode.resolve` makes the decision and has the unit tests. `scripts/check-release.sh` fails if the Release binary holds the fakes' types or the fake backend's address, and CI runs it on every archive. CI archives are built without these settings on purpose, so they are the "unavailable" kind.
 
 ## Paid actions and App Attest (Phase 24b)
 
@@ -51,4 +55,4 @@ Send feedback goes to the support queue once she is signed in on the real backen
 
 ## Going back to the fakes
 
-Delete `Configs/Secrets.xcconfig` (or empty either value) and rebuild.
+Delete `Configs/Secrets.xcconfig` (or empty either value) and rebuild a Debug build. A Release build goes to the unavailable state instead.

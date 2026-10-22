@@ -36,6 +36,8 @@ final class TryOnModel {
         case making
         case made(TryOnPicture)
         case failed(Failure)
+        /// 32b (L9): a build with no backend settings. Nothing is simulated and nothing is sent.
+        case unavailable
     }
 
     enum Failure: Equatable {
@@ -85,10 +87,18 @@ final class TryOnModel {
     /// 33a: real pictures, made from her try-on photo with her face kept on the phone.
     var isReal: Bool { services.tryOnPipeline != nil }
 
+    /// 32b (L9): the sheet says pictures aren't available, instead of simulating one.
+    var isUnavailable: Bool { step == .unavailable }
+
     /// Looks for a picture of exactly this look. If the store can't be read, it goes on as if
     /// there were none: making another is never wrong, only less thrifty.
     func start(with services: NookServices) async {
         self.services = services
+        // 32b (L9): a Release build with no backend has no pictures to make, simulated or real.
+        if services.cloudUnavailable {
+            step = .unavailable
+            return
+        }
         guard step == .ready else { return }
         let status = await services.subscriptions.cachedStatus()
         // 30b: what's left of the month's pictures and her credits, once pictures cost something.
@@ -110,7 +120,7 @@ final class TryOnModel {
     func make() {
         // 30a: never starts a paid picture without styling access or (30b) credits. The server
         // checks too (30c).
-        guard step != .making, step != .preparing, allowance.canMake else { return }
+        guard step != .unavailable, step != .making, step != .preparing, allowance.canMake else { return }
         if case .sending = step { return }
         guard isReal else {
             step = .making
