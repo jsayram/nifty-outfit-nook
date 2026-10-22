@@ -34,6 +34,12 @@ CLANG_ENABLE_OBJC_ARC = YES
 CLERK_PUBLISHABLE_KEY =
 NOOK_API_BASE_URL =
 
+// The website's support page (Phase 24d): what Help and Send feedback open, and the App Store's
+// Support URL. A placeholder until the page is published (Phase 35b; compliance/SUPPORT_PAGE_OUTLINE.md
+// in the planning repo). The app holds no email address, only this page. `$()` stops xcconfig
+// reading `//` as a comment.
+NOOK_SUPPORT_URL = https:/$()/niftyoutfitnook.pages.dev/support
+
 // Live weather (Phase 29). NO keeps the stand-in weather and the app's signing as it is. YES turns on
 // Apple WeatherKit and adds its entitlement (Configs/NiftyOutfit-WeatherKit.entitlements), which needs the
 // WeatherKit capability on the App ID first: docs/weather.md has Jose's steps. Set it in

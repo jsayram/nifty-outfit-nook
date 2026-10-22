@@ -121,7 +121,7 @@ public final class FakeBackendURLProtocol: URLProtocol, @unchecked Sendable {
             let read = stream.read(&buffer, maxLength: buffer.count)
             guard read > 0 else { break }
             data.append(buffer, count: read)
-            if data.count > APIV1.maxBodyBytes * 2 { break }
+            if data.count > (APIV1.endpoints.map(\.maxBodyBytes).max() ?? APIV1.maxBodyBytes) * 2 { break }
         }
         return data
     }

@@ -57,7 +57,7 @@ private struct RootTabs: View {
     init(services: NookServices) {
         self.services = services
         _garmentImages = State(initialValue: GarmentImageLoader(provider: services.images))
-        _feedback = State(initialValue: FeedbackModel(store: services.feedbackDrafts))
+        _feedback = State(initialValue: FeedbackModel(services: services))
     }
 
     var body: some View {

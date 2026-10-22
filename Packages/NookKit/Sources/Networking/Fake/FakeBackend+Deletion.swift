@@ -52,7 +52,7 @@ extension FakeBackend {
             state.principals[subject] != nil || state.ledger.actions.values.contains { $0.subject == subject }
                 || state.ledger.keys.values.contains { $0.subject == subject }
                 || state.ledger.challenges.values.contains { $0.subject == subject }
-                || state.ledger.buckets[subject] != nil
+                || state.ledger.buckets[subject] != nil || state.support.tickets.contains { $0.subject == subject }
         }
     }
 
@@ -74,6 +74,7 @@ extension FakeBackend {
             subjects.formUnion(state.ledger.keys.values.map(\.subject))
             subjects.formUnion(state.ledger.challenges.values.map(\.subject))
             subjects.formUnion(state.ledger.buckets.keys)
+            subjects.formUnion(state.support.tickets.map(\.subject))
             return [
                 "accounts": state.principals.count,
                 "deletionsCompleted": state.deletions.completed,
@@ -122,6 +123,7 @@ extension FakeBackend {
             state.ledger.keys = state.ledger.keys.filter { $0.value.subject != subject }
             state.ledger.challenges = state.ledger.challenges.filter { $0.value.subject != subject }
             state.ledger.buckets[subject] = nil
+            deleteSupport(for: subject, in: &state)
             record.set("serverData", "done")
             if record.state("account") != "done" {
                 if state.deletions.accountStepFailures > 0 {

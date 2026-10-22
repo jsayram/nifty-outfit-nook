@@ -61,6 +61,39 @@ struct FakeBackendContractTests {
         #expect(backend.accountCount == 1)
     }
 
+    /// 24d: the feedback examples the contract says are invalid are refused, and nothing is kept.
+    @Test(arguments: [
+        "feedback.request.no_message.json", "feedback.request.blank_message.json",
+        "feedback.request.long_message.json", "feedback.request.bad_kind.json", "feedback.request.user_id.json",
+        "feedback.request.bad_reply_address.json", "feedback.request.bad_attachment_type.json",
+        "feedback.request.extra_diagnostics_field.json", "feedback.request.closet_names.json",
+    ])
+    func rejectsTheContractsInvalidFeedbackExamples(file: String) async throws {
+        _ = try await send(
+            "POST", "/v1/session", token: token(), body: ContractTests.data("v1/examples/session.request.json"))
+        let body = try ContractTests.data("v1/examples/invalid/\(file)")
+        let reply = try await send("POST", "/v1/feedback", token: token(), body: body)
+        #expect(reply.status == 400)
+        #expect(try errorCode(reply.body) == "invalid_request")
+        #expect(backend.supportTickets.isEmpty)
+    }
+
+    @Test func theFeedbackGoldenRequestGetsTheContractsShape() async throws {
+        _ = try await send(
+            "POST", "/v1/session", token: token(), body: ContractTests.data("v1/examples/session.request.json"))
+        let reply = try await send(
+            "POST", "/v1/feedback", token: token(), body: ContractTests.data("v1/examples/feedback.request.json"))
+        #expect(reply.status == 202)
+        let receipt = try JSONDecoder().decode(APIV1.FeedbackReceipt.self, from: reply.body)
+        #expect(receipt.ticket.ref.wholeMatch(of: /NK-[0-9A-F]{8}/) != nil)
+        #expect(receipt.ticket.hasAttachment)
+        #expect(APIV1.parseDate(receipt.ticket.receivedAt) != nil)
+        // A note needs a token and an account, and no App Attest.
+        let anonymous = try await send(
+            "POST", "/v1/feedback", body: ContractTests.data("v1/examples/feedback.request.json"))
+        #expect(anonymous.status == 401)
+    }
+
     @Test func theDeletionGoldenRequestGetsTheContractsShape() async throws {
         _ = try await send(
             "POST", "/v1/session", token: token(), body: ContractTests.data("v1/examples/session.request.json"))
@@ -113,6 +146,13 @@ struct FakeBackendContractTests {
             + Data(#""}"#.utf8)
         let large = try await send("POST", "/v1/session", token: token(), body: big)
         #expect(try errorCode(large.body) == "payload_too_large")
+        // Only a note may be larger than 64 KiB, up to its own limit.
+        _ = try await send("POST", "/v1/session", token: token(), body: body)
+        let note = try await send("POST", "/v1/feedback", token: token(), body: big)
+        #expect(try errorCode(note.body) == "invalid_request")
+        let huge = Data(repeating: 0x61, count: APIV1.sendFeedback.maxBodyBytes + 1)
+        let tooBig = try await send("POST", "/v1/feedback", token: token(), body: huge)
+        #expect(try errorCode(tooBig.body) == "payload_too_large")
     }
 
     @Test func unknownPathsMethodsAndRetiredVersions() async throws {

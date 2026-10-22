@@ -58,6 +58,13 @@ public struct NookServices: Sendable {
     /// Paid cloud work and her allowances (Phase 24b), for the stylist (27a) and try-on (33a).
     /// Signed out until the app sets one, like `account`.
     public var paid: any PaidActionService = UnavailablePaidActionService()
+    /// Send feedback's support queue (Phase 24d). Unavailable until the app sets one, and then the
+    /// page uses the share sheet; signed out it says so the same way.
+    public var feedback: any FeedbackService = UnavailableFeedbackService()
+    /// Shrinks and cleans a screenshot she chooses for a note (Phase 24d).
+    public var screenshots: any FeedbackScreenshotPreparing = UnavailableScreenshotPreparer()
+    /// The website's support page (Phase 24d), a placeholder address until the page is published.
+    public var supportLinks = SupportLinks()
     /// 27a: her yes to the cloud stylist's provider. Erased by Delete my data.
     public var stylistConsent: any StylistConsentStore = InMemoryStylistConsentStore()
     /// 27a: true when `stylist` is the cloud stylist. Then Style Me checks her history first
