@@ -19,12 +19,12 @@ struct FeedbackQueueTests {
     private func model(
         service: ScriptedFeedbackService = ScriptedFeedbackService(), store: (any FeedbackDraftStore)? = nil,
         screenshots: any FeedbackScreenshotPreparing = ScriptedScreenshots(),
-        spoken: SpokenLines = SpokenLines()
+        spoken: SpokenLines = SpokenLines(), health: (@Sendable () async -> DeviceHealthSummary?)? = nil
     ) async -> FeedbackModel {
         let counts = counts
         let model = FeedbackModel(
             diagnostics: details, store: store, service: service, screenshots: screenshots,
-            closetCounts: { counts }, announce: { spoken.add($0) })
+            closetCounts: { counts }, deviceHealth: health, announce: { spoken.add($0) })
         await model.checkRoute()
         return model
     }
@@ -251,6 +251,118 @@ struct FeedbackQueueTests {
         broken.includesClosetCounts = true
         await broken.finishCounting()
         #expect(!broken.includesClosetCounts && broken.closetCounts == nil)
+    }
+
+    // MARK: Crash and speed details (31)
+
+    private let health = DeviceHealthSummary(
+        windowDays: 14, crashes: 2, hangs: 1, memoryExits: 1, longestHangMs: 2400, launchMedianMs: 450,
+        peakMemoryMB: 310,
+        crashKinds: [.init(exception: .badAccess, signal: .sigsegv, count: 2)])
+
+    @Test func theSwitchShowsOnlyWhenThePhoneHasSomethingToShareAndTheNoteGoesToTheQueue() async {
+        let health = health
+        let nothing = await model()
+        #expect(!nothing.offersDeviceHealth, "no diagnostics at all")
+        let empty = await model(health: { nil })
+        #expect(!empty.offersDeviceHealth, "nothing collected yet")
+        let some = await model(health: { health })
+        #expect(some.offersDeviceHealth)
+        // The share sheet carries only her words and the app details, so no switch there.
+        let signedOut = await model(service: ScriptedFeedbackService(canSend: false), health: { health })
+        #expect(!signedOut.offersDeviceHealth)
+    }
+
+    @Test func itIsOffForEveryNoteAndNothingIsReadUntilSheTurnsItOn() async throws {
+        let health = health
+        let reads = Mutex(0)
+        let service = ScriptedFeedbackService()
+        let model = await model(
+            service: service,
+            health: {
+                reads.withLock { $0 += 1 }
+                return health
+            })
+        // Opening the page asked once whether there is anything to offer, and shows nothing of it.
+        let afterOpening = reads.withLock { $0 }
+        #expect(!model.includesDeviceHealth && model.deviceHealth == nil)
+        model.message = "Words"
+        #expect(model.preview?.contains("Crash") == false)
+        await model.submit()
+        let note = try #require(await service.submissions().first).note
+        #expect(note.deviceHealth == nil && note.sentValues == ["Words"])
+        #expect(reads.withLock { $0 } == afterOpening, "the summary was not read for a note that didn’t ask")
+    }
+
+    @Test func whatIsSentIsWhatIsShown() async throws {
+        let health = health
+        let service = ScriptedFeedbackService()
+        let model = await model(service: service, health: { health })
+        model.message = "It crashed when I opened Laundry."
+        model.includesDeviceHealth = true
+        await model.finishReadingDeviceHealth()
+        #expect(model.deviceHealth == health)
+        let preview = try #require(model.preview)
+        let note = try model.note()
+        #expect(note.deviceHealth == health)
+        for value in note.sentValues {
+            #expect(preview.contains(value), "“\(value)” is sent but not shown")
+        }
+        #expect(preview.contains("Crash and speed details, last 14 days:"))
+        #expect(preview.contains("Crashes: 2. Hangs: 1."))
+        #expect(preview.contains("Crash type: badAccess, sigsegv, 2 times."))
+        await model.submit()
+        let sent = try #require(await service.submissions().first)
+        #expect(sent.note == note && sent.note.deviceHealth == health)
+    }
+
+    @Test func turningItOffTakesItBackOutAndItIsNotKeptInTheDraft() async throws {
+        let health = health
+        let store = InMemoryFeedbackDraftStore()
+        let model = await model(store: store, health: { health })
+        model.message = "Words"
+        model.includesDeviceHealth = true
+        await model.finishReadingDeviceHealth()
+        #expect(try model.note().deviceHealth == health)
+        model.includesDeviceHealth = false
+        let withoutIt = try model.note()
+        #expect(model.deviceHealth == nil && withoutIt.deviceHealth == nil)
+        #expect(model.preview?.contains("Crash and speed") == false)
+        model.includesDeviceHealth = true
+        await model.finishReadingDeviceHealth()
+        await model.finishWriting()
+        // A new session starts with it off again: she decides for each note.
+        let relaunched = await self.model(store: store, health: { health })
+        await relaunched.restore()
+        #expect(relaunched.message == "Words" && !relaunched.includesDeviceHealth && relaunched.deviceHealth == nil)
+    }
+
+    @Test func aSummaryThatDisappearsLeavesTheSwitchOffInsteadOfSendingNothing() async throws {
+        let health = health
+        let available = Mutex<DeviceHealthSummary?>(health)
+        let model = await model(health: { available.withLock { $0 } })
+        #expect(model.offersDeviceHealth)
+        // Cleared (Delete my data) while the page was open.
+        available.withLock { $0 = nil }
+        model.includesDeviceHealth = true
+        await model.finishReadingDeviceHealth()
+        #expect(!model.includesDeviceHealth && model.deviceHealth == nil)
+    }
+
+    @Test func writeAnotherAndTheShareSheetNeverCarryIt() async throws {
+        let health = health
+        let model = await model(health: { health })
+        model.message = "Words"
+        model.includesDeviceHealth = true
+        await model.finishReadingDeviceHealth()
+        model.startOver()
+        #expect(!model.includesDeviceHealth && model.deviceHealth == nil)
+        let signedOut = await self.model(service: ScriptedFeedbackService(canSend: false), health: { health })
+        signedOut.message = "Words"
+        signedOut.includesDeviceHealth = true
+        await signedOut.finishReadingDeviceHealth()
+        #expect(try signedOut.note().deviceHealth == nil)
+        #expect(signedOut.preview?.contains("Crash") == false)
     }
 
     // MARK: The screenshot

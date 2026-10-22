@@ -91,6 +91,9 @@ struct NiftyOutfitNookApp: App {
                 // `-limits-lab` opens the Phase 24b limits screen (debug builds only).
                 LimitsLabScreen(
                     account: AppGateway.account, paid: AppGateway.paid, controls: AppGateway.limitsControls)
+            } else if ProcessInfo.processInfo.arguments.contains("-diagnostics-lab") {
+                // `-diagnostics-lab` opens the Phase 31 diagnostics screen (debug builds only).
+                DiagnosticsLabScreen(log: AppDiagnostics.log)
             } else if ProcessInfo.processInfo.arguments.contains("-gateway-lab") {
                 // `-gateway-lab` opens the Phase 24a gateway screen (debug builds only).
                 GatewayLabScreen(
@@ -128,6 +131,9 @@ struct NiftyOutfitNookApp: App {
             let tourOptions = TourLaunchOptions.standard
             let offersSampleCloset = false
         #endif
+
+        // Phase 31: Apple's MetricKit crash and speed reports, kept on the phone.
+        AppDiagnostics.start()
 
         let storage: NookStorage
         switch NookStorage.open(backups: .app) {
@@ -203,11 +209,13 @@ struct NiftyOutfitNookApp: App {
                     // 27c: AI jobs and Ask stylist conversations, kept in the store.
                     services.aiJobs = keptJobs
                     services.stylistThreads = storage.stylistThreads
+                    AppDiagnostics.install(into: &services)
                     // Delete my data, and Delete my account (Phase 24c) when she's signed in. The
                     // jobs stop first, so none writes a look after the looks are gone.
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
                             stores: [(.looks, AIJobsEraser(keptJobs))] + storage.erasableData + [
+                                (.drafts, AppDiagnostics.log),
                                 (.profile, tours), (.profile, services.weatherSettings),
                                 (.profile, services.stylistConsent), (.profile, jobNotifier),
                                 (.profile, onboarding),
@@ -232,6 +240,7 @@ struct NiftyOutfitNookApp: App {
                     AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
                     AppStylist.install(into: &services, paid: cloudStylist, keepsSettings: closet != nil)
                     services.aiJobs = sampleJobs
+                    AppDiagnostics.install(into: &services)
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
                             stores: [(.looks, AIJobsEraser(sampleJobs))] + storage.erasableData + [
@@ -257,6 +266,7 @@ struct NiftyOutfitNookApp: App {
                     await DebugPhotoCloset.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
                     await AppGateway.signInIfAsked(arguments: arguments)
                     await AppStylist.prepareFakeIfAsked(arguments: arguments)
+                    await AppDiagnostics.seedIfAsked(arguments: arguments)
                 #endif
                 if let imageFiles {
                     Task.detached(priority: .utility) { await imageFiles.removeUnused() }

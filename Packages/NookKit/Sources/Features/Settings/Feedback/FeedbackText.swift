@@ -18,6 +18,7 @@ nonisolated enum FeedbackComposer {
         var extras: [String] = []
         if let address = note.replyAddress { extras.append(FeedbackText.replyLine(address)) }
         if let counts = note.closetCounts { extras.append(FeedbackText.closetLine(counts)) }
+        if let health = note.deviceHealth { extras.append(contentsOf: FeedbackText.healthLines(health)) }
         if let screenshot = note.screenshot { extras.append(FeedbackText.screenshotLine(screenshot)) }
         if !extras.isEmpty {
             lines.append("")
@@ -165,6 +166,72 @@ nonisolated enum FeedbackText {
         String(
             localized: "How many pieces, looks and suitcases. Never their names or photos.", bundle: .module,
             comment: "Send feedback: under the closet switch while it's on")
+    }
+
+    // MARK: Crash and speed details (31)
+
+    /// The lines "Share crash and speed details" adds, exactly as they're sent: every number and
+    /// name in the summary appears in one of them.
+    static func healthLines(_ health: DeviceHealthSummary) -> [String] {
+        var lines = [
+            String(
+                localized: "Crash and speed details, last \(String(health.windowDays)) days:", bundle: .module,
+                comment: "Send feedback: heading of the phone's crash and speed counts, with a number of days"),
+            String(
+                localized:
+                    "Crashes: \(String(health.crashes)). Hangs: \(String(health.hangs)). Heavy processor use: \(String(health.cpuExceptions)). Heavy disk writing: \(String(health.diskWriteExceptions)).",
+                bundle: .module, comment: "Send feedback: four counts from the phone's reports"),
+            String(
+                localized:
+                    "Ended by the system: \(String(health.memoryExits)) for memory, \(String(health.watchdogExits)) for being too slow.",
+                bundle: .module, comment: "Send feedback: two counts from the phone's reports"),
+        ]
+        var timings: [String] = []
+        if let hang = health.longestHangMs {
+            timings.append(
+                String(
+                    localized: "Longest hang: \(String(hang)) ms.", bundle: .module,
+                    comment: "Send feedback: the longest time the app stopped answering, in milliseconds"))
+        }
+        if let launch = health.launchMedianMs {
+            timings.append(
+                String(
+                    localized: "Typical start-up: \(String(launch)) ms.", bundle: .module,
+                    comment: "Send feedback: the typical time to open the app, in milliseconds"))
+        }
+        if let memory = health.peakMemoryMB {
+            timings.append(
+                String(
+                    localized: "Most memory used: \(String(memory)) MB.", bundle: .module,
+                    comment: "Send feedback: the most memory the app used, in megabytes"))
+        }
+        if !timings.isEmpty { lines.append(timings.joined(separator: " ")) }
+        for kind in health.crashKinds {
+            lines.append(
+                String(
+                    localized:
+                        "Crash type: \(kind.exception.rawValue), \(kind.signal.rawValue), \(String(kind.count)) times.",
+                    bundle: .module, comment: "Send feedback: one kind of crash, with fixed names and a count"))
+        }
+        return lines
+    }
+
+    static var healthRow: String {
+        String(
+            localized: "Share crash and speed details", bundle: .module,
+            comment: "Send feedback: the switch for the phone's crash and speed counts")
+    }
+
+    static var healthRowOff: String {
+        String(
+            localized: "Off unless you turn it on. Helps to find a problem that crashes or slows the app.",
+            bundle: .module, comment: "Send feedback: under the crash and speed switch")
+    }
+
+    static var healthRowOn: String {
+        String(
+            localized: "Counts and timings from your phone’s own reports. No screens, pieces, names or places.",
+            bundle: .module, comment: "Send feedback: under the crash and speed switch while it's on")
     }
 
     static var queueNote: String {

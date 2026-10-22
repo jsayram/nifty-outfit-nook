@@ -81,17 +81,21 @@ public struct FeedbackNote: Hashable, Sendable {
     /// Where to answer, if she gave an address (24d). Used for this note only.
     public var replyAddress: String?
     public var closetCounts: FeedbackClosetCounts?
+    /// The phone's crash and speed counts, only if she turned on sharing them for this note (31).
+    public var deviceHealth: DeviceHealthSummary?
     public var screenshot: FeedbackScreenshot?
 
     public init(
         kind: FeedbackKind, message: String, diagnostics: FeedbackDiagnostics? = nil, replyAddress: String? = nil,
-        closetCounts: FeedbackClosetCounts? = nil, screenshot: FeedbackScreenshot? = nil
+        closetCounts: FeedbackClosetCounts? = nil, deviceHealth: DeviceHealthSummary? = nil,
+        screenshot: FeedbackScreenshot? = nil
     ) {
         self.kind = kind
         self.message = message
         self.diagnostics = diagnostics
         self.replyAddress = replyAddress
         self.closetCounts = closetCounts
+        self.deviceHealth = deviceHealth
         self.screenshot = screenshot
     }
 
@@ -109,6 +113,7 @@ public struct FeedbackNote: Hashable, Sendable {
         if let closetCounts {
             values += [String(closetCounts.pieces), String(closetCounts.looks), String(closetCounts.suitcases)]
         }
+        if let deviceHealth { values += deviceHealth.sentValues }
         return values
     }
 }
@@ -194,7 +199,8 @@ public enum FeedbackRules {
     /// them on, so the default is a note with nothing but her words.
     public static func note(
         kind: FeedbackKind, message: String, includeDiagnostics: Bool, diagnostics: FeedbackDiagnostics,
-        replyAddress: String = "", closetCounts: FeedbackClosetCounts? = nil, screenshot: FeedbackScreenshot? = nil
+        replyAddress: String = "", closetCounts: FeedbackClosetCounts? = nil,
+        deviceHealth: DeviceHealthSummary? = nil, screenshot: FeedbackScreenshot? = nil
     ) throws(FeedbackProblem) -> FeedbackNote {
         let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw .empty }
@@ -203,7 +209,8 @@ public enum FeedbackRules {
         guard address.isEmpty || isEmailAddress(address) else { throw .badReplyAddress }
         return FeedbackNote(
             kind: kind, message: trimmed, diagnostics: includeDiagnostics ? diagnostics : nil,
-            replyAddress: address.isEmpty ? nil : address, closetCounts: closetCounts, screenshot: screenshot)
+            replyAddress: address.isEmpty ? nil : address, closetCounts: closetCounts,
+            deviceHealth: deviceHealth?.isWithinContract == true ? deviceHealth : nil, screenshot: screenshot)
     }
 
     /// The same shape the backend accepts (the contract's `replyTo` pattern): something, an @,
