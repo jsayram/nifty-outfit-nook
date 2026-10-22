@@ -91,6 +91,10 @@ struct NiftyOutfitNookApp: App {
                 // `-limits-lab` opens the Phase 24b limits screen (debug builds only).
                 LimitsLabScreen(
                     account: AppGateway.account, paid: AppGateway.paid, controls: AppGateway.limitsControls)
+            } else if ProcessInfo.processInfo.arguments.contains("-device-checks") {
+                // `-device-checks` opens the device checks screen: file protection, the store and the
+                // last migration, and a locked-phone test (debug builds only).
+                DeviceChecksScreen(source: .make())
             } else if ProcessInfo.processInfo.arguments.contains("-diagnostics-lab") {
                 // `-diagnostics-lab` opens the Phase 31 diagnostics screen (debug builds only).
                 DiagnosticsLabScreen(log: AppDiagnostics.log)
@@ -124,6 +128,10 @@ struct NiftyOutfitNookApp: App {
             let onboardingOptions = OnboardingLaunchOptions(launchArguments: arguments)
             let tourOptions = TourLaunchOptions(launchArguments: arguments)
             let offersSampleCloset = true
+            // `-migration-kill-at <step>`, `-migration-pause-at <step>` and `-make-old-store` (debug
+            // builds only) set up a real migration to kill on a device (checklist 2.16).
+            MigrationDebug.install(arguments: arguments)
+            MigrationDebug.makeOldStoreIfAsked(arguments: arguments, location: .app)
         #else
             // Release builds ship no sample data and read no `-fixtures` argument (Phase 20a).
             let configuration = FixtureConfiguration(set: .empty)

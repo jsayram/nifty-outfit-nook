@@ -88,7 +88,7 @@ public struct MigrationJournal: Codable, Hashable, Sendable {
 }
 
 /// Held while a `ModelContainer` is made, so two never are at once (see `container()`).
-private let containerCreation = NSLock()
+let containerCreation = NSLock()
 
 /// Opens the store at a location, migrating it safely through `Plan`'s versions.
 public struct MigrationCoordinator<Plan: SchemaMigrationPlan>: Sendable {
@@ -113,11 +113,19 @@ public struct MigrationCoordinator<Plan: SchemaMigrationPlan>: Sendable {
     /// Opens the store, migrating it first if it's an older version. Never deletes or resets a
     /// store it can't open.
     public func open() -> StoreOpening {
+        #if DEBUG
+            MigrationDebug.openStarted()
+        #endif
+        let opening: StoreOpening
         do {
-            return try openThrowing()
+            opening = try openThrowing()
         } catch {
-            return .problem(.couldNotOpen)
+            opening = .problem(.couldNotOpen)
         }
+        #if DEBUG
+            MigrationDebug.openFinished(opening)
+        #endif
+        return opening
     }
 
     /// `open()`, letting a test's simulated kill through.
@@ -419,7 +427,7 @@ enum StoreSQLite {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
-    private static func query(_ url: URL, _ sql: String, row: (OpaquePointer?) -> Void) throws {
+    static func query(_ url: URL, _ sql: String, row: (OpaquePointer?) -> Void) throws {
         var database: OpaquePointer?
         guard sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
             sqlite3_close(database)
