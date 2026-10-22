@@ -100,6 +100,9 @@ jobs:
   #         builds, makes the archive check and runs every package test (iPhone snapshot tests
   #         included). A pull request or push that touches a UI path without the label gets a
   #         note in the run's summary, and its UI tests run in the next batch on develop.
+  #   storekit  The StoreKit suites are due on the self-hosted runner (see the step in
+  #         build-and-archive): the change touches StoreKit code or its tests, or the pull request
+  #         has the run-storekit label, or this is a manual run.
   changes:
     name: changes
     runs-on: ubuntu-latest
@@ -109,6 +112,7 @@ jobs:
       ui: ${{ steps.filter.outputs.ui }}
       ui_paths: ${{ steps.filter.outputs.ui_paths }}
       ipad: ${{ steps.filter.outputs.ipad }}
+      storekit: ${{ steps.filter.outputs.storekit }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -133,7 +137,8 @@ jobs:
           code=true
           ui=false
           ui_paths=false
-          if [[ "$EVENT" == "workflow_dispatch" ]]; then ui=true; fi
+          storekit=false
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then ui=true; storekit=true; fi
           files=""
           if [[ "$EVENT" == "pull_request" ]]; then
             files="$(git diff --name-only "$BASE...$HEAD")"
@@ -144,6 +149,11 @@ jobs:
             echo "$files"
             code=false
             while IFS= read -r file; do
+              # StoreKit: its services, the hosted tests and their configuration, the app's
+              # StoreKit setup, and the CI pieces that run them.
+              case "$file" in
+                Packages/NookKit/Sources/Services/Store/* | NiftyOutfitNookTests/* | NiftyOutfitNook/AppSubscriptions.swift | Configs/UnitTests.xcconfig | Configs/*.entitlements | Configs/AppInfo.plist | .github/workflows/ci.yml | scripts/ci-simulator.sh | scripts/test.sh) storekit=true ;;
+              esac
               case "$file" in
                 # UI paths: a change to one of these is UI-touching. It doesn't start the UI tests
                 # (the run-ui label does, and the batch run on develop), but the summary says
@@ -162,13 +172,15 @@ jobs:
             done <<< "$files"
           fi
           if [[ ",$LABELS," == *",run-ui,"* && "$code" == "true" ]]; then ui=true; fi
-          echo "Build and package tests: $code, UI tests: $ui, UI paths touched: $ui_paths"
+          if [[ ",$LABELS," == *",run-storekit,"* && "$code" == "true" ]]; then storekit=true; fi
+          echo "Build and package tests: $code, UI tests: $ui, UI paths touched: $ui_paths, StoreKit suites: $storekit"
           if [[ "$ui" == "false" && "$ui_paths" == "true" ]]; then
             echo "This change touches UI paths, so the UI tests are due. They did not run here: add the run-ui label to run them on this pull request, or they run in the next batch on develop (scripts/run-ui-batch.sh)." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "ui=$ui" >> "$GITHUB_OUTPUT"
           echo "ui_paths=$ui_paths" >> "$GITHUB_OUTPUT"
+          echo "storekit=$storekit" >> "$GITHUB_OUTPUT"
           # The paused iPad parts: only a manual run with include_ipad ticked.
           ipad=false
           if [[ "$EVENT" == "workflow_dispatch" && "$INCLUDE_IPAD" == "true" ]]; then ipad=true; fi
@@ -288,20 +300,78 @@ jobs:
         run: >-
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
           scripts/test.sh -skip-testing:NiftyOutfitNookUITests
+      # The StoreKit suites (SubscriptionStoreKitTests, with CreditsStoreKitTests nested in it)
+      # skip themselves on CI: the iOS 27.0 simulator serves StoreKit's test environment no
+      # products. They pass on iOS 26.5, so on the self-hosted runner they run here on a second
+      # simulator of this job's own, an iPhone 12 on iOS 26.5, made for this step and deleted in
+      # the last one. The build is the one above (the deployment target is iOS 26.0), so this
+      # costs a boot and the tests, not a build. Hosted runners keep skipping them.
+      #
+      # When it runs: only when `changes` says the StoreKit suites are due (a change to StoreKit
+      # code or its tests or this CI setup, the run-storekit label, or a manual run), and only
+      # on the self-hosted runner. Not on every pull request, because of the next point.
+      #
+      # Advisory for now (continue-on-error): on this Mac, at a load average of 400 to 900 from
+      # other jobs and agents, StoreKit's own daemon (storekitd) sometimes stops answering during
+      # a purchase or an entitlement query on a fresh simulator, and the test sits until the
+      # suite's two-minute limit and the host restarts. One hang often brings more in the same
+      # run. It did not happen in the local runs on a warm simulator at lower load, and it
+      # happened in about half of the runs on fresh ones and in both runs of this step in CI
+      # (22 October 2026). The tests themselves are fixed (see docs/payments.md), so a failure
+      # here is a hang, not a wrong answer. Take continue-on-error off, and the `storekit`
+      # condition, once the step has passed several runs in a row.
+      #
+      # Left out here: checkpointPurchaseRenewRestoreExpire, which waits on StoreKit's own sped-up
+      # clock (a month is 30 seconds) and takes 95 seconds or more. On this Mac, at a load average
+      # of 500 to 900 from other jobs and agents, it passed once in ten runs (the others missed the
+      # renewal or hit the suite's two-minute limit). Its parts have their own fast tests (a forced renewal, expiry,
+      # restore on a fresh install, purchase). Run it with `scripts/test.sh -only-testing:
+      # NiftyOutfitNookTests/SubscriptionStoreKitTests/checkpointPurchaseRenewRestoreExpire()`.
+      - name: Make the StoreKit test simulator (self-hosted only)
+        if: ${{ !cancelled() && runner.environment == 'self-hosted' && needs.changes.outputs.storekit == 'true' }}
+        run: |
+          # NOOK_SIM_ID is still the iOS 27.0 simulator: create leaves it alone.
+          echo "NOOK_STOREKIT_SIM_ID=$(NOOK_SIM_OS=26.5 scripts/ci-simulator.sh create iPhone)" >> "$GITHUB_ENV"
+      - name: Test (StoreKit suites on iOS 26.5, self-hosted only)
+        id: storekit
+        if: ${{ !cancelled() && runner.environment == 'self-hosted' && env.NOOK_STOREKIT_SIM_ID != '' }}
+        continue-on-error: true
+        # About 1.5 minutes when nothing hangs. The limit keeps a run of hangs (each costs 2
+        # minutes and a host restart) from holding the runner for the rest of the job's 40.
+        timeout-minutes: 6
+        env:
+          NOOK_STOREKIT: 1
+          NOOK_SIM_ID: ${{ env.NOOK_STOREKIT_SIM_ID }}
+          NOOK_RESULT_BUNDLE: build/TestResults-storekit.xcresult
+        run: >-
+          NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
+          scripts/test.sh -only-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests
+          '-skip-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests/checkpointPurchaseRenewRestoreExpire()'
+      - name: Say that the StoreKit suites failed (advisory)
+        if: ${{ steps.storekit.outcome == 'failure' }}
+        run: |
+          echo "::warning title=StoreKit suites failed::Advisory for now. See the step's log and docs/payments.md (Testing). The job still passes."
       - name: Keep test results on failure
-        if: failure()
+        if: ${{ failure() || steps.storekit.outcome == 'failure' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: TestResults-build-and-archive
           path: |
             build/TestResults.xcresult
             build/TestResults-package.xcresult
+            build/TestResults-storekit.xcresult
             build/SnapshotArtifacts
           retention-days: 7
           if-no-files-found: ignore
-      - name: Delete this job's simulator
-        if: ${{ always() && runner.environment == 'self-hosted' && env.NOOK_SIM_ID != '' }}
-        run: scripts/ci-simulator.sh delete "$NOOK_SIM_ID"
+      - name: Delete this job's simulators
+        if: ${{ always() && runner.environment == 'self-hosted' }}
+        run: |
+          # Each one on its own: a failed delete of the first must not skip the second.
+          status=0
+          for udid in "${NOOK_SIM_ID:-}" "${NOOK_STOREKIT_SIM_ID:-}"; do
+            [[ -z "$udid" ]] || scripts/ci-simulator.sh delete "$udid" || status=1
+          done
+          exit "$status"
 
   # The other UI tests in three parts, by test class, on an iPhone simulator. The iPad layouts
   # are paused: they are the separate `ui-ipad` job below, which runs only on a manual run with

@@ -25,6 +25,10 @@
 # themselves then, and run in a manual full-suite workflow run and locally.
 # See UITestTier in NiftyOutfitNookUITests/UITestSupport.swift.
 #
+# NOOK_STOREKIT=1 runs the StoreKit suites (SubscriptionStoreKitTests) on CI, where they skip
+# themselves (NOOK_CI) because the iOS 27.0 simulator serves them no products. Use it only with a
+# simulator on iOS 26.5, as the self-hosted gate does (NOOK_SIM_OS=26.5, see ci.yml).
+#
 # NOOK_IPAD_SNAPSHOTS=1 runs the iPad snapshot tests in the package tests. They skip themselves
 # otherwise: iPad testing is paused until the app's features are done (22 October 2026). The
 # snapshots are drawn at iPad sizes on whatever simulator runs them, so this needs no iPad
@@ -47,6 +51,9 @@ if [[ -n "${CI:-}" ]]; then
 fi
 if [[ -n "${NOOK_PR_RUN:-}" ]]; then
     export TEST_RUNNER_NOOK_PR_RUN=1
+fi
+if [[ -n "${NOOK_STOREKIT:-}" ]]; then
+    export TEST_RUNNER_NOOK_STOREKIT=1
 fi
 if [[ -n "${NOOK_IPAD_SNAPSHOTS:-}" ]]; then
     export TEST_RUNNER_NOOK_IPAD_SNAPSHOTS="$NOOK_IPAD_SNAPSHOTS"

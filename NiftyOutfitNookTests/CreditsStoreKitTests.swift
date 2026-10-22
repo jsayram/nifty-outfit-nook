@@ -16,8 +16,9 @@ import Testing
 /// JWS, checks it's a pack for this app, and credits each transaction ID once. The backend's own
 /// tests check the endpoint itself.
 ///
-/// Not on CI, like `SubscriptionStoreKitTests`: CI's iOS 27.0 simulator gets no products from
-/// StoreKit's test environment. Run with `scripts/test.sh -only-testing:NiftyOutfitNookTests`.
+/// Not on hosted CI, like `SubscriptionStoreKitTests`: the iOS 27.0 simulator gets no products from
+/// StoreKit's test environment. The self-hosted gate runs them on an iOS 26.5 simulator; locally,
+/// `scripts/test.sh -only-testing:NiftyOutfitNookTests`.
 ///
 /// Nested in `SubscriptionStoreKitTests` so its `.serialized` and CI traits cover these too: there
 /// is one StoreKit test environment, so no two of these tests may run at once.
@@ -97,12 +98,7 @@ extension SubscriptionStoreKitTests {
         #expect(ledger.balance == 40)
         #expect(ledger.grants == 2)
         // Screens that listen hear the new balance.
-        var heard: [Int] = []
-        for await balance in balances {
-            heard.append(balance)
-            if heard.count == 2 { break }
-        }
-        #expect(heard == [10, 40])
+        #expect(await StoreKitWaits.collect(balances, count: 2) == [10, 40])
     }
 
     @Test func aPackTheServerCouldNotCreditIsRecoveredAtTheNextLaunch() async throws {
@@ -150,13 +146,16 @@ extension SubscriptionStoreKitTests {
         // Buy): it arrives through Transaction.updates. The unlock is bought too, so the
         // subscription listener has something to finish and report.
         try await session.buyProduct(identifier: CreditPacks.small)
+        // Taken now: StoreKit's test environment drops an unfinished consumable from
+        // Transaction.unfinished a second or so after it first lists it (see docs/payments.md).
+        let open = try await Self.signed(CreditPacks.small)
         try await session.buyProduct(
             identifier: SubscriptionProducts.complimentary, options: [.codeOffer(referenceName: "Family unlock")])
-        for await status in updates where status.isComplimentary { break }
-        // The pack is still open for the credits service, which credits it from
-        // Transaction.unfinished.
+        let (unlocked, heard) = await StoreKitWaits.listen(to: updates) { $0.isComplimentary }
+        #expect(unlocked != nil, "The listener reported: \(heard.map { "\($0.state), unlock: \($0.isComplimentary)" })")
+        // The listener finished the unlock and left the pack open: the credits service credits it.
         let ledger = TestLedger()
-        #expect(await StoreKitCreditsService(claimer: ledger).recoverUnfinished() == 1)
+        #expect(await StoreKitCreditsService(claimer: ledger, unfinished: { [open] }).recoverUnfinished() == 1)
         #expect(ledger.balance == 10)
     }
 
@@ -168,7 +167,8 @@ extension SubscriptionStoreKitTests {
         defer { credits.stop() }
         let balances = await credits.balanceUpdates()
         try await session.buyProduct(identifier: CreditPacks.large)
-        for await balance in balances where balance == 30 { break }
+        let (credited, heard) = await StoreKitWaits.listen(to: balances) { $0 == 30 }
+        #expect(credited == 30, "The packs listener reported \(heard)")
         #expect(ledger.balance == 30)
         #expect(ledger.grants == 1)
     }
