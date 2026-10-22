@@ -240,6 +240,19 @@ struct YourLooksCloudTests {
         model.cancel()
     }
 
+    /// iOS's answer about notifications can stall (the iOS 27.0 simulator under load, October 2026);
+    /// her looks must not wait for it.
+    @Test func aNotifierThatNeverAnswersDoesNotHoldUpHerLooks() async throws {
+        let services = cloudServices(ScriptedStylist())
+        services.aiJobs.notifier = SilentNotifier()
+        let model = yourLooksModel()
+        model.start(with: services)
+        await model.settle()
+        #expect(model.status == .showing)
+        #expect(model.result?.simple != nil)
+        #expect(model.notificationOffer == .off)
+    }
+
     @Test func theNotesSayWhereTheLooksCameFrom() {
         let text = YourLooksText(request: lookRequest(), suitcaseName: nil, locale: TestTime.locale)
         #expect(text.line(for: .fromHistory, now: TestTime.now, calendar: TestTime.calendar).contains("history"))
@@ -273,6 +286,17 @@ actor OfferingNotifier: AIJobNotifier {
     func offer() async -> AIJobNotificationOffer { declined ? .off : .offer }
     func requestPermission() async -> Bool { true }
     func declineOffer() async { declined = true }
+    func notifyDone(_ kind: AIJob.Kind, id: AIJob.ID) async {}
+    func withdraw(_ id: AIJob.ID) async {}
+}
+
+/// Never answers a question about notifications, like iOS on a stalled simulator.
+struct SilentNotifier: AIJobNotifier {
+    func offer() async -> AIJobNotificationOffer {
+        await withCheckedContinuation { (_: CheckedContinuation<AIJobNotificationOffer, Never>) in }
+    }
+    func requestPermission() async -> Bool { false }
+    func declineOffer() async {}
     func notifyDone(_ kind: AIJob.Kind, id: AIJob.ID) async {}
     func withdraw(_ id: AIJob.ID) async {}
 }

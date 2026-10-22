@@ -358,7 +358,16 @@ final class YourLooksModel {
         }
         if services.aiJobs.job(id)?.state.isActive == true {
             status = .styling(.choosing)
-            if notificationOffer == .off { notificationOffer = await services.aiJobs.notifier.offer() }
+            // Asked on the side: iOS's answer about notifications must never hold up her looks. On
+            // the iOS 27.0 simulator on Jose's Mac it never comes (SpringBoard's notification
+            // server waits on a deadlocked dasd), and the looks stayed on "Choose one outfit".
+            if notificationOffer == .off {
+                let notifier = services.aiJobs.notifier
+                Task {
+                    let offer = await notifier.offer()
+                    if notificationOffer == .off { notificationOffer = offer }
+                }
+            }
             _ = await services.aiJobs.finished(id)
         }
         guard thisRun == run else { return }
