@@ -14,6 +14,9 @@ struct EditorTextField<Focus: Hashable>: View {
     let prompt: String
     @Binding var text: String
     var isMultiline = false
+    /// An email address field (Send feedback's reply address): the email keyboard, no capital
+    /// letter to start, no autocorrect.
+    var isEmailAddress = false
     var problem: String?
     let identifier: String
     /// Where VoiceOver goes when Save finds a problem here.
@@ -74,6 +77,10 @@ struct EditorTextField<Focus: Hashable>: View {
                 .nookTextStyle(.body)
                 .foregroundStyle(.nook.textPrimary)
                 .focused($isFocused)
+                .keyboardType(isEmailAddress ? .emailAddress : .default)
+                .textContentType(isEmailAddress ? .emailAddress : nil)
+                .textInputAutocapitalization(isEmailAddress ? .never : nil)
+                .autocorrectionDisabled(isEmailAddress)
                 .submitLabel(isMultiline ? .return : .done)
                 .onChange(of: text) { _, newValue in
                     // A vertical field puts Return into the text; one-line fields treat it as done.

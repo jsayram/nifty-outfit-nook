@@ -190,6 +190,7 @@ struct NiftyOutfitNookApp: App {
                     services.backups = storage.backups
                     services.account = account
                     services.paid = paid
+                    AppGateway.installSupport(into: &services)
                     return services
                 case .sample, nil:
                     // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
@@ -207,6 +208,7 @@ struct NiftyOutfitNookApp: App {
                         account: account)
                     services.account = account
                     services.paid = paid
+                    AppGateway.installSupport(into: &services)
                     return services
                 }
             },

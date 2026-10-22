@@ -54,6 +54,8 @@ public struct FakeGateway: Sendable {
     /// 24b: paid actions, signed by a stand-in for App Attest (the simulator can't attest).
     public let attester: FakeDeviceAttester
     public let paid: GatewayPaidActionService
+    /// 24d: notes to the support queue.
+    public let feedback: GatewayFeedbackService
 
     public init(
         appVersion: String, tokenLifetime: TimeInterval = 60, policy: RetryPolicy = .standard,
@@ -73,5 +75,6 @@ public struct FakeGateway: Sendable {
         self.account = GatewayAccountService(
             auth: auth, client: client, appVersion: appVersion, attestation: attestation)
         self.paid = GatewayPaidActionService(client: client, attestation: attestation)
+        self.feedback = GatewayFeedbackService(auth: auth, client: client)
     }
 }

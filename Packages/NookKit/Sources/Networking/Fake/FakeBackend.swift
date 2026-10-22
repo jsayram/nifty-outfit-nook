@@ -69,6 +69,8 @@ public final class FakeBackend: Sendable {
         var ledger = FakeLedger()
         /// 24c: account deletions (FakeBackend+Deletion.swift).
         var deletions = FakeDeletions()
+        /// 24d: support notes (FakeBackend+Support.swift).
+        var support = FakeSupport()
     }
 
     let state = Mutex(State())
@@ -196,6 +198,9 @@ public final class FakeBackend: Sendable {
                 return error(.notRegistered, id)
             }
             return encode(200, APIV1.Me(user: APIV1.User(id: existing.id, createdAt: existing.createdAt)), id)
+        case APIV1.sendFeedback:
+            guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
+            return routeFeedback(request, body: body, subject: parsed.subject, id: id)
         default:
             guard state.withLock({ $0.principals[parsed.subject] }) != nil else { return error(.notRegistered, id) }
             return routeLimits(request, body: body, endpoint: endpoint, subject: parsed.subject, id: id)

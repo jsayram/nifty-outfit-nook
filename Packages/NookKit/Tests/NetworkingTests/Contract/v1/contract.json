@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "27a: the cloud stylist on POST /v1/style (try-on stays a placeholder until 33a)",
+  "status": "24d: support and feedback, POST /v1/feedback (27a: the cloud stylist on POST /v1/style; try-on stays a placeholder until 33a)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -12,10 +12,26 @@
     "Authorization: every endpoint acts only on the caller's own account, taken from the verified token. No request names an account, a row or another user's ID, so there is nothing to point at someone else's data. An account being deleted gets forbidden on every endpoint except the deletion ones.",
     "Account deletion (24c): POST /v1/account/deletion needs a fresh Sign in with Apple authorization code (re-authentication, and what the backend needs to revoke the Apple sign-in link). It answers 202 with the deletion's ID and steps; repeating it returns the same deletion and carries on. Once the account is gone the token stops working, so the status endpoint takes the deletion ID instead of a token. The ID is random and the status names no person.",
     "Stylist (27a): POST /v1/style sends a bounded snapshot of the pieces she can use (IDs and plain descriptors, never photos, notes, brands, sizes or her name) and returns looks that reference only those IDs. The backend chooses the provider and model from its own configuration and checks every answer before it is returned. consentVersion names the consent text she agreed to; when it doesn't cover the backend's current provider the answer is consent_required and nothing is sent.",
-    "Stylist results: kind complete (three versions), partial (fewer, with each missing version and why), insufficient (no outfit can be made from these pieces; nothing counted), or answer (mode ask). fromCache is true when an identical request from the same account in the last 24 hours was answered again without asking the provider; such an answer doesn't count against an allowance."
+    "Stylist results: kind complete (three versions), partial (fewer, with each missing version and why), insufficient (no outfit can be made from these pieces; nothing counted), or answer (mode ask). fromCache is true when an identical request from the same account in the last 24 hours was answered again without asking the provider; such an answer doesn't count against an allowance.",
+    "Support (24d): POST /v1/feedback sends one private note to the support queue. It needs a token but not App Attest, on purpose: support has to work on a device that can't attest, and it costs nothing. It is limited per account (a token bucket, a daily count and a daily count of screenshots) and for all accounts together; over a limit is rate_limited, or unavailable for the all-accounts limit and when Jose closes intake. submissionId makes a resend safe: the same submissionId from the same account gets the same ticket back and stores nothing twice. An optional screenshot (JPEG or PNG, base64) has its metadata (EXIF, GPS, text and thumbnail chunks) removed by the backend, whatever the app did first; anything else is invalid_request. Diagnostics and closetCounts are included only when the person turned them on, and the app shows exactly these values before sending."
   ],
   "limits": {
-    "maxBodyBytes": 65536
+    "maxBodyBytes": 65536,
+    "feedback": {
+      "maxBodyBytes": 1048576,
+      "messageMaxCharacters": 2000,
+      "attachmentMaxBytes": 600000,
+      "attachmentTypes": [
+        "image/jpeg",
+        "image/png"
+      ],
+      "attachmentMaxPixelsPerSide": 8192,
+      "perHour": 5,
+      "perDay": 10,
+      "attachmentsPerDay": 3,
+      "allAccountsPerDay": 300,
+      "note": "Only this endpoint accepts a body larger than limits.maxBodyBytes. The numbers are the backend's starting settings and are enforced on the server; the app never relies on them."
+    }
   },
   "auth": {
     "scheme": "Bearer",
@@ -302,6 +318,36 @@
         "payload_too_large",
         "unsupported_media_type",
         "not_found",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "sendFeedback",
+      "summary": "Sends one private note to the support queue, with an optional reply address, an optional screenshot and, only if the person turned them on, app details and closet counts. 202 with a ticket reference. Safe to repeat with the same submissionId. No App Attest, on purpose.",
+      "method": "POST",
+      "path": "/v1/feedback",
+      "auth": "required",
+      "cost": "free",
+      "maxBodyBytes": 1048576,
+      "request": {
+        "schema": "FeedbackRequest",
+        "example": "examples/feedback.request.json"
+      },
+      "response": {
+        "status": 202,
+        "schema": "FeedbackReceipt",
+        "example": "examples/feedback.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "unauthenticated",
+        "token_expired",
+        "forbidden",
+        "not_registered",
         "rate_limited",
         "unavailable",
         "internal"
@@ -1484,10 +1530,163 @@
           "$ref": "UsageCategory"
         }
       }
+    },
+    "FeedbackRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "submissionId",
+        "kind",
+        "message"
+      ],
+      "properties": {
+        "submissionId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{16,64}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "somethingWrong",
+            "idea",
+            "other"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 2000
+        },
+        "replyTo": {
+          "type": "string",
+          "pattern": "^[^@\\s<>\"(),;:\\\\]{1,64}@[A-Za-z0-9.-]{1,190}\\.[A-Za-z]{2,24}$",
+          "maxLength": 254
+        },
+        "diagnostics": {
+          "$ref": "FeedbackDiagnostics"
+        },
+        "closetCounts": {
+          "$ref": "FeedbackClosetCounts"
+        },
+        "attachment": {
+          "$ref": "FeedbackAttachment"
+        }
+      }
+    },
+    "FeedbackDiagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appVersion",
+        "build",
+        "systemVersion",
+        "deviceModel"
+      ],
+      "properties": {
+        "appVersion": {
+          "type": "string",
+          "pattern": "^[0-9A-Za-z.+-]{1,32}$",
+          "maxLength": 32
+        },
+        "build": {
+          "type": "string",
+          "pattern": "^[0-9A-Za-z.-]{1,16}$",
+          "maxLength": 16
+        },
+        "systemVersion": {
+          "type": "string",
+          "pattern": "^[0-9.]{1,16}$",
+          "maxLength": 16
+        },
+        "deviceModel": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9,]{1,32}$",
+          "maxLength": 32
+        }
+      }
+    },
+    "FeedbackClosetCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pieces",
+        "looks",
+        "suitcases"
+      ],
+      "properties": {
+        "pieces": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "looks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "suitcases": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      }
+    },
+    "FeedbackAttachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contentType",
+        "data"
+      ],
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "enum": [
+            "image/jpeg",
+            "image/png"
+          ]
+        },
+        "data": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+          "maxLength": 800000
+        }
+      }
+    },
+    "FeedbackReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ticket"
+      ],
+      "properties": {
+        "ticket": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "receivedAt",
+            "hasAttachment"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "pattern": "^NK-[0-9A-F]{8}$"
+            },
+            "receivedAt": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 30
+            },
+            "hasAttachment": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
     }
   },
   "planned": {
-    "24d": "Support: POST /v1/feedback with the note (at most 2,000 characters), an optional reply address and a diagnostics opt-in; 202 with a ticket reference.",
     "33a": "Try-on: POST /v1/try-on keeps its admission path; its request gains the faceless body photo and garment photos, and it becomes a job with up to three child pictures (PRD 9.2.4)."
   },
   "attestation": {
