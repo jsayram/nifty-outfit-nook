@@ -174,6 +174,8 @@ struct NiftyOutfitNookApp: App {
         // Nothing on the local closet depends on it.
         let account = AppGateway.account
         let paid = AppGateway.paid
+        // 32b (L9): true only in a Release build with no backend settings.
+        let cloudUnavailable = AppGateway.cloudUnavailable
         // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.
         let cloudStylist = AppStylist.usesCloud(arguments) ? paid : nil
         // 33a: real try-on pictures, with her face kept on the phone. With the real backend, or
@@ -238,6 +240,8 @@ struct NiftyOutfitNookApp: App {
                         account: account)
                     services.backups = storage.backups
                     services.account = account
+                    // 32b (L9): a Release build with no backend settings says so; nothing is simulated.
+                    services.cloudUnavailable = cloudUnavailable
                     services.paid = paid
                     services.subscriptions = subscriptions
                     services.credits = credits
@@ -266,6 +270,8 @@ struct NiftyOutfitNookApp: App {
                             ] + LocalDataDeletion.stores(of: services)),
                         account: account)
                     services.account = account
+                    // 32b (L9): a Release build with no backend settings says so; nothing is simulated.
+                    services.cloudUnavailable = cloudUnavailable
                     services.paid = paid
                     services.subscriptions = subscriptions
                     services.credits = credits

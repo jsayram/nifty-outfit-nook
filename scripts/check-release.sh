@@ -12,6 +12,14 @@
 # labs, the diagnostics lab, the fake sign-in, the cloud stylist against the fake backend, the
 # seeded photo closet, the sample feedback screenshot, frame stats and the weather test switches.
 #
+# 32b (L9): a Release build fails closed. The in-process fake backend and fake sign-in are compiled
+# only into Debug (FakeGateway and everything under Networking/Fake is inside `#if DEBUG` or
+# unreachable from Release code), so a Release build with no backend settings has no fake to fall
+# back to. The check looks for the fakes' type names in the Release binary and for the fake
+# backend's host (a name under .invalid): if code in Release can reach the fakes, the binary has
+# them. This is the reliable check (a binary can't tell us which settings it was built with, and
+# CI archives are built without any on purpose).
+#
 # It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
 # or test-support resource bundle, or any file with the name of one of the repo's sample photos
 # (Packages/NookKit/Tests/NookTestSupport/SampleWardrobe, the one copy). The photos are for Debug
@@ -43,7 +51,8 @@ failed=0
 for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting \
     DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
     MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson \
-    GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot; do
+    GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot \
+    FakeGateway FakeBackend FakeAuthProvider FakeDeviceAttester FakeStylist FakeTryOn FakeToken; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
@@ -59,6 +68,11 @@ for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animation
         failed=1
     fi
 done
+# The fake backend's address (fake-<random>.backend.invalid): nothing in Release may name it.
+if grep -q -- "\.backend\.invalid" <<<"$text"; then
+    echo "Release binary contains the fake backend's address" >&2
+    failed=1
+fi
 if [[ -d "$(dirname "$binary")/Frameworks" ]] && ls "$(dirname "$binary")/Frameworks" | grep -qi snapshot; then
     echo "Release app bundles a snapshot-testing framework" >&2
     failed=1
@@ -153,4 +167,4 @@ fi
 if [[ $failed -ne 0 ]]; then
     exit 1
 fi
-echo "Release app has no catalog, benchmark, snapshot-testing code, sample data code, sample photos or secrets"
+echo "Release app has no catalog, benchmark, snapshot-testing code, fake backend, sample data code, sample photos or secrets"

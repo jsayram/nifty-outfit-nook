@@ -39,12 +39,14 @@
       "maxBodyBytes": 6291456,
       "personMaxBytes": 1500000,
       "garmentMaxBytes": 400000,
+      "personMaxPixelsPerSide": 2048,
+      "garmentMaxPixelsPerSide": 1024,
       "maxGarments": 9,
       "imageTypes": [
         "image/jpeg",
         "image/png"
       ],
-      "note": "POST /v1/try-on only. Sizes are of the decoded image bytes, checked on the server; the body as a whole stays under maxBodyBytes. At least one garment, each id once. Each image must really be the JPEG or PNG its contentType says; the backend removes metadata (EXIF, GPS, text chunks) whatever the app did first."
+      "note": "POST /v1/try-on only. Sizes are of the decoded image bytes, checked on the server; the body as a whole stays under maxBodyBytes. Neither side of her photo may pass personMaxPixelsPerSide, nor either side of a piece's photo garmentMaxPixelsPerSide (the app sends at most 1280 and 768); a bigger one is invalid_request with the message \"The photo is too large in pixels. Its longest side can be 2048 pixels.\" (or \"The piece's photo ...1024 pixels.\"), and nothing is counted. At least one garment, each id once. Each image must really be the JPEG or PNG its contentType says; the backend removes metadata (EXIF, GPS, text chunks) whatever the app did first."
     }
   },
   "auth": {

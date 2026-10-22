@@ -48,6 +48,13 @@ struct StylingAccessPage: View {
             if model.isLoading {
                 NookLoadingState(StylingAccessText.loading)
                     .floorCard()
+            } else if model.cloudUnavailable {
+                // 32b (L9): no backend in this build, so no offer, no packs and no restore.
+                CloudUnavailableNote(message: StylingAccessText.unavailable)
+                    .floorCard()
+                SettingsGroup(header: StylingAccessText.freeHeader) {
+                    SettingsNote(StylingAccessText.freeDetail)
+                }
             } else {
                 if model.isComplimentary {
                     complimentary

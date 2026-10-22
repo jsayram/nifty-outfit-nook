@@ -50,6 +50,22 @@ struct TryOnModelTests {
         #expect(picture.createdAt == TestTime.now)
     }
 
+    /// 32b (L9): a Release build with no backend settings says pictures aren't available. It doesn't
+    /// simulate one, and Make a picture does nothing.
+    @Test func saysNotAvailableInsteadOfSimulatingWhenTheBuildHasNoBackend() async throws {
+        var services = services()
+        services.cloudUnavailable = true
+        let blazer = try await look("o-blazer-office", in: services)
+        let model = model(for: blazer)
+        await model.start(with: services)
+        #expect(model.step == .unavailable)
+        #expect(model.isUnavailable && !model.isReal)
+        model.make()
+        await model.settle()
+        #expect(model.step == .unavailable)
+        #expect(try await services.pictures.pictures().count == 7)
+    }
+
     /// FR-59: a picture of exactly this look is offered first; Make another still makes one.
     @Test func offersAPictureSheAlreadyHas() async throws {
         let services = services()

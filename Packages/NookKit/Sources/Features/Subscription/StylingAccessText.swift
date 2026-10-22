@@ -17,6 +17,14 @@ nonisolated enum StylingAccessText {
             bundle: .module, comment: "Styling access: the line under the title")
     }
 
+    /// 32b (L9): this build has no backend settings.
+    static var unavailable: String {
+        String(
+            localized:
+                "Styling access and picture packs can’t be offered right now. Quick ideas and everything on your phone keep working.",
+            bundle: .module, comment: "Styling access when this build has no backend (nothing can be bought)")
+    }
+
     static var loading: String {
         String(localized: "Checking with the App Store", bundle: .module, comment: "Styling access: loading")
     }

@@ -78,6 +78,11 @@ struct ContractTests {
         #expect(limits["maxGarments"] as? Int == TryOnCall.maximumGarments)
         #expect(limits["personMaxBytes"] as? Int == TryOnCall.personMaxBytes)
         #expect(limits["garmentMaxBytes"] as? Int == TryOnCall.garmentMaxBytes)
+        // 32b: the backend refuses photos bigger than these sides, so what the phone sends fits.
+        let personSide = try #require(limits["personMaxPixelsPerSide"] as? Int)
+        let garmentSide = try #require(limits["garmentMaxPixelsPerSide"] as? Int)
+        #expect(TryOnCall.personSendSide <= personSide)
+        #expect(TryOnCall.garmentSendSide <= garmentSide)
         // Everything at its largest still fits in one body once it is base64 (4/3 larger).
         #expect(TryOnCall.garmentSendBytes <= TryOnCall.garmentMaxBytes)
         let largest = (TryOnCall.personMaxBytes + TryOnCall.maximumGarments * TryOnCall.garmentSendBytes) * 4 / 3
