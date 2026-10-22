@@ -270,7 +270,8 @@ extension FakeBackend {
                 // running" until the picture is ready, then the picture (the first time unreplayed).
                 if let readyAt = existing.tryOnReadyAt {
                     if now() < readyAt {
-                        return .reply(error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
+                        return .reply(
+                            error(.actionInProgress, id, message: "Your picture is being made.", retryAfter: 2))
                     }
                     if existing.failed {
                         return .reply(error(.unavailable, id, message: "This action didn't work. Start a new one."))
@@ -282,12 +283,15 @@ extension FakeBackend {
                             existing.counted = false
                             state.ledger.actions[actionKey] = existing
                             return .reply(
-                                error(.unavailable, id, message: "It didn't work this time. It wasn't counted.", retryAfter: 30))
+                                error(
+                                    .unavailable, id, message: "It didn't work this time. It wasn't counted.",
+                                    retryAfter: 30))
                         }
                         existing.tryOnImage = FakeTryOn.dress(request)
                         state.ledger.actions[actionKey] = existing
                     }
-                    return .done(existing, replayed: !first, usage: snapshot(state, subject: subject, category: category))
+                    return .done(
+                        existing, replayed: !first, usage: snapshot(state, subject: subject, category: category))
                 }
                 return .done(existing, replayed: true, usage: snapshot(state, subject: subject, category: category))
             }

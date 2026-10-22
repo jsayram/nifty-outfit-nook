@@ -62,7 +62,10 @@ struct PhoneTryOnTests {
         #expect(paid.calls.count == 1 && paid.keys == ["idem_key_33a_00000"])
         #expect(call.consentVersion == "tryon-1")
         // Exactly the kept bytes, so "See what was sent" shows exactly what left.
-        guard case .stored(let personID) = upload.sent.person else { Issue.record("not stored"); return }
+        guard case .stored(let personID) = upload.sent.person else {
+            Issue.record("not stored")
+            return
+        }
         #expect(call.person == files.data(for: personID.rawValue))
         #expect(call.garments.map(\.id) == ["g-top", "g-trousers"])
         #expect(call.garments.map(\.subKind) == [.sweater, .trousers])
@@ -93,7 +96,10 @@ struct PhoneTryOnTests {
         // The stand-in backend sends the faceless photo back unchanged, as the backend's fake does.
         let echoed = try #require(paid.echo(upload, files: files))
         let picture = try await pipeline.restore(echoed, upload: upload)
-        guard case .stored(let id) = picture else { Issue.record("not stored"); return }
+        guard case .stored(let id) = picture else {
+            Issue.record("not stored")
+            return
+        }
         let restoredData = try #require(files.data(for: id.rawValue))
         let restored = try #require(TryOnBitmap.decode(restoredData, maxPixelSize: 2_000))
         #expect(try await SyntheticPersonAnalyzer().faces(in: restored).count == 1)
@@ -124,7 +130,8 @@ struct PhoneTryOnTests {
         #expect(
             await prepareProblem(pipeline, photo: try photo(SyntheticPerson.draw(centers: [0.3, 0.72]).bitmap))
                 == .severalPeople)
-        #expect(await prepareProblem(pipeline, photo: try photo(SyntheticPerson.draw(facingAway: true).bitmap)) == .noFace)
+        #expect(
+            await prepareProblem(pipeline, photo: try photo(SyntheticPerson.draw(facingAway: true).bitmap)) == .noFace)
         #expect(await prepareProblem(pipeline, photo: .noPhoto) == .noTryOnPhoto)
         #expect(await prepareProblem(pipeline, photo: try photo(), pieces: [Self.pieces[2]]) == .noGarmentPhotos)
         #expect(paid.calls.isEmpty)

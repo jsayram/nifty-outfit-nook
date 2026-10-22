@@ -77,7 +77,10 @@ struct TryOnGatewayTests {
             _ = try await paid.run(.tryOn(.sample(note: "fails")), idempotencyKey: IdempotencyKey.make())
             Issue.record("expected a failure")
         } catch {
-            guard case .didNotFinish = error else { Issue.record("got \(error)"); return }
+            guard case .didNotFinish = error else {
+                Issue.record("got \(error)")
+                return
+            }
         }
         #expect(try await paid.usage().allowance(.tryOn)?.usedToday == 0)
     }

@@ -203,7 +203,8 @@ struct PrivacyPage: View {
                 SettingsNote(PrivacyText.laterNote)
                 ForEach(
                     PrivacyText.later(
-                        includingWeather: weather == nil, includingStylist: stylist == nil, includingTryOn: tryOn == nil),
+                        includingWeather: weather == nil, includingStylist: stylist == nil, includingTryOn: tryOn == nil
+                    ),
                     id: \.title
                 ) { item in
                     SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)

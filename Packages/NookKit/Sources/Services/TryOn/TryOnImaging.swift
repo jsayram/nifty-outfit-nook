@@ -65,7 +65,9 @@ public enum HeadMasking {
         public static let minimumFaceWidth = 24.0
     }
 
-    public static func mask(_ image: TryOnBitmap, analysis: PersonAnalysis) throws(TryOnPrepareProblem) -> MaskedPortrait {
+    public static func mask(_ image: TryOnBitmap, analysis: PersonAnalysis) throws(TryOnPrepareProblem)
+        -> MaskedPortrait
+    {
         let width = image.width
         let height = image.height
         let matte = analysis.matte.resized(width: width, height: height)

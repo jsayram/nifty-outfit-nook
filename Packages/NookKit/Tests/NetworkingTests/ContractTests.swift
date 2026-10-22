@@ -66,7 +66,9 @@ struct ContractTests {
             #expect(swift.maxBodyBytes == (endpoint["maxBodyBytes"] as? Int ?? APIV1.maxBodyBytes), "\(id)")
         }
         #expect(
-            Set(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id)) == ["sendFeedback", "tryOn"])
+            Set(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id)) == [
+                "sendFeedback", "tryOn",
+            ])
     }
 
     /// 33a: what the phone sends fits what the backend takes.

@@ -72,7 +72,9 @@ struct HeadMaskingTests {
         #expect(hair == 0)
         // Her neck and shoulders, below the chin, are left as they are.
         let neck = try #require(drawing.figures.first?.neck)
-        #expect(SyntheticPerson.distance(portrait.faceless.rgb(Int(neck.x), Int(neck.y)), SyntheticPerson.Palette.skin) < 12)
+        #expect(
+            SyntheticPerson.distance(portrait.faceless.rgb(Int(neck.x), Int(neck.y)), SyntheticPerson.Palette.skin) < 12
+        )
     }
 
     @Test func theRoomIsReplacedByThePlainStudioBackdrop() async throws {

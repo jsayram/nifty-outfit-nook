@@ -116,7 +116,8 @@ public struct VisionPersonAnalyzer: PersonAnalyzing {
     }
 
     /// Face rectangles, then landmarks for the chin. Both requests run; an error fails.
-    private static func faces(in image: CGImage, width: Int, height: Int) throws(PersonAnalysisFailed) -> [DetectedFace] {
+    private static func faces(in image: CGImage, width: Int, height: Int) throws(PersonAnalysisFailed) -> [DetectedFace]
+    {
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
         let rectangles = VNDetectFaceRectanglesRequest()
         let landmarks = VNDetectFaceLandmarksRequest()

@@ -61,7 +61,8 @@
                 guard
                     let context = CGContext(
                         data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8,
-                        bytesPerRow: width * 4, space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                        bytesPerRow: width * 4,
+                        space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
                         bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
                 else { return }
                 // Top-left origin, like the bitmap.
@@ -93,25 +94,51 @@
             let neckTop = face.maxY - unit * 0.05
             let shoulders = neckTop + unit * 0.35
             // Legs, then the top, then the neck and head over them.
-            fill(context, Palette.trousers, CGRect(x: centerX - unit * 0.75, y: shoulders + unit * 2.2, width: unit * 0.65, height: unit * 3))
-            fill(context, Palette.trousers, CGRect(x: centerX + unit * 0.1, y: shoulders + unit * 2.2, width: unit * 0.65, height: unit * 3))
-            fill(context, Palette.shoes, CGRect(x: centerX - unit * 0.85, y: shoulders + unit * 5.2, width: unit * 0.75, height: unit * 0.3))
-            fill(context, Palette.shoes, CGRect(x: centerX + unit * 0.1, y: shoulders + unit * 5.2, width: unit * 0.75, height: unit * 0.3))
-            fill(context, Palette.top, CGRect(x: centerX - unit * 1.0, y: shoulders, width: unit * 2.0, height: unit * 2.4))
-            fill(context, Palette.skin, CGRect(x: centerX - unit * 1.35, y: shoulders + unit * 0.1, width: unit * 0.32, height: unit * 2.3))
-            fill(context, Palette.skin, CGRect(x: centerX + unit * 1.03, y: shoulders + unit * 0.1, width: unit * 0.32, height: unit * 2.3))
-            fill(context, Palette.skin, CGRect(x: centerX - unit * 0.17, y: neckTop, width: unit * 0.34, height: unit * 0.45))
+            fill(
+                context, Palette.trousers,
+                CGRect(x: centerX - unit * 0.75, y: shoulders + unit * 2.2, width: unit * 0.65, height: unit * 3))
+            fill(
+                context, Palette.trousers,
+                CGRect(x: centerX + unit * 0.1, y: shoulders + unit * 2.2, width: unit * 0.65, height: unit * 3))
+            fill(
+                context, Palette.shoes,
+                CGRect(x: centerX - unit * 0.85, y: shoulders + unit * 5.2, width: unit * 0.75, height: unit * 0.3))
+            fill(
+                context, Palette.shoes,
+                CGRect(x: centerX + unit * 0.1, y: shoulders + unit * 5.2, width: unit * 0.75, height: unit * 0.3))
+            fill(
+                context, Palette.top,
+                CGRect(x: centerX - unit * 1.0, y: shoulders, width: unit * 2.0, height: unit * 2.4))
+            fill(
+                context, Palette.skin,
+                CGRect(x: centerX - unit * 1.35, y: shoulders + unit * 0.1, width: unit * 0.32, height: unit * 2.3))
+            fill(
+                context, Palette.skin,
+                CGRect(x: centerX + unit * 1.03, y: shoulders + unit * 0.1, width: unit * 0.32, height: unit * 2.3))
+            fill(
+                context, Palette.skin,
+                CGRect(x: centerX - unit * 0.17, y: neckTop, width: unit * 0.34, height: unit * 0.45))
             // Hair behind and around the face.
-            fillEllipse(context, Palette.hair, face.insetBy(dx: -unit * 0.18, dy: -unit * 0.15).offsetBy(dx: 0, dy: -unit * 0.08))
+            fillEllipse(
+                context, Palette.hair,
+                face.insetBy(dx: -unit * 0.18, dy: -unit * 0.15).offsetBy(dx: 0, dy: -unit * 0.08))
             fillEllipse(context, Palette.skin, face)
             if facingAway {
                 fillEllipse(context, Palette.hair, face.insetBy(dx: -unit * 0.05, dy: -unit * 0.05))
             } else {
                 let eyeY = face.minY + face.height * 0.42
                 let eye = unit * 0.11
-                fillEllipse(context, Palette.eye, CGRect(x: centerX - unit * 0.2 - eye / 2, y: eyeY - eye / 2, width: eye, height: eye))
-                fillEllipse(context, Palette.eye, CGRect(x: centerX + unit * 0.2 - eye / 2, y: eyeY - eye / 2, width: eye, height: eye))
-                fill(context, Palette.mouth, CGRect(x: centerX - unit * 0.14, y: face.minY + face.height * 0.72, width: unit * 0.28, height: unit * 0.06))
+                fillEllipse(
+                    context, Palette.eye,
+                    CGRect(x: centerX - unit * 0.2 - eye / 2, y: eyeY - eye / 2, width: eye, height: eye))
+                fillEllipse(
+                    context, Palette.eye,
+                    CGRect(x: centerX + unit * 0.2 - eye / 2, y: eyeY - eye / 2, width: eye, height: eye))
+                fill(
+                    context, Palette.mouth,
+                    CGRect(
+                        x: centerX - unit * 0.14, y: face.minY + face.height * 0.72, width: unit * 0.28,
+                        height: unit * 0.06))
             }
             return Figure(
                 face: face, neck: CGPoint(x: centerX, y: neckTop + unit * 0.3),
@@ -158,7 +185,8 @@
             for y in 0..<image.height {
                 for x in 0..<image.width {
                     let pixel = image.rgb(x, y)
-                    let nearest = SyntheticPerson.Palette.roomAndEdges.map { SyntheticPerson.distance(pixel, $0) }.min() ?? 0
+                    let nearest =
+                        SyntheticPerson.Palette.roomAndEdges.map { SyntheticPerson.distance(pixel, $0) }.min() ?? 0
                     // Clearly the room below 24, clearly the person above 60, soft in between (edges).
                     matte[x, y] = UInt8(min(255, max(0, (nearest - 24) * 255 / 36)))
                 }

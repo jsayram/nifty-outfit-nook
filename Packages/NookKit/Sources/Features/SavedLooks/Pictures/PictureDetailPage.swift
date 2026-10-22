@@ -85,7 +85,9 @@ struct PictureDetailPage: View {
             .accessibilityHint(Text(TryOnText.deleteHint))
             .accessibilityIdentifier("picture.delete")
             .tourAnchor(PictureTour.Anchor.delete, label: TryOnText.delete) { actions.delete() }
-        about(item.picture.isReal ? TryOnConsentText.underPicture : TryOnText.aboutSimulated(showsPerson: item.content.tryOnPhoto != nil))
+        about(
+            item.picture.isReal
+                ? TryOnConsentText.underPicture : TryOnText.aboutSimulated(showsPerson: item.content.tryOnPhoto != nil))
     }
 
     private var header: some View {

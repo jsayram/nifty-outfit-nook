@@ -133,8 +133,53 @@ The large set's 165 pictures load and filter well inside the test's bounds (`Sav
 - **15b (done):** on iPad a picture opens beside the Pictures grid (`docs/ipad.md`).
 - **22b (done):** a generated picture's image is a stored file, removed once Delete picture's Undo has gone, or when a piece it shows is deleted for good (`docs/image-storage.md`).
 - **30a (done):** the picture allowance follows styling access; credit packs are 30b.
-- **33:** real pictures from the gated image service, its permission and cost check, behind `TryOnService`.
+- **33a (done):** real pictures, with her face kept on the phone ("Real pictures (33a)" above). 33b (the try-on photo setup) and 33c (the privacy walkthrough) are next.
 - **21b and 22b (done):** deleting a piece for good deletes the pictures that show it, with their files.
+
+## Real pictures (33a)
+
+Phase 33a, 22 October 2026. Real try-on pictures with her face kept on the phone, as Jose approved on 19 October 2026 (closet `THREAT_MODEL.md` D1, `SWIFT_BUILD_PLAN.md` Phase 33a). They are on with the real backend, or with `-cloud-tryon [normal|slow|fails]` against the fake one in debug builds; otherwise pictures stay simulated, as above. The backend calls Black Forest Labs' FLUX.3 only when its key is set (backend README, "Try-on (33a)"); until then it answers with a stand-in picture.
+
+### What happens
+
+1. **Her OK first.** Try it on asks for try-on's own consent (`TryOnConsent`, version `tryon-1`), in the words of closet `compliance/IN_APP_PRIVACY_TEXT.md`, including the approved sentence that Black Forest Labs may keep the photos and use them to improve their models. No consent, nothing is prepared or sent. Privacy and terms gets a Try-on pictures switch; Delete my data erases the consent.
+2. **On the phone** (`PhoneTryOn.prepare`, Services): her try-on photo at up to 1,280 pixels. `PersonAnalyzing` finds her outline (Vision person segmentation, accurate), her face (face rectangles and landmarks) and her neck and shoulders (body pose). `HeadMasking` builds the head shape: her outline above the chin line, near the face, joined with a padded oval around the face, so it takes in her hair; it's filled with flat grey (128). The same outline puts her on a plain studio backdrop (a soft vertical gradient), so her room never leaves the phone either.
+3. **Fail closed.** It refuses, and says why kindly, when there's no person, no face, more than one face or outline, an outline too unsure (over 30% of it neither clearly in nor out), a face outside her outline, or the grey not covering every pixel of the face's box. Then the check that matters: the analyzer looks for a face in the faceless photo, both in its pixels and in the exact JPEG that would be sent, and must find none. If the checks can't run (Vision fails), nothing is sent.
+4. **Sent** (`PhoneTryOn.dress`): only that JPEG and up to nine garment photos (cutout on white when there is one, otherwise the photo, at up to 768 pixels), each with its ID, category and kind. No metadata in any of them. The backend builds the prompt from those alone. POST /v1/try-on answers "still running" first (409, Retry-After 5); the client asks again with the same Idempotency-Key and body until the picture comes back, within try-on's 360-second deadline (Phase 26).
+5. **Back on the phone** (`PhoneTryOn.restore`, `HeadRestore`): if the model moved her, her head follows her neck and shoulders (body pose; small moves are ignored, moves over 8% of the width aren't trusted). Only where the flat grey is still there does her original outline go back, so a hat, scarf or collar the model drew stays in front. Grey outside her outline becomes the original backdrop times the brightness change measured on nearby backdrop the model left alone. Edges are feathered.
+6. **Kept** as a stored file (22b), linked to its look, with `TryOnPicture.sent`: the exact faceless JPEG and garment JPEGs that left the phone. Deleting the picture, or a piece it shows for good, removes them too (21b, 22b). The files only the phone needed (her photo with her real head on the backdrop, her outline, the head shape) go as soon as the picture is kept, or when the job fails or she cancels.
+
+### A background job
+
+A try-on is a 27c job (`AIJob.Kind.tryOn`): the sheet says "Dressing you" with Keep browsing and Cancel, and she can leave. The banner says "Your try-on picture is ready" (or that it didn't finish), Saved Looks gets a dot, and in the background a notification says so; tapping either opens the picture (or its look, to try again). One key from the first try to the last, so a job resumed after a relaunch is never run or charged twice. The upload's files are kept while a job points to them, so the launch sweep doesn't take them.
+
+### See what was sent
+
+Every real picture has See what was sent: the faceless photo and each garment photo, as the bytes that were sent, with the approved line about Black Forest Labs. They're hidden while the app isn't active, like the pictures. Real pictures aren't labelled Simulated.
+
+### Simulator and device
+
+Simulators can't run Vision's person segmentation, face or pose requests (iOS 26.5: "Could not create inference context", "E5RT is not supported"). So the tests and the debug checkpoint use `SyntheticPersonAnalyzer`, which reads a drawn stand-in figure (`SyntheticPerson`, never a photo of anyone) from its colours; covering its eyes with grey leaves no face to find, as Vision would. `-seed-tryon` puts that figure in her own closet as the try-on photo, with three drawn pieces and a saved look. Both are debug-only and checked out of Release by `scripts/check-release.sh`. With the real backend on a simulator the Vision checks fail and nothing is sent.
+
+The real Vision path was checked on a Mac (22 October 2026) on the AI-generated sample person (`SampleWardrobe/people/person.jpg`): one face found, none after masking (also in the JPEG), and no grey left after restoring onto a copy moved by 14 and 9 pixels, with the move found from the body pose.
+
+**Device checklist (Jose's iPhone 14, then Lily's iPhone 12):**
+
+1. Set up a try-on photo of herself, standing, facing the camera. Try it on with a look of 2 to 5 pieces against the fake backend (`-cloud-tryon slow`). See what was sent: no face, no room, a plain backdrop, hair fully grey.
+2. Refusals: a photo with two people, one facing away, one with her face half out of frame, one in a busy room. Each says why and sends nothing.
+3. Long hair down, curly or afro hair, a ponytail, glasses, a hat or hood in the photo: the grey covers all of it.
+4. Timing and memory on the iPhone 12 (Vision accurate segmentation plus the pixel work at 1,280 pixels).
+5. With the real backend and BFL key (Jose's OK, about US$0.05 a picture): the 19 October hard cases redone in the app, hats ("pulled down over the top of the grey shape"), and the restore with no seam.
+
+### Tests
+
+- `HeadMaskingTests`: no face after masking and every face pixel grey, hair taken in, neck left, the room gone; refusals for two people, no face, no person, an unsure outline, a second face, a face outside her outline.
+- `HeadRestoreTests`: no grey left and her face back; her head following a moved neck; a hat staying in front; leftover grey becoming the backdrop as the model lit it; large or missing moves ignored.
+- `PhoneTryOnTests`: only the faceless photo and garment photos sent, as kept, with no metadata and within the contract's sizes; the head back on and the work files gone; a face still found after masking, two people, no face, no photo, no garment photos and checks that can't run all send nothing.
+- `TryOnJobsTests` (real store, `ManualClock`): one key across a late answer, the picture kept with what was sent, the banner and dot, failure and Cancel letting go of the files, and a relaunch asking again with the same key.
+- `RealTryOnModelTests`: no consent means nothing prepared or sent; Allow then a picture as a job; a refused photo explained with nothing sent; leaving the sheet leaves the job running.
+- `TryOnGatewayTests` and `ContractTests`: still running then the picture, counted once, replayed with the same key; only the contract's fields on the wire; a failed picture not counted; consent to another text refused; the try-on limits match the contract.
+- UI, `TryOnTests` (skipped on pull requests): the checkpoint below.
 
 ## Sample previews
 

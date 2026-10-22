@@ -54,7 +54,8 @@ public struct TryOnBitmap: Sendable, Equatable {
             guard
                 let context = CGContext(
                     data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8,
-                    bytesPerRow: width * 4, space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                    bytesPerRow: width * 4,
+                    space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
                     bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
             else { return false }
             context.interpolationQuality = .high
@@ -69,7 +70,8 @@ public struct TryOnBitmap: Sendable, Equatable {
     /// Decodes JPEG, PNG, HEIC or WebP bytes, upright, no larger than `maxPixelSize` on the long
     /// side.
     public static func decode(_ data: Data, maxPixelSize: Int) -> TryOnBitmap? {
-        guard let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary)
+        guard
+            let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary)
         else { return nil }
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -129,10 +131,12 @@ public struct TryOnBitmap: Sendable, Equatable {
         if abs(current - target) > 0.005 {
             if current > target {
                 let cropWidth = Double(self.height) * target
-                crop = CGRect(x: (Double(self.width) - cropWidth) / 2, y: 0, width: cropWidth, height: Double(self.height))
+                crop = CGRect(
+                    x: (Double(self.width) - cropWidth) / 2, y: 0, width: cropWidth, height: Double(self.height))
             } else {
                 let cropHeight = Double(self.width) / target
-                crop = CGRect(x: 0, y: (Double(self.height) - cropHeight) / 2, width: Double(self.width), height: cropHeight)
+                crop = CGRect(
+                    x: 0, y: (Double(self.height) - cropHeight) / 2, width: Double(self.width), height: cropHeight)
             }
         }
         guard let cropped = image.cropping(to: crop.integral) else { return nil }
@@ -274,7 +278,8 @@ public struct TryOnMask: Sendable, Equatable {
         guard let provider = CGDataProvider(data: Data(values) as CFData),
             let image = CGImage(
                 width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: width,
-                space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                space: CGColorSpaceCreateDeviceGray(),
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
                 provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
         else { return nil }
         return TryOnBitmap.encode(image, type: .png, quality: nil)

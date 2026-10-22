@@ -56,7 +56,8 @@ public struct PhoneTryOn: TryOnPipeline {
 
         // The check that matters: no face can be found in what would be sent, both in the pixels
         // and in the JPEG made from them.
-        guard let personJPEG = Self.jpeg(portrait.faceless, quality: Self.personQuality, limit: TryOnCall.personMaxBytes),
+        guard
+            let personJPEG = Self.jpeg(portrait.faceless, quality: Self.personQuality, limit: TryOnCall.personMaxBytes),
             let sentPixels = TryOnBitmap.decode(personJPEG, maxPixelSize: Self.workingSize)
         else { throw .notSaved }
         do {
@@ -89,7 +90,8 @@ public struct PhoneTryOn: TryOnPipeline {
         var sentGarments: [SentGarment] = []
         for (piece, jpeg) in garments {
             sentGarments.append(
-                SentGarment(garmentID: piece.id, category: piece.category, subKind: piece.subKind, image: try add(jpeg)))
+                SentGarment(garmentID: piece.id, category: piece.category, subKind: piece.subKind, image: try add(jpeg))
+            )
         }
         let work = TryOnWorkFiles(
             studio: try add(portrait.studio.jpeg(quality: 0.92)), matte: try add(portrait.matte.png()),
@@ -148,7 +150,8 @@ public struct PhoneTryOn: TryOnPipeline {
         var garments: [TryOnCall.Garment] = []
         for garment in upload.sent.garments {
             guard let jpeg = stored(garment.image) else { throw .didNotFinish(retryAfterSeconds: nil) }
-            garments.append(.init(id: garment.garmentID, category: garment.category, subKind: garment.subKind, jpeg: jpeg))
+            garments.append(
+                .init(id: garment.garmentID, category: garment.category, subKind: garment.subKind, jpeg: jpeg))
         }
         let call = TryOnCall(
             contextRevision: upload.contextRevision, consentVersion: consentVersion, person: person, garments: garments)
@@ -171,7 +174,8 @@ public struct PhoneTryOn: TryOnPipeline {
                 .resized(width: geometry.width, height: geometry.height),
             let matte = stored(work.matte).flatMap(TryOnMask.decode)?.resized(
                 width: geometry.width, height: geometry.height),
-            let head = stored(work.head).flatMap(TryOnMask.decode)?.resized(width: geometry.width, height: geometry.height),
+            let head = stored(work.head).flatMap(TryOnMask.decode)?.resized(
+                width: geometry.width, height: geometry.height),
             let picture = TryOnBitmap.decode(dressed, maxPixelSize: 4 * Self.workingSize)?.fitted(
                 width: geometry.width, height: geometry.height)
         else { throw .notCompleted }

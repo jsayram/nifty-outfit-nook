@@ -206,7 +206,8 @@ public struct TryOnCall: Sendable, Equatable {
         let person = Data(base64Encoded: samplePersonJPEG, options: .ignoreUnknownCharacters) ?? Data()
         let top = Data(base64Encoded: sampleGarmentJPEG, options: .ignoreUnknownCharacters) ?? Data()
         return TryOnCall(
-            contextRevision: "rev_" + String(note.unicodeScalars.map { String($0.value, radix: 16) }.joined().prefix(12)),
+            contextRevision: "rev_"
+                + String(note.unicodeScalars.map { String($0.value, radix: 16) }.joined().prefix(12)),
             consentVersion: TryOnConsent.currentVersion, person: person,
             garments: [Garment(id: .init("g-sample-top"), category: .top, subKind: .blouse, jpeg: top)])
     }

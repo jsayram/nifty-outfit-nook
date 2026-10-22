@@ -55,8 +55,9 @@ nonisolated enum AppTryOn {
         /// sign-in at launch (paid requests need an account) and sets how its image service behaves.
         @MainActor
         static func prepareFakeIfAsked(arguments: [String]) async {
-            guard let fake = AppGateway.fake, let value = DebugLaunchArgument.value(after: "-cloud-tryon", in: arguments)
-                ?? (arguments.contains("-cloud-tryon") ? "normal" : nil)
+            guard let fake = AppGateway.fake,
+                let value = DebugLaunchArgument.value(after: "-cloud-tryon", in: arguments)
+                    ?? (arguments.contains("-cloud-tryon") ? "normal" : nil)
             else { return }
             fake.backend.setTryOn(FakeTryOnBehaviour(rawValue: value) ?? .normal)
             if !(await fake.account.isSignedIn()) { _ = try? await fake.account.signIn() }
@@ -64,12 +65,11 @@ nonisolated enum AppTryOn {
 
         /// `-seed-tryon`: her own closet in the store gets three pieces with drawn photos, one saved
         /// look of them, and a drawn stand-in try-on photo (`SyntheticPerson`, never a person),
-        /// then onboarding is finished. Only an empty closet is filled. For the 33a checkpoint on
-        /// the simulator.
+        /// then onboarding is finished. Only once: a closet that already has the look is left as it
+        /// is. For the 33a checkpoint on the simulator.
         static func seedIfAsked(arguments: [String], storage: NookStorage, photos: PhotoFileStore) async {
-            guard arguments.contains("-seed-tryon"), (try? await storage.closet.garments().isEmpty) ?? false else {
-                return
-            }
+            guard arguments.contains("-seed-tryon"), (try? await storage.looks.look("l-tryon-checkpoint")) == nil
+            else { return }
             let now = Date.now
             let pieces: [(String, GarmentCategory, GarmentSubKind, ColorName, SyntheticGarmentPhotos.Scene)] = [
                 ("Striped sweater", .top, .sweater, .navy, .stripedSweater),

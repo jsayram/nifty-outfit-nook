@@ -33,7 +33,8 @@ nonisolated enum AIJobText {
     /// 33a: a finished picture is one thing to see.
     static func detail(_ kind: AIJob.Kind, done: Bool) -> String {
         guard kind == .tryOn, done else { return detail(done: done) }
-        return String(localized: "Tap to see it.", bundle: .module, comment: "Banner: what tapping a finished picture does")
+        return String(
+            localized: "Tap to see it.", bundle: .module, comment: "Banner: what tapping a finished picture does")
     }
 
     static func detail(done: Bool) -> String {

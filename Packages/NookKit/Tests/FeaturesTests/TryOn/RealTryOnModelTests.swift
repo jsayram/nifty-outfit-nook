@@ -52,7 +52,10 @@ struct RealTryOnModelTests {
         #expect(services.tryOnConsent.current()?.version == TryOnConsent.currentVersion)
         await model.settle()
         // She could leave here; the job is the app's, not the sheet's.
-        guard case .sending(let id) = model.step else { Issue.record("not sending: \(model.step)"); return }
+        guard case .sending(let id) = model.step else {
+            Issue.record("not sending: \(model.step)")
+            return
+        }
         let job = try #require(await services.aiJobs.finished(id))
         #expect(job.state == .done)
         await model.settle()

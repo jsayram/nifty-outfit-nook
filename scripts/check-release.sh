@@ -4,7 +4,8 @@
 # the cutout benchmark (Features/Debug, Phase 8a), swift-snapshot-testing (test targets only) and
 # the sample data (Fixtures/Sets and the sample photo providers, Phase 20a), and that the
 # debug-only launch arguments (-catalog, -cutout-bench, Phase 16a's -tour, Phase 17's -onboarding,
-# -toasts-stay and -animations, and Phase 20a's -fixtures) aren't in it.
+# -toasts-stay and -animations, Phase 20a's -fixtures, and 33a's -seed-tryon and -cloud-tryon)
+# aren't in it. 33a: nor is the drawn stand-in person the simulator uses (SyntheticPerson).
 #
 # It also fails if any sample photo is inside the built app: the SampleWardrobe folder, a Fixtures
 # or test-support resource bundle, or any file with the name of one of the repo's sample photos
@@ -35,13 +36,14 @@ text="$(strings "$binary")"
 
 failed=0
 for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleSamples LookBundleDemo SnapshotTesting \
-    DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider; do
+    DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
+    SyntheticPerson; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
     fi
 done
-for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animations -fixtures; do
+for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animations -fixtures -seed-tryon -cloud-tryon; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1
