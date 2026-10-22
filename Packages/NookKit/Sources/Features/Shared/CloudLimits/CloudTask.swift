@@ -32,18 +32,23 @@ public final class CloudTask {
     }
 
     @ObservationIgnored private let slowAfter: Duration
+    @ObservationIgnored private let clock: any Clock<Duration>
     @ObservationIgnored private let announce: @MainActor (String) -> Void
     @ObservationIgnored private let holder = Holder()
     @ObservationIgnored private var generation = 0
 
     /// - Parameters:
     ///   - slowAfter: when to flip to `takingLong`. PRD 11.7 wants a useful status by ten seconds.
+    ///   - clock: what `slowAfter` is counted on. The app uses the default, `ContinuousClock`; a
+    ///     test passes a clock it advances by hand.
     ///   - announce: how a failure or a slow call is spoken. VoiceOver by default.
     public init(
         slowAfter: Duration = .seconds(10),
+        clock: any Clock<Duration> = ContinuousClock(),
         announce: @escaping @MainActor (String) -> Void = { CloudProblemText.announce($0) }
     ) {
         self.slowAfter = slowAfter
+        self.clock = clock
         self.announce = announce
     }
 
@@ -55,9 +60,10 @@ public final class CloudTask {
         let mine = generation
         state = .running
         let slowAfter = slowAfter
+        let clock = clock
         let task = Task { @MainActor [weak self] in
             let timer = Task { @MainActor [weak self] in
-                guard (try? await Task.sleep(for: slowAfter)) != nil, let self, self.generation == mine,
+                guard (try? await clock.sleep(for: slowAfter)) != nil, let self, self.generation == mine,
                     self.state == .running
                 else { return }
                 self.state = .takingLong

@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Synchronization
 import Testing
 
@@ -31,8 +32,41 @@ struct CloudTaskTests {
         }
     }
 
+    /// Work that goes on after it is cancelled, until the test lets it finish.
+    final class Gate: Sendable {
+        private enum State {
+            case closed
+            case waiting(UnsafeContinuation<Void, Never>)
+            case open
+        }
+        private let state = Mutex(State.closed)
+
+        func wait() async {
+            await withUnsafeContinuation { continuation in
+                let open = state.withLock { state -> Bool in
+                    if case .open = state { return true }
+                    state = .waiting(continuation)
+                    return false
+                }
+                if open { continuation.resume() }
+            }
+        }
+
+        func open() {
+            let waiting = state.withLock { state -> UnsafeContinuation<Void, Never>? in
+                defer { state = .open }
+                if case .waiting(let continuation) = state { return continuation }
+                return nil
+            }
+            waiting?.resume()
+        }
+    }
+
+    /// The task's clock is one the test moves, so "ten seconds" pass when the test says so.
+    let clock = ManualClock()
+
     func task(slowAfter: Duration = .seconds(10), _ spoken: Spoken) -> CloudTask {
-        CloudTask(slowAfter: slowAfter, announce: { spoken.lines.append($0) })
+        CloudTask(slowAfter: slowAfter, clock: clock, announce: { spoken.lines.append($0) })
     }
 
     func eventually(_ condition: @MainActor () -> Bool) async -> Bool {
@@ -110,15 +144,21 @@ struct CloudTaskTests {
 
     @Test func aSlowCallSaysSoOnceAndKeepsRunning() async {
         let spoken = Spoken()
-        let cloud = task(slowAfter: .milliseconds(60), spoken)
+        let cloud = task(spoken)
         let waiter = Waiter()
         // The work only ends when it is cancelled, so how long the runner takes to notice is
         // never a race against the work finishing.
         cloud.start { () async throws(CloudLimitProblem) in try await waiter.wait() }
+        // Nine seconds in: still just running. Then the tenth.
+        await clock.waitForSleepers(1)
+        clock.advance(by: .seconds(9))
+        #expect(cloud.state == .running)
+        clock.advance(by: .seconds(1))
         #expect(await eventually { cloud.state == .takingLong })
         #expect(cloud.isRunning)
         #expect(spoken.lines == ["This is taking longer than usual. You can wait or cancel."])
-        try? await Task.sleep(for: .milliseconds(150))
+        clock.advance(by: .seconds(600))
+        await Task.yield()
         #expect(spoken.lines.count == 1)
         cloud.cancel()
         #expect(cloud.state == .idle)
@@ -126,10 +166,12 @@ struct CloudTaskTests {
 
     @Test func aCallThatEndsInTimeNeverSaysItIsSlow() async {
         let spoken = Spoken()
-        let cloud = task(slowAfter: .milliseconds(300), spoken)
+        let cloud = task(spoken)
         cloud.start { () async throws(CloudLimitProblem) in }
         #expect(await eventually { cloud.state == .finished })
-        try? await Task.sleep(for: .milliseconds(400))
+        // Long after it ended, there is no timer left to go off.
+        clock.advance(by: .seconds(600))
+        await Task.yield()
         #expect(cloud.state == .finished)
         #expect(spoken.lines.isEmpty)
     }
@@ -141,25 +183,35 @@ struct CloudTaskTests {
         let second = Mutex(false)
         cloud.start { () async throws(CloudLimitProblem) in try await waiter.wait() }
         cloud.start { () async throws(CloudLimitProblem) in second.withLock { $0 = true } }
-        try? await Task.sleep(for: .milliseconds(100))
-        #expect(second.withLock { $0 } == false)
+        // The first call ends when it is cancelled, and the second never began.
+        #expect(await eventually { waiter.hasStarted })
         cloud.cancel()
+        #expect(await eventually { waiter.wasCancelled })
+        #expect(second.withLock { $0 } == false)
     }
 
     @Test func aCancelledCallsLateAnswerDoesNotChangeTheNextCall() async {
         let spoken = Spoken()
         let cloud = task(spoken)
+        let gate = Gate()
+        let answered = Mutex(false)
         // The first call ignores cancellation and fails late; it must not overwrite the second's state.
         cloud.start { () async throws(CloudLimitProblem) in
-            try? await Task.sleep(for: .milliseconds(150))
+            await gate.wait()
+            answered.withLock { $0 = true }
             throw .account(.serverError)
         }
         cloud.cancel()
-        cloud.start { () async throws(CloudLimitProblem) in }
-        #expect(await eventually { cloud.state == .finished })
-        try? await Task.sleep(for: .milliseconds(250))
-        #expect(cloud.state == .finished)
+        let waiter = Waiter()
+        cloud.start { () async throws(CloudLimitProblem) in try await waiter.wait() }
+        #expect(await eventually { waiter.hasStarted })
+        // The late answer arrives while the second call is running.
+        gate.open()
+        #expect(await eventually { answered.withLock { $0 } })
+        for _ in 0..<10 { await Task.yield() }
+        #expect(cloud.state == .running)
         #expect(spoken.lines.isEmpty)
+        cloud.cancel()
     }
 }
 
