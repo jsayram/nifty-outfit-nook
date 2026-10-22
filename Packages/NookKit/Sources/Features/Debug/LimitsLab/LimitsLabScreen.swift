@@ -73,18 +73,18 @@
 
         private var actionsSection: some View {
             Section {
-                button("Ask the stylist (swap)", id: "askStylist") {
-                    await model.run(.style(mode: .swap, contextRevision: "rev_lab"))
+                button("Ask the stylist", id: "askStylist") {
+                    await model.run(.style(.sample(.ask, note: Self.tapNote())))
                 }
                 button("Full outfit idea", id: "fullOutfit") {
-                    await model.run(.style(mode: .full, contextRevision: "rev_lab"))
+                    await model.run(.style(.sample(.full, note: Self.tapNote())))
                 }
                 button("Make a try-on picture", id: "tryOn") { await model.run(.tryOn(contextRevision: "rev_lab")) }
                 button("Send the last one again (same key)", id: "sendAgain") { await model.sendAgain() }
                     .disabled(!model.canSendAgain)
                 if model.controls != nil {
                     button("Full outfit idea, answer lost on the way", id: "lostAnswer") {
-                        await model.runWithLostAnswer(.style(mode: .full, contextRevision: "rev_lab"))
+                        await model.runWithLostAnswer(.style(.sample(.full, note: Self.tapNote())))
                     }
                 }
                 if model.isWorking {
@@ -111,6 +111,11 @@
             } footer: {
                 Text(verbatim: "On the real backend these are Jose's: npx convex run controls:setSwitch.")
             }
+        }
+
+        /// A different made-up request on every tap, so the stylist's result cache doesn't answer it.
+        private static func tapNote() -> String {
+            String(UUID().uuidString.prefix(8)).lowercased()
         }
 
         private func button(_ title: String, id: String, action: @escaping () async -> Void) -> some View {

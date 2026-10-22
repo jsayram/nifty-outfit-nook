@@ -152,6 +152,8 @@ struct NiftyOutfitNookApp: App {
         // Nothing on the local closet depends on it.
         let account = AppGateway.account
         let paid = AppGateway.paid
+        // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.
+        let cloudStylist = AppStylist.usesCloud(arguments) ? paid : nil
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
@@ -175,11 +177,14 @@ struct NiftyOutfitNookApp: App {
                     if let imageFiles { services.imageFiles = imageFiles }
                     // Her weather choices (Phase 29) are erased with the profile, before onboarding.
                     AppWeather.install(into: &services, arguments: arguments)
+                    // The cloud stylist (Phase 27a), once the backend is real or a debug launch asks.
+                    AppStylist.install(into: &services, paid: cloudStylist)
                     // Delete my data, and Delete my account (Phase 24c) when she's signed in.
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
                             stores: storage.erasableData + [
-                                (.profile, tours), (.profile, services.weatherSettings), (.profile, onboarding),
+                                (.profile, tours), (.profile, services.weatherSettings),
+                                (.profile, services.stylistConsent), (.profile, onboarding),
                             ]),
                         account: account)
                     services.backups = storage.backups
@@ -196,6 +201,7 @@ struct NiftyOutfitNookApp: App {
                         profileSettings: closet == nil ? nil : storage.profileSettings,
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
                     AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
+                    AppStylist.install(into: &services, paid: cloudStylist, keepsSettings: closet != nil)
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(stores: storage.erasableData + LocalDataDeletion.stores(of: services)),
                         account: account)
@@ -214,6 +220,7 @@ struct NiftyOutfitNookApp: App {
                 #if DEBUG
                     await DebugPhotoCloset.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
                     await AppGateway.signInIfAsked(arguments: arguments)
+                    await AppStylist.prepareFakeIfAsked(arguments: arguments)
                 #endif
                 if let imageFiles {
                     Task.detached(priority: .utility) { await imageFiles.removeUnused() }

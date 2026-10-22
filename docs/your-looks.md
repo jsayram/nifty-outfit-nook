@@ -91,10 +91,10 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 2. **One tap saves, with an automatic name** from the main colours. A name sheet would add a step to Save look; renaming comes with Saved Looks (12a).
 3. **Tapping Saved takes the look out again**, with Undo, rather than doing nothing.
 4. **A missing version is left off the switch** rather than shown greyed out, and the banner says what's missing and why.
-5. **Leaving cancels styling**, as the plan asks. The mockup's "You can leave this screen. Your looks will wait here." is replaced by "Leaving this screen stops it, and nothing is used." Coming back after switching tabs mid-way shows Styling stopped with Style again; it never re-sends on its own.
+5. **Leaving cancels styling** with Stage A's stylist, as the plan asks. With the cloud stylist (27a) it doesn't: the request runs apart from the screen and its looks land in her history ([decision 0008](decisions/0008-cloud-stylist.md), "Not tied to a screen"). The mockup's "You can leave this screen. Your looks will wait here." is replaced by "Leaving this screen stops it, and nothing is used." Coming back after switching tabs mid-way shows Styling stopped with Style again; it never re-sends on its own.
 6. **Offline retry is a button.** Stage A has no connection monitor, so Retry is how she says she's back; `offline-once` shows it working.
-7. **No "why" line under the bundle.** The mockup's explanation text needs the stylist to write one; the mock stylist doesn't. The description and notes cover it for now.
-8. **"From your history" (FR-58) isn't built.** The history check before paid inference belongs with the real stylist (27a); results are already kept for it.
+7. **The "why" line** (27a): the cloud stylist writes one line per version, shown under the look while the look is as it made it (a swap hides it, since the reason may no longer hold). The mock stylist writes none, so Stage A screens are unchanged.
+8. **"From your history" (FR-58, 27a):** with the cloud stylist, an earlier result for the same structured request that she can still wear shows first, with "From your history: it still fits today's request, so nothing was used." and New ideas in place of Try a different outfit ([decision 0008](decisions/0008-cloud-stylist.md)).
 9. **The recent-wear note counts days** ("You wore this 5 days ago") rather than the amendment's example "last week".
 10. **The saved look sheet is read-only** (bundle and pieces). Look detail, Wear today and Swap it live on Saved Looks (Phase 12a, `docs/saved-looks.md`).
 
@@ -104,5 +104,5 @@ Two more states guard the edges: the closet couldn't be read (nothing was sent),
 - **12a (done):** Saved Looks and look detail, renaming, Wear today (`docs/saved-looks.md`). Saving now records `savedAt`, and a piece that has left her closet shows faded on the Saved tab too.
 - **12b (done), 33:** Try it on with simulated pictures (`docs/try-on-pictures.md`), then real ones.
 - **15b (done):** on iPad the version switch and the look sit beside the pieces and buttons, and the Saved tab is a grid (`docs/ipad.md`).
-- **27a:** the real stylist contract, the history check, and the explanation line.
+- **27a (done):** the cloud stylist, the history check, the why line, the consent state ("Style Me needs your OK", Review) and the limit state ("Styling is resting for now"). Ask stylist's screen is still the stand-in; the endpoint supports it.
 - **34:** Find one.

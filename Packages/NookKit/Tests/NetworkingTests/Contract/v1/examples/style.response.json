@@ -7,7 +7,15 @@
     "createdAt": "2026-10-21T11:01:30.000Z"
   },
   "result": {
-    "placeholder": true
+    "kind": "complete",
+    "looks": [
+      { "version": "simple", "pieces": ["g-blouse-cream", "g-trousers-olive", "g-loafers-brown"], "why": "Cream and olive feel calm for the office, and loafers handle a rainy walk in." },
+      { "version": "dressedUp", "pieces": ["g-blouse-cream", "g-trousers-olive", "g-flats-black", "g-blazer-navy"], "why": "The navy blazer sharpens the same outfit and adds a layer for 14 degrees." },
+      { "version": "somethingNew", "pieces": ["g-blouse-cream", "g-trousers-olive", "g-loafers-brown"], "idea": { "name": "Rust knit vest", "category": "layer", "colors": ["orange"] }, "why": "A rust vest would warm up the olive and give the look some texture." }
+    ],
+    "missing": [],
+    "confidence": "high",
+    "fromCache": false
   },
   "usage": {
     "category": "styleFull",

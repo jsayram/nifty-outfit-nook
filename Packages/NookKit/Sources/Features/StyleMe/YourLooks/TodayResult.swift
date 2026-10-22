@@ -53,6 +53,7 @@ struct TodayResult: View {
                         notes(result, look: look)
                     }
                     bundle(content, result: result, isWide: isWide)
+                    why(look)
                 } trailing: { isWide in
                     if isWide {
                         notes(result, look: look)
@@ -201,15 +202,42 @@ struct TodayResult: View {
         .padding(.horizontal, NookSpacing.small)
     }
 
+    // MARK: Why
+
+    /// 27a: the stylist's one-line reason, under the look. Nothing when there isn't one.
+    @ViewBuilder
+    private func why(_ look: Look) -> some View {
+        // Only while the look is as the stylist made it: after a swap the reason may not hold.
+        if let original = model.originalLook, original.pieces == look.pieces, let why = original.why, !why.isEmpty {
+            Text(why)
+                .nookTextStyle(.body)
+                .italic()
+                .foregroundStyle(.nook.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, NookSpacing.medium)
+                .accessibilityLabel(
+                    Text("Why: \(why)", bundle: .module, comment: "VoiceOver: the stylist's reason for this look")
+                )
+                .accessibilityIdentifier("results.why")
+        }
+    }
+
     // MARK: Try a different outfit
 
     private var tryDifferent: some View {
         let caption = String(
             localized: "Uses 1 styling", bundle: .module,
             comment: "Caption under Try a different outfit: it costs one styling request (amendment, LR-05a)")
+        // FR-58: over a look from her history, the way on is New ideas.
+        let title =
+            model.isFromHistory
+            ? String(localized: "New ideas", bundle: .module, comment: "Your looks button over a look from her history")
+            : String(localized: "Try a different outfit", bundle: .module, comment: "Your looks button (LR-05a)")
         return VStack(spacing: NookSpacing.xxSmall) {
             NookButton(
-                String(localized: "Try a different outfit", bundle: .module, comment: "Your looks button (LR-05a)"),
+                title,
                 systemImage: "arrow.triangle.2.circlepath", kind: .text, action: actions.tryDifferentOutfit
             )
             .accessibilityHint(Text(caption))
@@ -339,6 +367,10 @@ struct ProblemBanner: View {
             )
         case .stopped:
             EmptyView()
+        case .needsConsent:
+            NookBanner(StylistConsentText.needsConsent, systemImage: "hand.raised")
+        case .limited(let problem):
+            NookBanner(CloudLimitText.message(for: problem), systemImage: "hourglass")
         case .notCompleted, .closetUnavailable, .requestChanged:
             NookBanner(
                 String(

@@ -43,20 +43,25 @@ public struct GatewayPaidActionService: PaidActionService {
     private func send(_ request: PaidActionRequest, idempotencyKey: String) async throws(APIFailure)
         -> PaidActionReceipt
     {
-        let response: APIV1.PaidActionResponse
         switch request {
-        case .style(let mode, let revision):
-            response = try await client.send(
-                APIV1.style, body: APIV1.StyleRequest(mode: mode.rawValue, contextRevision: revision),
-                idempotencyKey: idempotencyKey, signer: attestation, as: APIV1.PaidActionResponse.self)
+        case .style(let call):
+            let response = try await client.send(
+                APIV1.style, body: APIV1.StyleRequest(call), idempotencyKey: idempotencyKey, signer: attestation,
+                as: APIV1.StyleResponse.self)
+            guard let usage = Self.allowance(response.usage), let answer = response.result.styleAnswer else {
+                throw .invalidResponse
+            }
+            return PaidActionReceipt(
+                id: response.action.id, feature: .style, replayed: response.action.replayed, usage: usage, style: answer
+            )
         case .tryOn(let revision):
-            response = try await client.send(
+            let response = try await client.send(
                 APIV1.tryOn, body: APIV1.TryOnRequest(contextRevision: revision),
                 idempotencyKey: idempotencyKey, signer: attestation, as: APIV1.PaidActionResponse.self)
+            guard let usage = Self.allowance(response.usage) else { throw .invalidResponse }
+            return PaidActionReceipt(
+                id: response.action.id, feature: .tryOn, replayed: response.action.replayed, usage: usage)
         }
-        guard let usage = Self.allowance(response.usage) else { throw .invalidResponse }
-        return PaidActionReceipt(
-            id: response.action.id, feature: request.feature, replayed: response.action.replayed, usage: usage)
     }
 
     static func allowance(_ body: APIV1.UsageCategory) -> UsageAllowance? {
@@ -86,6 +91,8 @@ public struct GatewayPaidActionService: PaidActionService {
             .busy(retryAfterSeconds: seconds)
         case .attestationRequired, .attestationUnavailable:
             .deviceNotVerified
+        case .consentRequired:
+            .needsConsent
         case .unavailable(let seconds) where paid:
             // From a paid endpoint: the job failed, or its outcome is still being checked.
             .didNotFinish(retryAfterSeconds: seconds)

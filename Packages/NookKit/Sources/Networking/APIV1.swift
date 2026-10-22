@@ -143,13 +143,15 @@ public enum APIV1 {
         case actionInProgress = "action_in_progress"
         case quotaExceeded = "quota_exceeded"
         case featurePaused = "feature_paused"
+        // 27a
+        case consentRequired = "consent_required"
 
         /// The HTTP status the contract gives each code.
         public var status: Int {
             switch self {
             case .invalidRequest: 400
             case .unauthenticated, .tokenExpired: 401
-            case .forbidden, .attestationRequired: 403
+            case .forbidden, .attestationRequired, .consentRequired: 403
             case .notFound, .notRegistered: 404
             case .methodNotAllowed: 405
             case .idempotencyConflict, .actionInProgress: 409

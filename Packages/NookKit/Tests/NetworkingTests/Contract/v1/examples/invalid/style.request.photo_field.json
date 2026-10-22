@@ -1,0 +1,8 @@
+{
+  "mode": "full",
+  "contextRevision": "rev_1",
+  "consentVersion": "stylist-1",
+  "closet": [
+    { "id": "g-1", "category": "top", "colors": ["red"], "dressiness": "casual", "warmth": "light", "photo": "base64..." }
+  ]
+}

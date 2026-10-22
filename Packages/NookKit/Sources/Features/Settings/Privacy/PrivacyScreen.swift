@@ -22,6 +22,9 @@ struct PrivacyScreen: View {
     @Environment(\.openURL) private var openURL
     /// Delete my account is offered only while she's signed in (24c).
     @State private var isSignedIn = false
+    /// 27a: her yes to the cloud stylist, and the consent sheet the switch opens.
+    @State private var stylistOn = false
+    @State private var showsStylistConsent = false
 
     var body: some View {
         PrivacyPage(
@@ -30,11 +33,22 @@ struct PrivacyScreen: View {
             deleteData: { showsDeleteData = true },
             deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
             open: { page = $0 },
-            weather: weatherContent
+            weather: weatherContent,
+            stylist: services.cloudStyling ? stylistContent : nil
         )
         .task {
             await weather.load(from: services)
             isSignedIn = await services.account.isSignedIn()
+            stylistOn = services.stylistConsent.current()?.isCurrent == true
+        }
+        .nookSheet(isPresented: $showsStylistConsent, title: StylistConsentText.title, detents: [.large]) {
+            StylistConsentSheet(
+                allow: {
+                    services.stylistConsent.save(StylistConsent(agreedAt: .now))
+                    stylistOn = true
+                    showsStylistConsent = false
+                },
+                notNow: { showsStylistConsent = false })
         }
         .alert(
             WeatherText.explainerTitle, isPresented: $weather.showsLocationExplainer,
@@ -77,6 +91,20 @@ struct PrivacyScreen: View {
         .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && !showsBackups && page == nil)
     }
 
+    /// 27a: turning it on shows the consent text first; turning it off withdraws at once.
+    private var stylistContent: StylistPrivacy {
+        StylistPrivacy(
+            isOn: stylistOn,
+            set: { on in
+                if on {
+                    showsStylistConsent = true
+                } else {
+                    services.stylistConsent.save(nil)
+                    stylistOn = false
+                }
+            })
+    }
+
     private var weatherContent: WeatherPrivacy {
         WeatherPrivacy(
             isOn: weather.settings.isOn, usesMyLocation: weather.settings.usesMyLocation,
@@ -103,6 +131,8 @@ struct PrivacyPage: View {
     var open: (WebsiteLink) -> Void = { _ in }
     /// The weather rows (Phase 29). `nil` leaves them out, as the first Stage B screens drew it.
     var weather: WeatherPrivacy?
+    /// The stylist's consent switch (27a). `nil` while Style Me uses the stylist on the phone.
+    var stylist: StylistPrivacy?
 
     var body: some View {
         SettingsPage(
@@ -122,13 +152,19 @@ struct PrivacyPage: View {
                 SettingsNote(keepsChanges ? PrivacyText.staysNoteKept : PrivacyText.staysNote)
             }
 
+            if let stylist {
+                StylistPrivacyGroup(stylist: stylist)
+            }
+
             if let weather {
                 WeatherPrivacyGroup(weather: weather)
             }
 
             SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
                 SettingsNote(PrivacyText.laterNote)
-                ForEach(PrivacyText.later(includingWeather: weather == nil), id: \.title) { item in
+                ForEach(
+                    PrivacyText.later(includingWeather: weather == nil, includingStylist: stylist == nil), id: \.title
+                ) { item in
                     SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
                 }
             }
@@ -268,9 +304,12 @@ nonisolated enum PrivacyText {
             bundle: .module, comment: "Privacy and terms: the banner at the top while Live weather is on")
     }
 
-    /// Weather leaves the list once the Weather group above it is real (Phase 29).
-    static func later(includingWeather: Bool) -> [PrivacyItem] {
-        includingWeather ? later : later.filter { $0.systemImage != "cloud.sun" }
+    /// Weather leaves the list once the Weather group above it is real (Phase 29), and Style Me
+    /// once its switch is (27a).
+    static func later(includingWeather: Bool, includingStylist: Bool = true) -> [PrivacyItem] {
+        later.filter {
+            (includingWeather || $0.systemImage != "cloud.sun") && (includingStylist || $0.systemImage != "sparkles")
+        }
     }
 
     static var later: [PrivacyItem] {
