@@ -295,6 +295,15 @@ jobs:
       # the last one. The build is the one above (the deployment target is iOS 26.0), so this
       # costs a boot and the tests, not a build. Hosted runners keep skipping them.
       #
+      # Advisory for now (continue-on-error): on this Mac, at a load average of 400 to 900 from
+      # other jobs and agents, StoreKit's own daemon (storekitd) sometimes stops answering during
+      # a purchase or an entitlement query on a fresh simulator, and the test sits until the
+      # suite's two-minute limit and the host restarts. One hang often brings more in the same
+      # run. It did not happen at all in the runs on a warm simulator at lower load, and it
+      # happened in about half of the runs on fresh ones (about 15 runs, 22 October 2026). The
+      # tests themselves are fixed (see docs/payments.md), so a failure here is a hang, not a
+      # wrong answer. Take continue-on-error off once the step has passed a few runs in a row.
+      #
       # Left out here: checkpointPurchaseRenewRestoreExpire, which waits on StoreKit's own sped-up
       # clock (a month is 30 seconds) and takes 95 seconds or more. On this Mac, at a load average
       # of 500 to 900 from other jobs and agents, it passed once in ten runs (the others missed the
@@ -307,10 +316,12 @@ jobs:
           # NOOK_SIM_ID is still the iOS 27.0 simulator: create leaves it alone.
           echo "NOOK_STOREKIT_SIM_ID=$(NOOK_SIM_OS=26.5 scripts/ci-simulator.sh create iPhone)" >> "$GITHUB_ENV"
       - name: Test (StoreKit suites on iOS 26.5, self-hosted only)
+        id: storekit
         if: ${{ !cancelled() && runner.environment == 'self-hosted' && env.NOOK_STOREKIT_SIM_ID != '' }}
-        # About 1.5 minutes when it runs. A simulator that never gets to the tests on a very busy
-        # Mac would otherwise hold the runner for the rest of the job's 40 minutes.
-        timeout-minutes: 10
+        continue-on-error: true
+        # About 1.5 minutes when nothing hangs. The limit keeps a run of hangs (each costs 2
+        # minutes and a host restart) from holding the runner for the rest of the job's 40.
+        timeout-minutes: 6
         env:
           NOOK_STOREKIT: 1
           NOOK_SIM_ID: ${{ env.NOOK_STOREKIT_SIM_ID }}
@@ -319,8 +330,12 @@ jobs:
           NOOK_XCTESTRUN="$(ls build/DerivedData/Build/Products/*_NiftyOutfitNook_*.xctestrun)"
           scripts/test.sh -only-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests
           '-skip-testing:NiftyOutfitNookTests/SubscriptionStoreKitTests/checkpointPurchaseRenewRestoreExpire()'
+      - name: Say that the StoreKit suites failed (advisory)
+        if: ${{ steps.storekit.outcome == 'failure' }}
+        run: |
+          echo "::warning title=StoreKit suites failed::Advisory for now. See the step's log and docs/payments.md (Testing). The job still passes."
       - name: Keep test results on failure
-        if: failure()
+        if: ${{ failure() || steps.storekit.outcome == 'failure' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: TestResults-build-and-archive
