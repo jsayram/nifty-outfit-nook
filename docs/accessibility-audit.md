@@ -14,6 +14,9 @@ Stage A, 17 October 2026. Jose doesn't have Lily's iPhone 12, so the checks that
 | `testStyleMeAndYourLooks` | Style Me, Your looks (Today and Saved), Swap a piece |
 | `testSavedLooksAndPictures` | Saved Looks, Saved Looks on All (the Not saved tag and Save look), a saved look, Pictures, a picture |
 | `testProfileAndSettings` | Profile, Fit and measurements, Accessibility, Help, Send feedback, Privacy and terms, Delete my data |
+| `testTryOnPhotoAndStylingAccess` | Your try-on photo (the sheet from Profile) and Styling access, the paywall (added in Phase 35a) |
+| `testBackups` | Backups, reached through onboarding's empty closet because it shows only for her own closet (35a) |
+| `testDeleteMyAccount` | Delete my account, signed in with a subscription that still bills (35a) |
 
 Before each audit the test waits until two screenshots in a row are the same, because the room art, the name sign and look bundles are drawn a moment after a screen appears. Without the wait the audit checked "Lily" against an empty sign.
 
