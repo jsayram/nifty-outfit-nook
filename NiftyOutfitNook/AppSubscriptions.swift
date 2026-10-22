@@ -24,8 +24,11 @@ enum AppSubscriptions {
         let hostedTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
         let storeKit = StoreKitSubscriptionService(
             cache: DefaultsSubscriptionStatusCache(), claimer: hostedTests ? nil : AppGateway.stylingAccess)
-        // Before anything reads the status, so no transaction that arrives at launch is missed.
-        storeKit.start()
+        // Before anything reads the status, so no transaction that arrives at launch is missed. Not
+        // while the hosted unit tests run inside the app: a second `Transaction.updates` listener
+        // here takes updates the tests' own service is waiting for, and which of the two hears a
+        // purchase varies from run to run. The tests start their own where they need one.
+        if !hostedTests { storeKit.start() }
         return storeKit
     }()
 
@@ -50,6 +53,8 @@ enum AppSubscriptions {
     /// Keeps the hint on paid requests in step with StoreKit for the life of the app. The server
     /// never trusts it: since 30c it decides from Apple's verified records.
     static func follow() async {
+        // The hosted unit tests drive StoreKit themselves (see `service` and `credits`).
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         let service = service
         let hint = EntitlementHintSource.shared
         // 30b: packs paid for but not credited at the last launch.
