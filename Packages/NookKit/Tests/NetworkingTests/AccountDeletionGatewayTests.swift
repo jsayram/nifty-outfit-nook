@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Testing
 
 @testable import Networking
@@ -11,13 +12,17 @@ import Testing
 struct AccountDeletionGatewayTests {
     let backend = FakeBackend()
     let auth = FakeAuthProvider(subject: "lily")
-    let policy = RetryPolicy(baseDelay: .milliseconds(5), maxDelay: .milliseconds(10), requestTimeout: .seconds(5))
+    let policy = RetryPolicy(requestTimeout: .seconds(60))
+    /// The client's clock, which a wait between retries jumps ahead on instead of really waiting,
+    /// so these tests neither take real seconds nor have a timeout that a slow machine could hit.
+    let clock = ManualClock()
 
     func client(auth: (any AuthProvider)? = nil) -> APIClient {
-        APIClient(
+        let clock = clock
+        return APIClient(
             baseURL: backend.baseURL,
             session: APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self]),
-            auth: auth ?? self.auth, policy: policy)
+            auth: auth ?? self.auth, policy: policy, clock: clock, sleep: { try await clock.skip($0) })
     }
 
     /// Signed in, with a paid action and a registered key on the backend.

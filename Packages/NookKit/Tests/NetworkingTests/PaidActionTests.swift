@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import Models
+import NookTestSupport
 import Synchronization
 import Testing
 
@@ -14,14 +15,17 @@ struct PaidActionTests {
     let backend = FakeBackend()
     let auth = FakeAuthProvider(subject: "lily")
     let attester = FakeDeviceAttester()
-    /// Short backoff, so the timeout retries don't take real seconds.
-    let policy = RetryPolicy(baseDelay: .milliseconds(5), maxDelay: .milliseconds(10), requestTimeout: .seconds(5))
+    let policy = RetryPolicy(requestTimeout: .seconds(60))
+    /// The client's clock, which a wait between retries jumps ahead on instead of really waiting,
+    /// so these tests neither take real seconds nor have a timeout that a slow machine could hit.
+    let clock = ManualClock()
 
     func client() -> APIClient {
-        APIClient(
+        let clock = clock
+        return APIClient(
             baseURL: backend.baseURL,
             session: APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self]),
-            auth: auth, policy: policy)
+            auth: auth, policy: policy, clock: clock, sleep: { try await clock.skip($0) })
     }
 
     func service(attester: (any DeviceAttester)? = nil) async throws -> GatewayPaidActionService {

@@ -49,6 +49,8 @@ The state is a hint, not a gate. A request is still sent when the state says off
 
 ## Proof
 
+The tests don't wait on real time. `APIClient` and `CloudTask` take a clock (`ContinuousClock` in the app), and the tests hand them a `ManualClock` (`NookTestSupport`) that only moves when the test advances it, so a timeout happens because the test says so, not because a busy machine was slow. The one test that still leans on real time is the trickle case, which the 15-second answer outlasts by a wide margin.
+
 `ResilienceTests` forces each case against the fake backend (`FakeBackendMode`, with two new modes: `connectionLost` and `actionInProgress`):
 
 | Case | Test |
