@@ -211,23 +211,44 @@ final class ProfileModel {
         await replacePhoto(with: Self.exampleTryOnPhoto, in: services)
     }
 
-    /// Her own photo from the system picker (Phase 22a): kept without its metadata, then set as
-    /// her try-on photo. The photo it replaces is deleted from the iPhone at once, since it's
-    /// Sensitive and nothing else points to it. If the profile can't be saved, the new copy is
-    /// deleted and the old photo stays.
-    func useTryOnPhoto(_ picked: PickedPhoto, in services: NookServices) async -> Bool {
+    /// Her own photo, taken with the app's camera or picked from Photos (Phase 22a, 33b): kept
+    /// without its metadata (the same intake as any photo), then checked on the phone with the
+    /// same fail-closed checks try-on runs (`TryOnPhotoChecking`). Nothing is her try-on photo yet:
+    /// she sees what the check found first, and then `saveTryOnPhoto` or `discardTryOnPhoto`.
+    /// `nil` when the photo couldn't be read or kept.
+    func prepareTryOnPhoto(_ picked: PickedPhoto, in services: NookServices) async -> TryOnPhotoCandidate? {
         let photo: PhotoReference
         do {
             let data = try await picked.load()
             photo = try await services.photos.keep(data, from: picked.source)
         } catch {
-            return false
+            return nil
         }
-        guard await replacePhoto(with: photo, in: services) else {
-            await services.photos.discard(photo)
+        return TryOnPhotoCandidate(
+            photo: photo, source: picked.source, check: await checkTryOnPhoto(photo, in: services))
+    }
+
+    /// Runs the checks again. Where nothing checks photos (the example, most tests) every photo is
+    /// fine.
+    func checkTryOnPhoto(_ photo: PhotoReference, in services: NookServices) async -> TryOnPhotoCheck {
+        guard let checker = services.tryOnPhotoChecker else { return .fine(tips: []) }
+        return await checker.check(photo)
+    }
+
+    /// Makes the checked photo her try-on photo. The photo it replaces is deleted from the iPhone
+    /// at once, since it's Sensitive and nothing else points to it. If the profile can't be saved,
+    /// the new copy is deleted and the old photo stays.
+    func saveTryOnPhoto(_ candidate: TryOnPhotoCandidate, in services: NookServices) async -> Bool {
+        guard await replacePhoto(with: candidate.photo, in: services) else {
+            await services.photos.discard(candidate.photo)
             return false
         }
         return true
+    }
+
+    /// A photo she didn't use: its copy is deleted. Her current try-on photo is untouched.
+    func discardTryOnPhoto(_ candidate: TryOnPhotoCandidate, in services: NookServices) async {
+        await services.photos.discard(candidate.photo)
     }
 
     /// Removes the photo, and deletes her own photo's file. Saved try-on pictures stay

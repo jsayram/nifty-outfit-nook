@@ -825,6 +825,9 @@
     "2 weeks" : {
       "comment" : "Repeat setting value (LR-10)"
     },
+    "A bit more light would help." : {
+      "comment" : "Try-on camera hint"
+    },
     "A photo of your body, without your face and on a plain backdrop, and that look’s piece photos, only when you tap Try it on. Your face never leaves your iPhone." : {
       "comment" : "Privacy and terms: under the try-on switch"
     },
@@ -833,6 +836,9 @@
     },
     "A piece no longer in your closet" : {
       "comment" : "See what was sent"
+    },
+    "A plain wall and light on your face help. Arms a little away from your body." : {
+      "comment" : "Try-on camera: a tip under the hint"
     },
     "Add a photo of yourself in Profile, Your try-on photo. Nothing was sent." : {
       "comment" : "Try it on sheet (33a)"
@@ -849,6 +855,9 @@
     "Anthropic makes Claude, the AI that suggests your outfits." : {
       "comment" : "Stylist consent: who the recipient is"
     },
+    "Any hairstyle is fine. Hats, scarves and turtlenecks work too, but your picture looks best without them." : {
+      "comment" : "Try-on photo sheet: hair, hats, scarves and turtlenecks"
+    },
     "Apple couldn’t take the last payment, so styling access is paused. Update your payment details in Manage subscription, and it starts again." : {
       "comment" : "Styling access: billing retry"
     },
@@ -857,6 +866,9 @@
     },
     "Apple refunded this subscription, so styling access is off. Your closet, looks and pictures are all still here." : {
       "comment" : "Styling access: subscription refunded or revoked"
+    },
+    "Camera view" : {
+      "comment" : "VoiceOver: the try-on camera's picture"
     },
     "Cancel at least a day before it renews: Settings, then your name, then Subscriptions. You keep styling access until the end of the month you’ve paid for." : {
       "comment" : "Paywall: how to cancel, without a free month"
@@ -867,8 +879,23 @@
     "Charged today, then every month until you cancel. This Apple Account has already had its free month." : {
       "comment" : "Paywall: under the offer, without a free month"
     },
+    "Check again" : {
+      "comment" : "Try-on photo setup button"
+    },
     "Checking with the App Store" : {
       "comment" : "Styling access: loading"
+    },
+    "Checking your photo" : {
+      "comment" : "Try-on photo setup: working"
+    },
+    "Choose a different photo" : {
+      "comment" : "Try-on photo sheet button"
+    },
+    "Choose another photo" : {
+      "comment" : "Try-on photo setup button"
+    },
+    "Close camera" : {
+      "comment" : "Try-on camera: closes it"
     },
     "Dressing you" : {
       "comment" : "Try it on sheet (33a): the job is running"
@@ -882,6 +909,9 @@
     "Ends %@. It won’t renew, so nothing more will be charged." : {
       "comment" : "Styling access: subscribed, cancelled. The argument is a date."
     },
+    "For the best pictures: stand where the camera sees you from head to toe, facing it, with your arms a little away from your body, in good light. A plain wall helps." : {
+      "comment" : "Try-on photo sheet: what makes a good photo"
+    },
     "Free and paid" : {
       "comment" : "Help topic"
     },
@@ -891,17 +921,47 @@
     "From your history: it still fits today’s request, so nothing was used." : {
       "comment" : "Note on Your looks: an earlier result reused before asking the stylist (FR-58)"
     },
+    "Getting ready to look for you" : {
+      "comment" : "Try-on camera hint"
+    },
+    "Hats, scarves and turtlenecks are fine, but your picture looks best without them." : {
+      "comment" : "Try-on photo setup: a gentle note after the check"
+    },
     "Hiding your face" : {
       "comment" : "Try it on sheet (33a): on the phone"
     },
     "How try-on pictures work" : {
       "comment" : "Try-on consent: title"
     },
+    "It didn’t work just now. You can check again, or keep the photo: it’s checked once more before any picture is made." : {
+      "comment" : "Try-on photo setup: the check didn't run"
+    },
+    "It seems to show more than one person. Try again with just you in the picture." : {
+      "comment" : "Try-on photo setup: the check failed"
+    },
+    "Just you in the picture, please." : {
+      "comment" : "Try-on camera hint"
+    },
     "Keep browsing" : {
       "comment" : "Try it on sheet (33a): closes the sheet"
     },
+    "Keep it anyway" : {
+      "comment" : "Try-on photo setup button"
+    },
+    "Keep my current photo" : {
+      "comment" : "Try-on photo setup button"
+    },
+    "Let your arms hang a little away from your body." : {
+      "comment" : "Try-on camera hint"
+    },
+    "Live hints aren’t available right now. Tap the button when you’re ready." : {
+      "comment" : "Try-on camera: Vision can't look at the camera"
+    },
     "Manage subscription" : {
       "comment" : "Styling access: button"
+    },
+    "Move to the middle of the picture." : {
+      "comment" : "Try-on camera hint"
     },
     "Never sent: your face, your room, your measurements, your notes, your name." : {
       "comment" : "Try-on consent"
@@ -929,6 +989,9 @@
     },
     "Nothing was sent" : {
       "comment" : "Try it on sheet (33a)"
+    },
+    "Nothing was sent, and nothing has changed. Your current photo, if you have one, is still yours." : {
+      "comment" : "Try-on photo setup: after a failed check"
     },
     "Only the photo without your face and your clothing photos were sent. You can leave this screen: we’ll tell you when your picture is ready, and your iPhone puts you back together." : {
       "comment" : "Try it on sheet (33a): the job is running"
@@ -977,6 +1040,12 @@
     },
     "Start free month" : {
       "comment" : "Paywall: the purchase button"
+    },
+    "Step a little closer." : {
+      "comment" : "Try-on camera hint"
+    },
+    "Step back a little, so your whole body is in view." : {
+      "comment" : "Try-on camera hint"
     },
     "Style Me is off. Your closet, saved looks and making your own looks still work." : {
       "comment" : "Privacy and terms: the stylist switch is off"
@@ -1041,17 +1110,62 @@
     "Swapping in a studio backdrop. Nothing has left your iPhone yet." : {
       "comment" : "Try it on sheet (33a): on the phone, before sending"
     },
+    "Switch camera" : {
+      "comment" : "Try-on camera: front or back"
+    },
+    "Take a new photo" : {
+      "comment" : "Try-on photo sheet button"
+    },
+    "Take another photo" : {
+      "comment" : "Try-on photo setup button"
+    },
+    "Take it for me when I’m ready" : {
+      "comment" : "Try-on camera: switch for the timer"
+    },
+    "Take your photo" : {
+      "comment" : "Try-on photo sheet button"
+    },
+    "Take your try-on photo" : {
+      "comment" : "Before the camera permission prompt"
+    },
+    "Taking your photo in %lld" : {
+      "comment" : "Try-on camera, spoken: the timer started. The argument is the seconds left"
+    },
     "Tap to see it." : {
       "comment" : "Banner: what tapping a finished picture does"
     },
     "That didn’t work, and nothing was charged. Try again." : {
       "comment" : "Styling access: purchase failed"
     },
+    "That’s it. Hold still." : {
+      "comment" : "Try-on camera hint"
+    },
+    "The app only sees the photo you take or pick. It keeps its own copy on this iPhone, without the location, and nothing is uploaded." : {
+      "comment" : "Try-on photo sheet: note with real photos"
+    },
     "The App Store can’t be reached. Check your connection and try again." : {
       "comment" : "Styling access: offline"
     },
     "The App Store didn’t answer, so the price can’t be shown. Try again later." : {
       "comment" : "Paywall: the offer couldn't be loaded"
+    },
+    "The app uses your camera to take one full-length photo with a timer, and to see where you stand so it can tell you when it looks right. Nothing is recorded. The photo is kept on this iPhone, without its location, and in your iCloud if sync is on." : {
+      "comment" : "Before the camera permission prompt: try-on photo (PERMISSIONS.md)"
+    },
+    "The camera didn’t start. You can close this and choose a photo instead." : {
+      "comment" : "Try-on camera: it couldn't start"
+    },
+    "The light is behind you. Turn so it falls on you." : {
+      "comment" : "Try-on camera hint"
+    },
+    "The light seems to be behind you. Light on you works better." : {
+      "comment" : "Try-on photo setup: a gentle tip"
+    },
+    "The photo didn’t come out. Try again." : {
+      "comment" : "Try-on camera: the shutter failed"
+    },
+    "The photo looks dark. Good light gives a cleaner picture." : {
+      "comment" : "Try-on photo setup: a gentle tip"
     },
     "The photo that was sent: your body on a plain studio backdrop, with your head covered in flat grey." : {
       "comment" : "VoiceOver: the faceless photo on See what was sent"
@@ -1065,8 +1179,23 @@
     "These pieces have no photos to send" : {
       "comment" : "Try it on sheet (33a)"
     },
-    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps neither." : {
+    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Try-on consent"
+    },
+    "This happens on your iPhone. Nothing is sent." : {
+      "comment" : "Try-on photo setup: working"
+    },
+    "This photo couldn’t be read. Try another one." : {
+      "comment" : "Try-on photo setup: the photo couldn't be read"
+    },
+    "This photo won’t work for try-on" : {
+      "comment" : "Try-on photo setup: the check failed"
+    },
+    "This photo works" : {
+      "comment" : "Try-on photo setup: the check passed"
+    },
+    "To make it even better" : {
+      "comment" : "Try-on photo setup: gentle tips"
     },
     "To pay nothing, cancel at least a day before %@: Settings, then your name, then Subscriptions." : {
       "comment" : "Paywall: how to cancel the free month. The argument is a date."
@@ -1080,6 +1209,9 @@
     "Try-on pictures come with styling access. Your saved pictures stay free to open." : {
       "comment" : "Try it on sheet: without styling access"
     },
+    "Turn to face the camera." : {
+      "comment" : "Try-on camera hint"
+    },
     "Up to %lld a day" : {
       "comment" : "Paywall: the allowance for swaps and questions. The argument is a number."
     },
@@ -1088,6 +1220,9 @@
     },
     "Up to %lld requests a day" : {
       "comment" : "Paywall: Style Me's allowance. The argument is a number."
+    },
+    "Use this photo" : {
+      "comment" : "Try-on photo setup button"
     },
     "Uses 1 of your %lld picture credits. Credits don’t expire." : {
       "comment" : "Try it on sheet: paid with a purchased credit. The argument is how many she has. Pluralized.",
@@ -5958,9 +6093,6 @@
     "Photos aren’t built yet. For now each photo choice adds the same example photo, and nothing asks for your camera or photos." : {
       "comment" : "Add a piece: under the choices, while photos are a stand-in"
     },
-    "Pick a clear, full-length photo of you standing naturally in fitted clothes, in good light." : {
-      "comment" : "Try-on photo sheet: what makes a good photo, with real photos"
-    },
     "Pick a colour to set how strongly it’s used and where." : {
       "comment" : "Colour sheet note before a colour is picked"
     },
@@ -7721,9 +7853,6 @@
     "The app needs your camera to take the picture. The photo is saved in the app on this iPhone, without its location." : {
       "comment" : "Before the camera permission prompt (PERMISSIONS.md)"
     },
-    "The app only sees the photo you pick. It keeps its own copy on this iPhone, without the location, and nothing is uploaded." : {
-      "comment" : "Try-on photo sheet: note with real photos (Phase 22a)"
-    },
     "The app only sees the photos you pick or take, and keeps its own copy on this iPhone without the location." : {
       "comment" : "Add a piece: under the choices, with real photos (Phase 22a)"
     },
@@ -8896,6 +9025,9 @@
     "You left before your looks came, so nothing was used. Your request is kept." : {
       "comment" : "Your looks after leaving mid-way"
     },
+    "You look a long way from the camera. Closer shows your clothes better." : {
+      "comment" : "Try-on photo setup: a gentle tip"
+    },
     "You mark pieces as in the wash. Style Me skips them unless you allow one." : {
       "comment" : "Laundry tracking sheet",
       "localizations" : {
@@ -8906,6 +9038,9 @@
           }
         }
       }
+    },
+    "You may not be facing the camera. Facing it gives the best picture." : {
+      "comment" : "Try-on photo setup: a gentle tip"
     },
     "You started a look with %@ and didn’t save it." : {
       "comment" : "Make your own look: draft card, with how many pieces, as in 3 pieces"
@@ -8974,6 +9109,9 @@
     },
     "Your account, everything the app’s server keeps for it, and everything in the app on this iPhone will be deleted. Apple will ask you to confirm it’s you. This can’t be undone." : {
       "comment" : "Delete my account: the question"
+    },
+    "Your arms look close to your body. A little space between helps your clothes show." : {
+      "comment" : "Try-on photo setup: a gentle tip"
     },
     "Your changes to %@ aren’t saved yet." : {
       "comment" : "Draft card: changes to a piece, with the piece's saved name",
@@ -9134,11 +9272,29 @@
     "Your iCloud copy is deleted the next time this iPhone is online." : {
       "comment" : "Delete my account: iCloud copy pending"
     },
+    "Your iPhone can find you and cover your face before any picture is made. Nothing was sent." : {
+      "comment" : "Try-on photo setup: the check passed"
+    },
+    "Your iPhone can’t see you yet. Step into the picture." : {
+      "comment" : "Try-on camera hint"
+    },
+    "Your iPhone couldn’t be sure your face would stay hidden. Face the camera, with your face clear and well lit." : {
+      "comment" : "Try-on photo setup: the check failed"
+    },
+    "Your iPhone couldn’t check this photo" : {
+      "comment" : "Try-on photo setup: the check didn't run"
+    },
     "Your iPhone couldn’t check your photo this time. Try again in a moment." : {
       "comment" : "Try it on sheet (33a): the checks didn't run"
     },
+    "Your iPhone couldn’t find you in it. Try again with your whole body in view." : {
+      "comment" : "Try-on photo setup: the check failed"
+    },
     "Your iPhone couldn’t find you in your try-on photo, so nothing was sent. Try a photo of your whole body." : {
       "comment" : "Try it on sheet (33a): fail closed"
+    },
+    "Your iPhone couldn’t find your face. Face the camera, with your face clear and well lit." : {
+      "comment" : "Try-on photo setup: the check failed"
     },
     "Your iPhone may be out of space. Nothing was saved." : {
       "comment" : "Add a piece: after a photo couldn't be saved"
@@ -9246,6 +9402,9 @@
     "Your outfit pictures" : {
       "comment" : "Saved Looks tour, step 2 title"
     },
+    "Your outline isn’t clear enough in it. Stand against a plain wall, in good light." : {
+      "comment" : "Try-on photo setup: the check failed"
+    },
     "Your outline wasn’t clear enough to be sure, so nothing was sent. Try a photo against a plain wall, in good light." : {
       "comment" : "Try it on sheet (33a): fail closed"
     },
@@ -9262,6 +9421,9 @@
           }
         }
       }
+    },
+    "Your photo couldn’t be saved. Try again." : {
+      "comment" : "Try-on photo setup: the photo couldn't be kept"
     },
     "Your photo, without your face, on a plain backdrop" : {
       "comment" : "See what was sent: the faceless photo"
@@ -9354,6 +9516,9 @@
     },
     "Your weight is optional" : {
       "comment" : "Fit tour, step 3 title"
+    },
+    "Your whole body may not be in the photo. Pictures look best from head to toe." : {
+      "comment" : "Try-on photo setup: a gentle tip"
     },
     "Yours to remove" : {
       "comment" : "Try-on photo sheet point"

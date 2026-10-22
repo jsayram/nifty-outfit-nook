@@ -102,6 +102,12 @@ public struct NookServices: Sendable {
     public var tryOnPipeline: (any TryOnPipeline)?
     /// 33a: her yes to sending try-on photos to the image provider. Erased by Delete my data.
     public var tryOnConsent: any TryOnConsentStore = InMemoryTryOnConsentStore()
+    /// 33b: checks a photo for use as her try-on photo before she saves it (the same fail-closed
+    /// checks try-on runs). `nil` where nothing is checked: the example photo and most tests.
+    public var tryOnPhotoChecker: (any TryOnPhotoChecking)?
+    /// 33b: looks at camera frames for the try-on photo's live guidance. `nil` where there's no
+    /// live guidance.
+    public var frameAnalyzer: (any FrameAnalyzing)?
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.

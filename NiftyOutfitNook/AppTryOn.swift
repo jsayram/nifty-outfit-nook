@@ -1,3 +1,4 @@
+import Features
 import Foundation
 import Models
 import Networking
@@ -39,18 +40,52 @@ nonisolated enum AppTryOn {
         #endif
     }
 
-    /// Apple Vision, except for a debug build on the simulator running against the fake backend.
+    /// Apple Vision, except for a debug build on the simulator running against the fake backend, or
+    /// with `-fake-camera` (33b).
     @MainActor
     static func analyzer(arguments: [String]) -> any PersonAnalyzing {
         #if DEBUG && targetEnvironment(simulator)
-            if !AppGateway.settings.usesRealServices, arguments.contains("-cloud-tryon") {
+            if !AppGateway.settings.usesRealServices,
+                arguments.contains("-cloud-tryon") || arguments.contains("-fake-camera")
+            {
                 return SyntheticPersonAnalyzer()
             }
         #endif
         return VisionPersonAnalyzer()
     }
 
+    /// Phase 33b: the try-on photo's setup, with her own photos. The photo is checked on the phone
+    /// with the same checks try-on runs (`TryOnPhotoChecker`), and the camera's live hints come
+    /// from Vision on the camera's frames (`VisionFrameAnalyzer`). Both run on the phone and send
+    /// nothing, so they don't wait for the backend.
+    static func installPhotoSetup(
+        into services: inout NookServices, files: PhotoFileStore, analyzer: any PersonAnalyzing
+    ) {
+        let frames = VisionFrameAnalyzer()
+        services.frameAnalyzer = frames
+        services.tryOnPhotoChecker = TryOnPhotoChecker(
+            analyzer: analyzer, frames: frames, files: files, images: services.images)
+    }
+
     #if DEBUG
+        /// `-fake-camera [away|two]` (33b): the try-on photo's camera is a stand-in, since the
+        /// simulator has none. It shows a drawn person (`SyntheticPerson`, never a photo of anyone),
+        /// gives hints in turn, and "takes" that drawing. `away` draws her facing away and `two`
+        /// draws two people, so the check before saving can be seen refusing.
+        @MainActor
+        static func cameraMaker(arguments: [String]) -> TryOnCameraMaker? {
+            guard DebugTryOnCamera.isOn else { return nil }
+            let kind = DebugLaunchArgument.value(after: "-fake-camera", in: arguments)
+            let drawing: TryOnBitmap
+            switch kind {
+            case "away": drawing = SyntheticPerson.draw(width: 600, height: 800, facingAway: true).bitmap
+            case "two": drawing = SyntheticPerson.draw(width: 600, height: 800, centers: [0.3, 0.7]).bitmap
+            default: drawing = SyntheticPerson.draw(width: 600, height: 800).bitmap
+            }
+            guard let photo = drawing.png() else { return nil }
+            return DebugTryOnCamera.maker(photo: photo)
+        }
+
         /// `-cloud-tryon [normal|slow|fails]` against the fake backend: signs in with the fake Apple
         /// sign-in at launch (paid requests need an account) and sets how its image service behaves.
         @MainActor

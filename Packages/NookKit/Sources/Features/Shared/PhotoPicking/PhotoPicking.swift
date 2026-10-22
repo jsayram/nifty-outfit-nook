@@ -52,13 +52,40 @@ extension View {
     /// The system photo picker and the camera, with the camera's permission flow (Phase 22a).
     /// `model.start(_:)` begins; `picked` gets the photo. Nothing here reads or keeps the photo:
     /// the screen passes it to `PhotoIntake.keep`, which strips its metadata.
-    func photoPicking(_ model: PhotoPickingModel, picked: @escaping (PickedPhoto) -> Void) -> some View {
-        modifier(PhotoPickingModifier(model: model, picked: picked))
+    ///
+    /// Phase 33b: the try-on photo passes its own `camera` (the guided camera, which finishes with
+    /// the photo's bytes or `nil` when she closes it) and its own words before the permission
+    /// prompt. The permission steps and the rest are the same.
+    func photoPicking(
+        _ model: PhotoPickingModel, explainer: CameraExplainerText = .piece,
+        camera: ((_ finish: @escaping CameraFinish) -> AnyView)? = nil, picked: @escaping (PickedPhoto) -> Void
+    ) -> some View {
+        modifier(PhotoPickingModifier(model: model, explainer: explainer, camera: camera, picked: picked))
+    }
+}
+
+/// How a custom camera ends: with the photo's bytes, or `nil` when she closes it.
+typealias CameraFinish = @MainActor @Sendable (Data?) -> Void
+
+/// The app's words before iOS's camera prompt.
+struct CameraExplainerText {
+    let title: String
+    let message: String
+
+    /// Add a piece: "Take a photo of a piece".
+    static let piece = CameraExplainerText(
+        title: PhotoPickingText.explainerTitle, message: PhotoPickingText.explainerMessage)
+    /// The try-on photo (Phase 33b).
+    static var tryOn: CameraExplainerText {
+        CameraExplainerText(
+            title: TryOnSetupText.cameraExplainerTitle, message: TryOnSetupText.cameraExplainerMessage)
     }
 }
 
 private struct PhotoPickingModifier: ViewModifier {
     let model: PhotoPickingModel
+    let explainer: CameraExplainerText
+    let camera: ((_ finish: @escaping CameraFinish) -> AnyView)?
     let picked: (PickedPhoto) -> Void
 
     @Environment(\.openURL) private var openURL
@@ -84,19 +111,30 @@ private struct PhotoPickingModifier: ViewModifier {
                     })
             }
             .fullScreenCover(isPresented: binding(.camera)) {
-                CameraPicker { image in
-                    model.finish()
-                    guard let image else { return }
-                    picked(
-                        PickedPhoto(source: .camera) {
-                            guard let data = await CameraPicker.encode(image) else { throw PhotoIntakeError.unreadable }
-                            return data
-                        })
+                if let camera {
+                    camera { data in
+                        model.finish()
+                        guard let data else { return }
+                        picked(PickedPhoto(source: .camera) { data })
+                    }
+                } else {
+                    CameraPicker { image in
+                        model.finish()
+                        guard let image else { return }
+                        picked(
+                            PickedPhoto(source: .camera) {
+                                guard let data = await CameraPicker.encode(image) else {
+                                    throw PhotoIntakeError.unreadable
+                                }
+                                return data
+                            })
+                    }
+                    .ignoresSafeArea()
                 }
-                .ignoresSafeArea()
             }
             .sheet(isPresented: binding(.cameraExplainer)) {
                 CameraExplainer(
+                    text: explainer,
                     proceed: { Task { await model.continueToCamera() } },
                     notNow: { model.finish() })
             }
@@ -126,6 +164,7 @@ private struct PhotoPickingModifier: ViewModifier {
 /// (which shows iOS's prompt) and Not now (which asks nothing), so the one prompt isn't spent
 /// before she's ready (PERMISSIONS.md).
 private struct CameraExplainer: View {
+    let text: CameraExplainerText
     let proceed: () -> Void
     let notNow: () -> Void
 
@@ -138,11 +177,11 @@ private struct CameraExplainer: View {
                     .font(.system(size: 36, weight: .regular))
                     .foregroundStyle(.nook.accent)
                     .accessibilityHidden(true)
-                Text(PhotoPickingText.explainerTitle)
+                Text(text.title)
                     .nookTextStyle(.title)
                     .foregroundStyle(.nook.textPrimary)
                     .accessibilityAddTraits(.isHeader)
-                Text(PhotoPickingText.explainerMessage)
+                Text(text.message)
                     .nookTextStyle(.body)
                     .foregroundStyle(.nook.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
