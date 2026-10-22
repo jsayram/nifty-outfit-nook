@@ -54,7 +54,10 @@ env:
   # The self-hosted runner (Jose's Mac) has Xcode 27.1 at /Applications/Xcode.app instead.
   # scripts/ci-select-xcode.sh uses XCODE_APP when it exists and falls back to that, so one value
   # works on both. Which runner the macOS jobs use is the repository variable MACOS_RUNNER (see
-  # the README, "CI"): empty or unset means GitHub's `xcode-27`.
+  # the README, "CI"): empty or unset means GitHub's `xcode-27`. The UI test jobs (ui-tests and
+  # ui-ipad) read MACOS_UI_RUNNER instead, so the gate can run on the Mac while the UI parts spread
+  # over hosted VMs, one each (since 22 October 2026: one Mac runs one job at a time, so the four
+  # UI parts take longer there in wall time than on four hosted VMs, though each is faster).
   # '1' except on a manual run. A few UI tests skip themselves when it is set, because package
   # tests cover what they check or another test walks the same screens (UITestTier in
   # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
@@ -62,6 +65,10 @@ env:
   NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
   # '1' only on a manual run with cold_cache ticked (scripts/ci-local-cache.sh).
   NOOK_CI_COLD: ${{ github.event_name == 'workflow_dispatch' && inputs.cold_cache && '1' || '' }}
+  # '1' when the UI test jobs run on the self-hosted runner (MACOS_UI_RUNNER names it, and this
+  # isn't a fork's pull request, which always gets the hosted image). Then they build for
+  # themselves from the cached DerivedData, and build-and-archive uploads no build for them.
+  NOOK_UI_ON_MAC: ${{ contains(vars.MACOS_UI_RUNNER, 'self-hosted') && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && '1' || '' }}
 
 jobs:
   swift-format:
@@ -233,15 +240,17 @@ jobs:
           NOOK_TEST_PLAN: UITests
         run: |
           scripts/test.sh
-          # The UI test jobs download this build, except on the self-hosted runner: the next job
-          # builds from the cached DerivedData there, which is faster than an upload and a download.
-          if [[ "$RUNNER_ENVIRONMENT" == "github-hosted" ]]; then
+          # The UI test jobs download this build, except when they run on the self-hosted runner
+          # (NOOK_UI_ON_MAC): the next job builds from the cached DerivedData there, which is
+          # faster than an upload and a download. Uploaded from the Mac too, so that UI parts on
+          # hosted VMs don't each build for 20 minutes.
+          if [[ -z "$NOOK_UI_ON_MAC" ]]; then
             # tar keeps the apps' symlinks and permissions, which an artifact's zip doesn't.
             tar -czf "$RUNNER_TEMP/ui-test-products.tgz" -C build/DerivedData/Build/Products \
               Debug-iphonesimulator/NiftyOutfitNook.app Debug-iphonesimulator/NiftyOutfitNookUITests-Runner.app \
               $(cd build/DerivedData/Build/Products && ls -- *_UITests_*.xctestrun)
           fi
-      - if: ${{ needs.changes.outputs.ui == 'true' && runner.environment == 'github-hosted' }}
+      - if: ${{ needs.changes.outputs.ui == 'true' && env.NOOK_UI_ON_MAC == '' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-test-products
@@ -329,7 +338,7 @@ jobs:
     name: ui-tests (${{ matrix.part }})
     needs: changes
     if: needs.changes.outputs.ui == 'true'
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_UI_RUNNER || '"xcode-27"') }}
     timeout-minutes: 40
     permissions:
       contents: read
@@ -490,7 +499,7 @@ jobs:
     name: ui-tests (ui-ipad)
     needs: changes
     if: needs.changes.outputs.ipad == 'true'
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_RUNNER || '"xcode-27"') }}
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'xcode-27' || fromJSON(vars.MACOS_UI_RUNNER || '"xcode-27"') }}
     timeout-minutes: 40
     permissions:
       contents: read
