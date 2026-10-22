@@ -30,6 +30,7 @@ for devices in json.load(sys.stdin)["devices"].values():
         if "'"$prefix"'" in device["name"]:  # also "Clone 1 of nook-ci-..."
             print(device["udid"])
 ' | while read -r stale; do
+        [[ "$stale" != "${NOOK_SIM_ID:-}" ]] || continue
         echo "Deleting stale simulator $stale" >&2
         xcrun simctl shutdown "$stale" > /dev/null 2>&1 || true
         xcrun simctl delete "$stale" >&2
