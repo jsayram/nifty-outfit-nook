@@ -102,6 +102,8 @@ public struct RetryPolicy: Sendable, Equatable {
     public static let defaultTimingOverrides: [String: EndpointTiming] = [
         APIV1.style.id: EndpointTiming(attemptTimeout: .seconds(40), deadline: .seconds(45)),
         APIV1.tryOn.id: EndpointTiming(attemptTimeout: .seconds(30), deadline: .seconds(360)),
+        // A note can carry a screenshot of up to 600 KB: room to upload it on a slow connection.
+        APIV1.sendFeedback.id: EndpointTiming(attemptTimeout: .seconds(20), deadline: .seconds(45)),
     ]
 
     public init(
@@ -219,7 +221,7 @@ public final class APIClient: Sendable {
     ) async throws(APIFailure) -> Response {
         let payload: Data?
         if let body {
-            guard let data = try? APIV1.encoder().encode(body), data.count <= APIV1.maxBodyBytes else {
+            guard let data = try? APIV1.encoder().encode(body), data.count <= endpoint.maxBodyBytes else {
                 throw fail(endpoint, .rejected(code: APIV1.ErrorCode.payloadTooLarge.rawValue))
             }
             payload = data

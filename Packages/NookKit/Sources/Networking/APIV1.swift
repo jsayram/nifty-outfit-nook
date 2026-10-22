@@ -20,6 +20,9 @@ public enum APIV1 {
         public var idempotent: Bool
         /// Paid endpoints need an Idempotency-Key and an App Attest assertion (24b).
         public var paid = false
+        /// The most a request body may hold. The contract's 64 KiB, except for the one endpoint
+        /// that carries a screenshot (24d).
+        public var maxBodyBytes = APIV1.maxBodyBytes
     }
 
     public static let health = Endpoint(
@@ -47,6 +50,7 @@ public enum APIV1 {
 
     public static let endpoints = [
         health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
+        sendFeedback,
     ]
 
     // MARK: Bodies

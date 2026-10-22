@@ -14,6 +14,15 @@ nonisolated enum FeedbackComposer {
             "",
             note.message,
         ]
+        // The support queue's extras (24d). None of them is ever in a note that goes to the share sheet.
+        var extras: [String] = []
+        if let address = note.replyAddress { extras.append(FeedbackText.replyLine(address)) }
+        if let counts = note.closetCounts { extras.append(FeedbackText.closetLine(counts)) }
+        if let screenshot = note.screenshot { extras.append(FeedbackText.screenshotLine(screenshot)) }
+        if !extras.isEmpty {
+            lines.append("")
+            lines.append(contentsOf: extras)
+        }
         if let details = note.diagnostics {
             lines.append("")
             lines.append(contentsOf: FeedbackText.detailLines(details))
@@ -52,6 +61,198 @@ nonisolated enum FeedbackText {
                 localized: "Device: \(details.deviceModel)", bundle: .module,
                 comment: "Send feedback: app details line, the model identifier such as iPhone13,2"),
         ]
+    }
+
+    // MARK: The support queue (24d)
+
+    static func replyLine(_ address: String) -> String {
+        String(
+            localized: "Reply address: \(address)", bundle: .module,
+            comment: "Send feedback: a line of what's sent, the address she gave to be answered at")
+    }
+
+    static func closetLine(_ counts: FeedbackClosetCounts) -> String {
+        String(
+            localized: "Closet size: \(counts.pieces) pieces, \(counts.looks) looks, \(counts.suitcases) suitcases",
+            bundle: .module,
+            comment: "Send feedback: a line of what's sent, three numbers and no names")
+    }
+
+    static func screenshotLine(_ screenshot: FeedbackScreenshot) -> String {
+        let size = screenshot.data.count.formatted(.byteCount(style: .file))
+        return String(
+            localized: "Screenshot: 1 picture, \(size)", bundle: .module,
+            comment: "Send feedback: a line of what's sent, with the picture's size like 143 KB")
+    }
+
+    static var replyLabel: String {
+        String(localized: "Reply address", bundle: .module, comment: "Send feedback: the field's name")
+    }
+
+    static var replyPrompt: String {
+        String(localized: "you@example.com", bundle: .module, comment: "Send feedback: the empty reply field")
+    }
+
+    static var replyHint: String {
+        String(
+            localized: "We’ll use it only to answer this note. Without one, we can’t answer you.",
+            bundle: .module, comment: "Send feedback: under the reply address field")
+    }
+
+    static var replyProblem: String {
+        String(
+            localized: "That doesn’t look like an email address.", bundle: .module,
+            comment: "Send feedback: the reply address isn't an address")
+    }
+
+    static var screenshotHeader: String {
+        String(localized: "Screenshot", bundle: .module, comment: "Send feedback: above the screenshot row")
+    }
+
+    static var addScreenshot: String {
+        String(localized: "Add a screenshot", bundle: .module, comment: "Send feedback: the row that opens the picker")
+    }
+
+    static var chooseAnother: String {
+        String(localized: "Choose another", bundle: .module, comment: "Send feedback: replaces the screenshot")
+    }
+
+    static var removeScreenshot: String {
+        String(localized: "Remove", bundle: .module, comment: "Send feedback: removes the screenshot")
+    }
+
+    static var screenshotHint: String {
+        String(
+            localized:
+                "Choose it yourself, and check it first: a screenshot can show your closet. Its location and other photo details are removed before it leaves your phone.",
+            bundle: .module, comment: "Send feedback: under the screenshot row")
+    }
+
+    static var screenshotPreparing: String {
+        String(
+            localized: "Getting your screenshot ready…", bundle: .module,
+            comment: "Send feedback: while the picture is shrunk and cleaned")
+    }
+
+    static func screenshotProblem(_ problem: FeedbackScreenshotProblem) -> String {
+        switch problem {
+        case .unreadable:
+            String(
+                localized: "That picture couldn’t be read. Try another.", bundle: .module,
+                comment: "Send feedback: the screenshot isn't a picture the phone can open")
+        case .tooLarge:
+            String(
+                localized: "That picture is too large to send. Try another.", bundle: .module,
+                comment: "Send feedback: the screenshot is too big even after shrinking")
+        }
+    }
+
+    static var screenshotLabel: String {
+        String(
+            localized: "Your screenshot", bundle: .module, comment: "Send feedback: the attached picture's description")
+    }
+
+    static var closetRow: String {
+        String(localized: "Include my closet’s size", bundle: .module, comment: "Send feedback: the switch")
+    }
+
+    static var closetRowOff: String {
+        String(
+            localized: "Off unless you turn it on.", bundle: .module, comment: "Send feedback: under the closet switch")
+    }
+
+    static var closetRowOn: String {
+        String(
+            localized: "How many pieces, looks and suitcases. Never their names or photos.", bundle: .module,
+            comment: "Send feedback: under the closet switch while it's on")
+    }
+
+    static var queueNote: String {
+        String(
+            localized: "This note goes to the app’s private support inbox. Only what you see here is sent.",
+            bundle: .module, comment: "Send feedback: under the preview when it goes to the support inbox")
+    }
+
+    static var queueHowItGoes: String {
+        String(
+            localized:
+                "Send goes straight to the support inbox. If it can’t go now, your note stays here and you can tap Send again.",
+            bundle: .module, comment: "Send feedback: under the button when it goes to the support inbox")
+    }
+
+    static var sending: String {
+        String(localized: "Sending…", bundle: .module, comment: "Send feedback: the button while it sends")
+    }
+
+    static var supportPageRow: String {
+        String(localized: "Support page", bundle: .module, comment: "Send feedback: a link row")
+    }
+
+    static var supportPageDetail: String {
+        String(
+            localized: "Other ways to reach us, on the website.", bundle: .module,
+            comment: "Send feedback: under the support page row")
+    }
+
+    static var sentAnnouncement: String {
+        String(
+            localized: "Your note was sent.", bundle: .module, comment: "Spoken after a note reached the support inbox")
+    }
+
+    static var thanksQueueMessage: String {
+        String(
+            localized: "Your note reached the support inbox. This is what it said.", bundle: .module,
+            comment: "Send feedback: after sending to the support inbox")
+    }
+
+    static func referenceLine(_ reference: String) -> String {
+        String(
+            localized: "Reference: \(reference)", bundle: .module,
+            comment: "Send feedback: after sending, the note's reference to quote if she writes again")
+    }
+
+    static var noReplyAddressNote: String {
+        String(
+            localized: "You didn’t give a reply address, so we can’t answer this note.", bundle: .module,
+            comment: "Send feedback: after sending without a reply address")
+    }
+
+    static func sendProblem(_ problem: FeedbackSendProblem, hasScreenshot: Bool) -> String {
+        switch problem {
+        case .offline:
+            String(
+                localized: "No connection. Your note is saved here. Tap Send again when you’re back online.",
+                bundle: .module, comment: "Send feedback: no connection")
+        case .timedOut:
+            String(
+                localized: "That took too long. Your note is saved here. Tap Send again to try once more.",
+                bundle: .module, comment: "Send feedback: the server didn't answer in time")
+        case .signedOut:
+            String(
+                localized: "You’re not signed in any more. Your note is saved here.", bundle: .module,
+                comment: "Send feedback: the session ended")
+        case .rateLimited(let seconds):
+            String(
+                localized: "You’ve sent a lot of notes. Try again in \(CloudLimitText.waitText(seconds)).",
+                bundle: .module, comment: "Send feedback: too many notes; the argument is a wait like '5 minutes'")
+        case .unavailable:
+            String(
+                localized:
+                    "Sending notes is paused for now. Your note is saved here. Try again later, or use the support page.",
+                bundle: .module, comment: "Send feedback: the support inbox is paused or busy")
+        case .screenshotRefused where hasScreenshot:
+            String(
+                localized: "The screenshot couldn’t be used. Remove it or choose another, then send again.",
+                bundle: .module, comment: "Send feedback: the server refused the picture")
+        case .updateRequired:
+            String(
+                localized: "Update the app to send notes.", bundle: .module,
+                comment: "Send feedback: this version is too old for the server")
+        case .screenshotRefused, .serverError, .rejected:
+            String(
+                localized: "Something went wrong on our side. Your note is saved here. Try again later.",
+                bundle: .module, comment: "Send feedback: the server failed")
+        }
     }
 
     static var kindHeader: String {
@@ -95,6 +296,7 @@ nonisolated enum FeedbackText {
             String(
                 localized: "Keep it to \(maximum) characters or fewer.", bundle: .module,
                 comment: "Send feedback: the note is too long")
+        case .badReplyAddress: replyProblem
         }
     }
 

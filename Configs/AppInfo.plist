@@ -17,6 +17,9 @@
 	<string>$(CLERK_PUBLISHABLE_KEY)</string>
 	<key>NookAPIBaseURL</key>
 	<string>$(NOOK_API_BASE_URL)</string>
+	<!-- The website's support page (Phase 24d), from NOOK_SUPPORT_URL in Configs/Base.xcconfig. -->
+	<key>NookSupportURL</key>
+	<string>$(NOOK_SUPPORT_URL)</string>
 	<!-- Live weather (Phase 29): location is always approximate, never full accuracy. The switch
 	     for WeatherKit comes from NOOK_WEATHERKIT in Configs/Base.xcconfig. -->
 	<key>NSLocationDefaultAccuracyReduced</key>

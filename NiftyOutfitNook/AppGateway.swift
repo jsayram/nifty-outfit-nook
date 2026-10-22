@@ -3,6 +3,7 @@ import Features
 import Foundation
 import Models
 import Networking
+import Services
 
 /// The app's one gateway to the backend (Phase 24a). With a Clerk publishable key and the backend
 /// URL set (Configs/Secrets.xcconfig, docs/backend-switch.md) it signs in through Clerk and calls
@@ -33,9 +34,23 @@ enum AppGateway {
 
     static let account: any AccountService = real?.account ?? fake?.account ?? UnavailableAccountService()
 
+    /// Send feedback's support queue (Phase 24d): the real backend, or the fake one. It takes notes
+    /// only while she's signed in; signed out, Send feedback uses the share sheet.
+    static let feedback: any FeedbackService = real?.feedback ?? fake?.feedback ?? UnavailableFeedbackService()
+
+    /// The website's support page, from `NOOK_SUPPORT_URL` (a placeholder address until 35b).
+    static let supportLinks = SupportLinks(info: Bundle.main.infoDictionary ?? [:])
+
     /// Paid cloud work (Phase 24b): App Attest on a device with the real backend; the stand-in
     /// attester with the fake backend.
     static let paid: any PaidActionService = real?.paid ?? fake?.paid ?? UnavailablePaidActionService()
+
+    /// Send feedback's queue, its screenshot maker and the support page (Phase 24d).
+    static func installSupport(into services: inout NookServices) {
+        services.feedback = feedback
+        services.screenshots = ScreenshotPreparer()
+        services.supportLinks = supportLinks
+    }
 
     #if DEBUG
         /// The fake backend's behaviours, for the gateway screen. Nil on the real services.
@@ -75,6 +90,9 @@ enum AppGateway {
             guard arguments.contains("-fake-signed-in"), let fake else { return }
             let report = FileManager.default.temporaryDirectory.appending(path: "fake-backend-deletions.json")
             fake.backend.observeDeletions { data in try? data.write(to: report, options: .atomic) }
+            // 24d: what the support queue received, for a check from outside the app.
+            let support = FileManager.default.temporaryDirectory.appending(path: "fake-backend-support.json")
+            fake.backend.observeSupport { data in try? data.write(to: support, options: .atomic) }
             _ = try? await fake.account.signIn()
             _ = try? await fake.paid.run(
                 .style(.sample(.full, note: "debug")), idempotencyKey: IdempotencyKey.make())

@@ -9131,6 +9131,108 @@
         }
       }
     },
+    "Reply address: %@" : {
+      "comment" : "Send feedback: a line of what's sent, the address she gave to be answered at"
+    },
+    "Closet size: %lld pieces, %lld looks, %lld suitcases" : {
+      "comment" : "Send feedback: a line of what's sent, three numbers and no names"
+    },
+    "Screenshot: 1 picture, %@" : {
+      "comment" : "Send feedback: a line of what's sent, with the picture's size like 143 KB"
+    },
+    "Reply address" : {
+      "comment" : "Send feedback: the field's name"
+    },
+    "you@example.com" : {
+      "comment" : "Send feedback: the empty reply field"
+    },
+    "We’ll use it only to answer this note. Without one, we can’t answer you." : {
+      "comment" : "Send feedback: under the reply address field"
+    },
+    "That doesn’t look like an email address." : {
+      "comment" : "Send feedback: the reply address isn't an address"
+    },
+    "Screenshot" : {
+      "comment" : "Send feedback: above the screenshot row"
+    },
+    "Add a screenshot" : {
+      "comment" : "Send feedback: the row that opens the picker"
+    },
+    "Remove" : {
+      "comment" : "Send feedback: removes the screenshot"
+    },
+    "Choose it yourself, and check it first: a screenshot can show your closet. Its location and other photo details are removed before it leaves your phone." : {
+      "comment" : "Send feedback: under the screenshot row"
+    },
+    "Getting your screenshot ready…" : {
+      "comment" : "Send feedback: while the picture is shrunk and cleaned"
+    },
+    "That picture couldn’t be read. Try another." : {
+      "comment" : "Send feedback: the screenshot isn't a picture the phone can open"
+    },
+    "That picture is too large to send. Try another." : {
+      "comment" : "Send feedback: the screenshot is too big even after shrinking"
+    },
+    "Your screenshot" : {
+      "comment" : "Send feedback: the attached picture's description"
+    },
+    "Include my closet’s size" : {
+      "comment" : "Send feedback: the switch"
+    },
+    "How many pieces, looks and suitcases. Never their names or photos." : {
+      "comment" : "Send feedback: under the closet switch while it's on"
+    },
+    "This note goes to the app’s private support inbox. Only what you see here is sent." : {
+      "comment" : "Send feedback: under the preview when it goes to the support inbox"
+    },
+    "Send goes straight to the support inbox. If it can’t go now, your note stays here and you can tap Send again." : {
+      "comment" : "Send feedback: under the button when it goes to the support inbox"
+    },
+    "Sending…" : {
+      "comment" : "Send feedback: the button while it sends"
+    },
+    "Support page" : {
+      "comment" : "Send feedback: a link row"
+    },
+    "Other ways to reach us, on the website." : {
+      "comment" : "Send feedback: under the support page row"
+    },
+    "Your note was sent." : {
+      "comment" : "Spoken after a note reached the support inbox"
+    },
+    "Your note reached the support inbox. This is what it said." : {
+      "comment" : "Send feedback: after sending to the support inbox"
+    },
+    "Reference: %@" : {
+      "comment" : "Send feedback: after sending, the note's reference to quote if she writes again"
+    },
+    "You didn’t give a reply address, so we can’t answer this note." : {
+      "comment" : "Send feedback: after sending without a reply address"
+    },
+    "No connection. Your note is saved here. Tap Send again when you’re back online." : {
+      "comment" : "Send feedback: no connection"
+    },
+    "That took too long. Your note is saved here. Tap Send again to try once more." : {
+      "comment" : "Send feedback: the server didn't answer in time"
+    },
+    "You’re not signed in any more. Your note is saved here." : {
+      "comment" : "Send feedback: the session ended"
+    },
+    "You’ve sent a lot of notes. Try again in %@." : {
+      "comment" : "Send feedback: too many notes; the argument is a wait like '5 minutes'"
+    },
+    "Sending notes is paused for now. Your note is saved here. Try again later, or use the support page." : {
+      "comment" : "Send feedback: the support inbox is paused or busy"
+    },
+    "The screenshot couldn’t be used. Remove it or choose another, then send again." : {
+      "comment" : "Send feedback: the server refused the picture"
+    },
+    "Update the app to send notes." : {
+      "comment" : "Send feedback: this version is too old for the server"
+    },
+    "Something went wrong on our side. Your note is saved here. Try again later." : {
+      "comment" : "Send feedback: the server failed"
+    },
     "This is taking a little longer. It keeps going if you leave." : {
       "comment" : "Your looks while a cloud styling job is late and still being checked"
     },

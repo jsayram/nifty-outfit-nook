@@ -39,6 +39,10 @@ Delete my account works on the fakes. On the real backend it needs, in the backe
 
 With the real services configured, Style Me uses the cloud stylist ([decision 0008](decisions/0008-cloud-stylist.md)); nothing in the app changes when the backend switches from its fake to Anthropic. On the backend (its README, "How to switch the stylist to Anthropic"): a result key (`NOOK_RESULT_KEY`), then `ANTHROPIC_API_KEY`, both set by Jose in Convex and never in a file. Like every paid endpoint it needs App Attest on a device first. On the simulator, `-cloud-stylist` runs it against the fake backend.
 
+## Support and feedback (Phase 24d)
+
+Send feedback goes to the support queue once she is signed in on the real backend ([decision 0009](decisions/0009-support-and-feedback.md)); nothing in the app changes when the backend switches. It needs no App Attest, on purpose. On the backend (its README, "Support and feedback (24d)"): nothing to configure for notes to arrive. Jose reads them in the Convex dashboard or with `npx convex run support:list`. Optional: `NOOK_SUPPORT_NOTIFY_MODE` for the email hook (only a mock exists), and `NOOK_SUPPORT_INTAKE=closed` to close intake in an emergency. The website's support page address comes from `NOOK_SUPPORT_URL` in `Configs/Base.xcconfig` (a placeholder until the page is published); the App Store's Support URL should be the same address.
+
 ## Before production
 
 - Decision 0005's open points: the Clerk Keychain accessibility class needs Jose's written exception first.
