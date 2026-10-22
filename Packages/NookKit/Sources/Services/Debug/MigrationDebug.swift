@@ -160,13 +160,30 @@
                 let rows = try StoreSQLite.rowsWithDates(of: location.storeURL)
                 try writeVersion1(rows, to: temporary)
                 // One file with no log beside it, so it can replace the store file by file.
-                try StoreSQLite.checkpoint(temporary)
+                try checkpointOnceClosed(temporary)
                 for file in location.storeFiles { try? FileManager.default.removeItem(at: file) }
                 try FileManager.default.moveItem(at: temporary, to: location.storeURL)
                 location.protectStoreFiles()
                 return .written(records: rows.count)
             } catch {
                 return .failed
+            }
+        }
+
+        /// SwiftData closes a container's SQLite connection a little after the container goes,
+        /// not as it goes (tens of milliseconds on a busy machine), and leaving WAL mode needs
+        /// every other connection closed: until then SQLite answers SQLITE_BUSY, and doesn't wait
+        /// on a busy timeout for it. So this tries again until the file is free, up to 5 seconds.
+        private static func checkpointOnceClosed(_ url: URL) throws {
+            let clock = ContinuousClock()
+            let deadline = clock.now + .seconds(5)
+            while true {
+                do {
+                    return try StoreSQLite.checkpoint(url)
+                } catch {
+                    if clock.now >= deadline { throw error }
+                    Thread.sleep(forTimeInterval: 0.02)
+                }
             }
         }
 
