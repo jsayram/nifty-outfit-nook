@@ -46,29 +46,7 @@ public struct PhoneTryOn: TryOnPipeline {
             let bitmap = TryOnBitmap.decode(original, maxPixelSize: Self.workingSize)
         else { throw .photoUnreadable }
 
-        let analysis: PersonAnalysis
-        do {
-            analysis = try await analyzer.analyze(bitmap)
-        } catch {
-            throw .checksUnavailable
-        }
-        let portrait = try HeadMasking.mask(bitmap, analysis: analysis)
-
-        // The check that matters: no face can be found in what would be sent, both in the pixels
-        // and in the JPEG made from them.
-        guard
-            let personJPEG = Self.jpeg(portrait.faceless, quality: Self.personQuality, limit: TryOnCall.personMaxBytes),
-            let sentPixels = TryOnBitmap.decode(personJPEG, maxPixelSize: Self.workingSize)
-        else { throw .notSaved }
-        do {
-            guard try await analyzer.faces(in: portrait.faceless).isEmpty,
-                try await analyzer.faces(in: sentPixels).isEmpty
-            else { throw TryOnPrepareProblem.faceStillVisible }
-        } catch let problem as TryOnPrepareProblem {
-            throw problem
-        } catch {
-            throw .checksUnavailable
-        }
+        let (portrait, personJPEG) = try await Self.facelessPortrait(of: bitmap, using: analyzer)
 
         var garments: [(Garment, Data)] = []
         for piece in pieces where garments.count < TryOnCall.maximumGarments {
@@ -105,6 +83,38 @@ public struct PhoneTryOn: TryOnPipeline {
         return TryOnUpload(
             sent: TryOnSent(person: person, garments: sentGarments), work: work, geometry: geometry,
             contextRevision: TryOnCall.revision(person: personJPEG, garments: garments.map(\.1)))
+    }
+
+    /// Her outline, face and pose, then her head and hair filled with flat grey and her room replaced
+    /// by the studio backdrop, then the check that matters: no face can be found in what would be
+    /// sent, both in the pixels and in the JPEG made from them. Throws instead of going on when any
+    /// of it fails. `prepare` and the photo check at setup (`TryOnPhotoChecker`) both use this, so
+    /// a photo she is told is fine is one try-on will accept.
+    static func facelessPortrait(of bitmap: TryOnBitmap, using analyzer: any PersonAnalyzing)
+        async throws(TryOnPrepareProblem) -> (portrait: MaskedPortrait, jpeg: Data)
+    {
+        let analysis: PersonAnalysis
+        do {
+            analysis = try await analyzer.analyze(bitmap)
+        } catch {
+            throw .checksUnavailable
+        }
+        let portrait = try HeadMasking.mask(bitmap, analysis: analysis)
+
+        guard
+            let personJPEG = jpeg(portrait.faceless, quality: personQuality, limit: TryOnCall.personMaxBytes),
+            let sentPixels = TryOnBitmap.decode(personJPEG, maxPixelSize: workingSize)
+        else { throw .notSaved }
+        do {
+            guard try await analyzer.faces(in: portrait.faceless).isEmpty,
+                try await analyzer.faces(in: sentPixels).isEmpty
+            else { throw TryOnPrepareProblem.faceStillVisible }
+        } catch let problem as TryOnPrepareProblem {
+            throw problem
+        } catch {
+            throw .checksUnavailable
+        }
+        return (portrait, personJPEG)
     }
 
     /// A garment's picture to send: its cutout on white when it has one (the clearest view of the

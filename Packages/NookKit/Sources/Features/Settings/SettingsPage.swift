@@ -212,7 +212,7 @@ struct SettingsSwitchRow: View {
 }
 
 /// The system switch as a still drawing, for snapshot tests.
-private struct DrawnSwitch: View {
+struct DrawnSwitch: View {
     let isOn: Bool
 
     var body: some View {

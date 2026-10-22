@@ -9,10 +9,13 @@ import UIKit
 /// sheet explains what it's for and how it's kept. She can add it, change it and remove it, and
 /// removing never touches the try-on pictures she saved.
 ///
-/// With real photos (Phase 22a, `ownPhoto` set) Choose from Photos opens the system picker,
-/// which needs no permission, and the app keeps its own copy without the location. Otherwise
-/// (Stage A, the debug sample closet and the screen tests) it offers an example in its place: a
-/// sample photo of a woman standing, AI-generated and not her. Either is hidden in the app
+/// With real photos (Phase 22a, `ownPhoto` set) she can take the photo with the app's own camera
+/// (Phase 33b: an outline to stand in, live hints, a timer) or choose one from Photos, which needs
+/// no permission. The app keeps its own copy without the location. Either way the photo is checked
+/// on the phone with the same fail-closed checks try-on runs, and she sees what it found before it
+/// becomes her try-on photo, so a try-on never fails later for a reason she could have fixed.
+/// Otherwise (Stage A, the debug sample closet and the screen tests) it offers an example in its
+/// place: a sample photo of a woman standing, AI-generated and not her. Either is hidden in the app
 /// switcher.
 struct TryOnPhotoSheet: View {
     let hasPhoto: Bool
@@ -29,10 +32,17 @@ struct TryOnPhotoSheet: View {
     @State private var isSaving = false
     @State private var didFail = false
     @AccessibilityFocusState private var focusedStep: Step?
-    @State private var picking = PhotoPickingModel()
+    @State private var picking: PhotoPickingModel
+    /// 33b: the photo she took or picked, checked, and not yet her try-on photo.
+    @State private var candidate: TryOnPhotoCandidate?
+    @Environment(\.tryOnCameraMaker) private var cameraMaker
 
     enum Step: Hashable {
         case main
+        /// 33b: the phone is checking the photo she took or picked.
+        case checking
+        /// 33b: what the check found, with Use this photo or another try.
+        case review
         /// "Choose example photo": what she'd pick, as an example.
         case example
         /// "Remove photo?"
@@ -40,20 +50,30 @@ struct TryOnPhotoSheet: View {
     }
 
     init(
-        hasPhoto: Bool, step: Step = .main, ownPhoto: OwnTryOnPhoto? = nil, useExample: @escaping () async -> Bool,
-        remove: @escaping () async -> Bool
+        hasPhoto: Bool, step: Step = .main, ownPhoto: OwnTryOnPhoto? = nil, candidate: TryOnPhotoCandidate? = nil,
+        useExample: @escaping () async -> Bool, remove: @escaping () async -> Bool
     ) {
         self.hasPhoto = hasPhoto
         self.ownPhoto = ownPhoto
         self.useExample = useExample
         self.remove = remove
         _step = State(initialValue: step)
+        _candidate = State(initialValue: candidate)
+        #if DEBUG
+            // `-fake-camera` (debug builds): the simulator has no camera, so the app's own camera
+            // screen opens with a stand-in picture.
+            _picking = State(initialValue: PhotoPickingModel(access: FakeTryOnCamera.access ?? .system))
+        #else
+            _picking = State(initialValue: PhotoPickingModel())
+        #endif
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: NookSpacing.large) {
             switch step {
             case .main: main
+            case .checking: checking
+            case .review: review
             case .example: example
             case .remove: removal
             }
@@ -65,9 +85,25 @@ struct TryOnPhotoSheet: View {
             didFail = false
             focusedStep = new
         }
-        .photoPicking(picking) { picked in
-            guard let ownPhoto else { return }
-            run { await ownPhoto.choose(picked) }
+        .photoPicking(picking, explainer: .tryOn, camera: cameraContent) { picked in
+            receive(picked)
+        }
+        .onDisappear {
+            // A photo she hasn't used goes, as it would if she cancelled.
+            if let candidate, let ownPhoto { Task { await ownPhoto.discard(candidate) } }
+        }
+    }
+
+    /// The guided camera, in place of the system's.
+    private var cameraContent: ((_ finish: @escaping CameraFinish) -> AnyView)? {
+        guard let ownPhoto else { return nil }
+        let frames = ownPhoto.frames
+        let maker = cameraMaker
+        return { finish in
+            AnyView(
+                TryOnCaptureScreen(
+                    makeModel: { TryOnCaptureModel(source: maker.make(frames)) }, photoTaken: { finish($0) },
+                    close: { finish(nil) }))
         }
     }
 
@@ -97,23 +133,28 @@ struct TryOnPhotoSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             }
             if ownPhoto != nil {
-                Text(
-                    "Pick a clear, full-length photo of you standing naturally in fitted clothes, in good light.",
-                    bundle: .module, comment: "Try-on photo sheet: what makes a good photo, with real photos"
-                )
-                .nookTextStyle(.note)
-                .foregroundStyle(.nook.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(TryOnSetupText.whatHelps)
+                    .nookTextStyle(.note)
+                    .foregroundStyle(.nook.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(TryOnSetupText.anyHair)
+                    .nookTextStyle(.note)
+                    .foregroundStyle(.nook.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             privacyPoints
             VStack(spacing: NookSpacing.small) {
                 if ownPhoto != nil {
                     NookButton(
-                        hasPhoto
-                            ? String(localized: "Change photo", bundle: .module, comment: "Try-on photo sheet button")
-                            : String(
-                                localized: "Choose from Photos", bundle: .module, comment: "Try-on photo sheet button"),
-                        systemImage: "photo", isLoading: isSaving, fillsWidth: true
+                        hasPhoto ? TryOnSetupText.takeNewPhoto : TryOnSetupText.takePhoto, systemImage: "camera",
+                        isLoading: isSaving, fillsWidth: true
+                    ) {
+                        picking.start(.camera)
+                    }
+                    .accessibilityIdentifier("tryOnPhoto.take")
+                    NookButton(
+                        hasPhoto ? TryOnSetupText.chooseDifferent : TryOnSetupText.chooseFromPhotos,
+                        systemImage: "photo", kind: .soft, isLoading: isSaving, fillsWidth: true
                     ) {
                         picking.start(.library)
                     }
@@ -152,9 +193,7 @@ struct TryOnPhotoSheet: View {
             }
             Group {
                 if ownPhoto != nil {
-                    Text(
-                        "The app only sees the photo you pick. It keeps its own copy on this iPhone, without the location, and nothing is uploaded.",
-                        bundle: .module, comment: "Try-on photo sheet: note with real photos (Phase 22a)")
+                    Text(TryOnSetupText.ownNote)
                 } else {
                     Text(
                         "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded.",
@@ -215,6 +254,130 @@ struct TryOnPhotoSheet: View {
                 }
             }
         }
+    }
+
+    /// 33b: the phone is checking the photo.
+    private var checking: some View {
+        VStack(spacing: NookSpacing.large) {
+            lead(TryOnSetupText.checking, step: .checking)
+            NookLoadingIndicator(label: TryOnSetupText.checking)
+            Text(TryOnSetupText.checkingNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityIdentifier("tryOnPhoto.checking")
+    }
+
+    /// 33b: what the check found, before the photo becomes her try-on photo.
+    @ViewBuilder
+    private var review: some View {
+        if let candidate {
+            VStack(alignment: .leading, spacing: NookSpacing.large) {
+                switch candidate.check {
+                case .fine(let tips):
+                    lead(TryOnSetupText.fineTitle, step: .review)
+                    OwnPhotoView(photo: candidate.photo)
+                        .frame(maxWidth: .infinity)
+                    Text(TryOnSetupText.fineMessage)
+                        .nookTextStyle(.body)
+                        .foregroundStyle(.nook.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    tipsList(tips)
+                    VStack(spacing: NookSpacing.small) {
+                        NookButton(
+                            TryOnSetupText.useThisPhoto, systemImage: "checkmark", isLoading: isSaving, fillsWidth: true
+                        ) {
+                            useCandidate()
+                        }
+                        .accessibilityIdentifier("tryOnPhoto.use")
+                        anotherPhotoButtons(for: candidate, kind: .soft)
+                    }
+                case .problem(let problem):
+                    lead(TryOnSetupText.problemTitle(problem), step: .review)
+                    OwnPhotoView(photo: candidate.photo)
+                        .frame(maxWidth: .infinity)
+                    Text(TryOnSetupText.problemMessage(problem))
+                        .nookTextStyle(.body)
+                        .foregroundStyle(.nook.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(spacing: NookSpacing.small) {
+                        if problem == .checksUnavailable {
+                            // The checks didn't run (Vision isn't there). Try-on checks again before
+                            // anything is sent, so keeping the photo is safe.
+                            NookButton(
+                                TryOnSetupText.checkAgain, systemImage: "arrow.clockwise", isLoading: isSaving,
+                                fillsWidth: true
+                            ) {
+                                checkAgain()
+                            }
+                            .accessibilityIdentifier("tryOnPhoto.checkAgain")
+                            NookButton(TryOnSetupText.keepAnyway, kind: .soft, fillsWidth: true) {
+                                useCandidate()
+                            }
+                            .accessibilityIdentifier("tryOnPhoto.keepAnyway")
+                        } else {
+                            anotherPhotoButtons(for: candidate, kind: .primary)
+                        }
+                        if problem == .checksUnavailable {
+                            anotherPhotoButtons(for: candidate, kind: .soft)
+                        }
+                    }
+                    Text(TryOnSetupText.problemFooter)
+                        .nookTextStyle(.note)
+                        .foregroundStyle(.nook.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    /// Gentle tips from the framing rules, then the standing note about hats, scarves and
+    /// turtlenecks. Never about her hair.
+    private func tipsList(_ tips: [FramingAdvice]) -> some View {
+        let lines = tips.compactMap(TryOnSetupText.tip)
+        return VStack(alignment: .leading, spacing: NookSpacing.small) {
+            if !lines.isEmpty {
+                Text(TryOnSetupText.tipsTitle)
+                    .nookTextStyle(.label)
+                    .foregroundStyle(.nook.textPrimary)
+                ForEach(lines, id: \.self) { line in
+                    Text(line)
+                        .nookTextStyle(.note)
+                        .foregroundStyle(.nook.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Text(TryOnSetupText.hatsNote)
+                .nookTextStyle(.note)
+                .foregroundStyle(.nook.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("tryOnPhoto.tips")
+    }
+
+    /// Take another (from the camera) or choose another (from Photos), and Cancel.
+    @ViewBuilder
+    private func anotherPhotoButtons(for candidate: TryOnPhotoCandidate, kind: NookButtonKind) -> some View {
+        if candidate.source == .camera {
+            NookButton(TryOnSetupText.takeAnother, systemImage: "camera", kind: kind, fillsWidth: true) {
+                letGo(then: .camera)
+            }
+            .accessibilityIdentifier("tryOnPhoto.another")
+        } else {
+            NookButton(TryOnSetupText.chooseAnother, systemImage: "photo", kind: kind, fillsWidth: true) {
+                letGo(then: .library)
+            }
+            .accessibilityIdentifier("tryOnPhoto.another")
+        }
+        NookButton(
+            hasPhoto ? TryOnSetupText.keepCurrent : TryOnSetupText.cancel, kind: .soft, fillsWidth: true
+        ) {
+            letGo(then: nil)
+        }
+        .accessibilityIdentifier("tryOnPhoto.cancelCandidate")
     }
 
     // MARK: Parts
@@ -281,6 +444,55 @@ struct TryOnPhotoSheet: View {
             line
         } else {
             line.accessibilityFocused($focusedStep, equals: step)
+        }
+    }
+
+    /// A photo from the camera or Photos: kept without its metadata and checked on the phone, then
+    /// shown to her. Nothing is her try-on photo until she says so.
+    private func receive(_ picked: PickedPhoto) {
+        guard let ownPhoto else { return }
+        step = .checking
+        Task {
+            guard let found = await ownPhoto.prepare(picked) else {
+                step = .main
+                didFail = true
+                return
+            }
+            candidate = found
+            step = .review
+        }
+    }
+
+    private func useCandidate() {
+        guard let ownPhoto, let candidate else { return }
+        Task {
+            isSaving = true
+            let saved = await ownPhoto.save(candidate)
+            isSaving = false
+            self.candidate = nil
+            step = .main
+            didFail = !saved
+        }
+    }
+
+    private func checkAgain() {
+        guard let ownPhoto, var current = candidate else { return }
+        Task {
+            isSaving = true
+            current.check = await ownPhoto.check(current.photo)
+            candidate = current
+            isSaving = false
+        }
+    }
+
+    /// Lets the photo go (its copy is deleted), then opens the camera or Photos again, or goes back.
+    private func letGo(then source: PhotoSource?) {
+        guard let ownPhoto, let current = candidate else { return }
+        candidate = nil
+        step = .main
+        Task {
+            await ownPhoto.discard(current)
+            if let source { picking.start(source) }
         }
     }
 
@@ -360,17 +572,26 @@ struct ExamplePhoto: View {
     }
 }
 
-/// Her own try-on photo and how to change it, when real photos are on (Phase 22a).
+/// Her own try-on photo and how to change it, when real photos are on (Phase 22a, 33b).
 struct OwnTryOnPhoto {
-    /// Her photo, or `nil` before she picks one.
+    /// Her photo, or `nil` before she has one.
     let photo: PhotoReference?
-    /// Keeps the photo she picked and makes it her try-on photo. False when it wasn't saved.
-    let choose: (PickedPhoto) async -> Bool
+    /// Looks at the camera's frames for the live hints, or `nil` for none.
+    let frames: (any FrameAnalyzing)?
+    /// Keeps the photo she took or picked (without its metadata) and checks it. `nil` when it
+    /// couldn't be read or kept.
+    let prepare: (PickedPhoto) async -> TryOnPhotoCandidate?
+    /// Checks a kept photo again.
+    let check: (PhotoReference) async -> TryOnPhotoCheck
+    /// Makes the photo her try-on photo. False when it wasn't saved (and its copy is gone).
+    let save: (TryOnPhotoCandidate) async -> Bool
+    /// Deletes a photo she didn't use.
+    let discard: (TryOnPhotoCandidate) async -> Void
 }
 
 /// Her own try-on photo, 9:16 like the example, hidden in the app switcher. Sensitive
 /// (DATA_MAP.md): it's only drawn here, from the photo files on the iPhone.
-private struct OwnPhotoView: View {
+struct OwnPhotoView: View {
     let photo: PhotoReference
 
     @Environment(\.garmentImages) private var loader

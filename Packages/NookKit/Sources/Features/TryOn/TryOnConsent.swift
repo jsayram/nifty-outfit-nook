@@ -27,7 +27,7 @@ nonisolated enum TryOnConsentText {
     static var comesBack: String {
         String(
             localized:
-                "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps neither.",
+                "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them.",
             bundle: .module, comment: "Try-on consent")
     }
 

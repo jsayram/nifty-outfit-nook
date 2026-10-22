@@ -7,8 +7,9 @@
 # debug-only launch arguments (-catalog, -cutout-bench, Phase 16a's -tour, Phase 17's -onboarding,
 # -toasts-stay and -animations, Phase 20a's -fixtures, the device checks' -device-checks,
 # -make-old-store, -migration-kill-at and -migration-pause-at, and 33a's -seed-tryon and
-# -cloud-tryon) aren't in it. 33a: nor is the drawn stand-in person the simulator uses
-# (SyntheticPerson). Phase 32b added the later debug screens and switches: the gateway and limits
+# -cloud-tryon, and 33b's -fake-camera) aren't in it. 33a: nor is the drawn stand-in person the
+# simulator uses (SyntheticPerson), nor 33b's stand-in camera (FakeTryOnCamera).
+# Phase 32b added the later debug screens and switches: the gateway and limits
 # labs, the diagnostics lab, the fake sign-in, the cloud stylist against the fake backend, the
 # seeded photo closet, the sample feedback screenshot, frame stats and the weather test switches.
 #
@@ -52,7 +53,7 @@ for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleS
     DemoCloset LargeCloset SampleWardrobe SamplePhotoGarments SyntheticGarmentPhotos FixtureDrafts SamplePhotoProvider \
     MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson \
     GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot \
-    FakeGateway FakeBackend FakeAuthProvider FakeDeviceAttester FakeStylist FakeTryOn FakeToken; do
+    FakeGateway FakeBackend FakeAuthProvider FakeDeviceAttester FakeStylist FakeTryOn FakeToken FakeTryOnCamera DebugTryOnCamera; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
@@ -62,7 +63,7 @@ for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animation
     -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon \
     -gateway-lab -limits-lab -diagnostics-lab -diagnostics-sample-reports -fake-signed-in -cloud-stylist \
     -seed-photo-closet -feedback-sample-screenshot -frame-stats -weather-cities -weather-location \
-    -weather-settings-memory; do
+    -weather-settings-memory -fake-camera; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1

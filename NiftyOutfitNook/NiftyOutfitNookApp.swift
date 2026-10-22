@@ -55,6 +55,11 @@ struct NiftyOutfitNookApp: App {
         WindowGroup {
             root
                 .environment(\.connection, connection)
+                #if DEBUG
+                    // `-fake-camera` (33b): the try-on photo's camera is a drawn stand-in.
+                    .environment(
+                        \.tryOnCameraMaker, AppTryOn.cameraMaker(arguments: ProcessInfo.processInfo.arguments) ?? .live)
+                #endif
                 .task { await connection.follow(connectivitySource) }
                 // 30a: the subscription hint on paid requests follows StoreKit.
                 .task { await AppSubscriptions.follow() }
@@ -222,6 +227,8 @@ struct NiftyOutfitNookApp: App {
                     AppStylist.install(into: &services, paid: cloudStylist)
                     // 33a: try-on pictures, made from her own photo files.
                     AppTryOn.install(into: &services, paid: cloudTryOn, files: photos, analyzer: tryOnAnalyzer)
+                    // 33b: the try-on photo is checked on the phone before she saves it.
+                    AppTryOn.installPhotoSetup(into: &services, files: photos, analyzer: tryOnAnalyzer)
                     // 27c: AI jobs and Ask stylist conversations, kept in the store.
                     services.aiJobs = keptJobs
                     services.stylistThreads = storage.stylistThreads

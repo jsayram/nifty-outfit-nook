@@ -34,7 +34,7 @@ INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPort
 // Phase 22a: the camera, for garment photos (closet/compliance/PERMISSIONS.md). Picking from
 // Photos uses the system picker and needs no key. English is the only language, so there's no
 // InfoPlist.xcstrings yet; add one, with this string, with the first translation.
-INFOPLIST_KEY_NSCameraUsageDescription = Take photos of your clothes to add them to your closet.
+INFOPLIST_KEY_NSCameraUsageDescription = Take photos of your clothes to add them to your closet, and take your try-on photo if you set one up.
 // Phase 29, live weather (closet/compliance/PERMISSIONS.md). Approximate location while the app is
 // open, for the weather only, and only if she turns on "Use my location". A city she types needs no
 // permission. NSLocationDefaultAccuracyReduced is in Configs/AppInfo.plist (no build setting for it).
