@@ -27,7 +27,7 @@ Home's name sign and Profile button (and the same in the large-text and sideways
 Top to bottom, as `settings.html`:
 
 1. **The wall.** "Profile" in display type, her name sign in the middle (the Home drawing at 1.3 times, her name as live text) and a floor plant. The sign is a button that opens the name sheet. An empty name shows "Hello" (RD-03.2). At the accessibility sizes the plant goes; the row below carries the name at full size.
-2. **Name on your sign** (value: the name, or Hello), **Fit and measurements**, **Your try-on photo** (Added or Not added).
+2. **Name on your sign** (value: the name, or Hello), **Styling access** (Phase 30a; value: Not subscribed, Free month, Subscribed, Payment problem or Ended; opens the paywall and status screen in `docs/payments.md`), **Fit and measurements**, **Your try-on photo** (Added or Not added).
 3. **Style Me:** Preferences (Mine + one idea or Only mine), Avoid repeating outfits for (1 week, 2 weeks, I don't mind), and the Track laundry switch.
 4. **Help and privacy:** Accessibility, Help, Send feedback, Privacy and terms, Delete my data.
 

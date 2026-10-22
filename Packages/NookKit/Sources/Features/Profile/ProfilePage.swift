@@ -14,7 +14,7 @@ struct ProfileActions {
 /// Profile, top to bottom (`settings.html`, Phase 14a): the wall with her name sign, then three
 /// groups of rows on the floor.
 ///
-/// 1. Name on your sign, Fit and measurements, Your try-on photo.
+/// 1. Name on your sign, Styling access (30a), Fit and measurements, Your try-on photo.
 /// 2. Style Me: Preferences, Avoid repeating outfits for, and the Track laundry switch (14b).
 /// 3. Help and privacy: Accessibility, Help, App tours (16b), Send feedback, Privacy and
 ///    terms, Delete my data (14b).
@@ -84,6 +84,14 @@ struct ProfilePage: View {
                 action: actions.editName
             )
             .tourAnchor(ProfileTour.Anchor.name, label: ProfileText.nameRow, action: actions.editName)
+            // 30a: under the name, as in `settings.html`.
+            row(
+                StylingAccessText.title, subtitle: StylingAccessText.rowDetail,
+                value: StylingAccessText.rowValue(model.subscription), systemImage: "sparkles",
+                identifier: "profile.stylingAccess"
+            ) {
+                actions.open(.stylingAccess)
+            }
             row(
                 ProfileText.fitRow, subtitle: ProfileText.fitRowDetail, systemImage: "ruler",
                 identifier: "profile.fit"

@@ -28,13 +28,15 @@ struct PaidActionTests {
             auth: auth, policy: policy, clock: clock, sleep: { try await clock.skip($0) })
     }
 
-    func service(attester: (any DeviceAttester)? = nil) async throws -> GatewayPaidActionService {
+    func service(
+        attester: (any DeviceAttester)? = nil, hint: EntitlementHintSource = EntitlementHintSource()
+    ) async throws -> GatewayPaidActionService {
         let client = client()
         try await auth.signInWithApple()
         _ = try await GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0").whoAmI()
         let session = AttestationSession(
             attester: attester ?? self.attester, store: MemoryAttestKeyStore(), client: client)
-        return GatewayPaidActionService(client: client, attestation: session)
+        return GatewayPaidActionService(client: client, attestation: session, entitlementHint: hint)
     }
 
     func problem(_ call: () async throws(CloudLimitProblem) -> PaidActionReceipt) async -> CloudLimitProblem? {
@@ -64,6 +66,28 @@ struct PaidActionTests {
         let usage = try await paid.usage()
         #expect(usage.allowance(.styleFull)?.usedToday == 1)
         #expect(usage.paused.isEmpty)
+    }
+
+    /// 30a: paid requests carry the subscription hint, worked out when sent, and the backend
+    /// treats it as a hint only: an "expired" hint is still admitted and run.
+    @Test func paidRequestsCarryTheSubscriptionHintOnly() async throws {
+        let clock = Mutex(TestTime.now)
+        let hint = EntitlementHintSource(now: { clock.withLock { $0 } })
+        let paid = try await service(hint: hint)
+        _ = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        #expect(backend.lastEntitlementHint == nil)
+        hint.set(
+            SubscriptionStatus(
+                state: .trial, productID: SubscriptionProducts.monthly, expiresAt: TestTime.day(3), willAutoRenew: true,
+                checkedAt: TestTime.now))
+        _ = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        #expect(backend.lastEntitlementHint == "trial")
+        // The free month ends with no new status: the next request says so.
+        clock.withLock { $0 = TestTime.day(4) }
+        let receipt = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        #expect(backend.lastEntitlementHint == "expired")
+        #expect(!receipt.replayed)
+        #expect(backend.paidJobsRun == 3)
     }
 
     @Test func aLostAnswerIsRetriedWithTheSameKeyAndNotRunTwice() async throws {

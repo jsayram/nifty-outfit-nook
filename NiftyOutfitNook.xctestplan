@@ -66,6 +66,13 @@
     {
       "target": {
         "containerPath": "container:NiftyOutfitNook.xcodeproj",
+        "identifier": "4E4F4F4B0000000000000047",
+        "name": "NiftyOutfitNookTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:NiftyOutfitNook.xcodeproj",
         "identifier": "4E4F4F4B000000000000000B",
         "name": "NiftyOutfitNookUITests"
       }

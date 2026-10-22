@@ -95,9 +95,10 @@ The models, the store protocols and the fixture sets are described in `docs/mode
 
 ```
 NiftyOutfitNook.xcodeproj    Thin app project. Folders are synchronized, so adding a file never edits it.
-NiftyOutfitNook.xctestplan   Runs the NookKit tests and the UI tests.
+NiftyOutfitNook.xctestplan   Runs the NookKit tests, the hosted unit tests and the UI tests.
 NiftyOutfitNook/             App target: entry point, app icon (AppIcon.icon), assets, entitlements, privacy manifest.
 NiftyOutfitNookUITests/      XCUITest UI tests.
+NiftyOutfitNookTests/        Unit tests hosted in the app: StoreKit's test sessions and the local .storekit file (Phase 30a).
 Packages/NookKit/            Almost all of the code.
   Sources/DesignSystem/      Tokens, shared components and the debug-only catalog (Phase 2).
   Sources/Models/            Domain types, rules as pure functions, and service protocols (Phase 3).
@@ -143,6 +144,7 @@ docs/try-on-pictures.md      Try it on, the Pictures tab, picture detail, and ho
 docs/suitcases-and-laundry.md  Suitcases, a suitcase and packing, Add to a suitcase, Laundry, and the remembered source.
 docs/profile.md              Profile, Fit and measurements, the try-on photo sheet, and hiding sensitive screens.
 docs/settings.md             Track laundry, Accessibility, Help, Send feedback, Privacy and terms, and Delete my data.
+docs/payments.md             The styling subscription: StoreKit, access rules, the paywall, tests and App Store Connect setup.
 docs/tours.md                Quick tours: the tour system, every screen's tour, App tours, the -tour flag, VoiceOver and the tests.
 docs/onboarding.md           Onboarding: the welcome and its steps, what's kept across launches, a relaunch, and the -onboarding flag.
 docs/testflight.md           Lily's TestFlight build: setup, each build, What to Test, her notes, and the release checks.

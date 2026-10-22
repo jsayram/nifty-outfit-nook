@@ -32,6 +32,10 @@ final class ProfileModel {
     /// Pieces in her closet still marked as in the wash, kept while tracking is off (RD-11).
     /// Track laundry's line and toast mention them.
     private(set) var keptDirtyCount = 0
+    /// 30a: her styling subscription, for the Styling access row.
+    private(set) var subscription = SubscriptionState.none
+    /// The clock for the subscription's dates. Tests fix it.
+    @ObservationIgnored var now: () -> Date = { .now }
     @ObservationIgnored private var loads = LoadGeneration()
 
     // MARK: Loading
@@ -53,6 +57,15 @@ final class ProfileModel {
         if let garments = try? await services.closet.garments(), loads.isCurrent(load) {
             keptDirtyCount = Self.dirtyCount(in: garments)
         }
+        // StoreKit's own records, read on the phone. The cached status shows first.
+        subscription = await services.subscriptions.cachedStatus().effectiveState(at: now())
+        let fresh = await services.subscriptions.refresh()
+        if loads.isCurrent(load) { subscription = fresh.effectiveState(at: now()) }
+    }
+
+    /// Sets the subscription state directly, for tests that hand data straight in.
+    func show(subscription: SubscriptionState) {
+        self.subscription = subscription
     }
 
     /// Pieces in her closet marked as in the wash, whether or not tracking is on.

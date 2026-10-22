@@ -18,6 +18,8 @@ final class AccountDeletionTests: XCTestCase {
         app.launchArguments =
             UITestLaunch.toursOff + UITestLaunch.animationsOff + [
                 "-seed-photo-closet", "3", "-fake-signed-in",
+                // 30a: in the free month, so the subscription note and Manage subscription show.
+                "-subscription", "trial",
             ]
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 120), "Home didn't open")
@@ -28,7 +30,8 @@ final class AccountDeletionTests: XCTestCase {
         let row = element("privacy.deleteAccount", in: app)
         app.reveal(row, timeout: Self.wait)
         row.tapUntil(app.navigationBars["Delete my account"], appears: Self.wait)
-        XCTAssertTrue(labelled("doesn’t cancel a subscription", in: app).waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(labelled("doesn’t cancel your subscription", in: app).waitUntilExists(timeout: Self.wait))
+        XCTAssertTrue(element("deleteData.manageSubscription", in: app).exists)
 
         // Cancel first: nothing changes.
         let alert = app.alerts["Delete your account?"]
