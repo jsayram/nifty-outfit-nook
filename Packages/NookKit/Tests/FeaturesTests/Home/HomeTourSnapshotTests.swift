@@ -55,7 +55,7 @@ struct HomeTourSnapshotTests {
             dynamicTypeSize: .accessibility5, named: "ax5")
     }
 
-    @Test func iPadLandscape() {
+    @Test(.ipadSnapshots) func iPadLandscape() {
         let layout = IPadWindow.iPad11Landscape.roomLayout
         assertTourSnapshot(
             RoomCanvas(layout: layout, content: Self.content, open: { _ in }),

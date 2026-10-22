@@ -23,7 +23,7 @@ struct ComponentSnapshotTests {
     }
 
     /// Pages that stretch or centre on a wide screen. Light only, to keep the image count down.
-    @Test(arguments: [CatalogDemo.segmented, .chips, .rows, .banners, .emptyState])
+    @Test(.ipadSnapshots, arguments: [CatalogDemo.segmented, .chips, .rows, .banners, .emptyState])
     func iPad(demo: CatalogDemo) {
         assertComponentSnapshot(demo.content, canvas: .iPad, look: .light, named: "\(demo.rawValue)-ipad")
     }

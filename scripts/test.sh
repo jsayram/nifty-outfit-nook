@@ -25,6 +25,11 @@
 # themselves then, and run in a manual full-suite workflow run and locally.
 # See UITestTier in NiftyOutfitNookUITests/UITestSupport.swift.
 #
+# NOOK_IPAD_SNAPSHOTS=1 runs the iPad snapshot tests in the package tests. They skip themselves
+# otherwise: iPad testing is paused until the app's features are done (22 October 2026). The
+# snapshots are drawn at iPad sizes on whatever simulator runs them, so this needs no iPad
+# simulator. See README.md, "Turning iPad testing back on".
+#
 # NOOK_PARALLEL_WORKERS=<n> runs the tests on <n> cloned simulators at once. Off by default.
 #
 # Otherwise it builds once with build-for-testing, then tests without building, and prints how
@@ -42,6 +47,9 @@ if [[ -n "${CI:-}" ]]; then
 fi
 if [[ -n "${NOOK_PR_RUN:-}" ]]; then
     export TEST_RUNNER_NOOK_PR_RUN=1
+fi
+if [[ -n "${NOOK_IPAD_SNAPSHOTS:-}" ]]; then
+    export TEST_RUNNER_NOOK_IPAD_SNAPSHOTS="$NOOK_IPAD_SNAPSHOTS"
 fi
 result_bundle="${NOOK_RESULT_BUNDLE:-build/TestResults.xcresult}"
 echo "Testing on simulator $simulator_id"

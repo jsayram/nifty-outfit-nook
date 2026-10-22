@@ -2,23 +2,41 @@
 # Every third-party action is pinned to a full commit SHA. Dependabot proposes updates.
 name: CI
 
+# What runs when (22 October 2026):
+#   Pull request   swift-format, gitleaks, build-and-archive (the build, the archive check and every
+#                  package test, iPhone snapshots included) and build-and-test. This is the fast gate.
+#   run-ui label   The same, plus the UI tests (the iPhone parts), for a pull request that needs
+#                  them before it merges.
+#   Manual run     Everything, with the whole UI suite (the iPhone parts). This is the batch run on
+#                  develop: scripts/run-ui-batch.sh starts it. Tick `include_ipad` to add iPad.
+#   Push           The fast gate again on develop and main. No UI tests.
+# The UI tests never start by themselves. iPad testing is paused until the app's features are done.
 on:
   pull_request:
     # `labeled` and `unlabeled` so adding the run-ui label starts the UI tests.
     types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [develop, main]
-  # Run the whole UI suite by hand: Actions tab, CI, Run workflow.
+  # Run the whole UI suite by hand: Actions tab, CI, Run workflow (or scripts/run-ui-batch.sh).
   workflow_dispatch:
+    inputs:
+      include_ipad:
+        description: >-
+          Also run the iPad parts: the iPad UI tests (ui-ipad) and the iPad snapshot tests. iPad
+          testing is paused until the app's features are done.
+        type: boolean
+        default: false
 
 # Read-only token for every job. No job needs to write.
 permissions:
   contents: read
 
 # A new push to a pull request cancels the run it replaces.
-# Runs on develop and main always finish.
+# Runs on develop and main always finish. The event name is in the group so that a push to develop
+# can't replace a batch run waiting behind another run (a waiting run is dropped for a newer one
+# in the same group).
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -33,6 +51,9 @@ env:
   # NiftyOutfitNookUITests/UITestSupport.swift, and each test's comment, say why). A manual run
   # (workflow_dispatch) leaves it empty and runs every UI test.
   NOOK_PR_RUN: ${{ github.event_name != 'workflow_dispatch' && '1' || '' }}
+  # '1' only on a manual run with include_ipad ticked. The iPad snapshot tests in the package tests
+  # skip themselves otherwise (IPadSnapshots in Packages/NookKit/Tests/NookTestSupport).
+  NOOK_IPAD_SNAPSHOTS: ${{ github.event_name == 'workflow_dispatch' && inputs.include_ipad && '1' || '' }}
 
 jobs:
   swift-format:
@@ -52,10 +73,11 @@ jobs:
   # after). Two answers:
   #   code  Anything but docs (Markdown outside the source folders, docs/, website/). A docs-only
   #         change skips the build and test jobs below, and `build-and-test` still passes.
-  #   ui    A UI path changed (see the list in the step), or the pull request has the run-ui
-  #         label, or this is a manual run. Only then do the UI test jobs run. Every change that
-  #         isn't docs-only still builds, makes the archive check and runs every package test
-  #         (snapshot tests included).
+  #   ui    The pull request has the run-ui label (and isn't docs-only), or this is a manual
+  #         run. Only then do the UI test jobs run. Every change that isn't docs-only still
+  #         builds, makes the archive check and runs every package test (iPhone snapshot tests
+  #         included). A pull request or push that touches a UI path without the label gets a
+  #         note in the run's summary, and its UI tests run in the next batch on develop.
   changes:
     name: changes
     runs-on: ubuntu-latest
@@ -63,6 +85,7 @@ jobs:
     outputs:
       code: ${{ steps.filter.outputs.code }}
       ui: ${{ steps.filter.outputs.ui }}
+      ui_paths: ${{ steps.filter.outputs.ui_paths }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -78,8 +101,12 @@ jobs:
           AFTER: ${{ github.sha }}
           LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
+          # Build and test everything unless a file list says less. The UI tests run on a manual
+          # run (the batch), never on their own otherwise.
           code=true
-          ui=true
+          ui=false
+          ui_paths=false
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then ui=true; fi
           files=""
           if [[ "$EVENT" == "pull_request" ]]; then
             files="$(git diff --name-only "$BASE...$HEAD")"
@@ -89,17 +116,16 @@ jobs:
           if [[ -n "$files" ]]; then
             echo "$files"
             code=false
-            ui=false
             while IFS= read -r file; do
               case "$file" in
-                # UI paths: the UI tests run only when one of these changes (or the run-ui label is
-                # on the pull request, or the workflow is run by hand). Views and screens in
-                # Features (its model files are not UI), strings, the design system, the app
-                # target (assets, entitlements, app file), its Info.plist, the Xcode project,
-                # and the UI tests themselves.
+                # UI paths: a change to one of these is UI-touching. It doesn't start the UI tests
+                # (the run-ui label does, and the batch run on develop), but the summary says
+                # so. Views and screens in Features (its model files are not UI), strings, the
+                # design system, the app target (assets, entitlements, app file), its Info.plist,
+                # the Xcode project, and the UI tests themselves.
                 Packages/NookKit/Sources/Features/*Model.swift | Packages/NookKit/Sources/Features/*/*Model.swift | Packages/NookKit/Sources/Features/*/*/*Model.swift) code=true ;;
-                Packages/NookKit/Sources/Features/* | Packages/NookKit/Sources/DesignSystem/*) code=true; ui=true ;;
-                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | NiftyOutfitNook.xcodeproj/* | Configs/AppInfo.plist | *.xcstrings | *.xcassets/*) code=true; ui=true ;;
+                Packages/NookKit/Sources/Features/* | Packages/NookKit/Sources/DesignSystem/*) code=true; ui_paths=true ;;
+                NiftyOutfitNook/* | NiftyOutfitNookUITests/* | NiftyOutfitNook.xcodeproj/* | Configs/AppInfo.plist | *.xcstrings | *.xcassets/*) code=true; ui_paths=true ;;
                 # Models, services, fixtures, backup, storage and the package tests build and test
                 # without UI tests. A Markdown file in a source folder can end up in the app bundle.
                 Packages/*) code=true ;;
@@ -109,15 +135,20 @@ jobs:
             done <<< "$files"
           fi
           if [[ ",$LABELS," == *",run-ui,"* && "$code" == "true" ]]; then ui=true; fi
-          echo "Build and package tests: $code, UI tests: $ui"
+          echo "Build and package tests: $code, UI tests: $ui, UI paths touched: $ui_paths"
+          if [[ "$ui" == "false" && "$ui_paths" == "true" ]]; then
+            echo "This change touches UI paths, so the UI tests are due. They did not run here: add the run-ui label to run them on this pull request, or they run in the next batch on develop (scripts/run-ui-batch.sh)." >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "ui=$ui" >> "$GITHUB_OUTPUT"
+          echo "ui_paths=$ui_paths" >> "$GITHUB_OUTPUT"
 
   # The build and tests run as parallel jobs, and `build-and-test` (the required check) passes
   # only when every one of them passed.
   #
-  # The free plan runs at most five macOS jobs at once, so there are five: this build job and
-  # four test jobs. The test jobs start with this one, not after it, and boot their simulator
+  # The free plan runs at most five macOS jobs at once, so there are at most five: this build job
+  # and up to four test jobs (three on an iPhone, and the iPad one on a manual run that asks for
+  # it). The test jobs start with this one, not after it, and boot their simulator
   # while it builds (booting takes 2 to 5 minutes on the hosted runner). When this job uploads
   # what it built, they download it and test it without building. Building during a boot on the
   # same runner was much slower (a build took 9 minutes instead of 1 to 2.5, October 2026).
@@ -136,7 +167,9 @@ jobs:
   # classes and every package test target on an iPhone simulator. It runs the package tests
   # itself because it has their build: until October 2026 the iPad part ran them, which meant
   # uploading the full plan's products (144 MB) for that part to download, and the iPad part
-  # started its own tests about 8 minutes in.
+  # started its own tests about 8 minutes in. The package tests run on an iPhone simulator. The
+  # iPad snapshot tests draw iPad-sized windows on it (no iPad simulator is involved), and skip
+  # themselves unless NOOK_IPAD_SNAPSHOTS is set (see `env` above).
   build-and-archive:
     name: build-and-archive
     needs: changes
@@ -212,11 +245,14 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # The other UI tests in four parts, by test class: three on an iPhone simulator and one, the
-  # iPad layouts, on an iPad simulator.
+  # The other UI tests in three parts, by test class, on an iPhone simulator. A fourth part, the
+  # iPad layouts on an iPad simulator, exists but is paused: it runs only on a manual run with
+  # include_ipad ticked (iPad testing waits until the app's features are done; README.md,
+  # "Turning iPad testing back on").
   #
-  # What runs where. These parts run only when the change touches UI paths (see `changes`). They
-  # cover the real user flows once; a test that package tests already cover, or that repeats
+  # What runs when. These parts run only with the run-ui label on a pull request, or on a manual
+  # run (the batch run on develop, scripts/run-ui-batch.sh); never by themselves (see `changes`).
+  # They cover the real user flows once; a test that package tests already cover, or that repeats
   # another test's screens at the largest text size, skips itself (NOOK_PR_RUN above) and runs
   # only in a manual full-suite run. The sizes below are the normal run's, then the full suite's,
   # in seconds of tests (the classes' mean times from the test log, 6 runs on Xcode 27.1, 20 and
@@ -237,7 +273,7 @@ jobs:
   #   ui-rest                 GarmentDetailTests 80, HomeTests 126, StyleMeTests 113,
   #                           SuitcasesAndLaundryTests 85 / 109, SwapTests 59, ClosetTests 52,
   #                           MakeYourOwnLookTests 51, YourLooksTests 38 / 117, and any new class
-  #   ui-ipad                 IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
+  #   ui-ipad (paused)        IPadTests 191, IPadKeyboardTests 95, IPadStyleMeAndSavedTests 90
   # When a part grows well past the others, move a class. A new iPad class goes in ui-ipad;
   # in ui-rest it would only skip itself on the iPhone. Every part, the iPad one too, tests what
   # the UI test plan's build made and downloads only that (28 MB).
@@ -255,6 +291,12 @@ jobs:
       # Let every part finish, so one failure doesn't hide another.
       fail-fast: false
       matrix:
+        # The parts are listed here, and `include` below gives each its simulator and tests. The
+        # `exclude` drops ui-ipad unless this is a manual run with include_ipad ticked. (Entries
+        # that only appear under `include` could not be excluded, which is why the names are here.)
+        part: [ui-audit-and-settings, ui-add-and-saved, ui-rest, ui-ipad]
+        exclude:
+          - part: ${{ github.event_name == 'workflow_dispatch' && inputs.include_ipad && 'none' || 'ui-ipad' }}
         include:
           - part: ui-audit-and-settings
             family: iPhone
@@ -307,7 +349,7 @@ jobs:
               -skip-testing:NiftyOutfitNookUITests/IPadStyleMeAndSavedTests
               -skip-testing:NiftyOutfitNookUITests/IPadKeyboardTests
           # The iPad layouts (Phases 15a and 15b), on the iPad Pro 11-inch (M5) simulator. Every
-          # one of these skips itself on an iPhone.
+          # one of these skips itself on an iPhone. Paused: see the matrix's `exclude`.
           - part: ui-ipad
             family: iPad
             selection: >-
@@ -407,7 +449,7 @@ jobs:
           fi
           [[ "$BUILD_AND_ARCHIVE" == "success" ]] || exit 1
           if [[ "$UI" == "false" ]]; then
-            echo "No UI path changed: the UI tests were skipped on purpose."
+            echo "The UI tests were skipped on purpose (no run-ui label, not a manual run)."
             [[ "$UI_TESTS" == "skipped" ]]
           else
             [[ "$UI_TESTS" == "success" ]]

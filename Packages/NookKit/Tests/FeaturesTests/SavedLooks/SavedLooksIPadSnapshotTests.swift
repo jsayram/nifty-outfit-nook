@@ -21,7 +21,7 @@ import UIKit
 /// - the Pictures tab with the Lace date night picture beside it, sideways and upright;
 /// - Make your own look sideways, upright and in a narrow window.
 @MainActor
-@Suite(.heavyMainActorWork)
+@Suite(.heavyMainActorWork, .ipadSnapshots)
 struct SavedLooksIPadSnapshotTests {
     // MARK: Looks
 
