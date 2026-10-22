@@ -13,6 +13,8 @@ nonisolated enum HomeDestination: Hashable, Sendable {
     case feedback
     case privacy
     case profile
+    /// 27c: Your looks for a request whose job finished, from the banner or a notification.
+    case yourLooks(StyleRequest)
 
     /// The screen's title.
     var title: String {
@@ -23,6 +25,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         case .feedback: String(localized: "Send feedback", bundle: .module, comment: "Screen title")
         case .privacy: String(localized: "Privacy and terms", bundle: .module, comment: "Screen title")
         case .profile: String(localized: "Profile", bundle: .module, comment: "Screen title")
+        case .yourLooks: String(localized: "Your looks", bundle: .module, comment: "Screen title")
         }
     }
 
@@ -35,6 +38,7 @@ nonisolated enum HomeDestination: Hashable, Sendable {
         case .feedback: "feedback"
         case .privacy: "privacy"
         case .profile: "profile"
+        case .yourLooks: "yourLooks"
         }
     }
 }

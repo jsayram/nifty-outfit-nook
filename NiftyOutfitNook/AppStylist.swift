@@ -35,7 +35,7 @@ nonisolated enum AppStylist {
     }
 
     #if DEBUG
-        /// `-cloud-stylist [normal|fails]` against the fake backend: signs in with the fake Apple
+        /// `-cloud-stylist [normal|fails|slow]` against the fake backend: signs in with the fake Apple
         /// sign-in at launch (paid requests need an account) and sets how its stylist behaves.
         @MainActor
         static func prepareFakeIfAsked(arguments: [String]) async {

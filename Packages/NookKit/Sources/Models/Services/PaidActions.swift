@@ -5,14 +5,14 @@ import Foundation
 // (27a) and try-on (33a) call `PaidActionService`; until then only the debug limits screen does.
 
 /// A paid feature the server can switch off on its own.
-public enum PaidFeature: String, Sendable, CaseIterable {
+public enum PaidFeature: String, Sendable, CaseIterable, Codable {
     case style
     case tryOn
 }
 
 /// What an allowance counts. `monthlySpend` is the account's overall monthly limit, which isn't a
 /// count she sees, only a reason something stopped.
-public enum UsageCategory: String, Sendable, CaseIterable {
+public enum UsageCategory: String, Sendable, CaseIterable, Codable {
     case styleFull
     case styleQuick
     case tryOn
@@ -104,7 +104,7 @@ public struct PaidActionReceipt: Sendable, Equatable {
 }
 
 /// Why a paid action, or reading usage, didn't happen, in the terms a screen needs.
-public enum CloudLimitProblem: Error, Sendable, Hashable {
+public enum CloudLimitProblem: Error, Sendable, Hashable, Codable {
     /// Too many in a short time. Try again after this many seconds.
     case rateLimited(retryAfterSeconds: Int)
     /// An allowance is used up until `resetAt`.

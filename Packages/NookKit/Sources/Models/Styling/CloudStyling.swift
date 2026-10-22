@@ -202,10 +202,32 @@ public enum StyleAnswer: Sendable, Equatable {
     case answer(String, pieces: [Garment.ID], fromCache: Bool)
 }
 
+/// A stylist whose requests are paid jobs (27c): each job passes its own Idempotency-Key, so a
+/// job resumed after a relaunch sends the same request with the same key and is never run or
+/// charged twice. `CloudStylist` is one; Stage A's stylist on the phone isn't.
+public protocol KeyedStylist: Stylist {
+    /// The consent text she agreed to, or `needsConsent`.
+    func consentVersion() throws(StylistError) -> String
+    func style(_ context: StylingContext, consentVersion: String, idempotencyKey: String)
+        async throws(StylistError) -> StyleOutcome
+    func ask(_ request: AskStylistRequest, idempotencyKey: String) async throws(StylistError) -> StylistReply
+}
+
+/// Ask stylist's answer: its words and the pieces it mentions (only pieces that were sent).
+public struct StylistReply: Hashable, Sendable {
+    public var text: String
+    public var pieces: [Garment.ID]
+
+    public init(text: String, pieces: [Garment.ID]) {
+        self.text = text
+        self.pieces = pieces
+    }
+}
+
 /// The stylist behind Style Me once the cloud is on: one paid action per request, through the
 /// 24b gateway, with a new idempotency key each time she asks (retries of that one request reuse
 /// it inside the client).
-public struct CloudStylist: Stylist {
+public struct CloudStylist: KeyedStylist {
     private let paid: any PaidActionService
     private let consent: any StylistConsentStore
     private let makeKey: @Sendable () -> String
@@ -220,18 +242,47 @@ public struct CloudStylist: Stylist {
     }
 
     public func style(_ context: StylingContext) async throws(StylistError) -> StyleOutcome {
-        // No consent, no call: nothing leaves the phone.
+        try await style(context, consentVersion: try consentVersion(), idempotencyKey: makeKey())
+    }
+
+    /// The consent text she agreed to, or `needsConsent`: no consent, no call, and nothing leaves
+    /// the phone.
+    public func consentVersion() throws(StylistError) -> String {
         guard let agreed = consent.current(), agreed.isCurrent else { throw .needsConsent }
-        let call = StyleCall.outfit(from: context, consentVersion: agreed.version)
+        return agreed.version
+    }
+
+    /// 27c: one styling job's request, with the job's own key. The same context, consent version
+    /// and key always send the same body, so asking again (a retry, or after a relaunch) gets the
+    /// server's record instead of a second run.
+    public func style(_ context: StylingContext, consentVersion: String, idempotencyKey: String)
+        async throws(StylistError) -> StyleOutcome
+    {
+        let call = StyleCall.outfit(from: context, consentVersion: consentVersion)
+        guard let answer = try await send(call, idempotencyKey: idempotencyKey) else { throw .notCompleted }
+        return try Self.outcome(answer, for: context, sentIDs: Set(call.pieces.map(\.id)))
+    }
+
+    /// 27c: an Ask stylist question, with its job's key. Only the pieces that were sent may be
+    /// mentioned.
+    public func ask(_ request: AskStylistRequest, idempotencyKey: String) async throws(StylistError) -> StylistReply {
+        let call = request.call
+        guard case .answer(let text, let pieces, _) = try await send(call, idempotencyKey: idempotencyKey),
+            !text.isEmpty
+        else { throw .notCompleted }
+        let sent = Set(call.pieces.map(\.id))
+        return StylistReply(text: text, pieces: pieces.filter(sent.contains))
+    }
+
+    private func send(_ call: StyleCall, idempotencyKey: String) async throws(StylistError) -> StyleAnswer? {
         let receipt: PaidActionReceipt
         do {
-            receipt = try await paid.run(.style(call), idempotencyKey: makeKey())
+            receipt = try await paid.run(.style(call), idempotencyKey: idempotencyKey)
         } catch {
             throw Self.error(for: error)
         }
         if Task.isCancelled { throw .cancelled }
-        guard let answer = receipt.style else { throw .notCompleted }
-        return try Self.outcome(answer, for: context, sentIDs: Set(call.pieces.map(\.id)))
+        return receipt.style
     }
 
     /// The backend's checked answer as the app's outcome. Every piece must be one that was sent;

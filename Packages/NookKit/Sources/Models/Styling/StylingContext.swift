@@ -6,7 +6,7 @@ import Foundation
 /// The app builds it on the phone, so the stylist never sees ineligible or out-of-source pieces
 /// (PRD §8.1 "bounded snapshot of eligible items"). It holds no profile name, suitcase name or
 /// photo.
-public struct StylingContext: Hashable, Sendable {
+public struct StylingContext: Hashable, Sendable, Codable {
     public var request: StyleRequest
     /// Pieces the stylist may use, sorted by ID so every run sees the same order.
     public var eligibleGarments: [Garment]

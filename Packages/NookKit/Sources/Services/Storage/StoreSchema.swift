@@ -130,6 +130,11 @@ public enum RecordKind: String, CaseIterable, Sendable {
     /// A record that differed in a copy restored with Add what's missing (Phase 21b): the copy's
     /// version, kept for review while this iPhone's stays in place.
     case restoreConflict
+    /// A paid AI job (Phase 27c), by job ID. This iPhone's work in progress: never exported,
+    /// never restored, and a restore leaves it alone.
+    case aiJob
+    /// An Ask stylist conversation (Phase 27c), by thread ID. Exported and restored like looks.
+    case stylistThread
 
     /// The key of a kind that has one record.
     public static let singleKey = "only"

@@ -37,6 +37,8 @@ struct NiftyOutfitNookApp: App {
     /// Debug builds take `-connection offline` or `-connection online`, which fix the state for UI
     /// tests; otherwise it follows the system's path monitor.
     @State private var connection = ConnectionStatus()
+    /// 27c: when she leaves mid-job, the app asks iOS for a short background task.
+    @Environment(\.scenePhase) private var scenePhase
 
     private var connectivitySource: any ConnectivitySource {
         #if DEBUG
@@ -54,6 +56,10 @@ struct NiftyOutfitNookApp: App {
             root
                 .environment(\.connection, connection)
                 .task { await connection.follow(connectivitySource) }
+                .onAppear { AppJobs.installDelegate() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { AppJobs.didEnterBackground() }
         }
     }
 
@@ -154,6 +160,12 @@ struct NiftyOutfitNookApp: App {
         let paid = AppGateway.paid
         // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.
         let cloudStylist = AppStylist.usesCloud(arguments) ? paid : nil
+        // 27c: one set of AI jobs for the life of the app: kept in the store for her own closet,
+        // in memory for the debug sample closet (which comes back as it ships at each launch).
+        let keptJobs = AppJobs.kept(in: storage)
+        let sampleJobs = AppJobs.inMemory()
+        let jobNotifier = AppJobs.notifier
+        AppJobs.all = [keptJobs, sampleJobs]
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
@@ -179,12 +191,17 @@ struct NiftyOutfitNookApp: App {
                     AppWeather.install(into: &services, arguments: arguments)
                     // The cloud stylist (Phase 27a), once the backend is real or a debug launch asks.
                     AppStylist.install(into: &services, paid: cloudStylist)
-                    // Delete my data, and Delete my account (Phase 24c) when she's signed in.
+                    // 27c: AI jobs and Ask stylist conversations, kept in the store.
+                    services.aiJobs = keptJobs
+                    services.stylistThreads = storage.stylistThreads
+                    // Delete my data, and Delete my account (Phase 24c) when she's signed in. The
+                    // jobs stop first, so none writes a look after the looks are gone.
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
-                            stores: storage.erasableData + [
+                            stores: [(.looks, AIJobsEraser(keptJobs))] + storage.erasableData + [
                                 (.profile, tours), (.profile, services.weatherSettings),
-                                (.profile, services.stylistConsent), (.profile, onboarding),
+                                (.profile, services.stylistConsent), (.profile, jobNotifier),
+                                (.profile, onboarding),
                             ]),
                         account: account)
                     services.backups = storage.backups
@@ -203,8 +220,12 @@ struct NiftyOutfitNookApp: App {
                         feedbackDrafts: closet == nil ? nil : storage.feedbackDrafts)
                     AppWeather.install(into: &services, arguments: arguments, keepsSettings: closet != nil)
                     AppStylist.install(into: &services, paid: cloudStylist, keepsSettings: closet != nil)
+                    services.aiJobs = sampleJobs
                     services.deletion = AccountDataDeletion(
-                        local: LocalDataDeletion(stores: storage.erasableData + LocalDataDeletion.stores(of: services)),
+                        local: LocalDataDeletion(
+                            stores: [(.looks, AIJobsEraser(sampleJobs))] + storage.erasableData + [
+                                (.profile, jobNotifier)
+                            ] + LocalDataDeletion.stores(of: services)),
                         account: account)
                     services.account = account
                     services.paid = paid

@@ -62,7 +62,7 @@ public struct AccountUser: Sendable, Equatable {
 }
 
 /// Why an account call didn't work, in the terms a screen needs to explain it.
-public enum AccountProblem: Error, Sendable, Hashable {
+public enum AccountProblem: Error, Sendable, Hashable, Codable {
     /// She closed the Sign in with Apple sheet. Not an error to show.
     case cancelled
     /// Not signed in, or the backend refused a fresh token too.

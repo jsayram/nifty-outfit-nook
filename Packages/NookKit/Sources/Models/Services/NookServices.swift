@@ -71,9 +71,12 @@ public struct NookServices: Sendable {
     /// (FR-58) and Privacy and terms shows the stylist's consent switch. Stage A's mock stylist
     /// sends nothing, so neither applies.
     public var cloudStyling = false
-    /// 27a: runs cloud styling requests apart from any screen, so leaving Your looks never stops
-    /// one and its looks still land in her history. Copies of these services share it.
-    public var stylingJobs = StylingJobs()
+    /// 27c: every paid AI job (Style Me's outfit ideas, Ask stylist, try-on in 33a), run apart
+    /// from any screen and kept across a relaunch, with the banner and notifications that say a
+    /// job is done. Copies of these services share it.
+    public var aiJobs = AIJobs()
+    /// 27c: Ask stylist conversations, kept so she can leave and come back.
+    public var stylistThreads: any StylistThreadStore = InMemoryStylistThreadStore()
     /// Delete my data (Phase 14b). By default it erases the stores above as they are when it's
     /// read, so a store replaced after `init` is the one erased. Phase 24c adds the account and
     /// what the server holds.
@@ -83,7 +86,8 @@ public struct NookServices: Sendable {
                 ?? LocalDataDeletion(
                     closet: closet, looks: looks, suitcases: suitcases, profile: profile, drafts: drafts,
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
-                    onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent)
+                    onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
+                    aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads)
         }
         set { customDeletion = newValue }
     }

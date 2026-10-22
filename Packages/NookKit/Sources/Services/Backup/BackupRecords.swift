@@ -37,7 +37,8 @@ struct RecordCodec: Sendable {
     /// Whether two payloads of this kind hold the same value.
     let same: @Sendable (StoreRow, StoreRow) -> Bool
 
-    /// Every kind an export carries: everything but the content-free `UserDefaults` move marker.
+    /// Every kind an export carries: everything but the content-free `UserDefaults` move marker
+    /// and the AI jobs in progress (27c).
     static let all: [RecordCodec] = [
         make(.garment, Garment.self, key: { $0.id.rawValue }, check: StoreValidation.garment),
         make(.look, Look.self, key: { $0.id.rawValue }, check: StoreValidation.look),
@@ -51,6 +52,8 @@ struct RecordCodec: Sendable {
         make(.tours, StoredTours.self, key: { _ in RecordKind.singleKey }),
         make(.deletion, StoredDeletion.self, key: nil),
         make(.restoreConflict, StoredConflict.self, key: { "\($0.kind)/\($0.key)" }),
+        // 27c. Not `aiJob`: a job is this iPhone's work in progress, tied to its sign-in.
+        make(.stylistThread, StylistThread.self, key: { $0.id.rawValue }),
     ]
 
     static let byKind: [String: RecordCodec] = Dictionary(uniqueKeysWithValues: all.map { ($0.kind.rawValue, $0) })

@@ -142,6 +142,12 @@ public final class FakeBackend: Sendable {
         if case .slow(let seconds) = mode, case .respond(let status, let headers, let body, _) = answer {
             return .respond(status: status, headers: headers, body: body, delay: .seconds(seconds))
         }
+        // 27c: the slow stand-in stylist takes its time over an answer.
+        if endpoint == APIV1.style, state.withLock({ $0.limits.stylist }) == .slow,
+            case .respond(200, let headers, let body, _) = answer
+        {
+            return .respond(status: 200, headers: headers, body: body, delay: FakeStylistBehaviour.slowAnswer)
+        }
         return answer
     }
 

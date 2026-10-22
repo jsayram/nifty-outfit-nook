@@ -48,6 +48,10 @@ public final class NookStorage: Sendable {
     public var feedbackDrafts: StoredFeedbackDraftStore { current.withLock { $0.feedbackDrafts } }
     public var onboarding: StoredOnboardingStore { current.withLock { $0.onboarding } }
     public var tours: StoredTourProgressStore { current.withLock { $0.tours } }
+    /// 27c: paid AI jobs, kept so they carry on after a relaunch.
+    public var aiJobs: StoredAIJobStore { current.withLock { $0.aiJobs } }
+    /// 27c: Ask stylist conversations.
+    public var stylistThreads: StoredStylistThreadStore { current.withLock { $0.stylistThreads } }
     /// Export a copy, Check a copy and Restore. `nil` without a backup location.
     public var backups: LocalBackupService? { current.withLock { $0.backups } }
 
@@ -99,8 +103,9 @@ public final class NookStorage: Sendable {
     /// The tours and the onboarding state aren't here: they're in every launch's services already.
     public var erasableData: [(DataPart, any ErasableStore)] {
         var stores: [(DataPart, any ErasableStore)] = [
-            (.drafts, drafts), (.drafts, lookDrafts), (.drafts, feedbackDrafts), (.pictures, pictures),
-            (.looks, looks), (.suitcases, suitcases), (.closet, closet), (.profile, profile),
+            (.looks, aiJobs), (.looks, stylistThreads), (.drafts, drafts), (.drafts, lookDrafts),
+            (.drafts, feedbackDrafts), (.pictures, pictures), (.looks, looks), (.suitcases, suitcases),
+            (.closet, closet), (.profile, profile),
         ]
         if let location {
             stores.append((.closet, StoreSafetyCopies(location: location)))
@@ -123,6 +128,8 @@ public final class NookStorage: Sendable {
         let feedbackDrafts: StoredFeedbackDraftStore
         let onboarding: StoredOnboardingStore
         let tours: StoredTourProgressStore
+        let aiJobs: StoredAIJobStore
+        let stylistThreads: StoredStylistThreadStore
         let backups: LocalBackupService?
 
         init(container: ModelContainer, calendar: Calendar, backups: BackupLocation?) {
@@ -136,6 +143,8 @@ public final class NookStorage: Sendable {
             feedbackDrafts = StoredFeedbackDraftStore(modelContainer: container)
             onboarding = StoredOnboardingStore(modelContainer: container)
             tours = StoredTourProgressStore(modelContainer: container)
+            aiJobs = StoredAIJobStore(modelContainer: container)
+            stylistThreads = StoredStylistThreadStore(modelContainer: container)
             self.backups = backups.map { LocalBackupService(container: container, location: $0) }
         }
     }
