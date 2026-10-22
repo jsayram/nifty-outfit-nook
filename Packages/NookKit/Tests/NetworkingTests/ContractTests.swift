@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import Models
 import Testing
 
 @testable import Networking
@@ -56,6 +57,28 @@ struct ContractTests {
         #expect(fromContract == fromSwift)
     }
 
+    @Test func bodyLimitsMatchPerEndpoint() throws {
+        // Only the endpoint that carries a screenshot takes more than the contract's 64 KiB.
+        let listed = try #require(Self.contract()["endpoints"] as? [[String: Any]])
+        for endpoint in listed {
+            let id = try #require(endpoint["id"] as? String)
+            let swift = try #require(APIV1.endpoints.first { $0.id == id })
+            #expect(swift.maxBodyBytes == (endpoint["maxBodyBytes"] as? Int ?? APIV1.maxBodyBytes), "\(id)")
+        }
+        #expect(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id) == ["sendFeedback"])
+    }
+
+    @Test func feedbackLimitsMatch() throws {
+        let limits = try #require((Self.contract()["limits"] as? [String: Any])?["feedback"] as? [String: Any])
+        #expect(limits["maxBodyBytes"] as? Int == APIV1.sendFeedback.maxBodyBytes)
+        #expect(limits["messageMaxCharacters"] as? Int == APIV1.FeedbackLimits.messageMaxCharacters)
+        #expect(limits["attachmentMaxBytes"] as? Int == APIV1.FeedbackLimits.attachmentMaxBytes)
+        // The app's own limit on her words is inside the backend's.
+        #expect(FeedbackRules.maximumLength <= APIV1.FeedbackLimits.messageMaxCharacters)
+        // A screenshot at the limit still fits in a body once it is base64 (4/3 larger).
+        #expect(APIV1.FeedbackLimits.attachmentMaxBytes * 4 / 3 + 4_096 <= APIV1.sendFeedback.maxBodyBytes)
+    }
+
     @Test func errorCodesAndStatusesMatch() throws {
         let listed = try #require(Self.contract()["errors"] as? [[String: Any]])
         let fromContract = Dictionary(
@@ -91,6 +114,8 @@ struct ContractTests {
         ("v1/examples/deletion-status.request.json", "deletionStatusRequest"),
         ("v1/examples/deletion.response.json", "deletionStatus"),
         ("v1/examples/deletion-status.response.json", "deletionStatus"),
+        ("v1/examples/feedback.request.json", "feedbackRequest"),
+        ("v1/examples/feedback.response.json", "feedbackReceipt"),
     ])
     func goldenExamplesRoundTrip(path: String, type: String) throws {
         // Decoding then encoding gives the same JSON: the Swift types neither drop nor add a field.
@@ -115,6 +140,8 @@ struct ContractTests {
             case "deletionStatusRequest":
                 try encoder.encode(decoder.decode(APIV1.DeletionStatusRequest.self, from: original))
             case "deletionStatus": try encoder.encode(decoder.decode(APIV1.DeletionStatus.self, from: original))
+            case "feedbackRequest": try encoder.encode(decoder.decode(APIV1.FeedbackRequest.self, from: original))
+            case "feedbackReceipt": try encoder.encode(decoder.decode(APIV1.FeedbackReceipt.self, from: original))
             default: try encoder.encode(decoder.decode(APIV1.ErrorEnvelope.self, from: original))
             }
         #expect(try Self.sameJSON(original, reencoded), "\(path)")

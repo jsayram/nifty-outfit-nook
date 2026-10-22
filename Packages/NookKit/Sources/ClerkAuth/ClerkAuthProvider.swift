@@ -99,6 +99,8 @@ public enum RealGateway {
     public struct Services: Sendable {
         public let account: GatewayAccountService
         public let paid: GatewayPaidActionService
+        /// 24d: notes to the support queue.
+        public let feedback: GatewayFeedbackService
     }
 
     @MainActor
@@ -114,6 +116,7 @@ public enum RealGateway {
         return Services(
             account: GatewayAccountService(
                 auth: auth, client: client, appVersion: appVersion, attestation: attestation),
-            paid: GatewayPaidActionService(client: client, attestation: attestation))
+            paid: GatewayPaidActionService(client: client, attestation: attestation),
+            feedback: GatewayFeedbackService(auth: auth, client: client))
     }
 }
