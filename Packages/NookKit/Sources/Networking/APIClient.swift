@@ -127,6 +127,20 @@ public struct RetryPolicy: Sendable, Equatable {
     }
 }
 
+/// A clock, reduced to what the client needs: how long it has run, and a sleep. The client reads these instead of `ContinuousClock` itself,
+/// so a test can hand it a clock it advances by hand.
+struct TimeSource: Sendable {
+    /// Time since this source was made.
+    let now: @Sendable () -> Duration
+    let sleep: @Sendable (Duration) async throws -> Void
+
+    init<C: Clock>(_ clock: C) where C.Duration == Duration {
+        let start = clock.now
+        now = { start.duration(to: clock.now) }
+        sleep = { try await clock.sleep(for: $0) }
+    }
+}
+
 /// Sends contract requests to the backend over `URLSession`: the bearer token, one token refresh
 /// on a 401, bounded retries with backoff for safe requests, Retry-After on 429 and 503, and
 /// mapping every other failure to an `APIFailure`. It logs nothing personal and no tokens.
@@ -135,20 +149,31 @@ public final class APIClient: Sendable {
     private let session: URLSession
     private let auth: any AuthProvider
     private let policy: RetryPolicy
+    private let time: TimeSource
     private let sleep: @Sendable (Duration) async throws -> Void
     private let onEvent: @Sendable (APIEvent) -> Void
     private static let logger = Logger(subsystem: "com.jsayram.niftyoutfitnook", category: "gateway")
 
+    /// - Parameters:
+    ///   - clock: what the deadline, each try's time limit and the waits between tries are
+    ///     measured on. The app uses the default, `ContinuousClock`. A test passes a clock it
+    ///     advances by hand, so a timeout happens when the test says so and not when a busy
+    ///     machine is slow.
+    ///   - sleep: how a wait between tries is made. Left out, it sleeps on `clock`; a test passes
+    ///     its own to record the waits without really waiting.
     public init(
         baseURL: URL, session: URLSession, auth: any AuthProvider, policy: RetryPolicy = .standard,
-        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) },
+        clock: any Clock<Duration> = ContinuousClock(),
+        sleep: (@Sendable (Duration) async throws -> Void)? = nil,
         onEvent: @escaping @Sendable (APIEvent) -> Void = { _ in }
     ) {
+        let time = TimeSource(clock)
         self.baseURL = baseURL
         self.session = session
         self.auth = auth
         self.policy = policy
-        self.sleep = sleep
+        self.time = time
+        self.sleep = sleep ?? time.sleep
         self.onEvent = onEvent
     }
 
@@ -200,10 +225,10 @@ public final class APIClient: Sendable {
         }
 
         let timing = policy.timing(for: endpoint)
-        let clock = ContinuousClock()
-        let deadline = clock.now.advanced(by: timing.deadline)
+        let time = time
+        let deadline = time.now() + timing.deadline
         /// Whether a wait of `delay` and then another try can still finish before the deadline.
-        func fits(_ delay: Duration) -> Bool { clock.now.advanced(by: delay) < deadline }
+        func fits(_ delay: Duration) -> Bool { time.now() + delay < deadline }
 
         var attempt = 0
         var sends = 0
@@ -211,7 +236,7 @@ public final class APIClient: Sendable {
         var forceRefresh = false
         while true {
             if Task.isCancelled { throw fail(endpoint, .cancelled) }
-            if clock.now >= deadline { throw fail(endpoint, .timedOut) }
+            if time.now() >= deadline { throw fail(endpoint, .timedOut) }
             attempt += 1
             sends += 1
             var request = URLRequest(url: baseURL.appending(path: endpoint.path))
@@ -255,7 +280,7 @@ public final class APIClient: Sendable {
                 }
             }
             // This try gets its full timeout, or what is left of the call's deadline.
-            let allowed = min(timing.attemptTimeout, clock.now.duration(to: deadline))
+            let allowed = min(timing.attemptTimeout, deadline - time.now())
             request.timeoutInterval = allowed.seconds
 
             onEvent(.sent(endpoint: endpoint.id, attempt: sends))
@@ -398,13 +423,14 @@ public final class APIClient: Sendable {
     /// trickle.
     private func fetch(_ request: URLRequest, within limit: Duration) async throws -> (Data, URLResponse) {
         let session = session
+        let time = time
         let fetched = try await withThrowingTaskGroup(of: Fetched?.self) { group in
             group.addTask {
                 let (data, response) = try await session.data(for: request)
                 return Fetched(data: data, response: response)
             }
             group.addTask {
-                try await Task.sleep(for: limit)
+                try await time.sleep(limit)
                 return nil
             }
             defer { group.cancelAll() }

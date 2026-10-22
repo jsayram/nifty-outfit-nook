@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import NookTestSupport
 import Synchronization
 import Testing
 
@@ -21,18 +22,22 @@ struct GatewayClientTests {
     let backend = FakeBackend()
     let auth = FakeAuthProvider(subject: "lily")
     let recorder = Recorder()
+    /// The client's clock. It only moves when a test advances it, or when the client waits between
+    /// tries (the wait is recorded and the clock jumps ahead by it), so no timeout here depends
+    /// on how fast the machine is. The limits are long so the request's own limit, which
+    /// URLSession counts in real time, never gets a chance to fire.
+    let clock = ManualClock()
 
-    func service(policy: RetryPolicy = .init(requestTimeout: .seconds(5)), realSleep: Bool = false)
-        -> GatewayAccountService
-    {
+    func service(policy: RetryPolicy = .init(requestTimeout: .seconds(60))) -> GatewayAccountService {
         let recorder = recorder
+        let clock = clock
         let client = APIClient(
             baseURL: backend.baseURL,
             session: APIClient.makeSession(policy: policy, protocolClasses: [FakeBackendURLProtocol.self]),
-            auth: auth, policy: policy,
+            auth: auth, policy: policy, clock: clock,
             sleep: { duration in
                 recorder.wait(duration)
-                if realSleep { try await Task.sleep(for: duration) } else { try Task.checkCancellation() }
+                try await clock.skip(duration)
             },
             onEvent: { recorder.record($0) })
         return GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0")
@@ -197,30 +202,11 @@ struct GatewayClientTests {
 
     @Test(.timeLimit(.minutes(1)))
     func aBackendThatNeverAnswersTimesOutAfterBoundedTries() async throws {
-        let policy = RetryPolicy(maxAttempts: 2, requestTimeout: .milliseconds(500))
+        let policy = RetryPolicy(maxAttempts: 2, requestTimeout: .seconds(30), overallDeadline: .seconds(300))
         let account = service(policy: policy)
         try await auth.signInWithApple()
         backend.setMode(.timeout)
-        let started = ContinuousClock.now
-        await expectProblem(.timedOut) { () async throws(AccountProblem) in try await account.whoAmI() }
-        #expect(backend.requestCount == 2)
-        #expect(ContinuousClock.now - started < .seconds(10))
-    }
-
-    @Test func aSlowBackendStillAnswers() async throws {
-        let account = service()
-        _ = try await account.signIn()
-        backend.setMode(.slow(seconds: 0.3))
-        let started = ContinuousClock.now
-        _ = try await account.whoAmI()
-        #expect(ContinuousClock.now - started >= .milliseconds(300))
-    }
-
-    @Test(.timeLimit(.minutes(1)))
-    func cancellingACallStopsIt() async throws {
-        let account = service()
-        _ = try await account.signIn()
-        backend.setMode(.slow(seconds: 20))
+        // Each try runs until its limit, which the test fires once the try is under way.
         let call = Task { () async -> AccountProblem? in
             do {
                 _ = try await account.whoAmI()
@@ -229,7 +215,37 @@ struct GatewayClientTests {
                 return error as? AccountProblem
             }
         }
-        try await Task.sleep(for: .milliseconds(150))
+        for attempt in 1...2 {
+            while backend.requestCount < attempt { try await Task.sleep(for: .milliseconds(1)) }
+            await clock.advanceToNextSleeper()
+        }
+        #expect(await call.value == .timedOut)
+        #expect(backend.requestCount == 2)
+    }
+
+    @Test func aSlowBackendStillAnswers() async throws {
+        let account = service()
+        _ = try await account.signIn()
+        backend.setMode(.slow(seconds: 0.3))
+        _ = try await account.whoAmI()
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func cancellingACallStopsIt() async throws {
+        let account = service()
+        _ = try await account.signIn()
+        let before = backend.requestCount
+        backend.setMode(.slow(seconds: 3600))
+        let call = Task { () async -> AccountProblem? in
+            do {
+                _ = try await account.whoAmI()
+                return nil
+            } catch {
+                return error as? AccountProblem
+            }
+        }
+        // Once the request has reached the backend, which is not going to answer.
+        while backend.requestCount == before { try await Task.sleep(for: .milliseconds(1)) }
         call.cancel()
         let problem = await call.value
         #expect(problem == .cancelled)

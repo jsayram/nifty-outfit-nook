@@ -106,7 +106,7 @@ let package = Package(
         // Contract/ is a byte-identical copy of the backend repo's contract (its golden examples);
         // the tests check the Swift types and the fake backend against it.
         .testTarget(
-            name: "NetworkingTests", dependencies: ["Networking", "Models"],
+            name: "NetworkingTests", dependencies: ["Networking", "Models", "NookTestSupport"],
             resources: [.copy("Contract")], swiftSettings: strictSettings),
         .testTarget(
             name: "PersistenceSpikeTests", dependencies: ["Models", "Fixtures", "NookTestSupport"],
