@@ -86,6 +86,16 @@ Apple counts under 5 ms/s as good. Every steady run is well under it, and memory
 
 **Needs a device:** the same run on Lily's iPhone 12 for hitches and memory on an A14, the Data Protection class on the thumbnail folder, and HEIC as above.
 
+## Scale checks (Phase 32a)
+
+Measured on 22 October 2026 on the "32a iPhone 12" simulator (iOS 26.5, Xcode 27.1, Debug build) with 5,000 pieces, 2,000 saved looks plus 1,000 unsaved results, and 500 try-on pictures (`ScaleData` in `NookTestSupport`). The tests are `ScaleBrowsingTests` (Closet and Saved Looks models), `ScaleStoreTests` (the real store and the backup) and `ScaleDataTests`. They print `SCALE` lines; the numbers and what they mean are in `LOAD_TEST_REPORT.md` in the closet repo. The simulator runs on the Mac's chip, so these are relative numbers; the device list in `DEVICE_TEST_CHECKLIST.md` has what to repeat on a phone.
+
+**The one bug this found:** exporting held every photo in memory until it finished. `BackupArchiveWriter.add` read each photo in 1 MiB pieces with `FileHandle.read(upToCount:)`, and Foundation only frees what that returns when the autorelease pool it runs in drains. An export runs in one pool from start to end, so 1,000 photos of 1.8 MB peaked at 1,789 MB, which would end the app on an iPhone 12. Each piece is now read inside its own pool: the same export peaks at 71 to 76 MB. The earlier export tests used a few small files, so they couldn't see it.
+
+**Not a bug, but worth knowing:** writing 8,500 records through `RecordTable.write` in one save took 57 s (it looks each key up first, and the lookups get slower as the save fills; the scale tests insert new rows directly instead). Nothing in the app writes that many at once: a restore writes the same records in about 5 s, and one edit among 5,000 pieces saves in 2 ms.
+
+Run the heavy part (writes the photos a closet this size would have) with `TEST_RUNNER_NOOK_PERFORMANCE=1 TEST_RUNNER_NOOK_SCALE_PHOTOS=1000 scripts/test.sh "-only-testing:ServicesTests/ScaleStoreTests/backupExportWithPhotos()"`. Add `TEST_RUNNER_NOOK_SCALE_ALL_PIECES=1` to write all 5,000 pieces' records beside the photos (slow). The other scale tests run with the normal suite, with loose bounds (three times as long on CI).
+
 ## Tests
 
 - `ThumbnailCacheTests` (14): made once then read, also after a relaunch; one file per size and large sizes from the image; no metadata; a cutout stays PNG with transparency; left out of backups; the byte limit trims the least recently used; short of space nothing is written but the thumbnail comes; a failed write isn't an error; removing an image removes its thumbnails and strays; only thumbnail names are read; the provider serves small sizes from thumbnails; a photo isn't written when the iPhone would be too full, and the intake then saves nothing; a cutout kept next to its photo.
@@ -93,3 +103,4 @@ Apple counts under 5 ms/s as good. Every steady run is well under it, and memory
 - `SavedPicturesTests.aDeletedPicturesFileGoesWhenItsUndoDoes`, `TryOnModelTests.aPictureThatCantBeKeptLetsGoOfItsFile`, `GarmentImageLoaderTests.theMemoryCacheKeepsToItsByteLimit`.
 - `RestoreTests.replaceIntoAFullCloset…` now deletes the purged piece's pictures first, as the app does, since Undo restore leaves them out.
 - UI, `PhotoClosetScrollTests`: the checkpoint above, skipped unless asked.
+- `ScaleBrowsingTests` (9), `ScaleStoreTests` (3, one only when asked) and `ScaleDataTests` (2): the 5,000-piece checks above (Phase 32a).
