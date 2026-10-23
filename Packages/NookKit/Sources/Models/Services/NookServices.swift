@@ -112,6 +112,10 @@ public struct NookServices: Sendable {
     public var tryOnPipeline: (any TryOnPipeline)?
     /// 33a: her yes to sending try-on photos to the image provider. Erased by Delete my data.
     public var tryOnConsent: any TryOnConsentStore = InMemoryTryOnConsentStore()
+    /// Private iCloud sync (Phase 21b, decision 0004 §5). `nil` hides the iCloud row: it stays
+    /// hidden in every build until Jose makes the container and builds with `NOOK_ICLOUD = YES`
+    /// (docs/icloud.md).
+    public var iCloud: (any ICloudSyncService)?
     /// 33b: checks a photo for use as her try-on photo before she saves it (the same fail-closed
     /// checks try-on runs). `nil` where nothing is checked: the example photo and most tests.
     public var tryOnPhotoChecker: (any TryOnPhotoChecking)?

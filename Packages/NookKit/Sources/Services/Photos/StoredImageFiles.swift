@@ -70,7 +70,7 @@ public struct StoredImageFiles: ImageFiles {
 
     func removeUnusedNow() {
         PhotoFolderLock.run {
-            guard let referenced = referencedIDs() else { return }
+            guard let referenced = referencedIDs(includingSynced: true) else { return }
             let new = NewPhotoFiles.shared.all
             let names = (try? FileManager.default.contentsOfDirectory(atPath: location.photos.path)) ?? []
             var kept: Set<String> = []
@@ -86,9 +86,14 @@ public struct StoredImageFiles: ImageFiles {
     }
 
     /// The photo IDs the store's records point to, or `nil` when the store can't be read.
-    private func referencedIDs() -> Set<String>? {
+    ///
+    /// `includingSynced` keeps photos iCloud sync downloaded (Phase 21b) for the launch sweep: a
+    /// photo can arrive before the piece that points to it. Never for `release`, so a piece deleted
+    /// for good loses its photos at once.
+    private func referencedIDs(includingSynced: Bool = false) -> Set<String>? {
         guard let rows = try? StoreRow.all(in: ModelContext(container)) else { return nil }
         var ids = BackupContents(rows).photoIDs
+        if includingSynced { ids.formUnion(SyncImages.downloaded(in: rows)) }
         // 33a: a try-on job's upload files, which a job resumed after a relaunch sends again. Jobs
         // aren't exported, so they aren't in the export's list.
         for row in rows where row.kind == RecordKind.aiJob.rawValue {

@@ -6,13 +6,15 @@ import Foundation
 // 1. Apple confirms it's her and the backend accepts the deletion. If either fails, nothing is
 //    deleted anywhere, and the screen says why.
 // 2. The backend's steps are read back, a few times if they're still running.
-// 3. Her iCloud copy is deleted (decision 0004 §6; sync isn't built yet, so this is a hook).
+// 3. Her iCloud copy is deleted (decision 0004 §6), when sync was ever on.
+// Delete my data on this iPhone deletes her iCloud copy too, first, then this iPhone (0004 §6).
+// If iCloud can't be reached, that part is pending and runs at the next connected launch.
 // 4. Everything on this iPhone is erased, as Delete my data does.
 // 5. She's signed out and this iPhone's App Attest key is forgotten.
 // Repeating it after a local part failed skips step 1: the backend already has the deletion.
 
-/// Her private iCloud copy, for Delete my account and Delete my data. Sync isn't built yet
-/// (decision 0004), so the app uses `NoICloudCopy`; Phase 21b's sync engine conforms to this.
+/// Her private iCloud copy, for Delete my account and Delete my data. `ICloudSync` (Phase 21b)
+/// conforms; builds without sync (`NOOK_ICLOUD = NO`, the default) use `NoICloudCopy`.
 public protocol ICloudCopyDeletion: Sendable {
     /// Whether sync was ever on, so there may be a copy to delete. When false, the part isn't listed.
     var mayHaveCopy: Bool { get }
@@ -21,7 +23,7 @@ public protocol ICloudCopyDeletion: Sendable {
     func deleteCopy() async -> DeletionOutcome
 }
 
-/// No sync, so no copy: what the app uses until sync is built.
+/// No sync, so no copy: what a build without iCloud uses.
 public struct NoICloudCopy: ICloudCopyDeletion {
     public init() {}
     public var mayHaveCopy: Bool { false }
@@ -58,7 +60,7 @@ public actor AccountDataDeletion: DataDeletionService {
     public nonisolated func parts(in scope: DeletionScope) -> [DataPart] {
         let onDevice = local.parts(in: .thisDevice)
         switch scope {
-        case .thisDevice: return onDevice
+        case .thisDevice: return (iCloud.mayHaveCopy ? [.iCloudCopy] : []) + onDevice
         case .account:
             var remote: [DataPart] = [.serverData, .account, .signInWithApple]
             if iCloud.mayHaveCopy { remote.append(.iCloudCopy) }
@@ -67,7 +69,15 @@ public actor AccountDataDeletion: DataDeletionService {
     }
 
     public func delete(_ scope: DeletionScope) async -> DeletionReport {
-        guard scope == .account else { return await local.delete(scope) }
+        guard scope == .account else {
+            guard iCloud.mayHaveCopy else { return await local.delete(scope) }
+            // Her iCloud copy first, so a pending deletion is saved before this iPhone is erased.
+            let copy = await iCloud.deleteCopy()
+            let onDevice = await local.delete(.thisDevice)
+            return DeletionReport(
+                scope: scope,
+                results: [(.iCloudCopy, copy)] + onDevice.order.map { ($0, onDevice.outcomes[$0] ?? .failed) })
+        }
 
         var deletion: AccountDeletion
         if let accepted {

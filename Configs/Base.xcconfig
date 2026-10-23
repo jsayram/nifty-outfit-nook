@@ -46,6 +46,14 @@ NOOK_SUPPORT_URL = https:/$()/niftyoutfitnook.pages.dev/support
 // Secrets.xcconfig on the Mac that builds, or here once the capability is confirmed.
 NOOK_WEATHERKIT = NO
 
+// Private iCloud sync (Phase 21b, decision 0004 §5). NO hides the iCloud row and signs the app as it
+// is. YES shows the row, runs the real CKSyncEngine against iCloud.com.jsayram.niftyoutfitnook, and adds
+// the iCloud and push entitlements (Configs/NiftyOutfit-ICloud.entitlements and its copies). It needs
+// the container, the App ID's iCloud and Push Notifications capabilities, and the CloudKit schema
+// first: docs/icloud.md has Jose's steps. Set it in Secrets.xcconfig on the Mac that builds, or here
+// once the two-device tests have passed.
+NOOK_ICLOUD = NO
+
 // Optional, ignored by git. Copy Signing.local.xcconfig.example to Signing.local.xcconfig
 // and set DEVELOPMENT_TEAM there to build for a device. Secrets.xcconfig is reserved for
 // non-secret identifiers that shouldn't be public; it never holds a real secret.

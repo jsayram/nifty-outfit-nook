@@ -17,6 +17,7 @@ struct PrivacyScreen: View {
     @State private var showsDeleteData = false
     @State private var showsDeleteAccount = false
     @State private var showsBackups = false
+    @State private var showsICloud = false
     @State private var page: WebsiteLink?
     @State private var weather = WeatherSettingsModel()
     @Environment(\.openURL) private var openURL
@@ -33,6 +34,7 @@ struct PrivacyScreen: View {
         PrivacyPage(
             keepsChanges: services.keepsChanges,
             backups: services.backups == nil ? nil : { showsBackups = true },
+            iCloud: services.iCloud == nil ? nil : { showsICloud = true },
             deleteData: { showsDeleteData = true },
             deleteAccount: isSignedIn ? { showsDeleteAccount = true } : nil,
             open: { page = $0 },
@@ -101,12 +103,16 @@ struct PrivacyScreen: View {
         .navigationDestination(isPresented: $showsBackups) {
             BackupsScreen()
         }
+        .navigationDestination(isPresented: $showsICloud) {
+            ICloudScreen()
+        }
         .fullScreenCover(item: $page) { link in
             SafariView(url: link.url)
                 .ignoresSafeArea()
         }
         // Privacy and terms' quick tour (Phase 16b).
-        .screenTour(PrivacyTour.definition, isReady: !showsDeleteData && !showsBackups && page == nil)
+        .screenTour(
+            PrivacyTour.definition, isReady: !showsDeleteData && !showsBackups && !showsICloud && page == nil)
     }
 
     /// 27a: turning it on shows the consent text first; turning it off withdraws at once.
@@ -158,6 +164,8 @@ struct PrivacyPage: View {
     var keepsChanges = false
     /// Opens Backups (Phase 21b). `nil` hides the row: the debug sample closet has nothing to back up.
     var backups: (() -> Void)?
+    /// Phase 21b: only in a build with iCloud on.
+    var iCloud: (() -> Void)?
     var deleteData: () -> Void = {}
     /// Opens Delete my account (24c). `nil` hides the row: she isn't signed in.
     var deleteAccount: (() -> Void)?
@@ -213,6 +221,15 @@ struct PrivacyPage: View {
             .tourAnchor(PrivacyTour.Anchor.later, label: PrivacyText.laterHeader)
 
             SettingsGroup(header: PrivacyText.yourDataHeader) {
+                if let iCloud {
+                    Button(action: iCloud) {
+                        NookRow(
+                            ICloudText.title, subtitle: ICloudText.rowDetail, systemImage: "icloud",
+                            accessory: .chevron)
+                    }
+                    .buttonStyle(.nookRow)
+                    .accessibilityIdentifier("privacy.iCloud")
+                }
                 if let backups {
                     Button(action: backups) {
                         NookRow(

@@ -7,15 +7,25 @@ PRODUCT_BUNDLE_IDENTIFIER = com.jsayram.niftyoutfitnook
 // UI code defaults to the main actor. Background work is explicit.
 SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor
 
-// The entitlements file follows NOOK_WEATHERKIT (Base.xcconfig, Phase 29): the one with WeatherKit
-// only when the switch is YES. Any other value picks no file and fails the build, not the app.
-// Debug builds use a copy that adds get-task-allow (Phase 30a): StoreKit's local testing on the
-// simulator refuses an app without it ("not installed for development"). Release never has it.
-NOOK_ENTITLEMENTS_FILE_NO_Release = NiftyOutfitNook/NiftyOutfitNook.entitlements
-NOOK_ENTITLEMENTS_FILE_YES_Release = Configs/NiftyOutfit-WeatherKit.entitlements
-NOOK_ENTITLEMENTS_FILE_NO_Debug = Configs/NiftyOutfitNook-Debug.entitlements
-NOOK_ENTITLEMENTS_FILE_YES_Debug = Configs/NiftyOutfit-WeatherKit-Debug.entitlements
-CODE_SIGN_ENTITLEMENTS = $(NOOK_ENTITLEMENTS_FILE_$(NOOK_WEATHERKIT)_$(CONFIGURATION))
+// The entitlements file follows NOOK_WEATHERKIT (Phase 29) and NOOK_ICLOUD (Phase 21b), both in
+// Base.xcconfig: WeatherKit's and iCloud's entitlements only when their switch is YES. Any other
+// value picks no file and fails the build, not the app. Debug builds use a copy that adds
+// get-task-allow (Phase 30a): StoreKit's local testing on the simulator refuses an app without it
+// ("not installed for development"). Release never has it. The names read WEATHERKIT_ICLOUD_CONFIG.
+NOOK_ENTITLEMENTS_FILE_NO_NO_Release = NiftyOutfitNook/NiftyOutfitNook.entitlements
+NOOK_ENTITLEMENTS_FILE_YES_NO_Release = Configs/NiftyOutfit-WeatherKit.entitlements
+NOOK_ENTITLEMENTS_FILE_NO_YES_Release = Configs/NiftyOutfit-ICloud.entitlements
+NOOK_ENTITLEMENTS_FILE_YES_YES_Release = Configs/NiftyOutfit-WeatherKit-ICloud.entitlements
+NOOK_ENTITLEMENTS_FILE_NO_NO_Debug = Configs/NiftyOutfitNook-Debug.entitlements
+NOOK_ENTITLEMENTS_FILE_YES_NO_Debug = Configs/NiftyOutfit-WeatherKit-Debug.entitlements
+NOOK_ENTITLEMENTS_FILE_NO_YES_Debug = Configs/NiftyOutfit-ICloud-Debug.entitlements
+NOOK_ENTITLEMENTS_FILE_YES_YES_Debug = Configs/NiftyOutfit-WeatherKit-ICloud-Debug.entitlements
+CODE_SIGN_ENTITLEMENTS = $(NOOK_ENTITLEMENTS_FILE_$(NOOK_WEATHERKIT)_$(NOOK_ICLOUD)_$(CONFIGURATION))
+// iCloud sync (Phase 21b): CKSyncEngine needs the remote-notification background mode for its
+// silent pushes. There's no build setting for UIBackgroundModes, so Configs/AppInfo.plist is
+// preprocessed and includes the key only when NOOK_ICLOUD = YES.
+INFOPLIST_PREPROCESS = YES
+INFOPLIST_PREPROCESSOR_DEFINITIONS = NOOK_ICLOUD_$(NOOK_ICLOUD)=1
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
 ENABLE_PREVIEWS = YES

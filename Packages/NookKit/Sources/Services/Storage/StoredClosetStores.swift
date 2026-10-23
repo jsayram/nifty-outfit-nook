@@ -371,3 +371,40 @@ public actor StoredTryOnPictureStore: TryOnPictureStore {
         return byID
     }
 }
+
+// MARK: iCloud sync (Phase 21b)
+
+/// A store that keeps what it read in memory. iCloud sync writes such a kind through the actor
+/// that owns it, so her edits and changes from another device never interleave, and the actor
+/// forgets what it kept, so the next read sees the change.
+protocol SyncWritableStore: Actor {
+    func applySynced<T: Sendable>(_ body: @Sendable (ModelContext) throws -> T) throws(StoreError) -> T
+}
+
+extension StoredClosetStore: SyncWritableStore {
+    func applySynced<T: Sendable>(_ body: @Sendable (ModelContext) throws -> T) throws(StoreError) -> T {
+        defer { cache = nil }
+        return try storeCall { try body(modelContext) }
+    }
+}
+
+extension StoredLookStore: SyncWritableStore {
+    func applySynced<T: Sendable>(_ body: @Sendable (ModelContext) throws -> T) throws(StoreError) -> T {
+        defer { cache = nil }
+        return try storeCall { try body(modelContext) }
+    }
+}
+
+extension StoredSuitcaseStore: SyncWritableStore {
+    func applySynced<T: Sendable>(_ body: @Sendable (ModelContext) throws -> T) throws(StoreError) -> T {
+        defer { cache = nil }
+        return try storeCall { try body(modelContext) }
+    }
+}
+
+extension StoredTryOnPictureStore: SyncWritableStore {
+    func applySynced<T: Sendable>(_ body: @Sendable (ModelContext) throws -> T) throws(StoreError) -> T {
+        defer { cache = nil }
+        return try storeCall { try body(modelContext) }
+    }
+}
