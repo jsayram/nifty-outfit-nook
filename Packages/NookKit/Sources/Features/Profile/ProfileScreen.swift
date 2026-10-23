@@ -13,6 +13,8 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     case help
     case feedback
     case privacy
+    /// Private iCloud sync (Phase 21b). Only in a build with iCloud on (`NookServices.iCloud`).
+    case iCloud
     /// Export a copy and Restore (Phase 21b). Only where there's a store to back up.
     case backups
     case deleteData
@@ -20,9 +22,12 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
     /// The Help and privacy group, in order.
     static let helpAndPrivacy: [ProfileDestination] = [.accessibility, .help, .feedback, .privacy, .deleteData]
 
-    /// The group with Backups before Delete my data, when her closet is in the store.
-    static func helpAndPrivacy(showsBackups: Bool) -> [ProfileDestination] {
-        showsBackups ? [.accessibility, .help, .feedback, .privacy, .backups, .deleteData] : helpAndPrivacy
+    /// The group with iCloud and Backups before Delete my data, when they're there.
+    static func helpAndPrivacy(showsBackups: Bool, showsICloud: Bool = false) -> [ProfileDestination] {
+        var destinations: [ProfileDestination] = [.accessibility, .help, .feedback, .privacy]
+        if showsICloud { destinations.append(.iCloud) }
+        if showsBackups { destinations.append(.backups) }
+        return destinations + [.deleteData]
     }
 
     var id: Self { self }
@@ -35,6 +40,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: ProfileText.helpRow
         case .feedback: ProfileText.feedbackRow
         case .privacy: ProfileText.privacyRow
+        case .iCloud: ICloudText.title
         case .backups: BackupsText.title
         case .deleteData: ProfileText.deleteDataRow
         }
@@ -48,6 +54,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: "questionmark.circle"
         case .feedback: "bubble.left"
         case .privacy: "hand.raised"
+        case .iCloud: "icloud"
         case .backups: "externaldrive"
         case .deleteData: "trash"
         }
@@ -62,6 +69,7 @@ nonisolated enum ProfileDestination: Hashable, Identifiable, Sendable {
         case .help: "help"
         case .feedback: "feedback"
         case .privacy: "privacy"
+        case .iCloud: "iCloud"
         case .backups: "backups"
         case .deleteData: "deleteData"
         }
@@ -133,6 +141,7 @@ struct ProfileScreen: View {
         ProfilePage(
             model: model,
             showsBackups: services.backups != nil,
+            showsICloud: services.iCloud != nil,
             actions: ProfileActions(
                 retry: { Task { await model.load(from: services, locale: locale) } },
                 editName: { sheet = .name },
@@ -175,6 +184,7 @@ struct ProfileScreen: View {
             case .help: HelpScreen()
             case .feedback: FeedbackScreen()
             case .privacy: PrivacyScreen()
+            case .iCloud: ICloudScreen()
             case .backups: BackupsScreen()
             case .deleteData: DeleteDataScreen()
             }

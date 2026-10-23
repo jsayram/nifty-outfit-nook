@@ -135,6 +135,21 @@ public enum RecordKind: String, CaseIterable, Sendable {
     case aiJob
     /// An Ask stylist conversation (Phase 27c), by thread ID. Exported and restored like looks.
     case stylistThread
+    // iCloud sync's bookkeeping (Phase 21b, decision 0004 §5, THREAT_MODEL D8(d)): in the store,
+    // with its file protection, saved after the records it describes. Never exported or synced.
+    /// Whether sync is on, for which account, and the engine's saved state. One record.
+    case syncState
+    /// Per synced record, by record name: its system fields and the version both sides last
+    /// agreed on, for three-way merges.
+    case syncRecord
+    /// A record from another device saved by a newer app version, by record name: kept as it
+    /// came and never overwritten, until an update can read it.
+    case syncHeld
+    /// A value that lost a sync merge, by record name, kept for her to review.
+    case syncConflict
+    /// Delete my data's request to delete the iCloud copy, content-free (zone names and the
+    /// hashed account). Survives Delete my data's erase, so it runs at the next connected launch.
+    case syncPendingDeletion
 
     /// The key of a kind that has one record.
     public static let singleKey = "only"

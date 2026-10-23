@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import SwiftData
+import Synchronization
 
 /// Reading and writing one kind of record, for the store actors. Each actor owns its
 /// `ModelContext`; this only says how a kind's rows are read and written in it.
@@ -94,6 +95,28 @@ func saveChanges(in context: ModelContext, _ changes: () throws -> Void) throws(
     } catch {
         context.rollback()
         throw (error as? StoreError) ?? .unavailable
+    }
+    StoreSaveSignal.post()
+}
+
+/// Tells whoever listens that a store save went through (iCloud sync, Phase 21b, which then
+/// looks for changes to upload). Nobody listens unless sync is built into the app.
+public enum StoreSaveSignal {
+    private static let listeners = Mutex<[UUID: @Sendable () -> Void]>([:])
+
+    /// Starts listening. The listener runs on the saving thread, so it should only schedule work.
+    public static func listen(_ listener: @escaping @Sendable () -> Void) -> UUID {
+        let id = UUID()
+        listeners.withLock { $0[id] = listener }
+        return id
+    }
+
+    public static func stopListening(_ id: UUID) {
+        _ = listeners.withLock { $0.removeValue(forKey: id) }
+    }
+
+    static func post() {
+        for listener in listeners.withLock({ Array($0.values) }) { listener() }
     }
 }
 

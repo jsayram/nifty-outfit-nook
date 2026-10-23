@@ -337,9 +337,27 @@ Export, Check a copy, Restore, Undo restore and the recovery screen's export are
 
 **Built in Phase 22b:** a piece deleted for good loses its images from the restore's safety copy at once (no `purged.json` is needed: Undo restore already leaves out pieces with a deletion marker, and now their try-on pictures too); thumbnails sit in `Library/Caches/Thumbnails`, outside every backup (`docs/image-storage.md`).
 
-**Not built yet:** iCloud sync and everything in section 5 (no container); the iCloud copy in Delete my data (section 6); export carrying on in the background (`BGContinuedProcessingTask`) and progress counts, since closets have no photos until 22a; Try again and Send feedback on the recovery screen.
+**Not built yet:** export carrying on in the background (`BGContinuedProcessingTask`) and progress counts, since closets have no photos until 22a; Try again and Send feedback on the recovery screen.
 
 **The test plan, where it stands.** Automated and passing: round trips of the demo (every kind of record, three photos), the 2,400-piece closet and an empty closet; a wrong passphrase; one changed byte in five places, a cut file, an extra byte and swapped blocks; a file that isn't a copy, a newer prologue, manifest and payload version; crafted archives with `..`, an absolute path, a link, too many entries, a file bigger than the manifest says, an unlisted file, a missing file, a changed file, too little space, and records that fail their checks; the format 1 fixture file; nothing about her in the clear; what's left out; the passphrase never written; Replace into a full closet with Undo bringing back every record and photo; Add what's missing; deletion markers both ways; a kill at each of six restore steps for both modes, and during Undo; the safety copy left out of backups, expired after 7 days and removed by Delete my data; too little space for the safety copy or the export. Parked, waiting on Jose: every **[device]** and **[iCloud]** item above, the sync tests, and a store copy from an older schema (it can only run once the app has a real second schema, since a test-only version 2 in the same process makes SwiftData map the shared model to it, as 20a found).
+
+## Built in Phase 21b: iCloud sync, against a stand-in (22 October 2026)
+
+Section 5 and the iCloud part of section 6 are app code (`Services/Sync`, `Features/Settings/ICloud`), tested against an in-memory stand-in for CloudKit and `CKSyncEngine`, and **off**: no row and no CloudKit call in any build until `NOOK_ICLOUD = YES` (`docs/icloud.md`, with Jose's steps for the container, the schema and the device tests). No entitlement is in a default build. Decision 2 keeps the `Me` zone off; the other open decisions use the defaults suggested above.
+
+**As designed:** `CKSyncEngine`, wrapped behind a protocol; one encrypted payload per record (`payload`, `payloadVersion`, `tombstone` in `encryptedValues`, nothing else plain but the record name, type and system fields); images as separate `Image` records with a `CKAsset`, written once; `Closet`, `Me` and `Control` zones; three-way merges with the 20a rules, removal and restriction winning, what lost kept for review; newer payload versions held and never overwritten; every account event in the table above with its response, and nothing ever sent unless the account signed in is the closet's; the restored-device marker in the Keychain; the engine state saved in the store after the records; Delete my data deleting the zones first after writing `SyncGeneration`, pending and run first at the next connected launch when offline, and other devices asking before they erase.
+
+**Changed from the design, and why:**
+
+- **What's pending is worked out from the store, not tracked.** Each look compares every synced row with the version both sides last agreed on, so an engine reset, a crash or a restore can't lose a change. Compared as values, since JSON from sets isn't byte-stable.
+- **Record names are `<kind>.<key>`** (the row's stable ID with its kind), and two record types were added for kinds that came later: `AppState` (onboarding and tours) and `StylistThread` (27c).
+- **Every content record gets a tombstone** when it goes, not only pieces, so a stale device can't bring back a look or a suitcase either. They're content-free and stay.
+- **Her usual fit counts as body data** and stays on the phone with the measurements, the more careful reading of "fit notes about her body".
+- **Conflicts are `syncConflict` records** (`StoredSyncConflict`), the sync counterpart of 21b's copies kept for review, with the fields that clashed. A deletion that beat an edit keeps no content.
+- **Writes from iCloud go through the store actor that owns the kind** when it keeps values in memory, so her edits and remote changes never interleave.
+- **Delete my data on this iPhone** (not only Delete my account) now lists and deletes the iCloud copy first, as section 6 says.
+
+**Not built yet:** the safety copy before the first merge and Undo iCloud merge (section 1), a screen to review conflicts (a count only, decision 7), the onboarding step and Get my closet from iCloud (decision 5), and a body data switch (decision 2). Every **[iCloud]** and **[device]** item above waits on the container and the test accounts.
 
 ## Decisions for Jose
 

@@ -106,6 +106,8 @@ public final class NookStorage: Sendable {
             (.looks, aiJobs), (.looks, stylistThreads), (.drafts, drafts), (.drafts, lookDrafts),
             (.drafts, feedbackDrafts), (.pictures, pictures), (.looks, looks), (.suitcases, suitcases),
             (.closet, closet), (.profile, profile),
+            // iCloud sync's bookkeeping (Phase 21b), all but a pending iCloud deletion.
+            (.profile, SyncStateEraser(container: container)),
         ]
         if let location {
             stores.append((.closet, StoreSafetyCopies(location: location)))

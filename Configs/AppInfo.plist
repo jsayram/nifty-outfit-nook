@@ -26,6 +26,15 @@
 	<true/>
 	<key>NookWeatherKitEnabled</key>
 	<string>$(NOOK_WEATHERKIT)</string>
+	<!-- Private iCloud sync (Phase 21b): from NOOK_ICLOUD in Configs/Base.xcconfig. -->
+	<key>NookICloudEnabled</key>
+	<string>$(NOOK_ICLOUD)</string>
+#if NOOK_ICLOUD_YES
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+#endif
 	<!-- Picture packs (Phase 30b): StoreKit keeps consumables in the transaction history, so an
 	     unfinished pack stays in Transaction.unfinished until the server has credited it. -->
 	<key>SKIncludeConsumableInAppPurchaseHistory</key>

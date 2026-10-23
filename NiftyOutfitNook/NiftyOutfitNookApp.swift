@@ -238,16 +238,22 @@ struct NiftyOutfitNookApp: App {
                     AppDiagnostics.install(into: &services)
                     // Delete my data, and Delete my account (Phase 24c) when she's signed in. The
                     // jobs stop first, so none writes a look after the looks are gone.
+                    let local = LocalDataDeletion(
+                        stores: [(.looks, AIJobsEraser(keptJobs))] + storage.erasableData + [
+                            (.drafts, AppDiagnostics.log),
+                            (.profile, tours), (.profile, services.weatherSettings),
+                            (.profile, services.stylistConsent), (.profile, services.tryOnConsent),
+                            (.profile, jobNotifier),
+                            (.profile, onboarding),
+                        ])
+                    // Phase 21b: private iCloud sync, only in a build with NOOK_ICLOUD = YES. Delete
+                    // my data then deletes her iCloud copy first.
+                    let iCloud = AppICloud.sync(storage: storage) {
+                        await local.delete(.thisDevice).isLocalComplete
+                    }
+                    services.iCloud = iCloud
                     services.deletion = AccountDataDeletion(
-                        local: LocalDataDeletion(
-                            stores: [(.looks, AIJobsEraser(keptJobs))] + storage.erasableData + [
-                                (.drafts, AppDiagnostics.log),
-                                (.profile, tours), (.profile, services.weatherSettings),
-                                (.profile, services.stylistConsent), (.profile, services.tryOnConsent),
-                                (.profile, jobNotifier),
-                                (.profile, onboarding),
-                            ]),
-                        account: account)
+                        local: local, account: account, iCloud: iCloud ?? NoICloudCopy())
                     services.backups = storage.backups
                     services.account = account
                     // 32b (L9): a Release build with no backend settings says so; nothing is simulated.

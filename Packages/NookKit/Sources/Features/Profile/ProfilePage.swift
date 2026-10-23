@@ -26,6 +26,8 @@ struct ProfilePage: View {
     let model: ProfileModel
     /// Backups shows when her closet is in the store (Phase 21b).
     var showsBackups = false
+    /// Phase 21b: only in a build with iCloud on.
+    var showsICloud = false
     var actions = ProfileActions()
 
     @Environment(\.closetIsStillImage) private var isStillImage
@@ -142,7 +144,8 @@ struct ProfilePage: View {
 
     private var help: some View {
         group(ProfileText.helpSection) {
-            ForEach(ProfileDestination.helpAndPrivacy(showsBackups: showsBackups), id: \.self) { destination in
+            ForEach(ProfileDestination.helpAndPrivacy(showsBackups: showsBackups, showsICloud: showsICloud), id: \.self)
+            { destination in
                 row(
                     destination.title, systemImage: destination.systemImage,
                     identifier: "profile.\(destination.identifier)"
