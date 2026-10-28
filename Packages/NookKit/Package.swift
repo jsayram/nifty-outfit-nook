@@ -37,7 +37,7 @@ let package = Package(
     // product, only in the ClerkAuth target, pinned exactly (vetting in
     // docs/decisions/0005-gateway-and-identity.md). Never add another without written approval.
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.7"),
         .package(url: "https://github.com/clerk/clerk-ios", exact: "1.6.1"),
     ],
     targets: [
