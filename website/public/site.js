@@ -23,3 +23,29 @@
     });
   }
 })();
+
+(() => {
+  'use strict';
+  const viewer = document.getElementById('capture-viewer');
+  if (!viewer || typeof viewer.showModal !== 'function') return;
+  const image = document.getElementById('capture-viewer-image');
+  const title = document.getElementById('capture-viewer-title');
+  let source;
+  document.querySelectorAll('a.capture-open').forEach(link => {
+    link.addEventListener('click', event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      source = link;
+      image.src = link.href;
+      image.alt = link.querySelector('img').alt;
+      title.textContent = link.closest('figure')?.querySelector('figcaption')?.textContent || 'App preview';
+      viewer.showModal();
+    });
+  });
+  viewer.addEventListener('close', () => source?.focus({preventScroll:true}));
+  viewer.addEventListener('click', event => {
+    if (event.target !== viewer) return;
+    const bounds = viewer.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) viewer.close();
+  });
+})();
