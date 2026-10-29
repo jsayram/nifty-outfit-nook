@@ -849,7 +849,7 @@
     "A photo of your body, without your face and on a plain backdrop, and that look’s piece photos, only when you tap Try it on. Your face never leaves your iPhone." : {
       "comment" : "Privacy and terms: under the try-on switch"
     },
-    "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+    "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Try-on consent: the approved disclosure, word for word"
     },
     "A piece no longer in your closet" : {
@@ -1029,7 +1029,7 @@
     "Never sent: your face, your room, your measurements, your notes, your name." : {
       "comment" : "Try-on consent"
     },
-    "Never sent: your photos, your name, your measurements or weight, your location." : {
+    "Never sent: your photos, your face, your name, your location." : {
       "comment" : "Stylist consent: what is never sent"
     },
     "New ideas" : {
@@ -1062,9 +1062,6 @@
     "Off: the picture stays on this iPhone." : {
       "comment" : "Report sheet: under Include the picture, off"
     },
-    "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
-      "comment" : "Under the privacy walkthrough and See what was sent (33c)"
-    },
     "On your phone" : {
       "comment" : "Privacy walkthrough: under the lock (33c)"
     },
@@ -1083,7 +1080,7 @@
     "Payment problem" : {
       "comment" : "Profile: Styling access row value"
     },
-    "Piece descriptions, the occasion and the weather go to Anthropic when you ask. Never your photos, name, measurements or location." : {
+    "Piece descriptions, the occasion, the weather and, when they help, your measurements and weight go to Anthropic when you ask. Never your photos, face, name or location." : {
       "comment" : "Privacy and terms: under the stylist switch"
     },
     "Purchases are turned off on this iPhone in Screen Time." : {
@@ -1386,7 +1383,7 @@
     "They leave your history after sending. A look you saved stays saved." : {
       "comment" : "Report sheet: under Hide these looks"
     },
-    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
+    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on)." : {
       "comment" : "Try-on consent"
     },
     "This happens on your iPhone. Nothing has been sent yet." : {
@@ -1496,7 +1493,7 @@
     "What’s it about?" : {
       "comment" : "Report sheet: above the subject choice"
     },
-    "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat." : {
+    "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, your recent looks so ideas don’t repeat, and your height, measurements and weight when they help with the request, like your inseam for trousers." : {
       "comment" : "Stylist consent: what is sent"
     },
     "What’s wrong?" : {
@@ -9491,7 +9488,7 @@
     "Your face never leaves your iPhone. Before anything is sent, your iPhone covers your head and hair and puts you on a plain studio backdrop. If it can’t do that, nothing is sent." : {
       "comment" : "Try-on consent"
     },
-    "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+    "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Under every try-on picture (33a)"
     },
     "Your favourite outfits" : {

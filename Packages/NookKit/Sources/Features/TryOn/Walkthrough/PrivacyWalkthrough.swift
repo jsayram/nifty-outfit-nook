@@ -172,12 +172,4 @@ nonisolated enum WalkthroughText {
     static var skip: String {
         String(localized: "Skip", bundle: .module, comment: "Privacy walkthrough: ends it early on a replay (33c)")
     }
-
-    /// Under the animation, with the approved line: what our server does on the way.
-    static var serverNote: String {
-        String(
-            localized:
-                "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them.",
-            bundle: .module, comment: "Under the privacy walkthrough and See what was sent (33c)")
-    }
 }

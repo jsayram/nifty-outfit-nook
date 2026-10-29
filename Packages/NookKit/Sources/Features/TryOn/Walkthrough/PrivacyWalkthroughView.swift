@@ -47,11 +47,6 @@ struct PrivacyWalkthroughView: View {
                 .foregroundStyle(.nook.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text(WalkthroughText.serverNote)
-                .nookTextStyle(.note)
-                .foregroundStyle(.nook.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
 
             if model.canSkip {
                 NookButton(WalkthroughText.skip, kind: .soft, fillsWidth: true) {

@@ -14,9 +14,10 @@ import Synchronization
 ///
 /// Data tier: **Personal**. Kept on the iPhone only; erased by Delete my data.
 public struct StylistConsent: Codable, Hashable, Sendable {
-    /// The consent text in this app version: Anthropic, version A of the in-app privacy text
-    /// (no measurements or weight are sent).
-    public static let currentVersion = "stylist-1"
+    /// The consent text in this app version: Anthropic, naming her height, measurements and
+    /// weight (D10, 29 October 2026). `stylist-1` was version A, which promised they never go; a
+    /// yes to it is no longer current, so she's asked again.
+    public static let currentVersion = "stylist-2"
 
     public var version: String
     public var agreedAt: Date
