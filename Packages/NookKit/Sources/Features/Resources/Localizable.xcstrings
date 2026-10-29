@@ -1005,6 +1005,9 @@
     "It’s wrong or offensive" : {
       "comment" : "Report sheet: reason"
     },
+    "I’m 18 or older" : {
+      "comment" : "Sign-in sheet: age confirmation switch"
+    },
     "Just you in the picture, please." : {
       "comment" : "Try-on camera hint"
     },
@@ -1067,6 +1070,9 @@
     },
     "On your phone" : {
       "comment" : "Privacy walkthrough: under the lock (33c)"
+    },
+    "Online features are for adults. Sign in with Apple works once this is on." : {
+      "comment" : "Sign-in sheet: under the age confirmation switch"
     },
     "Only needed for cloud styling, try-on pictures and styling access." : {
       "comment" : "Profile: under Sign in, signed out"
