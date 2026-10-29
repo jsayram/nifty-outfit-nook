@@ -439,10 +439,13 @@ struct TwoDeviceICloudTests {
         #expect(try updated.conflicts().map(\.key) == [key])
     }
 
-    @Test("Body data stays on the device while decision 2 keeps the Me zone off")
+    @Test("With the fallback switch, body data stays on the device and the Me zone stays off")
     func bodyDataStaysHere() async throws {
         let pair = try SyncPair()
         defer { pair.cleanUp() }
+        // The fallback if App Review 5.1.3(ii) rejects body data in iCloud (D11).
+        await pair.phone.sync.setIncludesBodyData(false)
+        await pair.iPad.sync.setIncludesBodyData(false)
         await pair.turnOnBoth()
         let photoID = UUID().uuidString
         try BackupLocation.prepare(pair.phone.location.photos, backedUp: true)
@@ -471,13 +474,13 @@ struct TwoDeviceICloudTests {
         #expect(try await pair.phone.storage.profile.profile().measurements.height == Length(160, .centimeters))
     }
 
-    @Test("With decision 2's second switch on, body data and the try-on photo go in the Me zone only")
+    @Test("Body data and the try-on photo sync, in the Me zone only (D11)")
     func bodyDataInMeZone() async throws {
         let pair = try SyncPair()
         defer { pair.cleanUp() }
         await pair.turnOnBoth()
-        await pair.phone.sync.setIncludesBodyData(true)
-        await pair.iPad.sync.setIncludesBodyData(true)
+        #expect(await pair.phone.status().includesBodyData)
+        #expect(await pair.iPad.status().includesBodyData)
         let photoID = UUID().uuidString
         try BackupLocation.prepare(pair.phone.location.photos, backedUp: true)
         try Data(repeating: 7, count: 3_000).write(to: try #require(pair.phone.photos.url(for: photoID)))

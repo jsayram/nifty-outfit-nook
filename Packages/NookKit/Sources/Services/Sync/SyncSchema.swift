@@ -53,6 +53,12 @@ enum SyncSchema {
     }
 
     static let body = SyncRecordID(zone: .me, name: "body.only")
+
+    /// Decision 2 (0004), answered by Jose on 29 October 2026 (D11): body data and the try-on photo
+    /// sync with everything else, in the `Me` zone. App Review 5.1.3(ii) may still reject that. The
+    /// fallback is this one line: set it to `false` and resubmit; the `Me` zone then stays off on
+    /// every device the next time sync starts or is turned on (docs/icloud.md).
+    static let syncsBodyData = true
     static let generation = SyncRecordID(zone: .control, name: "generation")
 
     /// CloudKit allows 1 MB per record, assets aside. Records bigger than this stay on the

@@ -51,8 +51,8 @@ public struct ICloudSyncStatus: Hashable, Sendable {
     public var notice: ICloudNotice?
     /// About how much of her iCloud storage the copy uses.
     public var estimatedBytes: Int64
-    /// Whether measurements, weight, fit notes and the try-on photo go to iCloud too. Off while
-    /// decision 2 (App Review 5.1.3(ii)) is open.
+    /// Whether measurements, weight, fit notes and the try-on photo go to iCloud too. On since
+    /// decision 2 was answered (D11, 29 October 2026); off only if the fallback switch is used.
     public var includesBodyData: Bool
 
     public init(

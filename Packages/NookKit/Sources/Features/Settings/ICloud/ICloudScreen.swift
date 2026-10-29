@@ -85,7 +85,9 @@ struct ICloudScreen: View {
                 .accessibilityIdentifier("iCloud.turnOn.confirm")
             Button(ICloudText.notNow, role: .cancel) {}
         } message: {
-            Text(ICloudText.turnOnMessage(bytes: model.status?.estimatedBytes ?? 0))
+            Text(
+                ICloudText.turnOnMessage(
+                    bytes: model.status?.estimatedBytes ?? 0, includesBodyData: model.status?.includesBodyData ?? true))
         }
         .confirmationDialog(ICloudText.turnOffTitle, isPresented: $model.isAskingTurnOff, titleVisibility: .visible) {
             Button(ICloudText.keepCopy) { Task { await model.turnOff(services.iCloud, deletingCopy: false) } }

@@ -41,19 +41,25 @@ nonisolated enum ICloudText {
         String(localized: "Keep a copy in your iCloud?", bundle: .module, comment: "Turn on iCloud: question")
     }
 
-    static func turnOnMessage(bytes: Int64) -> String {
+    /// F1 (D11): body data goes too, unless the build uses decision 2's fallback.
+    static func turnOnMessage(bytes: Int64, includesBodyData: Bool) -> String {
         let size = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
-        return String(
+        let message = String(
             localized: """
                 Your closet, photos and looks go to your private iCloud, so they’re on your other devices and come back if you change iPhones. Only your Apple Account can reach it; we can’t.
 
                 Apple can read most iCloud data unless you’ve turned on Advanced Data Protection in Settings. With it on, everything the app puts in iCloud is end-to-end encrypted, apart from the names of record types and their dates and sizes.
 
                 It uses your iCloud storage. About \(size) now.
-
-                Your measurements, weight, fit notes and try-on photo stay on this iPhone.
                 """,
             bundle: .module, comment: "Turn on iCloud: what it means. The size is like 1.4 GB")
+        return message + "\n\n" + (includesBodyData ? bodyDataGoes : bodyDataStays)
+    }
+
+    static var bodyDataGoes: String {
+        String(
+            localized: "Your measurements, weight, fit notes and try-on photo go too, kept apart from the rest.",
+            bundle: .module, comment: "Turn on iCloud: body data is synced too (D11)")
     }
 
     static var turnOn: String {
