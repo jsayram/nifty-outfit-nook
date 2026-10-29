@@ -43,3 +43,5 @@ Timeline refreshed on 21 October 2026 with dated milestones from the original 26
 Screenshot galleries expanded on 21 October 2026: important-feature previews, iPad, and relevant dated timeline previews. Captures enlarge in a keyboard-accessible native dialog and fall back to direct image links without JavaScript. See CAPTURES.md for provenance. Static checks and the finish review passed. No AI-generated visuals were added.
 
 Scheduled progress refresh, 23 October 2026: six dated development milestones and seven verified sample captures added. Existing galleries, enlargement controls and all earlier history preserved. Static checks and a local visual check passed.
+
+Policy pages drafted on 29 October 2026 (Phase F1, D9 and D18): `/privacy/`, `/terms/` (extra terms alongside Apple's standard EULA: AI suggestions not guaranteed, credits and refunds, account deletion) and `/support/`. **Drafts, not published.** Each carries a draft note, `noindex`, and an HTML comment listing what to fill in first: `[support email]` (Jose's iCloud+ project address; he asked for a placeholder), the publisher's legal name, and the support reply time. Publishing is Jose's step S5.
