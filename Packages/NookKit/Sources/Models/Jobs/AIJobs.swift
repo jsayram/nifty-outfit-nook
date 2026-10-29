@@ -529,6 +529,22 @@ public final class AIJobs {
             $0.failure = failure
             $0.finishedAt = now()
         }
+        // F1 (D24): only the kind of job and whether it worked, and only if she turned it on.
+        if let services, let job = job(id) {
+            let event: AnalyticsEvent =
+                switch job.request {
+                case .styling: .styleFinished
+                case .ask: .askFinished
+                case .tryOn: .tryOnFinished
+                }
+            let outcome: AnalyticsOutcome =
+                switch state {
+                case .done: .succeeded
+                case .cancelled: .cancelled
+                default: .failed
+                }
+            services.analytics.record(event, outcome)
+        }
         finishWaiters(id)
     }
 

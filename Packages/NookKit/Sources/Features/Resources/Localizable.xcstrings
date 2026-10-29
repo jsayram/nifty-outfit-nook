@@ -936,6 +936,9 @@
     "Cloud styling, try-on pictures and support use this account." : {
       "comment" : "Profile: under Signed in with Apple"
     },
+    "Delete my analytics data" : {
+      "comment" : "Privacy and terms: analytics action"
+    },
     "Dressing you" : {
       "comment" : "Try it on sheet (33a): the job is running"
     },
@@ -966,6 +969,12 @@
     "Hats, scarves and turtlenecks are fine, but your picture looks best without them." : {
       "comment" : "Try-on photo setup: a gentle note after the check"
     },
+    "Help improve the app" : {
+      "comment" : "Privacy and terms: the analytics switch"
+    },
+    "Help improve the app?" : {
+      "comment" : "Analytics consent: title"
+    },
     "Hide these looks" : {
       "comment" : "Report sheet: switch to hide the result"
     },
@@ -980,6 +989,12 @@
     },
     "How your photo stays private. %@" : {
       "comment" : "VoiceOver: the privacy walkthrough. The argument is its steps, one sentence each."
+    },
+    "If you turn this on, the app sends simple events, like “Style Me finished”, with the app version and a random ID you can reset. That shows us what works and what breaks." : {
+      "comment" : "Analytics consent: what is sent"
+    },
+    "Improving the app" : {
+      "comment" : "Privacy and terms: section header (F1)"
     },
     "Include the picture" : {
       "comment" : "Report sheet: switch to send the picture"
@@ -1020,6 +1035,9 @@
     "Keep my current photo" : {
       "comment" : "Try-on photo setup button"
     },
+    "Kept for 30 days, then only totals. Turning it off changes nothing else in the app." : {
+      "comment" : "Analytics consent: how long, and that nothing else changes"
+    },
     "Let your arms hang a little away from your body." : {
       "comment" : "Try-on camera hint"
     },
@@ -1031,6 +1049,9 @@
     },
     "Move to the middle of the picture." : {
       "comment" : "Try-on camera hint"
+    },
+    "Never sent: what you type, your photos, measurements, closet, looks or location." : {
+      "comment" : "Analytics consent: what is never sent"
     },
     "Never sent: your face, your room, your measurements, your notes, your name." : {
       "comment" : "Try-on consent"
@@ -1109,6 +1130,9 @@
     },
     "Report a problem" : {
       "comment" : "Link under an AI result: opens the report sheet"
+    },
+    "Reset analytics ID" : {
+      "comment" : "Privacy and terms: analytics action"
     },
     "Restore purchases" : {
       "comment" : "Styling access: button"
@@ -1196,6 +1220,9 @@
     },
     "Signing in…" : {
       "comment" : "Sign-in sheet: while Sign in with Apple runs"
+    },
+    "Simple events with a random ID. Never what you type, your photos, measurements or closet." : {
+      "comment" : "Privacy and terms: under the analytics switch"
     },
     "So nothing was sent. Try a photo where you face the camera, with your face clear and well lit." : {
       "comment" : "Try it on sheet (33a): fail closed, after the title"
@@ -9355,6 +9382,15 @@
     },
     "Your account, everything the app’s server keeps for it, and everything in the app on this iPhone will be deleted. Apple will ask you to confirm it’s you. This can’t be undone." : {
       "comment" : "Delete my account: the question"
+    },
+    "Your analytics data couldn’t be deleted right now. Try again when you’re online." : {
+      "comment" : "Privacy and terms: Delete my analytics data didn't reach the server"
+    },
+    "Your analytics data is deleted, and your analytics ID is new." : {
+      "comment" : "Privacy and terms: after Delete my analytics data"
+    },
+    "Your analytics ID is new." : {
+      "comment" : "Privacy and terms: after Reset analytics ID"
     },
     "Your arms look close to your body. A little space between helps your clothes show." : {
       "comment" : "Try-on photo setup: a gentle tip"

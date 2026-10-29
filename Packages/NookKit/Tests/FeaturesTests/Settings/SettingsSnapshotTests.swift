@@ -99,6 +99,14 @@ struct SettingsSnapshotTests {
             colorScheme: .dark, named: "privacy-weather-blocked-dark")
     }
 
+    /// F1 (D24): "Help improve the app" on, with Reset analytics ID and Delete my analytics data.
+    @Test func privacyAnalytics() {
+        assertSnapshot(
+            AnalyticsPrivacyGroup(
+                analytics: AnalyticsPrivacy(isOn: true, note: AnalyticsText.resetDone, set: { _ in })),
+            named: "privacy-analytics-on")
+    }
+
     @Test func privacyWeatherAX5() {
         // The group alone: the whole page with it is taller than the renderer can draw at AX5.
         assertSnapshot(
