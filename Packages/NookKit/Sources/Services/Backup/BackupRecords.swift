@@ -158,6 +158,8 @@ struct BackupContents: Sendable {
                     if case .generated(let photo) = picture.image { addPhoto(photo) }
                     // 33a: what was sent for it, which "See what was sent" shows.
                     for photo in picture.sent?.imageReferences ?? [] { addPhoto(photo) }
+                    // F1: the faceless dressed copy a report sends.
+                    if let faceless = picture.faceless { addPhoto(faceless) }
                 }
             case .garmentDraft:
                 counts.drafts += 1

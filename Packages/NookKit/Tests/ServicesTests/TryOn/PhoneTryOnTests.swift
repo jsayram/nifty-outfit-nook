@@ -119,6 +119,18 @@ struct PhoneTryOnTests {
         for reference in upload.sent.imageReferences { #expect(files.data(for: storedID(reference)) == nil) }
     }
 
+    @Test func theFacelessCopyIsTheDressedPictureWithHerHeadStillGrey() async throws {
+        // F1 (D12): what a report's Include the picture sends. Drawn again from its pixels.
+        let pipeline = pipeline()
+        let upload = try await pipeline.prepare(photo: try photo(), pieces: Self.pieces)
+        let echoed = try #require(paid.echo(upload, files: files))
+        let kept = try #require(await pipeline.keepFaceless(echoed))
+        let data = try #require(files.data(for: storedID(kept)))
+        let copy = try #require(TryOnBitmap.decode(data, maxPixelSize: 2_000))
+        #expect(try await SyntheticPersonAnalyzer().faces(in: copy).isEmpty)
+        #expect(await pipeline.keepFaceless(Data("not a picture".utf8)) == nil)
+    }
+
     // MARK: 33c: the steps are reported as the phone does them
 
     /// The steps `prepare` reports, and what it threw (if anything).

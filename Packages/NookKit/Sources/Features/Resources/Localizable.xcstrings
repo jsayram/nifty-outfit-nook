@@ -879,6 +879,9 @@
     "Any hairstyle is fine. Hats, scarves and turtlenecks work too, but your picture looks best without them." : {
       "comment" : "Try-on photo sheet: hair, hats, scarves and turtlenecks"
     },
+    "Any unused picture credits are given up with your account. They can’t be moved to a new one." : {
+      "comment" : "Delete my account: credits note when the count isn't known"
+    },
     "Anything to add?" : {
       "comment" : "Report sheet: note field label"
     },
@@ -1353,7 +1356,7 @@
     "The picture couldn’t be included. Turn off Include the picture, then send again." : {
       "comment" : "Report sheet: the picture couldn't be read or was refused"
     },
-    "The picture, with your face, goes to our private support inbox only. Never to the image service." : {
+    "The picture, without your face, goes to our private support inbox only. Never to the image service." : {
       "comment" : "Report sheet: under Include the picture, on"
     },
     "The reason under it" : {
@@ -1430,6 +1433,9 @@
     },
     "Turn to face the camera." : {
       "comment" : "Try-on camera hint"
+    },
+    "Unused picture credits: %lld. They’re given up with your account and can’t be moved to a new one." : {
+      "comment" : "Delete my account: how many unused picture credits are given up"
     },
     "Up to %lld a day" : {
       "comment" : "Paywall: the allowance for swaps and questions. The argument is a number."

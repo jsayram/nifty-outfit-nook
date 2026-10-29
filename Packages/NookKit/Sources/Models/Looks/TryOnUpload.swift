@@ -308,6 +308,9 @@ public protocol TryOnPipeline: Sendable {
         async throws(CloudLimitProblem) -> Data
     /// On the phone: puts her real head back over the grey and writes the finished picture.
     func restore(_ dressed: Data, upload: TryOnUpload) async throws(TryOnError) -> PhotoReference
+    /// F1 (D12): writes the dressed picture as it came back, head still grey and with no metadata,
+    /// for a report's Include the picture. `nil` if it can't be read or written.
+    func keepFaceless(_ dressed: Data) async -> PhotoReference?
     /// Removes files written for an upload: the work files always, the sent ones too unless a
     /// picture keeps them.
     func discard(_ upload: TryOnUpload, keepingSent: Bool) async
@@ -320,6 +323,9 @@ extension TryOnPipeline {
     {
         try await dress(upload, consentVersion: consentVersion, idempotencyKey: idempotencyKey)
     }
+
+    /// A stand-in that keeps no faceless copy: its pictures offer no picture to a report.
+    public func keepFaceless(_ dressed: Data) async -> PhotoReference? { nil }
 
     /// Prepares without reporting each step.
     public func prepare(photo: PhotoReference, pieces: [Garment]) async throws(TryOnPrepareProblem) -> TryOnUpload {
