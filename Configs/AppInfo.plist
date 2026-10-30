@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- The launch screen is the room's wall colour, light or dark, so the first frame doesn't
-	     flash white or black before the app draws (Phase 18). LaunchBackground in the app's
-	     asset catalog holds the DesignSystem background token's values. Every other key but the
+	<!-- The launch screen is the room wall colour, light or dark, so the first frame does not
+	     flash white or black before the app draws (Phase 18). LaunchBackground in the app
+	     asset catalog holds the values of the DesignSystem background token. Every other key but the
 	     backup type below is generated from Configs/App.xcconfig. -->
 	<key>UILaunchScreen</key>
 	<dict>
@@ -15,7 +15,7 @@
 	     Empty keeps the app on the fake backend (GatewaySettings). -->
 	<key>NookAPIBaseURL</key>
 	<string>$(NOOK_API_BASE_URL)</string>
-	<!-- The website's support page (Phase 24d), from NOOK_SUPPORT_URL in Configs/Base.xcconfig. -->
+	<!-- The support page on the website (Phase 24d), from NOOK_SUPPORT_URL in Configs/Base.xcconfig. -->
 	<key>NookSupportURL</key>
 	<string>$(NOOK_SUPPORT_URL)</string>
 	<!-- Live weather (Phase 29): location is always approximate, never full accuracy. The switch
@@ -37,7 +37,7 @@
 	     unfinished pack stays in Transaction.unfinished until the server has credited it. -->
 	<key>SKIncludeConsumableInAppPurchaseHistory</key>
 	<true/>
-	<!-- Backups (Phase 21b): the export file's type, so the Files sheet names it and Restore's
+	<!-- Backups (Phase 21b): the export file type, so the Files sheet names it and the Restore
 	     picker can ask for it. An encrypted archive; nothing else opens it on iOS. -->
 	<key>UTExportedTypeDeclarations</key>
 	<array>

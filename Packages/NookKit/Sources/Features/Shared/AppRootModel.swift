@@ -14,8 +14,9 @@ nonisolated public struct AppLaunch: Sendable {
     /// `-onboarding reset` flag can forget them too. `nil` when nothing is kept.
     public var profileSettings: (any ProfileSettingsKeeper)?
     /// Makes the services for a starting closet. `nil` is the launch's own sample data as it is,
-    /// for the debug `-onboarding skip` flag.
-    public var services: @Sendable (StartingCloset?) -> NookServices
+    /// for the debug `-onboarding skip` flag. Called only by `AppRootModel`, on the main actor, so
+    /// the app's main-actor installers (diagnostics, the gateway) can run inside it.
+    public var services: @MainActor @Sendable (StartingCloset?) -> NookServices
     /// The debug `-onboarding` flag. Release builds pass `standard`.
     public var onboardingOptions: OnboardingLaunchOptions
     /// The debug `-tour` flag. Release builds pass `standard`.
@@ -45,7 +46,7 @@ nonisolated public struct AppLaunch: Sendable {
         onboarding: any OnboardingStateStore,
         tours: any TourProgressStore,
         profileSettings: (any ProfileSettingsKeeper)? = nil,
-        services: @escaping @Sendable (StartingCloset?) -> NookServices,
+        services: @escaping @MainActor @Sendable (StartingCloset?) -> NookServices,
         onboardingOptions: OnboardingLaunchOptions = .standard,
         tourOptions: TourLaunchOptions = .standard,
         offersSampleCloset: Bool = true,
