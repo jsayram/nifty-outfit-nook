@@ -12,7 +12,8 @@
 #   background mode, and no usage-description (permission) key but the camera's (Phase 22a), with
 #   the words in closet/compliance/PERMISSIONS.md;
 # - the privacy manifest is in the app and declares only UserDefaults, reason CA92.1, and (since
-#   Phase 21a, for the migration's free-space check) disk space, reason E174.1;
+#   Phase 21a, for the migration's free-space check) disk space, reason E174.1; no tracking; and
+#   exactly the collected data types PM1 declared;
 # - the entitlements file asks for Data Protection (complete) and nothing else;
 # - no test bundle, framework or plug-in is in the app, the binary doesn't link XCTest, Swift
 #   Testing or swift-snapshot-testing, and it holds no path from the Mac it was built on;
@@ -100,8 +101,35 @@ with open(privacy_path, "rb") as f:
     privacy = plistlib.load(f)
 if privacy.get("NSPrivacyTracking") is not False:
     problems.append("privacy manifest: NSPrivacyTracking isn't false")
-if privacy.get("NSPrivacyTrackingDomains") or privacy.get("NSPrivacyCollectedDataTypes"):
-    problems.append("privacy manifest lists tracking domains or collected data")
+if privacy.get("NSPrivacyTrackingDomains"):
+    problems.append("privacy manifest lists tracking domains")
+# PM1: exactly the data the app sends, as closet compliance/PRIVACY_MANIFEST.md lists it. Each type:
+# linked to her, never tracking, and its purposes. A new type, or a changed one, fails until it's
+# declared here too.
+APP = "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+expected_collected = {
+    "NSPrivacyCollectedDataTypeUserID": (True, [APP]),
+    "NSPrivacyCollectedDataTypeDeviceID": (True, [APP]),
+    "NSPrivacyCollectedDataTypeEmailAddress": (True, [APP]),
+    "NSPrivacyCollectedDataTypeCustomerSupport": (True, [APP]),
+    "NSPrivacyCollectedDataTypeOtherUserContent": (True, [APP]),
+    "NSPrivacyCollectedDataTypeHealth": (True, [APP]),
+    "NSPrivacyCollectedDataTypePurchaseHistory": (True, [APP]),
+    "NSPrivacyCollectedDataTypeCrashData": (True, [APP]),
+    "NSPrivacyCollectedDataTypePerformanceData": (True, [APP]),
+    "NSPrivacyCollectedDataTypeProductInteraction": (False, ["NSPrivacyCollectedDataTypePurposeAnalytics"]),
+    "NSPrivacyCollectedDataTypePhotosorVideos": (True, [APP, "NSPrivacyCollectedDataTypePurposeOther"]),
+}
+collected = {}
+for item in privacy.get("NSPrivacyCollectedDataTypes", []):
+    kind = item.get("NSPrivacyCollectedDataType")
+    if kind in collected:
+        problems.append(f"privacy manifest lists {kind} twice")
+    if item.get("NSPrivacyCollectedDataTypeTracking") is not False:
+        problems.append(f"privacy manifest: {kind} isn't marked as not tracking")
+    collected[kind] = (item.get("NSPrivacyCollectedDataTypeLinked"), item.get("NSPrivacyCollectedDataTypePurposes"))
+if collected != expected_collected:
+    problems.append(f"privacy manifest collected data changed: {collected}")
 apis = {
     item["NSPrivacyAccessedAPIType"]: item["NSPrivacyAccessedAPITypeReasons"]
     for item in privacy.get("NSPrivacyAccessedAPITypes", [])
