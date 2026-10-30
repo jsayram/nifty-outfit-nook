@@ -18,7 +18,8 @@ public struct AuthToken: Sendable, Equatable {
 public enum AuthError: Error, Sendable, Equatable {
     /// She closed the Sign in with Apple sheet.
     case cancelled
-    /// No session: never signed in, signed out, or the session ended (Clerk's 7-day limit, D4).
+    /// No session: never signed in, signed out, or the session ended (7 days after she last used
+    /// the app, D4).
     case signedOut
     /// The sign-in service couldn't be reached.
     case offline
@@ -26,14 +27,15 @@ public enum AuthError: Error, Sendable, Equatable {
     case failed
 }
 
-/// Which sign-in is running. The fake is the default until a Clerk key is configured.
+/// Which sign-in is running. `fake` signs in without a backend's sign-in at all (package tests);
+/// `betterAuth` is the app's real sign-in client, against the real backend or the fake one.
 public enum AuthProviderKind: String, Sendable {
     case fake
-    case clerk
+    case betterAuth
 }
 
-/// Who signs her in and keeps the token for the backend fresh. `FakeAuthProvider` (Networking)
-/// by default; `ClerkAuthProvider` (ClerkAuth) when the app has a Clerk publishable key.
+/// Who signs her in and keeps the token for the backend fresh. `BetterAuthProvider` (BetterAuth)
+/// in the app; `FakeAuthProvider` (Networking) in package tests that don't test sign-in itself.
 public protocol AuthProvider: Sendable {
     var kind: AuthProviderKind { get }
     func isSignedIn() async -> Bool

@@ -5,35 +5,24 @@ import Testing
 
 @Suite("Gateway settings and token claims")
 struct GatewaySettingsTests {
-    // Made-up values, assembled at run time so the secret scanner doesn't flag test data.
-    static let publishable = "pk_" + "test_" + String(repeating: "x", count: 24)
-    static let secret = "sk_" + "live_" + String(repeating: "y", count: 24)
-
-    @Test func bothValuesSwitchToTheRealServices() throws {
-        let settings = GatewaySettings(info: [
-            "NookClerkPublishableKey": GatewaySettingsTests.publishable,
-            "NookAPIBaseURL": "https://beaming-oyster-905.convex.site",
-        ])
+    @Test func theBackendAddressSwitchesToTheRealServices() throws {
+        let settings = GatewaySettings(info: ["NookAPIBaseURL": "https://beaming-oyster-905.convex.site"])
         #expect(settings.usesRealServices)
         #expect(settings.apiBaseURL?.host() == "beaming-oyster-905.convex.site")
     }
 
     @Test(arguments: [
         [String: String](),
-        ["NookClerkPublishableKey": "", "NookAPIBaseURL": ""],
-        ["NookClerkPublishableKey": "$(CLERK_PUBLISHABLE_KEY)", "NookAPIBaseURL": "$(NOOK_API_BASE_URL)"],
-        ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "http://insecure.example"],
-        ["NookClerkPublishableKey": GatewaySettingsTests.secret, "NookAPIBaseURL": "https://a.convex.site"],
-        ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "https:"],
+        ["NookAPIBaseURL": ""],
+        ["NookAPIBaseURL": "$(NOOK_API_BASE_URL)"],
+        ["NookAPIBaseURL": "http://insecure.example"],
+        ["NookAPIBaseURL": "https:"],
+        ["NookAPIBaseURL": "https://a.convex.site?debug=1"],
         // A web address with a user name and password in it (Phase 25a).
-        [
-            "NookClerkPublishableKey": GatewaySettingsTests.publishable,
-            "NookAPIBaseURL": "https://someone:made-up@a.convex.site",
-        ],
-        [
-            "NookClerkPublishableKey": GatewaySettingsTests.publishable,
-            "NookAPIBaseURL": "https://someone@a.convex.site",
-        ],
+        ["NookAPIBaseURL": "https://someone:made-up@a.convex.site"],
+        ["NookAPIBaseURL": "https://someone@a.convex.site"],
+        // BA4: the old Clerk key alone configures nothing.
+        ["NookClerkPublishableKey": "pk_" + "test_" + String(repeating: "x", count: 24)],
     ])
     func anythingMissingOrWrongStaysOnTheFakes(info: [String: String]) {
         #expect(!GatewaySettings(info: info).usesRealServices)
@@ -41,9 +30,7 @@ struct GatewaySettingsTests {
 
     // MARK: Release fails closed (32b, L9)
 
-    private static let configured = GatewaySettings(info: [
-        "NookClerkPublishableKey": publishable, "NookAPIBaseURL": "https://beaming-oyster-905.convex.site",
-    ])
+    private static let configured = GatewaySettings(info: ["NookAPIBaseURL": "https://beaming-oyster-905.convex.site"])
 
     @Test func aReleaseBuildWithNoSettingsHasNoFakes() {
         // `allowsFakes` is false in a Release build: the app passes it from `#if DEBUG`.
@@ -51,13 +38,10 @@ struct GatewaySettingsTests {
     }
 
     @Test(arguments: [
-        ["NookClerkPublishableKey": "", "NookAPIBaseURL": ""],
-        ["NookClerkPublishableKey": "$(CLERK_PUBLISHABLE_KEY)", "NookAPIBaseURL": "$(NOOK_API_BASE_URL)"],
-        // Half set is still not configured.
-        ["NookClerkPublishableKey": GatewaySettingsTests.publishable],
-        ["NookAPIBaseURL": "https://beaming-oyster-905.convex.site"],
-        ["NookClerkPublishableKey": GatewaySettingsTests.publishable, "NookAPIBaseURL": "http://insecure.example"],
-        ["NookClerkPublishableKey": GatewaySettingsTests.secret, "NookAPIBaseURL": "https://a.convex.site"],
+        ["NookAPIBaseURL": ""],
+        ["NookAPIBaseURL": "$(NOOK_API_BASE_URL)"],
+        ["NookAPIBaseURL": "http://insecure.example"],
+        ["NookAPIBaseURL": "http://127.0.0.1:3211"],
     ])
     func aReleaseBuildWithMissingOrWrongSettingsNeverFallsBackToTheFakes(info: [String: String]) {
         #expect(GatewayMode.resolve(settings: GatewaySettings(info: info), allowsFakes: false) == .unavailable)
@@ -70,11 +54,6 @@ struct GatewaySettingsTests {
     @Test func configuredSettingsAreTheRealServicesInEveryBuild() {
         #expect(GatewayMode.resolve(settings: Self.configured, allowsFakes: false) == .real)
         #expect(GatewayMode.resolve(settings: Self.configured, allowsFakes: true) == .real)
-    }
-
-    @Test func aSecretKeyIsNeverTakenForAPublishableOne() {
-        #expect(
-            GatewaySettings(info: ["NookClerkPublishableKey": GatewaySettingsTests.secret]).clerkPublishableKey == nil)
     }
 
     @Test func readsTheExpiryOfAJWT() throws {

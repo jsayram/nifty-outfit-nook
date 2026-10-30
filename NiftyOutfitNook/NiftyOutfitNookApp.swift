@@ -175,13 +175,13 @@ struct NiftyOutfitNookApp: App {
         #else
             let thumbnails = imageFiles?.thumbnails
         #endif
-        // Sign-in and the backend (Phase 24a): the fakes until Clerk and Convex are configured.
+        // Sign-in and the backend (Phase 24a): the fakes until Better Auth and Convex are configured.
         // Nothing on the local closet depends on it.
         let account = AppGateway.account
         let paid = AppGateway.paid
         // 32b (L9): true only in a Release build with no backend settings.
         let cloudUnavailable = AppGateway.cloudUnavailable
-        // Release: Clerk, or the fake sign-in in a Debug build. None in a Release build with no
+        // Release: Better Auth, or the fake backend in a Debug build. None in a Release build with no
         // backend settings, where the cloud features say they aren't available right now.
         let offersSignIn = !cloudUnavailable
         // The cloud stylist (Phase 27a): with the real backend, or `-cloud-stylist` on the fake.

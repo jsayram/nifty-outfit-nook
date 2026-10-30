@@ -51,7 +51,7 @@ struct AccountDeletionGatewayTests {
         await account.forgetAccountOnThisDevice()
         #expect(await !auth.isSignedIn())
         #expect(store.load() == nil)
-        // Signing in again with the same pretend Apple user: its old tokens are gone, as at Clerk.
+        // Signing in again with the same pretend Apple user: its old tokens are gone, as at Better Auth.
         try await auth.signInWithApple()
         await #expect(throws: AccountProblem.signedOut) { try await account.whoAmI() }
         // The status needs no sign-in.

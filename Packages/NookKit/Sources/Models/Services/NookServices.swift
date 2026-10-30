@@ -53,9 +53,9 @@ public struct NookServices: Sendable {
     /// Finds a city by name for the weather, with no location permission (Phase 29).
     public var cities: any CityFinder = UnavailableCityFinder()
     /// Sign in and the backend account (Phase 24a). Signed out until the app sets one: a fake
-    /// sign-in and an in-process fake backend, or Clerk and Convex when they're configured.
+    /// sign-in and an in-process fake backend, or Better Auth and Convex when they're configured.
     public var account: any AccountService = UnavailableAccountService()
-    /// Release: true when the app has a way to sign in (Clerk, or the fake sign-in in a Debug
+    /// Release: true when the app has a way to sign in (Better Auth, or the fake backend in a Debug
     /// build). Then a cloud feature asks her to sign in the first time she uses it, and Profile
     /// shows the account row. False in a Release build with no backend settings (`cloudUnavailable`),
     /// in previews and in most tests, where nothing asks.

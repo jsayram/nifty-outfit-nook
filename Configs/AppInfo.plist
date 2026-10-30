@@ -11,10 +11,8 @@
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
-	<!-- The backend and sign-in (Phase 24a), from Configs/Base.xcconfig or Secrets.xcconfig.
-	     Empty values keep the app on the fake sign-in and fake backend (GatewaySettings). -->
-	<key>NookClerkPublishableKey</key>
-	<string>$(CLERK_PUBLISHABLE_KEY)</string>
+	<!-- The backend and its sign-in (Phase 24a, BA4), from Configs/Base.xcconfig or Secrets.xcconfig.
+	     Empty keeps the app on the fake backend (GatewaySettings). -->
 	<key>NookAPIBaseURL</key>
 	<string>$(NOOK_API_BASE_URL)</string>
 	<!-- The website's support page (Phase 24d), from NOOK_SUPPORT_URL in Configs/Base.xcconfig. -->

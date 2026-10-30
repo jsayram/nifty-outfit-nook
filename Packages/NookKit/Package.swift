@@ -29,16 +29,14 @@ let package = Package(
         .library(name: "Features", targets: ["Features"]),
         .library(name: "Services", targets: ["Services"]),
         .library(name: "Networking", targets: ["Networking"]),
-        .library(name: "ClerkAuth", targets: ["ClerkAuth"]),
+        .library(name: "BetterAuth", targets: ["BetterAuth"]),
     ],
     // swift-snapshot-testing is test-only (decision 0001, items 8 and 10; vetting in
-    // docs/decisions/0002-snapshot-testing.md). clerk-ios is the one shipping dependency, approved
-    // by Jose as decision D2 on 19 October 2026 (closet THREAT_MODEL.md): only its ClerkKit
-    // product, only in the ClerkAuth target, pinned exactly (vetting in
-    // docs/decisions/0005-gateway-and-identity.md). Never add another without written approval.
+    // docs/decisions/0002-snapshot-testing.md). Nothing third-party ships in the app: sign-in is
+    // our own client for Better Auth (BA4), which replaced clerk-ios. Never add a dependency
+    // without Jose's written approval.
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
-        .package(url: "https://github.com/clerk/clerk-ios", exact: "1.6.1"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6")
     ],
     targets: [
         .target(
@@ -57,15 +55,13 @@ let package = Package(
         // on-device subject lifting with Vision.
         .target(name: "Services", dependencies: ["Models"], swiftSettings: strictSettings),
         // The backend gateway (Phase 24a): the v1 contract types, the URLSession client, the
-        // account service, and the fake sign-in and in-process fake backend the app runs on until
-        // Clerk and Convex are configured. Apple frameworks only.
+        // account service, and the in-process fake backend the app runs on until the backend
+        // address is configured. Apple frameworks only.
         .target(name: "Networking", dependencies: ["Models"], swiftSettings: strictSettings),
-        // Sign-in through Clerk (decision D2), active only when the app has a publishable key.
-        .target(
-            name: "ClerkAuth",
-            dependencies: ["Models", "Networking", .product(name: "ClerkKit", package: "clerk-ios")],
-            swiftSettings: strictSettings
-        ),
+        // Sign in with Apple through Better Auth in our Convex deployment (BA4): the client for the
+        // contract's signIn routes, the session in the Keychain, and the real gateway. Apple
+        // frameworks only.
+        .target(name: "BetterAuth", dependencies: ["Models", "Networking"], swiftSettings: strictSettings),
         .target(
             name: "Features",
             dependencies: ["DesignSystem", "Models"],
@@ -108,6 +104,9 @@ let package = Package(
         .testTarget(
             name: "NetworkingTests", dependencies: ["Networking", "Models", "NookTestSupport"],
             resources: [.copy("Contract")], swiftSettings: strictSettings),
+        .testTarget(
+            name: "BetterAuthTests", dependencies: ["BetterAuth", "Networking", "Models", "NookTestSupport"],
+            swiftSettings: strictSettings),
         .testTarget(
             name: "PersistenceSpikeTests", dependencies: ["Models", "Fixtures", "NookTestSupport"],
             exclude: ["KillHarness"], swiftSettings: strictSettings

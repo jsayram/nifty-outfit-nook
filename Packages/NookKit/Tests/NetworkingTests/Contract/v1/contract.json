@@ -2,7 +2,7 @@
   "name": "Nifty Outfit Nook API",
   "version": 1,
   "basePath": "/v1",
-  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text); 35: action status, POST /v1/actions/status (a running action is polled by its ID, with no photos); Release: kind aiReport on POST /v1/feedback (Report a problem on AI results, guideline 1.2)",
+  "status": "33a: try-on pictures on POST /v1/try-on (the faceless photo and garment photos in, one dressed picture out, made in the background and fetched with the same Idempotency-Key) (30c: purchases verified on the server; 30b: picture credits; 24d: support; 27a: the cloud stylist); 31: feedback notes can carry an approved device-health summary (counts of crashes, hangs and similar, no stacks or text); 35: action status, POST /v1/actions/status (a running action is polled by its ID, with no photos); Release: kind aiReport on POST /v1/feedback (Report a problem on AI results, guideline 1.2); F1b: consent stylist-2 with optional measurements and weight on POST /v1/style (D10), and opt-in analytics on POST /v1/analytics/events and /v1/analytics/deletion, with no token (D24)",
   "notes": [
     "This file is the single source of truth for the app-to-backend API. The backend tests and the app's contract tests both read it and the golden examples next to it.",
     "The app never names an AI provider, model or prompt. Later endpoints ask the backend to do a job (for example to style); the backend chooses the provider.",
@@ -17,7 +17,9 @@
     "Picture credits (30b): after a StoreKit purchase of a credit pack the app sends the transaction's signed JWS to POST /v1/credits/claim, and finishes the transaction only after a 200. The backend reads the transaction ID and product ID from the JWS, never from the app, credits the pack's size from its own product list, and credits each transaction ID once: a repeat from the same account gets the first answer with replayed true, and a transaction already credited to another account is forbidden. Until 30c checks Apple's signature and the App Store Server API, crediting is mocked and only on when the backend's NOOK_CREDITS_MODE is mock; otherwise the endpoint is unavailable and the app keeps the transaction to try again. Credits never expire. GET /v1/usage shows the balance.",
     "30c, purchases: every signed transaction the app sends (POST /v1/credits/claim, POST /v1/entitlements/claim) is verified on the server against Apple's certificates before anything is credited or linked. The app's X-Nook-Entitlement-Hint is never used to authorize anything. Styling access comes from Apple's records only: the subscription (renewals, expiry, grace period, refunds and Family Sharing revocations arrive through App Store Server Notifications, which aren't part of this contract) or the complimentary unlock. Pass user.appAccountToken to StoreKit with every purchase (Product.PurchaseOption.appAccountToken) so Apple's notifications can be matched to the account.",
     "Try-on (33a): POST /v1/try-on sends only the faceless photo (her head already masked with flat grey on the phone and her room replaced with a plain studio backdrop) and the photos of the pieces to put on her, with category and kind for each. Nothing else of hers may be sent: no face, no room, no names, notes or measurements. The backend writes the picture instruction itself from the categories and kinds. consentVersion is the try-on consent text she agreed to; if it doesn't cover the service the backend would send the photos to, the answer is consent_required and nothing is sent or counted. The first POST checks everything, admits and counts the action, starts the picture and answers 409 action_in_progress with Retry-After 5 and the message \"Your picture is being made.\". The 409 carries error.actionId, and from 35 the app then asks POST /v1/actions/status with only that ID after Retry-After, until the picture comes back or it is told failed or expired (see the action status note). Asking again the old way, with the same Idempotency-Key and the SAME body (byte for byte, or it is idempotency_conflict), still works and gets the same answers, but uploads the photos every time. An attempt that failed is started once more by the next ask (at most two attempts, the second counted again only if it works); after that the answer is 503 unavailable \"This action didn't work. Start a new one.\". A picture can take a few minutes; the action's lease is 6 minutes, after which the outcome is checked by hand (409 with Retry-After 60). The backend keeps the photos only sealed and only while the picture is made: the inputs are deleted as soon as the picture service answers, and the result is kept sealed for at most 30 minutes, and 2 minutes after it was first delivered. After that the same key gets 503 unavailable \"That picture is no longer kept. Make a new one.\". The first 200 has replayed false; later ones replayed true. The picture service may keep what it receives and use it to improve its models, which the consent text must say.",
-    "Action status (35): while a paid action runs (try-on, or a stylist ask whose answer is late), the app polls with POST /v1/actions/status and only the action's ID, never by sending the paid request again. The first POST answers 409 action_in_progress with error.actionId, the ID of this key's own action (it is absent when the 409 is about another action of the account running; then the app waits and asks again). The status answer says running (with retryAfterSeconds), succeeded (with the result and usage, shaped as the paid endpoint's own 200), failed (nothing is counted; start a new action with a new key) or expired (it finished but the result is no longer kept). A try-on picture is handed out the same way as before: kept sealed at most 30 minutes, and 2 minutes after it was first delivered. The ID is random (128 bits) and every answer for an ID that isn't the caller's, or doesn't exist, is the same 404 not_found, so the call can't be used to find out whether an action exists. It needs the bearer token but no App Attest assertion and no Idempotency-Key: it runs nothing paid, counts nothing, and returns only what the same account already got (or may still fetch with its own key) from the paid endpoint. It has its own limit per account (30 a minute, rate_limited) and a 1 KiB body limit. Re-sending the paid request with the same key and body still works and returns the same answers as before; older apps keep doing that."
+    "Action status (35): while a paid action runs (try-on, or a stylist ask whose answer is late), the app polls with POST /v1/actions/status and only the action's ID, never by sending the paid request again. The first POST answers 409 action_in_progress with error.actionId, the ID of this key's own action (it is absent when the 409 is about another action of the account running; then the app waits and asks again). The status answer says running (with retryAfterSeconds), succeeded (with the result and usage, shaped as the paid endpoint's own 200), failed (nothing is counted; start a new action with a new key) or expired (it finished but the result is no longer kept). A try-on picture is handed out the same way as before: kept sealed at most 30 minutes, and 2 minutes after it was first delivered. The ID is random (128 bits) and every answer for an ID that isn't the caller's, or doesn't exist, is the same 404 not_found, so the call can't be used to find out whether an action exists. It needs the bearer token but no App Attest assertion and no Idempotency-Key: it runs nothing paid, counts nothing, and returns only what the same account already got (or may still fetch with its own key) from the paid endpoint. It has its own limit per account (30 a minute, rate_limited) and a 1 KiB body limit. Re-sending the paid request with the same key and body still works and returns the same answers as before; older apps keep doing that.",
+    "F1b, measurements (D10): POST /v1/style may carry measurements (whole centimetres and kilograms, each optional) only under a consent text that names them, today stylist-2. With stylist-1, which promised they never go, a request carrying measurements is consent_required and nothing is sent; stylist-1 without measurements still works as before. They go to the stylist only inside that request, are never stored or logged by the backend, and no answer repeats them. No request to the stylist ever carries a photo or her face.",
+    "F1b, analytics (D24): \"Help improve the app\" is off by default. POST /v1/analytics/events takes a batch of allowlisted events under one random analytics ID, and POST /v1/analytics/deletion deletes every raw event kept under an ID. Both take no token: a request carrying Authorization, X-Nook-Attest-Key, X-Nook-Assertion or Idempotency-Key is invalid_request, so an analytics ID is never seen next to an account. Raw events are kept 30 days, then folded into daily totals that carry no ID. The deletion answers the same for an ID with events and one without."
   ],
   "limits": {
     "maxBodyBytes": 65536,
@@ -50,13 +52,112 @@
         "image/png"
       ],
       "note": "POST /v1/try-on only. Sizes are of the decoded image bytes, checked on the server; the body as a whole stays under maxBodyBytes. Neither side of her photo may pass personMaxPixelsPerSide, nor either side of a piece's photo garmentMaxPixelsPerSide (the app sends at most 1280 and 768); a bigger one is invalid_request with the message \"The photo is too large in pixels. Its longest side can be 2048 pixels.\" (or \"The piece's photo ...1024 pixels.\"), and nothing is counted. At least one garment, each id once. Each image must really be the JPEG or PNG its contentType says; the backend removes metadata (EXIF, GPS, text chunks) whatever the app did first."
+    },
+    "analytics": {
+      "maxBodyBytes": 32768,
+      "maxEventsPerBatch": 100,
+      "batchesPerHourPerID": 12,
+      "eventsPerDayPerID": 500,
+      "allIDsEventsPerDay": 10000,
+      "oldestEventHours": 192,
+      "rawKeptDays": 30,
+      "consentVersions": [
+        "analytics-1"
+      ],
+      "note": "POST /v1/analytics/events only. Each event's hour is the start of a UTC hour, not more than an hour ahead of the server's clock; events older than oldestEventHours are dropped and not counted in accepted. Every event in a batch carries the same analyticsID and a consentVersion from consentVersions (otherwise consent_required). Over batchesPerHourPerID or eventsPerDayPerID is rate_limited with retryAfterSeconds; over allIDsEventsPerDay is unavailable (the server takes no more today). The numbers are the backend's starting settings and the app never relies on them."
     }
   },
   "auth": {
     "scheme": "Bearer",
     "header": "Authorization",
-    "token": "A Clerk session token minted from the JWT template named \"convex\" (aud \"convex\"). The backend takes the user only from the verified token, never from a body or query field.",
+    "token": "A Convex token from GET /api/auth/convex/token (see signIn): a JWT signed by this deployment's own Better Auth, issuer the deployment's site URL, audience \"convex\", valid 5 minutes, carrying only the user and session IDs. The backend takes the user only from the verified token, never from a body or query field.",
     "onUnauthorized": "On any 401 the client gets a fresh token once and retries the request once. A second 401 means signed out."
+  },
+  "signIn": {
+    "basePath": "/api/auth",
+    "summary": "Sign in with Apple through Better Auth, inside the same deployment as /v1 (same host). Four routes only; every other path under /api/auth answers the not_found error envelope.",
+    "notes": [
+      "The app asks Apple for no scopes, with nonce = SHA-256 (lowercase hex) of a random raw nonce it keeps. It sends Apple's identity token and that raw nonce. A sign-in without a nonce is invalid_request.",
+      "The session is the set-auth-token response header of a successful sign-in. The app keeps it in the Keychain (WhenUnlockedThisDeviceOnly) and sends it as Authorization: Bearer to the token and sign-out routes. It ignores the body's token and keeps no cookies (the backend sends none).",
+      "A session lasts 7 days and is extended once a day while it is used. A 401 from GET /api/auth/convex/token means the session has ended: the app deletes it and is signed out.",
+      "The Convex token lives 5 minutes. The app keeps it in memory only, gets a new one before it expires or after a 401 from /v1, and sends it to /v1 as Authorization: Bearer.",
+      "Refusals use the same error envelope as /v1. Sign-ins are limited across everyone (rate_limited with Retry-After); the backend keeps no IP address or user agent.",
+      "Sign out ends the session on the server. A Convex token already issued keeps working until it expires (at most 5 minutes)."
+    ],
+    "routes": [
+      {
+        "id": "signInApple",
+        "method": "POST",
+        "path": "/api/auth/sign-in/social",
+        "auth": "none",
+        "request": {
+          "schema": "AppleSignInRequest",
+          "example": "examples/auth-sign-in.request.json",
+          "maxBodyBytes": 8192
+        },
+        "response": {
+          "status": 200,
+          "schema": "AppleSignInResponse",
+          "example": "examples/auth-sign-in.response.json",
+          "headers": {
+            "set-auth-token": "The session token. The only part of the answer the app keeps."
+          }
+        },
+        "errors": [
+          "invalid_request",
+          "payload_too_large",
+          "unsupported_media_type",
+          "unauthenticated",
+          "rate_limited",
+          "internal"
+        ]
+      },
+      {
+        "id": "convexToken",
+        "method": "GET",
+        "path": "/api/auth/convex/token",
+        "auth": "session",
+        "response": {
+          "status": 200,
+          "schema": "ConvexTokenResponse",
+          "example": "examples/auth-convex-token.response.json"
+        },
+        "errors": [
+          "unauthenticated",
+          "internal"
+        ]
+      },
+      {
+        "id": "signOut",
+        "method": "POST",
+        "path": "/api/auth/sign-out",
+        "auth": "session",
+        "response": {
+          "status": 200,
+          "schema": "SignOutResponse",
+          "example": "examples/auth-sign-out.response.json"
+        },
+        "errors": [
+          "unauthenticated",
+          "internal"
+        ]
+      },
+      {
+        "id": "convexJwks",
+        "method": "GET",
+        "path": "/api/auth/convex/jwks",
+        "auth": "none",
+        "note": "Public keys for the Convex token. For Convex itself; the app never calls it.",
+        "response": {
+          "status": 200,
+          "schema": "Jwks",
+          "example": "examples/auth-jwks.response.json"
+        },
+        "errors": [
+          "internal"
+        ]
+      }
+    ]
   },
   "headers": {
     "request": {
@@ -461,6 +562,58 @@
         "forbidden",
         "not_found",
         "not_registered",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "sendAnalytics",
+      "summary": "F1b (D24): a batch of opt-in improvement events under one random analytics ID. No token, on purpose: the analytics ID must never be seen next to an account. Answers 202 with how many events were kept.",
+      "method": "POST",
+      "path": "/v1/analytics/events",
+      "auth": "none",
+      "cost": "free",
+      "maxBodyBytes": 32768,
+      "request": {
+        "schema": "AnalyticsBatch",
+        "example": "examples/analytics-events.request.json"
+      },
+      "response": {
+        "status": 202,
+        "schema": "AnalyticsReceipt",
+        "example": "examples/analytics-events.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
+        "consent_required",
+        "rate_limited",
+        "unavailable",
+        "internal"
+      ]
+    },
+    {
+      "id": "deleteAnalytics",
+      "summary": "F1b (D24): Delete my analytics data. Deletes every raw event kept under the analytics ID. No token. The answer is the same whether the ID had events or not; totals older than 30 days carry no ID, so there is nothing of hers in them to delete.",
+      "method": "POST",
+      "path": "/v1/analytics/deletion",
+      "auth": "none",
+      "cost": "free",
+      "request": {
+        "schema": "AnalyticsDeletionRequest",
+        "example": "examples/analytics-deletion.request.json"
+      },
+      "response": {
+        "status": 200,
+        "schema": "AnalyticsDeletionResponse",
+        "example": "examples/analytics-deletion.response.json"
+      },
+      "errors": [
+        "invalid_request",
+        "payload_too_large",
+        "unsupported_media_type",
         "rate_limited",
         "unavailable",
         "internal"
@@ -924,6 +1077,9 @@
         },
         "question": {
           "$ref": "StylistQuestion"
+        },
+        "measurements": {
+          "$ref": "StylistMeasurements"
         }
       }
     },
@@ -2305,6 +2461,275 @@
         },
         "usage": {
           "$ref": "UsageCategory"
+        }
+      }
+    },
+    "AppleSignInRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "idToken"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "apple"
+          ]
+        },
+        "idToken": {
+          "$ref": "AppleIdToken"
+        }
+      }
+    },
+    "AppleIdToken": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token",
+        "nonce"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+          "maxLength": 4096
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]{16,128}$",
+          "maxLength": 128
+        }
+      }
+    },
+    "AppleSignInResponse": {
+      "type": "object",
+      "required": [
+        "token",
+        "user"
+      ],
+      "properties": {
+        "redirect": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "user": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "ConvexTokenResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+          "maxLength": 4096
+        }
+      }
+    },
+    "SignOutResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success"
+      ],
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Jwks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keys"
+      ],
+      "properties": {
+        "keys": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "kid",
+              "kty",
+              "alg"
+            ]
+          }
+        }
+      }
+    },
+    "StylistMeasurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "heightCm": {
+          "type": "integer",
+          "minimum": 91,
+          "maximum": 244
+        },
+        "bustCm": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 178
+        },
+        "waistCm": {
+          "type": "integer",
+          "minimum": 38,
+          "maximum": 178
+        },
+        "hipsCm": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 204
+        },
+        "inseamCm": {
+          "type": "integer",
+          "minimum": 38,
+          "maximum": 115
+        },
+        "weightKg": {
+          "type": "integer",
+          "minimum": 22,
+          "maximum": 318
+        }
+      }
+    },
+    "AnalyticsBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "AnalyticsRecord"
+          }
+        }
+      }
+    },
+    "AnalyticsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "outcome",
+        "hour",
+        "appVersion",
+        "systemVersion",
+        "deviceClass",
+        "consentVersion",
+        "analyticsID"
+      ],
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "styleFinished",
+            "askFinished",
+            "tryOnFinished"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "none",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "hour": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 32
+        },
+        "appVersion": {
+          "type": "string",
+          "pattern": "^[0-9]{1,4}(\\.[0-9]{1,4}){0,3}$"
+        },
+        "systemVersion": {
+          "type": "string",
+          "pattern": "^[0-9]{1,4}(\\.[0-9]{1,4}){0,3}$"
+        },
+        "deviceClass": {
+          "type": "string",
+          "enum": [
+            "iPhone",
+            "iPad"
+          ]
+        },
+        "consentVersion": {
+          "type": "string",
+          "pattern": "^[a-z0-9.-]{1,32}$"
+        },
+        "analyticsID": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        }
+      }
+    },
+    "AnalyticsReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accepted"
+      ],
+      "properties": {
+        "accepted": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "AnalyticsDeletionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analyticsID"
+      ],
+      "properties": {
+        "analyticsID": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        }
+      }
+    },
+    "AnalyticsDeletionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deleted"
+      ],
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+          "enum": [
+            true
+          ]
         }
       }
     }

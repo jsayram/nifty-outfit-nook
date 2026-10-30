@@ -223,7 +223,7 @@ struct SignInSheetContent: View {
 
 /// Apple's own Sign in with Apple button (`ASAuthorizationAppleIDButton`), black in light mode and
 /// white in dark mode as Apple's guidelines ask. It only starts the app's sign-in: the
-/// `AuthProvider` runs the request (Clerk's, or the fake in a Debug build). It keeps Apple's
+/// `AuthProvider` runs the request (Better Auth, against the fake backend in a Debug build). It keeps Apple's
 /// label and look, at least 50 points tall; VoiceOver reads Apple's own label. A still image
 /// (snapshot tests) draws a SwiftUI copy, since `ImageRenderer` can't draw UIKit views.
 struct AppleSignInButton: View {

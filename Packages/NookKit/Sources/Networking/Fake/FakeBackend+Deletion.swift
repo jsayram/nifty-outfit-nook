@@ -22,7 +22,7 @@ import Foundation
         }
 
         var records: [String: Record] = [:]
-        /// Subjects whose sign-in account was deleted: their tokens no longer work, as at Clerk.
+        /// Subjects whose sign-in account was deleted: their tokens no longer work, as at Better Auth.
         var deletedSubjects: Set<String> = []
         /// How many more times the sign-in account's step fails.
         var accountStepFailures = 0
@@ -39,7 +39,7 @@ import Foundation
     extension FakeBackend {
         // MARK: Controls for tests and the debug screen
 
-        /// The next `times` deletion requests can't delete the sign-in account (as if Clerk were down).
+        /// The next `times` deletion requests can't delete the sign-in account (Better Auth's step fails).
         public func failAccountDeletion(times: Int) {
             state.withLock { $0.deletions.accountStepFailures = times }
         }
@@ -138,6 +138,9 @@ import Foundation
                     } else {
                         record.set("account", "done")
                         state.deletions.deletedSubjects.insert(subject)
+                        // BA3: the Better Auth user goes with its sessions and its Apple link.
+                        state.signIn.endSessions(of: subject)
+                        state.signIn.users = state.signIn.users.filter { $0.value != subject }
                     }
                 }
                 if record.state("account") == "done" {
