@@ -55,6 +55,9 @@ struct StylingAccessScreen: View {
             SafariView(url: link.url)
                 .ignoresSafeArea()
         }
+        #if DEBUG
+            .modifier(SandboxRefundMenu())
+        #endif
         .task { await model.load(from: services) }
         .task { await model.follow(services) }
         .task { await model.followCredits(services) }
@@ -100,6 +103,51 @@ private struct OfferCodeSheet: ViewModifier {
         }
     }
 }
+
+#if DEBUG
+    /// S4: Apple's refund request sheet for the latest subscription or unlock transaction, so a
+    /// sandbox refund can be tested (the sandbox approves any reason; Other with "DECLINE" tests a
+    /// decline). Debug builds launched with `-refund-lab` only: the app has no refund button.
+    private struct SandboxRefundMenu: ViewModifier {
+        private static let isOn = ProcessInfo.processInfo.arguments.contains("-refund-lab")
+        @State private var transactionID: UInt64?
+        @State private var isPresented = false
+
+        func body(content: Content) -> some View {
+            if Self.isOn {
+                content
+                    .toolbar {
+                        ToolbarItem(placement: .primaryAction) {
+                            Menu {
+                                Button {
+                                    Task { await present(SubscriptionProducts.monthly) }
+                                } label: {
+                                    Text(verbatim: "Refund the subscription")
+                                }
+                                Button {
+                                    Task { await present(SubscriptionProducts.complimentary) }
+                                } label: {
+                                    Text(verbatim: "Refund the unlock")
+                                }
+                            } label: {
+                                Text(verbatim: "Refund (test)")
+                            }
+                            .accessibilityIdentifier("access.refundLab")
+                        }
+                    }
+                    .refundRequestSheet(for: transactionID ?? 0, isPresented: $isPresented)
+            } else {
+                content
+            }
+        }
+
+        private func present(_ productID: String) async {
+            guard case .verified(let transaction)? = await Transaction.latest(for: productID) else { return }
+            transactionID = transaction.id
+            isPresented = true
+        }
+    }
+#endif
 
 extension View {
     /// Apple's Manage subscription sheet, for other screens that link to it (Delete my account).
