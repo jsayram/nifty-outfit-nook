@@ -20,6 +20,12 @@ public struct StylingContext: Hashable, Sendable, Codable {
     /// When the request is styled. Results and looks are stamped with it.
     public var now: Date
     public var calendar: Calendar
+    /// D10: her measurements and weight for the cloud stylist, in whole units. Set only when the
+    /// cloud stylist is on, and sent only under a consent that names them (`StyleCall`). Kept with
+    /// a job so a resumed one sends the same body.
+    ///
+    /// Data tier: **Sensitive**.
+    public var measurements: StyleCall.Measurements?
 
     public init(
         request: StyleRequest,
@@ -28,7 +34,8 @@ public struct StylingContext: Hashable, Sendable, Codable {
         recentCombinations: [Set<Garment.ID>: Date] = [:],
         shownCombinations: Set<Set<Garment.ID>> = [],
         now: Date,
-        calendar: Calendar
+        calendar: Calendar,
+        measurements: StyleCall.Measurements? = nil
     ) {
         self.request = request
         self.eligibleGarments = eligibleGarments.sorted { $0.id < $1.id }
@@ -37,6 +44,7 @@ public struct StylingContext: Hashable, Sendable, Codable {
         self.shownCombinations = shownCombinations
         self.now = now
         self.calendar = calendar
+        self.measurements = measurements
     }
 
     /// Builds the context from everything in the stores.
@@ -52,7 +60,8 @@ public struct StylingContext: Hashable, Sendable, Codable {
         usualFit: Comfort?,
         shown: Set<Set<Garment.ID>> = [],
         now: Date,
-        calendar: Calendar
+        calendar: Calendar,
+        measurements: StyleCall.Measurements? = nil
     ) throws(StylingContextError) -> StylingContext {
         var members: Set<Garment.ID>?
         if let suitcaseID = request.source.suitcaseID {
@@ -84,7 +93,8 @@ public struct StylingContext: Hashable, Sendable, Codable {
             recentCombinations: recent,
             shownCombinations: shown,
             now: now,
-            calendar: calendar
+            calendar: calendar,
+            measurements: measurements
         )
     }
 

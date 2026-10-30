@@ -13,6 +13,8 @@ public enum RealGateway {
         public let feedback: GatewayFeedbackService
         /// 30b: picture-credit claims.
         public let credits: GatewayCreditClaimer
+        /// F1c: opt-in analytics, with no token.
+        public let analytics: GatewayAnalyticsEndpoint
     }
 
     @MainActor
@@ -43,6 +45,7 @@ public enum RealGateway {
                 auth: auth, client: client, appVersion: appVersion, attestation: attestation),
             paid: GatewayPaidActionService(client: client, attestation: attestation),
             feedback: GatewayFeedbackService(auth: auth, client: client),
-            credits: GatewayCreditClaimer(client: client))
+            credits: GatewayCreditClaimer(client: client),
+            analytics: GatewayAnalyticsEndpoint(client: client))
     }
 }

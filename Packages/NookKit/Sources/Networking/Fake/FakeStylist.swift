@@ -12,6 +12,9 @@ import Foundation
         /// 27c: answers like `normal`, but only after `slowAnswer`, like a busy provider, so there's
         /// time to leave the screen, browse and search before the looks are ready.
         case slow
+        /// F1c: the server's record shows no styling access for her account (30c): 403
+        /// entitlement_required, with nothing sent or counted.
+        case noStylingAccess
 
         /// How long `slow` takes. Under the paid-text try timeout (40 seconds), so one try answers.
         public static let slowAnswer: Duration = .seconds(15)
@@ -164,11 +167,14 @@ import Foundation
 
         /// The fake's checks of a style body beyond decoding: the contract's keys, mode and limits.
         static func isValid(_ object: [String: Any], decoded: APIV1.StyleRequest) -> Bool {
-            let top: Set<String> = ["mode", "contextRevision", "consentVersion", "closet", "outfit", "question"]
+            let top: Set<String> = [
+                "mode", "contextRevision", "consentVersion", "closet", "outfit", "question", "measurements",
+            ]
             let piece: Set<String> = [
                 "id", "category", "kind", "colors", "colorNote", "fit", "dressiness", "warmth", "name", "otherNames",
             ]
             guard Set(object.keys).isSubset(of: top), ["full", "ask"].contains(decoded.mode),
+                isValid(measurements: object["measurements"]),
                 decoded.contextRevision.wholeMatch(of: /[A-Za-z0-9_-]{1,64}/) != nil,
                 decoded.closet.count <= 150,
                 (object["closet"] as? [[String: Any]])?.allSatisfy({ Set($0.keys).isSubset(of: piece) }) == true
@@ -184,6 +190,33 @@ import Foundation
             }
             guard let question = decoded.question, decoded.outfit == nil else { return false }
             return !question.look.isEmpty && question.look.allSatisfy(ids.contains) && question.text.count <= 500
+        }
+
+        /// F1b (D10): the consent texts that name measurements and weight.
+        static let measurementConsentVersions: Set<String> = ["stylist-2"]
+
+        /// The contract's ranges, whole numbers only, and no other key (a photo has nowhere to go).
+        static let measurementRanges: [String: ClosedRange<Int>] = [
+            "heightCm": 91...244, "bustCm": 50...178, "waistCm": 38...178, "hipsCm": 50...204,
+            "inseamCm": 38...115, "weightKg": 22...318,
+        ]
+
+        static func isValid(measurements value: Any?) -> Bool {
+            guard let value else { return true }
+            guard let object = value as? [String: Any] else { return false }
+            return object.allSatisfy { key, number in
+                guard let range = measurementRanges[key], let number = number as? NSNumber,
+                    CFGetTypeID(number) != CFBooleanGetTypeID(), number.doubleValue.rounded() == number.doubleValue
+                else { return false }
+                return range.contains(number.intValue)
+            }
+        }
+
+        /// Whether a body carrying measurements is covered by its consent, as the backend decides it
+        /// (an empty object counts as none).
+        static func consentCoversMeasurements(_ request: APIV1.StyleRequest, object: [String: Any]) -> Bool {
+            guard let sent = object["measurements"] as? [String: Any], !sent.isEmpty else { return true }
+            return measurementConsentVersions.contains(request.consentVersion)
         }
     }
 #endif

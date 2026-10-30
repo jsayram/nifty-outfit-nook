@@ -137,6 +137,8 @@ struct QuickIdeasLabel: View {
     let reviewConsent: () -> Void
     /// Release: signed out, after Not now: Sign in, then the stylist tries again.
     var signIn: () -> Void = {}
+    /// F1c: the server shows no styling access: opens Styling access.
+    var seeStylingAccess: () -> Void = {}
 
     @Environment(\.connection) private var connection
 
@@ -158,6 +160,7 @@ struct QuickIdeasLabel: View {
         switch reason {
         case .needsConsent: StylistConsentText.review
         case .limited(.account(.signedOut)): SignInText.signIn
+        case .limited(.needsStylingAccess): CloudLimitText.seeStylingAccess
         case .offline where !connection.isOffline, .cloudDidNotFinish:
             String(
                 localized: "Ask the stylist", bundle: .module,
@@ -170,6 +173,7 @@ struct QuickIdeasLabel: View {
         switch reason {
         case .needsConsent: reviewConsent
         case .limited(.account(.signedOut)): signIn
+        case .limited(.needsStylingAccess): seeStylingAccess
         case .offline where !connection.isOffline, .cloudDidNotFinish: retry
         default: nil
         }

@@ -244,6 +244,8 @@ struct PaidActionTests {
         #expect(map(.unavailable(retryAfterSeconds: 30), true) == .didNotFinish(retryAfterSeconds: 30))
         #expect(map(.unavailable(retryAfterSeconds: 30), false) == .account(.unavailable(retryAfterSeconds: 30)))
         #expect(map(.offline, true) == .account(.offline))
+        // F1c: the server's "no styling access" says so, instead of a plain "not allowed".
+        #expect(map(.entitlementRequired, true) == .needsStylingAccess)
     }
 }
 

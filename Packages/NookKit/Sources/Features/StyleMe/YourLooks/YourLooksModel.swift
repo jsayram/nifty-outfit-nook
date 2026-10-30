@@ -312,13 +312,17 @@ final class YourLooksModel {
             async let profile = services.profile.profile()
             let (garments, suitcases, storedLooks) = try await (garmentList, suitcaseList, lookList)
             looks = storedLooks
-            let usualFit = try await profile.usualFit
+            let loaded = try await profile
+            let usualFit = loaded.usualFit
             guard thisRun == run else { return }
             self.usualFit = usualFit
             show(garments: garments, suitcases: suitcases, looks: looks)
+            // D10: her measurements go only to the cloud stylist, and only under a consent that
+            // names them (`StyleCall`). The stylist on the phone doesn't use them.
             context = try StylingContext.make(
                 request: request, garments: garments, suitcases: suitcases, looks: looks, usualFit: usualFit,
-                shown: shown, now: now(), calendar: calendar)
+                shown: shown, now: now(), calendar: calendar,
+                measurements: services.cloudStyling ? StyleCall.Measurements(loaded.measurements) : nil)
         } catch is StylingContextError {
             return finish(.requestChanged, run: thisRun)
         } catch {

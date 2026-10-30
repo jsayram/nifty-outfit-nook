@@ -40,6 +40,10 @@ public enum APIFailure: Error, Sendable, Equatable {
     // 27a
     /// 403 consent_required: her consent doesn't cover where the backend would send this.
     case consentRequired
+    // 30c, F1c
+    /// 403 entitlement_required: the server's record of Apple's purchases shows no styling access
+    /// (for a try-on picture, and no credits either). Nothing was sent or counted.
+    case entitlementRequired
 }
 
 /// Signs a paid request (24b): the App Attest headers for one try. Called again for every try,
@@ -346,6 +350,8 @@ public final class APIClient: Sendable {
                 throw fail(endpoint, .attestationRequired)
             case 403 where envelope?.error.code == APIV1.ErrorCode.consentRequired.rawValue:
                 throw fail(endpoint, .consentRequired)
+            case 403 where envelope?.error.code == APIV1.ErrorCode.entitlementRequired.rawValue:
+                throw fail(endpoint, .entitlementRequired)
             case 403:
                 throw fail(endpoint, .forbidden)
             case 409 where envelope?.error.code == APIV1.ErrorCode.idempotencyConflict.rawValue:

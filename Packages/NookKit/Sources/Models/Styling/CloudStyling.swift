@@ -28,6 +28,14 @@ public struct StylistConsent: Codable, Hashable, Sendable {
     }
 
     public var isCurrent: Bool { version == Self.currentVersion }
+
+    /// The consent texts that name her height, measurements and weight (D10). Under any other a
+    /// request never carries them, and the backend refuses one that does.
+    public static let versionsNamingMeasurements: Set<String> = ["stylist-2"]
+
+    public static func namesMeasurements(_ version: String) -> Bool {
+        versionsNamingMeasurements.contains(version)
+    }
 }
 
 /// Where her stylist consent is kept.
@@ -110,16 +118,91 @@ public struct StyleCall: Sendable, Equatable {
         }
     }
 
+    /// Her measurements and weight in whole centimetres and kilograms (D10), as the stylist may
+    /// see them. Only the numbers she filled in, each inside the contract's range; never a photo.
+    ///
+    /// Data tier: **Sensitive**. Goes only inside a request whose consent names it.
+    public struct Measurements: Hashable, Sendable, Codable {
+        public var heightCm: Int?
+        public var bustCm: Int?
+        public var waistCm: Int?
+        public var hipsCm: Int?
+        public var inseamCm: Int?
+        public var weightKg: Int?
+
+        /// The contract's ranges (`StylistMeasurements`). The app's own limits round into them; a
+        /// value outside is left out rather than refused with the whole request.
+        static let heightRange = 91...244
+        static let bustRange = 50...178
+        static let waistRange = 38...178
+        static let hipsRange = 50...204
+        static let inseamRange = 38...115
+        static let weightRange = 22...318
+
+        public init(
+            heightCm: Int? = nil, bustCm: Int? = nil, waistCm: Int? = nil, hipsCm: Int? = nil, inseamCm: Int? = nil,
+            weightKg: Int? = nil
+        ) {
+            self.heightCm = heightCm
+            self.bustCm = bustCm
+            self.waistCm = waistCm
+            self.hipsCm = hipsCm
+            self.inseamCm = inseamCm
+            self.weightKg = weightKg
+        }
+
+        /// Her profile's values, rounded to whole units. `nil` when none is filled in.
+        public init?(_ body: BodyMeasurements) {
+            self.init(
+                heightCm: Self.centimetres(body.height, in: Self.heightRange),
+                bustCm: Self.centimetres(body.bust, in: Self.bustRange),
+                waistCm: Self.centimetres(body.waist, in: Self.waistRange),
+                hipsCm: Self.centimetres(body.hips, in: Self.hipsRange),
+                inseamCm: Self.centimetres(body.inseam, in: Self.inseamRange),
+                weightKg: Self.kilograms(body.weight, in: Self.weightRange))
+            if isEmpty { return nil }
+        }
+
+        public var isEmpty: Bool {
+            heightCm == nil && bustCm == nil && waistCm == nil && hipsCm == nil && inseamCm == nil && weightKg == nil
+        }
+
+        static func centimetres(_ length: Length?, in range: ClosedRange<Int>) -> Int? {
+            guard let length else { return nil }
+            let value = length.unit == .centimeters ? length.value : length.value * 2.54
+            return whole(value, in: range)
+        }
+
+        static func kilograms(_ weight: Weight?, in range: ClosedRange<Int>) -> Int? {
+            guard let weight else { return nil }
+            let value = weight.unit == .kilograms ? weight.value : weight.value / 2.204_622_6
+            return whole(value, in: range)
+        }
+
+        private static func whole(_ value: Double, in range: ClosedRange<Int>) -> Int? {
+            guard value.isFinite else { return nil }
+            let rounded = value.rounded()
+            guard rounded >= Double(range.lowerBound), rounded <= Double(range.upperBound) else { return nil }
+            return Int(rounded)
+        }
+    }
+
     public var mode: Mode
     public var contextRevision: String
     public var consentVersion: String
     public var pieces: [Garment]
     public var outfit: Outfit?
     public var question: Question?
+    /// D10: only when `consentVersion` names them (`StylistConsent.namesMeasurements`); under any
+    /// other consent this is always `nil`, whatever was passed, even if the version changes later.
+    public var measurements: Measurements? {
+        StylistConsent.namesMeasurements(consentVersion) ? givenMeasurements : nil
+    }
+    private var givenMeasurements: Measurements?
 
     public init(
         mode: Mode, contextRevision: String, consentVersion: String, pieces: [Garment], outfit: Outfit?,
-        question: Question?
+        question: Question?, measurements: Measurements? = nil
     ) {
         self.mode = mode
         self.contextRevision = contextRevision
@@ -127,6 +210,7 @@ public struct StyleCall: Sendable, Equatable {
         self.pieces = pieces
         self.outfit = outfit
         self.question = question
+        givenMeasurements = measurements?.isEmpty == false ? measurements : nil
     }
 
     /// At most this many pieces go in one request (the contract's limit).
@@ -154,7 +238,7 @@ public struct StyleCall: Sendable, Equatable {
             avoid: Array(avoid.prefix(maximumAvoid)))
         return StyleCall(
             mode: .full, contextRevision: revision(of: pieces), consentVersion: consentVersion, pieces: pieces,
-            outfit: outfit, question: nil)
+            outfit: outfit, question: nil, measurements: context.measurements)
     }
 
     /// The pieces to send, sorted by ID: all of them, or the starting piece and the most recently
@@ -365,14 +449,16 @@ extension StyleCall {
     /// An Ask stylist question about one look, with the earlier turns of that conversation
     /// (Phase 27a builds the request; the screen is still a stand-in).
     public static func question(
-        _ text: String, about look: Look, pieces: [Garment], earlier: [Turn], consentVersion: String
+        _ text: String, about look: Look, pieces: [Garment], earlier: [Turn], consentVersion: String,
+        measurements: Measurements? = nil
     ) -> StyleCall {
         let sent = pieces.sorted { $0.id < $1.id }
         return StyleCall(
             mode: .ask, contextRevision: revision(of: sent), consentVersion: consentVersion, pieces: sent, outfit: nil,
             question: Question(
                 look: look.garmentIDs.filter { id in sent.contains { $0.id == id } }, occasion: look.occasion,
-                text: text, earlier: Array(earlier.suffix(6))))
+                text: text, earlier: Array(earlier.suffix(6))),
+            measurements: measurements)
     }
 
     /// A small made-up request, for the debug limits screen and tests: three plain pieces, no

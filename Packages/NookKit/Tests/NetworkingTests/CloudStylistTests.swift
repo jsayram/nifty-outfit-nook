@@ -156,4 +156,98 @@ struct CloudStylistTests {
         #expect(weather["temperatureCelsius"] as? Int == 14)
         #expect(weather["precipitationPercent"] as? Int == 70)
     }
+
+    // MARK: D10, F1c: measurements and weight under stylist-2
+
+    static let measurements = StyleCall.Measurements(heightCm: 160, waistCm: 71, hipsCm: 97, inseamCm: 74, weightKg: 58)
+
+    static func measuredContext() -> StylingContext {
+        var context = context()
+        context.measurements = measurements
+        return context
+    }
+
+    @Test func underStylist2HerMeasurementsReachTheStylistAndNothingElseOfHerBody() async throws {
+        let outcome = try await stylist(paid()).style(Self.measuredContext())
+        #expect(outcome.result != nil)
+        let sent = try #require(backend.styleRequests.last)
+        #expect(sent.consentVersion == "stylist-2")
+        #expect(
+            sent.measurements
+                == APIV1.StylistMeasurements(
+                    StyleCall.Measurements(heightCm: 160, waistCm: 71, hipsCm: 97, inseamCm: 74, weightKg: 58)))
+        // In the body: whole numbers under the contract's keys, and no field that could hold a
+        // photo or a face anywhere.
+        let data = try APIV1.encoder().encode(sent)
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let numbers = try #require(object["measurements"] as? [String: Any])
+        #expect(Set(numbers.keys) == ["heightCm", "waistCm", "hipsCm", "inseamCm", "weightKg"])
+        #expect(numbers.values.allSatisfy { $0 is Int })
+        func keys(_ value: Any) -> [String] {
+            if let dictionary = value as? [String: Any] {
+                return dictionary.keys + dictionary.values.flatMap(keys)
+            }
+            return (value as? [Any])?.flatMap(keys) ?? []
+        }
+        let all = keys(object).map { $0.lowercased() }
+        for word in ["photo", "image", "picture", "face", "person", "data"] {
+            #expect(!all.contains { $0.contains(word) }, "\(word)")
+        }
+    }
+
+    @Test func underStylist1TheRequestCarriesNoMeasurements() async throws {
+        let consent = StylistConsent(version: "stylist-1", agreedAt: Self.now)
+        // stylist-1 isn't current, so the app asks again and sends nothing ...
+        await #expect(throws: StylistError.needsConsent) {
+            try await stylist(paid(), consent: consent).style(Self.measuredContext())
+        }
+        // ... and a body built under it never has the field.
+        let call = StyleCall.outfit(from: Self.measuredContext(), consentVersion: "stylist-1")
+        let data = try APIV1.encoder().encode(APIV1.StyleRequest(call))
+        #expect(!String(decoding: data, as: UTF8.self).contains("measurements"))
+        #expect(backend.styleRequests.isEmpty)
+    }
+
+    @Test func withoutMeasurementsTheBodyHasNoField() async throws {
+        _ = try await stylist(paid()).style(Self.context())
+        #expect(backend.styleRequests.last?.measurements == nil)
+    }
+
+    @Test func theFakeRefusesMeasurementsUnderAConsentThatDoesntNameThem() throws {
+        let golden = try ContractTests.data("v1/examples/style-measurements.request.json")
+        let request = try JSONDecoder().decode(APIV1.StyleRequest.self, from: golden)
+        let object = try #require(JSONSerialization.jsonObject(with: golden) as? [String: Any])
+        #expect(FakeStylist.consentCoversMeasurements(request, object: object))
+        var older = request
+        older.consentVersion = "stylist-1"
+        #expect(!FakeStylist.consentCoversMeasurements(older, object: object))
+        // stylist-1 without them is still fine.
+        var without = object
+        without.removeValue(forKey: "measurements")
+        #expect(FakeStylist.consentCoversMeasurements(older, object: without))
+    }
+
+    @Test(arguments: [
+        "style.request.measurements_decimal.json", "style.request.measurements_in_pounds.json",
+        "style.request.measurements_out_of_range.json", "style.request.measurements_photo.json",
+    ])
+    func theFakeRefusesTheContractsInvalidMeasurements(file: String) throws {
+        let body = try ContractTests.data("v1/examples/invalid/\(file)")
+        let object = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
+        let decoded = try? JSONDecoder().decode(APIV1.StyleRequest.self, from: body)
+        #expect(decoded.map { FakeStylist.isValid(object, decoded: $0) } != true, "\(file)")
+    }
+
+    // MARK: F1c: no styling access on the server's record
+
+    @Test func noStylingAccessOnTheServerSaysSoAndCountsNothing() async throws {
+        let service = try await paid()
+        backend.setStylist(.noStylingAccess)
+        await #expect(throws: StylistError.limited(.needsStylingAccess)) {
+            try await stylist(service).style(Self.context())
+        }
+        #expect(backend.paidJobsRun == 0)
+        let usage = try await service.usage()
+        #expect(usage.allowance(.styleFull)?.usedToday == 0)
+    }
 }

@@ -132,6 +132,9 @@ public enum CloudLimitProblem: Error, Sendable, Hashable, Codable {
     case account(AccountProblem)
     /// 27a: her consent doesn't cover where the server would send this. Nothing was sent.
     case needsConsent
+    /// 30c (F1c): the server's record of Apple's purchases shows no styling access (for a try-on
+    /// picture, and no credits either). Nothing was sent or counted; Styling access is the way on.
+    case needsStylingAccess
 }
 
 /// Paid cloud work through the gateway (24b). The same idempotency key must be passed for every

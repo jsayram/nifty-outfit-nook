@@ -8,8 +8,9 @@ import Synchronization
 // weight, closet contents, garment IDs, looks, a location, her account or a transaction ID.
 //
 // Events wait in memory only (at most 100 or 64 KB, each dropped after 7 days) and are sent with
-// no account token, so the server can't link them to her. The ingestion endpoint is a later
-// backend phase; until then `NoAnalyticsEndpoint` sends nothing.
+// no account token, so the server can't link them to her (F1c: POST /v1/analytics/events). They go
+// at launch and then on a timer, and only once their hour is over, never right after the event:
+// the server's own row times are finer than the hour (THREAT_MODEL, the F1b timing note).
 
 /// The events the app may send (PRD 23.1's Styling family to start). Adding one is a change to the
 /// allowlist, here and on the server.
@@ -62,6 +63,20 @@ public struct AnalyticsRecord: Hashable, Sendable, Codable {
     /// The random ID she can reset. Never joined to her account.
     public var analyticsID: String
 
+    public init(
+        event: AnalyticsEvent, outcome: AnalyticsOutcome, hour: Date, appVersion: String, systemVersion: String,
+        deviceClass: AnalyticsDeviceClass, consentVersion: String, analyticsID: String
+    ) {
+        self.event = event
+        self.outcome = outcome
+        self.hour = hour
+        self.appVersion = appVersion
+        self.systemVersion = systemVersion
+        self.deviceClass = deviceClass
+        self.consentVersion = consentVersion
+        self.analyticsID = analyticsID
+    }
+
     /// Roughly what one record takes when sent, for the 64 KB cap.
     static let estimatedBytes = 256
 }
@@ -90,11 +105,17 @@ public struct AnalyticsSettings: Codable, Hashable, Sendable {
 public protocol AnalyticsSettingsStore: ErasableStore {
     func current() -> AnalyticsSettings?
     func save(_ settings: AnalyticsSettings?)
+    /// Analytics IDs whose events the server still has to delete: she turned it off and the
+    /// deletion couldn't be sent then. Kept across launches until it goes. **Personal**
+    /// (pseudonymous), erased by Delete my data.
+    func pendingDeletions() -> [String]
+    func savePendingDeletions(_ ids: [String])
 }
 
 /// In memory: previews, tests and the debug sample closet.
 public final class InMemoryAnalyticsSettingsStore: AnalyticsSettingsStore {
     private let state: Mutex<AnalyticsSettings?>
+    private let pending = Mutex<[String]>([])
 
     public init(_ settings: AnalyticsSettings? = nil) {
         state = Mutex(settings)
@@ -102,18 +123,31 @@ public final class InMemoryAnalyticsSettingsStore: AnalyticsSettingsStore {
 
     public func current() -> AnalyticsSettings? { state.withLock { $0 } }
     public func save(_ settings: AnalyticsSettings?) { state.withLock { $0 = settings } }
-    public func eraseAll() async throws(StoreError) { state.withLock { $0 = nil } }
+    public func pendingDeletions() -> [String] { pending.withLock { $0 } }
+    public func savePendingDeletions(_ ids: [String]) { pending.withLock { $0 = ids } }
+    public func eraseAll() async throws(StoreError) {
+        state.withLock { $0 = nil }
+        pending.withLock { $0 = [] }
+    }
 }
 
 /// The server's analytics endpoint, as the app sees it. Sent with no account token.
 public protocol AnalyticsEndpoint: Sendable {
-    /// Sends a batch. Throws when it didn't go, so the events stay queued.
+    /// Sends a batch. Throws when it didn't go, so the events stay queued, or
+    /// `AnalyticsBatchRefused` when the server won't ever take it, so they're dropped.
     func send(_ records: [AnalyticsRecord]) async throws
     /// Delete my analytics data: removes the events the server keeps under `analyticsID`.
     func deleteEvents(analyticsID: String) async throws
 }
 
-/// No endpoint yet (a later backend phase): nothing is sent, so there is nothing to delete.
+/// The server refused a batch for good (it doesn't match the contract or the consent): sending it
+/// again would be refused again, so its events are dropped rather than kept.
+public struct AnalyticsBatchRefused: Error, Equatable {
+    public init() {}
+}
+
+/// No backend (previews, tests, a build without one): nothing is sent, so there is nothing to
+/// delete.
 public struct NoAnalyticsEndpoint: AnalyticsEndpoint {
     public struct NotAvailable: Error {
         public init() {}
@@ -127,11 +161,13 @@ public struct NoAnalyticsEndpoint: AnalyticsEndpoint {
 /// "Help improve the app", as the screens and the rest of the app see it.
 public protocol AnalyticsService: ErasableStore {
     var isOn: Bool { get }
-    /// Turning it on makes a new random ID; turning it off clears unsent events at once.
+    /// Turning it on makes a new random ID; turning it off clears unsent events at once and
+    /// queues the deletion of what the server has under the old ID (sent by the next `flush`).
     func setOn(_ on: Bool)
     /// Queues an event only while it's on. Never blocks and never fails.
     func record(_ event: AnalyticsEvent, _ outcome: AnalyticsOutcome)
-    /// Sends what's queued, if anything. Nothing is lost if it can't.
+    /// Sends any queued deletions, then the queued events whose hour is over, if any. Nothing is
+    /// lost if it can't.
     func flush() async
     /// A new random ID, and the unsent events are cleared.
     func resetID()
@@ -140,11 +176,24 @@ public protocol AnalyticsService: ErasableStore {
     func deleteMyData() async -> Bool
 }
 
+extension AnalyticsService {
+    /// Sends at once (at launch) and then every `interval` until the task is cancelled. Never
+    /// called from `record`, so an event never goes out the moment it happens.
+    public func sendRegularly(every interval: Duration = OptInAnalytics.sendInterval) async {
+        while !Task.isCancelled {
+            await flush()
+            try? await Task.sleep(for: interval)
+        }
+    }
+}
+
 /// The queue in memory and her choice in `settings` (PRD 23.1).
 public final class OptInAnalytics: AnalyticsService {
     public static let maximumEvents = 100
     public static let maximumBytes = 64 * 1_024
     public static let keptFor: TimeInterval = 7 * 24 * 60 * 60
+    /// How often the app sends while it's open, besides at launch.
+    public static let sendInterval: Duration = .seconds(3_600)
 
     private let settings: any AnalyticsSettingsStore
     private let endpoint: any AnalyticsEndpoint
@@ -166,6 +215,15 @@ public final class OptInAnalytics: AnalyticsService {
 
     public func setOn(_ on: Bool) {
         queue.withLock { $0.removeAll() }
+        // F1c: off forgets the ID, so what the server has under it is deleted first; until that
+        // goes through, the ID waits in the store for the next try (`flush`, at the latest at the
+        // next launch). Nothing she shared is left where she can't delete it.
+        if !on, let current = settings.current() {
+            let pending = settings.pendingDeletions()
+            if !pending.contains(current.analyticsID) {
+                settings.savePendingDeletions(pending + [current.analyticsID])
+            }
+        }
         settings.save(on ? AnalyticsSettings(agreedAt: now(), analyticsID: Self.newID()) : nil)
     }
 
@@ -188,14 +246,32 @@ public final class OptInAnalytics: AnalyticsService {
     public var queued: [AnalyticsRecord] { queue.withLock { $0 } }
 
     public func flush() async {
+        await sendPendingDeletions()
         guard isOn else { return }
-        let batch = queue.withLock { $0 }
+        // Only hours that are over: the arrival then says nothing finer than the hour already does.
+        let time = now()
+        let batch = queue.withLock { queued in queued.filter { time.timeIntervalSince($0.hour) >= 3_600 } }
         guard !batch.isEmpty else { return }
         do {
             try await endpoint.send(batch)
             queue.withLock { queued in queued.removeAll { batch.contains($0) } }
+        } catch is AnalyticsBatchRefused {
+            queue.withLock { queued in queued.removeAll { batch.contains($0) } }
         } catch {
             // Kept for the next try, within the same limits.
+        }
+    }
+
+    /// The deletions she asked for by turning it off, each removed from the store once the server
+    /// confirmed it. Sent whether or not it's on now.
+    func sendPendingDeletions() async {
+        for id in settings.pendingDeletions() {
+            do {
+                try await endpoint.deleteEvents(analyticsID: id)
+                settings.savePendingDeletions(settings.pendingDeletions().filter { $0 != id })
+            } catch {
+                // Kept for the next try.
+            }
         }
     }
 

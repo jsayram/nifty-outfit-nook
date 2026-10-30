@@ -55,7 +55,8 @@ enum AppDiagnostics {
         services.diagnostics = log
         let settings: any AnalyticsSettingsStore =
             keepsSettings ? DefaultsAnalyticsSettingsStore() : InMemoryAnalyticsSettingsStore()
-        services.analytics = OptInAnalytics(settings: settings, context: analyticsContext)
+        services.analytics = OptInAnalytics(
+            settings: settings, endpoint: AppGateway.analytics, context: analyticsContext)
     }
 
     /// The app and iOS version and iPhone or iPad: all an event says about the device.

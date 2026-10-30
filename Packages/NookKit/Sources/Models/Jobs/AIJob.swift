@@ -149,10 +149,13 @@ public struct AskStylistRequest: Hashable, Sendable, Codable {
     public var pieces: [Garment]
     public var earlier: [StylistThread.Turn]
     public var consentVersion: String
+    /// D10: her measurements and weight when the job was made, sent only under a consent that
+    /// names them. **Sensitive**.
+    public var measurements: StyleCall.Measurements?
 
     public init(
         thread: StylistThread.ID, turn: StylistThread.Turn.ID, text: String, look: Look, pieces: [Garment],
-        earlier: [StylistThread.Turn], consentVersion: String
+        earlier: [StylistThread.Turn], consentVersion: String, measurements: StyleCall.Measurements? = nil
     ) {
         self.thread = thread
         self.turn = turn
@@ -161,6 +164,7 @@ public struct AskStylistRequest: Hashable, Sendable, Codable {
         self.pieces = pieces
         self.earlier = earlier
         self.consentVersion = consentVersion
+        self.measurements = measurements
     }
 
     /// The contract's request, built the same way every time.
@@ -168,7 +172,7 @@ public struct AskStylistRequest: Hashable, Sendable, Codable {
         StyleCall.question(
             text, about: look, pieces: pieces,
             earlier: earlier.map { StyleCall.Turn(from: $0.from == .her ? .her : .stylist, text: $0.text) },
-            consentVersion: consentVersion)
+            consentVersion: consentVersion, measurements: measurements)
     }
 }
 

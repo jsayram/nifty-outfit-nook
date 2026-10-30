@@ -71,6 +71,26 @@ extension APIV1 {
         public var earlier: [StylistTurn]?
     }
 
+    /// F1b (D10): her measurements and weight in whole centimetres and kilograms. Only under a
+    /// consent that names them (`stylist-2`); the backend refuses them under any other.
+    public struct StylistMeasurements: Codable, Sendable, Equatable {
+        public var heightCm: Int?
+        public var bustCm: Int?
+        public var waistCm: Int?
+        public var hipsCm: Int?
+        public var inseamCm: Int?
+        public var weightKg: Int?
+
+        public init(_ m: StyleCall.Measurements) {
+            heightCm = m.heightCm
+            bustCm = m.bustCm
+            waistCm = m.waistCm
+            hipsCm = m.hipsCm
+            inseamCm = m.inseamCm
+            weightKg = m.weightKg
+        }
+    }
+
     public struct StyleRequest: Codable, Sendable, Equatable {
         public var mode: String
         public var contextRevision: String
@@ -78,12 +98,15 @@ extension APIV1 {
         public var closet: [StylistPiece]
         public var outfit: OutfitRequest?
         public var question: StylistQuestion?
+        /// Never a photo or the face: the contract has no field for either.
+        public var measurements: StylistMeasurements?
 
         public init(_ call: StyleCall) {
             mode = call.mode.rawValue
             contextRevision = call.contextRevision
             consentVersion = call.consentVersion
             closet = call.pieces.map(StylistPiece.init)
+            measurements = call.measurements.map(StylistMeasurements.init)
             outfit = call.outfit.map { o in
                 OutfitRequest(
                     occasion: o.occasion.rawValue,

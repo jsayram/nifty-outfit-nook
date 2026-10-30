@@ -34,6 +34,8 @@ struct YourLooksScreen: View {
     @State private var swapping: SwapRoute?
     /// 27a: the stylist's consent sheet, from Review.
     @State private var showsConsent = false
+    /// F1c: Styling access, when the server shows none for her account.
+    @State private var showsStylingAccess = false
     /// Release: Report a problem, open for a result.
     @State private var reporting: AIReportRoute?
     @Environment(\.signIn) private var signIn
@@ -66,6 +68,7 @@ struct YourLooksScreen: View {
                 signIn: {
                     Task { if await signInAgain(.styling) { model.retry() } }
                 },
+                seeStylingAccess: { showsStylingAccess = true },
                 report: { target, subjects in
                     reporting = AIReportRoute(
                         target: target, subjects: subjects, hide: { Task { await model.hideResult() } })
@@ -80,6 +83,14 @@ struct YourLooksScreen: View {
                     model.agreeToStylist()
                 },
                 notNow: { showsConsent = false })
+        }
+        // F1c: after Styling access closes, the stylist is asked again; without access the
+        // server refuses again, and nothing is counted either way.
+        .sheet(isPresented: $showsStylingAccess, onDismiss: { model.retry() }) {
+            NavigationStack {
+                StylingAccessScreen(isSheet: true)
+            }
+            .signInGate()
         }
         .navigationTitle(Text("Your looks", bundle: .module, comment: "Screen title"))
         .navigationBarTitleDisplayMode(.inline)
