@@ -203,6 +203,11 @@ struct ContractTests {
         ("v1/examples/style.response.json", "styleResponse"),
         ("v1/examples/style-ask.request.json", "styleRequest"),
         ("v1/examples/style-ask.response.json", "styleResponse"),
+        ("v1/examples/style-measurements.request.json", "styleRequest"),
+        ("v1/examples/analytics-events.request.json", "analyticsBatch"),
+        ("v1/examples/analytics-events.response.json", "analyticsReceipt"),
+        ("v1/examples/analytics-deletion.request.json", "analyticsDeletionRequest"),
+        ("v1/examples/analytics-deletion.response.json", "analyticsDeletionResponse"),
         ("v1/examples/try-on.response.json", "tryOnResponse"),
         ("v1/examples/deletion.request.json", "deletionRequest"),
         ("v1/examples/deletion-status.request.json", "deletionStatusRequest"),
@@ -242,6 +247,12 @@ struct ContractTests {
             case "tryOnRequest": try encoder.encode(decoder.decode(APIV1.TryOnRequest.self, from: original))
             case "tryOnResponse": try encoder.encode(decoder.decode(APIV1.TryOnResponse.self, from: original))
             case "styleResponse": try encoder.encode(decoder.decode(APIV1.StyleResponse.self, from: original))
+            case "analyticsBatch": try encoder.encode(decoder.decode(APIV1.AnalyticsBatch.self, from: original))
+            case "analyticsReceipt": try encoder.encode(decoder.decode(APIV1.AnalyticsReceipt.self, from: original))
+            case "analyticsDeletionRequest":
+                try encoder.encode(decoder.decode(APIV1.AnalyticsDeletionRequest.self, from: original))
+            case "analyticsDeletionResponse":
+                try encoder.encode(decoder.decode(APIV1.AnalyticsDeletionResponse.self, from: original))
             case "actionStatusRequest":
                 try encoder.encode(decoder.decode(APIV1.ActionStatusRequest.self, from: original))
             case "actionStatusResponse":

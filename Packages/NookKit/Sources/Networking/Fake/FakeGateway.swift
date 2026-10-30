@@ -17,6 +17,8 @@ import Models
         public let feedback: GatewayFeedbackService
         /// 30b: picture-credit claims.
         public let credits: GatewayCreditClaimer
+        /// F1c: opt-in analytics, with no token.
+        public let analytics: GatewayAnalyticsEndpoint
 
         /// - Parameter makeAuth: the sign-in, given the fake backend and the session that reaches
         ///   it. Left out, a `FakeAuthProvider` that skips the sign-in routes.
@@ -40,6 +42,7 @@ import Models
             self.paid = GatewayPaidActionService(client: client, attestation: attestation)
             self.feedback = GatewayFeedbackService(auth: auth, client: client)
             self.credits = GatewayCreditClaimer(client: client)
+            self.analytics = GatewayAnalyticsEndpoint(client: client)
         }
     }
 #endif

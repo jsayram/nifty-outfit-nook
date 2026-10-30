@@ -79,6 +79,8 @@ import Synchronization
             var credits = FakeCredits()
             /// BA4: Better Auth's users, Apple links and sessions (FakeBackend+SignIn.swift).
             var signIn = FakeSignIn()
+            /// F1c: opt-in analytics events, kept by analytics ID (FakeBackend+Analytics.swift).
+            var analytics = FakeAnalytics()
         }
 
         let state = Mutex(State())
@@ -184,6 +186,10 @@ import Synchronization
             }
             if endpoint == APIV1.deletionStatus {
                 return routeDeletionStatus(request, body: body, id: id)
+            }
+            // F1c: analytics take no token, and the fake never looks for one.
+            if endpoint == APIV1.sendAnalytics || endpoint == APIV1.deleteAnalytics {
+                return routeAnalytics(request, body: body, endpoint: endpoint, id: id)
             }
 
             // The token.

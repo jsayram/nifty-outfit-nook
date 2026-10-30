@@ -107,6 +107,9 @@ private struct RootTabs: View {
         }
         // 27c: jobs kept from before carry on, with their own keys.
         .task { await services.aiJobs.resume(with: services) }
+        // F1c (D24): "Help improve the app" sends at launch and then hourly while the app is open,
+        // never right after an event. Nothing goes while it's off.
+        .task { await services.analytics.sendRegularly() }
         .onChange(of: scenePhase) { _, phase in
             services.aiJobs.isInForeground = phase == .active
             if phase == .active { Task { await services.aiJobs.resume(with: services) } }

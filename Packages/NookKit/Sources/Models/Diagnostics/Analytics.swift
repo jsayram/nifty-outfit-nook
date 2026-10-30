@@ -8,8 +8,9 @@ import Synchronization
 // weight, closet contents, garment IDs, looks, a location, her account or a transaction ID.
 //
 // Events wait in memory only (at most 100 or 64 KB, each dropped after 7 days) and are sent with
-// no account token, so the server can't link them to her. The ingestion endpoint is a later
-// backend phase; until then `NoAnalyticsEndpoint` sends nothing.
+// no account token, so the server can't link them to her (F1c: POST /v1/analytics/events). They go
+// at launch and then on a timer, and only once their hour is over, never right after the event:
+// the server's own row times are finer than the hour (THREAT_MODEL, the F1b timing note).
 
 /// The events the app may send (PRD 23.1's Styling family to start). Adding one is a change to the
 /// allowlist, here and on the server.
@@ -62,6 +63,20 @@ public struct AnalyticsRecord: Hashable, Sendable, Codable {
     /// The random ID she can reset. Never joined to her account.
     public var analyticsID: String
 
+    public init(
+        event: AnalyticsEvent, outcome: AnalyticsOutcome, hour: Date, appVersion: String, systemVersion: String,
+        deviceClass: AnalyticsDeviceClass, consentVersion: String, analyticsID: String
+    ) {
+        self.event = event
+        self.outcome = outcome
+        self.hour = hour
+        self.appVersion = appVersion
+        self.systemVersion = systemVersion
+        self.deviceClass = deviceClass
+        self.consentVersion = consentVersion
+        self.analyticsID = analyticsID
+    }
+
     /// Roughly what one record takes when sent, for the 64 KB cap.
     static let estimatedBytes = 256
 }
@@ -107,13 +122,21 @@ public final class InMemoryAnalyticsSettingsStore: AnalyticsSettingsStore {
 
 /// The server's analytics endpoint, as the app sees it. Sent with no account token.
 public protocol AnalyticsEndpoint: Sendable {
-    /// Sends a batch. Throws when it didn't go, so the events stay queued.
+    /// Sends a batch. Throws when it didn't go, so the events stay queued, or
+    /// `AnalyticsBatchRefused` when the server won't ever take it, so they're dropped.
     func send(_ records: [AnalyticsRecord]) async throws
     /// Delete my analytics data: removes the events the server keeps under `analyticsID`.
     func deleteEvents(analyticsID: String) async throws
 }
 
-/// No endpoint yet (a later backend phase): nothing is sent, so there is nothing to delete.
+/// The server refused a batch for good (it doesn't match the contract or the consent): sending it
+/// again would be refused again, so its events are dropped rather than kept.
+public struct AnalyticsBatchRefused: Error, Equatable {
+    public init() {}
+}
+
+/// No backend (previews, tests, a build without one): nothing is sent, so there is nothing to
+/// delete.
 public struct NoAnalyticsEndpoint: AnalyticsEndpoint {
     public struct NotAvailable: Error {
         public init() {}
@@ -131,7 +154,7 @@ public protocol AnalyticsService: ErasableStore {
     func setOn(_ on: Bool)
     /// Queues an event only while it's on. Never blocks and never fails.
     func record(_ event: AnalyticsEvent, _ outcome: AnalyticsOutcome)
-    /// Sends what's queued, if anything. Nothing is lost if it can't.
+    /// Sends the queued events whose hour is over, if any. Nothing is lost if it can't.
     func flush() async
     /// A new random ID, and the unsent events are cleared.
     func resetID()
@@ -140,11 +163,24 @@ public protocol AnalyticsService: ErasableStore {
     func deleteMyData() async -> Bool
 }
 
+extension AnalyticsService {
+    /// Sends at once (at launch) and then every `interval` until the task is cancelled. Never
+    /// called from `record`, so an event never goes out the moment it happens.
+    public func sendRegularly(every interval: Duration = OptInAnalytics.sendInterval) async {
+        while !Task.isCancelled {
+            await flush()
+            try? await Task.sleep(for: interval)
+        }
+    }
+}
+
 /// The queue in memory and her choice in `settings` (PRD 23.1).
 public final class OptInAnalytics: AnalyticsService {
     public static let maximumEvents = 100
     public static let maximumBytes = 64 * 1_024
     public static let keptFor: TimeInterval = 7 * 24 * 60 * 60
+    /// How often the app sends while it's open, besides at launch.
+    public static let sendInterval: Duration = .seconds(3_600)
 
     private let settings: any AnalyticsSettingsStore
     private let endpoint: any AnalyticsEndpoint
@@ -189,10 +225,14 @@ public final class OptInAnalytics: AnalyticsService {
 
     public func flush() async {
         guard isOn else { return }
-        let batch = queue.withLock { $0 }
+        // Only hours that are over: the arrival then says nothing finer than the hour already does.
+        let time = now()
+        let batch = queue.withLock { queued in queued.filter { time.timeIntervalSince($0.hour) >= 3_600 } }
         guard !batch.isEmpty else { return }
         do {
             try await endpoint.send(batch)
+            queue.withLock { queued in queued.removeAll { batch.contains($0) } }
+        } catch is AnalyticsBatchRefused {
             queue.withLock { queued in queued.removeAll { batch.contains($0) } }
         } catch {
             // Kept for the next try, within the same limits.

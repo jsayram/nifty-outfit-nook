@@ -153,9 +153,14 @@ public final class AIJobs {
             let turn = StylistThread.Turn(from: .her, text: text, at: now())
             thread.append(turn)
             try await threads.save(thread)
+            // D10: her measurements, when she has any; `StyleCall` drops them unless the consent
+            // names them. A profile that can't be read just means none go.
+            let measurements = (try? await services.profile.profile()).flatMap {
+                StyleCall.Measurements($0.measurements)
+            }
             let request = AskStylistRequest(
                 thread: thread.id, turn: turn.id, text: text, look: look, pieces: pieces, earlier: earlier,
-                consentVersion: consent)
+                consentVersion: consent, measurements: measurements)
             return add(
                 AIJob(kind: .askStylist, idempotencyKey: makeKey(), request: .ask(request), createdAt: now()))
         } catch {

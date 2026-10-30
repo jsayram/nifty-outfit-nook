@@ -95,11 +95,63 @@ struct AnalyticsTests {
         #expect(analytics.queued.count == 1)
 
         let working = Recording()
-        let other = self.analytics(working)
+        let clock = Clock()
+        let other = self.analytics(working, clock: clock)
         other.setOn(true)
         other.record(.styleFinished, .succeeded)
+        clock.advance(3_600)
         await other.flush()
         #expect(other.queued.isEmpty && working.sent.withLock { $0.count } == 1)
+    }
+
+    @Test func anEventWaitsUntilItsHourIsOver() async {
+        let endpoint = Recording()
+        let clock = Clock()
+        let analytics = analytics(endpoint, clock: clock)
+        analytics.setOn(true)
+        analytics.record(.styleFinished, .succeeded)
+        await analytics.flush()
+        #expect(endpoint.sent.withLock { $0.isEmpty } && analytics.queued.count == 1)
+        // The next hour: the first event goes, one from this hour waits.
+        clock.advance(3_600)
+        analytics.record(.askFinished, .succeeded)
+        await analytics.flush()
+        #expect(endpoint.sent.withLock { $0.flatMap { $0.map(\.event) } } == [.styleFinished])
+        #expect(analytics.queued.map(\.event) == [.askFinished])
+    }
+
+    @Test func aBatchTheServerRefusesForGoodIsDropped() async {
+        final class Refusing: AnalyticsEndpoint {
+            func send(_ records: [AnalyticsRecord]) async throws { throw AnalyticsBatchRefused() }
+            func deleteEvents(analyticsID: String) async throws {}
+        }
+        let clock = Clock()
+        let analytics = OptInAnalytics(
+            settings: InMemoryAnalyticsSettingsStore(), endpoint: Refusing(), context: Self.context,
+            now: { clock.time.withLock { $0 } })
+        analytics.setOn(true)
+        analytics.record(.styleFinished, .succeeded)
+        clock.advance(3_600)
+        await analytics.flush()
+        #expect(analytics.queued.isEmpty)
+    }
+
+    @Test func itSendsAtOnceWhenStartedNotWhenAnEventIsRecorded() async throws {
+        let endpoint = Recording()
+        let clock = Clock()
+        let analytics = analytics(endpoint, clock: clock)
+        analytics.setOn(true)
+        analytics.record(.styleFinished, .succeeded)
+        clock.advance(3_600)
+        // Recording another event sends nothing by itself.
+        analytics.record(.askFinished, .succeeded)
+        #expect(endpoint.sent.withLock { $0.isEmpty })
+        // The launch send goes at once, then the task waits for the next hour.
+        let task = Task { await analytics.sendRegularly(every: .seconds(3_600)) }
+        for _ in 0..<200 where endpoint.sent.withLock({ $0.isEmpty }) { try await Task.sleep(for: .milliseconds(10)) }
+        task.cancel()
+        await task.value
+        #expect(endpoint.sent.withLock { $0.flatMap { $0.map(\.event) } } == [.styleFinished])
     }
 
     @Test func deleteMyAnalyticsDataAsksTheServerThenResetsTheID() async throws {

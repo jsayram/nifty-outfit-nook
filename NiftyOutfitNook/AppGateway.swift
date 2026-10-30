@@ -118,6 +118,16 @@ enum AppGateway {
         return UnavailableCreditClaimer()
     }()
 
+    /// F1c (D24): where "Help improve the app" sends its events, with no token. Nothing in a Release
+    /// build with no backend settings.
+    static let analytics: any AnalyticsEndpoint = {
+        if let real { return real.analytics }
+        #if DEBUG
+            if let fake { return fake.analytics }
+        #endif
+        return NoAnalyticsEndpoint()
+    }()
+
     /// The website's support page, from `NOOK_SUPPORT_URL` (a placeholder address until 35b).
     static let supportLinks = SupportLinks(info: Bundle.main.infoDictionary ?? [:])
 

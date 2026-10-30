@@ -65,6 +65,8 @@ import Foundation
         var styleCache: [String: (result: APIV1.StylistResult, at: Date)] = [:]
         /// 33a: every try-on body received.
         var tryOnRequests: [APIV1.TryOnRequest] = []
+        /// F1c: every style body that passed its checks, as sent.
+        var styleRequests: [APIV1.StyleRequest] = []
         /// 35: every POST /v1/try-on received, and the bytes of their bodies: what was uploaded.
         var tryOnPosts = 0
         var tryOnPostBytes = 0
@@ -94,6 +96,9 @@ import Foundation
         public func setTryOn(_ behaviour: FakeTryOnBehaviour) {
             state.withLock { $0.limits.tryOn = behaviour }
         }
+
+        /// F1c: the style requests that passed the checks, as sent (for tests of what leaves the phone).
+        public var styleRequests: [APIV1.StyleRequest] { state.withLock { $0.ledger.styleRequests } }
 
         /// 33a: the try-on requests received, as sent (for tests of what leaves the phone).
         public var tryOnRequests: [APIV1.TryOnRequest] { state.withLock { $0.ledger.tryOnRequests } }
@@ -277,6 +282,12 @@ import Foundation
             if let styleRequest, !FakeStylist.consentVersions.contains(styleRequest.consentVersion) {
                 return error(.consentRequired, id)
             }
+            // F1b (D10): measurements only under a consent that names them, refused before anything
+            // is counted.
+            if let styleRequest, !FakeStylist.consentCoversMeasurements(styleRequest, object: object) {
+                return error(.consentRequired, id)
+            }
+            if let styleRequest { state.withLock { $0.ledger.styleRequests.append(styleRequest) } }
             if let tryOnRequest, !FakeTryOn.consentVersions.contains(tryOnRequest.consentVersion) {
                 return error(.consentRequired, id)
             }
