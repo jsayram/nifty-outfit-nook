@@ -33,6 +33,8 @@ final class SignInAndReportTests: XCTestCase {
             app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch.waitUntilExists(
                 timeout: Self.wait))
         XCTAssertTrue(Self.element("signIn.privacy", in: app).exists)
+        // F1: Sign in with Apple waits for "I'm 18 or older".
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch.isEnabled)
         Screenshots.save(app, as: "1-sign-in-sheet")
 
         // Not now: Quick ideas, nothing sent, and Sign in beside them.
@@ -44,6 +46,7 @@ final class SignInAndReportTests: XCTestCase {
 
         // Sign in: the stylist's looks, with the why line, without asking again.
         tap(signIn, until: { sheet.exists })
+        app.confirmAdultForSignIn()
         tap(app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch, until: { !sheet.exists })
         XCTAssertTrue(app.staticTexts["results.why"].waitUntilExists(timeout: Self.wait))
         XCTAssertFalse(quickIdeas.exists)
@@ -77,6 +80,7 @@ final class SignInAndReportTests: XCTestCase {
         XCTAssertTrue(row.label.hasPrefix("Sign in"), "Profile's row says \(row.label)")
 
         tap(row, until: { Self.element("signIn.sheet", in: app).exists })
+        app.confirmAdultForSignIn()
         tap(
             app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch,
             until: { !Self.element("signIn.sheet", in: app).exists })

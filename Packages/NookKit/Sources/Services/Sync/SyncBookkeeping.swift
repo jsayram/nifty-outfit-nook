@@ -16,8 +16,9 @@ struct SyncLedger: Codable, Hashable, Sendable {
     var everOn = false
     /// `CKSyncEngine.State.Serialization`, as the engine handed it over.
     var engineState: Data?
-    /// Decision 2: the `Me` zone stays off until App Review 5.1.3(ii) is answered.
-    var includesBodyData = false
+    /// Decision 2: whether the `Me` zone syncs. Set from `SyncSchema.syncsBodyData` whenever sync
+    /// starts or is turned on.
+    var includesBodyData = SyncSchema.syncsBodyData
     var quotaFull = false
     var offline = false
     var lastConfirmedAt: Date?

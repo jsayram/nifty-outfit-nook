@@ -77,6 +77,18 @@ nonisolated enum SignInText {
             bundle: .module, comment: "Sign-in sheet: what signing in shares")
     }
 
+    /// F1 (29 October 2026, PRD 24.2): online features are for adults. She confirms it on the sheet
+    /// before Sign in with Apple works, every time the sheet opens. Nothing about it is kept.
+    static var adult: String {
+        String(localized: "I’m 18 or older", bundle: .module, comment: "Sign-in sheet: age confirmation switch")
+    }
+
+    static var adultDetail: String {
+        String(
+            localized: "Online features are for adults. Sign in with Apple works once this is on.", bundle: .module,
+            comment: "Sign-in sheet: under the age confirmation switch")
+    }
+
     static var notNow: String {
         String(localized: "Not now", bundle: .module, comment: "Sign-in sheet: decline")
     }
@@ -137,12 +149,14 @@ struct SignInSheet: View {
     let reason: SignInReason
 
     @State private var showsPrivacy = false
+    @State private var isAdult = false
 
     var body: some View {
         ScrollView {
             SignInSheetContent(
-                reason: reason, isSigningIn: gate.isSigningIn, problem: gate.problem,
-                signIn: { Task { await gate.signIn() } }, notNow: gate.notNow, privacy: { showsPrivacy = true })
+                reason: reason, isSigningIn: gate.isSigningIn, problem: gate.problem, isAdult: isAdult,
+                setAdult: { isAdult = $0 }, signIn: { Task { await gate.signIn() } }, notNow: gate.notNow,
+                privacy: { showsPrivacy = true })
         }
         .fullScreenCover(isPresented: $showsPrivacy) {
             SafariView(url: WebsiteLink.privacyPolicy.url)
@@ -157,6 +171,8 @@ struct SignInSheetContent: View {
     let reason: SignInReason
     var isSigningIn = false
     var problem: AccountProblem?
+    var isAdult = false
+    var setAdult: @MainActor @Sendable (Bool) -> Void = { _ in }
     var signIn: () -> Void = {}
     var notNow: () -> Void = {}
     var privacy: () -> Void = {}
@@ -170,8 +186,14 @@ struct SignInSheetContent: View {
                 NookBanner(text, systemImage: "exclamationmark.circle")
                     .accessibilityIdentifier("signIn.problem")
             }
+            SettingsGroup {
+                SettingsSwitchRow(
+                    title: SignInText.adult, detail: SignInText.adultDetail,
+                    systemImage: "person.badge.shield.checkmark", isOn: isAdult, identifier: "signIn.adult",
+                    set: setAdult)
+            }
             VStack(spacing: NookSpacing.small) {
-                AppleSignInButton(isSigningIn: isSigningIn, action: signIn)
+                AppleSignInButton(isSigningIn: isSigningIn, isEnabled: isAdult, action: signIn)
                 NookButton(SignInText.notNow, kind: .soft, fillsWidth: true, action: notNow)
                     .disabled(isSigningIn)
                     .accessibilityIdentifier("signIn.notNow")
@@ -206,6 +228,8 @@ struct SignInSheetContent: View {
 /// (snapshot tests) draws a SwiftUI copy, since `ImageRenderer` can't draw UIKit views.
 struct AppleSignInButton: View {
     var isSigningIn = false
+    /// F1: off until she confirms she's 18 or older. Dimmed, and VoiceOver says it's dimmed.
+    var isEnabled = true
     let action: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -232,7 +256,9 @@ struct AppleSignInButton: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: Self.height, maxHeight: Self.height)
-        .allowsHitTesting(!isSigningIn)
+        .opacity(isEnabled ? 1 : 0.4)
+        .disabled(!isEnabled)
+        .allowsHitTesting(!isSigningIn && isEnabled)
     }
 
     private var stillCopy: some View {

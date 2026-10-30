@@ -243,7 +243,7 @@ struct NiftyOutfitNookApp: App {
                             (.drafts, AppDiagnostics.log),
                             (.profile, tours), (.profile, services.weatherSettings),
                             (.profile, services.stylistConsent), (.profile, services.tryOnConsent),
-                            (.profile, jobNotifier),
+                            (.profile, services.analytics), (.profile, jobNotifier),
                             (.profile, onboarding),
                         ])
                     // Phase 21b: private iCloud sync, only in a build with NOOK_ICLOUD = YES. Delete
@@ -280,7 +280,7 @@ struct NiftyOutfitNookApp: App {
                         into: &services, paid: cloudTryOn, files: photos, analyzer: tryOnAnalyzer,
                         keepsSettings: closet != nil)
                     services.aiJobs = sampleJobs
-                    AppDiagnostics.install(into: &services)
+                    AppDiagnostics.install(into: &services, keepsSettings: closet != nil)
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
                             stores: [(.looks, AIJobsEraser(sampleJobs))] + storage.erasableData + [

@@ -73,6 +73,25 @@ struct AIJobsTests {
         #expect(try await storage.aiJobs.jobs().first?.isSeen == true)
     }
 
+    /// F1 (D24): with "Help improve the app" on, a finished job adds one event: its kind and that
+    /// it worked. Off, nothing.
+    @Test func aFinishedJobIsCountedOnlyWhenAnalyticsIsOn() async throws {
+        var services = Self.services(KeyedScript())
+        let analytics = OptInAnalytics(
+            settings: InMemoryAnalyticsSettingsStore(),
+            context: AnalyticsContext(appVersion: "1", systemVersion: "27.0", deviceClass: .iPhone))
+        services.analytics = analytics
+        let jobs = jobs()
+        let first = try jobs.startStyling(Self.context("req-1"), services: services)
+        _ = await jobs.finished(first.id)
+        #expect(analytics.queued.isEmpty)
+        analytics.setOn(true)
+        let second = try jobs.startStyling(Self.context("req-2"), services: services)
+        _ = await jobs.finished(second.id)
+        #expect(analytics.queued.map(\.event) == [.styleFinished])
+        #expect(analytics.queued.map(\.outcome) == [.succeeded])
+    }
+
     @Test func noBannerForAResultSheIsAlreadyLookingAt() async throws {
         let stylist = KeyedScript([.wait])
         let jobs = jobs()

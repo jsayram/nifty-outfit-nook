@@ -43,15 +43,15 @@ struct PrivacyWalkthroughTests {
     }
 
     @Test func itSaysTheSameThingAsTheConsent() {
-        // The exact line from the plan, under the walkthrough and under See what was sent.
+        // The exact line from the plan, under the walkthrough and under See what was sent, with the
+        // server's 30 minutes in the line itself (D13, 29 October 2026).
         #expect(
             TryOnConsentText.underPicture
-                == "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models."
+                == "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them."
         )
-        // The consent's sentence about the server and the walkthrough's agree on the 30 minutes
-        // (corrected 22 October 2026, Phase 33b), so the two never contradict each other.
-        #expect(TryOnConsentText.comesBack.contains("for up to 30 minutes while your picture is made, then deletes"))
-        #expect(WalkthroughText.serverNote.contains("for up to 30 minutes while your picture is made, then deletes"))
+        // The consent and the line agree on the 30 minutes, word for word, so they never
+        // contradict each other.
+        #expect(TryOnConsentText.underPicture.hasSuffix(TryOnConsentText.whatGoes))
         // And nothing in the walkthrough says no one keeps the photos.
         let spoken = WalkthroughText.spoken.lowercased()
         for claim in ["nothing is kept", "never stored", "deleted right away", "keeps neither"] {

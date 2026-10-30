@@ -21,7 +21,7 @@ import Foundation
     /// (convex/stylist/fake.ts), on the request's own pieces, so the app sees contract-shaped looks
     /// made only of what it sent, each with a why line. Not taste, and not the real prompt.
     enum FakeStylist {
-        static let consentVersions: Set<String> = ["stylist-1"]
+        static let consentVersions: Set<String> = ["stylist-1", "stylist-2"]
 
         private static let rank = ["casual": 0, "smart": 1, "dressy": 2]
         private static let warmthRank = ["light": 0, "medium": 1, "warm": 2]

@@ -44,21 +44,21 @@ struct TryOnSetupTextTests {
         #expect(TryOnSetupText.problemTitle(.checksUnavailable) == "Your iPhone couldn’t check this photo")
     }
 
-    // MARK: The consent text (the approved correction of 22 October 2026)
+    // MARK: The consent text (corrected 22 October 2026; the 30 minutes moved into the line, D13)
 
-    @Test func theConsentSaysTheServerKeepsThePhotosEncryptedForUpTo30Minutes() {
+    @Test func theConsentSaysTheServerHoldsThePhotosEncryptedForUpTo30Minutes() {
+        #expect(TryOnConsentText.whatGoes.contains("our server holds them, encrypted, for up to 30 minutes"))
+        #expect(TryOnConsentText.whatGoes.hasSuffix("then deletes them."))
+        // Said once: the paragraph after it no longer repeats it, and nothing says no one keeps them.
         let text = TryOnConsentText.comesBack
-        #expect(!text.contains("keeps neither"))
-        #expect(text.contains("Our server keeps the photos, encrypted, for up to 30 minutes"))
-        #expect(text.contains("then deletes them"))
-        // The rest of the sentence is as it was: the finished picture is saved on her phone.
+        #expect(!text.contains("30 minutes") && !text.contains("keeps neither"))
         #expect(text.contains("saved only on your iPhone"))
     }
 
     @Test func theApprovedDisclosureIsUntouched() {
         #expect(
-            TryOnConsentText.whatGoes
-                == "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models."
-        )
+            TryOnConsentText.whatGoes.hasPrefix(
+                "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. "
+            ))
     }
 }
