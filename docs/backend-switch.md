@@ -20,7 +20,7 @@ In `nifty-outfit-nook-backend`, following its README: Jose runs `npx convex logi
 
 1. Copy `Configs/Secrets.xcconfig.example` to `Configs/Secrets.xcconfig` (git ignores it).
 2. Set `CLERK_PUBLISHABLE_KEY` to the publishable key and `NOOK_API_BASE_URL` to `https:/$()/beaming-oyster-905.convex.site` (the HTTP actions URL, `.convex.site`; the `$()` stops xcconfig reading `//` as a comment).
-3. Add the **Sign in with Apple** capability to the app target in Xcode, so the entitlement is in the build.
+3. Nothing to add in Xcode: since BA6 every entitlements file carries Sign in with Apple (`com.apple.developer.applesignin`), and `scripts/check-archive.sh` expects it. With automatic signing, Xcode registers the capability on the App ID the first time it signs for a device, if step 1 hasn't already.
 4. Build and run with `-gateway-lab`. The Sign-in row says "Clerk (real)". Sign in with Apple, then Who am I?.
 
 With either value missing or malformed a Debug build stays on the fakes, so a fresh clone or CI never needs these for Debug builds and tests.

@@ -14,7 +14,8 @@
 # - the privacy manifest is in the app and declares only UserDefaults, reason CA92.1, and (since
 #   Phase 21a, for the migration's free-space check) disk space, reason E174.1; no tracking; and
 #   exactly the collected data types PM1 declared;
-# - the entitlements file asks for Data Protection (complete) and nothing else;
+# - the entitlements file asks for Data Protection (complete) and Sign in with Apple (BA6), and
+#   nothing else;
 # - no test bundle, framework or plug-in is in the app, the binary doesn't link XCTest, Swift
 #   Testing or swift-snapshot-testing, and it holds no path from the Mac it was built on;
 # - scripts/check-release.sh on the device binary (no catalog, benchmark or debug flags);
@@ -142,7 +143,10 @@ if apis != {
 
 with open(entitlements_path, "rb") as f:
     entitlements = plistlib.load(f)
-if entitlements != {"com.apple.developer.default-data-protection": "NSFileProtectionComplete"}:
+if entitlements != {
+    "com.apple.developer.default-data-protection": "NSFileProtectionComplete",
+    "com.apple.developer.applesignin": ["Default"],
+}:
     problems.append(f"entitlements changed: {entitlements}")
 
 for problem in problems:
