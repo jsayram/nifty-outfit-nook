@@ -43,6 +43,9 @@ final class DeleteDataModel {
     private(set) var subscriptionMayRenew = false
     /// The subscription group, for Apple's Manage subscription sheet.
     private(set) var subscriptionGroupID: String?
+    /// F1 (D18): Delete my account, her unused picture credits as the server last said, which the
+    /// deletion gives up. `nil` when the server couldn't say (offline, signed out, no backend).
+    private(set) var unusedCredits: Int?
     @ObservationIgnored private var loads = LoadGeneration()
     let scope: DeletionScope
 
@@ -65,6 +68,7 @@ final class DeleteDataModel {
             let subscriptions = services.subscriptions
             subscriptionMayRenew = await subscriptions.refresh().mayRenew
             subscriptionGroupID = await subscriptions.subscriptionGroupID()
+            unusedCredits = (try? await services.paid.usage())?.credits
         }
         do {
             var counts = Counts()
@@ -84,10 +88,11 @@ final class DeleteDataModel {
     }
 
     /// Sets the counts directly, for snapshot tests.
-    func show(_ counts: Counts?, phase: Phase = .ready, subscriptionMayRenew: Bool = false) {
+    func show(_ counts: Counts?, phase: Phase = .ready, subscriptionMayRenew: Bool = false, unusedCredits: Int? = nil) {
         self.counts = counts
         self.phase = phase
         self.subscriptionMayRenew = subscriptionMayRenew
+        self.unusedCredits = unusedCredits
     }
 
     /// Deletes everything in scope. Returns true when every part was deleted.

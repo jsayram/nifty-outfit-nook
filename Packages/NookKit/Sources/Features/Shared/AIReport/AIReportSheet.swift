@@ -80,7 +80,7 @@ nonisolated enum AIReportText {
     static var pictureOn: String {
         String(
             localized:
-                "The picture, with your face, goes to our private support inbox only. Never to the image service.",
+                "The picture, without your face, goes to our private support inbox only. Never to the image service.",
             bundle: .module, comment: "Report sheet: under Include the picture, on")
     }
 

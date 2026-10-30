@@ -373,3 +373,21 @@ enum Screenshots {
         }
     }
 }
+
+extension XCUIApplication {
+    /// F1: the sign-in sheet's "I'm 18 or older" switch, which Sign in with Apple waits for. Taps
+    /// the switch itself (its trailing end), since a tap on the row's words doesn't flip it.
+    @MainActor
+    func confirmAdultForSignIn(timeout: TimeInterval = 10, file: StaticString = #filePath, line: UInt = #line) {
+        let adult = switches["signIn.adult"]
+        XCTAssertTrue(
+            adult.waitUntilExists(timeout: timeout), "No age switch on the sign-in sheet", file: file, line: line)
+        let isOn: @MainActor () -> Bool = { (adult.value as? String) == "1" }
+        let inner = adult.switches.firstMatch
+        let flipped =
+            inner.exists
+            ? inner.tapUntil(timeout: timeout, isOn)
+            : adult.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tapUntil(timeout: timeout, isOn)
+        XCTAssertTrue(flipped, "The age switch didn't turn on", file: file, line: line)
+    }
+}

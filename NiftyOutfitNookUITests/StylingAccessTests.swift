@@ -39,6 +39,7 @@ final class StylingAccessTests: XCTestCase {
         app.reveal(subscribe, timeout: Self.wait)
         let apple = app.descendants(matching: .any).matching(identifier: "signIn.apple").firstMatch
         subscribe.tapUntil(apple, appears: Self.wait)
+        app.confirmAdultForSignIn()
         apple.tapUntil(element("access.message", in: app), appears: Self.wait)
         XCTAssertTrue(labelled("Styling access is on.", in: app).exists)
         XCTAssertTrue(labelled("Your free month ends", in: app).waitUntilExists(timeout: Self.wait))

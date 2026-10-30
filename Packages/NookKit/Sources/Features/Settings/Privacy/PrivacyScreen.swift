@@ -9,8 +9,8 @@ import SwiftUI
 /// terms on the website, opened in an in-app Safari view.
 ///
 /// The mockup's permission switches (Style Me, Ask stylist, Try-on, Describe my photos, Weather,
-/// analytics) aren't here: nothing is sent in Stage A, so a switch would control nothing. They
-/// arrive with the features that need them (19b, 24a, 27a, 29, 31, 33). Backups (export and
+/// analytics) arrive with the features that need them (19b, 24a, 27a, 29, 31, 33; analytics in F1,
+/// off by default). Backups (export and
 /// restore) sits in Your data since Phase 21b, where her closet is in the store.
 struct PrivacyScreen: View {
     @Environment(\.services) private var services
@@ -29,6 +29,10 @@ struct PrivacyScreen: View {
     /// 33a: her yes to try-on's image provider, and the consent the switch opens.
     @State private var tryOnOn = false
     @State private var showsTryOnConsent = false
+    /// F1 (D24): "Help improve the app", off by default, and what its last action said.
+    @State private var analyticsOn = false
+    @State private var analyticsNote: String?
+    @State private var showsAnalyticsConsent = false
 
     var body: some View {
         PrivacyPage(
@@ -40,13 +44,25 @@ struct PrivacyScreen: View {
             open: { page = $0 },
             weather: weatherContent,
             stylist: services.cloudStyling ? stylistContent : nil,
-            tryOn: services.tryOnPipeline == nil ? nil : tryOnContent
+            tryOn: services.tryOnPipeline == nil ? nil : tryOnContent,
+            analytics: analyticsContent
         )
         .task {
             await weather.load(from: services)
             isSignedIn = await services.account.isSignedIn()
             stylistOn = services.stylistConsent.current()?.isCurrent == true
             tryOnOn = services.tryOnConsent.current()?.isCurrent == true
+            analyticsOn = services.analytics.isOn
+        }
+        .nookSheet(isPresented: $showsAnalyticsConsent, title: AnalyticsText.title, detents: [.large]) {
+            AnalyticsConsentSheet(
+                turnOn: {
+                    services.analytics.setOn(true)
+                    analyticsOn = true
+                    analyticsNote = nil
+                    showsAnalyticsConsent = false
+                },
+                notNow: { showsAnalyticsConsent = false })
         }
         .nookSheet(isPresented: $showsTryOnConsent, title: TryOnConsentText.switchTitle, detents: [.large]) {
             ScrollView {
@@ -144,6 +160,33 @@ struct PrivacyScreen: View {
             })
     }
 
+    /// F1: turning it on shows the consent first; turning it off clears unsent events at once.
+    private var analyticsContent: AnalyticsPrivacy {
+        AnalyticsPrivacy(
+            isOn: analyticsOn, note: analyticsNote,
+            set: { on in
+                analyticsNote = nil
+                if on {
+                    showsAnalyticsConsent = true
+                } else {
+                    services.analytics.setOn(false)
+                    analyticsOn = false
+                }
+            },
+            resetID: {
+                services.analytics.resetID()
+                analyticsNote = AnalyticsText.resetDone
+                CloudProblemText.announce(AnalyticsText.resetDone)
+            },
+            deleteData: {
+                Task {
+                    let deleted = await services.analytics.deleteMyData()
+                    analyticsNote = deleted ? AnalyticsText.deleteDone : AnalyticsText.deleteFailed
+                    CloudProblemText.announce(analyticsNote ?? "")
+                }
+            })
+    }
+
     private var weatherContent: WeatherPrivacy {
         WeatherPrivacy(
             isOn: weather.settings.isOn, usesMyLocation: weather.settings.usesMyLocation,
@@ -176,6 +219,8 @@ struct PrivacyPage: View {
     var stylist: StylistPrivacy?
     /// Try-on's consent switch (33a). `nil` while pictures are simulated on the phone.
     var tryOn: TryOnPrivacy?
+    /// F1 (D24): "Help improve the app". `nil` leaves it out, as screens before F1 drew it.
+    var analytics: AnalyticsPrivacy?
 
     var body: some View {
         SettingsPage(
@@ -205,6 +250,10 @@ struct PrivacyPage: View {
 
             if let weather {
                 WeatherPrivacyGroup(weather: weather)
+            }
+
+            if let analytics {
+                AnalyticsPrivacyGroup(analytics: analytics)
             }
 
             SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {

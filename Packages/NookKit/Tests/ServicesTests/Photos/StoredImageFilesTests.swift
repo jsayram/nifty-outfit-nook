@@ -55,13 +55,14 @@ struct StoredImageFilesTests {
     // MARK: The launch sweep
 
     /// Everything a record points to stays: pieces and cutouts, Recently deleted, a draft and
-    /// what it started from, the try-on photo, a stored picture and a copy kept for review.
+    /// what it started from, the try-on photo, a stored picture with its faceless copy (F1) and a
+    /// copy kept for review.
     /// Files nothing points to go, with their thumbnails, and so does anything that isn't a photo.
     @Test func theSweepKeepsWhatRecordsPointToAndNothingElse() async throws {
         let phone = try BackupTestBed("sweep")
         let kept = [
             "photo-a", "cutout-a", "photo-deleted", "draft-new", "draft-base", "tryon-photo", "picture-1",
-            "conflict-photo",
+            "faceless-1", "conflict-photo",
         ]
         for id in kept + ["orphan-1", "orphan-2"] { try Self.plant(id, on: phone) }
         try Data("half written".utf8).write(to: phone.location.photos.appending(path: ".dat.nosync1a2b"))
@@ -80,7 +81,9 @@ struct StoredImageFilesTests {
         let look = Self.look("l-1", pieces: ["g-a"])
         try await phone.storage.looks.save(look)
         try await phone.storage.pictures.save(
-            TryOnPicture(id: "t-1", of: look, image: .generated(Self.stored("picture-1")), createdAt: TestTime.now))
+            TryOnPicture(
+                id: "t-1", of: look, image: .generated(Self.stored("picture-1")), createdAt: TestTime.now,
+                faceless: Self.stored("faceless-1")))
         let reviewed = Self.piece("g-review", photo: "conflict-photo")
         try RecordTable<StoredConflict>(kind: .restoreConflict).write(
             [

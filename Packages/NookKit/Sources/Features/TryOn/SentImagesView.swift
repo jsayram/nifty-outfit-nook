@@ -26,12 +26,6 @@ struct SentImagesView: View {
                     .foregroundStyle(.nook.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("sent.line")
-                // 33c: what our server does on the way, in the words of the consent.
-                Text(WalkthroughText.serverNote)
-                    .nookTextStyle(.note)
-                    .foregroundStyle(.nook.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("sent.serverNote")
                 VStack(alignment: .leading, spacing: NookSpacing.small) {
                     Text(SentText.photoHeader)
                         .nookTextStyle(.headline)

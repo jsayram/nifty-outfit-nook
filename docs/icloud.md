@@ -12,7 +12,7 @@ An **iCloud** row on Profile and in Privacy and terms (Your data), only in a bui
 - **Notes**: changes kept for review after a conflict, records from a newer app version waiting for an update, and the re-upload after an encrypted data reset.
 - **Delete my data** deletes her iCloud copy first, then the iPhone (both Delete my data and Delete my account).
 
-Not built yet, and why: the safety copy before the first merge with Undo iCloud merge (0004 §1; needs its own small screen), a screen to review conflicts (only a count for now, decision 7), the onboarding step and Get my closet from iCloud (decision 5), and a switch for body data (decision 2 keeps the `Me` zone off).
+Not built yet, and why: the safety copy before the first merge with Undo iCloud merge (0004 §1; needs its own small screen), a screen to review conflicts (only a count for now, decision 7), the onboarding step and Get my closet from iCloud (decision 5). There's no switch for body data on screen: since decision 2 (Phase F1) it syncs with everything, and the fallback is a line of code.
 
 ## How it works
 
@@ -30,7 +30,7 @@ Not built yet, and why: the safety copy before the first merge with Undo iCloud 
 
 **Records.** Each synced store row is one CloudKit record named `<kind>.<key>` (such as `garment.<uuid>`), never anything she typed. The payload is the row's JSON exactly as stored, with its payload version, in `encryptedValues` with a tombstone flag. Nothing else is a field: no references, no plain values. Photos are `Image` records named by the photo's ID, a `CKAsset` each, written once and deleted when nothing points to them. Record types: `Garment`, `Look`, `Suitcase`, `TryOnPicture`, `Profile`, `Draft`, `AppState` (onboarding and tours), `StylistThread`, `Image`, `Body`, `SyncGeneration`.
 
-**Zones.** `Closet` for everything she makes; `Me` for body data (measurements, weight, usual fit, pieces that fit, the try-on photo and its image), never written while decision 2 keeps it off; `Control` for one content-free `SyncGeneration` (a number, a reason, a date) that tells other devices why a zone was deleted. The profile goes to `Closet` with its body data taken out.
+**Zones.** `Closet` for everything she makes; `Me` for body data (measurements, weight, usual fit, pieces that fit, the try-on photo and its image), written since decision 2 was answered on 29 October 2026 (D11: sync everything; Phase F1), with `SyncSchema.syncsBodyData` as the one-line fallback if App Review 5.1.3(ii) rejects it; `Control` for one content-free `SyncGeneration` (a number, a reason, a date) that tells other devices why a zone was deleted. The profile goes to `Closet` with its body data taken out.
 
 **Not synced:** the unsent feedback note, AI jobs in progress, copies kept from a restore, deletion markers (tombstones carry them), thumbnails and caches, and sync's own rows.
 

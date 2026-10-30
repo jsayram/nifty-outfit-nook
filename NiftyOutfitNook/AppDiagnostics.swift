@@ -2,6 +2,7 @@ import Features
 import Foundation
 import Models
 import Services
+import UIKit
 
 /// The phone's own crash and speed reports (Phase 31, `docs/monitoring.md`): Apple's MetricKit
 /// hands the app a report about once a day; the app keeps a few numbers from it on the phone and
@@ -48,7 +49,20 @@ enum AppDiagnostics {
         #endif
     }
 
-    static func install(into services: inout NookServices) {
+    /// - Parameter keepsSettings: whether "Help improve the app" is kept on the iPhone (F1, D24).
+    ///   The debug sample closet that UI tests open keeps nothing.
+    static func install(into services: inout NookServices, keepsSettings: Bool = true) {
         services.diagnostics = log
+        let settings: any AnalyticsSettingsStore =
+            keepsSettings ? DefaultsAnalyticsSettingsStore() : InMemoryAnalyticsSettingsStore()
+        services.analytics = OptInAnalytics(settings: settings, context: analyticsContext)
+    }
+
+    /// The app and iOS version and iPhone or iPad: all an event says about the device.
+    private static var analyticsContext: AnalyticsContext {
+        AnalyticsContext(
+            appVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0",
+            systemVersion: UIDevice.current.systemVersion,
+            deviceClass: UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone)
     }
 }

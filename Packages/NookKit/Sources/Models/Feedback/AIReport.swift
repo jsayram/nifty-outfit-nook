@@ -84,13 +84,13 @@ public struct AIReportTarget: Hashable, Sendable {
     }
 
     /// A try-on picture. Only a real one is reported: a simulated picture is drawn on the phone.
+    /// The picture it can include is the faceless copy (F1, D12), never the finished one with her
+    /// face; a picture without one offers none.
     public static func picture(_ picture: TryOnPicture) -> AIReportTarget {
         let id = picture.id.rawValue
-        var image: PhotoReference?
-        if case .generated(let photo) = picture.image { image = photo }
         return AIReportTarget(
             subject: .tryOnPicture, resultID: id, actionID: id, madeBy: .cloud, madeAt: picture.createdAt,
-            picture: image)
+            picture: picture.faceless)
     }
 }
 

@@ -849,7 +849,7 @@
     "A photo of your body, without your face and on a plain backdrop, and that look’s piece photos, only when you tap Try it on. Your face never leaves your iPhone." : {
       "comment" : "Privacy and terms: under the try-on switch"
     },
-    "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+    "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Try-on consent: the approved disclosure, word for word"
     },
     "A piece no longer in your closet" : {
@@ -878,6 +878,9 @@
     },
     "Any hairstyle is fine. Hats, scarves and turtlenecks work too, but your picture looks best without them." : {
       "comment" : "Try-on photo sheet: hair, hats, scarves and turtlenecks"
+    },
+    "Any unused picture credits are given up with your account. They can’t be moved to a new one." : {
+      "comment" : "Delete my account: credits note when the count isn't known"
     },
     "Anything to add?" : {
       "comment" : "Report sheet: note field label"
@@ -933,6 +936,9 @@
     "Cloud styling, try-on pictures and support use this account." : {
       "comment" : "Profile: under Signed in with Apple"
     },
+    "Delete my analytics data" : {
+      "comment" : "Privacy and terms: analytics action"
+    },
     "Dressing you" : {
       "comment" : "Try it on sheet (33a): the job is running"
     },
@@ -963,6 +969,12 @@
     "Hats, scarves and turtlenecks are fine, but your picture looks best without them." : {
       "comment" : "Try-on photo setup: a gentle note after the check"
     },
+    "Help improve the app" : {
+      "comment" : "Privacy and terms: the analytics switch"
+    },
+    "Help improve the app?" : {
+      "comment" : "Analytics consent: title"
+    },
     "Hide these looks" : {
       "comment" : "Report sheet: switch to hide the result"
     },
@@ -977,6 +989,12 @@
     },
     "How your photo stays private. %@" : {
       "comment" : "VoiceOver: the privacy walkthrough. The argument is its steps, one sentence each."
+    },
+    "If you turn this on, the app sends simple events, like “Style Me finished”, with the app version and a random ID you can reset. That shows us what works and what breaks." : {
+      "comment" : "Analytics consent: what is sent"
+    },
+    "Improving the app" : {
+      "comment" : "Privacy and terms: section header (F1)"
     },
     "Include the picture" : {
       "comment" : "Report sheet: switch to send the picture"
@@ -1002,6 +1020,9 @@
     "It’s wrong or offensive" : {
       "comment" : "Report sheet: reason"
     },
+    "I’m 18 or older" : {
+      "comment" : "Sign-in sheet: age confirmation switch"
+    },
     "Just you in the picture, please." : {
       "comment" : "Try-on camera hint"
     },
@@ -1013,6 +1034,9 @@
     },
     "Keep my current photo" : {
       "comment" : "Try-on photo setup button"
+    },
+    "Kept for 30 days, then only totals. Turning it off changes nothing else in the app." : {
+      "comment" : "Analytics consent: how long, and that nothing else changes"
     },
     "Let your arms hang a little away from your body." : {
       "comment" : "Try-on camera hint"
@@ -1026,10 +1050,13 @@
     "Move to the middle of the picture." : {
       "comment" : "Try-on camera hint"
     },
+    "Never sent: what you type, your photos, measurements, closet, looks or location." : {
+      "comment" : "Analytics consent: what is never sent"
+    },
     "Never sent: your face, your room, your measurements, your notes, your name." : {
       "comment" : "Try-on consent"
     },
-    "Never sent: your photos, your name, your measurements or weight, your location." : {
+    "Never sent: your photos, your face, your name, your location." : {
       "comment" : "Stylist consent: what is never sent"
     },
     "New ideas" : {
@@ -1062,11 +1089,11 @@
     "Off: the picture stays on this iPhone." : {
       "comment" : "Report sheet: under Include the picture, off"
     },
-    "On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
-      "comment" : "Under the privacy walkthrough and See what was sent (33c)"
-    },
     "On your phone" : {
       "comment" : "Privacy walkthrough: under the lock (33c)"
+    },
+    "Online features are for adults. Sign in with Apple works once this is on." : {
+      "comment" : "Sign-in sheet: under the age confirmation switch"
     },
     "Only needed for cloud styling, try-on pictures and styling access." : {
       "comment" : "Profile: under Sign in, signed out"
@@ -1083,7 +1110,7 @@
     "Payment problem" : {
       "comment" : "Profile: Styling access row value"
     },
-    "Piece descriptions, the occasion and the weather go to Anthropic when you ask. Never your photos, name, measurements or location." : {
+    "Piece descriptions, the occasion, the weather and, when they help, your measurements and weight go to Anthropic when you ask. Never your photos, face, name or location." : {
       "comment" : "Privacy and terms: under the stylist switch"
     },
     "Purchases are turned off on this iPhone in Screen Time." : {
@@ -1103,6 +1130,9 @@
     },
     "Report a problem" : {
       "comment" : "Link under an AI result: opens the report sheet"
+    },
+    "Reset analytics ID" : {
+      "comment" : "Privacy and terms: analytics action"
     },
     "Restore purchases" : {
       "comment" : "Styling access: button"
@@ -1190,6 +1220,9 @@
     },
     "Signing in…" : {
       "comment" : "Sign-in sheet: while Sign in with Apple runs"
+    },
+    "Simple events with a random ID. Never what you type, your photos, measurements or closet." : {
+      "comment" : "Privacy and terms: under the analytics switch"
     },
     "So nothing was sent. Try a photo where you face the camera, with your face clear and well lit." : {
       "comment" : "Try it on sheet (33a): fail closed, after the title"
@@ -1356,7 +1389,7 @@
     "The picture couldn’t be included. Turn off Include the picture, then send again." : {
       "comment" : "Report sheet: the picture couldn't be read or was refused"
     },
-    "The picture, with your face, goes to our private support inbox only. Never to the image service." : {
+    "The picture, without your face, goes to our private support inbox only. Never to the image service." : {
       "comment" : "Report sheet: under Include the picture, on"
     },
     "The reason under it" : {
@@ -1386,7 +1419,7 @@
     "They leave your history after sending. A look you saved stays saved." : {
       "comment" : "Report sheet: under Hide these looks"
     },
-    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
+    "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on)." : {
       "comment" : "Try-on consent"
     },
     "This happens on your iPhone. Nothing has been sent yet." : {
@@ -1433,6 +1466,9 @@
     },
     "Turn to face the camera." : {
       "comment" : "Try-on camera hint"
+    },
+    "Unused picture credits: %lld. They’re given up with your account and can’t be moved to a new one." : {
+      "comment" : "Delete my account: how many unused picture credits are given up"
     },
     "Up to %lld a day" : {
       "comment" : "Paywall: the allowance for swaps and questions. The argument is a number."
@@ -1496,7 +1532,7 @@
     "What’s it about?" : {
       "comment" : "Report sheet: above the subject choice"
     },
-    "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat." : {
+    "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, your recent looks so ideas don’t repeat, and your height, measurements and weight when they help with the request, like your inseam for trousers." : {
       "comment" : "Stylist consent: what is sent"
     },
     "What’s wrong?" : {
@@ -9347,6 +9383,15 @@
     "Your account, everything the app’s server keeps for it, and everything in the app on this iPhone will be deleted. Apple will ask you to confirm it’s you. This can’t be undone." : {
       "comment" : "Delete my account: the question"
     },
+    "Your analytics data couldn’t be deleted right now. Try again when you’re online." : {
+      "comment" : "Privacy and terms: Delete my analytics data didn't reach the server"
+    },
+    "Your analytics data is deleted, and your analytics ID is new." : {
+      "comment" : "Privacy and terms: after Delete my analytics data"
+    },
+    "Your analytics ID is new." : {
+      "comment" : "Privacy and terms: after Reset analytics ID"
+    },
     "Your arms look close to your body. A little space between helps your clothes show." : {
       "comment" : "Try-on photo setup: a gentle tip"
     },
@@ -9491,7 +9536,7 @@
     "Your face never leaves your iPhone. Before anything is sent, your iPhone covers your head and hair and puts you on a plain studio backdrop. If it can’t do that, nothing is sent." : {
       "comment" : "Try-on consent"
     },
-    "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models." : {
+    "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them." : {
       "comment" : "Under every try-on picture (33a)"
     },
     "Your favourite outfits" : {

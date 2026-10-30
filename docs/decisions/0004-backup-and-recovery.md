@@ -1,6 +1,6 @@
 # 0004. Backup and recovery: safety copies, encrypted export, private iCloud sync
 
-Status: **proposed, waiting for Jose** (Phase 20b checkpoint). Backups built in Phase 21b; see "Built in Phase 21b" below
+Status: **approved by Jose, 29 October 2026** (D11 and D17 in closet `DECISIONS_FOR_JOSE_2026-10-29.md`; see "Answers" under "Decisions for Jose"). Backups built in Phase 21b; see "Built in Phase 21b" below. Decision 2 built in Phase F1
 Date: 20 October 2026
 Plan: `closet/SWIFT_BUILD_PLAN.md`, Phase 20b. Builds on `0003-persistence-spike.md` (SwiftData with a migration journal, `CKSyncEngine`, value types only). Rules: PRD 11.7, 15.1, 15.2, 15.3 and 15.4; `closet/SECURITY_STANDARD.md` §1, §4, §9 and §10; `closet/THREAT_MODEL.md` R7, R15, F2 to F4, F12, D8 and D10; `closet/DATA_MAP.md`; `closet/compliance/` (P12 and R8 in the App Review checklist).
 
@@ -51,7 +51,7 @@ The store and photos stay in device backups, as iOS does by default. That's how 
 Two rules make a restored device safe:
 
 - **A restored device starts sync fresh.** The app keeps a marker in the Keychain with `WhenUnlockedThisDeviceOnly`, which never moves to another device. A store found without its marker came from a backup, so the app drops the `CKSyncEngine` state and the per-record sync bookkeeping, then fetches everything and merges by ID. Without this, the restored engine state could claim changes were already sent **[device + iCloud: confirm the marker doesn't survive a backup restore, and what a restored engine state does]**.
-- **5.1.3(ii) may reach device backups too.** If the lawyer reads "personal health information in iCloud" to include iCloud Backup, body data would need a separate file left out of backups, and a restored phone would come back without it. Asked as part of decision 2.
+- **5.1.3(ii) may reach device backups too.** If "personal health information in iCloud" were read to include iCloud Backup, body data would need a separate file left out of backups, and a restored phone would come back without it. Answered with decision 2 (29 October 2026): no separate treatment.
 
 ## 3. Export
 
@@ -167,7 +167,7 @@ The sheet is the 19b wording (`closet/compliance/IN_APP_PRIVACY_TEXT.md`), finis
 > It uses your iCloud storage. About [1.4 GB] now.
 > [Turn on sync] [Not now]
 
-Plus, while decision 2 is open: "Your measurements, weight, fit notes and try-on photo stay on this iPhone." (or, once allowed, a second switch, **Include my fit and try-on photo**).
+Plus, since decision 2 was answered (sync everything, F1): "Your measurements, weight, fit notes and try-on photo go too, kept apart from the rest." With the fallback switch off (below), the old line instead: "Your measurements, weight, fit notes and try-on photo stay on this iPhone." There's no second switch for her.
 
 If iCloud already holds a copy (another device), she's told how many pieces are there and here, a safety copy is taken, and the two merge by ID. Pieces made on different devices never collide, because IDs are UUIDs.
 
@@ -176,7 +176,7 @@ If iCloud already holds a copy (another device), she's told how many pieces are 
 | Zone | Record types | Holds |
 |---|---|---|
 | `Closet` | `Garment`, `Look`, `Suitcase`, `TryOnPicture`, `Profile`, `Draft`, `Image` | Pieces with their states and wear days, looks (saved and unsaved results), suitcases and memberships, try-on picture records, the profile without body data (name on the sign, Preferences, remembered choices, tour progress, app state flags), drafts with their device and base revision (PRD 15.1), and every image as its own record |
-| `Me` | `Body`, `Image` | Measurements and weight, fit notes about her body, pieces that fit well, the try-on photo. Synced only if decision 2 allows |
+| `Me` | `Body`, `Image` | Measurements and weight, fit notes about her body, pieces that fit well, the try-on photo. Synced since decision 2 (F1), unless the fallback switch turns it off |
 | `Control` | `SyncGeneration` | One content-free record: a generation number, a reason and a date, so other devices know a zone was deleted on purpose (below) |
 
 Never synced: today's comfort, unless she saved it with a look as an approved neutral preference (PRD 15); thumbnails, the search index and caches; safety copies; the export passphrase; consent receipts (the server is the authority); account tokens.
@@ -370,6 +370,14 @@ Section 5 and the iCloud part of section 6 are app code (`Services/Sync`, `Featu
 7. **Merge on restore.** Ship Replace and "Add what's missing" together in 21b (PRD 15.2 asks for both), or Replace first and merge later if 21b runs long. And where conflicts to review live (iCloud screen plus a badge, suggested).
 8. **Apple setup (Jose only):** the iCloud capability, the container `iCloud.com.jsayram.niftyoutfitnook`, and two test Apple Accounts for the two-device tests (one with ADP on, one nearly full).
 9. **Passphrase rules:** at least 12 characters for her own, or a generated one. Fine as suggested, or different.
+
+### Answers (Jose, 29 October 2026)
+
+From closet `DECISIONS_FOR_JOSE_2026-10-29.md`, D11 and D17, with no legal review:
+
+- **1, 3, 4, 5, 6, 7 and 9:** approved as built and suggested. For 9, the 12-character minimum stays, with the "Make one for me" nudge; the security report's L11 (14 to 16 characters) isn't taken and is written up as an accepted risk (draft E2 in closet `SWIFT_BUILD_PLAN.md`, awaiting Jose's signature).
+- **2: (c), sync everything.** Measurements, weight, fit notes, usual fit, pieces that fit well and the try-on photo, her face included, sync in the `Me` zone; iCloud Backup gets no separate treatment. App Review 5.1.3(ii) is a carried rejection risk. **The fallback is one line:** `SyncSchema.syncsBodyData` in `Services/Sync/SyncSchema.swift`. Set it to `false` and resubmit: every device stops writing the `Me` zone the next time sync starts or is turned on, and the screens go back to "stay on this iPhone". The iCloud switch-on phase re-reads the guideline's wording before turning sync on. Built in Phase F1 (the two-device tests cover both settings).
+- **8:** Jose's setup (S6 in the decisions sheet), not done yet.
 
 ## Test plan for Phase 21b
 

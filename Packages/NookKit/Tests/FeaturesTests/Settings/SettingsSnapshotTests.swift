@@ -99,6 +99,14 @@ struct SettingsSnapshotTests {
             colorScheme: .dark, named: "privacy-weather-blocked-dark")
     }
 
+    /// F1 (D24): "Help improve the app" on, with Reset analytics ID and Delete my analytics data.
+    @Test func privacyAnalytics() {
+        assertSnapshot(
+            AnalyticsPrivacyGroup(
+                analytics: AnalyticsPrivacy(isOn: true, note: AnalyticsText.resetDone, set: { _ in })),
+            named: "privacy-analytics-on")
+    }
+
     @Test func privacyWeatherAX5() {
         // The group alone: the whole page with it is taller than the renderer can draw at AX5.
         assertSnapshot(
@@ -143,12 +151,13 @@ struct SettingsSnapshotTests {
     }
 
     /// Delete my account (24c), before and after a deletion the server is still finishing. Before,
-    /// with a subscription that may renew (30a): the note and Manage subscription; after, none.
+    /// with a subscription that may renew (30a): the note and Manage subscription, and the unused
+    /// credits she gives up (F1, D18); after, none.
     @Test func deleteAccountScreen() {
         let model = DeleteDataModel(scope: .account)
         model.show(
             DeleteDataModel.Counts(pieces: 21, looks: 6, pictures: 3, suitcases: 6, drafts: 1),
-            subscriptionMayRenew: true)
+            subscriptionMayRenew: true, unusedCredits: 7)
         assertSnapshot(DeleteDataPage(model: model), named: "delete-account")
         let report = DeletionReport(
             scope: .account,

@@ -110,6 +110,11 @@ struct DeleteDataPage: View {
                         .buttonStyle(.nookRow)
                         .accessibilityIdentifier("deleteData.manageSubscription")
                     }
+                    // F1 (D18): unused credits go with the account, so the count is said first.
+                    if !model.phase.isFinished, let credits = DeleteDataText.creditsNote(model.unusedCredits) {
+                        SettingsNote(credits)
+                            .accessibilityIdentifier("deleteData.creditsNote")
+                    }
                     SettingsNote(DeleteDataText.providersNote)
                 } else {
                     SettingsNote(DeleteDataText.after)
@@ -425,6 +430,22 @@ nonisolated enum DeleteDataText {
             localized:
                 "Deleting your account doesn’t cancel your subscription. Cancel it with Manage subscription below, or in the Settings app: tap your name, then Subscriptions.",
             bundle: .module, comment: "Delete my account: the subscription note")
+    }
+
+    /// D18: unused picture credits are given up with the account (the Terms page says so too).
+    /// None left says nothing; when the server couldn't say, the general line.
+    static func creditsNote(_ credits: Int?) -> String? {
+        guard let credits else {
+            return String(
+                localized:
+                    "Any unused picture credits are given up with your account. They can’t be moved to a new one.",
+                bundle: .module, comment: "Delete my account: credits note when the count isn't known")
+        }
+        guard credits > 0 else { return nil }
+        return String(
+            localized:
+                "Unused picture credits: \(credits). They’re given up with your account and can’t be moved to a new one.",
+            bundle: .module, comment: "Delete my account: how many unused picture credits are given up")
     }
 
     static var providersNote: String {
