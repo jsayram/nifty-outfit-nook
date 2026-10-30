@@ -288,6 +288,10 @@ import Foundation
                 return error(.consentRequired, id)
             }
             if let styleRequest { state.withLock { $0.ledger.styleRequests.append(styleRequest) } }
+            // F1c: styling needs access on the server's record (30c), checked before anything counts.
+            if styleRequest != nil, state.withLock({ $0.limits.stylist }) == .noStylingAccess {
+                return error(.entitlementRequired, id, feature: "style")
+            }
             if let tryOnRequest, !FakeTryOn.consentVersions.contains(tryOnRequest.consentVersion) {
                 return error(.consentRequired, id)
             }

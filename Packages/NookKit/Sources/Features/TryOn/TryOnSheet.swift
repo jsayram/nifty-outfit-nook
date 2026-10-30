@@ -294,10 +294,18 @@ struct TryOnSheetContent: View {
     private func failed(_ failure: TryOnModel.Failure) -> some View {
         VStack(spacing: NookSpacing.large) {
             if let progress = model.progress { TryOnStepsList(progress: progress) }
-            NookErrorState(
-                TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure),
-                retry: model.make
-            )
+            if case .limited(.needsStylingAccess) = failure {
+                // F1c: the server shows no styling access (and no credits). Closing Styling access
+                // starts the sheet again, as from the allowance line.
+                NookErrorState(
+                    TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure),
+                    retryTitle: TryOnSheetText.seeStylingAccess, retry: { showsStylingAccess = true })
+            } else {
+                NookErrorState(
+                    TryOnSheetText.failedTitle(failure), message: TryOnSheetText.failedMessage(failure),
+                    retry: model.make
+                )
+            }
         }
         .frame(maxWidth: .infinity)
         .accessibilityIdentifier("tryOn.failed")

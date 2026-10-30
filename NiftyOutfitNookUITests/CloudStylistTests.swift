@@ -77,6 +77,19 @@ final class CloudStylistTests: XCTestCase {
         keepScreenshot("28-2-dressed-up")
     }
 
+    /// F1c: the server's record shows no styling access (403 entitlement_required). Your looks
+    /// says so and offers Styling access instead of a plain "not allowed".
+    @MainActor
+    func testNoStylingAccessOnTheServerOffersStylingAccess() {
+        let app = launch(stylist: "noStylingAccess")
+        styleMe(in: app)
+        tap(app.buttons["Review"], until: { app.buttons["stylistConsent.allow"].exists })
+        let see = app.buttons["See styling access"]
+        tap(app.buttons["stylistConsent.allow"], until: { see.exists })
+        keepScreenshot("f1c-no-styling-access")
+        tap(see, until: { app.navigationBars["Styling access"].exists })
+    }
+
     // MARK: Helpers
 
     @MainActor

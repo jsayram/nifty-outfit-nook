@@ -44,7 +44,7 @@ public struct GatewayCreditClaimer: CreditClaiming, StylingAccessClaiming {
         case .rateLimited, .unavailable, .actionInProgress, .actionRunning, .quotaExceeded, .featurePaused:
             .unavailable
         case .serverError, .updateRequired, .invalidResponse, .attestationRequired, .attestationUnavailable,
-            .consentRequired, .idempotencyConflict:
+            .consentRequired, .entitlementRequired, .idempotencyConflict:
             .failed
         }
     }

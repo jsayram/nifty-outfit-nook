@@ -104,6 +104,38 @@ struct AnalyticsTests {
         #expect(other.queued.isEmpty && working.sent.withLock { $0.count } == 1)
     }
 
+    @Test func turningItOffDeletesWhatTheServerHasUnderTheOldID() async throws {
+        let endpoint = Recording()
+        let analytics = analytics(endpoint)
+        analytics.setOn(true)
+        analytics.record(.styleFinished, .succeeded)
+        let id = try #require(analytics.queued.first?.analyticsID)
+        analytics.setOn(false)
+        await analytics.flush()
+        #expect(endpoint.deleted.withLock { $0 } == [id])
+        // Done: nothing waits, and the next flush asks for nothing.
+        await analytics.flush()
+        #expect(endpoint.deleted.withLock { $0 } == [id])
+    }
+
+    @Test func aDeletionThatCouldntGoIsSentAtTheNextLaunch() async throws {
+        let store = InMemoryAnalyticsSettingsStore()
+        let offline = OptInAnalytics(settings: store, endpoint: Recording(fails: true), context: Self.context)
+        offline.setOn(true)
+        let id = try #require(store.current()?.analyticsID)
+        offline.setOn(false)
+        await offline.flush()
+        #expect(store.pendingDeletions() == [id] && store.current() == nil)
+
+        // The next launch (`sendRegularly` starts with a flush): a new instance over the same
+        // store sends it, even while it's off.
+        let endpoint = Recording()
+        let next = OptInAnalytics(settings: store, endpoint: endpoint, context: Self.context)
+        await next.flush()
+        #expect(endpoint.deleted.withLock { $0 } == [id])
+        #expect(store.pendingDeletions().isEmpty)
+    }
+
     @Test func anEventWaitsUntilItsHourIsOver() async {
         let endpoint = Recording()
         let clock = Clock()

@@ -26,14 +26,16 @@ struct TodayResult: View {
                 look: look, garments: model.garments, layoutSeed: model.originalLook?.id.rawValue)
             VStack(spacing: NookSpacing.medium) {
                 if let problem = model.problem {
-                    ProblemBanner(problem: problem, retry: actions.retry)
-                        .readablePane()
+                    let banner = ProblemBanner(
+                        problem: problem, retry: actions.retry, seeStylingAccess: actions.seeStylingAccess)
+                    banner.readablePane()
                 }
                 // Phase 28: looks made on the phone say so, and why.
                 if let lane = result.madeBy, lane != .cloud {
                     QuickIdeasLabel(
                         lane: lane, reason: model.quickIdeasReason, retry: actions.retry,
-                        reviewConsent: actions.reviewConsent, signIn: actions.signIn
+                        reviewConsent: actions.reviewConsent, signIn: actions.signIn,
+                        seeStylingAccess: actions.seeStylingAccess
                     )
                     .readablePane()
                 }
@@ -399,6 +401,7 @@ struct ResultActions: View {
 struct ProblemBanner: View {
     let problem: YourLooksModel.Failure
     let retry: () -> Void
+    var seeStylingAccess: () -> Void = {}
 
     var body: some View {
         switch problem {
@@ -413,6 +416,10 @@ struct ProblemBanner: View {
             EmptyView()
         case .needsConsent:
             NookBanner(StylistConsentText.needsConsent, systemImage: "hand.raised")
+        case .limited(.needsStylingAccess):
+            NookBanner(
+                CloudLimitText.message(for: .needsStylingAccess), systemImage: "sparkles",
+                actionTitle: CloudLimitText.seeStylingAccess, action: seeStylingAccess)
         case .limited(let problem):
             NookBanner(CloudLimitText.message(for: problem), systemImage: "hourglass")
         case .notCompleted, .closetUnavailable, .requestChanged, .hidden:

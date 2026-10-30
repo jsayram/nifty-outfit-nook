@@ -444,6 +444,19 @@ struct FailureState: View {
                 .accessibilityIdentifier("results.hidden.tryDifferent")
                 backButton(kind: .soft)
             }
+        case .limited(.needsStylingAccess):
+            // F1c: the server shows no styling access. Nothing was sent or counted.
+            NookErrorState(
+                String(
+                    localized: "The stylist needs styling access", bundle: .module,
+                    comment: "Your looks when the server shows no styling access"),
+                message: CloudLimitText.message(for: .needsStylingAccess),
+                retryTitle: CloudLimitText.seeStylingAccess,
+                retry: actions.seeStylingAccess
+            ) {
+                backButton(kind: .soft)
+                savedButton
+            }
         case .limited(let problem):
             // 27a: a server limit. Its own words say when it can work again; nothing was counted.
             NookErrorState(

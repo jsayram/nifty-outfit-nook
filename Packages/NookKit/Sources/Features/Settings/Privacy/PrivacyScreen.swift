@@ -171,6 +171,8 @@ struct PrivacyScreen: View {
                 } else {
                     services.analytics.setOn(false)
                     analyticsOn = false
+                    // F1c: the deletion for the old ID goes now; if it can't, at the next launch.
+                    Task { await services.analytics.flush() }
                 }
             },
             resetID: {

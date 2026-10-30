@@ -23,6 +23,8 @@ struct YourLooksActions {
     var reviewConsent: () -> Void = {}
     /// Release: Sign in beside Quick ideas, after she said Not now to signing in.
     var signIn: () -> Void = {}
+    /// F1c: opens Styling access when the server shows none for her account.
+    var seeStylingAccess: () -> Void = {}
     /// Release (guideline 1.2): Report a problem on the stylist's look or its why line: the
     /// result, and what she may say it's about.
     var report: (AIReportTarget, [AIReportSubject]) -> Void = { _, _ in }

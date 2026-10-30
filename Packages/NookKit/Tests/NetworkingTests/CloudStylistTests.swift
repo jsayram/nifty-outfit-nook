@@ -237,4 +237,17 @@ struct CloudStylistTests {
         let decoded = try? JSONDecoder().decode(APIV1.StyleRequest.self, from: body)
         #expect(decoded.map { FakeStylist.isValid(object, decoded: $0) } != true, "\(file)")
     }
+
+    // MARK: F1c: no styling access on the server's record
+
+    @Test func noStylingAccessOnTheServerSaysSoAndCountsNothing() async throws {
+        let service = try await paid()
+        backend.setStylist(.noStylingAccess)
+        await #expect(throws: StylistError.limited(.needsStylingAccess)) {
+            try await stylist(service).style(Self.context())
+        }
+        #expect(backend.paidJobsRun == 0)
+        let usage = try await service.usage()
+        #expect(usage.allowance(.styleFull)?.usedToday == 0)
+    }
 }

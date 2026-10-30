@@ -12,6 +12,9 @@ import Foundation
         /// 27c: answers like `normal`, but only after `slowAnswer`, like a busy provider, so there's
         /// time to leave the screen, browse and search before the looks are ready.
         case slow
+        /// F1c: the server's record shows no styling access for her account (30c): 403
+        /// entitlement_required, with nothing sent or counted.
+        case noStylingAccess
 
         /// How long `slow` takes. Under the paid-text try timeout (40 seconds), so one try answers.
         public static let slowAnswer: Duration = .seconds(15)

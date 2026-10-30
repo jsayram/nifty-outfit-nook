@@ -160,6 +160,8 @@ public struct GatewayPaidActionService: PaidActionService {
             .deviceNotVerified
         case .consentRequired:
             .needsConsent
+        case .entitlementRequired:
+            .needsStylingAccess
         case .unavailable(let seconds) where paid:
             // From a paid endpoint: the job failed, or its outcome is still being checked.
             .didNotFinish(retryAfterSeconds: seconds)

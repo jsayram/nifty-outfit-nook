@@ -71,7 +71,18 @@ nonisolated public enum CloudLimitText {
             return CloudProblemText.message(for: problem) ?? ""
         case .needsConsent:
             return StylistConsentText.needsConsent
+        case .needsStylingAccess:
+            return String(
+                localized: "The stylist’s ideas come with styling access. Your closet works as usual.",
+                bundle: .module, comment: "Cloud limit: the server shows no styling access for this account")
         }
+    }
+
+    /// The button that opens Styling access, where a problem is answered there (F1c).
+    public static var seeStylingAccess: String {
+        String(
+            localized: "See styling access", bundle: .module,
+            comment: "Button on a cloud limit message: opens Styling access")
     }
 
     /// "1 second", "12 seconds", "3 minutes".
