@@ -24,10 +24,8 @@
             let machine = String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
             #if targetEnvironment(simulator)
                 let model = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] ?? machine
-                let simulator = true
             #else
                 let model = machine
-                let simulator = false
             #endif
             let info = Bundle.main.infoDictionary
             let version = info?["CFBundleShortVersionString"] as? String ?? "?"
@@ -37,9 +35,10 @@
                 "App: \(version) (\(build)), Debug",
                 "Taken: \(Date.now.formatted(.iso8601))",
             ]
-            if simulator {
+            // Inside #if, not a constant Bool: a device build warned that the branch never runs.
+            #if targetEnvironment(simulator)
                 lines.append("SIMULATOR: it keeps no Data Protection classes, so ignore the file results.")
-            }
+            #endif
             return lines
         }
     }
