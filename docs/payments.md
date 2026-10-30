@@ -102,7 +102,7 @@ The app never types a price or a date: the price, period and trial come from Sto
 
 Do these before a TestFlight build can sell anything. Sandbox and TestFlight purchases are free.
 
-1. **Agreements**: App Store Connect → Business → accept the Paid Apps Agreement, and fill in banking and tax. Products can't be fetched until it's active.
+1. **Agreements**: App Store Connect → Business → accept the Paid Apps Agreement, and fill in banking and tax. Products can't be fetched until it's active. (S4, 30 October 2026: Active for all countries or regions, effective 30 December 2025 to **29 December 2026**. Renew it before then, or sandbox and real purchases stop.)
 2. **Group**: My Apps → Nifty Outfit Nook → Monetization → Subscriptions → create a subscription group named `Styling`. Add a group display name (shown in Settings → Subscriptions), for example "Nifty Outfit Nook styling".
 3. **Subscription**: in the group, create a subscription with Reference Name `Styling monthly` and Product ID `com.jsayram.niftyoutfitnook.styling.monthly` (exactly; it can't be changed or reused). Duration 1 month.
 4. **Price**: Subscription Prices → add the price (US$9.99 is the placeholder; pick the final one) and let App Store Connect fill other storefronts, or set them by hand.
