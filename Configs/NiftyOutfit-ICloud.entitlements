@@ -8,6 +8,8 @@
 	</array>
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>production</string>
 	<!-- Phase 21b: only used when NOOK_ICLOUD = YES (Configs/Base.xcconfig). Needs the iCloud
 	     capability with CloudKit and this container on the App ID first, and Push Notifications
 	     for CKSyncEngine's wake-ups: docs/icloud.md has Jose's steps. -->

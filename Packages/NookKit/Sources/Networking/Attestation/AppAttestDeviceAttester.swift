@@ -4,11 +4,11 @@ import Security
 
 /// App Attest on a real device, through Apple's DCAppAttestService (DeviceCheck, part of iOS).
 ///
-/// Not yet run on a device: it needs the App Attest capability on the App ID and the
-/// `com.apple.developer.devicecheck.appattest-environment` entitlement (Jose, Apple Developer),
-/// and the backend's attestation check, which is built only for its mock mode so far. Both are on
-/// the device checklist (docs/decisions/0006-limits-and-cost-protection.md). On the simulator
-/// `isSupported` is false, and the app uses `FakeDeviceAttester` with the fake backend instead.
+/// Needs the App Attest capability on the App ID (on since S2, 30 October 2026) and the
+/// `com.apple.developer.devicecheck.appattest-environment` entitlement: `development` in Debug
+/// builds, `production` in Release (a shipped app always uses production). The backend checks
+/// Apple's attestation in its "apple" mode. On the simulator `isSupported` is false, and the app
+/// uses `FakeDeviceAttester` with the fake backend instead.
 public struct AppAttestDeviceAttester: DeviceAttester {
     public init() {}
 

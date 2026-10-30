@@ -8,6 +8,8 @@
 	</array>
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>development</string>
 	<!-- Debug builds only (Configs/App.xcconfig, Phase 30a): get-task-allow marks the app as a
 	     development build, which StoreKit's local testing (the .storekit file and SKTestSession)
 	     requires on the simulator. Release builds use the file without it. -->

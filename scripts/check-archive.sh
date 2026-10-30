@@ -146,6 +146,8 @@ with open(entitlements_path, "rb") as f:
 if entitlements != {
     "com.apple.developer.default-data-protection": "NSFileProtectionComplete",
     "com.apple.developer.applesignin": ["Default"],
+    # S2: App Attest. A shipped app always uses Apple's production environment.
+    "com.apple.developer.devicecheck.appattest-environment": "production",
 }:
     problems.append(f"entitlements changed: {entitlements}")
 
