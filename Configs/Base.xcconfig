@@ -27,11 +27,10 @@ ALWAYS_SEARCH_USER_PATHS = NO
 CLANG_ENABLE_MODULES = YES
 CLANG_ENABLE_OBJC_ARC = YES
 
-// The real backend and sign-in (Phase 24a). Empty here, so the app runs on the fake sign-in and
-// the in-process fake backend. Configs/Secrets.xcconfig (ignored by git) sets them when Jose
-// switches to Clerk and Convex: see Secrets.xcconfig.example and docs/backend-switch.md. Neither
-// is a secret (both ship inside the app), but they stay out of this public repo.
-CLERK_PUBLISHABLE_KEY =
+// The real backend and its sign-in (Phase 24a, BA4). Empty here, so a Debug build runs on the
+// in-process fake backend. Configs/Secrets.xcconfig (ignored by git) sets it when Jose switches to
+// Better Auth and Convex: see Secrets.xcconfig.example and docs/backend-switch.md. Not a secret
+// (it ships inside the app), but it stays out of this public repo.
 NOOK_API_BASE_URL =
 
 // The website's support page (Phase 24d): what Help and Send feedback open, and the App Store's

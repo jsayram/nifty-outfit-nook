@@ -67,8 +67,81 @@ struct ContractTests {
         }
         #expect(
             Set(APIV1.endpoints.filter { $0.maxBodyBytes != APIV1.maxBodyBytes }.map(\.id)) == [
-                "sendFeedback", "tryOn", "actionStatus",
+                "sendFeedback", "tryOn", "actionStatus", "sendAnalytics",
             ])
+    }
+
+    // MARK: Sign-in (BA4)
+
+    static func signIn() throws -> [String: Any] {
+        try #require(contract()["signIn"] as? [String: Any])
+    }
+
+    @Test func signInRoutesMatch() throws {
+        let section = try Self.signIn()
+        #expect(section["basePath"] as? String == APIV1.SignIn.basePath)
+        let listed = try #require(section["routes"] as? [[String: Any]])
+        let fromContract = listed.map { "\($0["id"]!) \($0["method"]!) \($0["path"]!) \($0["auth"]!)" }.sorted()
+        let fromSwift = APIV1.SignIn.routes.map {
+            "\($0.id) \($0.method) \($0.path) \($0.requiresSession ? "session" : "none")"
+        }
+        .sorted()
+        #expect(fromContract == fromSwift)
+        for route in listed {
+            let swift = try #require(APIV1.SignIn.routes.first { $0.id == route["id"] as? String })
+            #expect(swift.maxBodyBytes == (route["request"] as? [String: Any])?["maxBodyBytes"] as? Int)
+        }
+        let signInRoute = try #require(listed.first { $0["id"] as? String == "signInApple" })
+        let headers = (signInRoute["response"] as? [String: Any])?["headers"] as? [String: Any]
+        #expect(headers?.keys.contains(APIV1.SignIn.sessionHeader) == true)
+    }
+
+    @Test(arguments: [
+        ("v1/examples/auth-sign-in.request.json", "signInRequest"),
+        ("v1/examples/auth-convex-token.response.json", "convexToken"),
+        ("v1/examples/auth-sign-out.response.json", "signOut"),
+    ])
+    func signInExamplesRoundTrip(path: String, type: String) throws {
+        let original = try Self.data(path)
+        let decoder = JSONDecoder()
+        let encoder = APIV1.encoder()
+        let reencoded: Data =
+            switch type {
+            case "signInRequest":
+                try encoder.encode(decoder.decode(APIV1.SignIn.AppleSignInRequest.self, from: original))
+            case "convexToken":
+                try encoder.encode(decoder.decode(APIV1.SignIn.ConvexTokenResponse.self, from: original))
+            default: try encoder.encode(decoder.decode(APIV1.SignIn.SignOutResponse.self, from: original))
+            }
+        #expect(try Self.sameJSON(original, reencoded), "\(path)")
+    }
+
+    /// The sign-in answer carries more than the app reads (Better Auth's user row); the app
+    /// decodes only what it needs, and keeps none of it.
+    @Test func signInResponseDecodes() throws {
+        let response = try JSONDecoder().decode(
+            APIV1.SignIn.AppleSignInResponse.self, from: Self.data("v1/examples/auth-sign-in.response.json"))
+        #expect(!response.user.id.isEmpty)
+        #expect(APIV1.SignIn.isPlausibleSession(response.token))
+    }
+
+    /// What the app sends: the provider, Apple's token and the raw nonce, and nothing else, so
+    /// the contract's invalid examples (no nonce, a name) can't come from it.
+    @Test func signInRequestCarriesOnlyTokenAndNonce() throws {
+        let request = APIV1.SignIn.AppleSignInRequest(
+            identityToken: "a.b.c", rawNonce: String(repeating: "f", count: 64))
+        let object = try #require(
+            JSONSerialization.jsonObject(with: APIV1.encoder().encode(request)) as? [String: Any])
+        #expect(Set(object.keys) == ["provider", "idToken"])
+        #expect(Set((object["idToken"] as? [String: Any])?.keys.map { $0 } ?? []) == ["token", "nonce"])
+        for invalid in ["no_nonce", "with_name"] {
+            let data = try Self.data("v1/examples/invalid/auth-sign-in.request.\(invalid).json")
+            let decoded = try? JSONDecoder().decode(APIV1.SignIn.AppleSignInRequest.self, from: data)
+            if let decoded {
+                // Decodes (Codable ignores the extra name), but re-encodes without it.
+                #expect(try !Self.sameJSON(data, APIV1.encoder().encode(decoded)))
+            }
+        }
     }
 
     /// 33a: what the phone sends fits what the backend takes.

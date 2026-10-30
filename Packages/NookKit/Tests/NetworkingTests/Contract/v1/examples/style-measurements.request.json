@@ -1,0 +1,122 @@
+{
+  "mode": "full",
+  "contextRevision": "rev_7f3a9c",
+  "consentVersion": "stylist-2",
+  "closet": [
+    {
+      "id": "g-blouse-cream",
+      "category": "top",
+      "kind": "blouse",
+      "colors": [
+        "cream"
+      ],
+      "fit": "relaxed",
+      "dressiness": "smart",
+      "warmth": "light",
+      "name": "Cream silk blouse"
+    },
+    {
+      "id": "g-tee-white",
+      "category": "top",
+      "kind": "tee",
+      "colors": [
+        "white"
+      ],
+      "dressiness": "casual",
+      "warmth": "light",
+      "name": "White tee",
+      "otherNames": [
+        "my comfy tee"
+      ]
+    },
+    {
+      "id": "g-trousers-olive",
+      "category": "bottom",
+      "kind": "trousers",
+      "colors": [
+        "olive"
+      ],
+      "fit": "regular",
+      "dressiness": "smart",
+      "warmth": "medium",
+      "name": "Olive trousers"
+    },
+    {
+      "id": "g-jeans-dark",
+      "category": "bottom",
+      "kind": "jeans",
+      "colors": [
+        "denim"
+      ],
+      "dressiness": "casual",
+      "warmth": "medium",
+      "name": "Dark jeans"
+    },
+    {
+      "id": "g-blazer-navy",
+      "category": "layer",
+      "kind": "blazer",
+      "colors": [
+        "navy"
+      ],
+      "dressiness": "dressy",
+      "warmth": "medium",
+      "name": "Navy blazer"
+    },
+    {
+      "id": "g-loafers-brown",
+      "category": "shoes",
+      "kind": "loafers",
+      "colors": [
+        "brown"
+      ],
+      "dressiness": "smart",
+      "warmth": "medium",
+      "name": "Brown loafers"
+    },
+    {
+      "id": "g-flats-black",
+      "category": "shoes",
+      "kind": "flats",
+      "colors": [
+        "black"
+      ],
+      "dressiness": "smart",
+      "warmth": "light",
+      "name": "Black flats",
+      "colorNote": "patent"
+    }
+  ],
+  "measurements": {
+    "heightCm": 160,
+    "waistCm": 71,
+    "hipsCm": 97,
+    "inseamCm": 74,
+    "weightKg": 58
+  },
+  "outfit": {
+    "occasion": "office",
+    "setting": "outdoors",
+    "weather": {
+      "condition": "rain",
+      "temperatureCelsius": 14,
+      "lowCelsius": 11,
+      "highCelsius": 16,
+      "precipitationPercent": 70,
+      "isNight": false
+    },
+    "comfort": "relaxed",
+    "color": {
+      "family": "olive",
+      "strength": "preferred",
+      "scope": "anyPiece"
+    },
+    "ideaAllowed": true,
+    "avoid": [
+      [
+        "g-tee-white",
+        "g-jeans-dark"
+      ]
+    ]
+  }
+}

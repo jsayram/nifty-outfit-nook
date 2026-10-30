@@ -3,9 +3,10 @@ import Models
 
 // Debug builds only (32b, L9): a Release build has no fake backend to fall back to.
 #if DEBUG
-    /// The default sign-in until a Clerk key is configured: a pretend Sign in with Apple that
-    /// always succeeds (unless told otherwise) and tokens that expire like Clerk's do (60 seconds by
-    /// default). Nothing leaves the phone and nothing is stored: a relaunch starts signed out.
+    /// A pretend sign-in for package tests that aren't about sign-in: a Sign in with Apple that
+    /// always succeeds (unless told otherwise) and short-lived tokens (60 seconds by default),
+    /// with no sign-in routes involved. The app's fakes use the real client, `BetterAuthProvider`,
+    /// against the fake backend's sign-in routes instead. Nothing is stored.
     public actor FakeAuthProvider: AuthProvider {
         public nonisolated let kind = AuthProviderKind.fake
 
@@ -18,7 +19,7 @@ import Models
         public private(set) var tokensIssued = 0
 
         /// - Parameters:
-        ///   - lifetime: how long each token lasts. Clerk's session tokens last 60 seconds.
+        ///   - lifetime: how long each token lasts.
         ///   - subject: the pretend Apple user, or a random one at each sign-in.
         public init(
             lifetime: TimeInterval = 60, subject: String? = nil, now: @escaping @Sendable () -> Date = { Date() }
@@ -66,7 +67,7 @@ import Models
 
         public func token(forceRefresh: Bool) async throws(AuthError) -> AuthToken {
             guard let subject else { throw .signedOut }
-            // Like Clerk's SDK: reuse a token with more than 10 seconds left, unless told not to.
+            // Reuse a token with more than 10 seconds left, unless told not to.
             if !forceRefresh, let current, current.expiresAt.timeIntervalSince(now()) > 10 {
                 return current
             }

@@ -77,6 +77,8 @@ import Synchronization
             var support = FakeSupport()
             /// 30b: picture credits (FakeBackend+Credits.swift).
             var credits = FakeCredits()
+            /// BA4: Better Auth's users, Apple links and sessions (FakeBackend+SignIn.swift).
+            var signIn = FakeSignIn()
         }
 
         let state = Mutex(State())
@@ -107,10 +109,13 @@ import Synchronization
         // MARK: Answering
 
         func reply(to request: URLRequest, body: Data?) -> FakeReply {
+            let isSignIn = Self.isSignInPath(request.url?.path() ?? "")
             let mode = state.withLock { state -> FakeBackendMode in
                 state.requestCount += 1
                 let mode = state.mode
-                if let remaining = state.remaining {
+                // A token that expires on the way is a /v1 token: getting one from the sign-in
+                // routes doesn't use up the mode.
+                if let remaining = state.remaining, !(isSignIn && mode == .expiredToken) {
                     if remaining <= 1 {
                         state.mode = .normal
                         state.remaining = nil
@@ -140,7 +145,10 @@ import Synchronization
                 break
             }
 
-            let answer = route(request, body: body, endpoint: endpoint, id: id, refuseNextToken: mode == .expiredToken)
+            let answer =
+                isSignIn
+                ? routeSignIn(request, body: body, id: id)
+                : route(request, body: body, endpoint: endpoint, id: id, refuseNextToken: mode == .expiredToken)
             if mode == .answerLost { return .fail(.timedOut, delay: .milliseconds(80)) }
             if mode == .connectionLost { return .fail(.networkConnectionLost, delay: .milliseconds(80)) }
             if mode == .trickle, case .respond(let status, let headers, let body, _) = answer {
@@ -187,7 +195,7 @@ import Synchronization
                 return state.refusedTokens.contains(token)
             }
             if refused || parsed.expiresAt <= now() { return error(.tokenExpired, id) }
-            // 24c: a deleted sign-in account's tokens stop working, as Clerk's do.
+            // 24c: a deleted sign-in account's tokens stop working, as Better Auth's do.
             if isDeletedSubject(parsed.subject) { return error(.unauthenticated, id) }
             if endpoint == APIV1.deleteAccount {
                 return routeDeleteAccount(request, body: body, subject: parsed.subject, id: id)

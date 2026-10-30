@@ -4,7 +4,7 @@
     import Observation
 
     /// What the gateway screen can change about the fake backend. The app fills it in when it runs
-    /// on the fakes; with Clerk and the real backend there's nothing to change, so it's nil.
+    /// on the fakes; with Better Auth and the real backend there's nothing to change, so it's nil.
     public struct GatewayLabControls: Sendable {
         public struct Mode: Sendable, Identifiable, Hashable {
             public var id: String
@@ -88,7 +88,11 @@
         }
 
         var providerName: String {
-            account.providerKind == .clerk ? "Clerk (real)" : "Fake sign-in and fake backend"
+            switch (account.providerKind, controls) {
+            case (.betterAuth, nil): "Better Auth (real)"
+            case (.betterAuth, _): "Better Auth client and fake backend"
+            case (.fake, _): "Fake sign-in and fake backend"
+            }
         }
 
         var isWaitingToRetry: Bool {

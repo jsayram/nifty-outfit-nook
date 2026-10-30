@@ -2,7 +2,7 @@
     import Models
     import SwiftUI
 
-    /// The Phase 24a checkpoint screen: sign in with the fake Apple sign-in (or Clerk, once it's
+    /// The Phase 24a checkpoint screen: sign in through Better Auth (against the fake backend, or the real one once it's
     /// configured), make the authenticated who-am-I call, and switch the fake backend between its
     /// failure modes to see each one handled.
     ///

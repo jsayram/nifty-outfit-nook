@@ -265,7 +265,7 @@ struct ResilienceTests {
         #expect(backend.requestCount == before + 2)
     }
 
-    /// An auth provider whose refresh fails the way Clerk's can: a token for the first ask, then
+    /// An auth provider whose refresh fails the way a sign-in service's can: a token for the first ask, then
     /// an error when the client asks for a fresh one.
     final class RefreshFailsAuth: AuthProvider {
         let inner = FakeAuthProvider(subject: "lily")

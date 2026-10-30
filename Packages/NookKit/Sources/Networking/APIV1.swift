@@ -67,9 +67,20 @@ public enum APIV1 {
         id: "actionStatus", method: "POST", path: "/v1/actions/status", requiresAuth: true, idempotent: true,
         maxBodyBytes: 1_024)
 
+    // F1b (D24): opt-in analytics. Listed so the contract test sees every endpoint; the app starts
+    // sending to them in F1c. No token on either, on purpose: the analytics ID must never travel
+    // next to an account.
+    /// Not repeated on its own: a repeated batch would be counted twice.
+    public static let sendAnalytics = Endpoint(
+        id: "sendAnalytics", method: "POST", path: "/v1/analytics/events", requiresAuth: false, idempotent: false,
+        maxBodyBytes: 32_768)
+    /// Safe to repeat: deleting what's already gone answers the same.
+    public static let deleteAnalytics = Endpoint(
+        id: "deleteAnalytics", method: "POST", path: "/v1/analytics/deletion", requiresAuth: false, idempotent: true)
+
     public static let endpoints = [
         health, createSession, me, usage, attestChallenge, attestKey, style, tryOn, deleteAccount, deletionStatus,
-        sendFeedback, claimCredits, claimEntitlement, actionStatus,
+        sendFeedback, claimCredits, claimEntitlement, actionStatus, sendAnalytics, deleteAnalytics,
     ]
 
     // MARK: Bodies

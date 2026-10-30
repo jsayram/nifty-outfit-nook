@@ -52,6 +52,13 @@
     {
       "target": {
         "containerPath": "container:Packages/NookKit",
+        "identifier": "BetterAuthTests",
+        "name": "BetterAuthTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Packages/NookKit",
         "identifier": "PersistenceSpikeTests",
         "name": "PersistenceSpikeTests"
       }

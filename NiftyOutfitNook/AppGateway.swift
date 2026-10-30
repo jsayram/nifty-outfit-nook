@@ -1,17 +1,17 @@
-import ClerkAuth
+import BetterAuth
 import Features
 import Foundation
 import Models
 import Networking
 import Services
 
-/// The app's one gateway to the backend (Phase 24a). With a Clerk publishable key and the backend
-/// URL set (Configs/Secrets.xcconfig, docs/backend-switch.md) it signs in through Clerk and calls
-/// the Convex deployment. Without them a Debug build runs on the fake sign-in and the in-process
-/// fake backend. A Release build runs on neither: it fails closed (32b, L9), with every service
-/// "unavailable" (signed out, nothing cloud works) and `cloudUnavailable` true, so the cloud
-/// features say they aren't available right now. `FakeGateway` isn't compiled into Release at all.
-/// Screens see only `AccountService` either way.
+/// The app's one gateway to the backend (Phase 24a). With the backend URL set
+/// (Configs/Secrets.xcconfig, docs/backend-switch.md) it signs in through Better Auth and calls
+/// the Convex deployment at that address. Without it a Debug build runs the same Better Auth client
+/// against the in-process fake backend, with a stand-in for Apple's sheet. A Release build runs on
+/// neither: it fails closed (32b, L9), with every service "unavailable" (signed out, nothing cloud
+/// works) and `cloudUnavailable` true, so the cloud features say they aren't available right now.
+/// `FakeGateway` isn't compiled into Release at all. Screens see only `AccountService` either way.
 @MainActor
 enum AppGateway {
     static let settings = GatewaySettings(info: Bundle.main.infoDictionary ?? [:])
@@ -23,7 +23,12 @@ enum AppGateway {
     #else
         private static let allowsFakes = false
     #endif
-    static let mode = GatewayMode.resolve(settings: settings, allowsFakes: allowsFakes)
+    static let mode: GatewayMode = {
+        #if DEBUG
+            if local != nil { return .real }
+        #endif
+        return GatewayMode.resolve(settings: settings, allowsFakes: allowsFakes)
+    }()
 
     /// True in a Release build with the backend settings missing. The services below are then the
     /// unavailable ones, and `NookServices.cloudUnavailable` tells the screens.
@@ -41,14 +46,41 @@ enum AppGateway {
     #endif
 
     #if DEBUG
-        /// The fakes, when the real services aren't configured. Debug builds only.
+        /// The fakes, when the real services aren't configured. Debug builds only. Sign-in is the
+        /// real Better Auth client against the fake's sign-in routes, with the session in memory
+        /// (the fake backend forgets it on relaunch too) and no Apple sheet.
         static let fake: FakeGateway? =
             mode == .fake
-            ? FakeGateway(appVersion: appVersion, policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent)
+            ? FakeGateway(
+                appVersion: appVersion, policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent,
+                makeAuth: { backend, session in
+                    BetterAuthProvider(
+                        baseURL: backend.baseURL, session: session, store: MemorySessionStore(),
+                        apple: FakeAppleIdentity(), policy: RetryPolicy(requestTimeout: .seconds(5)), onEvent: onEvent)
+                })
             : nil
-    #endif
 
-    static let real = RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
+        /// BA4's checkpoint: `-local-backend http://127.0.0.1:<site port> -fake-apple-issuer
+        /// http://127.0.0.1:<port>` signs in through a local Convex backend from the private backend
+        /// repo, with its fake Apple issuer standing in for Apple. Loopback addresses only, Debug
+        /// builds only. The session goes in the Keychain under its own item, apart from the app's.
+        static let local: RealGateway.Services? = {
+            let arguments = ProcessInfo.processInfo.arguments
+            guard let site = DebugLaunchArgument.value(after: "-local-backend", in: arguments).flatMap(URL.init),
+                site.scheme == "http", site.host() == "127.0.0.1", site.port != nil,
+                let issuer = DebugLaunchArgument.value(after: "-fake-apple-issuer", in: arguments).flatMap(URL.init),
+                let apple = LocalFakeAppleIssuer(issuer: issuer)
+            else { return nil }
+            return RealGateway.make(
+                baseURL: site, apple: apple,
+                store: KeychainSessionStore(service: KeychainSessionStore.defaultService + ".local"),
+                appVersion: appVersion, onEvent: onEvent)
+        }()
+
+        static let real = local ?? RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
+    #else
+        static let real = RealGateway.make(settings: settings, appVersion: appVersion, onEvent: onEvent)
+    #endif
 
     static let account: any AccountService = {
         if let real { return real.account }
