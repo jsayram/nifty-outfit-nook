@@ -1,6 +1,7 @@
 import DeviceCheck
 import Foundation
 import Security
+import os
 
 /// App Attest on a real device, through Apple's DCAppAttestService (DeviceCheck, part of iOS).
 ///
@@ -41,11 +42,18 @@ public struct AppAttestDeviceAttester: DeviceAttester {
         }
     }
 
+    private static let logger = Logger(subsystem: "com.jsayram.niftyoutfitnook", category: "attest")
+
     static func map(_ error: any Error) -> AttestError {
+        // Only the error's domain and code (no key ID or data), so a device run shows in Xcode's
+        // console exactly what iOS answered (S2: the reinstall case).
+        let nsError = error as NSError
+        logger.notice("App Attest failed: \(nsError.domain, privacy: .public) \(nsError.code, privacy: .public)")
         guard let error = error as? DCError else { return .failed }
         switch error.code {
         case .featureUnsupported: return .unsupported
         case .invalidKey: return .invalidKey
+        case .serverUnavailable: return .temporary
         default: return .failed
         }
     }

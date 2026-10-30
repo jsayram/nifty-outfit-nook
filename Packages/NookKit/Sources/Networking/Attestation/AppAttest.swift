@@ -14,6 +14,9 @@ public enum AttestError: Error, Sendable, Equatable {
     case unsupported
     /// The key is no longer valid (for example after a restore to a new device): make a new one.
     case invalidKey
+    /// Apple's service is busy or unreachable (DCError.serverUnavailable): try again later, and
+    /// keep the key.
+    case temporary
     /// Anything else, including a temporary failure of Apple's service.
     case failed
 }
