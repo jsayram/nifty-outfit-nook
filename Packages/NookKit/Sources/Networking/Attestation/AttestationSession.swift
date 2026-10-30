@@ -25,12 +25,17 @@ public actor AttestationSession: RequestSigner {
             let assertion = try await attester.generateAssertion(
                 keyID, clientDataHash: AttestClientData.hash(clientData))
             return ["X-Nook-Attest-Key": keyID, "X-Nook-Assertion": assertion.base64EncodedString()]
-        } catch .invalidKey {
-            // A key that no longer works (a restore to another device, for example): start again.
+        } catch .unsupported, .temporary {
+            // The device can't attest, or Apple's service is busy: the key may still be good.
+            throw .attestationUnavailable
+        } catch {
+            // The stored key can't sign. After a restore to another device that's `invalidKey`; after
+            // the app was deleted and installed again, the key ID survives in the Keychain but the
+            // key is gone, and iOS 27 answers `invalidInput` (com.apple.devicecheck.error 2; S2,
+            // iPhone 14 Pro). Either way, forget it: the caller registers a new key and tries once
+            // more, once.
             store.clear()
             throw .attestationRequired
-        } catch {
-            throw .attestationUnavailable
         }
     }
 

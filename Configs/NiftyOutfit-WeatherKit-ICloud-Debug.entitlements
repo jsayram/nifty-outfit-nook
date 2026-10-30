@@ -8,6 +8,8 @@
 	</array>
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>development</string>
 	<!-- Phase 29: only used when NOOK_WEATHERKIT = YES (Configs/Base.xcconfig). Needs the WeatherKit
 	     capability on the App ID in the Apple Developer portal first. -->
 	<key>com.apple.developer.weatherkit</key>

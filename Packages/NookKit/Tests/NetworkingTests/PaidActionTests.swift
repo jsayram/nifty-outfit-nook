@@ -189,6 +189,79 @@ struct PaidActionTests {
         #expect(backend.paidJobsRun == 2)
     }
 
+    /// A key ID left in the Keychain by an earlier install: the Secure Enclave key is gone, and the
+    /// assertion fails with an error other than `invalidKey` (what iOS 27 did in S2).
+    struct LeftoverKeyAttester: DeviceAttester {
+        let inner: FakeDeviceAttester
+        let leftover: String
+        var isSupported: Bool { inner.isSupported }
+        func generateKey() async throws(AttestError) -> String { try await inner.generateKey() }
+        func attestKey(_ keyID: String, clientDataHash: Data) async throws(AttestError) -> Data {
+            try await inner.attestKey(keyID, clientDataHash: clientDataHash)
+        }
+        func generateAssertion(_ keyID: String, clientDataHash: Data) async throws(AttestError) -> Data {
+            if keyID == leftover { throw .failed }
+            return try await inner.generateAssertion(keyID, clientDataHash: clientDataHash)
+        }
+    }
+
+    @Test func aKeyLeftFromAnEarlierInstallIsReplacedOnTheFirstRequest() async throws {
+        let client = client()
+        try await auth.signInWithApple()
+        _ = try await GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0").whoAmI()
+        let store = MemoryAttestKeyStore()
+        store.save("bGVmdG92ZXIta2V5LWZyb20tYW4tZWFybGllci1pbnN0YWxs")
+        let attester = LeftoverKeyAttester(inner: FakeDeviceAttester(), leftover: store.load()!)
+        let session = AttestationSession(attester: attester, store: store, client: client)
+        let paid = GatewayPaidActionService(
+            client: client, attestation: session, entitlementHint: EntitlementHintSource())
+        let receipt = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        #expect(!receipt.replayed)
+        #expect(store.load() != nil)
+        #expect(store.load() != "bGVmdG92ZXIta2V5LWZyb20tYW4tZWFybGllci1pbnN0YWxs")
+        #expect(backend.paidJobsRun == 1)
+    }
+
+    /// Apple's service busy (DCError.serverUnavailable) while signing: no paid access this time,
+    /// but the key is kept, so a passing outage doesn't make the device attest again.
+    final class BusyAttester: DeviceAttester {
+        let inner: FakeDeviceAttester
+        let busy = Mutex(false)
+        init(inner: FakeDeviceAttester) { self.inner = inner }
+        var isSupported: Bool { inner.isSupported }
+        func generateKey() async throws(AttestError) -> String { try await inner.generateKey() }
+        func attestKey(_ keyID: String, clientDataHash: Data) async throws(AttestError) -> Data {
+            try await inner.attestKey(keyID, clientDataHash: clientDataHash)
+        }
+        func generateAssertion(_ keyID: String, clientDataHash: Data) async throws(AttestError) -> Data {
+            if busy.withLock({ $0 }) { throw .temporary }
+            return try await inner.generateAssertion(keyID, clientDataHash: clientDataHash)
+        }
+    }
+
+    @Test func aBusyAppleServiceKeepsTheKey() async throws {
+        let client = client()
+        try await auth.signInWithApple()
+        _ = try await GatewayAccountService(auth: auth, client: client, appVersion: "0.1.0").whoAmI()
+        let store = MemoryAttestKeyStore()
+        let attester = BusyAttester(inner: FakeDeviceAttester())
+        let session = AttestationSession(attester: attester, store: store, client: client)
+        let paid = GatewayPaidActionService(
+            client: client, attestation: session, entitlementHint: EntitlementHintSource())
+        _ = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        let key = try #require(store.load())
+        attester.busy.withLock { $0 = true }
+        let refused = await problem { () async throws(CloudLimitProblem) in
+            try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        }
+        #expect(refused == .deviceNotVerified)
+        #expect(store.load() == key)
+        attester.busy.withLock { $0 = false }
+        _ = try await paid.run(Self.swap, idempotencyKey: IdempotencyKey.make())
+        #expect(store.load() == key)
+        #expect(backend.paidJobsRun == 2)
+    }
+
     @Test func aDeviceThatCantAttestGetsNoPaidAccess() async throws {
         let paid = try await service(attester: FakeDeviceAttester(supported: false))
         let refused = await problem { () async throws(CloudLimitProblem) in

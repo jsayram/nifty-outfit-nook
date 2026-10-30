@@ -1,14 +1,15 @@
 import DeviceCheck
 import Foundation
 import Security
+import os
 
 /// App Attest on a real device, through Apple's DCAppAttestService (DeviceCheck, part of iOS).
 ///
-/// Not yet run on a device: it needs the App Attest capability on the App ID and the
-/// `com.apple.developer.devicecheck.appattest-environment` entitlement (Jose, Apple Developer),
-/// and the backend's attestation check, which is built only for its mock mode so far. Both are on
-/// the device checklist (docs/decisions/0006-limits-and-cost-protection.md). On the simulator
-/// `isSupported` is false, and the app uses `FakeDeviceAttester` with the fake backend instead.
+/// Needs the App Attest capability on the App ID (on since S2, 30 October 2026) and the
+/// `com.apple.developer.devicecheck.appattest-environment` entitlement: `development` in Debug
+/// builds, `production` in Release (a shipped app always uses production). The backend checks
+/// Apple's attestation in its "apple" mode. On the simulator `isSupported` is false, and the app
+/// uses `FakeDeviceAttester` with the fake backend instead.
 public struct AppAttestDeviceAttester: DeviceAttester {
     public init() {}
 
@@ -41,11 +42,18 @@ public struct AppAttestDeviceAttester: DeviceAttester {
         }
     }
 
+    private static let logger = Logger(subsystem: "com.jsayram.niftyoutfitnook", category: "attest")
+
     static func map(_ error: any Error) -> AttestError {
+        // Only the error's domain and code (no key ID or data), so a device run shows in Xcode's
+        // console exactly what iOS answered (S2: the reinstall case).
+        let nsError = error as NSError
+        logger.notice("App Attest failed: \(nsError.domain, privacy: .public) \(nsError.code, privacy: .public)")
         guard let error = error as? DCError else { return .failed }
         switch error.code {
         case .featureUnsupported: return .unsupported
         case .invalidKey: return .invalidKey
+        case .serverUnavailable: return .temporary
         default: return .failed
         }
     }
