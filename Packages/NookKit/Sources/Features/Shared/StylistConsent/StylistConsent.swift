@@ -2,9 +2,10 @@ import DesignSystem
 import Models
 import SwiftUI
 
-/// The cloud stylist's consent words (Phase 27a): version A of `closet/compliance/IN_APP_PRIVACY_TEXT.md`,
-/// since measurements and weight are never sent. The version they belong to is
-/// `StylistConsent.currentVersion`; changing what they promise needs a new version.
+/// The cloud stylist's consent words (Phase 27a; F1 for D10): `closet/compliance/IN_APP_PRIVACY_TEXT.md`,
+/// naming her height, measurements and weight, which may go when they help with a request. Her
+/// face never goes. The version they belong to is `StylistConsent.currentVersion`; changing what
+/// they promise needs a new version.
 nonisolated enum StylistConsentText {
     static var title: String {
         String(
@@ -21,13 +22,13 @@ nonisolated enum StylistConsentText {
     static var whatsSent: String {
         String(
             localized:
-                "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, and your recent looks so ideas don’t repeat.",
+                "What’s sent, when you tap Style me, swap a piece or ask the stylist: short descriptions of the pieces involved (kind, colour, fabric, the names you gave them), the occasion, the weather (like “cool and rainy”), any note you type, your recent looks so ideas don’t repeat, and your height, measurements and weight when they help with the request, like your inseam for trousers.",
             bundle: .module, comment: "Stylist consent: what is sent")
     }
 
     static var neverSent: String {
         String(
-            localized: "Never sent: your photos, your name, your measurements or weight, your location.",
+            localized: "Never sent: your photos, your face, your name, your location.",
             bundle: .module, comment: "Stylist consent: what is never sent")
     }
 
@@ -76,7 +77,7 @@ nonisolated enum StylistConsentText {
     static var switchDetail: String {
         String(
             localized:
-                "Piece descriptions, the occasion and the weather go to Anthropic when you ask. Never your photos, name, measurements or location.",
+                "Piece descriptions, the occasion, the weather and, when they help, your measurements and weight go to Anthropic when you ask. Never your photos, face, name or location.",
             bundle: .module, comment: "Privacy and terms: under the stylist switch")
     }
 

@@ -30,9 +30,9 @@ extension TryOnPicture {
     }
 
     /// Every stored file the picture points to: its image and, for a real picture (33a), the
-    /// faceless photo and garment photos that were sent.
+    /// faceless photo and garment photos that were sent, and the faceless dressed copy (F1).
     public var storedImages: [PhotoReference] {
-        ([storedImage].compactMap { $0 } + (sent?.imageReferences ?? [])).filter {
+        ([storedImage, faceless].compactMap { $0 } + (sent?.imageReferences ?? [])).filter {
             if case .stored = $0 { true } else { false }
         }
     }

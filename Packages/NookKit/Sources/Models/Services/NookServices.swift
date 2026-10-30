@@ -76,6 +76,10 @@ public struct NookServices: Sendable {
     public var supportLinks = SupportLinks()
     /// 27a: her yes to the cloud stylist's provider. Erased by Delete my data.
     public var stylistConsent: any StylistConsentStore = InMemoryStylistConsentStore()
+    /// F1 (D24): "Help improve the app", off by default. Erased by Delete my data.
+    public var analytics: any AnalyticsService = OptInAnalytics(
+        settings: InMemoryAnalyticsSettingsStore(),
+        context: AnalyticsContext(appVersion: "0", systemVersion: "0", deviceClass: .iPhone))
     /// 27a: true when `stylist` is the cloud stylist. Then Style Me checks her history first
     /// (FR-58) and Privacy and terms shows the stylist's consent switch. Stage A's mock stylist
     /// sends nothing, so neither applies.
@@ -133,7 +137,7 @@ public struct NookServices: Sendable {
                     lookDrafts: lookDrafts, feedbackDrafts: feedbackDrafts, pictures: pictures, tours: tours,
                     onboarding: onboarding, weatherSettings: weatherSettings, stylistConsent: stylistConsent,
                     aiJobs: AIJobsEraser(aiJobs), stylistThreads: stylistThreads, tryOnConsent: tryOnConsent,
-                    diagnostics: diagnostics)
+                    diagnostics: diagnostics, analytics: analytics)
         }
         set { customDeletion = newValue }
     }

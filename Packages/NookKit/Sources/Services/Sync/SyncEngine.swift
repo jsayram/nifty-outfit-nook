@@ -14,8 +14,8 @@ public enum SyncZone: String, CaseIterable, Codable, Hashable, Sendable, Compara
     /// Pieces, looks, suitcases, try-on pictures, the profile without body data, drafts, app
     /// state, Ask stylist conversations and their images.
     case closet = "Closet"
-    /// Body data: measurements, weight, fit notes, pieces that fit well, the try-on photo. Only
-    /// written when decision 2 allows (`ICloudSyncStatus.includesBodyData`).
+    /// Body data: measurements, weight, fit notes, pieces that fit well, the try-on photo. Written
+    /// since decision 2 was answered (D11, `SyncSchema.syncsBodyData`).
     case me = "Me"
     /// One content-free `SyncGeneration` record, so other devices know why a zone was deleted.
     case control = "Control"

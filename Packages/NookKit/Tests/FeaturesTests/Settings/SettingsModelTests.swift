@@ -296,6 +296,31 @@ struct DeleteAccountModelTests {
         #expect(DeleteDataText.screenTitle(.account) == "Delete my account")
     }
 
+    /// F1 (D18): her unused picture credits are given up with the account, so the screen says how
+    /// many, as the server last said. None says nothing; unknown says it in general.
+    @Test func theUnusedCreditCountIsShownBeforeDeletingTheAccount() async {
+        final class Credits: PaidActionService {
+            func usage() async throws(CloudLimitProblem) -> CloudUsage {
+                CloudUsage(allowances: [], paused: [], credits: 7)
+            }
+            func run(_ request: PaidActionRequest, idempotencyKey: String) async throws(CloudLimitProblem)
+                -> PaidActionReceipt
+            { throw .account(.signedOut) }
+        }
+        var withCredits = services(DeletionReport(scope: .account, results: []))
+        withCredits.paid = Credits()
+        let model = DeleteDataModel(scope: .account)
+        await model.load(from: withCredits)
+        #expect(model.unusedCredits == 7)
+        #expect(DeleteDataText.creditsNote(7)?.hasPrefix("Unused picture credits: 7.") == true)
+        #expect(DeleteDataText.creditsNote(0) == nil)
+        #expect(DeleteDataText.creditsNote(nil)?.contains("Any unused picture credits") == true)
+        // Delete my data keeps the account, so it never asks.
+        let local = DeleteDataModel(scope: .thisDevice)
+        await local.load(from: withCredits)
+        #expect(local.unusedCredits == nil)
+    }
+
     @Test func aFinishedDeletionStartsTheAppFresh() async {
         let report = DeletionReport(
             scope: .account,

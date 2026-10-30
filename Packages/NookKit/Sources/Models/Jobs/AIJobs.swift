@@ -426,12 +426,14 @@ public final class AIJobs {
                 } catch {
                     return Task.isCancelled ? .stopped : .failed(.notCompleted)
                 }
+                // F1 (D12): the faceless copy, for a report. Without it the picture still counts.
+                let faceless = await pipeline.keepFaceless(dressed)
                 // Release: the picture's ID is the server's action ID when it's known, so Report a
                 // problem can name the action that made it (`AIReportTarget`).
                 let actionID = self.job(job.id)?.actionID
                 let picture = TryOnPicture(
                     id: actionID.map { TryOnPicture.ID($0) } ?? .random(), of: request.look, image: .generated(image),
-                    createdAt: now(), sent: request.upload.sent)
+                    createdAt: now(), sent: request.upload.sent, faceless: faceless)
                 return .done(.tryOn(picture))
             }
         } catch {
@@ -526,6 +528,22 @@ public final class AIJobs {
             $0.result = result ?? $0.result
             $0.failure = failure
             $0.finishedAt = now()
+        }
+        // F1 (D24): only the kind of job and whether it worked, and only if she turned it on.
+        if let services, let job = job(id) {
+            let event: AnalyticsEvent =
+                switch job.request {
+                case .styling: .styleFinished
+                case .ask: .askFinished
+                case .tryOn: .tryOnFinished
+                }
+            let outcome: AnalyticsOutcome =
+                switch state {
+                case .done: .succeeded
+                case .cancelled: .cancelled
+                default: .failed
+                }
+            services.analytics.record(event, outcome)
         }
         finishWaiters(id)
     }

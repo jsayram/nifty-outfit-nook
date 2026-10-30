@@ -25,9 +25,14 @@ public struct TryOnPicture: Identifiable, Hashable, Sendable, Codable {
     /// 33a: exactly what left the phone to make it (the faceless photo and the garment photos), for
     /// "See what was sent". `nil` for simulated pictures and samples, which sent nothing.
     public var sent: TryOnSent?
+    /// F1 (D12): the dressed picture as the image service sent it back, before her head went back
+    /// on, so a report with Include the picture never carries her face. `nil` for simulated
+    /// pictures, samples and real ones made before F1, which then offer no picture to include.
+    public var faceless: PhotoReference?
 
     public init(
-        id: ID, lookID: Look.ID, captured: CapturedLook, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil
+        id: ID, lookID: Look.ID, captured: CapturedLook, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil,
+        faceless: PhotoReference? = nil
     ) {
         self.id = id
         self.lookID = lookID
@@ -35,11 +40,17 @@ public struct TryOnPicture: Identifiable, Hashable, Sendable, Codable {
         self.image = image
         self.createdAt = createdAt
         self.sent = sent
+        self.faceless = faceless
     }
 
     /// A picture of `look` as it is now.
-    public init(id: ID, of look: Look, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil) {
-        self.init(id: id, lookID: look.id, captured: CapturedLook(look), image: image, createdAt: createdAt, sent: sent)
+    public init(
+        id: ID, of look: Look, image: TryOnImage, createdAt: Date, sent: TryOnSent? = nil,
+        faceless: PhotoReference? = nil
+    ) {
+        self.init(
+            id: id, lookID: look.id, captured: CapturedLook(look), image: image, createdAt: createdAt, sent: sent,
+            faceless: faceless)
     }
 
     /// 33a: a real picture, made from her photo by the image service. Simulated pictures and the

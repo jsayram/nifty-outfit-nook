@@ -74,6 +74,18 @@ struct AIReportModelTests {
         #expect(!AIReportModel(target: look, canHide: true).offersPicture)
     }
 
+    @Test func aPictureOffersOnlyItsFacelessCopyNeverTheOneWithHerFace() {
+        // F1 (D12): the finished picture has her face; the report includes the copy without it.
+        let look = Look(id: "l-1", pieces: [], createdAt: TestTime.now)
+        var picture = TryOnPicture(
+            id: "t-1", of: look, image: .generated(.stored("finished")), createdAt: TestTime.now,
+            faceless: .stored("faceless"))
+        #expect(AIReportTarget.picture(picture).picture == .stored("faceless"))
+        picture.faceless = nil
+        #expect(AIReportTarget.picture(picture).picture == nil)
+        #expect(!AIReportModel(target: .picture(picture), canHide: true).offersPicture)
+    }
+
     @Test func aFailureKeepsTheReportAndSendingAgainUsesTheSameSubmission() async throws {
         let feedback = ScriptedFeedbackService(results: [.failure(.offline), .success(nil)])
         let model = AIReportModel(target: pictureTarget, canHide: true)

@@ -3,7 +3,10 @@ import Models
 import SwiftUI
 
 /// 33a: the words for try-on's own consent, from closet `compliance/IN_APP_PRIVACY_TEXT.md`
-/// ("Phase 33a to 33c"). The bold sentence is Jose's approved D1 wording, word for word.
+/// ("Phase 33a to 33c"). The bold sentence is Jose's approved D1 wording, word for word, followed
+/// since F1 by what our server does on the way (D13, 29 October 2026: the 30 minutes belong in the
+/// approved line itself). Still version `tryon-1`: the 30 minutes were already in the consent, the
+/// recipient is the same, and nothing real has been sent under it.
 nonisolated enum TryOnConsentText {
     static var title: String {
         String(localized: "How try-on pictures work", bundle: .module, comment: "Try-on consent: title")
@@ -16,18 +19,18 @@ nonisolated enum TryOnConsentText {
             bundle: .module, comment: "Try-on consent")
     }
 
-    /// The approved D1 sentence (THREAT_MODEL.md D1), word for word.
+    /// The approved D1 sentence (THREAT_MODEL.md D1), word for word, then the server's 30 minutes (D13).
     static var whatGoes: String {
         String(
             localized:
-                "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models.",
+                "A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them.",
             bundle: .module, comment: "Try-on consent: the approved disclosure, word for word")
     }
 
     static var comesBack: String {
         String(
             localized:
-                "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on). Our server keeps the photos, encrypted, for up to 30 minutes while your picture is made, then deletes them.",
+                "They send back the dressed picture, and your iPhone puts your face back in. The finished picture is saved only on your iPhone (and your iCloud if sync is on).",
             bundle: .module, comment: "Try-on consent")
     }
 
@@ -62,11 +65,12 @@ nonisolated enum TryOnConsentText {
         String(localized: "Not now", bundle: .module, comment: "Try-on consent: decline")
     }
 
-    /// The line under every real picture and on "See what was sent".
+    /// The line under every real picture, under the walkthrough and on "See what was sent", with the
+    /// server's 30 minutes in it (D13).
     static var underPicture: String {
         String(
             localized:
-                "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models.",
+                "Your face never leaves your phone. A photo of your body, without your face and on a plain backdrop, and your clothing photos go to Black Forest Labs, who may keep them and use them to improve their models. On the way, our server holds them, encrypted, for up to 30 minutes while your picture is made, then deletes them.",
             bundle: .module, comment: "Under every try-on picture (33a)")
     }
 

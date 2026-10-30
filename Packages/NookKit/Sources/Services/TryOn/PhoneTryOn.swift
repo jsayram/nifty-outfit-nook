@@ -223,6 +223,14 @@ public struct PhoneTryOn: TryOnPipeline {
         return .stored(EntityID(id))
     }
 
+    public func keepFaceless(_ dressed: Data) async -> PhotoReference? {
+        // Drawn again from its pixels, like every photo the app keeps, so nothing but the image stays.
+        guard let picture = TryOnBitmap.decode(dressed, maxPixelSize: 4 * Self.workingSize),
+            let jpeg = picture.jpeg(quality: 0.9), let id = try? files.add(jpeg)
+        else { return nil }
+        return .stored(EntityID(id))
+    }
+
     public func discard(_ upload: TryOnUpload, keepingSent: Bool) async {
         var references = upload.work?.imageReferences ?? []
         if !keepingSent { references += upload.sent.imageReferences }

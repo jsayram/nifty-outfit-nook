@@ -33,6 +33,9 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
     private var tooLarge: Set<String> = []
     /// A pending deletion waits because a different account is signed in.
     private var deletionWaitsForAccount = false
+    /// Decision 2 for this build: `SyncSchema.syncsBodyData`, the one-line fallback. Tests set it
+    /// through `setIncludesBodyData` to check both ways.
+    private var syncsBodyData = SyncSchema.syncsBodyData
     private let deviceMarker: any SyncDeviceMarker
 
     /// - Parameters:
@@ -76,7 +79,10 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
             updateLedger { $0.mode = .off }
             return
         case .on, .paused:
-            break
+            // Decision 2 follows the build: the fallback switch can turn the `Me` zone off.
+            if book.ledger().includesBodyData != syncsBodyData {
+                updateLedger { $0.includesBodyData = syncsBodyData }
+            }
         }
         _ = engineNow()
         await checkAccount()
@@ -103,7 +109,8 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
             case .deleting: status.state = .deletingCopy(waitingForAccount: false)
             }
         }
-        status.includesBodyData = ledger.includesBodyData
+        // Off, it says what turning it on would do (decision 2 follows the build).
+        status.includesBodyData = ledger.mode == .off ? syncsBodyData : ledger.includesBodyData
         status.lastConfirmed = ledger.lastConfirmedAt
         status.notice = ledger.notice
         status.conflictsToReview = book.conflicts().count
@@ -141,6 +148,7 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
         }
         updateLedger {
             $0.mode = .on
+            $0.includesBodyData = syncsBodyData
             $0.closetAccount = account
             $0.everOn = true
             $0.notice = nil
@@ -613,7 +621,7 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
         }
     }
 
-    /// The body record (`Me` zone, only when decision 2 allows): her measurements and fit go
+    /// The body record (`Me` zone, while decision 2 allows): her measurements and fit go
     /// back into the profile; the rest of the profile stays as it is.
     private func applyBody(_ record: SyncRecord, existing: SyncRecordMeta?) -> SyncRecordMeta? {
         guard let payload = record.payload,
@@ -774,9 +782,10 @@ public actor ICloudSync: ICloudSyncService, SyncEngineDelegate {
         updateLedger { $0.deviceMarker = marker }
     }
 
-    /// Decision 2: whether body data syncs in the `Me` zone. Off until App Review 5.1.3(ii) is
-    /// answered; there's no switch on screen yet, so only tests turn it on.
+    /// Decision 2: whether body data syncs in the `Me` zone. On since D11 (`SyncSchema.syncsBodyData`);
+    /// there's no switch on screen, so only tests change it, to check the fallback.
     func setIncludesBodyData(_ includes: Bool) async {
+        syncsBodyData = includes
         updateLedger { $0.includesBodyData = includes }
         if includes { await engine?.add(zoneSaves()) }
     }
