@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T22:49:58.468904+00:00",
+  "title": "Design System: Nifty Outfit Nook website",
+  "extensions": {
+    "shadows": [
+      {
+        "name": "capture",
+        "value": "0 24px 58px rgba(57,38,50,.14)",
+        "purpose": "App capture frame."
+      },
+      {
+        "name": "enlarge-hint",
+        "value": "0 4px 14px rgba(0,0,0,.14)",
+        "purpose": "Full-capture affordance."
+      },
+      {
+        "name": "current-milestone",
+        "value": "0 18px 44px rgba(74,42,63,.1)",
+        "purpose": "Current timeline card."
+      },
+      {
+        "name": "dialog",
+        "value": "0 30px 90px rgba(0,0,0,.35)",
+        "purpose": "Full-capture modal."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.23,1,.32,1)",
+        "purpose": "Existing entrance and press feedback."
+      },
+      {
+        "name": "press",
+        "value": "160ms",
+        "purpose": "Primary control feedback."
+      },
+      {
+        "name": "reveal",
+        "value": "700ms",
+        "purpose": "Existing optional content entrance."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "middle",
+        "value": "900px"
+      },
+      {
+        "name": "mobile",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled pill for the primary website action.",
+      "html": "<button class=\"ds-primary\">Explore the app <span aria-hidden=\"true\">\u2192</span></button>",
+      "css": ".ds-primary{font-family:-apple-system,BlinkMacSystemFont,\"Helvetica Neue\",Arial,sans-serif;display:inline-flex;align-items:center;gap:28px;min-height:46px;padding:12px 23px;border:0;border-radius:999px;background:var(--accent,#72385f);color:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 160ms ease}.ds-primary:hover{background:#5c294c;transform:translateY(-2px)}.ds-primary:active{transform:scale(.97)}.ds-primary:focus-visible{outline:3px solid var(--accent,#72385f);outline-offset:5px;}@media(prefers-color-scheme:dark){.ds-primary{background:#c08caf;color:#20161d}.ds-primary:hover{background:#dbafce}}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover,.ds-primary:active{transform:none}}"
+    },
+    {
+      "name": "Header navigation",
+      "kind": "nav",
+      "description": "Subdued website section links.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Website sections\"><a href=\"#preview\">App preview</a><a href=\"#progress\">Progress</a></nav>",
+      "css": ".ds-nav{font-family:-apple-system,BlinkMacSystemFont,\"Helvetica Neue\",Arial,sans-serif;display:flex;gap:32px;font-size:13px;color:var(--secondary,#626267)}.ds-nav a{color:inherit;text-decoration:none}.ds-nav a:hover{color:var(--accent,#72385f)}.ds-nav a:focus-visible{outline:3px solid var(--accent,#72385f);outline-offset:5px;border-radius:8px}"
+    },
+    {
+      "name": "Timeline status",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "Noninteractive development status text.",
+      "html": "<span class=\"ds-status\">In development</span>",
+      "css": ".ds-status{font-family:-apple-system,BlinkMacSystemFont,\"Helvetica Neue\",Arial,sans-serif;display:inline-block;padding:7px 10px;border-radius:999px;background:var(--surface,#fff);color:var(--accent,#72385f);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}"
+    },
+    {
+      "name": "Timeline card",
+      "kind": "card",
+      "refersTo": "timeline-card",
+      "description": "Dated development update with a separate phase and status.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-step\"><time datetime=\"2026-10-21\">October 21, 2026</time><span>Current stage</span></p><h3>Development preview</h3><p class=\"ds-copy\">Sample content from the development build.</p><span class=\"ds-chip\">In development</span></article>",
+      "css": ".ds-card{font-family:-apple-system,BlinkMacSystemFont,\"Helvetica Neue\",Arial,sans-serif;padding:26px 28px 28px;border-radius:26px;background:var(--bg,#f5f5f7);color:var(--ink,#1d1d1f)}.ds-step{margin:0 0 10px;color:var(--accent,#72385f);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.ds-step time{display:block;font-size:12px;letter-spacing:.02em;text-transform:none;font-variant-numeric:tabular-nums}.ds-step span{display:block;margin-top:6px;font-size:10px}.ds-card h3{margin:0;font-size:26px;line-height:1.12;letter-spacing:-.04em}.ds-copy{margin:14px 0 0;font-size:16px;line-height:1.58;color:var(--secondary,#626267)}.ds-chip{display:inline-block;margin-top:22px;padding:7px 10px;border-radius:999px;background:var(--surface,#fff);color:var(--accent,#72385f);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}"
+    },
+    {
+      "name": "Capture close control",
+      "kind": "button",
+      "refersTo": "capture-close",
+      "description": "Native-dialog close form control.",
+      "html": "<form method=\"dialog\"><button class=\"ds-close\" aria-label=\"Close screenshot\">Close <span aria-hidden=\"true\">\u00d7</span></button></form>",
+      "css": ".ds-close{font-family:-apple-system,BlinkMacSystemFont,\"Helvetica Neue\",Arial,sans-serif;display:flex;align-items:center;gap:12px;min-height:44px;padding:6px 12px;border:0;border-radius:10px;background:var(--surface,#fff);color:var(--ink,#1d1d1f);cursor:pointer}.ds-close span{font-size:24px}.ds-close:focus-visible{outline:3px solid var(--accent,#72385f);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "overview": "The existing identity is Apple-inspired: system typography, one plum accent, generous space, soft neutral surfaces, and rounded containers. This document captures the implemented website; it does not establish a new product identity or a new creative metaphor. The dark appearance follows the operating system.\n\nThe scoped expansion uses real app captures in a feature gallery and the existing dated, connected-dot timeline. Captions distinguish sample data, simulated services, and development previews. These are presentation constraints; milestone copy is not a reusable source of product capability claims.",
+    "keyCharacteristics": [
+      "System typography with compact headline tracking.",
+      "Plum accents over quiet light or dark surfaces.",
+      "Rounded, captioned captures with a full-image inspection path.",
+      "Connected dates, status text, and distinguishable timeline dots.",
+      "Native controls and operating-system accessibility preferences."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Extend the existing plum roles when adding previews; do not introduce a second feature-specific accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Full Capture Rule",
+        "body": "Every cropped capture must retain an accessible route to its complete image.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** reuse the system stack, plum roles, soft surfaces, and operating-system themes.",
+      "**Do** keep sample, simulated, and development context beside captures.",
+      "**Do** retain captions, alt text, keyboard focus, direct links, and focus restoration.",
+      "**Do** preserve source image proportions in the full viewer."
+    ],
+    "donts": [
+      "**Don't** present a sample or simulated capture as evidence of a live service.",
+      "**Don't** encode current product status as a permanent visual-system fact.",
+      "**Don't** remove the complete-image route when cropping a preview.",
+      "**Don't** hide content behind required animation or JavaScript."
+    ]
+  }
+}
