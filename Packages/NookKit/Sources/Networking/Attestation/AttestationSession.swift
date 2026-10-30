@@ -31,8 +31,9 @@ public actor AttestationSession: RequestSigner {
         } catch {
             // The stored key can't sign. After a restore to another device that's `invalidKey`; after
             // the app was deleted and installed again, the key ID survives in the Keychain but the
-            // key is gone, and iOS 27 answered with another error (S2, on Jose's iPhone). Either
-            // way, forget it: the caller registers a new key and tries once more, once.
+            // key is gone, and iOS 27 answers `invalidInput` (com.apple.devicecheck.error 2; S2,
+            // iPhone 14 Pro). Either way, forget it: the caller registers a new key and tries once
+            // more, once.
             store.clear()
             throw .attestationRequired
         }
