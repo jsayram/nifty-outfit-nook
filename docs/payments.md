@@ -30,7 +30,7 @@ Spec: PRD §14 (one monthly auto-renewable subscription, a free first month for 
 | Subscription group | Styling | 30a (PLACEHOLDER name, Jose can rename) |
 | Product ID | `com.jsayram.niftyoutfitnook.styling.monthly` | 30a. Must match App Store Connect exactly. Can't be reused once created |
 | Period | 1 month, auto-renewing | PRD §14 |
-| Price | US$9.99 a month | **PLACEHOLDER**: PRD §14 calls US$9.99 "a candidate, not a final price" |
+| Price | US$9.99 a month | **PLACEHOLDER**: PRD §14 calls US$9.99 "a candidate, not a final price". Set in App Store Connect in S4 (30 October 2026) for the sandbox; Jose re-evaluates it before launch, once real try-on costs are measured, together with Lily's view and an annual plan. Set the final price before any real customer subscribes (a later increase may need their consent) |
 | Introductory offer | Free trial, 1 month, new subscribers only | PRD §14.1 |
 | Allowances shown | Style Me 10 a day, swaps and Ask stylist 40 a day, try-on pictures 30 a month | **PLACEHOLDER**: 24b's development values (decision D12). The server enforces its own numbers |
 | Family Sharing | Off | **PLACEHOLDER**, a question for Jose |
