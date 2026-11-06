@@ -38,6 +38,15 @@ final class StylingAccessModel {
         /// 30b: a pack waits for approval (Ask to Buy).
         case packPending
         case problem(SubscriptionProblem)
+
+        /// Whether this says something about her subscription as it stood, so a change to the
+        /// subscription leaves it out of date.
+        var isAboutTheStatus: Bool {
+            switch self {
+            case .started, .restored, .nothingToRestore, .redeemed: true
+            case .pending, .creditsAdded, .creditsAwaiting, .packPending, .problem: false
+            }
+        }
     }
 
     private(set) var status: SubscriptionStatus
@@ -122,8 +131,8 @@ final class StylingAccessModel {
             return
         }
         let subscriptions = services.subscriptions
-        status = await subscriptions.cachedStatus()
-        status = await subscriptions.refresh()
+        take(await subscriptions.cachedStatus())
+        take(await subscriptions.refresh())
         groupID = await subscriptions.subscriptionGroupID()
         do {
             offer = try await subscriptions.offer()
@@ -153,7 +162,7 @@ final class StylingAccessModel {
         for await update in await services.subscriptions.statusUpdates() {
             let hadAccess = hasAccess
             let wasComplimentary = isComplimentary
-            status = update
+            take(update)
             if awaitingRedemption, !wasComplimentary, isComplimentary {
                 awaitingRedemption = false
                 message = .redeemed
@@ -161,6 +170,15 @@ final class StylingAccessModel {
                 message = .started
             }
         }
+    }
+
+    /// Takes a status from StoreKit. If it really changed, "Your subscription is restored." and the
+    /// like no longer describe it, so they go (S4 test 8). A tap still running sets its own message.
+    private func take(_ new: SubscriptionStatus) {
+        var unchanged = new
+        unchanged.checkedAt = status.checkedAt
+        if unchanged != status, busy == .none, message?.isAboutTheStatus == true { message = nil }
+        status = new
     }
 
     /// 30b: follows her balance while the screen is open (a pack credited in the background).

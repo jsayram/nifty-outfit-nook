@@ -198,6 +198,60 @@ struct StylingAccessModelTests {
         #expect(!device.subscriptionMayRenew)
     }
 
+    /// S4 test 8: "Your subscription is restored." doesn't outlive the cancel that follows it.
+    @Test func aConfirmationGoesWhenTheSubscriptionChanges() async {
+        let store = ScriptedSubscriptionService(status: .none(at: TestTime.now), restore: .success(trial))
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(model.message == .restored)
+        let following = Task { await model.follow(services) }
+        defer { following.cancel() }
+        // The same status read again, a moment later, leaves it.
+        var readAgain = trial
+        readAgain.checkedAt = TestTime.day(1)
+        for _ in 0..<50 where model.status != readAgain {
+            store.update(readAgain)
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.message == .restored)
+        var cancelled = trial
+        cancelled.willAutoRenew = false
+        for _ in 0..<50 where model.message != nil {
+            store.update(cancelled)
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.message == nil)
+        #expect(!model.status.willAutoRenew)
+    }
+
+    /// Back from Manage subscription the status is read again, and that clears it too.
+    @Test func aConfirmationGoesWhenAReloadFindsAChange() async {
+        let store = ScriptedSubscriptionService(status: .none(at: TestTime.now), restore: .success(trial))
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        var cancelled = trial
+        cancelled.willAutoRenew = false
+        store.update(cancelled)
+        await model.load(from: services)
+        #expect(model.message == nil)
+    }
+
+    /// A problem isn't about the status, so it stays until she taps something.
+    @Test func aProblemStaysWhenTheSubscriptionChanges() async {
+        let store = notSubscribed()
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        model.message = .problem(.unavailable)
+        store.update(trial)
+        await model.load(from: services)
+        #expect(model.message == .problem(.unavailable))
+    }
+
     // MARK: 30b: the complimentary unlock and picture credits
 
     @Test func redeemingACodeTurnsOnComplimentaryAccess() async {
