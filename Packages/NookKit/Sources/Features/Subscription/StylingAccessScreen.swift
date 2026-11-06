@@ -3,6 +3,10 @@ import Models
 import StoreKit
 import SwiftUI
 
+#if DEBUG
+    import os
+#endif
+
 /// Styling access (Phase 30a): pushed from Profile, or opened as a sheet where a feature needs
 /// it (try-on, once its pictures cost something). See `StylingAccessPage`.
 struct StylingAccessScreen: View {
@@ -115,6 +119,7 @@ private struct OfferCodeSheet: ViewModifier {
     /// decline). Debug builds launched with `-refund-lab` only: the app has no refund button.
     private struct SandboxRefundMenu: ViewModifier {
         private static let isOn = ProcessInfo.processInfo.arguments.contains("-refund-lab")
+        private static let log = Logger(subsystem: "com.jsayram.niftyoutfitnook", category: "refund-lab")
         @State private var transactionID: UInt64?
         @State private var isPresented = false
 
@@ -140,9 +145,22 @@ private struct OfferCodeSheet: ViewModifier {
                             .accessibilityIdentifier("access.refundLab")
                         }
                     }
-                    .refundRequestSheet(for: transactionID ?? 0, isPresented: $isPresented)
+                    .refundRequestSheet(for: transactionID ?? 0, isPresented: $isPresented) { result in
+                        Self.log.notice("Refund sheet: \(Self.describe(result), privacy: .public)")
+                    }
             } else {
                 content
+            }
+        }
+
+        /// What Apple's sheet answered, for Console. "userCancelled" and "success" are the only
+        /// statuses; neither says whether the refund was approved (that comes as a notification).
+        nonisolated private static func describe(
+            _ result: Result<StoreKit.Transaction.RefundRequestStatus, StoreKit.Transaction.RefundRequestError>
+        ) -> String {
+            switch result {
+            case .success(let status): "\(status)"
+            case .failure(let error): "failed, \(error)"
             }
         }
 
