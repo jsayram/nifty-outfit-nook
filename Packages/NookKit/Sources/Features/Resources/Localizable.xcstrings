@@ -999,6 +999,9 @@
     "Include the picture" : {
       "comment" : "Report sheet: switch to send the picture"
     },
+    "It asks first" : {
+      "comment" : "Onboarding privacy: row title"
+    },
     "It checks that no face is left. If one is, nothing is sent." : {
       "comment" : "Privacy walkthrough, beat 4 (33c)"
     },
@@ -1094,6 +1097,9 @@
     },
     "Online features are for adults. Sign in with Apple works once this is on." : {
       "comment" : "Sign-in sheet: under the age confirmation switch"
+    },
+    "Online features send what they need" : {
+      "comment" : "Onboarding privacy: row title"
     },
     "Only needed for cloud styling, try-on pictures and styling access." : {
       "comment" : "Profile: under Sign in, signed out"
@@ -1394,6 +1400,12 @@
     },
     "The reason under it" : {
       "comment" : "Report sheet: subject"
+    },
+    "The stylist gets short descriptions of your pieces and your request, and your measurements when they help. Try-on gets a photo with your face hidden, and photos of the pieces. Sign-in and purchases go through Apple and our server." : {
+      "comment" : "Onboarding privacy: what leaves the phone, only when she uses these features"
+    },
+    "The stylist and try-on each say exactly what they send before anything goes. The camera, your location and notifications are asked for only when you use them." : {
+      "comment" : "Onboarding privacy: consent and permissions come when a feature is used"
     },
     "The stylist works on our server. Signing in keeps your requests and your allowance yours, and no one else’s." : {
       "comment" : "Sign-in sheet: why, for Style Me"
@@ -4241,9 +4253,6 @@
     "Inside your suitcase" : {
       "comment" : "App tours: a screen"
     },
-    "It all stays on this iPhone" : {
-      "comment" : "Onboarding privacy: row title"
-    },
     "It already has that name." : {
       "comment" : "Add a piece: the other name is the same as its name or another of its names",
       "localizations" : {
@@ -4628,9 +4637,6 @@
     },
     "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline." : {
       "comment" : "Help: What needs a connection, the quieter line"
-    },
-    "Later, it asks first" : {
-      "comment" : "Onboarding privacy: row title"
     },
     "Later, sent only if you allow it" : {
       "comment" : "Privacy and terms: section header"
@@ -5698,9 +5704,6 @@
           }
         }
       }
-    },
-    "Nothing is sent" : {
-      "comment" : "Onboarding privacy: row title"
     },
     "Nothing packed yet" : {
       "comment" : "Packing sheet: nothing packed"
@@ -8458,9 +8461,6 @@
     "This test build can start with sample clothes, or with nothing." : {
       "comment" : "Onboarding: under the starting closet title"
     },
-    "This test build sends nothing. It asks for the camera only when you take a photo, and never for your location or notifications." : {
-      "comment" : "Onboarding privacy: nothing leaves the phone; the camera is asked for when used (Phase 22a)"
-    },
     "This test build uses an example photo. It doesn’t ask for your camera or your photos, and nothing is uploaded." : {
       "comment" : "Try-on photo sheet: Stage A note"
     },
@@ -9044,9 +9044,6 @@
         }
       }
     },
-    "When styling uses the internet, the app will say exactly what it sends and ask you before it sends anything." : {
-      "comment" : "Onboarding privacy: consent later"
-    },
     "When you see a look you like on Today, tap Save look. Looks you save for %@ from %@ show up here." : {
       "comment" : "Saved tab empty state: the occasion and the source"
     },
@@ -9481,6 +9478,9 @@
         }
       }
     },
+    "Your closet lives on this iPhone" : {
+      "comment" : "Onboarding privacy: row title"
+    },
     "Your closet needs more space to update" : {
       "comment" : "Recovery screen title: not enough free space for the update's safety copy",
       "localizations" : {
@@ -9737,7 +9737,7 @@
     "Your pieces to swap in" : {
       "comment" : "VoiceOver name of Swap's options, in its tour"
     },
-    "Your pieces, looks, name and fit are kept here. There’s no account to make." : {
+    "Your pieces, looks, name and fit are kept here. You don’t need an account for your closet or Quick ideas." : {
       "comment" : "Onboarding privacy: where things are kept"
     },
     "Your pieces, their pictures and details" : {

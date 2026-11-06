@@ -119,36 +119,39 @@ nonisolated enum OnboardingText {
     }
 
     static var staysTitle: String {
-        String(localized: "It all stays on this iPhone", bundle: .module, comment: "Onboarding privacy: row title")
+        String(localized: "Your closet lives on this iPhone", bundle: .module, comment: "Onboarding privacy: row title")
     }
 
     static var staysDetail: String {
         String(
-            localized: "Your pieces, looks, name and fit are kept here. There’s no account to make.",
+            localized:
+                "Your pieces, looks, name and fit are kept here. You don’t need an account for your closet or Quick ideas.",
             bundle: .module, comment: "Onboarding privacy: where things are kept")
     }
 
-    static var nothingSentTitle: String {
-        String(localized: "Nothing is sent", bundle: .module, comment: "Onboarding privacy: row title")
+    static var onlineTitle: String {
+        String(
+            localized: "Online features send what they need", bundle: .module,
+            comment: "Onboarding privacy: row title")
     }
 
-    static var nothingSentDetail: String {
+    static var onlineDetail: String {
         String(
             localized:
-                "This test build sends nothing. It asks for the camera only when you take a photo, and never for your location or notifications.",
+                "The stylist gets short descriptions of your pieces and your request, and your measurements when they help. Try-on gets a photo with your face hidden, and photos of the pieces. Sign-in and purchases go through Apple and our server.",
             bundle: .module,
-            comment: "Onboarding privacy: nothing leaves the phone; the camera is asked for when used (Phase 22a)")
+            comment: "Onboarding privacy: what leaves the phone, only when she uses these features")
     }
 
     static var asksFirstTitle: String {
-        String(localized: "Later, it asks first", bundle: .module, comment: "Onboarding privacy: row title")
+        String(localized: "It asks first", bundle: .module, comment: "Onboarding privacy: row title")
     }
 
     static var asksFirstDetail: String {
         String(
             localized:
-                "When styling uses the internet, the app will say exactly what it sends and ask you before it sends anything.",
-            bundle: .module, comment: "Onboarding privacy: consent later")
+                "The stylist and try-on each say exactly what they send before anything goes. The camera, your location and notifications are asked for only when you use them.",
+            bundle: .module, comment: "Onboarding privacy: consent and permissions come when a feature is used")
     }
 
     /// With the sample closet on offer (debug builds): the sample comes back as it ships, and an
