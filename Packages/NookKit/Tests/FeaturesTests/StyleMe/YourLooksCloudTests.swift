@@ -39,6 +39,22 @@ struct YourLooksCloudTests {
         return .complete(result)
     }
 
+    /// S4 test 10: Not now on Styling access sends nothing and uses nothing. Access arriving does.
+    @Test func closingStylingAccessAsksAgainOnlyIfAccessArrived() async {
+        let stylist = ScriptedStylist()
+        let model = await styledLooks(services: cloudServices(stylist))
+        #expect(await stylist.calls == 1)
+        model.stylingAccessClosed(accessArrived: false)
+        await model.settle()
+        #expect(await stylist.calls == 1)
+        model.tryDifferentOutfit()
+        await model.settle()
+        #expect(await stylist.calls == 2)
+        model.stylingAccessClosed(accessArrived: true)
+        await model.settle()
+        #expect(await stylist.calls == 3)
+    }
+
     /// S4 test 3: the real stylist isn't called simulated while it works. Stage A's stand-in still is.
     @Test func onlyTheStandInIsCalledSimulated() async {
         let cloud = await styledLooks(services: cloudServices(ScriptedStylist()))

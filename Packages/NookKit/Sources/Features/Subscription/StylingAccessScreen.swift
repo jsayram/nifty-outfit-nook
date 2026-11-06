@@ -8,6 +8,8 @@ import SwiftUI
 struct StylingAccessScreen: View {
     /// True when it's a sheet: then it has its own "Not now" button.
     var isSheet = false
+    /// Styling access came through while this was open.
+    var onAccessArrived: () -> Void = {}
 
     @Environment(\.services) private var services
     @Environment(\.dismiss) private var dismiss
@@ -61,6 +63,9 @@ struct StylingAccessScreen: View {
         .task { await model.load(from: services) }
         .task { await model.follow(services) }
         .task { await model.followCredits(services) }
+        .onChange(of: model.accessArrived) { _, arrived in
+            if arrived { onAccessArrived() }
+        }
         // Back from Apple's sheet: she may have cancelled or changed how she pays.
         .onChange(of: showsManage) { _, isShown in
             if !isShown { Task { await model.load(from: services) } }

@@ -67,6 +67,10 @@ final class StylingAccessModel {
     /// 32b (L9): a build with no backend settings. Nothing is offered or sold, because a purchase
     /// could never be matched to an account.
     private(set) var cloudUnavailable = false
+    /// Whether styling access came through since the screen opened: bought, restored, redeemed, or
+    /// arrived from StoreKit. Your looks asks the stylist again only then, since closing the sheet
+    /// with Not now means no.
+    private(set) var accessArrived = false
     /// 30b: Apple's offer code sheet closed and the unlock may still be on its way.
     private var awaitingRedemption = false
     /// The clock. Tests and snapshots fix it.
@@ -165,6 +169,7 @@ final class StylingAccessModel {
             take(update)
             if awaitingRedemption, !wasComplimentary, isComplimentary {
                 awaitingRedemption = false
+                accessArrived = true
                 message = .redeemed
             } else if !hadAccess, hasAccess, busy == .none, message == .pending {
                 message = .started
@@ -178,7 +183,10 @@ final class StylingAccessModel {
         var unchanged = new
         unchanged.checkedAt = status.checkedAt
         if unchanged != status, busy == .none, message?.isAboutTheStatus == true { message = nil }
+        let hadAccess = hasAccess
         status = new
+        // The first load only learns what she already had.
+        if !isLoading, !hadAccess, hasAccess { accessArrived = true }
     }
 
     /// 30b: follows her balance while the screen is open (a pack credited in the background).
@@ -197,6 +205,7 @@ final class StylingAccessModel {
         status = await services.subscriptions.redeemedOfferCode()
         if !wasComplimentary, isComplimentary {
             awaitingRedemption = false
+            accessArrived = true
             message = .redeemed
         }
     }
@@ -237,6 +246,7 @@ final class StylingAccessModel {
         switch await services.subscriptions.purchase() {
         case .purchased(let status):
             self.status = status
+            accessArrived = true
             message = .started
         case .pending:
             message = .pending
@@ -254,7 +264,9 @@ final class StylingAccessModel {
         defer { busy = .none }
         do {
             status = try await services.subscriptions.restore()
-            message = status.hasStylingAccess(at: now()) ? .restored : .nothingToRestore
+            let restored = status.hasStylingAccess(at: now())
+            if restored { accessArrived = true }
+            message = restored ? .restored : .nothingToRestore
         } catch {
             message = .problem(error)
         }

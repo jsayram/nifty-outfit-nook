@@ -36,6 +36,8 @@ struct YourLooksScreen: View {
     @State private var showsConsent = false
     /// F1c: Styling access, when the server shows none for her account.
     @State private var showsStylingAccess = false
+    /// Styling access came through while that sheet was open.
+    @State private var accessArrived = false
     /// Release: Report a problem, open for a result.
     @State private var reporting: AIReportRoute?
     @Environment(\.signIn) private var signIn
@@ -84,11 +86,17 @@ struct YourLooksScreen: View {
                 },
                 notNow: { showsConsent = false })
         }
-        // F1c: after Styling access closes, the stylist is asked again; without access the
-        // server refuses again, and nothing is counted either way.
-        .sheet(isPresented: $showsStylingAccess, onDismiss: { model.retry() }) {
+        // F1c: if access came through while Styling access was open, the stylist is asked again.
+        // Not now is a no, so it stays as it was (S4 test 10).
+        .sheet(
+            isPresented: $showsStylingAccess,
+            onDismiss: {
+                model.stylingAccessClosed(accessArrived: accessArrived)
+                accessArrived = false
+            }
+        ) {
             NavigationStack {
-                StylingAccessScreen(isSheet: true)
+                StylingAccessScreen(isSheet: true, onAccessArrived: { accessArrived = true })
             }
             .signInGate()
         }

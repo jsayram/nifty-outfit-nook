@@ -214,6 +214,11 @@ final class YourLooksModel {
         style()
     }
 
+    /// F1c: Styling access closed. The stylist is asked again only if access came through.
+    func stylingAccessClosed(accessArrived: Bool) {
+        if accessArrived { retry() }
+    }
+
     /// Asks for a new base outfit (LR-05a.4): one more request with the same choices. The
     /// versions on screen stay until the new ones arrive, and come back if it fails.
     func tryDifferentOutfit() {

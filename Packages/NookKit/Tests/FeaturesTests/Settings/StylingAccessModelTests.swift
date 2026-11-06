@@ -266,6 +266,51 @@ struct StylingAccessModelTests {
         #expect(before.contains("is off") || before.contains("paused"))
     }
 
+    /// S4 test 10: what she already had when the screen opened isn't access arriving.
+    @Test func accessAlreadyOnDoesNotCountAsArriving() async {
+        let services = services(ScriptedSubscriptionService(status: trial))
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.load(from: services)
+        #expect(model.hasAccess)
+        #expect(!model.accessArrived)
+    }
+
+    @Test func nothingArrivesWhenRestoreFindsNothing() async {
+        let services = services(notSubscribed())
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(!model.accessArrived)
+    }
+
+    @Test func buyingCountsAsArriving() async {
+        let services = services(notSubscribed())
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.purchase(in: services)
+        #expect(model.accessArrived)
+    }
+
+    /// Restoring counts even if the phone already showed access: the server may be what was behind.
+    @Test func restoringCountsAsArriving() async {
+        let services = services(ScriptedSubscriptionService(status: trial))
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(model.accessArrived)
+    }
+
+    @Test func accessFromStoreKitWhileOpenCountsAsArriving() async {
+        let store = notSubscribed()
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        store.update(trial)
+        await model.load(from: services)
+        #expect(model.accessArrived)
+    }
+
     // MARK: 30b: the complimentary unlock and picture credits
 
     @Test func redeemingACodeTurnsOnComplimentaryAccess() async {
