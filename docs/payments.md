@@ -30,7 +30,7 @@ Spec: PRD §14 (one monthly auto-renewable subscription, a free first month for 
 | Subscription group | Styling | 30a (PLACEHOLDER name, Jose can rename) |
 | Product ID | `com.jsayram.niftyoutfitnook.styling.monthly` | 30a. Must match App Store Connect exactly. Can't be reused once created |
 | Period | 1 month, auto-renewing | PRD §14 |
-| Price | US$9.99 a month | **PLACEHOLDER**: PRD §14 calls US$9.99 "a candidate, not a final price" |
+| Price | US$9.99 a month | **PLACEHOLDER**: PRD §14 calls US$9.99 "a candidate, not a final price". Set in App Store Connect in S4 (30 October 2026) for the sandbox; Jose re-evaluates it before launch, once real try-on costs are measured, together with Lily's view and an annual plan. Set the final price before any real customer subscribes (a later increase may need their consent) |
 | Introductory offer | Free trial, 1 month, new subscribers only | PRD §14.1 |
 | Allowances shown | Style Me 10 a day, swaps and Ask stylist 40 a day, try-on pictures 30 a month | **PLACEHOLDER**: 24b's development values (decision D12). The server enforces its own numbers |
 | Family Sharing | Off | **PLACEHOLDER**, a question for Jose |
@@ -102,8 +102,8 @@ The app never types a price or a date: the price, period and trial come from Sto
 
 Do these before a TestFlight build can sell anything. Sandbox and TestFlight purchases are free.
 
-1. **Agreements**: App Store Connect → Business → accept the Paid Apps Agreement, and fill in banking and tax. Products can't be fetched until it's active.
-2. **Group**: My Apps → Nifty Outfit Nook → Monetization → Subscriptions → create a subscription group named `Styling`. Add a group display name (shown in Settings → Subscriptions), for example "Nifty Outfit Nook styling".
+1. **Agreements**: App Store Connect → Business → accept the Paid Apps Agreement, and fill in banking and tax. Products can't be fetched until it's active. (S4, 30 October 2026: Active for all countries or regions, effective 30 December 2025 to **29 December 2026**. Renew it before then, or sandbox and real purchases stop.)
+2. **Group**: My Apps → Nifty Outfit Nook → Monetization → Subscriptions → create a subscription group named `Styling`. (S4, 30 October 2026: created, group ID `22530748`. App Store Connect notes that the first subscription group must be submitted with a new app version; the sandbox works before that.) Add a group display name (shown in Settings → Subscriptions), for example "Nifty Outfit Nook styling".
 3. **Subscription**: in the group, create a subscription with Reference Name `Styling monthly` and Product ID `com.jsayram.niftyoutfitnook.styling.monthly` (exactly; it can't be changed or reused). Duration 1 month.
 4. **Price**: Subscription Prices → add the price (US$9.99 is the placeholder; pick the final one) and let App Store Connect fill other storefronts, or set them by hand.
 5. **Free month**: Subscription Prices → Introductory Offers → create → all territories → Free → duration 1 month. Leave it open-ended.
@@ -131,7 +131,7 @@ Do these before a TestFlight build can sell anything. Sandbox and TestFlight pur
 
 ### 30c: server notifications and switching on verification
 
-21. **The app's Apple ID**: App Information → General Information → Apple ID (a number). Set it on the production deployment: `npx convex env set NOOK_APP_APPLE_ID <number>`. Without it production verifies nothing.
+21. **The app's Apple ID**: App Information → General Information → Apple ID (a number). (S4: `6829034351`; not a secret.) Set it on the production deployment: `npx convex env set NOOK_APP_APPLE_ID <number>`. Without it production verifies nothing.
 22. **Dev (sandbox) first**: on the dev deployment run `npx convex env set NOOK_APPSTORE_MODE apple` and `npx convex env set NOOK_APPSTORE_ENVIRONMENT Sandbox`, then deploy (`npx convex dev --once`).
 23. **Notification URLs**: App Information → App Store Server Notifications. Choose **Version 2** for both. Production Server URL: `https://<production deployment>.convex.site/appstore/v2/notifications`. Sandbox Server URL: `https://beaming-oyster-905.convex.site/appstore/v2/notifications` (dev). Save.
 24. **Test it**: in App Store Connect there's no button for it; the App Store Server API's "Request a Test Notification" sends one, which needs an App Store Connect API key (In-App Purchase type). Simpler: buy the subscription in the sandbox on a device signed in to dev, then check the dev deployment's logs for `"route":"appStoreNotification","status":200,"outcome":"subscription:subscribed"`. A `400` with `rejected:environment` means the deployment's environment doesn't match the URL; `503` means `NOOK_APPSTORE_MODE` isn't set.
