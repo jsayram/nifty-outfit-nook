@@ -948,6 +948,9 @@
     "Dressing you" : {
       "comment" : "Try it on sheet (33a): the job is running"
     },
+    "Each one asks first, and allowing one never allows another." : {
+      "comment" : "Privacy and terms: above what later features would send"
+    },
     "Each picture shows “See what was sent”, so you can check exactly what left your iPhone." : {
       "comment" : "Try-on consent"
     },
@@ -1103,6 +1106,9 @@
     },
     "Online features are for adults. Sign in with Apple works once this is on." : {
       "comment" : "Sign-in sheet: under the age confirmation switch"
+    },
+    "Online features ask you first. You can change your mind here any time." : {
+      "comment" : "Privacy tour, step 1"
     },
     "Online features send what they need" : {
       "comment" : "Onboarding privacy: row title"
@@ -5489,9 +5495,6 @@
         }
       }
     },
-    "None of these is in this test build. Each will ask first, and allowing one never allows another." : {
-      "comment" : "Privacy and terms: above what later features would send"
-    },
     "None of your other %@ in %@ go with this look." : {
       "comment" : "Swap: no good matches, with the kind of piece and the source's name"
     },
@@ -5645,9 +5648,6 @@
           }
         }
       }
-    },
-    "Nothing here is sent yet. Later, each of these asks you first." : {
-      "comment" : "Privacy tour, step 1"
     },
     "Nothing in %@ can be used today." : {
       "comment" : "Starting piece sheet with no usable pieces; the source's name"
@@ -8394,9 +8394,6 @@
     "This iPhone couldn't be checked, so cloud styling isn't available on it. Your closet works as usual." : {
       "comment" : "Cloud limit: App Attest isn't available or failed on this device"
     },
-    "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics." : {
-      "comment" : "Privacy and terms: the banner at the top"
-    },
     "This is taking a break. Everything else works as usual." : {
       "comment" : "Cloud limit: a cloud feature is switched off on the server"
     },
@@ -9486,6 +9483,12 @@
     },
     "Your closet lives on this iPhone" : {
       "comment" : "Onboarding privacy: row title"
+    },
+    "Your closet lives on this iPhone. Online features send only what they need, when you use them. There’s no tracking, and analytics stay off unless you turn them on." : {
+      "comment" : "Privacy and terms: the banner at the top"
+    },
+    "Your closet lives on this iPhone. Online features send only what they need, when you use them. There’s no tracking, and analytics stay off unless you turn them on. Live weather is on, so a rough location goes to Apple Weather." : {
+      "comment" : "Privacy and terms: the banner at the top while Live weather is on"
     },
     "Your closet needs more space to update" : {
       "comment" : "Recovery screen title: not enough free space for the update's safety copy",

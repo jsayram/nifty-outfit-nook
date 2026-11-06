@@ -230,10 +230,11 @@ struct PrivacyPage: View {
                 title: SettingsText.privacyTitle, lede: SettingsText.privacyLede, art: .drawersPrivacy)
         ) {
             NookBanner(
-                weather.map { $0.isOn && !$0.isSample } == true ? PrivacyText.testBuildWeather : PrivacyText.testBuild,
-                systemImage: "info.circle", tone: .warning
+                weather.map { $0.isOn && !$0.isSample } == true ? PrivacyText.summaryWithWeather : PrivacyText.summary,
+                systemImage: "info.circle", tone: .neutral
             )
-            .accessibilityIdentifier("privacy.testBuild")
+            .accessibilityIdentifier("privacy.summary")
+            .tourAnchor(PrivacyTour.Anchor.summary, label: SettingsText.privacyTitle)
 
             SettingsGroup(header: PrivacyText.staysHeader, identifier: "privacy.stays") {
                 ForEach(PrivacyText.stays, id: \.title) { item in
@@ -258,18 +259,17 @@ struct PrivacyPage: View {
                 AnalyticsPrivacyGroup(analytics: analytics)
             }
 
-            SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
-                SettingsNote(PrivacyText.laterNote)
-                ForEach(
-                    PrivacyText.later(
-                        includingWeather: weather == nil, includingStylist: stylist == nil, includingTryOn: tryOn == nil
-                    ),
-                    id: \.title
-                ) { item in
-                    SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
+            // Empty once every feature has its own group above.
+            let later = PrivacyText.later(
+                includingWeather: weather == nil, includingStylist: stylist == nil, includingTryOn: tryOn == nil)
+            if !later.isEmpty {
+                SettingsGroup(header: PrivacyText.laterHeader, identifier: "privacy.later") {
+                    SettingsNote(PrivacyText.laterNote)
+                    ForEach(later, id: \.title) { item in
+                        SettingsInfoRow(title: item.title, detail: item.detail, systemImage: item.systemImage)
+                    }
                 }
             }
-            .tourAnchor(PrivacyTour.Anchor.later, label: PrivacyText.laterHeader)
 
             SettingsGroup(header: PrivacyText.yourDataHeader) {
                 if let iCloud {
@@ -337,10 +337,10 @@ nonisolated struct PrivacyItem: Sendable {
 
 /// The words on Privacy and terms, in plain language, from `closet/DATA_MAP.md`.
 nonisolated enum PrivacyText {
-    static var testBuild: String {
+    static var summary: String {
         String(
             localized:
-                "This is a test build. It has no account, the app sends nothing, and there’s no tracking or analytics.",
+                "Your closet lives on this iPhone. Online features send only what they need, when you use them. There’s no tracking, and analytics stay off unless you turn them on.",
             bundle: .module, comment: "Privacy and terms: the banner at the top")
     }
 
@@ -402,15 +402,15 @@ nonisolated enum PrivacyText {
     static var laterNote: String {
         String(
             localized:
-                "None of these is in this test build. Each will ask first, and allowing one never allows another.",
+                "Each one asks first, and allowing one never allows another.",
             bundle: .module, comment: "Privacy and terms: above what later features would send")
     }
 
-    /// What a test build says while Live weather is on, since "sends nothing" would no longer be true.
-    static var testBuildWeather: String {
+    /// The banner while Live weather is on, which sends a rough location whenever the room needs it.
+    static var summaryWithWeather: String {
         String(
             localized:
-                "This is a test build. It has no account and no tracking or analytics. Live weather is on, so a rough location goes to Apple Weather. Nothing else is sent.",
+                "Your closet lives on this iPhone. Online features send only what they need, when you use them. There’s no tracking, and analytics stay off unless you turn them on. Live weather is on, so a rough location goes to Apple Weather.",
             bundle: .module, comment: "Privacy and terms: the banner at the top while Live weather is on")
     }
 
