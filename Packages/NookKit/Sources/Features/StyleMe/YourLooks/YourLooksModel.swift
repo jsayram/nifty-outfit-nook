@@ -177,6 +177,9 @@ final class YourLooksModel {
     /// 27c: whether this is the cloud stylist, so the progress says leaving is fine.
     var isCloud: Bool { services.cloudStyling }
 
+    /// Whether this is Stage A's stand-in on the phone, the only stylist the progress calls simulated.
+    var isSimulatedStylist: Bool { !isCloud }
+
     /// Phase 28: what the router decides from, as things are now.
     var stylistConditions: StylistConditions {
         StylistConditions(

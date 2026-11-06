@@ -69,6 +69,18 @@ struct YourLooksSnapshotTests {
         model.cancel()
     }
 
+    /// S4 test 3: no "Simulated" badge or step with the cloud stylist.
+    @Test func stylingWithTheCloudStylist() async throws {
+        var services = yourLooksServices(stylist: ScriptedStylist([.wait]))
+        services.cloudStyling = true
+        services.stylistConsent = InMemoryStylistConsentStore(StylistConsent(agreedAt: TestTime.now))
+        let model = yourLooksModel()
+        model.start(with: services)
+        defer { model.cancel() }
+        try await waitUntil { model.status == .styling(.choosing) && model.jobID != nil }
+        assertSnapshot(YourLooksPage(model: model), named: "styling-cloud")
+    }
+
     @Test func stylingAX5() async throws {
         let model = try await stylingModel()
         assertSnapshot(YourLooksPage(model: model), dynamicTypeSize: .accessibility5, named: "styling-ax5")
