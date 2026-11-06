@@ -122,15 +122,32 @@ nonisolated enum StylingAccessText {
                     "Apple couldn’t take the last payment. Styling access stays on until \(until) while you update your payment details in Manage subscription.",
                 bundle: .module, comment: "Styling access: billing grace period. The argument is a date.")
         case .billingRetry:
+            if status.isComplimentary {
+                return String(
+                    localized:
+                        "Apple couldn’t take the last payment. Update your payment details in Manage subscription, or cancel there. Your complimentary access stays on.",
+                    bundle: .module, comment: "Styling access: billing retry, with the complimentary unlock active")
+            }
             return String(
                 localized:
                     "Apple couldn’t take the last payment, so styling access is paused. Update your payment details in Manage subscription, and it starts again.",
                 bundle: .module, comment: "Styling access: billing retry")
         case .expired:
+            if status.isComplimentary {
+                return String(
+                    localized: "Your complimentary access stays on.", bundle: .module,
+                    comment: "Styling access: subscription ended, with the complimentary unlock active")
+            }
             return String(
                 localized: "Styling access is off. Your closet, looks and pictures are all still here.",
                 bundle: .module, comment: "Styling access: subscription ended")
         case .revoked:
+            if status.isComplimentary {
+                return String(
+                    localized: "Apple refunded this subscription. Your complimentary access stays on.",
+                    bundle: .module,
+                    comment: "Styling access: subscription refunded, with the complimentary unlock active")
+            }
             return String(
                 localized:
                     "Apple refunded this subscription, so styling access is off. Your closet, looks and pictures are all still here.",

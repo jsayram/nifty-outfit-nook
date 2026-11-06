@@ -252,6 +252,20 @@ struct StylingAccessModelTests {
         #expect(model.message == .problem(.unavailable))
     }
 
+    /// S4 test 9: a row about the old subscription doesn't say access is off under the unlock.
+    @Test(arguments: [SubscriptionState.expired, .revoked, .billingRetry])
+    func theSubscriptionRowDoesNotContradictTheUnlock(state: SubscriptionState) {
+        let plain = SubscriptionStatus(state: state, productID: id, checkedAt: TestTime.now)
+        var unlocked = plain
+        unlocked.complimentarySince = TestTime.now
+        let words = StylingAccessText.statusDetail(unlocked, state: state, price: nil)
+        #expect(words.contains("complimentary access stays on"))
+        #expect(!words.contains("is off") && !words.contains("paused"))
+        // Without the unlock it says as before that access isn't on.
+        let before = StylingAccessText.statusDetail(plain, state: state, price: nil)
+        #expect(before.contains("is off") || before.contains("paused"))
+    }
+
     // MARK: 30b: the complimentary unlock and picture credits
 
     @Test func redeemingACodeTurnsOnComplimentaryAccess() async {

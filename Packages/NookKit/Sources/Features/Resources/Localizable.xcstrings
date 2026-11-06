@@ -894,8 +894,14 @@
     "Apple couldn’t take the last payment. Styling access stays on until %@ while you update your payment details in Manage subscription." : {
       "comment" : "Styling access: billing grace period. The argument is a date."
     },
+    "Apple couldn’t take the last payment. Update your payment details in Manage subscription, or cancel there. Your complimentary access stays on." : {
+      "comment" : "Styling access: billing retry, with the complimentary unlock active"
+    },
     "Apple refunded this subscription, so styling access is off. Your closet, looks and pictures are all still here." : {
       "comment" : "Styling access: subscription refunded or revoked"
+    },
+    "Apple refunded this subscription. Your complimentary access stays on." : {
+      "comment" : "Styling access: subscription refunded, with the complimentary unlock active"
     },
     "Camera view" : {
       "comment" : "VoiceOver: the try-on camera's picture"
@@ -9512,6 +9518,9 @@
     },
     "Your closet, Quick ideas and backups work without signing in, and stay on this iPhone." : {
       "comment" : "Sign-in sheet: what works signed out"
+    },
+    "Your complimentary access stays on." : {
+      "comment" : "Styling access: subscription ended, with the complimentary unlock active"
     },
     "Your copy is saved as “%@”. It holds your measurements and photos; keep the passphrase somewhere safe." : {
       "comment" : "Export a copy: done, with the file name",
