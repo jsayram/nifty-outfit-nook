@@ -120,11 +120,13 @@ struct YourLooksScreen: View {
             model.start(with: services, connection: connection)
         }
         // Your looks' quick tour (Phase 16b), once the looks are ready on the Today tab, with no
-        // problem banner, sheet or toast over them.
+        // problem banner, sheet or toast over them. The consent, Styling access and report sheets
+        // count too: a tour starting under one would be hidden by it (N2).
         .screenTour(
             YourLooksTour.definition(hasVersions: model.versions.count > 1),
             isReady: model.status == .showing && model.result != nil && model.tab == .today && model.problem == nil
-                && stub == nil && tryingOn == nil && swapping == nil && toast == nil
+                && stub == nil && tryingOn == nil && swapping == nil && toast == nil && !showsConsent
+                && !showsStylingAccess && reporting == nil
         )
         .onDisappear {
             // Leaving stops Stage A's stylist on the phone. A cloud request keeps running apart

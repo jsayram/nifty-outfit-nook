@@ -48,6 +48,7 @@ struct StylingAccessPage: View {
             if model.isLoading {
                 NookLoadingState(StylingAccessText.loading)
                     .floorCard()
+                    .modifier(ReservesThePage())
             } else if model.cloudUnavailable {
                 // 32b (L9): no backend in this build, so no offer, no packs and no restore.
                 CloudUnavailableNote(message: StylingAccessText.unavailable)
@@ -246,6 +247,24 @@ struct StylingAccessPage: View {
         switch message {
         case .started, .restored, .pending, .redeemed, .creditsAdded, .creditsAwaiting, .packPending: .neutral
         case .nothingToRestore, .problem: .warning
+        }
+    }
+}
+
+/// While Styling access checks with the App Store, the page already takes the room its content
+/// will (S4, 31 October 2026): the check sits where the content starts and the window's height is
+/// held below it, with nothing to tap. The content then takes that place without the page growing
+/// under her finger. A still image (snapshots) has no window to fill.
+private struct ReservesThePage: ViewModifier {
+    @Environment(\.closetIsStillImage) private var isStillImage
+
+    func body(content: Content) -> some View {
+        if isStillImage {
+            content
+        } else {
+            content
+                .frame(maxHeight: .infinity, alignment: .top)
+                .containerRelativeFrame(.vertical, alignment: .top)
         }
     }
 }

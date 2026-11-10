@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension View {
     /// Presents a system bottom sheet with the app's styled header: a serif title, an optional
@@ -144,6 +145,10 @@ public struct NookSheetContainer<Content: View>: View {
     @Environment(\.nookStaticRendering) private var isStatic
     /// The header and content's height, which a form sheet on iPad sizes itself to.
     @State private var contentHeight: CGFloat = 0
+    /// Whether the sheet has finished rising. Until then it takes no taps (S4, 31 October 2026):
+    /// the system sheet keeps creeping up for a moment after it looks open, and a tap aimed at
+    /// Allow on the stylist's consent landed on blank space.
+    @State private var hasSettled = false
 
     public init(title: String, subtitle: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
@@ -164,6 +169,16 @@ public struct NookSheetContainer<Content: View>: View {
             // A scroll view has no height of its own to offer, so a fitted form sheet (iPad,
             // Phase 15b) is told its content's.
             .frame(idealHeight: contentHeight > 0 ? contentHeight : nil)
+            .allowsHitTesting(hasSettled)
+            .background {
+                SheetSettledReader { hasSettled = true }
+                    .accessibilityHidden(true)
+            }
+            // Never longer than this, whatever UIKit says.
+            .task {
+                try? await Task.sleep(for: .seconds(1))
+                hasSettled = true
+            }
         }
     }
 
@@ -226,5 +241,33 @@ public struct NookSheetContainer<Content: View>: View {
         // Escape (and Command-period) on a hardware keyboard closes the sheet.
         .keyboardShortcut(.cancelAction)
         .accessibilityLabel(Text("Close", bundle: .module, comment: "Button that closes a sheet"))
+    }
+}
+
+/// Calls `settled` once the sheet's presentation has finished: when UIKit says the sheet's view
+/// appeared, which is after its rise (or its fade, with Reduce Motion), and at once when
+/// animations are off. A child view controller gets the appearance calls of the sheet it's in.
+private struct SheetSettledReader: UIViewControllerRepresentable {
+    let settled: () -> Void
+
+    func makeUIViewController(context: Context) -> Controller {
+        let controller = Controller()
+        controller.settled = settled
+        controller.view.isUserInteractionEnabled = false
+        controller.view.backgroundColor = .clear
+        return controller
+    }
+
+    func updateUIViewController(_ controller: Controller, context: Context) {
+        controller.settled = settled
+    }
+
+    final class Controller: UIViewController {
+        var settled: (() -> Void)?
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            settled?()
+        }
     }
 }
