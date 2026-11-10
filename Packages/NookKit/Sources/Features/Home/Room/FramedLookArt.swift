@@ -14,7 +14,8 @@ struct FramedLookArt: View {
             ForEach(Array(boxes.enumerated()), id: \.offset) { _, item in
                 let (piece, box) = item
                 GarmentPicture(
-                    photo: piece.photo, cutout: piece.cutout, category: piece.category, colors: piece.colors,
+                    photo: piece.photo, cutout: piece.cutout, category: piece.category, subKind: piece.subKind,
+                    colors: piece.colors,
                     size: CGSize(width: box.width * scale, height: box.height * scale)
                 )
                 .frame(width: box.width * scale, height: box.height * scale)

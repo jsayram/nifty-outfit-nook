@@ -108,8 +108,8 @@ struct LookBundle: View {
                     .frame(width: frame.width, height: frame.height)
             } else {
                 GarmentPicture(
-                    photo: piece.photo, cutout: piece.cutout, category: piece.category, colors: piece.colors,
-                    size: frame.size, presentation: .sticker(.centred)
+                    photo: piece.photo, cutout: piece.cutout, category: piece.category, subKind: piece.subKind,
+                    colors: piece.colors, size: frame.size, presentation: .sticker(.centred)
                 )
             }
         }

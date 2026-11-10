@@ -213,8 +213,8 @@ extension LookBundleContent {
             layoutSeed: picture.lookID.rawValue,
             pieces: drawn.pieces.map { piece in
                 LookBundlePiece(
-                    id: piece.id, name: piece.name, category: piece.category, colors: piece.colors,
-                    photo: piece.photo, cutout: piece.cutout, isIdea: piece.isIdea)
+                    id: piece.id, name: piece.name, category: piece.category, subKind: piece.subKind,
+                    colors: piece.colors, photo: piece.photo, cutout: piece.cutout, isIdea: piece.isIdea)
             })
         if case .generated(let photo) = picture.image { tryOnPhoto = photo }
         isRealPicture = picture.isReal

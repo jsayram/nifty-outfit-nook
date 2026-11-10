@@ -134,9 +134,11 @@ nonisolated struct FramedLook: Identifiable, Hashable, Sendable {
     /// One piece's picture in the frame.
     struct Piece: Hashable, Sendable {
         var category: GarmentCategory
+        /// The narrower kind, which picks a skirt's drawing over trousers' when there's no photo.
+        var subKind: GarmentSubKind? = nil
         var colors: [ColorName]
         var photo: PhotoReference
-        var cutout: GarmentCutout?
+        var cutout: GarmentCutout? = nil
     }
 
     let id: Look.ID

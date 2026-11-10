@@ -32,6 +32,8 @@ struct GarmentPicture: View {
     let photo: PhotoReference
     let cutout: GarmentCutout?
     let category: GarmentCategory
+    /// The narrower kind, which picks a skirt's drawing over trousers'.
+    let subKind: GarmentSubKind?
     let colors: [ColorName]
     /// The space the picture takes, in points.
     let size: CGSize
@@ -44,12 +46,13 @@ struct GarmentPicture: View {
     @State private var loaded: Loaded?
 
     init(
-        photo: PhotoReference, cutout: GarmentCutout? = nil, category: GarmentCategory, colors: [ColorName],
-        size: CGSize, presentation: GarmentPresentation = .standing
+        photo: PhotoReference, cutout: GarmentCutout? = nil, category: GarmentCategory,
+        subKind: GarmentSubKind? = nil, colors: [ColorName], size: CGSize, presentation: GarmentPresentation = .standing
     ) {
         self.photo = photo
         self.cutout = cutout
         self.category = category
+        self.subKind = subKind
         self.colors = colors
         self.size = size
         self.presentation = presentation
@@ -57,8 +60,8 @@ struct GarmentPicture: View {
 
     init(_ garment: Garment, size: CGSize, presentation: GarmentPresentation = .standing) {
         self.init(
-            photo: garment.photo, cutout: garment.cutout, category: garment.category, colors: garment.colors,
-            size: size, presentation: presentation)
+            photo: garment.photo, cutout: garment.cutout, category: garment.category, subKind: garment.subKind,
+            colors: garment.colors, size: size, presentation: presentation)
     }
 
     /// A photo or cutout to load, at a size in pixels.
@@ -150,20 +153,20 @@ struct GarmentPicture: View {
     @ViewBuilder private var drawing: some View {
         switch presentation {
         case .sticker(let placement):
-            let sticker = Self.drawingSticker(category: category, colors: colors)
+            let sticker = Self.drawingSticker(category: category, subKind: subKind, colors: colors)
             NookSticker(sticker.id, size: size, source: sticker.source, placement: placement)
         case .standing:
-            GarmentPlaceholderArt(category: category, colors: colors)
+            GarmentPlaceholderArt(category: category, subKind: subKind, colors: colors)
         }
     }
 
     /// The sticker of a kind's drawing in its colours: its cache name and how it's drawn.
-    nonisolated static func drawingSticker(category: GarmentCategory, colors: [ColorName]) -> (
-        id: String, source: StickerSource
-    ) {
+    nonisolated static func drawingSticker(
+        category: GarmentCategory, subKind: GarmentSubKind? = nil, colors: [ColorName]
+    ) -> (id: String, source: StickerSource) {
         (
-            GarmentDrawing.stickerID(category: category, colors: colors),
-            .drawn { spec in GarmentDrawing.image(category: category, colors: colors, for: spec) }
+            GarmentDrawing.stickerID(category: category, subKind: subKind, colors: colors),
+            .drawn { spec in GarmentDrawing.image(category: category, subKind: subKind, colors: colors, for: spec) }
         )
     }
 

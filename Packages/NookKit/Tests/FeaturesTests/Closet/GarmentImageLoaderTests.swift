@@ -164,6 +164,32 @@ struct GarmentPlaceholderTests {
         #expect(bounds.count == GarmentCategory.allCases.count)
     }
 
+    /// Bottoms are one kind, so the narrower kind picks the drawing (N2): a skirt has its own
+    /// outline and waistband; trousers, jeans and no narrower kind keep the trousers. Other kinds
+    /// ignore it.
+    @Test func aSkirtIsDrawnAsASkirt() {
+        let rect = CGRect(x: 0, y: 0, width: 100, height: 128)
+        func outline(_ category: GarmentCategory, _ subKind: GarmentSubKind?) -> String {
+            "\(GarmentSilhouette(category: category, subKind: subKind).path(in: rect).description)"
+        }
+        func detail(_ category: GarmentCategory, _ subKind: GarmentSubKind?) -> String {
+            "\(GarmentDetail(category: category, subKind: subKind).path(in: rect).description)"
+        }
+        let trousers = outline(.bottom, nil)
+        #expect(outline(.bottom, .skirt) != trousers)
+        #expect(detail(.bottom, .skirt) != detail(.bottom, nil))
+        for kind in [GarmentSubKind.trousers, .jeans, .shorts, .leggings] {
+            #expect(outline(.bottom, kind) == trousers, "\(kind)")
+        }
+        // A skirt fits its frame like every other kind.
+        let frame = CGRect(x: 0, y: 0, width: 70, height: 90)
+        let skirt = GarmentSilhouette(category: .bottom, subKind: .skirt).path(in: frame).boundingRect
+        let band = GarmentDetail(category: .bottom, subKind: .skirt).path(in: frame).boundingRect
+        #expect(frame.insetBy(dx: -0.5, dy: -0.5).contains(skirt))
+        #expect(skirt.contains(band))
+        #expect(outline(.top, .skirt) == outline(.top, nil))
+    }
+
     /// Dark cloth gets a lighter outline so it still reads on the dark floor.
     @Test func lineColoursShowOnTheirFill() {
         for name in ColorName.allCases {
