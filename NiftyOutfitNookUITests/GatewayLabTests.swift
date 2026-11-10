@@ -11,7 +11,7 @@ final class GatewayLabTests: XCTestCase {
     @MainActor
     func testSignInAndTheFailureModes() {
         let app = XCUIApplication()
-        app.launchArguments = ["-gateway-lab"] + UITestLaunch.animationsOff
+        app.launchArguments = ["-gateway-lab"] + UITestLaunch.animationsOff + UITestLaunch.fakeBackend
         app.launch()
         XCTAssertTrue(app.navigationBars["Gateway"].waitUntilExists(timeout: uiTestWait))
 
@@ -60,7 +60,8 @@ final class GatewayLabTests: XCTestCase {
     @MainActor
     func testTheOfflineBannerAndAConnectionLostInTheMiddle() {
         let app = XCUIApplication()
-        app.launchArguments = ["-gateway-lab", "-connection", "offline"] + UITestLaunch.animationsOff
+        app.launchArguments =
+            ["-gateway-lab", "-connection", "offline"] + UITestLaunch.animationsOff + UITestLaunch.fakeBackend
         app.launch()
         XCTAssertTrue(app.navigationBars["Gateway"].waitUntilExists(timeout: uiTestWait))
         let banner = app.staticTexts["cloudOfflineBanner"]

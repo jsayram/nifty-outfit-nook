@@ -77,7 +77,9 @@ final class TryOnPhotoSetupTests: XCTestCase {
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments =
-            UITestLaunch.toursOff + UITestLaunch.animationsOff + ["-seed-tryon", "-cloud-tryon"] + extra
+            UITestLaunch.toursOff + UITestLaunch.animationsOff + UITestLaunch.fakeBackend + [
+                "-seed-tryon", "-cloud-tryon",
+            ] + extra
         app.launch()
         XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: 120), "Home didn't open")
         return app

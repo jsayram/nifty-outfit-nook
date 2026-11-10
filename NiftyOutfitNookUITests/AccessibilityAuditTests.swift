@@ -25,7 +25,9 @@ class AccessibilityAuditTests: XCTestCase {
     /// The welcome and the four onboarding steps.
     @MainActor
     func testOnboarding() throws {
-        let app = launch(["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff)
+        let app = launch(
+            ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+                + UITestLaunch.fakeBackend)
         XCTAssertTrue(app.buttons["welcome.getStarted"].waitUntilExists(timeout: Self.wait), "No welcome")
         try audit("Welcome", in: app)
         open("welcome.getStarted", showing: app.navigationBars["Your name"], in: app)
@@ -44,7 +46,8 @@ class AccessibilityAuditTests: XCTestCase {
         try audit("Home", in: app)
         app.terminate()
 
-        let toured = launch(UITestLaunch.skipOnboarding + ["-tour", "off,home", "-fixtures", "demo"])
+        let toured = launch(
+            UITestLaunch.skipOnboarding + UITestLaunch.fakeBackend + ["-tour", "off,home", "-fixtures", "demo"])
         XCTAssertTrue(element("tour.card", in: toured).waitUntilExists(timeout: Self.wait), "No tour")
         try audit("Home's tour", in: toured)
     }
@@ -172,7 +175,9 @@ class AccessibilityAuditTests: XCTestCase {
     /// closet from onboarding, as `BackupsTests` does.
     @MainActor
     func testBackups() throws {
-        let app = launch(["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff)
+        let app = launch(
+            ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+                + UITestLaunch.fakeBackend)
         open("welcome.getStarted", showing: app.navigationBars["Your name"], in: app)
         open("onboarding.skip", showing: app.navigationBars["Your closet stays here"], in: app)
         open("onboarding.continue", showing: app.navigationBars["How you like clothes to fit"], in: app)

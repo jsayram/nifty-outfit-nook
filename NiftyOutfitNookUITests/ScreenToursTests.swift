@@ -30,7 +30,10 @@ final class ScreenToursTests: XCTestCase {
     @MainActor
     func testFreshInstallShowsEachTourOnce() {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", "reset", "-fixtures", "demo:laundry=some"]
+        app.launchArguments =
+            UITestLaunch.skipOnboarding + UITestLaunch.fakeBackend + [
+                "-tour", "reset", "-fixtures", "demo:laundry=some",
+            ]
         app.launch()
         expectTour("Style Me", step: 1, of: 4, in: app)
         skip(in: app)

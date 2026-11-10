@@ -338,8 +338,15 @@ enum UITestLaunch {
     /// Settings from 283 to 235 seconds (October 2026). Tests about tours, onboarding and the iPad
     /// layouts leave it out, so animated transitions are still exercised.
     static let animationsOff = ["-animations", "off"]
-    /// Tours off, onboarding skipped and animations off: what most tests launch with.
-    static let standard = toursOff + skipOnboarding + animationsOff
+    /// The in-process fake backend, even on a Mac whose Configs/Secrets.xcconfig names the real
+    /// one (debug builds only). Without it the app there runs on the real backend: the fake's
+    /// launch flags (`-cloud-stylist`, `-fake-signed-in` and the rest) do nothing, and Style Me
+    /// stops at the sign-in sheet (N2, November 2026). CI has no Secrets.xcconfig, so it's the
+    /// fakes there either way.
+    static let fakeBackend = ["-fake-backend"]
+    /// Tours off, onboarding skipped, animations off and the fake backend: what most tests launch
+    /// with.
+    static let standard = toursOff + skipOnboarding + animationsOff + fakeBackend
 }
 
 extension XCUIApplication {

@@ -16,7 +16,7 @@ final class AccountDeletionTests: XCTestCase {
     func testDeleteMyAccountStartsTheAppFresh() {
         let app = XCUIApplication()
         app.launchArguments =
-            UITestLaunch.toursOff + UITestLaunch.animationsOff + [
+            UITestLaunch.toursOff + UITestLaunch.animationsOff + UITestLaunch.fakeBackend + [
                 "-seed-photo-closet", "3", "-fake-signed-in",
                 // 30a: in the free month, so the subscription note and Manage subscription show.
                 "-subscription", "trial",

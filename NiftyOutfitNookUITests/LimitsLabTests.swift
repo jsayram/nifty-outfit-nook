@@ -14,7 +14,7 @@ final class LimitsLabTests: XCTestCase {
     @MainActor
     func testLimitsKillSwitchAndRetries() {
         let app = XCUIApplication()
-        app.launchArguments = ["-limits-lab"] + UITestLaunch.animationsOff
+        app.launchArguments = ["-limits-lab"] + UITestLaunch.animationsOff + UITestLaunch.fakeBackend
         app.launch()
         XCTAssertTrue(app.navigationBars["Limits"].waitUntilExists(timeout: Self.wait))
 

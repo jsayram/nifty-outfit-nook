@@ -20,7 +20,7 @@ final class PrivacyWalkthroughTests: XCTestCase {
         try skipOnPullRequests("A seeded closet and a 15-second job; the package tests cover each step.")
         let app = XCUIApplication()
         app.launchArguments =
-            UITestLaunch.toursOff + UITestLaunch.animationsOff + [
+            UITestLaunch.toursOff + UITestLaunch.animationsOff + UITestLaunch.fakeBackend + [
                 "-seed-tryon", "-cloud-tryon", "slow", "-subscription", "active",
             ]
         app.launch()
