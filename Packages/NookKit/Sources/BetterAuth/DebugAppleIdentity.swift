@@ -15,7 +15,13 @@ import Networking
         }
 
         public func identityToken(rawNonce: String) async throws(AuthError) -> String {
-            FakeAppleToken.make(subject: subject, rawNonce: rawNonce, expiresAt: Date().addingTimeInterval(600))
+            // N4: `-hold sign-in` keeps "Signing in"; `-fail sign-in[=offline|failed]` fails it.
+            switch await DebugFaults.current.fault(for: ["sign-in"]) {
+            case .cancelled?: throw .cancelled
+            case .fail(let failure)?: throw failure.variant == "failed" ? .failed : .offline
+            case nil: break
+            }
+            return FakeAppleToken.make(subject: subject, rawNonce: rawNonce, expiresAt: Date().addingTimeInterval(600))
         }
 
         public func authorizationCode() async throws(AuthError) -> String {

@@ -10,7 +10,7 @@ public actor InMemoryClosetStore: ClosetStore {
     public init(garments: [Garment], calendar: Calendar, options: StoreOptions = StoreOptions()) {
         garmentsByID = Dictionary(garments.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
         self.calendar = calendar
-        self.options = options
+        self.options = options.named("closet")
     }
 
     public func garments() async throws(StoreError) -> [Garment] {

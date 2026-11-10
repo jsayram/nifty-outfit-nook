@@ -9,7 +9,7 @@ public actor InMemoryFeedbackDraftStore: FeedbackDraftStore {
 
     public init(draft: FeedbackDraft? = nil, options: StoreOptions = StoreOptions()) {
         current = draft
-        self.options = options
+        self.options = options.named("feedback-drafts")
     }
 
     public func draft() async throws(StoreError) -> FeedbackDraft? {

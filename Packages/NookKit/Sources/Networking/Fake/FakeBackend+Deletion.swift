@@ -1,4 +1,5 @@
 import Foundation
+import Models
 
 // Debug builds only (32b, L9): a Release build has no fake backend to fall back to.
 #if DEBUG
@@ -135,6 +136,9 @@ import Foundation
                 if record.state("account") != "done" {
                     if state.deletions.accountStepFailures > 0 {
                         state.deletions.accountStepFailures -= 1
+                    } else if DebugFaults.current.failure(for: ["account-delete"]) != nil {
+                        // N4: `-fail account-delete` leaves the account step pending, as a server
+                        // that hasn't finished would.
                     } else {
                         record.set("account", "done")
                         state.deletions.deletedSubjects.insert(subject)

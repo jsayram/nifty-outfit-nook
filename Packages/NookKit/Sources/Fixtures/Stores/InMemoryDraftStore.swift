@@ -12,7 +12,7 @@ public actor InMemoryDraftStore: DraftStore {
 
     public init(drafts: [GarmentDraft] = [], options: StoreOptions = StoreOptions()) {
         draftsByTarget = Dictionary(drafts.map { ($0.target, $0) }, uniquingKeysWith: { _, last in last })
-        self.options = options
+        self.options = options.named("drafts")
     }
 
     public func drafts() async throws(StoreError) -> [GarmentDraft] {

@@ -10,7 +10,7 @@ public actor InMemoryLookDraftStore: LookDraftStore {
 
     public init(draft: LookDraft? = nil, options: StoreOptions = StoreOptions()) {
         current = draft
-        self.options = options
+        self.options = options.named("look-drafts")
     }
 
     public func draft() async throws(StoreError) -> LookDraft? {

@@ -46,6 +46,8 @@ public enum FixtureServices {
             photos: startingCloset == .empty ? .drawn : configuration.photos,
             wardrobe: configuration.wardrobe,
             source: configuration.source,
+            suitcases: configuration.suitcases,
+            looks: configuration.looks,
             unnamed: startingCloset != nil,
             tours: tours,
             onboarding: onboarding,
@@ -62,7 +64,7 @@ public enum FixtureServices {
     /// `draft` puts an unsaved Add a piece, Edit or Make your own look draft in its store. `photos` picks
     /// the provider of garment pictures (the sample wardrobe's photos, or none) and can add the drawn
     /// sample photo pieces. `wardrobe` adds the full wardrobe to the demo set. `source` sets the
-    /// remembered source. `unnamed` leaves the sign without a name, for a closet started from
+    /// remembered source. `suitcases` and `looks` (N4) empty the suitcases or unsave the looks. `unnamed` leaves the sign without a name, for a closet started from
     /// onboarding. `tours` and `onboarding` are the stores to use; `nil` gives fresh in-memory ones.
     /// `profileSettings` keeps the name on the sign and the Style Me settings; with `nil` the
     /// whole profile is in memory. `feedbackDrafts` and `stores` are as above.
@@ -75,6 +77,8 @@ public enum FixtureServices {
         photos: FixturePhotoState = .real,
         wardrobe: FixtureWardrobeState = .demo,
         source: FixtureSourceState? = nil,
+        suitcases: FixtureSuitcasesState? = nil,
+        looks: FixtureLooksState? = nil,
         unnamed: Bool = false,
         tours: (any TourProgressStore)? = nil,
         onboarding: (any OnboardingStateStore)? = nil,
@@ -100,10 +104,20 @@ public enum FixtureServices {
         if let source {
             data = data.applying(source: source)
         }
+        if let suitcases {
+            data = data.applying(suitcases: suitcases)
+        }
+        if let looks {
+            data = data.applying(looks: looks)
+        }
         // `unavailable` has no snapshot: the provider throws instead, so any snapshot will do.
         let snapshot = weather.flatMap { FixtureWeather.snapshot($0, at: now) } ?? data.weather
         let slow = behavior == .slow
-        let options = StoreOptions(latency: slow ? .milliseconds(600) : .zero, fails: behavior == .storesFail)
+        var options = StoreOptions(latency: slow ? .milliseconds(600) : .zero, fails: behavior == .storesFail)
+        #if DEBUG
+            // N4: `-hold` and `-fail` for store calls.
+            options.faults = .current
+        #endif
 
         let stylistMode: MockStylist.Mode
         switch behavior {

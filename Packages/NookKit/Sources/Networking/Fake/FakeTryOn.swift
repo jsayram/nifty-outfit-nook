@@ -17,14 +17,20 @@ import UniformTypeIdentifiers
         case slow
         /// The job runs and fails: "It didn't work this time. It wasn't counted."
         case fails
+        /// N4: like `fails`, after about 15 seconds, so she can leave the screen and see the failed
+        /// banner.
+        case slowFails = "slow-fails"
 
         var delay: TimeInterval {
             switch self {
             case .instant: 0
             case .normal, .fails: 3
-            case .slow: 15
+            case .slow, .slowFails: 15
             }
         }
+
+        /// The job fails.
+        var isFailing: Bool { self == .fails || self == .slowFails }
     }
 
     /// The fake image service: checks a try-on request the way the backend does, and "dresses" the

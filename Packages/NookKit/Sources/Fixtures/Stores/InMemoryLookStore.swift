@@ -10,7 +10,7 @@ public actor InMemoryLookStore: LookStore {
     public init(looks: [Look], calendar: Calendar, options: StoreOptions = StoreOptions()) {
         looksByID = Dictionary(looks.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
         self.calendar = calendar
-        self.options = options
+        self.options = options.named("looks")
     }
 
     public func looks() async throws(StoreError) -> [Look] {

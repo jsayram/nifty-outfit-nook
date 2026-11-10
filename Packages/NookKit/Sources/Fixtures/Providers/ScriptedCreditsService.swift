@@ -39,6 +39,14 @@ public final class ScriptedCreditsService: CreditsService {
     }
 
     public func purchase(_ productID: String) async -> CreditPurchaseOutcome {
+        #if DEBUG
+            // N4: `-hold purchase` keeps a pack buying; `-fail purchase[=<problem>]` fails it.
+            switch await DebugFaults.current.fault(for: ["purchase"]) {
+            case .cancelled?: return .cancelled
+            case .fail(let failure)?: return .failed(.debug(failure.variant))
+            case nil: break
+            }
+        #endif
         let (outcome, balance) = state.withLock { state -> (CreditPurchaseOutcome, Int?) in
             state.purchases.append(productID)
             if let scripted = state.outcome { return (scripted, nil) }

@@ -14,7 +14,7 @@ public actor InMemorySuitcaseStore: SuitcaseStore {
         makeID: @escaping @Sendable () -> Suitcase.ID = { Suitcase.ID.random() }
     ) {
         suitcasesByID = Dictionary(suitcases.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
-        self.options = options
+        self.options = options.named("suitcases")
         self.makeID = makeID
     }
 

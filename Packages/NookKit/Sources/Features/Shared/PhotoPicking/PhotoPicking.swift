@@ -96,9 +96,17 @@ private struct PhotoPickingModifier: ViewModifier {
             // `.current` keeps the photo as stored (usually HEIC) instead of converting it; the
             // app makes its own clean copy anyway.
             .photosPicker(
-                isPresented: binding(.library), selection: $selection, matching: .images,
+                isPresented: libraryBinding, selection: $selection, matching: .images,
                 preferredItemEncoding: .current
             )
+            #if DEBUG
+                // N4: `-fake-picked-photo` hands over a sample garment photo instead of the picker.
+                .onChange(of: model.isShowing(.library)) { _, showing in
+                    guard showing, let data = DebugPickedPhoto.data else { return }
+                    model.finish()
+                    picked(PickedPhoto(source: .library) { data })
+                }
+            #endif
             .onChange(of: selection) { _, item in
                 guard let item else { return }
                 selection = nil
@@ -157,6 +165,14 @@ private struct PhotoPickingModifier: ViewModifier {
 
     private func binding(_ step: PhotoPickingModel.Step) -> Binding<Bool> {
         Binding(get: { model.isShowing(step) }, set: { model.set(step, isShowing: $0) })
+    }
+
+    /// The system photo picker's binding; never shown when a debug launch hands over a photo.
+    private var libraryBinding: Binding<Bool> {
+        #if DEBUG
+            if DebugPickedPhoto.data != nil { return .constant(false) }
+        #endif
+        return binding(.library)
     }
 }
 

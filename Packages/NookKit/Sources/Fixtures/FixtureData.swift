@@ -77,6 +77,7 @@ extension FixtureData {
         case .off, .clean: 0
         case .some: 2
         case .full: 8
+        case .all: Int.max
         }
     }
 
@@ -94,6 +95,32 @@ extension FixtureData {
         let dirty = Set(dirtyFirst.prefix(Self.dirtyCount(for: state)))
         for index in data.garments.indices {
             data.garments[index].laundry = dirty.contains(index) ? .dirty : .clean
+        }
+        return data
+    }
+}
+
+extension FixtureData {
+    /// N4: the same records without suitcases, remembering the main closet.
+    func applying(suitcases state: FixtureSuitcasesState) -> FixtureData {
+        var data = self
+        switch state {
+        case .none:
+            data.suitcases = []
+            data.profile.remembered.source = .mainCloset
+        }
+        return data
+    }
+
+    /// N4: the same records with every look an unsaved result.
+    func applying(looks state: FixtureLooksState) -> FixtureData {
+        var data = self
+        switch state {
+        case .unsaved:
+            for index in data.looks.indices {
+                data.looks[index].isSaved = false
+                data.looks[index].savedAt = nil
+            }
         }
         return data
     }

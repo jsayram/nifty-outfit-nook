@@ -87,6 +87,14 @@ public struct FixtureCityFinder: CityFinder {
     }
 
     public func cities(matching query: String) async throws(WeatherError) -> [WeatherPlace] {
+        #if DEBUG
+            // N4: `-hold search` keeps "Searching" on screen; `-fail search` can't search.
+            switch await DebugFaults.current.fault(for: ["search"]) {
+            case .cancelled?: throw .cancelled
+            case .fail?: throw .unavailable
+            case nil: break
+            }
+        #endif
         if isOffline { throw .unavailable }
         let wanted = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard wanted.count >= 2 else { return [] }

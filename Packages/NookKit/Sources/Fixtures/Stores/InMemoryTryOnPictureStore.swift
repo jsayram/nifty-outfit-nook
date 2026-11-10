@@ -9,7 +9,7 @@ public actor InMemoryTryOnPictureStore: TryOnPictureStore {
 
     public init(pictures: [TryOnPicture], options: StoreOptions = StoreOptions()) {
         picturesByID = Dictionary(pictures.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
-        self.options = options
+        self.options = options.named("pictures")
     }
 
     public func pictures() async throws(StoreError) -> [TryOnPicture] {

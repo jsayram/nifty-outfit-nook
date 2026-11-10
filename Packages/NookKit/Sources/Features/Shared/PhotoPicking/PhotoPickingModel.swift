@@ -34,6 +34,37 @@ struct CameraAccess: Sendable {
         request: { await AVCaptureDevice.requestAccess(for: .video) },
         hasCamera: { UIImagePickerController.isSourceTypeAvailable(.camera) }
     )
+
+    /// The system's, except in a debug build launched with `-camera-access allowed|denied|restricted`
+    /// (N4), which answers that way without asking iOS, so the camera messages can be seen on a
+    /// simulator. The simulator still has no camera.
+    static var current: CameraAccess {
+        #if DEBUG
+            let arguments = ProcessInfo.processInfo.arguments
+            if let index = arguments.firstIndex(of: "-camera-access"), arguments.indices.contains(index + 1) {
+                let status: Status? =
+                    switch arguments[index + 1] {
+                    case "allowed": .allowed
+                    case "denied": .denied
+                    case "restricted": .restricted
+                    case "ask": .notAsked
+                    default: nil
+                    }
+                if let status {
+                    return CameraAccess(
+                        status: { status },
+                        request: {
+                            switch status {
+                            case .allowed, .notAsked: true
+                            case .denied, .restricted: false
+                            }
+                        },
+                        hasCamera: system.hasCamera)
+                }
+            }
+        #endif
+        return system
+    }
 }
 
 /// What happens after she taps Take photo or Choose from Photos when real photos are on (Phase 22a,
@@ -60,7 +91,7 @@ final class PhotoPickingModel {
     private(set) var step: Step?
     private let access: CameraAccess
 
-    init(access: CameraAccess = .system) {
+    init(access: CameraAccess = .current) {
         self.access = access
     }
 

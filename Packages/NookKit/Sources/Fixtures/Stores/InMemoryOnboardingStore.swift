@@ -8,7 +8,7 @@ public actor InMemoryOnboardingStore: OnboardingStateStore {
 
     public init(state: OnboardingState = .fresh, options: StoreOptions = StoreOptions()) {
         stored = state
-        self.options = options
+        self.options = options.named("onboarding")
     }
 
     public func state() async throws(StoreError) -> OnboardingState {
