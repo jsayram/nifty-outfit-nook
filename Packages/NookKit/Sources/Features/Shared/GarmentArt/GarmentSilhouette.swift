@@ -8,15 +8,26 @@ import SwiftUI
 /// (Phase 6). When photos arrive (Phases 7b, 8b, 22) the photo replaces it and this stays for
 /// pieces added by words only. The shapes are drawn in a 100 x 128 box, as a hanging piece or a
 /// piece standing on the floor would sit, and scale to the frame.
+///
+/// Bottoms are one kind, so the narrower kind she picked (`GarmentSubKind`) decides between
+/// trousers and a skirt. A bottom with no narrower kind is drawn as trousers.
 nonisolated struct GarmentSilhouette: Shape {
     let category: GarmentCategory
+    /// The narrower kind she picked, if any. Only a skirt changes the drawing.
+    var subKind: GarmentSubKind? = nil
 
     static let designSize = CGSize(width: 100, height: 128)
+
+    /// Whether a piece of this kind is drawn as a skirt rather than as trousers.
+    static func isSkirt(_ category: GarmentCategory, _ subKind: GarmentSubKind?) -> Bool {
+        category == .bottom && subKind == .skirt
+    }
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
         switch category {
         case .top: Self.top(&path)
+        case .bottom where Self.isSkirt(category, subKind): Self.skirt(&path)
         case .bottom: Self.bottom(&path)
         case .dress: Self.dress(&path)
         case .layer: Self.layer(&path)
@@ -63,6 +74,15 @@ nonisolated struct GarmentSilhouette: Shape {
         p.addLine(to: CGPoint(x: 50, y: 44))
         p.addLine(to: CGPoint(x: 44, y: 122))
         p.addLine(to: CGPoint(x: 14, y: 122))
+        p.closeSubpath()
+    }
+
+    /// An A-line skirt to below the knee, hanging from its waistband.
+    private static func skirt(_ p: inout Path) {
+        p.move(to: CGPoint(x: 30, y: 8))
+        p.addLine(to: CGPoint(x: 70, y: 8))
+        p.addLine(to: CGPoint(x: 88, y: 112))
+        p.addQuadCurve(to: CGPoint(x: 12, y: 112), control: CGPoint(x: 50, y: 120))
         p.closeSubpath()
     }
 
@@ -139,10 +159,18 @@ nonisolated struct GarmentSilhouette: Shape {
 /// second colour if it has one.
 nonisolated struct GarmentDetail: Shape {
     let category: GarmentCategory
+    var subKind: GarmentSubKind? = nil
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
         switch category {
+        case .bottom where GarmentSilhouette.isSkirt(category, subKind):
+            // The waistband, following the skirt's flare.
+            p.move(to: CGPoint(x: 30, y: 8))
+            p.addLine(to: CGPoint(x: 70, y: 8))
+            p.addLine(to: CGPoint(x: 71.5, y: 17))
+            p.addLine(to: CGPoint(x: 28.5, y: 17))
+            p.closeSubpath()
         case .top:
             p.move(to: CGPoint(x: 21.5, y: 100))
             p.addLine(to: CGPoint(x: 78.5, y: 100))
@@ -190,6 +218,7 @@ nonisolated struct GarmentDetail: Shape {
 /// Cheap to draw: two filled paths and a stroke, no blur.
 struct GarmentPlaceholderArt: View {
     let category: GarmentCategory
+    var subKind: GarmentSubKind? = nil
     let colors: [ColorName]
 
     @Environment(\.colorScheme) private var colorScheme
@@ -199,12 +228,12 @@ struct GarmentPlaceholderArt: View {
         let second = colors.dropFirst().first.map(GarmentColor.fill(for:)) ?? main.scaled(0.86)
         ZStack {
             if colors.first == .multicolor {
-                GarmentSilhouette(category: category).fill(Self.stripes(colorScheme))
+                GarmentSilhouette(category: category, subKind: subKind).fill(Self.stripes(colorScheme))
             } else {
-                GarmentSilhouette(category: category).fill(main.color(in: colorScheme))
+                GarmentSilhouette(category: category, subKind: subKind).fill(main.color(in: colorScheme))
             }
-            GarmentDetail(category: category).fill(second.color(in: colorScheme))
-            GarmentSilhouette(category: category)
+            GarmentDetail(category: category, subKind: subKind).fill(second.color(in: colorScheme))
+            GarmentSilhouette(category: category, subKind: subKind)
                 .stroke(main.line.color(in: colorScheme), style: StrokeStyle(lineWidth: 1.6, lineJoin: .round))
         }
         .aspectRatio(GarmentSilhouette.designSize, contentMode: .fit)

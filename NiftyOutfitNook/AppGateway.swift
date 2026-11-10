@@ -14,7 +14,15 @@ import Services
 /// `FakeGateway` isn't compiled into Release at all. Screens see only `AccountService` either way.
 @MainActor
 enum AppGateway {
-    static let settings = GatewaySettings(info: Bundle.main.infoDictionary ?? [:])
+    static let settings: GatewaySettings = {
+        #if DEBUG
+            // `-fake-backend` (debug builds only): the in-process fakes even when
+            // Configs/Secrets.xcconfig names a backend. The UI tests pass it, so a Mac set up for the
+            // real backend runs them on the same fakes as CI, and they never reach the deployment.
+            if ProcessInfo.processInfo.arguments.contains("-fake-backend") { return GatewaySettings(apiBaseURL: nil) }
+        #endif
+        return GatewaySettings(info: Bundle.main.infoDictionary ?? [:])
+    }()
     static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
 
     /// Fakes exist only in Debug builds.

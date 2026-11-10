@@ -51,6 +51,22 @@ struct GarmentDrawingTests {
                 != GarmentDrawing.stickerID(category: .dress, colors: [.navy]))
     }
 
+    /// A skirt's drawing is cached apart from trousers' in the same colours; jeans share the
+    /// trousers' drawing, as they're drawn the same (N2).
+    @Test func aSkirtHasItsOwnSticker() throws {
+        let trousers = GarmentDrawing.stickerID(category: .bottom, colors: [.black])
+        #expect(GarmentDrawing.stickerID(category: .bottom, subKind: .skirt, colors: [.black]) != trousers)
+        #expect(GarmentDrawing.stickerID(category: .bottom, subKind: .jeans, colors: [.black]) == trousers)
+        #expect(GarmentPicture.drawingSticker(category: .bottom, subKind: .skirt, colors: [.black]).id != trousers)
+        let skirt = try #require(
+            GarmentDrawing.image(
+                category: .bottom, subKind: .skirt, colors: [.black], appearance: .light, longSide: 300, lineWidth: 3))
+        // Wider at the hem than trousers, for its height.
+        let legs = try #require(
+            GarmentDrawing.image(category: .bottom, colors: [.black], appearance: .light, longSide: 300, lineWidth: 3))
+        #expect(Double(skirt.width) / Double(skirt.height) > Double(legs.width) / Double(legs.height))
+    }
+
     static func pixels(of image: CGImage) -> [UInt8]? {
         var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
         let ok = bytes.withUnsafeMutableBytes { buffer -> Bool in

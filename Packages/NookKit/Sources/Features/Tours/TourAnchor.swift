@@ -114,11 +114,15 @@ private struct TourFocusTargetModifier: ViewModifier {
 
 /// Puts a scroll view's anchored controls in view as the tour reaches them, so a step never
 /// points at something off screen. Wrap the `ScrollView`. With Reduce Motion the page jumps
-/// instead of scrolling.
+/// instead of scrolling. A control that's already wholly on screen is left where it is, so a
+/// tour that needs no scrolling never moves the page (S4, 31 October 2026: on Your looks the
+/// tour scrolled the page for a control already in view, and the scroll back after Skip put the
+/// Saved tab where Review had been, under her finger).
 ///
 /// When the tour ends, however it ends, the page goes back to where it was before the tour
-/// moved it. Left where the last step was, a page could end with its title half under the back
-/// button (QA, October 2026: a look, Profile, Delete my data).
+/// moved it, if it did. Left where the last step was, a page could end with its title half under
+/// the back button (QA, October 2026: a look, Profile, Delete my data). It goes back at once, as
+/// the tour closes, never as a scroll that's still moving once the tour has gone.
 struct TourScrollReader<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -130,6 +134,8 @@ struct TourScrollReader<Content: View>: View {
     @State private var offset: CGFloat = 0
     /// Where the page was when the tour first moved it, until the tour ends.
     @State private var offsetBeforeTour: CGFloat?
+    /// The part of the scroll view she can see, in global coordinates, inside the bars.
+    @State private var visibleFrame: CGRect?
 
     var body: some View {
         if let tours {
@@ -141,9 +147,25 @@ struct TourScrollReader<Content: View>: View {
                     } action: { _, offset in
                         self.offset = offset
                     }
+                    .onGeometryChange(for: CGRect.self) { geometry in
+                        let frame = geometry.frame(in: .global)
+                        let insets = geometry.safeAreaInsets
+                        return CGRect(
+                            x: frame.minX + insets.leading, y: frame.minY + insets.top,
+                            width: frame.width - insets.leading - insets.trailing,
+                            height: frame.height - insets.top - insets.bottom)
+                    } action: { frame in
+                        visibleFrame = frame
+                    }
                     .onChange(of: tours.currentAnchor, initial: true) { _, anchor in
                         guard let anchor else {
                             restore()
+                            return
+                        }
+                        // Already wholly in view: the page stays put.
+                        if let frame = tours.anchors[anchor]?.frame, let visibleFrame,
+                            Self.isWhollyVisible(frame, in: visibleFrame)
+                        {
                             return
                         }
                         if offsetBeforeTour == nil { offsetBeforeTour = offset }
@@ -158,12 +180,21 @@ struct TourScrollReader<Content: View>: View {
         }
     }
 
-    /// Scrolls back to where the page was before the tour, if the tour moved it.
+    /// Whether a control's frame is all inside the visible part of the scroll view, allowing
+    /// half a point for rounding.
+    static func isWhollyVisible(_ frame: CGRect, in visible: CGRect) -> Bool {
+        !frame.isEmpty && visible.insetBy(dx: -0.5, dy: -0.5).contains(frame)
+    }
+
+    /// Puts the page back where it was before the tour, if the tour moved it. At once, with no
+    /// animation, so nothing is still moving once the tour has gone.
     private func restore() {
         guard let before = offsetBeforeTour else { return }
         offsetBeforeTour = nil
         guard abs(offset - before) > 1 else { return }
-        withAnimation(reduceMotion ? nil : .smooth(duration: 0.35)) {
+        var instantly = Transaction(animation: nil)
+        instantly.disablesAnimations = true
+        withTransaction(instantly) {
             if before <= 1 {
                 position.scrollTo(edge: .top)
             } else {

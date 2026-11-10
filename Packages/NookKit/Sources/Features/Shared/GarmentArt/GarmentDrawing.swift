@@ -10,19 +10,21 @@ import Models
 /// colours as the SwiftUI drawing.
 nonisolated enum GarmentDrawing {
     /// Names the drawing for the sticker cache. Pieces with the same kind and colours draw the
-    /// same, so they share one sticker.
-    static func stickerID(category: GarmentCategory, colors: [ColorName]) -> String {
-        "drawing:\(category.rawValue):\(colors.map(\.rawValue).joined(separator: ","))"
+    /// same, so they share one sticker. A skirt is drawn apart from trousers, so it has its own.
+    static func stickerID(category: GarmentCategory, subKind: GarmentSubKind? = nil, colors: [ColorName]) -> String {
+        let kind = GarmentSilhouette.isSkirt(category, subKind) ? "\(category.rawValue)-skirt" : category.rawValue
+        return "drawing:\(kind):\(colors.map(\.rawValue).joined(separator: ","))"
     }
 
     /// The drawing about `longSide` pixels on its longer side, with outlines `lineWidth` pixels
     /// wide (the SwiftUI drawing's 1.6 points at the screen's scale).
     static func image(
-        category: GarmentCategory, colors: [ColorName], appearance: Appearance, longSide: CGFloat, lineWidth: CGFloat
+        category: GarmentCategory, subKind: GarmentSubKind? = nil, colors: [ColorName], appearance: Appearance,
+        longSide: CGFloat, lineWidth: CGFloat
     ) -> CGImage? {
         let design = CGRect(origin: .zero, size: GarmentSilhouette.designSize)
-        let outline = GarmentSilhouette(category: category).path(in: design)
-        let detail = GarmentDetail(category: category).path(in: design)
+        let outline = GarmentSilhouette(category: category, subKind: subKind).path(in: design)
+        let detail = GarmentDetail(category: category, subKind: subKind).path(in: design)
         let scale = longSide / max(outline.boundingRect.width, outline.boundingRect.height)
         guard scale.isFinite, scale > 0 else { return nil }
         // Room for the half of the outline stroke that falls outside the shape.
@@ -71,9 +73,12 @@ nonisolated enum GarmentDrawing {
     }
 
     /// The drawing for a sticker of `spec`, drawn at the sticker's own resolution.
-    static func image(category: GarmentCategory, colors: [ColorName], for spec: StickerSpec) -> CGImage? {
+    static func image(
+        category: GarmentCategory, subKind: GarmentSubKind? = nil, colors: [ColorName], for spec: StickerSpec
+    ) -> CGImage? {
         image(
-            category: category, colors: colors, appearance: spec.appearance, longSide: spec.longSide * spec.scale,
+            category: category, subKind: subKind, colors: colors, appearance: spec.appearance,
+            longSide: spec.longSide * spec.scale,
             lineWidth: 1.6 * spec.scale)
     }
 }

@@ -91,7 +91,7 @@ final class BackgroundJobsTests: XCTestCase {
         try skipOnPullRequests("Two launches and a seeded closet; AIJobsTests covers the relaunch.")
         let app = XCUIApplication()
         app.launchArguments =
-            UITestLaunch.toursOff + UITestLaunch.animationsOff + [
+            UITestLaunch.toursOff + UITestLaunch.animationsOff + UITestLaunch.fakeBackend + [
                 "-seed-photo-closet", "8", "-cloud-stylist", "slow",
             ]
         app.launch()

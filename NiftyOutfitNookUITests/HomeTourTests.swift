@@ -174,7 +174,8 @@ final class HomeTourTests: XCTestCase {
         -> XCUIApplication
     {
         let app = XCUIApplication()
-        app.launchArguments = UITestLaunch.skipOnboarding + ["-tour", tour, "-fixtures", "demo"] + extra
+        app.launchArguments =
+            UITestLaunch.skipOnboarding + UITestLaunch.fakeBackend + ["-tour", tour, "-fixtures", "demo"] + extra
         app.launch()
         if openCloset {
             app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)

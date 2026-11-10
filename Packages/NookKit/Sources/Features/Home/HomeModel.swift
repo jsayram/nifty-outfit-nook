@@ -132,7 +132,8 @@ final class HomeModel {
                     case .garment(let id):
                         byID[id].map {
                             FramedLook.Piece(
-                                category: $0.category, colors: $0.colors, photo: $0.photo, cutout: $0.cutout)
+                                category: $0.category, subKind: $0.subKind, colors: $0.colors, photo: $0.photo,
+                                cutout: $0.cutout)
                         }
                     case .idea(let idea):
                         FramedLook.Piece(category: idea.category, colors: idea.colors, photo: .noPhoto)

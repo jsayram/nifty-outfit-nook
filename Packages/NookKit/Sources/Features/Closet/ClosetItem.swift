@@ -8,6 +8,8 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
     let id: Garment.ID
     let name: String
     let category: GarmentCategory
+    /// The narrower kind, which picks the drawing for a piece with no photo (a skirt, not trousers).
+    let subKind: GarmentSubKind?
     let colors: [ColorName]
     let photo: PhotoReference
     let cutout: GarmentCutout?
@@ -26,6 +28,7 @@ nonisolated struct ClosetItem: Identifiable, Hashable, Sendable {
         id = garment.id
         name = garment.name
         category = garment.category
+        subKind = garment.subKind
         colors = garment.colors
         photo = garment.photo
         cutout = garment.cutout

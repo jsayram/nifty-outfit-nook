@@ -77,6 +77,8 @@ struct LookBundlePiece: Identifiable, Hashable {
     let id: String
     let name: String
     let category: GarmentCategory
+    /// The narrower kind, which picks the drawing for a piece with no photo (a skirt, not trousers).
+    let subKind: GarmentSubKind?
     let colors: [ColorName]
     let photo: PhotoReference
     let cutout: GarmentCutout?
@@ -89,12 +91,14 @@ struct LookBundlePiece: Identifiable, Hashable {
     let removal: PieceRemoval?
 
     init(
-        id: String, name: String, category: GarmentCategory, colors: [ColorName], photo: PhotoReference = .noPhoto,
-        cutout: GarmentCutout? = nil, isIdea: Bool = false, isSameAsSimple: Bool = false, removal: PieceRemoval? = nil
+        id: String, name: String, category: GarmentCategory, subKind: GarmentSubKind? = nil, colors: [ColorName],
+        photo: PhotoReference = .noPhoto, cutout: GarmentCutout? = nil, isIdea: Bool = false,
+        isSameAsSimple: Bool = false, removal: PieceRemoval? = nil
     ) {
         self.id = id
         self.name = name
         self.category = category
+        self.subKind = subKind
         self.colors = colors
         self.photo = photo
         self.cutout = cutout
@@ -105,8 +109,9 @@ struct LookBundlePiece: Identifiable, Hashable {
 
     init(id: String, garment: Garment, isSameAsSimple: Bool = false) {
         self.init(
-            id: id, name: garment.name, category: garment.category, colors: garment.colors, photo: garment.photo,
-            cutout: garment.cutout, isSameAsSimple: isSameAsSimple, removal: PieceRemoval(garment))
+            id: id, name: garment.name, category: garment.category, subKind: garment.subKind, colors: garment.colors,
+            photo: garment.photo, cutout: garment.cutout, isSameAsSimple: isSameAsSimple, removal: PieceRemoval(garment)
+        )
     }
 
     /// True when the piece is a garment she no longer has in her closet.

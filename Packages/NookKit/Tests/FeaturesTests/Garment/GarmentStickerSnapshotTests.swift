@@ -50,6 +50,32 @@ struct GarmentStickerSnapshotTests {
         assertSnapshot(board(drawings), colorScheme: .dark, named: "drawings-dark")
     }
 
+    /// Bottoms with no photo, by the narrower kind she picked (N2): a skirt is drawn as a skirt;
+    /// trousers, jeans and a bottom with no narrower kind as trousers. As stickers, then standing
+    /// on the floor as in the Closet grid.
+    @Test func bottomsByKind() {
+        let bottoms: [Garment] = [
+            (GarmentSubKind?.none, "g-test-bottom"), (.trousers, "g-test-trousers"), (.jeans, "g-test-jeans"),
+            (.skirt, "g-test-skirt"),
+        ].map { kind, id in
+            Garment(
+                id: Garment.ID(id), name: id, category: .bottom, subKind: kind, colors: [.black], addedAt: TestTime.now)
+        }
+        assertSnapshot(
+            VStack(alignment: .leading, spacing: NookSpacing.large) {
+                HStack(alignment: .top, spacing: NookSpacing.medium) {
+                    ForEach(bottoms) { GarmentPicture($0, size: Self.small, presentation: .sticker(.centred)) }
+                }
+                HStack(alignment: .top, spacing: NookSpacing.medium) {
+                    ForEach(bottoms) { GarmentPicture($0, size: Self.small, presentation: .standing) }
+                }
+            }
+            .padding(NookSpacing.large)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.nook.floor),
+            named: "bottoms-by-kind")
+    }
+
     @Test func samplePhotos() async {
         let garments = SamplePhotoGarments.garments(now: TestTime.now)
         let loader = await loadedPictures(for: garments, sizes: [Self.large, Self.small])

@@ -209,7 +209,8 @@ struct GarmentCell: View {
                 .frame(width: size.width + 2, height: size.height * 0.15)
                 .offset(y: size.height * 0.06)
             GarmentPicture(
-                photo: item.photo, cutout: item.cutout, category: item.category, colors: item.colors, size: size)
+                photo: item.photo, cutout: item.cutout, category: item.category, subKind: item.subKind,
+                colors: item.colors, size: size)
         }
         .frame(width: size.width, height: size.height)
         .overlay(alignment: .topTrailing) {

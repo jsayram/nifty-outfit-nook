@@ -16,6 +16,7 @@ final class BackupsTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments =
             ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+            + UITestLaunch.fakeBackend
         app.launch()
         app.buttons["welcome.getStarted"].tapUntil(app.navigationBars["Your name"], appears: Self.wait)
         app.buttons["onboarding.skip"].tapUntil(app.navigationBars["Your closet stays here"], appears: Self.wait)

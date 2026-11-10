@@ -18,7 +18,8 @@ final class OnboardingTests: XCTestCase {
     @MainActor
     func testFromFirstLaunchToTheFirstLookThenARelaunch() {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding", "reset", "-tour", "reset", "-fixtures", "demo"]
+        app.launchArguments =
+            ["-onboarding", "reset", "-tour", "reset", "-fixtures", "demo"] + UITestLaunch.fakeBackend
         app.launch()
 
         // The welcome: the title, then Get started.
@@ -81,7 +82,7 @@ final class OnboardingTests: XCTestCase {
 
         // Relaunch as Lily would: no flags but the sample data.
         app.terminate()
-        app.launchArguments = ["-fixtures", "demo"]
+        app.launchArguments = ["-fixtures", "demo"] + UITestLaunch.fakeBackend
         app.launch()
 
         // Home straight away, not the welcome, and Home's tour doesn't come back.
@@ -100,7 +101,7 @@ final class OnboardingTests: XCTestCase {
     @MainActor
     func testAlreadyUsingSkipsTheSetup() {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"]
+        app.launchArguments = ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.fakeBackend
         app.launch()
         app.buttons["welcome.alreadyUsing"].tapUntilGone(timeout: Self.wait)
         XCTAssertTrue(app.buttons["home.laptop"].waitUntilHittable(timeout: Self.wait), "Didn't open Home")

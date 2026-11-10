@@ -46,6 +46,7 @@ final class AddPieceTests: XCTestCase {
         var app = XCUIApplication()
         app.launchArguments =
             ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+            + UITestLaunch.fakeBackend
         app.launch()
         openHerOwnEmptyCloset(in: app)
 
@@ -58,7 +59,8 @@ final class AddPieceTests: XCTestCase {
 
         // The relaunch: Home straight away, and the coat is in Closet.
         app = XCUIApplication()
-        app.launchArguments = ["-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+        app.launchArguments =
+            ["-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff + UITestLaunch.fakeBackend
         app.launch()
         app.tabBars.firstMatch.buttons["Closet"].tapUntilSelected(timeout: Self.wait)
         XCTAssertTrue(gridPiece("Navy coat", in: app).waitUntilExists(timeout: Self.wait), "The piece wasn't kept")
@@ -74,6 +76,7 @@ final class AddPieceTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments =
             ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+            + UITestLaunch.fakeBackend
         app.launch()
         openHerOwnEmptyCloset(in: app)
 
@@ -101,6 +104,7 @@ final class AddPieceTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments =
             ["-onboarding", "reset", "-tour", "off", "-fixtures", "demo"] + UITestLaunch.animationsOff
+            + UITestLaunch.fakeBackend
         app.launch()
         openHerOwnEmptyCloset(in: app)
         tap("closet.addPiece", in: app, showing: app.buttons["addPiece.camera"])
