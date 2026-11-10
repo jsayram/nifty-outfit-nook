@@ -419,7 +419,7 @@ struct ProblemBanner: View {
         case .limited(.needsStylingAccess):
             NookBanner(
                 CloudLimitText.message(for: .needsStylingAccess), systemImage: "sparkles",
-                actionTitle: CloudLimitText.seeStylingAccess, action: seeStylingAccess)
+                actionTitle: CloudLimitText.getStylingAccess, action: seeStylingAccess)
         case .limited(let problem):
             NookBanner(CloudLimitText.message(for: problem), systemImage: "hourglass")
         case .notCompleted, .closetUnavailable, .requestChanged, .hidden:

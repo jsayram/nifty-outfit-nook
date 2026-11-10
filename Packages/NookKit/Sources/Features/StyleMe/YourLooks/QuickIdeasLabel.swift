@@ -160,7 +160,7 @@ struct QuickIdeasLabel: View {
         switch reason {
         case .needsConsent: StylistConsentText.review
         case .limited(.account(.signedOut)): SignInText.signIn
-        case .limited(.needsStylingAccess): CloudLimitText.seeStylingAccess
+        case .limited(.needsStylingAccess): CloudLimitText.getStylingAccess
         case .offline where !connection.isOffline, .cloudDidNotFinish:
             String(
                 localized: "Ask the stylist", bundle: .module,

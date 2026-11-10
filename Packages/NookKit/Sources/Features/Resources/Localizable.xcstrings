@@ -10315,6 +10315,9 @@
     "Ask the stylist" : {
       "comment" : "Quick ideas label: tries the cloud stylist again"
     },
+    "Get styling access" : {
+      "comment" : "Button in Style Me when the server shows no styling access: opens Styling access"
+    },
     "Made on this iPhone, free" : {
       "comment" : "Caption under Try a different outfit when Quick ideas on the phone will answer"
     },

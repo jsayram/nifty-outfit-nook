@@ -454,7 +454,7 @@ struct FailureState: View {
                     localized: "The stylist needs styling access", bundle: .module,
                     comment: "Your looks when the server shows no styling access"),
                 message: CloudLimitText.message(for: .needsStylingAccess),
-                retryTitle: CloudLimitText.seeStylingAccess,
+                retryTitle: CloudLimitText.getStylingAccess,
                 retry: actions.seeStylingAccess
             ) {
                 backButton(kind: .soft)

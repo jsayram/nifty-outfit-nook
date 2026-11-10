@@ -84,7 +84,7 @@ final class CloudStylistTests: XCTestCase {
         let app = launch(stylist: "noStylingAccess")
         styleMe(in: app)
         tap(app.buttons["Review"], until: { app.buttons["stylistConsent.allow"].exists })
-        let see = app.buttons["See styling access"]
+        let see = app.buttons["Get styling access"]
         tap(app.buttons["stylistConsent.allow"], until: { see.exists })
         keepScreenshot("f1c-no-styling-access")
         tap(see, until: { app.navigationBars["Styling access"].exists })

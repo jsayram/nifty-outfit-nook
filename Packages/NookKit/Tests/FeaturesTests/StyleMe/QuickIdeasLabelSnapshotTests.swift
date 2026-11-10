@@ -39,6 +39,11 @@ struct QuickIdeasLabelSnapshotTests {
         assertSnapshot(label(.limited(.paused(feature: .style, retryAfterSeconds: nil))), named: "paused")
     }
 
+    /// D20: no styling access on the server's record. The button reads Get styling access.
+    @Test func needsStylingAccess() {
+        assertSnapshot(label(.limited(.needsStylingAccess)), named: "needs-styling-access")
+    }
+
     @Test func cloudDidNotFinish() {
         assertSnapshot(label(.cloudDidNotFinish), named: "did-not-finish")
     }
