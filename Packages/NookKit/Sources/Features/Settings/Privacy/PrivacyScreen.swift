@@ -438,10 +438,8 @@ nonisolated enum PrivacyText {
             PrivacyItem(
                 title: String(
                     localized: "Try-on pictures", bundle: .module, comment: "Privacy and terms: a later feature"),
-                detail: String(
-                    localized:
-                        "That look’s piece photos and your try-on photo, only when you tap Try it on, with its own permission.",
-                    bundle: .module, comment: "Privacy and terms: what Try it on would send"),
+                // Since D1 only a copy without her face leaves the phone: the same words as the switch.
+                detail: TryOnConsentText.switchDetail,
                 systemImage: "camera"),
             PrivacyItem(
                 title: String(localized: "Weather", bundle: .module, comment: "Privacy and terms: a later feature"),
@@ -484,8 +482,8 @@ nonisolated enum PrivacyText {
 
     static var policiesNote: String {
         String(
-            localized: "The full privacy policy and terms are still being written.", bundle: .module,
-            comment: "Privacy and terms: under the policy rows, before the pages exist")
+            localized: "The privacy policy and terms aren’t on the website yet.", bundle: .module,
+            comment: "Privacy and terms: under the policy rows, before the pages are published")
     }
 }
 

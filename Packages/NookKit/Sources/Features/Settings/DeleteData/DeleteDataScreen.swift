@@ -337,8 +337,8 @@ nonisolated enum DeleteDataText {
     static var nowhereElse: String {
         String(
             localized:
-                "Nothing about you is kept anywhere else. This test build has no account and sends nothing.",
-            bundle: .module, comment: "Delete my data: nothing is held off the iPhone in Stage A")
+                "This doesn’t delete your account or what the app’s server keeps for it. To delete those, sign in and use Delete my account in Privacy and terms.",
+            bundle: .module, comment: "Delete my data: what it leaves on the server, and where to delete that")
     }
 
     static var cantUndo: String {
