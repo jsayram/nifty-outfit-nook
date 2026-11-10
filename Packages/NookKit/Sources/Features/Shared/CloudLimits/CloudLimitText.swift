@@ -78,11 +78,11 @@ nonisolated public enum CloudLimitText {
         }
     }
 
-    /// The button that opens Styling access, where a problem is answered there (F1c).
-    public static var seeStylingAccess: String {
+    /// The button that opens Styling access when the server shows none (F1c), in D20's words.
+    public static var getStylingAccess: String {
         String(
-            localized: "See styling access", bundle: .module,
-            comment: "Button on a cloud limit message: opens Styling access")
+            localized: "Get styling access", bundle: .module,
+            comment: "Button in Style Me when the server shows no styling access: opens Styling access")
     }
 
     /// "1 second", "12 seconds", "3 minutes".

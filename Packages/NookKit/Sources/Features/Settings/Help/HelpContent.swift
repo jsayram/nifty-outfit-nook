@@ -100,11 +100,11 @@ nonisolated enum HelpContent {
                 systemImage: "wifi.slash",
                 answer: String(
                     localized:
-                        "In this test build nothing needs a connection, and nothing you add is sent anywhere.",
+                        "The stylist’s ideas, try-on pictures, signing in and purchases need a connection.",
                     bundle: .module, comment: "Help: What needs a connection"),
                 note: String(
                     localized:
-                        "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline.",
+                        "Your closet, laundry, suitcases and saved looks work offline. Without a connection, Style Me makes Quick ideas on this iPhone.",
                     bundle: .module, comment: "Help: What needs a connection, the quieter line")),
             HelpTopic(
                 id: "freeAndPaid", section: .goodToKnow,

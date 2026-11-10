@@ -68,4 +68,12 @@ struct CloudLimitTextTests {
             category: .tryOn, usedToday: 0, limitToday: 3, usedThisMonth: 30, limitThisMonth: 30, resetsAt: nil)
         #expect(monthUsed.remainingToday == 0)
     }
+
+    /// D20: a Style Me refused for no styling access offers "Get styling access", not the plain
+    /// "This account can't do that." that a 403 used to show.
+    @Test func noStylingAccessOffersToGetIt() {
+        #expect(CloudLimitText.getStylingAccess == "Get styling access")
+        #expect(text(.needsStylingAccess).contains("styling access"))
+        #expect(text(.needsStylingAccess) != text(.account(.forbidden)))
+    }
 }

@@ -25,4 +25,24 @@ struct PrivacyTextTests {
     @Test func nothingIsListedForLaterOnceEveryFeatureHasItsGroup() {
         #expect(PrivacyText.later(includingWeather: false, includingStylist: false, includingTryOn: false).isEmpty)
     }
+
+    /// N1: the other lines Jose left for later (9 November 2026). Help, Delete my data and the
+    /// policies note ship in Release, so none of them may call this a test build.
+    @Test func helpDeleteAndPoliciesPromiseNothingFalse() throws {
+        let connection = try #require(HelpContent.topics.first { $0.id == "connection" })
+        let words = [connection.answer, connection.note ?? "", DeleteDataText.nowhereElse, PrivacyText.policiesNote]
+            .joined(separator: " ")
+        for claim in ["test build", "no account", "sends nothing", "nothing you add is sent", "still being written"] {
+            #expect(!words.contains(claim), "\(claim)")
+        }
+        #expect(DeleteDataText.nowhereElse.contains("Delete my account"))
+    }
+
+    /// Since D1 only a copy without her face leaves the phone, so the later try-on line says what
+    /// the try-on switch says.
+    @Test func tryOnLaterLineMatchesTheSwitch() throws {
+        let tryOn = try #require(PrivacyText.later.first { $0.systemImage == "camera" })
+        #expect(tryOn.detail == TryOnConsentText.switchDetail)
+        #expect(tryOn.detail?.contains("without your face") == true)
+    }
 }

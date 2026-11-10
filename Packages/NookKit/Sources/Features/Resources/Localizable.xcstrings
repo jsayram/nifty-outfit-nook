@@ -4208,9 +4208,6 @@
         }
       }
     },
-    "In this test build nothing needs a connection, and nothing you add is sent anywhere." : {
-      "comment" : "Help: What needs a connection"
-    },
     "In this test build the picture is simulated: the person in your try-on photo wearing the look, or your pieces on their own. Nothing leaves your phone." : {
       "comment" : "Try it on sheet"
     },
@@ -4646,9 +4643,6 @@
           }
         }
       }
-    },
-    "Later, Style Me, swaps and Try it on will need a connection. Your closet, laundry, suitcases and saved looks will keep working offline." : {
-      "comment" : "Help: What needs a connection, the quieter line"
     },
     "Later, sent only if you allow it" : {
       "comment" : "Privacy and terms: section header"
@@ -5631,9 +5625,6 @@
           }
         }
       }
-    },
-    "Nothing about you is kept anywhere else. This test build has no account and sends nothing." : {
-      "comment" : "Delete my data: nothing is held off the iPhone in Stage A"
     },
     "Nothing goes until you say yes a second time. Deleting can’t be undone." : {
       "comment" : "Delete my data tour, step 2"
@@ -8066,9 +8057,6 @@
     "That look couldn’t be saved. Try again." : {
       "comment" : "Toast when saving a look fails"
     },
-    "That look’s piece photos and your try-on photo, only when you tap Try it on, with its own permission." : {
-      "comment" : "Privacy and terms: what Try it on would send"
-    },
     "That passphrase doesn’t open this copy." : {
       "comment" : "Check or Restore: the passphrase is wrong",
       "localizations" : {
@@ -8168,9 +8156,6 @@
           }
         }
       }
-    },
-    "The full privacy policy and terms are still being written." : {
-      "comment" : "Privacy and terms: under the policy rows, before the pages exist"
     },
     "The inside leg length you like, from a pair of trousers that fits." : {
       "comment" : "Measurement help"
@@ -10330,8 +10315,23 @@
     "Ask the stylist" : {
       "comment" : "Quick ideas label: tries the cloud stylist again"
     },
+    "Get styling access" : {
+      "comment" : "Button in Style Me when the server shows no styling access: opens Styling access"
+    },
     "Made on this iPhone, free" : {
       "comment" : "Caption under Try a different outfit when Quick ideas on the phone will answer"
+    },
+    "The privacy policy and terms aren’t on the website yet." : {
+      "comment" : "Privacy and terms: under the policy rows, before the pages are published"
+    },
+    "The stylist’s ideas, try-on pictures, signing in and purchases need a connection." : {
+      "comment" : "Help: What needs a connection"
+    },
+    "This doesn’t delete your account or what the app’s server keeps for it. To delete those, sign in and use Delete my account in Privacy and terms." : {
+      "comment" : "Delete my data: what it leaves on the server, and where to delete that"
+    },
+    "Your closet, laundry, suitcases and saved looks work offline. Without a connection, Style Me makes Quick ideas on this iPhone." : {
+      "comment" : "Help: What needs a connection, the quieter line"
     }
   },
   "version" : "1.0"
