@@ -161,6 +161,21 @@ nonisolated struct RoomLayout: Equatable, Sendable {
         target(plan.rect(for: control))
     }
 
+    /// The lamp's tap area (N3, the light switch): its drawing grown to 44 x 44 points, then
+    /// nudged sideways off any control's area it reaches into, keeping its size. In the wide iPad
+    /// room the name sign hangs just beside the lamp, a few points into its area, and keeps its
+    /// own taps; the lamp's area still covers most of the drawing.
+    var lampTarget: CGRect {
+        var lamp = target(plan.lamp)
+        for control in RoomControl.allCases where control != .wardrobe {
+            let other = target(for: control)
+            let overlap = lamp.intersection(other)
+            guard !overlap.isNull, overlap.width >= 0.5, overlap.height >= 0.5 else { continue }
+            lamp.origin.x += other.midX < lamp.midX ? overlap.width : -overlap.width
+        }
+        return lamp
+    }
+
     /// The tap areas of the frames under the shelf (Phase 12a; 44 points since the Stage A
     /// audit). The cards are only 35 stage units apart, about 34 points on an iPhone 17, so a
     /// 44-point area centred on each would overlap its neighbour. Instead the areas stand side by

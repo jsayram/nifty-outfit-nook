@@ -10,20 +10,30 @@ import SwiftUI
 public struct AppRootView: View {
     @State private var model: AppRootModel
     @State private var tours: TourCenter
+    @State private var appearance: AppearanceModel
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(launch: AppLaunch) {
         _model = State(initialValue: AppRootModel(launch: launch))
         _tours = State(initialValue: TourCenter(store: launch.tours, launch: launch.tourOptions))
+        _appearance = State(initialValue: AppearanceModel(store: launch.appearance))
     }
 
     public var body: some View {
         content
             // A short cross-fade between onboarding and the tabs, or none with Reduce Motion.
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: model.screen)
-            .task { await model.start() }
+            .task {
+                await model.start()
+                // The debug `-onboarding reset` flag may have erased it.
+                appearance.reload()
+            }
             .environment(\.tourCenter, tours)
+            // Her light or dark choice, or the iPhone's until she makes one (N3). It's set on the
+            // window, so sheets and alerts follow it too.
+            .preferredColorScheme(appearance.colorScheme)
+            .environment(\.setDarkMode, SetDarkModeAction { appearance.setDark($0) })
     }
 
     @ViewBuilder private var content: some View {
@@ -48,6 +58,8 @@ public struct AppRootView: View {
                     DataDeletedAction {
                         // As on a fresh install, the tours can start again once she's back on Home.
                         tours.forgetSession()
+                        // Delete my data erased her appearance choice: follow the iPhone again.
+                        appearance.reload()
                         model.dataDeleted()
                     }
                 )

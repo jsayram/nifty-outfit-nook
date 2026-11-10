@@ -19,6 +19,13 @@ struct RoomCanvas: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.roomIsStillImage) private var isStillImage
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.setDarkMode) private var setDarkMode
+
+    /// Maya wakes when the lights come back on (N3): her z's fade and she wags, then she
+    /// settles back to sleep. Counts each wake, so each one starts its own wag.
+    @State private var mayaWakes = 0
+    @State private var mayaIsAwake = false
 
     /// Where everything sits: the phone's room, or the iPad's tall or wide room (Phase 15a).
     private var plan: RoomPlan { layout.plan }
@@ -41,6 +48,17 @@ struct RoomCanvas: View {
         .accessibilityElement(children: .contain)
         // Which arrangement shows, for the UI tests: home.room.upright, .tall or .wide.
         .accessibilityIdentifier("home.room.\(plan.kind.rawValue)")
+        .onChange(of: colorScheme) { old, new in
+            if old == .dark, new == .light, !isStillImage {
+                mayaWakes += 1
+                mayaIsAwake = true
+            }
+        }
+        .task(id: mayaWakes) {
+            guard mayaWakes > 0 else { return }
+            try? await Task.sleep(for: .seconds(2.5))
+            mayaIsAwake = false
+        }
     }
 
     // MARK: - Wall and floor
@@ -77,7 +95,7 @@ struct RoomCanvas: View {
                 .roomFrame(layout.rect(plan.lampGlow))
             art(.desk, at: plan.desk)
             art(.laptop, at: plan.laptop)
-            art(.lamp, at: plan.lamp)
+            lamp
             art(.chair, at: plan.chair)
             maya
             suitcase
@@ -112,15 +130,57 @@ struct RoomCanvas: View {
     }
 
     /// Maya asleep on the rug with her z's (RD-12). Decoration only: hidden from VoiceOver, and
-    /// taps go through her to nothing.
+    /// taps go through her to nothing. When the lights come back on she wakes for a moment
+    /// (N3): her z's fade out, and she wags unless Reduce Motion is on.
     private var maya: some View {
         ZStack(alignment: .topLeading) {
-            art(.maya, at: plan.maya)
+            MayaWag(wakes: mayaWakes, wags: !reduceMotion)
+                .roomFrame(layout.rect(plan.maya))
             SleepyZs(scale: layout.scale * plan.mayaScale, animates: !reduceMotion && !isStillImage)
                 .roomFrame(layout.rect(plan.mayaZs))
+                .opacity(mayaIsAwake ? 0 : 1)
+                .animation(.easeInOut(duration: 0.4), value: mayaIsAwake)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// The desk lamp is the light switch (N3, decided 6 November 2026): a tap turns the lights
+    /// off for dark mode, or back on for light mode, for the whole app. The same choice as the
+    /// Dark mode switch in Profile.
+    private var lamp: some View {
+        let lightsOn = colorScheme == .light
+        return ZStack(alignment: .topLeading) {
+            art(.lamp, at: plan.lamp)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            Button {
+                setDarkMode(lightsOn)
+            } label: {
+                Color.clear.contentShape(Rectangle())
+            }
+            .buttonStyle(RoomControlButtonStyle())
+            .hoverEffect(.highlight)
+            .roomFrame(layout.lampTarget)
+            .accessibilityLabel(Text("Lamp", bundle: .module, comment: "VoiceOver label for the desk lamp"))
+            .accessibilityValue(
+                lightsOn
+                    ? Text("Lights on", bundle: .module, comment: "VoiceOver value of the lamp in light mode")
+                    : Text("Lights off", bundle: .module, comment: "VoiceOver value of the lamp in dark mode")
+            )
+            .accessibilityHint(
+                lightsOn
+                    ? Text(
+                        "Turns the lights off, for dark mode.", bundle: .module,
+                        comment: "VoiceOver hint on the lamp in light mode")
+                    : Text(
+                        "Turns the lights on, for light mode.", bundle: .module,
+                        comment: "VoiceOver hint on the lamp in dark mode")
+            )
+            .accessibilityIdentifier("home.lamp")
+            // Right after the laptop on the desk, before the drawers.
+            .accessibilitySortPriority(RoomControl.laptop.sortPriority - 0.5)
+        }
     }
 
     private var wardrobe: some View {

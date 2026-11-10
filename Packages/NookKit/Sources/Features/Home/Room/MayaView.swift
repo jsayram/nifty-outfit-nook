@@ -114,3 +114,50 @@ nonisolated struct SleepyZShape: Shape {
         return path.applying(tilt.concatenating(fit))
     }
 }
+
+/// Maya's wake when the lights come back on (N3). There's no awake drawing of her, so she wags
+/// with her whole body: a few quick swings from her paws, about a second long, with a small
+/// stretch at the start. With `wags` off (Reduce Motion) she stays still and only her z's
+/// cross-fade.
+struct MayaWag: View {
+    /// Goes up by one each time she wakes; each change starts one wag.
+    let wakes: Int
+    let wags: Bool
+
+    var body: some View {
+        if wags {
+            RoomArtImage(.maya)
+                .keyframeAnimator(initialValue: MayaWagFrame(), trigger: wakes) { content, frame in
+                    content
+                        .scaleEffect(x: 1, y: frame.stretch, anchor: .bottom)
+                        .rotationEffect(.degrees(frame.angle), anchor: .bottom)
+                } keyframes: { _ in
+                    KeyframeTrack(\.stretch) {
+                        CubicKeyframe(1.05, duration: 0.18)
+                        CubicKeyframe(1, duration: 0.22)
+                    }
+                    KeyframeTrack(\.angle) {
+                        LinearKeyframe(0, duration: 0.15)
+                        // Side to side, a little smaller each time.
+                        CubicKeyframe(-4, duration: 0.12)
+                        CubicKeyframe(4, duration: 0.12)
+                        CubicKeyframe(-3, duration: 0.12)
+                        CubicKeyframe(3, duration: 0.12)
+                        CubicKeyframe(-2, duration: 0.12)
+                        CubicKeyframe(2, duration: 0.12)
+                        CubicKeyframe(0, duration: 0.15)
+                    }
+                }
+        } else {
+            RoomArtImage(.maya)
+        }
+    }
+}
+
+/// One moment of Maya's wag.
+nonisolated struct MayaWagFrame: Sendable {
+    /// Degrees she leans, from her paws.
+    var angle: Double = 0
+    /// How tall she stretches, as she lifts her head.
+    var stretch: CGFloat = 1
+}

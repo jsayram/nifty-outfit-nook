@@ -32,6 +32,8 @@ struct ProfilePage: View {
 
     @Environment(\.closetIsStillImage) private var isStillImage
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.setDarkMode) private var setDarkMode
 
     var body: some View {
         if isStillImage {
@@ -74,6 +76,7 @@ struct ProfilePage: View {
         case .loaded:
             VStack(alignment: .leading, spacing: NookSpacing.groupGap) {
                 you
+                appearance
                 styleMe
                 help
             }
@@ -115,6 +118,16 @@ struct ProfilePage: View {
             ) {
                 actions.openSheet(.tryOnPhoto)
             }
+        }
+    }
+
+    /// Dark mode (N3), in its own group so it's easy to find. The same choice as the lamp in her
+    /// room: it shows what's on screen, so it follows the iPhone until she chooses.
+    private var appearance: some View {
+        group(ProfileText.appearanceSection) {
+            SettingsSwitchRow(
+                title: ProfileText.darkModeRow, detail: ProfileText.darkModeDetail, systemImage: "moon",
+                isOn: colorScheme == .dark, identifier: "profile.darkMode", set: { setDarkMode($0) })
         }
     }
 

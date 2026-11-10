@@ -28,10 +28,11 @@ Top to bottom, as `settings.html`:
 
 1. **The wall.** "Profile" in display type, her name sign in the middle (the Home drawing at 1.3 times, her name as live text) and a floor plant. The sign is a button that opens the name sheet. An empty name shows "Hello" (RD-03.2). At the accessibility sizes the plant goes; the row below carries the name at full size.
 2. **Name on your sign** (value: the name, or Hello), **Styling access** (Phase 30a; value: Not subscribed, Free month, Subscribed, Payment problem or Ended; opens the paywall and status screen in `docs/payments.md`), **Fit and measurements**, **Your try-on photo** (Added or Not added).
-3. **Style Me:** Preferences (Mine + one idea or Only mine), Avoid repeating outfits for (1 week, 2 weeks, I don't mind), and the Track laundry switch.
-4. **Help and privacy:** Accessibility, Help, Send feedback, Privacy and terms, Delete my data.
+3. **Appearance** (N3): the Dark mode switch, the same choice as the lamp in her room (`docs/home-room.md`, "The lamp is the light switch").
+4. **Style Me:** Preferences (Mine + one idea or Only mine), Avoid repeating outfits for (1 week, 2 weeks, I don't mind), and the Track laundry switch.
+5. **Help and privacy:** Accessibility, Help, Send feedback, Privacy and terms, Delete my data.
 
-Since Phase 14b, Track laundry is a switch and the fourth group opens real screens (`docs/settings.md`). App tours comes back in 16b, with tours to replay.
+Since Phase 14b, Track laundry is a switch and the Help and privacy group opens real screens (`docs/settings.md`). App tours comes back in 16b, with tours to replay.
 
 **Name on your sign.** One field, a small sign above it that shows what she types as she types, the note "Leave it empty and the sign says Hello", and Save. `NameRules.signName`: trimmed, one line, at most 20 characters. A problem shows under the field and Save is dimmed. Saving closes the sheet with "Your sign now says Lily."
 

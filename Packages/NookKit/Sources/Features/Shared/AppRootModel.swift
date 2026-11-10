@@ -41,6 +41,9 @@ nonisolated public struct AppLaunch: Sendable {
     /// Called after a restore or Undo restore, before the screens are built again: the app gives
     /// `services` fresh stores, since the old ones remember what the store held before.
     public var reload: @Sendable () -> Void
+    /// Light, dark or the iPhone's appearance, kept across launches (N3). Delete my data erases
+    /// it with the rest, and the root reads it again.
+    public var appearance: any AppearanceStore
 
     public init(
         onboarding: any OnboardingStateStore,
@@ -55,7 +58,8 @@ nonisolated public struct AppLaunch: Sendable {
         erasedOnReset: [any ErasableStore] = [],
         backups: (any BackupService)? = nil,
         storeCopy: (any StoreCopyExporter)? = nil,
-        reload: @escaping @Sendable () -> Void = {}
+        reload: @escaping @Sendable () -> Void = {},
+        appearance: any AppearanceStore = InMemoryAppearanceStore()
     ) {
         self.onboarding = onboarding
         self.tours = tours
@@ -70,6 +74,7 @@ nonisolated public struct AppLaunch: Sendable {
         self.backups = backups
         self.storeCopy = storeCopy
         self.reload = reload
+        self.appearance = appearance
     }
 }
 

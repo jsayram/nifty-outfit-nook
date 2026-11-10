@@ -31,6 +31,21 @@ struct RoomLayoutTests {
         }
     }
 
+    /// N3: the lamp is the light switch. Its tap area is at least 44 points and takes no taps from
+    /// the laptop, the drawers or anything else.
+    @Test(arguments: PhoneScreen.allCases)
+    func lampIsAFullTargetOfItsOwn(phone: PhoneScreen) {
+        let layout = phone.layout
+        let lamp = layout.lampTarget
+        #expect(lamp.width >= 44 && lamp.height >= 44, "The lamp on \(phone) is \(lamp.size)")
+        for control in RoomControl.allCases where control != .wardrobe {
+            let overlap = lamp.intersection(layout.target(control.stageRect))
+            #expect(
+                overlap.isNull || overlap.width < 0.5 || overlap.height < 0.5,
+                "The lamp and \(control) overlap by \(overlap.size) on \(phone)")
+        }
+    }
+
     @Test(arguments: PhoneScreen.allCases)
     func everyControlIsBetweenTheBarsOrReachableByScrolling(phone: PhoneScreen) {
         let layout = phone.layout
