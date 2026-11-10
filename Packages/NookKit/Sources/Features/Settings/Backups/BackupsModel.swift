@@ -135,6 +135,13 @@ final class BackupsModel {
     func pick(for flow: Flow) {
         self.flow = nil
         pickingFlow = flow
+        #if DEBUG
+            // N4: `-fake-picked-backup` hands over a file instead of opening the Files picker.
+            if DebugPickedBackup.kind != nil, let service {
+                Task { picked(await DebugPickedBackup.file(using: service)) }
+                return
+            }
+        #endif
         isPicking = true
     }
 

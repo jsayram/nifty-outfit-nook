@@ -79,6 +79,9 @@ public enum FixtureLaundryState: String, CaseIterable, Sendable {
     case some
     /// Tracking on, eight pieces dirty.
     case full
+    /// Tracking on, every piece in her closet dirty, so nothing can be worn today (N4: the empty
+    /// starting piece and swap lists).
+    case all
 }
 
 /// The source Style Me remembers at launch (Phase 13, FR-67), to show Home's suitcase and
@@ -125,6 +128,18 @@ public enum FixtureWardrobeState: String, CaseIterable, Sendable {
     case full
 }
 
+/// N4: the set without its suitcases, for Style Me's source sheet with the main closet only.
+public enum FixtureSuitcasesState: String, CaseIterable, Sendable {
+    /// No suitcases. Style Me remembers the main closet.
+    case none
+}
+
+/// N4: the set's looks, for the empty saved states that a closet with pieces doesn't reach.
+public enum FixtureLooksState: String, CaseIterable, Sendable {
+    /// Every look is an unsaved Style Me result: nothing saved, but results in All.
+    case unsaved
+}
+
 /// A fixture set plus options, as read from `-fixtures <set>[:<option>]...`.
 ///
 /// Each option after a colon is one of:
@@ -134,7 +149,8 @@ public enum FixtureWardrobeState: String, CaseIterable, Sendable {
 /// - `draft=<state>` (`FixtureDraftState`), such as `draft=add`;
 /// - `photos=<state>` (`FixturePhotoState`), such as `photos=samples`;
 /// - `wardrobe=<state>` (`FixtureWardrobeState`), such as `wardrobe=full`;
-/// - `source=<state>` (`FixtureSourceState`), such as `source=suitcase`.
+/// - `source=<state>` (`FixtureSourceState`), such as `source=suitcase`;
+/// - `suitcases=none` (`FixtureSuitcasesState`) and `looks=unsaved` (`FixtureLooksState`).
 ///
 /// They can come in any order: `-fixtures demo:slow:weather=night:laundry=some`.
 public struct FixtureConfiguration: Hashable, Sendable {
@@ -152,6 +168,10 @@ public struct FixtureConfiguration: Hashable, Sendable {
     public var wardrobe: FixtureWardrobeState
     /// `nil` keeps the set's own remembered source (the main closet).
     public var source: FixtureSourceState?
+    /// `nil` keeps the set's own suitcases.
+    public var suitcases: FixtureSuitcasesState?
+    /// `nil` keeps the set's own looks.
+    public var looks: FixtureLooksState?
 
     public init(
         set: FixtureSet = .demo,
@@ -161,7 +181,9 @@ public struct FixtureConfiguration: Hashable, Sendable {
         draft: FixtureDraftState? = nil,
         photos: FixturePhotoState = .real,
         wardrobe: FixtureWardrobeState = .demo,
-        source: FixtureSourceState? = nil
+        source: FixtureSourceState? = nil,
+        suitcases: FixtureSuitcasesState? = nil,
+        looks: FixtureLooksState? = nil
     ) {
         self.set = set
         self.behavior = behavior
@@ -171,6 +193,8 @@ public struct FixtureConfiguration: Hashable, Sendable {
         self.photos = photos
         self.wardrobe = wardrobe
         self.source = source
+        self.suitcases = suitcases
+        self.looks = looks
     }
 
     /// Debug builds only: Release ships no sample data and no `-fixtures` argument (Phase 20a).
@@ -201,6 +225,8 @@ public struct FixtureConfiguration: Hashable, Sendable {
                 case "photos": photos = FixturePhotoState(rawValue: pair[1]) ?? photos
                 case "wardrobe": wardrobe = FixtureWardrobeState(rawValue: pair[1]) ?? wardrobe
                 case "source": source = FixtureSourceState(rawValue: pair[1]) ?? source
+                case "suitcases": suitcases = FixtureSuitcasesState(rawValue: pair[1]) ?? suitcases
+                case "looks": looks = FixtureLooksState(rawValue: pair[1]) ?? looks
                 default: continue
                 }
             }

@@ -8,7 +8,7 @@ public actor InMemoryTourProgressStore: TourProgressStore {
 
     public init(progress: TourProgress = .fresh, options: StoreOptions = StoreOptions()) {
         stored = progress
-        self.options = options
+        self.options = options.named("tours")
     }
 
     public func progress() async throws(StoreError) -> TourProgress {

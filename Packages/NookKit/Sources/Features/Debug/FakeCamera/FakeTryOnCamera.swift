@@ -52,6 +52,8 @@
         }
 
         func start() async -> Bool {
+            // N4: `-fail camera` is a camera that doesn't start; `-hold camera` one still starting.
+            if await DebugFaults.current.fault(for: ["camera"]) != nil { return false }
             task = Task { [continuation, script, step] in
                 var index = 0
                 while !Task.isCancelled {
@@ -70,7 +72,11 @@
 
         func flip() async {}
 
-        func takePhoto() async -> Data? { photo }
+        func takePhoto() async -> Data? {
+            // N4: `-fail capture` is a photo that didn't come out.
+            if await DebugFaults.current.fault(for: ["capture"]) != nil { return nil }
+            return photo
+        }
 
         func preview() -> AnyView {
             AnyView(

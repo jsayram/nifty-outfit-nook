@@ -40,6 +40,14 @@ public struct MockStylist: Stylist {
                 throw .cancelled
             }
         }
+        #if DEBUG
+            // N4: `-hold stylist` keeps Your looks styling; `-fail stylist[=<variant>]` fails it.
+            switch await DebugFaults.current.fault(for: ["stylist"]) {
+            case .cancelled?: throw .cancelled
+            case .fail(let failure)?: throw StylistError.debug(failure.variant)
+            case nil: break
+            }
+        #endif
         if Task.isCancelled { throw .cancelled }
         let call = calls.next()
         switch mode {
@@ -64,6 +72,24 @@ public struct MockStylist: Stylist {
         return .partial(result, missing: [MissingVersion(version: .somethingNew, reason: .noOtherOwnedPiece)])
     }
 }
+
+#if DEBUG
+    extension StylistError {
+        /// N4: the error a `-fail stylist` variant names: `offline`, `timed-out`, `changed` (the
+        /// request needs another look), `limited` (a server limit), `consent`, or anything else for
+        /// `notCompleted`.
+        static func debug(_ variant: String?) -> StylistError {
+            switch variant {
+            case "offline": .offline
+            case "timed-out": .timedOut
+            case "changed": .invalidRequest(.suitcaseNotFound)
+            case "limited": .limited(.rateLimited(retryAfterSeconds: 60))
+            case "consent": .needsConsent
+            default: .notCompleted
+            }
+        }
+    }
+#endif
 
 /// Counts styling calls, for `failingOnce`. Shared by copies of the stylist.
 private final class CallCounter: Sendable {

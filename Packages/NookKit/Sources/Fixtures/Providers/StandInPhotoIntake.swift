@@ -33,6 +33,15 @@ public struct StandInPhotoIntake: PhotoIntake {
                 throw .cancelled
             }
         }
+        #if DEBUG
+            // N4: `-hold photo` keeps the photo step working; `-fail photo` is a photo that couldn't be
+            // saved (`-fail photo=unreadable` one that couldn't be read).
+            switch await DebugFaults.current.fault(for: ["photo"]) {
+            case .cancelled?: throw .cancelled
+            case .fail(let failure)?: throw failure.variant == "unreadable" ? .unreadable : .notSaved
+            case nil: break
+            }
+        #endif
         if Task.isCancelled { throw .cancelled }
         if fails { throw .unreadable }
         return Self.samplePhoto

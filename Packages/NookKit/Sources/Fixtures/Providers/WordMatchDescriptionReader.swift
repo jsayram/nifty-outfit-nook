@@ -31,6 +31,14 @@ public struct WordMatchDescriptionReader: GarmentDescriptionReader {
                 throw .cancelled
             }
         }
+        #if DEBUG
+            // N4: `-hold describe` keeps the suggestions loading; `-fail describe` can't read the words.
+            switch await DebugFaults.current.fault(for: ["describe"]) {
+            case .cancelled?: throw .cancelled
+            case .fail?: throw .unavailable
+            case nil: break
+            }
+        #endif
         if Task.isCancelled { throw .cancelled }
         return Self.suggestions(for: description)
     }

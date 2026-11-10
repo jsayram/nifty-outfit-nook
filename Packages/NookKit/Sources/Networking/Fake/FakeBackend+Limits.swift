@@ -336,7 +336,7 @@ import Foundation
                         }
                         let first = existing.tryOnImage == nil
                         if first, let request = existing.tryOnRequest {
-                            if behaviour == .fails {
+                            if behaviour.isFailing {
                                 existing.failed = true
                                 existing.counted = false
                                 state.ledger.actions[actionKey] = existing
@@ -388,7 +388,7 @@ import Foundation
                         again.fromCache = true
                         action.style = again
                         action.counted = false
-                    } else if state.limits.stylist == .fails {
+                    } else if state.limits.stylist.isFailing {
                         state.ledger.jobsRun += 1
                         return .reply(
                             error(
@@ -483,7 +483,7 @@ import Foundation
                 if let readyAt = action.tryOnReadyAt, time < readyAt { return .state("running", action, usage: nil) }
                 if action.expired { return .state("expired", action, usage: nil) }
                 if action.tryOnImage == nil, let tryOnRequest = action.tryOnRequest {
-                    if behaviour == .fails {
+                    if behaviour.isFailing {
                         action.failed = true
                         action.counted = false
                         state.ledger.actions[actionKey] = action

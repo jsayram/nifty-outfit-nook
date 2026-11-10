@@ -7,7 +7,7 @@ public actor InMemoryProfileStore: ProfileStore {
 
     public init(profile: Profile, options: StoreOptions = StoreOptions()) {
         stored = profile
-        self.options = options
+        self.options = options.named("profile")
     }
 
     public func profile() async throws(StoreError) -> Profile {

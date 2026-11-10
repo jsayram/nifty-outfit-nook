@@ -30,6 +30,10 @@ struct NiftyOutfitNookApp: App {
             if arguments.contains("-frame-stats") {
                 FrameStats.shared.start(autoScroll: arguments.contains("-auto-scroll"))
             }
+            // N4: `-faults-wait` arms `-hold` and `-fail` on a Darwin notification, and
+            // `-fake-picked-photo` stands in for the system photo picker (`DebugCaptureHooks`).
+            DebugFaults.listenForArming()
+            DebugCaptureHooks.installPickedPhoto(arguments)
         }
     #endif
 
@@ -132,7 +136,8 @@ struct NiftyOutfitNookApp: App {
             // builds only.
             let onboardingOptions = OnboardingLaunchOptions(launchArguments: arguments)
             let tourOptions = TourLaunchOptions(launchArguments: arguments)
-            let offersSampleCloset = true
+            // N4: `-no-sample-closet` shows onboarding as Release has it.
+            let offersSampleCloset = DebugCaptureHooks.offersSampleCloset(arguments)
             // N3: `-onboarding skip` keeps the appearance choice in memory, so every UI test starts
             // from the iPhone's appearance, whatever an earlier test chose.
             let appearance: any AppearanceStore =
@@ -153,21 +158,34 @@ struct NiftyOutfitNookApp: App {
         // Phase 31: Apple's MetricKit crash and speed reports, kept on the phone.
         AppDiagnostics.start()
 
+        // The recovery screen can still export the raw store, encrypted (Phase 21b).
+        func recovery(_ problem: StoreOpenProblem) -> AppLaunch {
+            AppLaunch(
+                onboarding: InMemoryOnboardingStore(), tours: InMemoryTourProgressStore(),
+                services: { _ in FixtureServices.make(FixtureConfiguration(set: .empty)) },
+                tourOptions: .standard, offersSampleCloset: offersSampleCloset,
+                storeProblem: problem, storeCopy: StoreCopyExport(location: .app),
+                appearance: appearance)
+        }
+        #if DEBUG
+            // N4: `-store-problem <problem>` shows the recovery screen without opening the store.
+            if let problem = DebugCaptureHooks.storeProblem(arguments) { return recovery(problem) }
+        #endif
         let storage: NookStorage
         switch NookStorage.open(backups: .app) {
         case .ready(let opened):
             storage = opened
         case .problem(let problem):
-            // The recovery screen can still export the raw store, encrypted (Phase 21b).
-            return AppLaunch(
-                onboarding: InMemoryOnboardingStore(), tours: InMemoryTourProgressStore(),
-                services: { _ in FixtureServices.make(FixtureConfiguration(set: .empty)) },
-                tourOptions: .standard, offersSampleCloset: offersSampleCloset,
-                storeProblem: StoreOpenProblem(problem), storeCopy: StoreCopyExport(location: .app),
-                appearance: appearance)
+            return recovery(StoreOpenProblem(problem))
         }
-        let onboarding = storage.onboarding
-        let tours = storage.tours
+        #if DEBUG
+            // N4: `-hold` and `-fail` reach the tours and onboarding kept in the store.
+            let onboarding = DebugCaptureHooks.wrap(storage.onboarding)
+            let tours = DebugCaptureHooks.wrap(storage.tours)
+        #else
+            let onboarding = storage.onboarding
+            let tours = storage.tours
+        #endif
         // Her photos (Phase 22a), in the folder backups carry. Delete my data removes it with
         // the backups' files (`BackupDataEraser`, in `storage.erasableData`). Their thumbnails
         // and the sweep for files nothing points to came in Phase 22b.
@@ -186,7 +204,12 @@ struct NiftyOutfitNookApp: App {
         let account = AppGateway.account
         let paid = AppGateway.paid
         // 32b (L9): true only in a Release build with no backend settings.
-        let cloudUnavailable = AppGateway.cloudUnavailable
+        #if DEBUG
+            // N4: `-cloud-unavailable` says so in a Debug build too.
+            let cloudUnavailable = AppGateway.cloudUnavailable || DebugCaptureHooks.cloudUnavailable(arguments)
+        #else
+            let cloudUnavailable = AppGateway.cloudUnavailable
+        #endif
         // Release: Better Auth, or the fake backend in a Debug build. None in a Release build with no
         // backend settings, where the cloud features say they aren't available right now.
         let offersSignIn = !cloudUnavailable
@@ -206,20 +229,31 @@ struct NiftyOutfitNookApp: App {
         // 30b: picture packs, with their transaction listener started now too.
         let credits = AppSubscriptions.credits
         AppJobs.all = [keptJobs, sampleJobs]
+        #if DEBUG
+            // N4: `-closet own` opens her own closet in the store with `-onboarding skip`.
+            let opensOwnCloset = DebugCaptureHooks.opensOwnCloset(arguments)
+        #else
+            let opensOwnCloset = false
+        #endif
         return AppLaunch(
             onboarding: onboarding,
             tours: tours,
             profileSettings: storage.profileSettings,
             services: { closet in
-                switch offersSampleCloset ? closet : .empty {
+                switch offersSampleCloset && !(opensOwnCloset && closet == nil) ? closet : .empty {
                 case .empty:
                     // Her own closet, kept in the store, with Backups (Phase 21b) and her own
                     // photos from the camera and the system picker, kept without their metadata
                     // (Phase 22a). Delete my data also deletes the migration's safety copy, the
                     // backups' files and the photos. The stores are read here, so after a restore
                     // (`reload`) the services get fresh ones.
-                    let tours = storage.tours
-                    let onboarding = storage.onboarding
+                    #if DEBUG
+                        let tours = DebugCaptureHooks.wrap(storage.tours)
+                        let onboarding = DebugCaptureHooks.wrap(storage.onboarding)
+                    #else
+                        let tours = storage.tours
+                        let onboarding = storage.onboarding
+                    #endif
                     var services = FixtureServices.make(
                         configuration, startingCloset: .empty, tours: tours, onboarding: onboarding,
                         stores: storage.stores)
@@ -258,6 +292,10 @@ struct NiftyOutfitNookApp: App {
                         await local.delete(.thisDevice).isLocalComplete
                     }
                     services.iCloud = iCloud
+                    #if DEBUG
+                        // N4: `-fake-icloud` stands in for sync, so the iCloud screen can be seen.
+                        if let fake = DebugCaptureHooks.iCloud(arguments) { services.iCloud = fake }
+                    #endif
                     services.deletion = AccountDataDeletion(
                         local: local, account: account, iCloud: iCloud ?? NoICloudCopy())
                     services.backups = storage.backups
@@ -270,6 +308,9 @@ struct NiftyOutfitNookApp: App {
                     services.subscriptions = subscriptions
                     services.credits = credits
                     AppGateway.installSupport(into: &services)
+                    #if DEBUG
+                        DebugCaptureHooks.wrap(&services)
+                    #endif
                     return services
                 case .sample, nil:
                     // The debug sample closet, in memory. `-onboarding skip` (`closet` is nil)
@@ -302,6 +343,9 @@ struct NiftyOutfitNookApp: App {
                     services.subscriptions = subscriptions
                     services.credits = credits
                     AppGateway.installSupport(into: &services)
+                    #if DEBUG
+                        DebugCaptureHooks.wrap(&services)
+                    #endif
                     return services
                 }
             },
@@ -319,6 +363,8 @@ struct NiftyOutfitNookApp: App {
                     await AppTryOn.seedIfAsked(arguments: arguments, storage: storage, photos: photos)
                     await AppTryOn.prepareFakeIfAsked(arguments: arguments)
                     await AppDiagnostics.seedIfAsked(arguments: arguments)
+                    // N4: last, after the launch's own sign-ins.
+                    await DebugCaptureHooks.applyBackendMode(arguments)
                 #endif
                 if let imageFiles {
                     Task.detached(priority: .utility) { await imageFiles.removeUnused() }

@@ -21,6 +21,14 @@ public struct FixtureWeatherProvider: WeatherProvider {
                 throw .cancelled
             }
         }
+        #if DEBUG
+            // N4: `-hold weather` keeps "Checking the weather" on screen; `-fail weather` can't read it.
+            switch await DebugFaults.current.fault(for: ["weather"]) {
+            case .cancelled?: throw .cancelled
+            case .fail?: throw .unavailable
+            case nil: break
+            }
+        #endif
         if isOffline { throw .unavailable }
         return snapshot
     }

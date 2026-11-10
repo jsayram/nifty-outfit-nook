@@ -12,12 +12,17 @@ import Foundation
         /// 27c: answers like `normal`, but only after `slowAnswer`, like a busy provider, so there's
         /// time to leave the screen, browse and search before the looks are ready.
         case slow
+        /// N4: like `fails`, after `slowAnswer`, so she can leave the screen and see the failed banner.
+        case slowFails = "slow-fails"
         /// F1c: the server's record shows no styling access for her account (30c): 403
         /// entitlement_required, with nothing sent or counted.
         case noStylingAccess
 
         /// How long `slow` takes. Under the paid-text try timeout (40 seconds), so one try answers.
         public static let slowAnswer: Duration = .seconds(15)
+
+        /// The provider fails.
+        var isFailing: Bool { self == .fails || self == .slowFails }
     }
 
     /// The fake backend's stand-in stylist: the same plain rules as the backend's fake

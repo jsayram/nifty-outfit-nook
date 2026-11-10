@@ -54,7 +54,13 @@ public final class ScriptedSubscriptionService: SubscriptionService {
 
     public func subscriptionGroupID() async -> String? { groupID }
     public func cachedStatus() async -> SubscriptionStatus { state.withLock { $0.status } }
-    public func refresh() async -> SubscriptionStatus { state.withLock { $0.status } }
+    public func refresh() async -> SubscriptionStatus {
+        #if DEBUG
+            // N4: `-hold subscription-load` keeps Styling access loading.
+            _ = await DebugFaults.current.fault(for: ["subscription-load"])
+        #endif
+        return state.withLock { $0.status }
+    }
 
     public func statusUpdates() async -> AsyncStream<SubscriptionStatus> {
         let (stream, continuation) = AsyncStream.makeStream(of: SubscriptionStatus.self)
@@ -67,11 +73,28 @@ public final class ScriptedSubscriptionService: SubscriptionService {
     }
 
     public func offer() async throws(SubscriptionProblem) -> SubscriptionOffer {
+        #if DEBUG
+            // N4: `-hold subscription-load` keeps Styling access loading; `-fail offer[=<problem>]`
+            // is an offer the App Store couldn't give.
+            switch await DebugFaults.current.fault(for: ["subscription-load", "offer"]) {
+            case .cancelled?: throw .failed
+            case .fail(let failure)?: throw SubscriptionProblem.debug(failure.variant)
+            case nil: break
+            }
+        #endif
         guard let offer = state.withLock({ $0.offer }) else { throw .unavailable }
         return offer
     }
 
     public func purchase() async -> PurchaseOutcome {
+        #if DEBUG
+            // N4: `-hold purchase` keeps "Subscribing"; `-fail purchase[=<problem>]` fails it.
+            switch await DebugFaults.current.fault(for: ["purchase"]) {
+            case .cancelled?: return .cancelled
+            case .fail(let failure)?: return .failed(.debug(failure.variant))
+            case nil: break
+            }
+        #endif
         let outcome = state.withLock { state in
             state.purchases += 1
             if case .purchased(let status) = state.purchase { state.status = status }
@@ -116,6 +139,22 @@ public final class ScriptedSubscriptionService: SubscriptionService {
                 willAutoRenew: true, checkedAt: date))
     }
 }
+
+#if DEBUG
+    extension SubscriptionProblem {
+        /// N4: the problem a `-fail` variant names: `offline`, `not-allowed`, `unavailable`,
+        /// `unverified`, or anything else for `failed`. No variant is `unavailable`.
+        static func debug(_ variant: String?) -> SubscriptionProblem {
+            switch variant {
+            case "offline": .offline
+            case "not-allowed": .notAllowed
+            case nil, "unavailable": .unavailable
+            case "unverified": .unverified
+            default: .failed
+            }
+        }
+    }
+#endif
 
 extension SubscriptionOffer {
     /// The sample offer: the local StoreKit configuration's PLACEHOLDER price and the PRD's free

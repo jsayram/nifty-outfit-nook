@@ -8,7 +8,8 @@
 # -toasts-stay and -animations, Phase 20a's -fixtures, the device checks' -device-checks,
 # -make-old-store, -migration-kill-at and -migration-pause-at, and 33a's -seed-tryon and
 # -cloud-tryon, and 33b's -fake-camera) aren't in it. 33a: nor is the drawn stand-in person the
-# simulator uses (SyntheticPerson), nor 33b's stand-in camera (FakeTryOnCamera).
+# simulator uses (SyntheticPerson), nor 33b's stand-in camera (FakeTryOnCamera). N4: nor the capture
+# hooks (DebugFaults behind -hold, -fail and -faults-wait, and DebugCaptureHooks' flags).
 # Phase 32b added the later debug screens and switches: the gateway and limits
 # labs, the diagnostics lab, the fake sign-in, the cloud stylist against the fake backend, the
 # seeded photo closet, the sample feedback screenshot, frame stats and the weather test switches.
@@ -55,7 +56,8 @@ for pattern in NookCatalog CatalogDemo CutoutBench LookBundleCatalog LookBundleS
     MigrationDebug DeviceFileChecks DeviceChecksScreen DeviceChecksSource FileCheckRow LockProbe SyntheticPerson \
     GatewayLabScreen GatewayLabControls LimitsLabScreen LimitsLabControls FeedbackSampleScreenshot \
     FakeGateway FakeBackend FakeAuthProvider FakeDeviceAttester FakeStylist FakeTryOn FakeToken FakeTryOnCamera DebugTryOnCamera \
-    FakeAppleIdentity FakeAppleToken LocalFakeAppleIssuer; do
+    FakeAppleIdentity FakeAppleToken LocalFakeAppleIssuer DebugFaults DebugCaptureHooks DebugPickedPhoto DebugPickedBackup \
+    FaultingBackupService FaultingTryOnPipeline FaultingFeedbackService DebugICloudSync; do
     if grep -q "$pattern" <<<"$symbols"; then
         echo "Release binary contains $pattern symbols" >&2
         failed=1
@@ -65,7 +67,9 @@ for argument in -catalog -cutout-bench -tour -onboarding -toasts-stay -animation
     -device-checks -make-old-store -migration-kill-at -migration-pause-at -seed-tryon -cloud-tryon \
     -gateway-lab -limits-lab -diagnostics-lab -diagnostics-sample-reports -fake-signed-in -cloud-stylist \
     -seed-photo-closet -feedback-sample-screenshot -frame-stats -weather-cities -weather-location \
-    -weather-settings-memory -fake-camera -local-backend -fake-apple-issuer; do
+    -weather-settings-memory -fake-camera -local-backend -fake-apple-issuer -faults-wait -store-problem \
+    -no-sample-closet -cloud-unavailable -backend-mode -fake-icloud -fake-picked-photo -fake-picked-backup \
+    -camera-access -style-note-two-lines; do
     if grep -q -- "$argument" <<<"$text"; then
         echo "Release binary contains the $argument launch argument" >&2
         failed=1

@@ -23,6 +23,15 @@ import Models
         /// A try-on preview: one of the six looks worn (`TryOnPreview`).
         public static func preview(_ name: String) -> PhotoReference { .sample("wardrobe:tryon:\(name)") }
 
+        /// N4: the bytes of a garment photo, such as `g-black-tee`, for `-fake-picked-photo`. Garment
+        /// photos only: the person and the try-on previews are never handed out this way.
+        public static func garmentPhotoData(_ asset: String) -> Data? {
+            guard !asset.isEmpty, asset.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }),
+                let url = Resource.photo(asset).url
+            else { return nil }
+            return try? Data(contentsOf: url)
+        }
+
         /// The example try-on photo of her, standing. It is the reference the Profile's try-on photo
         /// sheet already used for its example.
         public static let person = PhotoReference.sample("try-on-example")

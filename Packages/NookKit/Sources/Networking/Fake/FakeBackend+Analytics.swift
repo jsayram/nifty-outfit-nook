@@ -48,6 +48,8 @@ import Models
                     let decoded = try? JSONDecoder().decode(APIV1.AnalyticsDeletionRequest.self, from: body),
                     Self.isAnalyticsID(decoded.analyticsID)
                 else { return error(.invalidRequest, id) }
+                // N4: `-fail analytics-delete`, so "couldn't be deleted right now" can be seen.
+                if DebugFaults.current.failure(for: ["analytics-delete"]) != nil { return error(.internal, id) }
                 state.withLock { state in
                     state.analytics.events.removeAll { $0.record.analyticsID == decoded.analyticsID }
                     state.analytics.deletedIDs.append(decoded.analyticsID)

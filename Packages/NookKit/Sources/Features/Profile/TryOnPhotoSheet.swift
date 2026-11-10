@@ -62,7 +62,7 @@ struct TryOnPhotoSheet: View {
         #if DEBUG
             // `-fake-camera` (debug builds): the simulator has no camera, so the app's own camera
             // screen opens with a stand-in picture.
-            _picking = State(initialValue: PhotoPickingModel(access: FakeTryOnCamera.access ?? .system))
+            _picking = State(initialValue: PhotoPickingModel(access: FakeTryOnCamera.access ?? .current))
         #else
             _picking = State(initialValue: PhotoPickingModel())
         #endif

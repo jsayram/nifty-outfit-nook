@@ -84,6 +84,14 @@ final class StyleMeModel {
             draft = StyleRequestDraft(
                 preferences: profile.preferences, source: requestedSource ?? profile.remembered.source,
                 occasion: profile.remembered.occasion, startingPieceID: draft.startingPieceID)
+            #if DEBUG
+                // N4: `-style-note-two-lines` starts on Other with words on two lines, which typing
+                // can't enter, so the note's problem can be seen.
+                if ProcessInfo.processInfo.arguments.contains("-style-note-two-lines") {
+                    draft.occasion = .other
+                    draft.occasionNote = "Dinner\nwith friends"
+                }
+            #endif
             hasDraft = true
         }
         recheck()
