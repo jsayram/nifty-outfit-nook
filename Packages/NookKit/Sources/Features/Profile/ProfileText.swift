@@ -62,6 +62,22 @@ nonisolated enum ProfileText {
         String(localized: "Not added", bundle: .module, comment: "Your try-on photo row value: no photo")
     }
 
+    // MARK: Appearance (N3)
+
+    static var appearanceSection: String {
+        String(localized: "Appearance", bundle: .module, comment: "Profile section header, above Dark mode")
+    }
+
+    static var darkModeRow: String {
+        String(localized: "Dark mode", bundle: .module, comment: "Profile switch: the app's light or dark look")
+    }
+
+    static var darkModeDetail: String {
+        String(
+            localized: "You can also tap the lamp in your room.", bundle: .module,
+            comment: "Under the Dark mode switch in Profile")
+    }
+
     static var styleMeSection: String {
         String(localized: "Style Me", bundle: .module, comment: "Profile section header")
     }

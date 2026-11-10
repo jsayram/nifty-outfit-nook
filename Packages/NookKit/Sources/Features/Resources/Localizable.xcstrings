@@ -885,6 +885,9 @@
     "Anything to add?" : {
       "comment" : "Report sheet: note field label"
     },
+    "Appearance" : {
+      "comment" : "Profile section header, above Dark mode"
+    },
     "Apple confirms it’s you. The app keeps only a random account number, not your name." : {
       "comment" : "Sign-in sheet: what signing in shares"
     },
@@ -941,6 +944,9 @@
     },
     "Cloud styling, try-on pictures and support use this account." : {
       "comment" : "Profile: under Signed in with Apple"
+    },
+    "Dark mode" : {
+      "comment" : "Profile switch: the app's light or dark look"
     },
     "Delete my analytics data" : {
       "comment" : "Privacy and terms: analytics action"
@@ -1050,8 +1056,17 @@
     "Kept for 30 days, then only totals. Turning it off changes nothing else in the app." : {
       "comment" : "Analytics consent: how long, and that nothing else changes"
     },
+    "Lamp" : {
+      "comment" : "VoiceOver label for the desk lamp"
+    },
     "Let your arms hang a little away from your body." : {
       "comment" : "Try-on camera hint"
+    },
+    "Lights off" : {
+      "comment" : "VoiceOver value of the lamp in dark mode"
+    },
+    "Lights on" : {
+      "comment" : "VoiceOver value of the lamp in light mode"
     },
     "Live hints aren’t available right now. Tap the button when you’re ready." : {
       "comment" : "Try-on camera: Vision can't look at the camera"
@@ -1491,6 +1506,12 @@
     "Turn to face the camera." : {
       "comment" : "Try-on camera hint"
     },
+    "Turns the lights off, for dark mode." : {
+      "comment" : "VoiceOver hint on the lamp in light mode"
+    },
+    "Turns the lights on, for light mode." : {
+      "comment" : "VoiceOver hint on the lamp in dark mode"
+    },
     "Unused picture credits: %lld. They’re given up with your account and can’t be moved to a new one." : {
       "comment" : "Delete my account: how many unused picture credits are given up"
     },
@@ -1567,6 +1588,9 @@
     },
     "You asked for the same thing earlier today, so these are the same looks. Nothing was used." : {
       "comment" : "Note on Your looks: the server answered from its 24-hour result cache"
+    },
+    "You can also tap the lamp in your room." : {
+      "comment" : "Under the Dark mode switch in Profile"
     },
     "You can turn this off any time in Privacy and terms." : {
       "comment" : "Stylist consent: how to withdraw"

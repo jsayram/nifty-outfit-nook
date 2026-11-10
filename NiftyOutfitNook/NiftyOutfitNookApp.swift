@@ -133,6 +133,10 @@ struct NiftyOutfitNookApp: App {
             let onboardingOptions = OnboardingLaunchOptions(launchArguments: arguments)
             let tourOptions = TourLaunchOptions(launchArguments: arguments)
             let offersSampleCloset = true
+            // N3: `-onboarding skip` keeps the appearance choice in memory, so every UI test starts
+            // from the iPhone's appearance, whatever an earlier test chose.
+            let appearance: any AppearanceStore =
+                onboardingOptions == .skip ? InMemoryAppearanceStore() : DefaultsAppearanceStore()
             // `-migration-kill-at <step>`, `-migration-pause-at <step>` and `-make-old-store` (debug
             // builds only) set up a real migration to kill on a device (checklist 2.16).
             MigrationDebug.install(arguments: arguments)
@@ -143,6 +147,7 @@ struct NiftyOutfitNookApp: App {
             let onboardingOptions = OnboardingLaunchOptions.standard
             let tourOptions = TourLaunchOptions.standard
             let offersSampleCloset = false
+            let appearance: any AppearanceStore = DefaultsAppearanceStore()
         #endif
 
         // Phase 31: Apple's MetricKit crash and speed reports, kept on the phone.
@@ -158,7 +163,8 @@ struct NiftyOutfitNookApp: App {
                 onboarding: InMemoryOnboardingStore(), tours: InMemoryTourProgressStore(),
                 services: { _ in FixtureServices.make(FixtureConfiguration(set: .empty)) },
                 tourOptions: .standard, offersSampleCloset: offersSampleCloset,
-                storeProblem: StoreOpenProblem(problem), storeCopy: StoreCopyExport(location: .app))
+                storeProblem: StoreOpenProblem(problem), storeCopy: StoreCopyExport(location: .app),
+                appearance: appearance)
         }
         let onboarding = storage.onboarding
         let tours = storage.tours
@@ -244,7 +250,7 @@ struct NiftyOutfitNookApp: App {
                             (.profile, tours), (.profile, services.weatherSettings),
                             (.profile, services.stylistConsent), (.profile, services.tryOnConsent),
                             (.profile, services.analytics), (.profile, jobNotifier),
-                            (.profile, onboarding),
+                            (.profile, onboarding), (.profile, appearance),
                         ])
                     // Phase 21b: private iCloud sync, only in a build with NOOK_ICLOUD = YES. Delete
                     // my data then deletes her iCloud copy first.
@@ -284,7 +290,7 @@ struct NiftyOutfitNookApp: App {
                     services.deletion = AccountDataDeletion(
                         local: LocalDataDeletion(
                             stores: [(.looks, AIJobsEraser(sampleJobs))] + storage.erasableData + [
-                                (.profile, jobNotifier)
+                                (.profile, jobNotifier), (.profile, appearance),
                             ] + LocalDataDeletion.stores(of: services)),
                         account: account)
                     services.account = account
@@ -318,9 +324,10 @@ struct NiftyOutfitNookApp: App {
                     Task.detached(priority: .utility) { await imageFiles.removeUnused() }
                 }
             },
-            erasedOnReset: storage.erasableData.map(\.1),
+            erasedOnReset: storage.erasableData.map(\.1) + [appearance],
             backups: storage.backups,
-            reload: { storage.reload() })
+            reload: { storage.reload() },
+            appearance: appearance)
     }
 }
 

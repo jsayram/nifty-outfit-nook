@@ -173,6 +173,17 @@ Everything else held up: the plates use the strong tint with light text, the sig
 
 `HomeLayoutTests` checks which layout each text size and size class gets, the row labels, the banner's rail, and that the sideways scene fits above the tab bar and keeps every control inside it. `HomeSnapshotTests.darkRoom` is the dark room on iPhone 17. `HomeLayoutSnapshotTests` draws the large-text page at AX3 (light) and AX5 (dark, a snowy night in a suitcase), and the sideways layout at 874 x 402 in light and in dark at night. `HomeVariantTests` (UI) launches at AX5 (`-UIPreferredContentSizeCategoryName UICTContentSizeCategoryAccessibilityXXXL`) and opens every Home action from its row, the banner, the Profile button and the tabs, then turns the phone sideways, checks every control is there, opens Help and turns back upright with Help still open.
 
+## The lamp is the light switch
+
+N3, decided by Jose on 6 November 2026. Tapping the desk lamp turns the whole app dark (lights off) or light (lights on). It's the same choice as the **Dark mode** switch in Profile (`docs/profile.md`), so changing one changes the other.
+
+- **The choice.** `AppearanceChoice` is system, light or dark, and starts on system: the app follows the iPhone until she taps the lamp or the switch. After that her choice wins, across launches. It's kept in its own `UserDefaults` suite (`DefaultsAppearanceStore`), and Delete my data erases it, so the app follows the iPhone again.
+- **Where it applies.** `AppRootView` holds one `AppearanceModel` and sets `preferredColorScheme` on the window, so every screen, sheet and alert follows it. The lamp and the switch call the `setDarkMode` action in the environment, and both read what's on screen (`colorScheme`), so neither can show a stale state.
+- **The lamp.** A button over the drawing, at least 44 x 44 points, read right after the laptop. VoiceOver says "Lamp", with the value "Lights on" or "Lights off" and a hint that says what a tap does. Its identifier is `home.lamp`. The lamp's glow is unchanged: it still lights the dark room.
+- **Maya wakes.** When the lights come back on, her z's fade out and she wags for about a second, then she settles and the z's come back after 2.5 seconds. There's no awake drawing of her, so the wag is her whole body swinging a few degrees from her paws, with a small stretch at the start (`MayaWag`). With Reduce Motion on she stays still and only the z's cross-fade.
+- **Only the upright room.** The large-text and sideways layouts have no lamp control (the sideways scene's lamp is a drawing only); there the Dark mode switch in Profile does the same thing.
+- **UI tests.** `-onboarding skip` keeps the choice in memory, so every UI test starts on the simulator's own appearance. `LightSwitchTests` taps the lamp, checks its value and that the screen got darker, then turns Dark mode off in Profile and checks the lamp and the screen again.
+
 ## Left for later phases
 
 - **13 (done):** the remembered source and occasion on the suitcase and the calendar, and Suitcases and Laundry behind them (`docs/suitcases-and-laundry.md`).

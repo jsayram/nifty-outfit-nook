@@ -54,6 +54,21 @@ struct RoomPlanTests {
         }
     }
 
+    /// N3: the lamp, the light switch, is a full target clear of every control in the iPad rooms,
+    /// including the name sign beside it in the wide room.
+    @Test(arguments: IPadWindow.allCases)
+    func lampIsAFullTargetOfItsOwn(window: IPadWindow) {
+        let layout = window.roomLayout
+        let lamp = layout.lampTarget
+        #expect(lamp.width >= 44 && lamp.height >= 44, "The lamp on \(window) is \(lamp.size)")
+        for control in RoomControl.allCases where control != .wardrobe {
+            let overlap = lamp.intersection(layout.target(for: control))
+            #expect(
+                overlap.isNull || overlap.width < 0.5 || overlap.height < 0.5,
+                "The lamp and \(control) overlap by \(overlap.size) on \(window)")
+        }
+    }
+
     /// Stage A audit: the shelf frames are full targets in the iPad rooms too.
     @Test(arguments: IPadWindow.allCases)
     func shelfFramesAreFullTargets(window: IPadWindow) {
