@@ -124,6 +124,32 @@ final class YourLooksTests: XCTestCase {
         leaveYourLooks(with: "results.backToStyleMe", in: failing)
     }
 
+    /// Skipping Your looks' tour moves nothing (S4, 31 October 2026): the tabs and the Review button
+    /// are where they were while the tour showed, so a tap aimed at Review doesn't land on Saved.
+    /// The tour used to scroll the page for a control already on screen and scroll it back after.
+    @MainActor
+    func testSkippingTheTourMovesNothing() {
+        let app = XCUIApplication()
+        app.launchArguments =
+            UITestLaunch.skipOnboarding + UITestLaunch.animationsOff + UITestLaunch.fakeBackend + [
+                "-tour", "off,yourLooks", "-fixtures", "demo", "-cloud-stylist", "normal",
+            ]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Home"].waitUntilExists(timeout: Self.wait))
+        styleMe(in: app, waitForResult: false)
+        let skip = app.buttons["tour.skip"]
+        XCTAssertTrue(skip.waitUntilExists(timeout: Self.wait), "Your looks' tour didn't show")
+        let saved = app.buttons["results.tab.saved"]
+        let review = app.buttons["Review"]
+        XCTAssertTrue(review.waitUntilExists(timeout: Self.wait))
+        let before = (saved.frame, review.frame)
+        skip.tapUntilGone(timeout: Self.wait)
+        // A moment for anything still to move.
+        _ = review.waitUntilStill(timeout: 2)
+        XCTAssertEqual(saved.frame, before.0, "The Saved tab moved after the tour")
+        XCTAssertEqual(review.frame, before.1, "Review moved after the tour")
+    }
+
     // MARK: Helpers
 
     @MainActor
