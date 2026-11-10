@@ -91,8 +91,8 @@ struct OnboardingPrivacyStep: View {
                 SettingsInfoRow(
                     title: OnboardingText.staysTitle, detail: OnboardingText.staysDetail, systemImage: "lock")
                 SettingsInfoRow(
-                    title: OnboardingText.nothingSentTitle, detail: OnboardingText.nothingSentDetail,
-                    systemImage: "wifi.slash")
+                    title: OnboardingText.onlineTitle, detail: OnboardingText.onlineDetail,
+                    systemImage: "icloud.and.arrow.up")
                 SettingsInfoRow(
                     title: OnboardingText.asksFirstTitle, detail: OnboardingText.asksFirstDetail,
                     systemImage: "hand.raised")

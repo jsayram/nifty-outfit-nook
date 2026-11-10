@@ -198,6 +198,119 @@ struct StylingAccessModelTests {
         #expect(!device.subscriptionMayRenew)
     }
 
+    /// S4 test 8: "Your subscription is restored." doesn't outlive the cancel that follows it.
+    @Test func aConfirmationGoesWhenTheSubscriptionChanges() async {
+        let store = ScriptedSubscriptionService(status: .none(at: TestTime.now), restore: .success(trial))
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(model.message == .restored)
+        let following = Task { await model.follow(services) }
+        defer { following.cancel() }
+        // The same status read again, a moment later, leaves it.
+        var readAgain = trial
+        readAgain.checkedAt = TestTime.day(1)
+        for _ in 0..<50 where model.status != readAgain {
+            store.update(readAgain)
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.message == .restored)
+        var cancelled = trial
+        cancelled.willAutoRenew = false
+        for _ in 0..<50 where model.message != nil {
+            store.update(cancelled)
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.message == nil)
+        #expect(!model.status.willAutoRenew)
+    }
+
+    /// Back from Manage subscription the status is read again, and that clears it too.
+    @Test func aConfirmationGoesWhenAReloadFindsAChange() async {
+        let store = ScriptedSubscriptionService(status: .none(at: TestTime.now), restore: .success(trial))
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        var cancelled = trial
+        cancelled.willAutoRenew = false
+        store.update(cancelled)
+        await model.load(from: services)
+        #expect(model.message == nil)
+    }
+
+    /// A problem isn't about the status, so it stays until she taps something.
+    @Test func aProblemStaysWhenTheSubscriptionChanges() async {
+        let store = notSubscribed()
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        model.message = .problem(.unavailable)
+        store.update(trial)
+        await model.load(from: services)
+        #expect(model.message == .problem(.unavailable))
+    }
+
+    /// S4 test 9: a row about the old subscription doesn't say access is off under the unlock.
+    @Test(arguments: [SubscriptionState.expired, .revoked, .billingRetry])
+    func theSubscriptionRowDoesNotContradictTheUnlock(state: SubscriptionState) {
+        let plain = SubscriptionStatus(state: state, productID: id, checkedAt: TestTime.now)
+        var unlocked = plain
+        unlocked.complimentarySince = TestTime.now
+        let words = StylingAccessText.statusDetail(unlocked, state: state, price: nil)
+        #expect(words.contains("complimentary access stays on"))
+        #expect(!words.contains("is off") && !words.contains("paused"))
+        // Without the unlock it says as before that access isn't on.
+        let before = StylingAccessText.statusDetail(plain, state: state, price: nil)
+        #expect(before.contains("is off") || before.contains("paused"))
+    }
+
+    /// S4 test 10: what she already had when the screen opened isn't access arriving.
+    @Test func accessAlreadyOnDoesNotCountAsArriving() async {
+        let services = services(ScriptedSubscriptionService(status: trial))
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.load(from: services)
+        #expect(model.hasAccess)
+        #expect(!model.accessArrived)
+    }
+
+    @Test func nothingArrivesWhenRestoreFindsNothing() async {
+        let services = services(notSubscribed())
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(!model.accessArrived)
+    }
+
+    @Test func buyingCountsAsArriving() async {
+        let services = services(notSubscribed())
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.purchase(in: services)
+        #expect(model.accessArrived)
+    }
+
+    /// Restoring counts even if the phone already showed access: the server may be what was behind.
+    @Test func restoringCountsAsArriving() async {
+        let services = services(ScriptedSubscriptionService(status: trial))
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        await model.restore(in: services)
+        #expect(model.accessArrived)
+    }
+
+    @Test func accessFromStoreKitWhileOpenCountsAsArriving() async {
+        let store = notSubscribed()
+        let services = services(store)
+        let model = StylingAccessModel(now: { TestTime.now })
+        await model.load(from: services)
+        store.update(trial)
+        await model.load(from: services)
+        #expect(model.accessArrived)
+    }
+
     // MARK: 30b: the complimentary unlock and picture credits
 
     @Test func redeemingACodeTurnsOnComplimentaryAccess() async {

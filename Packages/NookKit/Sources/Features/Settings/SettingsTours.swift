@@ -60,12 +60,12 @@ enum FeedbackTour {
     }
 }
 
-/// Privacy and terms' quick tour (Phase 16b, `privacy-tour.html`): what's sent later, and Delete
-/// my data. The mockup's permission switches and Export a copy aren't built (docs/settings.md),
+/// Privacy and terms' quick tour (Phase 16b, `privacy-tour.html`): what's sent, and Delete my
+/// data. The mockup's permission switches and Export a copy aren't built (docs/settings.md),
 /// so the steps point at what stands in their place.
 enum PrivacyTour {
     enum Anchor {
-        static let later = TourAnchorID("privacy.later")
+        static let summary = TourAnchorID("privacy.summary")
         static let deleteData = TourAnchorID("privacy.deleteData")
     }
 
@@ -74,11 +74,12 @@ enum PrivacyTour {
             .privacy,
             steps: [
                 TourStep(
-                    Anchor.later,
+                    Anchor.summary,
                     title: String(
                         localized: "You choose what to share", bundle: .module, comment: "Privacy tour, step 1 title"),
                     message: String(
-                        localized: "Nothing here is sent yet. Later, each of these asks you first.", bundle: .module,
+                        localized: "Online features ask you first. You can change your mind here any time.",
+                        bundle: .module,
                         comment: "Privacy tour, step 1")),
                 TourStep(
                     Anchor.deleteData,

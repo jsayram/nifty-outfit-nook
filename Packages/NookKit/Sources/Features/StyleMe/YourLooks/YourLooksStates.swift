@@ -33,7 +33,9 @@ struct StylingProgress: View {
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("results.styling")
                 HStack(spacing: NookSpacing.small) {
-                    NookBadge(SharedText.simulated)
+                    if model.isSimulatedStylist {
+                        NookBadge(SharedText.simulated)
+                    }
                     Spacer(minLength: 0)
                     // The dots only fade under Reduce Motion.
                     NookLoadingIndicator(size: .large)
@@ -61,7 +63,8 @@ struct StylingProgress: View {
                 StepRow(
                     number: 2, state: step == .checking ? .waiting : .done,
                     title: String(localized: "Send the request", bundle: .module, comment: "Styling step 2"),
-                    detail: String(localized: "Simulated stylist", bundle: .module, comment: "Styling step detail"))
+                    detail: model.isSimulatedStylist
+                        ? String(localized: "Simulated stylist", bundle: .module, comment: "Styling step detail") : nil)
                 StepRow(
                     number: 3, state: step == .choosing ? .now : .waiting,
                     title: String(
